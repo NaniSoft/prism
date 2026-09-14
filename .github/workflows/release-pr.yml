@@ -1,0 +1,34 @@
+name: Changesets
+
+# On every push to main: consume merged changesets and keep a "Version Packages"
+# PR open. Merging that PR (once the publish workflow is armed) releases the
+# packages — plasma's release shape: independently versioned, non-lockstep.
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: changesets-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  version:
+    if: github.repository == 'NaniSoft/prism'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: changesets/action@v1
+        with:
+          version: pnpm run version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

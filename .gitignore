@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+
+# builds
+dist/
+.next/
+out/
+*.tsbuildinfo
+
+# tooling
+.turbo/
+coverage/
+.eslintcache
+.oxlint-cache/
+.pnpm-store/
+
+
+# env & secrets
+.env
+.env.*
+!.env.example
+
+# local agent/tool state
+.claude/
+.impeccable/
+.playwright-mcp/
+
+# os
+.DS_Store
+Thumbs.db

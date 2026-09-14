@@ -1,0 +1,31 @@
+{
+  "name": "@nanisoft/prism-mcp-server",
+  "version": "0.1.0",
+  "description": "Tool logic for the Prism MCP server — transport-free, fed by prism-llms output. The HTTP transport lives in the apps/site Worker at /mcp.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "oxlint .",
+    "test": "vitest run",
+    "prepublishOnly": "publint"
+  },
+  "devDependencies": {
+    "publint": "^0.3.24",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
+  }
+}

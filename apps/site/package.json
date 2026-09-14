@@ -1,0 +1,23 @@
+{
+  "name": "@nanisoft/site",
+  "version": "0.0.0",
+  "private": true,
+  "description": "prism.nanisoft.com — Fumadocs headless docs, landing page, and blog; static export served by Cloudflare Workers.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "oxlint ."
+  },
+  "dependencies": {
+    "@nanisoft/prism-ui": "workspace:*",
+    "next": "^16.3.5",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.5.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0"
+  }
+}

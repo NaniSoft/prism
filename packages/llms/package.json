@@ -1,0 +1,16 @@
+{
+  "name": "@nanisoft/prism-llms",
+  "version": "0.1.0",
+  "description": "Prism's LLM surface — generated llms.txt and per-component Markdown. Data-only; one dist/ serves npm, the site, and the MCP server.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  }
+}

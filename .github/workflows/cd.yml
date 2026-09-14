@@ -1,0 +1,33 @@
+name: Release (dry-run)
+
+# DRY-RUN until the npm org `nanisoft` and the NPM_TOKEN CI secret exist
+# (map ticket 07: accounts-and-infra). Going live means:
+#   1. add the NPM_TOKEN secret (automation-friendly, granular, scoped to the
+#      `nanisoft` org),
+#   2. swap `pnpm run release:dry` for the real publish below:
+#        - uses: changesets/action@v1
+#          with:
+#            version: pnpm run version
+#            publish: pnpm run release
+#          env:
+#            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#            NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+#      plus `npmAuthPublished`/`.npmrc` auth via actions/setup-node
+#      registry-url + node-auth-token.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  dry-run:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run release:dry

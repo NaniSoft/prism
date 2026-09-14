@@ -1,0 +1,26 @@
+{
+  "name": "prism",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Prism — one design language, many expressions. Ant Design–based design system for NaniSoft.",
+  "packageManager": "pnpm@11.18.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint && stylelint \"**/*.css\" --aei",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "changeset publish",
+    "release:dry": "changeset status --verbose && pnpm -r --filter \"./packages/*\" publish --dry-run --no-git-checks"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^3.0.2",
+    "oxlint": "^1.82.0",
+    "stylelint": "^17.15.0",
+    "turbo": "^2.10.12",
+    "typescript": "^7.0.2"
+  }
+}
