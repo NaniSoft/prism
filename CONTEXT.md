@@ -39,3 +39,21 @@ _Avoid_: primary color, accent color (unqualified)
 **Hairline elevation**:
 Depth in the plane expressed as a 1px border plus a surface tint shift; the single permitted shadow is cool-tinted and reserved for floating layers (dropdown, modal, popover).
 _Avoid_: box-shadow elevation, ambient shadow, glow
+
+### Taxonomy
+
+**Pass-through component**:
+An antd component re-exported unchanged through `prism-ui` by generated proxy exports. Every Prism delta on it is a token, never a wrapper.
+_Avoid_: re-export (unqualified), plain antd
+
+**Wrapped component**:
+An antd component whose export Prism replaces, gated by exactly one closed justification — `brand-behavior`, `api-narrowing`, `invariant`, `upstream-gap` — and tracked in `wrapped-registry.ts`. Anything else is a block.
+_Avoid_: custom component, override
+
+**Block**:
+A pre-composed component inside `prism-ui` (`PageHeader`, `ComponentDemo`) — data-in for canonical slots plus `ReactNode` slot props. An organization layer, never a second package.
+_Avoid_: widget, template
+
+**Page**:
+A full-page composition (`DocsShell`, `BlogLayout`) taking Prism-owned structural types via `toPrismTree()` — no `next`/`fumadocs-*` dependency in the package.
+_Avoid_: layout, screen
