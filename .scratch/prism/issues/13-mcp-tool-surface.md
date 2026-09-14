@@ -47,3 +47,9 @@ Resolved 2026-09-14 — human ratified the draft in full ("all four as recommend
 Adopted, per the draft's recommendations: the eight read-only v1 tools (`list_items`, `get_item_doc`, `get_item_props`, `get_item_source`, `get_theme_doc`, `list_pages`, `get_page`, `search_docs`) — `get_item_props` and `list_pages` stay; unprefixed tool names; `get_theme_doc` as markdown pass-through (structured `get_tokens` deferred to v2, pending ticket 09's tiers — now resolved); term-frequency search capped at 5; tools only, no resources/prompts in v1; `get_item_source` returns documented example TSX only; `PrismDocsStore` fixed here as the binding contract ticket 16 projects into; auth none in v1 per ticket 05 with the Cloudflare Access escalation pre-written.
 
 Follow-ups owned by other tickets: ticket 16 must emit `examples[].code` and the `antdBase` flag; ticket 12's `ComponentDemo` format must yield self-contained TSX per example; the pairing rule + `.mcp.json` mechanics landed early via ticket 15 (done).
+
+## Comments
+
+### Re-ratification — 2026-09-14
+
+The original resolution was a batch-level approval ("all four as recommended"); the audit pass put every decision point to the human individually. **All 7 confirmed, none reopened**: unprefixed tool names · `get_item_props` + `list_pages` stay (8-tool v1) · `get_item_source` returns documented example TSX only · `get_theme_doc` markdown pass-through — structured `get_tokens` stays v2 even though ticket 09's tiers now make it specifiable · term-frequency search capped at 5 · tools only, no resources/prompts · `PrismDocsStore` fixed in ADR-0004 §5.

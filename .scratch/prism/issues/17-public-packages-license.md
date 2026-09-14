@@ -135,4 +135,12 @@ Resolved 2026-09-14 — human ratified the draft in full ("all four as recommend
 
 Adopted, per the draft's recommendations: MIT over Apache-2.0 (no patent-grant need for a wrapped-antd design system; the `NOTICE` would silently fail to ship under `files: ["dist"]`) and over proprietary (contradicts "public in availability"); one uniform license across prism-tokens, prism-ui, prism-llms, prism-mcp-server; per-package + root `LICENSE`; third-party attribution (antd, `@ant-design/icons`, Fumadocs) in `THIRD-PARTY-NOTICES.md`; brand/attribution protection via a short policy page on prism.nanisoft.com, never license clauses; no trademark filing now (revisit if imitators appear); docs/prose and the visual language stay © NaniSoft all-rights-reserved, surfaced as a site footer line ("Code: MIT. Docs and visual language: © NaniSoft."); no attribution demand beyond notice preservation; no CLA/DCO at go-live — adopt DCO when the first external PR arrives; the npm premise correction is accepted and ticket 07's Answer was amended accordingly.
 
-Implementation remaining (mechanical, not a decision — gated before the `release-pr.yml` go-live swap): five LICENSE files (root + four packages, "Copyright (c) 2026 NaniSoft" — confirm NaniSoft is the legal entity before first publish; fall back to "NaniSoft (D. Vennapusa)" if not), `"license": "MIT"` in the four `package.json` files, `THIRD-PARTY-NOTICES.md`, and the brand-policy page + site footer when the site exists.
+Implementation remaining (mechanical, not a decision — gated before the `release-pr.yml` go-live swap): five LICENSE files (root + four packages, "Copyright (c) 2026 NaniSoft" — legal entity confirmed 2026-09-14, no fallback), `"license": "MIT"` in the four `package.json` files, `THIRD-PARTY-NOTICES.md`, and the brand-policy page + site footer when the site exists.
+
+## Comments
+
+### Re-ratification — 2026-09-14
+
+The original resolution was a batch-level approval ("all four as recommended"); the audit pass put every decision point to the human individually. **All 7 confirmed, none reopened**: MIT uniform across all four packages · no trademark filing now (brand policy page instead) · Apache-2.0 rejected (no patent-grant need) · docs/prose stay © NaniSoft reserved with the site footer line · one license across all four · no attribution demand beyond notice preservation · no CLA at go-live, DCO when the first external PR arrives.
+
+**New fact**: the human confirmed **NaniSoft is the legal entity** — the LICENSE carries `Copyright (c) 2026 NaniSoft` outright; the "(D. Vennapusa)" fallback is moot.

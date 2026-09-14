@@ -54,3 +54,9 @@ Resolved 2026-09-14 — human ratified the draft in full ("all four as recommend
 Adopted, per the draft's recommendations: three subpath layers with per-item entries; pass-through by default via hermetic codegen from installed antd + `parity.test.ts`; wrappers gated by the closed four-item justification list + `wrapped-registry.ts`; antd as a direct dependency of prism-ui; `PrismProvider` forwards locale/direction only (no locale ownership in v1 — a Prism-locale merge slot arrives with the first Prism-authored string); pages take Prism-owned structural types with an app-side `toPrismTree()`; router seam = `link` on `PrismProvider` + `usePrismLink()`; CSS is app-imported (`styles.css` in `@layer prism`); `@ant-design/x` not re-exported in v1; RTL forward-only and documented untested.
 
 The numbering note above is moot — ticket 09 landed as ADR-0002 in the same batch, so 0001–0004 is continuous. Remaining follow-ups belong to implementation tickets, not decisions here: wildcard `exports` map + deps + turbo `generate` task in `packages/ui/package.json`; `CONTEXT.md` glossary terms (pass-through, wrapped component, block, page); ticket 16's per-item `## Blocks`/`## Pages` sections + pass-through pointer; changeset-validator rule for antd-bump PRs.
+
+## Comments
+
+### Re-ratification — 2026-09-14
+
+The original resolution was a batch-level approval ("all four as recommended"); the audit pass put every decision point to the human individually. **All 8 confirmed, none reopened**: closed four-item wrapper justification list + `wrapped-registry.ts` · antd as a direct dependency of prism-ui · locale forward-only (merge slot arrives with the `ComponentDemo` copy button) · pages take Prism-owned structural types + app-side `toPrismTree()` · provider `link` + `usePrismLink()` · app-imported `styles.css` in `@layer prism` · `@ant-design/x` out of v1 · RTL forward-only, documented untested.

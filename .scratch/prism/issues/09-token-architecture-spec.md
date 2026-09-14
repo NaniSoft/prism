@@ -52,3 +52,9 @@ Adopted, per the draft's recommendations: structured `PrismTheme` return (`{ ant
 Ripple effects applied with this resolution: the "never hand-set map tokens" rule in `CLAUDE.md`/`AGENTS.md` (originating in ticket 02) is refined to "seeds + algorithms **plus the closed allowlist**"; ticket 07's npm premise was corrected per ticket 17's finding.
 
 Deferred, recorded where they belong: the ink hexes land in the brand-pack implementation pass (consider naming them in ADR-0001 then); ticket 14 must verify the chosen Figma plugin imports DTCG `$type: 'shadow'` composites before the floating shadow exports as a real composite.
+
+## Comments
+
+### Re-ratification — 2026-09-14
+
+The original resolution was a batch-level approval ("all four as recommended"); the audit pass put every decision point to the human individually. **All 8 confirmed, none reopened**: structured `PrismTheme` return · narrow `components` allowlist (the six shadow-zeroing entries) · closed 8-key map-token allowlist · no `rawAntd` in v1 · `color.surface.light` primitive for the light ground/container split · `wireframe: false` · brand-ink hexes pinned at the pack implementation pass · cssVar key `prism-<pack>-<mode>`.
