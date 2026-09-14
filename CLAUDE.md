@@ -21,3 +21,18 @@ The five canonical triage roles map to default label strings of the same names. 
 ### Domain docs
 
 Single-context: one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+### Environment skills
+
+Consult before writing code: `ant-design`, `antd` (component APIs, theming, migration), `cloudflare`, `wrangler`, `workers-best-practices` (the site Worker); `interfaces:*` / `impeccable` for UI direction.
+
+## Conventions
+
+- **The one rule**: apps always import from `@nanisoft/prism-ui`, never from `antd` directly (`@ant-design/icons` arrives via the prism-ui re-export).
+- **Taxonomy**: components → blocks → pages is an organization taxonomy *inside* `prism-ui` — blocks are pre-composed components, pages are full-page compositions; all npm-delivered, never copied into apps.
+- **Theming**: `createPrismTheme()` (prism-tokens) returns one brand pack (blue | green) in one mode (light | beam-dark), mapped to antd seed tokens + algorithms plus a **closed 8-key map-token allowlist** where antd's derivation mathematically can't express the language (ADR-0002).
+- Full handbook (commands, MCP servers, gotchas): `AGENTS.md`. Both files must agree.
+
+## MCP servers
+
+Repo `.mcp.json` carries only real, working servers. Wired: `antd` (offline antd knowledge via `@ant-design/cli`). Pending tickets 14 (Figma Dev Mode) and 13 (`prism-mcp-server`) stay out of the file until real — HTTP entries need both `type` and `url` or Claude Code skips them.

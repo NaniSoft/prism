@@ -8,7 +8,16 @@ Turborepo monorepo. The **map** — the canonical plan of record — lives at
 
 Apps always import from `@nanisoft/prism-ui`, **never from `antd` directly**.
 (Plasma's invariant; will be enforced by re-export codegen, not lint, once the
-export surface lands — see the prism-ui conventions ticket.)
+export surface lands — see the prism-ui conventions ticket.) `@ant-design/icons`
+is re-exported through prism-ui as well — there is deliberately no custom icons
+package.
+
+## Taxonomy: components → blocks → pages
+
+An organization taxonomy *inside* `prism-ui`: **components** are the antd-backed
+primitives, **blocks** are pre-composed components (a form section, a stat row),
+**pages** are full-page compositions. Everything is npm-delivered — consuming
+apps assemble, never copy, design-system code.
 
 ## Layout
 
@@ -32,6 +41,50 @@ pnpm changeset  # declare a version bump before merging to main
 TS is strict and ESM-only with no bundler for packages (types + `import`
 exports only); `publint` runs on publish.
 
+## Conventions
+
+- **Theming** — `createPrismTheme()` in `@nanisoft/prism-tokens` returns a
+  structured `PrismTheme`: one brand pack (blue | green) in one mode
+  (light | beam-dark). It maps Prism tokens onto antd **seed tokens +
+  algorithms** plus a **closed 8-key map-token allowlist** (ADR-0002: the
+  visual language's radius/motion are not seed-derivable) — anything outside
+  the allowlist is not a hand-set map token — and sets `cssVar.key`
+  explicitly (`prism-<pack>-<mode>`, `hashed: false`) so dark mode swaps
+  without a flash.
+- **`PrismProvider`** wraps antd `ConfigProvider`; it is the theming entry point.
+- **ProComponents cannot take antd v6 on stable** — dashboard blocks build on
+  plain antd v6.
+- **Docs** live in `apps/site` (Fumadocs headless, static export) as rendered
+  demos + copyable source (`ComponentDemo`); that MDX is the single source
+  `@nanisoft/prism-llms` generates `llms.txt` + per-component MD from — never
+  hand-copy content between the two.
+- **Figma** is one-way code → Figma Variables (repo-owned plugin fed by
+  `prism-tokens` build output). No two-way sync, no hand-built UI kit.
+
+## MCP servers (`.mcp.json`)
+
+`.mcp.json` is strict JSON and holds **only real, working servers** — no
+comments, no placeholders; add a server when it exists.
+
+- **`antd`** — offline antd knowledge over stdio from `@ant-design/cli`
+  (`npm i -g @ant-design/cli`): `antd_list`, `antd_info`, `antd_doc`,
+  `antd_demo`, `antd_token`, `antd_semantic`, `antd_changelog`. The
+  `ant-design` skill's `references/antd-cli.md` is its manual.
+
+Pending, deliberately **not** in the file yet:
+
+- **Figma Dev Mode MCP** (ticket 14) — remote endpoint, added as
+  `{ "type": "http", "url": "https://mcp.figma.com/mcp" }`. HTTP entries need
+  **both** `type` and `url`, or Claude Code silently skips them.
+- **`prism-mcp-server`** (ticket 13; spec accepted in
+  `docs/adr/0004-mcp-tool-surface.md`) — eight read-only tools over prism-llms
+  output, served as Streamable HTTP at `prism.nanisoft.com/mcp` with an
+  `npx mcp-remote` stdio bridge. Enters `.mcp.json` only when the server
+  actually exists.
+
+Pairing rule once both exist: **Prism MCP for Prism behaviour, antd MCP for
+inherited antd props — and always import from `@nanisoft/prism-ui`.**
+
 ## Working here
 
 - Read `.scratch/prism/map.md` first; claim a ticket (set `Status: claimed`)
@@ -39,4 +92,7 @@ exports only); `publint` runs on publish.
 - Domain language and standing decisions: `CONTEXT.md`, `PRODUCT.md`,
   `docs/adr/`, and the map's Notes section.
 - Agent-relevant skills installed in this environment: `ant-design`, `antd`,
-  `cloudflare`, `wrangler`, `workers-best-practices`.
+  `cloudflare`, `wrangler`, `workers-best-practices`; `interfaces:*` and
+  `impeccable` for UI direction.
+- Project-scope MCP servers in `.mcp.json` need one-time per-user approval
+  (`/mcp` in a session, or `claude mcp reset-project-choices` to re-prompt).
