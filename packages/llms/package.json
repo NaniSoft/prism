@@ -11,6 +11,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "node scripts/build.mjs"
+    "build": "node scripts/build.mjs",
+    "lint": "oxlint ."
   }
 }
