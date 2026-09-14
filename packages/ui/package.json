@@ -12,6 +12,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./prototype": {
+      "types": "./dist/prototype/index.d.ts",
+      "import": "./dist/prototype/index.js"
     }
   },
   "files": [
@@ -29,6 +33,7 @@
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.3",
+    "@types/node": "^26.5.1",
     "@types/react": "^19.3.0",
     "jsdom": "^30.0.1",
     "publint": "^0.3.24",
@@ -36,5 +41,9 @@
     "react-dom": "^19.3.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^6.3.4",
+    "antd": "^6.6.4"
   }
 }

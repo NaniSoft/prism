@@ -1,12 +1,8 @@
-import { PrismPlaceholder } from '@nanisoft/prism-ui';
+import { LandingPrototype } from '@nanisoft/prism-ui/prototype';
 
 export default function HomePage() {
-  return (
-    <main>
-      <h1>Prism</h1>
-      {/* Placeholder era: the real landing page is prototyped in the visual
-          language (map ticket 11) and built from the landing blocks catalog. */}
-      <PrismPlaceholder label="One design language, many expressions." />
-    </main>
-  );
+  // PROTOTYPE era (map ticket 11, resolved): the winning "Specimen" direction
+  // stands in on `/`, imported from prism-ui so apps never touch antd directly.
+  // The real prism-ui landing page is built in the site-build pass.
+  return <LandingPrototype />;
 }
