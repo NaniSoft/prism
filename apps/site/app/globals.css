@@ -1,0 +1,628 @@
+/*
+ * Site chrome + prism-ui structural styling (ticket 21).
+ *
+ * prism-ui's styles.css owns fonts, the display width axis, and dither
+ * patterns; this sheet styles everything app-level: the shell, the docs
+ * skeleton (DocsShell's structural classes), the ComponentDemo wire, and the
+ * Specimen landing. Colors ride antd's cssVar tokens (--prism-*) so every
+ * rule re-themes with the pack × mode class swap. No animations beyond antd's
+ * own; radius and hairlines follow ADR-0001.
+ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-archivo), sans-serif;
+  background: var(--prism-color-bg-layout);
+  color: var(--prism-color-text);
+}
+
+a {
+  color: var(--prism-color-link);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Shell ---------- */
+
+.site-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.site-mono {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.site-main {
+  min-height: calc(100vh - 200px);
+}
+
+/* ---------- Header / footer ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--prism-color-bg-layout) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--prism-color-border-secondary);
+}
+
+.site-header__row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 60px;
+}
+
+.site-brand {
+  font-weight: 700;
+  font-size: 18px;
+  font-variation-settings: 'wdth' 125, 'wght' 600;
+  color: var(--prism-color-text);
+}
+
+.site-brand:hover {
+  text-decoration: none;
+  color: var(--prism-color-primary);
+}
+
+.site-brand__note {
+  opacity: 0.66;
+}
+
+.site-nav {
+  margin-left: auto;
+  display: flex;
+  gap: 18px;
+  font-size: 13px;
+}
+
+.site-nav a {
+  color: var(--prism-color-text);
+  opacity: 0.82;
+}
+
+.site-nav a:hover {
+  opacity: 1;
+  text-decoration: none;
+  color: var(--prism-color-primary);
+}
+
+.site-theme-switcher {
+  display: flex;
+  gap: 8px;
+}
+
+.site-footer {
+  border-top: 1px solid var(--prism-color-border-secondary);
+}
+
+.site-footer__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  opacity: 0.78;
+}
+
+/* ---------- Docs skeleton (prism-ui DocsShell structural classes) ---------- */
+
+.prism-docs-shell__body {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 48px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 40px 24px 96px;
+}
+
+.prism-docs-shell__body:has(+ .prism-docs-shell__toc),
+.prism-docs-shell__body:has(~ .prism-docs-shell__toc) {
+  grid-template-columns: 240px minmax(0, 1fr) 200px;
+}
+
+.prism-docs-shell__nav,
+.prism-docs-shell__toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  display: grid;
+  gap: 6px;
+}
+
+.prism-docs-shell__nav__nested,
+.prism-docs-shell__toc-list .prism-docs-shell__nav__nested {
+  padding-left: 14px;
+  margin-top: 6px;
+}
+
+.prism-docs-shell__nav a,
+.prism-docs-shell__toc-list a {
+  color: var(--prism-color-text);
+  opacity: 0.78;
+}
+
+.prism-docs-shell__nav a:hover,
+.prism-docs-shell__toc-list a:hover {
+  opacity: 1;
+  text-decoration: none;
+  color: var(--prism-color-primary);
+}
+
+.prism-docs-shell__sidebar {
+  position: sticky;
+  top: 84px;
+  align-self: start;
+  max-height: calc(100vh - 108px);
+  overflow: auto;
+}
+
+.prism-docs-shell__toc {
+  display: none;
+}
+
+@media (min-width: 1080px) {
+  .prism-docs-shell__toc {
+    display: block;
+    position: sticky;
+    top: 84px;
+    align-self: start;
+  }
+}
+
+.prism-docs-shell__title {
+  font-variation-settings: 'wdth' 118, 'wght' 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+
+.prism-docs-shell__description {
+  margin: 0 0 8px;
+  opacity: 0.78;
+  line-height: 1.65;
+}
+
+.prism-docs-shell__neighbours {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 56px;
+  padding-top: 20px;
+  border-top: 1px solid var(--prism-color-border-secondary);
+  font-size: 13px;
+}
+
+.prism-docs-shell__neighbours a:last-child {
+  margin-left: auto;
+  text-align: right;
+}
+
+/* ---------- MDX prose ---------- */
+
+.site-prose {
+  line-height: 1.72;
+  font-size: 15px;
+}
+
+.site-prose h2 {
+  font-variation-settings: 'wdth' 114, 'wght' 600;
+  margin: 40px 0 12px;
+  scroll-margin-top: 84px;
+}
+
+.site-prose h3 {
+  font-variation-settings: 'wdth' 110, 'wght' 600;
+  margin: 32px 0 10px;
+  scroll-margin-top: 84px;
+}
+
+.site-prose p {
+  margin: 12px 0;
+}
+
+.site-prose ul {
+  padding-left: 22px;
+}
+
+.site-prose li {
+  margin: 6px 0;
+}
+
+.site-prose code {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 13px;
+  background: var(--prism-color-fill-tertiary);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.site-prose pre {
+  background: var(--prism-color-bg-container);
+  border: 1px solid var(--prism-color-border-secondary);
+  border-radius: 4px;
+  padding: 14px 16px;
+  overflow: auto;
+}
+
+.site-prose pre code {
+  background: none;
+  padding: 0;
+}
+
+.site-prose table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+  margin: 16px 0;
+}
+
+.site-prose th,
+.site-prose td {
+  border: 1px solid var(--prism-color-border-secondary);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.site-prose th {
+  background: var(--prism-color-fill-tertiary);
+  font-weight: 600;
+}
+
+/* ---------- ComponentDemo wire ---------- */
+
+.site-demo {
+  margin: 20px 0 28px;
+  border: 1px solid var(--prism-color-border-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--prism-color-bg-container);
+}
+
+.site-demo figure {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.prism-component-demo__body {
+  padding: 32px 24px;
+  background: var(--prism-color-bg-container);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.prism-component-demo__code {
+  display: none;
+  order: 3;
+  margin: 0;
+  padding: 16px 20px;
+  background: var(--prism-color-bg-layout);
+  border-top: 1px solid var(--prism-color-border-secondary);
+  overflow: auto;
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+.site-demo--open .prism-component-demo__code {
+  display: block;
+}
+
+.site-demo-bar {
+  order: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-top: 1px solid var(--prism-color-border-secondary);
+  background: var(--prism-color-bg-layout);
+}
+
+.site-demo-missing {
+  border: 1px dashed var(--prism-color-border);
+  border-radius: 4px;
+  padding: 12px 16px;
+  opacity: 0.8;
+}
+
+.site-catalog__title {
+  font-variation-settings: 'wdth' 118, 'wght' 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 4px;
+}
+
+.site-blog-list {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 28px;
+}
+
+.site-blog-list__title {
+  font-size: 20px;
+  font-weight: 600;
+  font-variation-settings: 'wdth' 112;
+}
+
+.site-blog-list__description {
+  margin: 6px 0;
+  opacity: 0.78;
+  line-height: 1.65;
+  max-width: 64ch;
+}
+
+.site-blog-list__meta {
+  margin: 0;
+  opacity: 0.66;
+}
+
+/* Sidebar group headers — DocsShell renders separators as links without href. */
+.prism-docs-shell__nav a:not([href]) {
+  display: block;
+  margin: 18px 0 4px;
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.prism-docs-shell__nav a:not([href]):first-child {
+  margin-top: 0;
+}
+
+/* ---------- Section index pages ---------- */
+
+.site-catalog {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 48px 24px 96px;
+}
+
+.site-catalog__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.site-catalog__item {
+  display: block;
+  border: 1px solid var(--prism-color-border-secondary);
+  border-radius: 4px;
+  padding: 14px 16px;
+  background: var(--prism-color-bg-container);
+  color: var(--prism-color-text);
+}
+
+.site-catalog__item:hover {
+  text-decoration: none;
+  border-color: var(--prism-color-primary);
+}
+
+.site-catalog__item strong {
+  display: block;
+  font-weight: 600;
+}
+
+.site-catalog__item span {
+  display: block;
+  font-size: 12.5px;
+  opacity: 0.72;
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.site-catalog__group {
+  margin-top: 36px;
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.66;
+}
+
+.site-empty {
+  margin-top: 20px;
+  opacity: 0.72;
+  max-width: 52ch;
+  line-height: 1.7;
+}
+
+/* ---------- Specimen landing ---------- */
+
+.site-landing {
+  background: var(--prism-color-bg-layout);
+  color: var(--prism-color-text);
+}
+
+.site-landing__note {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--prism-color-primary);
+  opacity: 0.82;
+}
+
+.site-landing__hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 48px;
+  align-items: center;
+  padding: 72px 0 88px;
+}
+
+@media (min-width: 960px) {
+  .site-landing__hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 56px;
+  }
+}
+
+.site-landing__title {
+  font-size: clamp(38px, 5.4vw, 52px);
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  margin: 18px 0 0;
+}
+
+.site-landing__lede {
+  margin: 22px 0 0;
+  font-size: 15px;
+  line-height: 1.7;
+  opacity: 0.82;
+  max-width: 46ch;
+}
+
+.site-landing__cta {
+  display: flex;
+  gap: 12px;
+  margin-top: 26px;
+  flex-wrap: wrap;
+}
+
+.site-landing__plate {
+  border: 1px solid var(--prism-color-border);
+  border-radius: 6px;
+  background: var(--prism-color-bg-container);
+  box-shadow: 0 18px 40px -24px color-mix(in srgb, var(--prism-color-primary) 32%, transparent);
+  padding: 20px 22px;
+  display: grid;
+  gap: 18px;
+}
+
+.site-landing__plate-section > .site-landing__note {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.site-landing__bands {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding: 64px 0 88px;
+}
+
+.site-landing__band {
+  flex: 1;
+  min-width: 260px;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.site-landing__band-index {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--prism-color-primary);
+}
+
+.site-landing__band-label {
+  font-size: 18px;
+  font-weight: 600;
+  font-variation-settings: 'wdth' 118;
+}
+
+.site-landing__band-blurb {
+  margin: 0;
+  opacity: 0.78;
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 40ch;
+}
+
+.site-landing__dither {
+  height: 96px;
+  background-image: radial-gradient(var(--prism-color-primary) 1px, transparent 1px);
+  background-size: 3px 3px;
+  opacity: 0.28;
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent);
+}
+
+/* The "docs in daylight" peek — one deliberate light-mode counterpoint
+   (ticket 11). The nested provider owns the theme; the surface classes only
+   need the light values, which the nested scope supplies. */
+.site-landing__daylight {
+  background: var(--prism-color-bg-layout);
+  padding: 72px 0;
+}
+
+.site-landing__daylight-card {
+  border: 1px solid var(--prism-color-border);
+  border-radius: 6px;
+  background: var(--prism-color-bg-container);
+  padding: 28px 32px;
+  display: grid;
+  gap: 16px;
+}
+
+.site-landing__daylight-code {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 12px;
+  background: var(--prism-color-bg-layout);
+  border: 1px solid var(--prism-color-border-secondary);
+  border-radius: 4px;
+  padding: 10px 14px;
+  overflow: auto;
+}
+
+.site-landing__outro {
+  padding: 88px 0;
+  text-align: center;
+}
+
+.site-landing__outro h2 {
+  font-size: 36px;
+  font-variation-settings: 'wdth' 118, 'wght' 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.site-landing__outro p {
+  margin: 14px auto 28px;
+  opacity: 0.75;
+  max-width: 44ch;
+  line-height: 1.7;
+}
+
+/* ---------- Generated API tables ---------- */
+
+.site-api {
+  margin-top: 48px;
+}
+
+.site-api h2 {
+  font-variation-settings: 'wdth' 114, 'wght' 600;
+  scroll-margin-top: 84px;
+}
+
+.site-api h3 {
+  margin: 24px 0 8px;
+}
+
+.site-api__optional {
+  opacity: 0.66;
+  font-size: 12.5px;
+}

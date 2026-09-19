@@ -3,5 +3,12 @@ packages:
   - apps/*
 allowBuilds:
   esbuild: false
+  workerd: false # wrangler deploy/config needs no workerd postinstall; `wrangler dev` is unused (static assets + remote preview)
 minimumReleaseAgeExclude:
   - antd@6.6.4
+  # stale-but-harmless: workers-types left the devDeps, pnpm added the exclusion
+  # while it was still installed and dropping it makes the lockfile policy reject
+  # the existing resolution
+  - '@cloudflare/workers-types@5.20260919.1'
+  - miniflare@5.20260918.0-alpha
+  - wrangler@4.135.0

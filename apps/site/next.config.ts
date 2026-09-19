@@ -1,3 +1,4 @@
+import { createMDX } from 'fumadocs-mdx/next';
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
@@ -8,4 +9,9 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// fumadocs-mdx's Macro API integration (ticket 03): compiles content collections
+// and transforms `lib/source.ts`'s defineDocs/defineCollections calls.
+// Call, not wrap: createMDX() returns the config decorator. `createMDX(nextConfig)`
+// would hand Next a function that spreads the 22-char phase string into the
+// config (numeric-key soup, `output` dropped).
+export default createMDX()(nextConfig);

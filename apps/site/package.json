@@ -5,20 +5,35 @@
   "description": "prism.nanisoft.com — Fumadocs headless docs, landing page, and blog; static export served by Cloudflare Workers.",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "generate": "node scripts/generate.mjs",
+    "build": "node scripts/generate.mjs && node scripts/bake-antd-css.mjs && next build && node scripts/copy-llms.mjs",
     "start": "next start",
-    "lint": "oxlint ."
+    "deploy": "wrangler deploy",
+    "lint": "oxlint .",
+    "test": "vitest run"
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.3.0",
+    "@ant-design/static-style-extract": "^2.1.0",
+    "@nanisoft/prism-llms": "workspace:*",
+    "@nanisoft/prism-tokens": "workspace:*",
     "@nanisoft/prism-ui": "workspace:*",
+    "feed": "^6.0.0",
+    "fumadocs-core": "^16.15.11",
+    "fumadocs-mdx": "^15.4.1",
     "next": "^16.3.5",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "zod": "^4.1.0"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^26.5.1",
     "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0"
+    "@types/react-dom": "^19.3.0",
+    "jsdom": "^30.0.1",
+    "vitest": "^5.0.0",
+    "wrangler": "^4.135.0"
   }
 }

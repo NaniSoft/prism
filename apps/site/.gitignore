@@ -1,0 +1,6 @@
+# generated build-time code (scripts/generate.mjs, scripts/bake-antd-css.mjs)
+/app/antd-vars.css
+/lib/generated/
+
+# wrangler local state
+.wrangler/

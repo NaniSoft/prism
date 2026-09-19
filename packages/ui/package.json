@@ -64,7 +64,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node scripts/copy-styles.mjs",
     "generate": "tsx scripts/generateAntdExports.mjs",
     "lint": "oxlint .",
     "test": "vitest run",
