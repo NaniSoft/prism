@@ -13,16 +13,59 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./provider": {
+      "types": "./dist/provider/index.d.ts",
+      "import": "./dist/provider/index.js"
+    },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "import": "./dist/components/index.js"
+    },
+    "./components/*": {
+      "types": "./dist/components/*/index.d.ts",
+      "import": "./dist/components/*/index.js"
+    },
+    "./blocks": {
+      "types": "./dist/blocks/index.d.ts",
+      "import": "./dist/blocks/index.js"
+    },
+    "./blocks/*": {
+      "types": "./dist/blocks/*/index.d.ts",
+      "import": "./dist/blocks/*/index.js"
+    },
+    "./pages": {
+      "types": "./dist/pages/index.d.ts",
+      "import": "./dist/pages/index.js"
+    },
+    "./pages/*": {
+      "types": "./dist/pages/*/index.d.ts",
+      "import": "./dist/pages/*/index.js"
+    },
+    "./icons": {
+      "types": "./dist/generated/icons.d.ts",
+      "import": "./dist/generated/icons.js"
+    },
+    "./wrapped-registry": {
+      "types": "./dist/wrapped-registry.d.ts",
+      "import": "./dist/wrapped-registry.js"
+    },
+    "./generated/pass-throughs": {
+      "types": "./dist/generated/pass-throughs.d.ts",
+      "import": "./dist/generated/pass-throughs.js"
+    },
     "./prototype": {
       "types": "./dist/prototype/index.d.ts",
       "import": "./dist/prototype/index.js"
-    }
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
   },
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "generate": "tsx scripts/generateAntdExports.mjs",
     "lint": "oxlint .",
     "test": "vitest run",
     "prepublishOnly": "publint"
@@ -40,10 +83,12 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "typescript": "^7.0.2",
+    "tsx": "^4.0.0",
     "vitest": "^5.0.0"
   },
   "dependencies": {
     "@ant-design/icons": "^6.3.4",
+    "@nanisoft/prism-tokens": "workspace:*",
     "antd": "^6.6.4"
   }
 }

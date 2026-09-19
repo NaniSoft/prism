@@ -1,17 +1,42 @@
 {
   "name": "@nanisoft/prism-llms",
   "version": "0.1.0",
-  "description": "Prism's LLM surface — generated llms.txt and per-component Markdown. Data-only; one dist/ serves npm, the site, and the MCP server.",
+  "description": "Prism's LLM surface — generated llms.txt, per-item Markdown, and the PrismDocsStore projection. Data-only; one dist/ serves npm, the site, and the MCP server.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {
     "node": ">=22"
   },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./extractor": {
+      "types": "./dist/extractor.d.ts",
+      "import": "./dist/extractor.js"
+    },
+    "./data.json": "./dist/data.json",
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "lint": "oxlint ."
+    "build": "tsc -p tsconfig.json && node scripts/build.mjs",
+    "check": "node scripts/check.mjs",
+    "generate-content": "node scripts/generate-content.mjs",
+    "lint": "oxlint .",
+    "test": "vitest run",
+    "prepublishOnly": "publint"
+  },
+  "devDependencies": {
+    "@nanisoft/prism-mcp-server": "workspace:*",
+    "@nanisoft/prism-tokens": "workspace:*",
+    "@nanisoft/prism-ui": "workspace:*",
+    "@types/node": "^26.5.1",
+    "publint": "^0.3.24",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
   }
 }

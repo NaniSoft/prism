@@ -7,6 +7,14 @@
  * component API/usage, theme tokens, docs) is specified by the MCP tool-surface
  * ticket (map ticket 13) and implemented against it.
  */
+export type {
+  PrismDocsStore,
+  PrismDocsItem,
+  PrismDocsPage,
+  PrismDocsTheme,
+} from './store.js';
+export { parsePrismDocsStore } from './store.js';
+
 export interface PrismMcpDocs {
   /** Component names the docs know about, e.g. `Button`. Placeholder shape. */
   readonly components?: readonly string[];

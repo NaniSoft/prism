@@ -1,12 +1,394 @@
 import { describe, expect, it } from 'vitest';
-import { prismTokensBootstrap } from '../src/index';
+import {
+  createPrismTheme,
+  defineBrandPack,
+  getPrismTheme,
+  prismBrandPacks,
+  prismCssVarKey,
+  resolvePrimitives,
+  resolveSemantics,
+  toDtcg,
+} from '../src/index.js';
+import type { BrandPackInput, PrismAntdMapKey, PrismDtcgDocument, PrismMode, PrismPackId } from '../src/types.js';
 
-describe('prismTokensBootstrap', () => {
-  it('marks the pre-spec placeholder era', () => {
-    expect(prismTokensBootstrap.schema).toBe('placeholder');
+const COMBOS: Array<[PrismPackId, PrismMode]> = [
+  ['blue', 'light'],
+  ['blue', 'dark'],
+  ['green', 'light'],
+  ['green', 'dark'],
+];
+
+// The closed map-token allowlist, mirrored for runtime assertions. The
+// exhaustiveness checks below fail compilation if the union grows without
+// this list being updated (ADR-0002 §2c: the allowlist is closed).
+const ANTD_MAP_KEYS = [
+  'borderRadiusSM',
+  'borderRadiusLG',
+  'motionDurationSlow',
+  'colorBgLayout',
+  'colorBgMask',
+  'colorBorder',
+  'colorBorderSecondary',
+  'colorSplit',
+  'controlItemBgActive',
+  'controlItemBgActiveHover',
+  'colorBgTextActive',
+  'colorPrimaryTextActive',
+  'controlOutline',
+  'boxShadow',
+  'boxShadowSecondary',
+  'boxShadowTertiary',
+] as const satisfies readonly PrismAntdMapKey[];
+type _MissingKeys = Exclude<PrismAntdMapKey, (typeof ANTD_MAP_KEYS)[number]>;
+declare const _exhaustive: _MissingKeys extends never ? true : 'allowlist union grew — update ANTD_MAP_KEYS';
+
+function deepFreezeCheck(value: unknown): void {
+  expect(Object.isFrozen(value)).toBe(true);
+  if (typeof value === 'object' && value !== null) {
+    for (const child of Object.values(value)) deepFreezeCheck(child);
+  }
+}
+
+/** Sorted leaf paths of a DTCG tree. */
+function leafPaths(tree: unknown, prefix = ''): string[] {
+  const out: string[] = [];
+  for (const [key, value] of Object.entries(tree as Record<string, unknown>)) {
+    const p = prefix ? `${prefix}/${key}` : key;
+    if (value && typeof value === 'object' && '$type' in (value as object)) out.push(p);
+    else out.push(...leafPaths(value, p));
+  }
+  return out.sort();
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Brand packs — pinned inks, validation, freezing
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe('brand packs', () => {
+  it('registers blue and green packs, deeply frozen', () => {
+    expect(Object.keys(prismBrandPacks)).toEqual(['blue', 'green']);
+    deepFreezeCheck(prismBrandPacks);
   });
 
-  it('lists the four Prism packages', () => {
-    expect(prismTokensBootstrap.packages).toHaveLength(4);
+  it('pins the brand-ink hexes (ADR-0002 open question 7)', () => {
+    expect(prismBrandPacks.blue.ink).toEqual({ light: '#2563EB', dark: '#3B82F6' });
+    expect(prismBrandPacks.green.ink).toEqual({ light: '#0D5C30', dark: '#22C55E' });
+  });
+
+  it('carves the state bands per ADR-0001 §8 (success joins the green pack)', () => {
+    expect(prismBrandPacks.blue.state.success).toBe('#16A34A');
+    expect(prismBrandPacks.blue.state.info).toBe(prismBrandPacks.blue.ink.light);
+    expect(prismBrandPacks.green.state.info).toBe('#2563EB');
+  });
+
+  it('carries the shared cool shadow with an explicit 0 spread', () => {
+    for (const pack of ['blue', 'green'] as const) {
+      expect(prismBrandPacks[pack].elevation.floatingLight).toBe('0 4px 16px 0 rgba(11, 18, 32, 0.16)');
+      expect(prismBrandPacks[pack].elevation.floatingDark).toBe('0 4px 16px 0 rgba(11, 18, 32, 0.24)');
+    }
+  });
+
+  it('tints hairlines per pack (variant-tinted neutrals, ADR-0001)', () => {
+    expect(prismBrandPacks.blue.hairline.dark).toBe('rgba(147, 178, 255, 0.16)');
+    expect(prismBrandPacks.green.hairline.dark).toBe('rgba(134, 239, 172, 0.16)');
+    expect(prismBrandPacks.green.hairline.light).not.toBe(prismBrandPacks.blue.hairline.light);
+  });
+});
+
+describe('AA contrast gate at defineBrandPack()', () => {
+  const validInput = (over: Partial<BrandPackInput>): BrandPackInput => ({
+    pack: 'blue',
+    ink: { light: '#2563EB', dark: '#3B82F6' },
+    ground: { light: '#F7F9FC', dark: '#0B1220' },
+    surface: { light: '#FFFFFF' },
+    text: { light: '#1A2A4A', dark: '#E8EEF9' },
+    hairline: { light: 'rgba(15, 23, 42, 0.08)', dark: 'rgba(147, 178, 255, 0.16)' },
+    state: { success: '#16A34A', info: '#2563EB', warning: '#D97706', error: '#DC2626' },
+    ...over,
+  });
+
+  it('accepts both v1 packs', () => {
+    expect(() => defineBrandPack(validInput({ pack: 'blue' }))).not.toThrow();
+    expect(() => defineBrandPack(validInput({ pack: 'green' }))).not.toThrow();
+  });
+
+  it('rejects ink that fails AA on the light ground', () => {
+    expect(() => defineBrandPack(validInput({ ink: { light: '#93C5FD', dark: '#3B82F6' } }))).toThrow(/fails WCAG AA/);
+  });
+
+  it('rejects ink that fails AA on the beam-dark ground', () => {
+    expect(() => defineBrandPack(validInput({ ink: { light: '#2563EB', dark: '#1D4ED8' } }))).toThrow(/fails WCAG AA/);
+  });
+
+  it('rejects text that fails AA on its surface (the gate is text-on-surface, not just ink)', () => {
+    expect(() => defineBrandPack(validInput({ text: { light: '#93B2FF', dark: '#E8EEF9' } }))).toThrow(/fails WCAG AA/);
+    expect(() => defineBrandPack(validInput({ text: { light: '#1A2A4A', dark: '#1A2A4A' } }))).toThrow(/fails WCAG AA/);
+  });
+
+  it('rejects pure black or white grounds (beam rule)', () => {
+    expect(() => defineBrandPack(validInput({ ground: { light: '#FFFFFF', dark: '#0B1220' } }))).toThrow(/pure white or black/);
+  });
+
+  it('freezes the registered output', () => {
+    deepFreezeCheck(defineBrandPack(validInput({ pack: 'blue' })));
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Tier 0 — mode-resolved primitives
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe('resolvePrimitives(pack, mode)', () => {
+  it('resolves primitives FOR a mode (ADR-0002 §1b)', () => {
+    const light = resolvePrimitives('blue', 'light');
+    const dark = resolvePrimitives('blue', 'dark');
+    expect(light.colorInk).toBe('#2563EB');
+    expect(dark.colorInk).toBe('#3B82F6');
+    expect(light.colorGround).toBe('#F7F9FC');
+    expect(dark.colorGround).toBe('#0B1220');
+    expect(light.colorHairline).toBe('rgba(15, 23, 42, 0.08)');
+    expect(dark.colorHairline).toBe('rgba(147, 178, 255, 0.16)');
+    expect(light.elevationFloating).toContain('0.16');
+    expect(dark.elevationFloating).toContain('0.24');
+  });
+
+  it('carries the container primitive in light mode only (ADR-0002 §3)', () => {
+    expect(resolvePrimitives('blue', 'light').colorSurface).toBe('#FFFFFF');
+    expect(resolvePrimitives('blue', 'dark').colorSurface).toBeUndefined();
+  });
+
+  it('resolves the radius family and grid numerically', () => {
+    const p = resolvePrimitives('green', 'light');
+    expect([p.shapeRadiusSm, p.shapeRadiusBase, p.shapeRadiusLg, p.shapeRadiusOuter]).toEqual([2, 4, 6, 4]);
+    expect(p.spaceUnit).toBe(4);
+    expect(p.typeSizeUi).toBe(14);
+  });
+
+  it('returns frozen plain data', () => {
+    deepFreezeCheck(resolvePrimitives('green', 'dark'));
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Tier 1 — pack-aware semantics
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe('resolveSemantics(primitives, mode)', () => {
+  it('derives text tints from the pack’s own text base — not a hardcoded hue', () => {
+    const green = resolveSemantics(resolvePrimitives('green', 'light'), 'light');
+    const blue = resolveSemantics(resolvePrimitives('blue', 'light'), 'light');
+    // Green text #162A1A at 0.68 — proves the derivation tracks the pack.
+    expect(green.textSecondary).toBe('rgba(22, 42, 26, 0.68)');
+    expect(blue.textSecondary).toBe('rgba(26, 42, 74, 0.68)');
+    expect(green.textTertiary).toBe('rgba(22, 42, 26, 0.45)');
+    expect(green.textFaint).toBe('rgba(22, 42, 26, 0.3)');
+  });
+
+  it('derives the focus ring from the pack’s own ink', () => {
+    expect(resolveSemantics(resolvePrimitives('blue', 'light'), 'light').focusRing).toBe('rgba(37, 99, 235, 0.35)');
+    expect(resolveSemantics(resolvePrimitives('blue', 'dark'), 'dark').focusRing).toBe('rgba(59, 130, 246, 0.55)');
+    expect(resolveSemantics(resolvePrimitives('green', 'light'), 'light').focusRing).toBe('rgba(13, 92, 48, 0.35)');
+  });
+
+  it('keeps the accent flood a TINT of the ink — never solid ink', () => {
+    for (const [pack, mode] of COMBOS) {
+      const s = resolveSemantics(resolvePrimitives(pack, mode), mode);
+      expect(s.accentLive).not.toBe(s.inkPrimary);
+      expect(s.accentLive).toMatch(/rgba\(/);
+    }
+    expect(resolveSemantics(resolvePrimitives('blue', 'light'), 'light').accentLive).toBe('rgba(37, 99, 235, 0.1)');
+  });
+
+  it('resolves surfaces per mode (dark container = ground, ADR-0002 §3)', () => {
+    const dark = resolveSemantics(resolvePrimitives('blue', 'dark'), 'dark');
+    expect(dark.surfaceContainer).toBe(dark.surfaceGround);
+    expect(dark.surfaceGround).toBe('#0B1220');
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// The antd lane
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe('createPrismTheme — antd lane', () => {
+  it('keeps numeric seeds numeric — strings would poison antd’s derivation', () => {
+    for (const [pack, mode] of COMBOS) {
+      const token = createPrismTheme({ pack, mode }).antd.token;
+      expect(token.borderRadius).toBe(4);
+      expect(token.lineWidth).toBe(1);
+      expect(token.sizeUnit).toBe(4);
+      expect(token.sizeStep).toBe(4);
+      expect(token.motionUnit).toBe(0.08);
+      expect(token.motionBase).toBe(0);
+      expect(token.fontSize).toBe(14);
+      expect(token.fontWeightStrong).toBe(600);
+    }
+  });
+
+  it('emits only allowlisted map keys, and always the two math-backed ones', () => {
+    for (const [pack, mode] of COMBOS) {
+      const token = createPrismTheme({ pack, mode }).antd.token as Record<string, unknown>;
+      const emitted = Object.keys(token).filter((k): k is PrismAntdMapKey => ANTD_MAP_KEYS.includes(k as PrismAntdMapKey));
+      for (const key of emitted) expect(ANTD_MAP_KEYS).toContain(key);
+      expect(token.borderRadiusSM).toBe(2);
+      expect(token.borderRadiusLG).toBe(6);
+      expect(token.motionDurationSlow).toBe('280ms');
+    }
+  });
+
+  it('sets colorBgLayout in light mode only — dark stays pure seed (ADR-0002 §3)', () => {
+    const light = createPrismTheme({ pack: 'blue', mode: 'light' }).antd.token;
+    const dark = createPrismTheme({ pack: 'blue', mode: 'dark' }).antd.token as Record<string, unknown>;
+    expect(light.colorBgLayout).toBe('#F7F9FC');
+    expect('colorBgLayout' in dark).toBe(false);
+  });
+
+  it('bases light mode on the container and dark on the ground (ADR-0002 §3)', () => {
+    expect(createPrismTheme({ pack: 'blue', mode: 'light' }).antd.token.colorBgBase).toBe('#FFFFFF');
+    expect(createPrismTheme({ pack: 'blue', mode: 'dark' }).antd.token.colorBgBase).toBe('#0B1220');
+  });
+
+  it('caps the accent flood and shadow per mode', () => {
+    const light = createPrismTheme({ pack: 'green', mode: 'light' }).antd.token;
+    expect(light.controlItemBgActive).toBe('rgba(13, 92, 48, 0.1)');
+    expect(light.boxShadow).toBe('0 4px 16px 0 rgba(11, 18, 32, 0.16)');
+    expect(light.boxShadowSecondary).toBe('none');
+  });
+
+  it('hashes nothing and names the cssVar key (ADR-0002 §1c)', () => {
+    const antd = createPrismTheme({ pack: 'green', mode: 'dark' }).antd;
+    expect(antd.hashed).toBe(false);
+    expect(antd.cssVar).toEqual({ key: 'prism-green-dark', prefix: 'prism' });
+  });
+
+  it('zeroes component shadows with algorithm: true (ADR-0002 §2c lane 3)', () => {
+    const components = createPrismTheme({ pack: 'blue', mode: 'light' }).antd.components;
+    expect(components.Button).toEqual({ primaryShadow: 'none', defaultShadow: 'none', dangerShadow: 'none', algorithm: true });
+    expect(components.Input).toEqual({ activeShadow: 'none', errorActiveShadow: 'none', warningActiveShadow: 'none', algorithm: true });
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// PrismTheme contracts
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe('PrismTheme contracts', () => {
+  it('deep-freezes the whole theme — primitives, semantics, and antd', () => {
+    for (const [pack, mode] of COMBOS) deepFreezeCheck(createPrismTheme({ pack, mode }));
+  });
+
+  it('is deterministic: same inputs → deep-equal output', () => {
+    for (const [pack, mode] of COMBOS) {
+      expect(JSON.stringify(createPrismTheme({ pack, mode }))).toBe(JSON.stringify(createPrismTheme({ pack, mode })));
+    }
+  });
+
+  it('memoises the no-override case (getPrismTheme returns the cached instance)', () => {
+    expect(getPrismTheme('blue', 'dark')).toBe(getPrismTheme('blue', 'dark'));
+    expect(getPrismTheme('blue', 'dark')).not.toBe(getPrismTheme('green', 'dark'));
+  });
+
+  it('flows semantic overrides into the antd lane, not just tier 1', () => {
+    const theme = createPrismTheme({
+      pack: 'blue',
+      mode: 'light',
+      overrides: { semantics: { accentLive: 'rgba(220, 38, 38, 0.1)' } },
+    });
+    expect(theme.semantics.accentLive).toBe('rgba(220, 38, 38, 0.1)');
+    expect(theme.antd.token.controlItemBgActive).toBe('rgba(220, 38, 38, 0.1)');
+  });
+
+  it('names the cssVar key after pack and mode (ADR-0002 §1c)', () => {
+    for (const [pack, mode] of COMBOS) {
+      expect(prismCssVarKey(pack, mode)).toBe(`prism-${pack}-${mode}`);
+      expect(createPrismTheme({ pack, mode }).cssVarKey).toBe(`prism-${pack}-${mode}`);
+    }
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// DTCG export (ADR-0002 §2d + ticket-14 research)
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe('toDtcg', () => {
+  it('ships tier 0 as resolved values with unit-ful strings', () => {
+    const doc = toDtcg('blue', 'light');
+    const ink = (doc.primitive as any).color.ink;
+    expect(ink.light).toMatchObject({ $type: 'color', $value: '#2563EB' });
+    expect((doc.primitive as any).space.unit.$value).toBe('4px');
+    expect((doc.primitive as any).shape.radius.sm.$value).toBe('2px');
+    expect((doc.primitive as any).motion.duration.slow.$value).toBe('280ms');
+    expect((doc.primitive as any).type.size.ui.$value).toBe('14px');
+  });
+
+  it('ships tier 1 as DTCG alias strings into the primitive paths', () => {
+    const doc = toDtcg('blue', 'dark');
+    const semantic = doc.semantic as any;
+    expect(semantic.surface.ground.$value).toBe('{color.ground.dark}');
+    expect(semantic.ink.primary.$value).toBe('{color.ink.dark}');
+    expect(semantic.text.primary.$value).toBe('{color.text.dark}');
+    expect(semantic.state.success.$value).toBe('{color.success}');
+    expect(semantic.radius.base.$value).toBe('{shape.radius.base}');
+    expect(semantic.typography.family.ui.$value).toBe('{type.family.ui}');
+    expect(semantic.spacing.unit.$value).toBe('{space.unit}');
+    expect(semantic.motion.timing.slow.$value).toBe('{motion.duration.slow}');
+    // Derived tokens have no primitive target — they ship resolved values.
+    expect(semantic.surface.scrim.$value).toMatch(/^rgba\(/);
+    expect(semantic.text.secondary.$value).toMatch(/^rgba\(/);
+    expect(semantic.focus.ring.$value).toMatch(/^rgba\(/);
+    expect(semantic.elevation.none.$value).toBe('none');
+  });
+
+  it('disambiguates tier-1 names from tier-0 paths (name-based alias lookup)', () => {
+    for (const [pack] of COMBOS) {
+      const light = toDtcg(pack, 'light');
+      const primitive = new Set(leafPaths(light.primitive));
+      const collisions = leafPaths(light.semantic).filter((p) => primitive.has(p));
+      expect(collisions).toEqual([]);
+    }
+  });
+
+  it('holds per-mode key parity across the tier-1 trees', () => {
+    for (const pack of ['blue', 'green'] as const) {
+      expect(leafPaths(toDtcg(pack, 'light').semantic)).toEqual(leafPaths(toDtcg(pack, 'dark').semantic));
+    }
+  });
+
+  it('emits the floating shadow as a STRING token with the composite in $extensions["prism.shadow"]', () => {
+    const floating = (toDtcg('blue', 'light').primitive as any).elevation.floating.light;
+    expect(floating.$type).toBe('string');
+    expect(floating.$value).toBe('0 4px 16px 0 rgba(11, 18, 32, 0.16)');
+    expect(floating.$extensions['prism.shadow']).toEqual({
+      $type: 'shadow',
+      color: '#0B122029',
+      offsetX: '0px',
+      offsetY: '4px',
+      blur: '16px',
+      spread: '0px',
+      inset: false,
+    });
+    expect(floating.$extensions['prism.antd']).toEqual({ map: 'boxShadow' });
+    // The semantic alias rides along for Dev Mode parity.
+    const semanticFloating = (toDtcg('blue', 'dark').semantic as any).elevation.floating;
+    expect(semanticFloating.$type).toBe('string');
+    expect(semanticFloating.$value).toBe('{elevation.floating.dark}');
+  });
+
+  it('stays within the stable 2023-07 subset', () => {
+    const ALLOWED = new Set(['$type', '$value', '$description', '$extensions']);
+    const walk = (node: unknown): void => {
+      if (!node || typeof node !== 'object') return;
+      for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+        if (key.startsWith('$')) expect(ALLOWED.has(key)).toBe(true);
+        walk(value);
+      }
+    };
+    for (const [pack, mode] of COMBOS) walk(toDtcg(pack, mode) satisfies PrismDtcgDocument);
+  });
+
+  it('is deterministic: same pack/mode → byte-identical output', () => {
+    for (const [pack, mode] of COMBOS) {
+      expect(JSON.stringify(toDtcg(pack, mode))).toBe(JSON.stringify(toDtcg(pack, mode)));
+    }
   });
 });

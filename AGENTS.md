@@ -34,9 +34,16 @@ apps assemble, never copy, design-system code.
 ```sh
 pnpm build   # turbo run build (packages emit dist/, site exports out/)
 pnpm test    # turbo run test (Vitest; RTL in prism-ui)
+pnpm check   # turbo run check — the prism-llms drift gate (7 corpus invariants; CI runs it)
 pnpm lint    # oxlint . + stylelint
 pnpm changeset  # declare a version bump before merging to main
 ```
+
+The corpus convention: a prism-ui change that alters the docs corpus ships a
+prism-llms changeset in the same PR, and `pnpm --filter @nanisoft/prism-llms
+generate-content` regenerates stub MDX + `meta.json` into `apps/site/content`
+(only marker-carrying generated stubs are ever rewritten — hand-authored docs
+are never touched).
 
 TS is strict and ESM-only with no bundler for packages (types + `import`
 exports only); `publint` runs on publish.
@@ -60,6 +67,7 @@ exports only); `publint` runs on publish.
   hand-copy content between the two.
 - **Figma** is one-way code → Figma Variables (repo-owned plugin fed by
   `prism-tokens` build output). No two-way sync, no hand-built UI kit.
+  The full design↔code conventions: `docs/design-conventions.md`.
 
 ## MCP servers (`.mcp.json`)
 

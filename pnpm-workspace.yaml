@@ -1,5 +1,7 @@
 packages:
   - packages/*
   - apps/*
+allowBuilds:
+  esbuild: false
 minimumReleaseAgeExclude:
   - antd@6.6.4

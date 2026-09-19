@@ -151,19 +151,20 @@ Three lanes, in priority order:
 
 ### 2d. Where the DTCG / Figma export slots in
 
-The export is a **build output of tiers 0 and 1 only** — antd tokens never reach Figma, because Figma mirrors the design language, not Prism's antd compiler. `toDtcg(pack, mode)` emits one document per pack per mode, written by the package's build script:
+The export is a **build output of tiers 0 and 1 only** — antd tokens never reach Figma, because Figma mirrors the design language, not Prism's antd compiler. `toDtcg(pack, mode)` emits one document per pack per mode (tiers 0 + 1, per-mode key parity asserted); the package's build script then partitions the output into the per-collection files the Figma importer consumes, alongside a manifest (ticket 14, verified against Microsoft's *Variables Import* — the only source-auditable candidate):
 
 ```
-dist/figma/prism.blue.light.tokens.json
-dist/figma/prism.blue.dark.tokens.json
-dist/figma/prism.green.light.tokens.json
-dist/figma/prism.green.dark.tokens.json
+dist/figma/blue/manifest.json                 ← collection × mode → file; Light listed first ⇒ default mode
+dist/figma/blue/primitive.tokens.json         ← tier 0, the modeless `prism.primitive` collection
+dist/figma/blue/semantic.light.tokens.json    ← tier 1, mode Light of `prism.semantic`
+dist/figma/blue/semantic.dark.tokens.json     ← tier 1, mode Dark of `prism.semantic`
 ```
 
-- **Shape** (stable DTCG subset only — `$value`, `$type`, `$description`, `$extensions`; the 2025.10 draft's `$extends`/`$root`/color-object forms are deliberately unused): group nesting mirrors the tier trees, token *names* never contain `.`, `{`, `}`, so `primitive.color.ink.light` becomes `primitive → color → ink → light`.
-- **Modes**: the light and dark files for a pack share an identical key set (asserted at build time), and the repo-owned plugin (ticket 14) pairs them into one Figma collection with Light/Dark modes.
+- **Shape** (stable DTCG **2023-07** subset only — `$value`, `$type`, `$description`, `$extensions`; the 2025.10 draft's `$extends`/`$root`/dimension-objects/multi-shadow-array forms are deliberately unused): group nesting mirrors the tier trees, token *names* never contain `.`, `{`, `}`, so `primitive.color.ink.light` becomes the Figma variable path `primitive/color/ink/light`.
+- **Tier 0 ships resolved values; tier 1 ships `{ref}` aliases into `prism.primitive`** — the alias is what makes a Figma semantic resolve per active mode (`VARIABLE_ALIAS`, cross-collection). Per-mode key parity is unchanged, and the antd mapping stays code-side as `$extensions` provenance.
+- **The floating shadow exports as `$type: "string"`** whose `$value` is the CSS `box-shadow` string — byte-identical to what the `boxShadow` allowlist entry and prism-ui CSS consume — with the true 2023-07 composite preserved losslessly in `$extensions["prism.shadow"]`. It is **not** a `$type: "shadow"` composite (no importer keeps one: Variables Import skips all six composite types with a reported info line) and **not** a `$description` (plugins map that to the Figma variable *description*, not its value). Figma cannot bind a STRING variable to an effect at all — only COLOR → a shadow's colour, FLOAT → offset/blur/spread per field — so the shadow variable is Dev-Mode parity, never a live style, regardless of owned plugin or Enterprise REST (ticket 14).
+- **Name-collision hazard, resolved in the tokens pass**: semantic names that exactly mirror a primitive path (`shape.radius.base` exists in both tiers, §2b) are ambiguous for the importer's name-based alias lookup — the real export prefixes or disambiguates tier-1 Figma names when it lands.
 - **Provenance, not mapping**: each token may carry `$extensions: { 'prism.antd': { seed: 'colorPrimary' } }` for human/agent readers, but the Figma *values* are the resolved Prism values — the antd mapping stays code-side.
-- Values are **resolved**, not `{ref}` aliases; the composite `shadow` type is the one risky spot (ticket 04's open `boxShadow` string-syntax item), so the floating shadow is exported as a `$description` plus `$extensions` string until ticket 14 proves the plugin path.
 
 ## 3. Dark mode
 

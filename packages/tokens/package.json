@@ -2,7 +2,7 @@
   "name": "@nanisoft/prism-tokens",
   "version": "0.1.0",
   "description": "Design tokens for Prism — the single source of truth for the Prism design language.",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "sideEffects": false,
   "engines": {
@@ -18,7 +18,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node scripts/build-figma.mjs",
     "lint": "oxlint .",
     "test": "vitest run",
     "prepublishOnly": "publint"
