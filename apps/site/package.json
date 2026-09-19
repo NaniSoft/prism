@@ -4,8 +4,9 @@
   "private": true,
   "description": "prism.nanisoft.com — Fumadocs headless docs, landing page, and blog; static export served by Cloudflare Workers.",
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/generate.mjs && pnpm bake && next dev",
     "generate": "node scripts/generate.mjs",
+    "bake": "node scripts/bake-antd-css.mjs",
     "build": "node scripts/generate.mjs && node scripts/bake-antd-css.mjs && next build && node scripts/copy-llms.mjs",
     "start": "next start",
     "deploy": "wrangler deploy",
