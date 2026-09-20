@@ -1,6 +1,6 @@
 {
   "name": "@nanisoft/prism-mcp-server",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Tool logic for the Prism MCP server — transport-free, fed by prism-llms output. The HTTP transport lives in the apps/site Worker at /mcp.",
   "license": "MIT",
   "type": "module",
