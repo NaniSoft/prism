@@ -2,6 +2,7 @@ packages:
   - packages/*
   - apps/*
 allowBuilds:
+  core-js-pure: false # transitive of agents → mimetext → @babel/runtime-corejs3; its postinstall is a funding note, nothing to build
   esbuild: false
   workerd: false # wrangler deploy/config needs no workerd postinstall; `wrangler dev` is unused (static assets + remote preview)
 minimumReleaseAgeExclude:
@@ -12,3 +13,4 @@ minimumReleaseAgeExclude:
   - '@cloudflare/workers-types@5.20260919.1'
   - miniflare@5.20260918.0-alpha
   - wrangler@4.135.0
+  - agents@0.24.0

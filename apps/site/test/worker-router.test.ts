@@ -19,8 +19,10 @@ function stubEnv(html = '<html>asset</html>'): { env: Env; calls: Request[] } {
   return { env, calls };
 }
 
-function requestFor(path: string, method = 'GET'): Request {
-  return new Request(`https://prism.nanisoft.com${path}`, { method });
+function requestFor(path: string, method = 'GET', headers: Record<string, string> = {}): Request {
+  // Host is pinned explicitly: Node's fetch hides it on absolute URLs, but the
+  // MCP lane's hostname allowlist (and a real Worker) always see one.
+  return new Request(`https://prism.nanisoft.com${path}`, { method, headers: { host: 'prism.nanisoft.com', ...headers } });
 }
 
 describe('rewriteMdPathname', () => {
@@ -70,18 +72,19 @@ describe('handleRequest', () => {
     expect(calls[1]!.method).toBe('HEAD');
   });
 
-  it('routes /mcp to the reserved seam — 501 on protocol methods, 405 otherwise', async () => {
+  it('routes /mcp into the live MCP lane — never to assets (ticket 22)', async () => {
     const { env, calls } = stubEnv();
-    const seeded = await handleRequest(requestFor('/mcp', 'POST'), env);
-    expect(seeded.status).toBe(501);
-    expect(await seeded.json()).toMatchObject({ error: 'not_implemented' });
-    expect(calls).toHaveLength(0); // never falls through to assets
+    // A stateless transport answers a bare GET (no server stream to offer) and
+    // an unknown method with a protocol-level 405 — proof the lane is wired,
+    // not stubbed. Full protocol round-trips: worker-mcp.test.ts.
+    for (const method of ['GET', 'PUT']) {
+      const response = await handleRequest(requestFor('/mcp', method), env);
+      expect(response.status, method).toBe(405);
+      expect(calls, method).toHaveLength(0);
+    }
 
-    const sse = await handleRequest(requestFor('/mcp/', 'GET'), env);
-    expect(sse.status).toBe(501);
-
-    const rejected = await handleRequest(requestFor('/mcp', 'PUT'), env);
-    expect(rejected.status).toBe(405);
-    expect(rejected.headers.get('allow')).toBe('GET, POST, DELETE');
+    const trailing = await handleRequest(requestFor('/mcp/', 'POST'), env);
+    expect(trailing.status).toBe(404); // the handler's route match is exact
+    expect(calls).toHaveLength(0);
   });
 });

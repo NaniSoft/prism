@@ -1,25 +1,53 @@
-// The /mcp endpoint seam (ticket 22's implementation site).
+// The /mcp endpoint (ticket 22): a stateless Streamable-HTTP MCP server over
+// prism-llms' bundled corpus. Tool logic lives in `@nanisoft/prism-mcp-server`;
+// this module is only transport wiring — `createMcpHandler(factory)` from the
+// Agents SDK (ticket 05: no McpAgent, no runtime I/O; the corpus is bundled at
+// build time, so deploy is invalidation).
 //
-// This module is deliberately the ONLY thing ticket 22 replaces: the Worker
-// entry, the router, and wrangler.jsonc (run_worker_first, the /mcp patterns,
-// the custom domain) are already in place. The landed implementation will be a
-// stateless `createMcpHandler(() => createPrismMcpServer(data))` over
-// prism-llms' bundled data.json (ticket 05: no McpAgent, no runtime I/O).
+// Options are pinned by ADR-0004 §6: the production hostname (the handler's
+// default allowlist is localhost + `*.workers.dev` only), no CORS (no browser
+// client in v1), JSON responses (docs tools are small — never stream).
 
-const ALLOWED_METHODS = 'GET, POST, DELETE';
+import { createMcpHandler } from 'agents/mcp/server';
+import { createPrismMcpServer, parsePrismDocsStore } from '@nanisoft/prism-mcp-server';
+import docsData from '@nanisoft/prism-llms/data.json';
 
-export async function handleMcp(request: Request): Promise<Response> {
-  // Streamable HTTP accepts GET (SSE), POST (messages), DELETE (session teardown).
-  if (!['GET', 'POST', 'DELETE'].includes(request.method)) {
-    return new Response(null, { status: 405, headers: { allow: ALLOWED_METHODS } });
-  }
-  const body = JSON.stringify({
-    error: 'not_implemented',
-    message: 'The Prism MCP endpoint is wired but unimplemented — ticket 22 (prism-mcp-server) lands it here.',
-    hint: 'Until then, agents read https://prism.nanisoft.com/llms.txt and per-page /md/*.md.',
-  });
-  return new Response(body, {
-    status: 501,
-    headers: { 'content-type': 'application/json', allow: ALLOWED_METHODS },
-  });
+/**
+ * The Workers execution context, typed structurally — this file typechecks in
+ * the same TS program as the site, which deliberately carries no
+ * `@cloudflare/workers-types` (its globals clash with the DOM lib; see
+ * router.ts).
+ */
+export interface WorkerExecutionContext {
+  waitUntil(promise: Promise<unknown>): void;
+  passThroughOnException(): void;
+}
+
+const NOOP_CONTEXT: WorkerExecutionContext = {
+  waitUntil() {},
+  passThroughOnException() {},
+};
+
+/**
+ * The JSON import arrives type-widened (a JSON literal cannot preserve the
+ * `kind` literals), so `parsePrismDocsStore` is the door: it validates the
+ * literals and hands the factory a real `PrismDocsStore`. The factory runs per
+ * request — the stateless handler builds a fresh server each time — so the
+ * lookup maps are built per request too, never at isolate scope (ticket 05's
+ * 1 s startup rule).
+ */
+const handler = createMcpHandler(() => createPrismMcpServer(parsePrismDocsStore(docsData)), {
+  route: '/mcp',
+  allowedHostnames: ['prism.nanisoft.com'],
+  corsOptions: false,
+  responseMode: 'json',
+});
+
+/**
+ * Handle one `/mcp` request. `env` is unused (the corpus is bundled, there are
+ * no bindings), and the runtime always supplies a context — the default only
+ * exists so tests can call this bare.
+ */
+export function handleMcp(request: Request, ctx: WorkerExecutionContext = NOOP_CONTEXT): Promise<Response> {
+  return handler(request, undefined, ctx);
 }

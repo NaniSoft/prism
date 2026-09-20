@@ -1,36 +1,13 @@
 /**
- * Tool logic for the Prism MCP server.
+ * `@nanisoft/prism-mcp-server` — the Prism MCP tool surface (ADR-0004).
  *
- * Deliberately transport-free: the HTTP transport is a stateless
- * `createMcpHandler(factory)` in the apps/site Worker (map ticket 05), and an
- * optional stdio shim reuses this same factory. The real tool surface (search,
- * component API/usage, theme tokens, docs) is specified by the MCP tool-surface
- * ticket (map ticket 13) and implemented against it.
+ * Transport-free: this package exports the pure `createPrismMcpServer(docs)`
+ * factory plus the `PrismDocsStore` corpus contract it reads (this package is
+ * that interface's canonical home — the consumer). It imports nothing from any
+ * other workspace package at runtime; apps/site bundles the factory together
+ * with `@nanisoft/prism-llms`' `data.json` at build time.
  */
-export type {
-  PrismDocsStore,
-  PrismDocsItem,
-  PrismDocsPage,
-  PrismDocsTheme,
-} from './store.js';
+
+export { createPrismMcpServer, type PrismMcpServerOptions } from './factory.js';
 export { parsePrismDocsStore } from './store.js';
-
-export interface PrismMcpDocs {
-  /** Component names the docs know about, e.g. `Button`. Placeholder shape. */
-  readonly components?: readonly string[];
-}
-
-export interface PrismMcpServer {
-  readonly name: 'prism-mcp-server';
-  readonly version: string;
-  /** Tool names registered on the server. Empty until the tool spec lands. */
-  readonly tools: readonly string[];
-}
-
-export function createPrismMcpServer(_docs: PrismMcpDocs = {}): PrismMcpServer {
-  return {
-    name: 'prism-mcp-server',
-    version: '0.1.0',
-    tools: [],
-  };
-}
+export type { PrismDocsStore, PrismDocsItem, PrismDocsPage, PrismDocsTheme } from './store.js';
