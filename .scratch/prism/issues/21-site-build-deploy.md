@@ -34,3 +34,7 @@ Implemented and deployed 2026-09-19 — **prism.nanisoft.com is live** (Worker `
 - **Consumer-side package fix**: prism-ui's `./styles.css` export was dangling (tsc never copied it); its build now copies the stylesheet (patch changeset).
 
 Deviations / notes: Next 16 prefetch payloads for optional-catch-all roots 404 (cosmetic console noise; navigation falls back to full page loads — a Next static-export quirk). Site search UI (ticket 12 §4) was not part of this ticket's inherited set and is deferred. The ticket-12 `PrismLocale` merge slot still needs its prism-ui home (ruling: no prism-ui API changes here); the site hardcodes English strings.
+
+## Comments
+
+- Reviewed 2026-09-20: spec ✅; one Important fixed in review round 1 (`pnpm dev` now self-sufficient — dev chain generates both gitignored artifacts before `next dev`; `bake` exposed as a named script). Nine minors deferred to the whole-branch review ledger; the OFL font-license text item graduated into ticket 23's THIRD-PARTY-NOTICES pass.
