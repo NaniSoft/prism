@@ -6,6 +6,9 @@
 import { render, screen } from '@testing-library/react';
 import { theme as antdTheme } from 'antd';
 import { describe, expect, it } from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createPrismTheme, getPrismTheme, type PrismPackId, type PrismMode } from '@nanisoft/prism-tokens';
 
 import { ComponentDemo } from '../src/blocks/component-demo/index.js';
@@ -81,6 +84,14 @@ describe('PrismProvider', () => {
   it('lets the consumer theme win per key over the default', () => {
     const merged = mergePrismTheme(getPrismTheme('blue', 'light'), { token: { colorPrimary: '#ABCDEF' } });
     expect(merged.token?.colorPrimary).toBe('#ABCDEF');
+  });
+
+  it("opens with the 'use client' directive (source-level — RSC boundary)", () => {
+    // A bundler directive can only be asserted on the source: render-time
+    // checks can't see it, and its absence is silent (the merged theme's
+    // algorithm function serializes to undefined across the RSC boundary).
+    const source = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'provider', 'PrismProvider.tsx'), 'utf8');
+    expect(source.startsWith("'use client';")).toBe(true);
   });
 });
 
