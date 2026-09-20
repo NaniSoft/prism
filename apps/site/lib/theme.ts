@@ -8,18 +8,30 @@
 // only follows the class — component CSS is theme-agnostic, so the swap is the
 // whole repaint.
 
-import { prismCssVarKey, type PrismMode, type PrismPackId } from '@nanisoft/prism-tokens';
+import { prismBrandPacks, prismCssVarKey, type PrismMode, type PrismPackId } from '@nanisoft/prism-tokens';
 
 export const THEME_STORAGE_KEY = 'prism-theme';
 
 export const DEFAULT_PACK: PrismPackId = 'blue';
 export const DEFAULT_MODE: PrismMode = 'dark';
 
-export const PACKS: readonly PrismPackId[] = ['blue', 'green'];
+/** Derived from prism-tokens' registered packs (ADR-0005) — a new pack needs no edit here. */
+export const PACKS: readonly PrismPackId[] = Object.keys(prismBrandPacks) as PrismPackId[];
 export const MODES: readonly PrismMode[] = ['light', 'dark'];
 
-export const PACK_LABELS: Record<PrismPackId, string> = { blue: 'Blue', green: 'Green' };
+export const PACK_LABELS: Record<PrismPackId, string> = {
+  blue: 'Blue',
+  green: 'Green',
+  lavender: 'Lavender',
+  rose: 'Rose',
+  peach: 'Peach',
+};
 export const MODE_LABELS: Record<PrismMode, string> = { light: 'Light', dark: 'Beam-dark' };
+
+/** The pack's own light-mode ink — the swatch dot in the switcher and gallery. */
+export function packSwatch(pack: PrismPackId): string {
+  return prismBrandPacks[pack].ink.light;
+}
 
 /** `<pack>-<mode>` — the localStorage value; the applied class is `prism-<id>`. */
 export function themeId(pack: PrismPackId, mode: PrismMode): string {

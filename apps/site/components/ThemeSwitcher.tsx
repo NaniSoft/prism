@@ -1,12 +1,13 @@
 'use client';
 
-// The shell-level pack × mode switcher (ticket 12 §2). Two segmented controls —
-// pack (blue | green) and mode (light | beam-dark) — driving SiteThemeProvider.
+// The shell-level pack × mode switcher (ticket 12 §2). Five packs — one Segmented
+// with each pack's own ink as its swatch dot — plus the mode (light | beam-dark)
+// control, driving SiteThemeProvider.
 
 import { Segmented } from '@nanisoft/prism-ui/components';
 
 import { useThemeSelection } from '@/components/SiteThemeProvider';
-import { MODES, MODE_LABELS, PACKS, PACK_LABELS } from '@/lib/theme';
+import { MODES, MODE_LABELS, PACKS, PACK_LABELS, packSwatch } from '@/lib/theme';
 import type { PrismMode, PrismPackId } from '@nanisoft/prism-tokens';
 
 export function ThemeSwitcher() {
@@ -17,7 +18,15 @@ export function ThemeSwitcher() {
       <Segmented<PrismPackId>
         size="small"
         value={selection.pack}
-        options={PACKS.map((pack) => ({ label: PACK_LABELS[pack], value: pack }))}
+        options={PACKS.map((pack) => ({
+          value: pack,
+          label: (
+            <span className="site-pack-option">
+              <span className="site-pack-option__dot" style={{ background: packSwatch(pack) }} aria-hidden />
+              <span className="site-pack-option__label">{PACK_LABELS[pack]}</span>
+            </span>
+          ),
+        }))}
         onChange={(pack) => setSelection({ pack, mode: selection.mode })}
         aria-label="Brand pack"
       />

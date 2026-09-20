@@ -10,9 +10,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const dist = path.join(here, '..', 'dist');
 
-const { toDtcg } = await import(pathToFileURL(path.join(dist, 'index.js')).href);
+const { toDtcg, prismBrandPacks } = await import(pathToFileURL(path.join(dist, 'index.js')).href);
 
-const PACKS = ['blue', 'green'];
+// Derived from the registered packs — a new pack in brands.ts ships to Figma
+// with no edit here.
+const PACKS = Object.keys(prismBrandPacks);
 const MODES = { Light: 'light', Dark: 'dark' };
 
 /** Collect sorted leaf paths ("color/ink/light") of a DTCG tree. */

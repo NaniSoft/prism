@@ -6,16 +6,28 @@
 import type { BrandPack, BrandPackInput, PrismPackId } from './types.js';
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Brand ink hexes — pinned per ADR-0002 open question 7 (resolved in ticket 18).
-// The AA gate decides, not taste: green ink is dark enough for 4.5:1 on its
-// light ground; dark-mode inks are lightened one step for the beam ground.
+// Brand hexes — the pastel spectrum (ADR-0005). Five packs, one voice: pastel-
+// tinted grounds, hairlines, and washes carry the colour; each ink stays a
+// mid-tone of its hue so the AA gate holds (ink doubles as body-link color in
+// light mode, 4.5:1). Dark-mode inks are lightened one step for the beam ground.
+// The founding hues keep their ids (blue, green) — only their atmosphere is
+// reforged — so the published PrismPackId API stays additive.
 // ──────────────────────────────────────────────────────────────────────────────
 
-const BLUE_INK_LIGHT = '#2563EB'; // blue-600 — the blue pack's primary
-const BLUE_INK_DARK = '#3B82F6'; // blue-500 — lightened for the beam-dark ground
+const BLUE_INK_LIGHT = '#2563EB'; // azure — 4.64:1 on the pastel sky ground
+const BLUE_INK_DARK = '#4C8DF6'; // lightened azure for the dusk-blue beam ground
 
-const GREEN_INK_LIGHT = '#0D5C30'; // dark forest green — 4.5:1 on the green light ground
-const GREEN_INK_DARK = '#22C55E'; // green-500 — lightened for the beam-dark ground
+const GREEN_INK_LIGHT = '#117A3B'; // spring green — 4.88:1 on the pastel mint ground
+const GREEN_INK_DARK = '#22C55E'; // lightened spring for the deep-spruce beam ground
+
+const LAVENDER_INK_LIGHT = '#6A58CE'; // violet — 4.81:1 on the pale lilac ground
+const LAVENDER_INK_DARK = '#9D8DF4'; // lightened violet for the ultraviolet beam ground
+
+const ROSE_INK_LIGHT = '#BC3A6C'; // magenta-rose — 4.80:1 on the pale blush ground
+const ROSE_INK_DARK = '#F08CB4'; // lightened rose for the wine-plum beam ground
+
+const PEACH_INK_LIGHT = '#B04A17'; // coral terracotta — 4.98:1 on the peach-cream ground
+const PEACH_INK_DARK = '#F2A05C'; // lightened apricot for the amber-dusk beam ground
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Shared tier-0 constants — the system shape a pack cannot change (ADR-0002 §4).
@@ -42,27 +54,60 @@ const SHARED = {
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Brand pack inputs. Hairlines are variant-tinted (ADR-0001: each pack generates
-// its own neutral atmosphere) — the blue pack tints cool blue, the green pack
-// tints green, at the same alphas.
+// its own neutral atmosphere) — every pack tints its hairlines from its own hue
+// at the same alphas, so a pack is a full re-expression, not a repainted primary.
+// Surfaces stay white: components float as crisp islands on the pastel ground.
+// State hues are shared (success green, warning amber, error red, info blue)
+// so meaning stays constant across the spectrum (ADR-0001 §8).
 // ──────────────────────────────────────────────────────────────────────────────
 
 const bluePackInput: BrandPackInput = {
   pack: 'blue',
   ink: { light: BLUE_INK_LIGHT, dark: BLUE_INK_DARK },
-  ground: { light: '#F7F9FC', dark: '#0B1220' },
+  ground: { light: '#EEF3FC', dark: '#0D1730' },
   surface: { light: '#FFFFFF' },
   text: { light: '#1A2A4A', dark: '#E8EEF9' },
-  hairline: { light: 'rgba(15, 23, 42, 0.08)', dark: 'rgba(147, 178, 255, 0.16)' },
+  hairline: { light: 'rgba(30, 64, 158, 0.10)', dark: 'rgba(158, 191, 255, 0.18)' },
   state: { success: '#16A34A', info: BLUE_INK_LIGHT, warning: '#D97706', error: '#DC2626' },
 };
 
 const greenPackInput: BrandPackInput = {
   pack: 'green',
   ink: { light: GREEN_INK_LIGHT, dark: GREEN_INK_DARK },
-  ground: { light: '#F0F9F5', dark: '#0A1612' },
+  ground: { light: '#E9F6EF', dark: '#0C1812' },
   surface: { light: '#FFFFFF' },
   text: { light: '#162A1A', dark: '#E8EEF9' },
-  hairline: { light: 'rgba(13, 42, 26, 0.08)', dark: 'rgba(134, 239, 172, 0.16)' },
+  hairline: { light: 'rgba(17, 90, 47, 0.10)', dark: 'rgba(134, 239, 172, 0.16)' },
+  state: { success: '#16A34A', info: '#2563EB', warning: '#D97706', error: '#DC2626' },
+};
+
+const lavenderPackInput: BrandPackInput = {
+  pack: 'lavender',
+  ink: { light: LAVENDER_INK_LIGHT, dark: LAVENDER_INK_DARK },
+  ground: { light: '#F2F1FB', dark: '#131022' },
+  surface: { light: '#FFFFFF' },
+  text: { light: '#262044', dark: '#ECE9FA' },
+  hairline: { light: 'rgba(84, 70, 176, 0.10)', dark: 'rgba(157, 141, 244, 0.17)' },
+  state: { success: '#16A34A', info: '#2563EB', warning: '#D97706', error: '#DC2626' },
+};
+
+const rosePackInput: BrandPackInput = {
+  pack: 'rose',
+  ink: { light: ROSE_INK_LIGHT, dark: ROSE_INK_DARK },
+  ground: { light: '#FBF1F5', dark: '#1A111C' },
+  surface: { light: '#FFFFFF' },
+  text: { light: '#331B29', dark: '#F9EAF1' },
+  hairline: { light: 'rgba(150, 48, 92, 0.10)', dark: 'rgba(240, 140, 180, 0.17)' },
+  state: { success: '#16A34A', info: '#2563EB', warning: '#D97706', error: '#DC2626' },
+};
+
+const peachPackInput: BrandPackInput = {
+  pack: 'peach',
+  ink: { light: PEACH_INK_LIGHT, dark: PEACH_INK_DARK },
+  ground: { light: '#FBF3EA', dark: '#1D140D' },
+  surface: { light: '#FFFFFF' },
+  text: { light: '#3A241A', dark: '#FAF0E4' },
+  hairline: { light: 'rgba(146, 62, 24, 0.10)', dark: 'rgba(242, 160, 92, 0.17)' },
   state: { success: '#16A34A', info: '#2563EB', warning: '#D97706', error: '#DC2626' },
 };
 
@@ -172,10 +217,19 @@ export function defineBrandPack(input: BrandPackInput): BrandPack {
   return buildBrandPack(input);
 }
 
-/** The two registered, validated, frozen brand packs for v1 (ADR-0001). */
+/** The five registered, validated, frozen brand packs (ADR-0005). */
 export const prismBrandPacks: Readonly<Record<PrismPackId, BrandPack>> = Object.freeze({
   blue: defineBrandPack(bluePackInput),
   green: defineBrandPack(greenPackInput),
+  lavender: defineBrandPack(lavenderPackInput),
+  rose: defineBrandPack(rosePackInput),
+  peach: defineBrandPack(peachPackInput),
 });
 
-export { bluePackInput, greenPackInput };
+export {
+  bluePackInput,
+  greenPackInput,
+  lavenderPackInput,
+  rosePackInput,
+  peachPackInput,
+};

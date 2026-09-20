@@ -16,6 +16,12 @@ const COMBOS: Array<[PrismPackId, PrismMode]> = [
   ['blue', 'dark'],
   ['green', 'light'],
   ['green', 'dark'],
+  ['lavender', 'light'],
+  ['lavender', 'dark'],
+  ['rose', 'light'],
+  ['rose', 'dark'],
+  ['peach', 'light'],
+  ['peach', 'dark'],
 ];
 
 // The closed map-token allowlist, mirrored for runtime assertions. The
@@ -35,6 +41,7 @@ const ANTD_MAP_KEYS = [
   'colorBgTextActive',
   'colorPrimaryTextActive',
   'controlOutline',
+  'colorTextPlaceholder',
   'boxShadow',
   'boxShadowSecondary',
   'boxShadowTertiary',
@@ -65,33 +72,47 @@ function leafPaths(tree: unknown, prefix = ''): string[] {
 // ──────────────────────────────────────────────────────────────────────────────
 
 describe('brand packs', () => {
-  it('registers blue and green packs, deeply frozen', () => {
-    expect(Object.keys(prismBrandPacks)).toEqual(['blue', 'green']);
+  it('registers the five pastel packs, deeply frozen', () => {
+    expect(Object.keys(prismBrandPacks)).toEqual(['blue', 'green', 'lavender', 'rose', 'peach']);
     deepFreezeCheck(prismBrandPacks);
   });
 
-  it('pins the brand-ink hexes (ADR-0002 open question 7)', () => {
-    expect(prismBrandPacks.blue.ink).toEqual({ light: '#2563EB', dark: '#3B82F6' });
-    expect(prismBrandPacks.green.ink).toEqual({ light: '#0D5C30', dark: '#22C55E' });
+  it('pins the brand-ink hexes (ADR-0002 open question 7, reforged per ADR-0005)', () => {
+    expect(prismBrandPacks.blue.ink).toEqual({ light: '#2563EB', dark: '#4C8DF6' });
+    expect(prismBrandPacks.green.ink).toEqual({ light: '#117A3B', dark: '#22C55E' });
+    expect(prismBrandPacks.lavender.ink).toEqual({ light: '#6A58CE', dark: '#9D8DF4' });
+    expect(prismBrandPacks.rose.ink).toEqual({ light: '#BC3A6C', dark: '#F08CB4' });
+    expect(prismBrandPacks.peach.ink).toEqual({ light: '#B04A17', dark: '#F2A05C' });
   });
 
   it('carves the state bands per ADR-0001 §8 (success joins the green pack)', () => {
     expect(prismBrandPacks.blue.state.success).toBe('#16A34A');
     expect(prismBrandPacks.blue.state.info).toBe(prismBrandPacks.blue.ink.light);
-    expect(prismBrandPacks.green.state.info).toBe('#2563EB');
+    for (const pack of ['green', 'lavender', 'rose', 'peach'] as const) {
+      expect(prismBrandPacks[pack].state.info).toBe('#2563EB');
+    }
   });
 
   it('carries the shared cool shadow with an explicit 0 spread', () => {
-    for (const pack of ['blue', 'green'] as const) {
+    for (const pack of Object.keys(prismBrandPacks) as PrismPackId[]) {
       expect(prismBrandPacks[pack].elevation.floatingLight).toBe('0 4px 16px 0 rgba(11, 18, 32, 0.16)');
       expect(prismBrandPacks[pack].elevation.floatingDark).toBe('0 4px 16px 0 rgba(11, 18, 32, 0.24)');
     }
   });
 
   it('tints hairlines per pack (variant-tinted neutrals, ADR-0001)', () => {
-    expect(prismBrandPacks.blue.hairline.dark).toBe('rgba(147, 178, 255, 0.16)');
+    expect(prismBrandPacks.blue.hairline.dark).toBe('rgba(158, 191, 255, 0.18)');
     expect(prismBrandPacks.green.hairline.dark).toBe('rgba(134, 239, 172, 0.16)');
-    expect(prismBrandPacks.green.hairline.light).not.toBe(prismBrandPacks.blue.hairline.light);
+    expect(prismBrandPacks.lavender.hairline.dark).toBe('rgba(157, 141, 244, 0.17)');
+    expect(prismBrandPacks.rose.hairline.dark).toBe('rgba(240, 140, 180, 0.17)');
+    expect(prismBrandPacks.peach.hairline.dark).toBe('rgba(242, 160, 92, 0.17)');
+    for (const [a, b] of [
+      ['blue', 'green'],
+      ['blue', 'lavender'],
+      ['rose', 'peach'],
+    ] as const) {
+      expect(prismBrandPacks[a].hairline.light).not.toBe(prismBrandPacks[b].hairline.light);
+    }
   });
 });
 
@@ -107,9 +128,10 @@ describe('AA contrast gate at defineBrandPack()', () => {
     ...over,
   });
 
-  it('accepts both v1 packs', () => {
-    expect(() => defineBrandPack(validInput({ pack: 'blue' }))).not.toThrow();
-    expect(() => defineBrandPack(validInput({ pack: 'green' }))).not.toThrow();
+  it('accepts all five registered packs', () => {
+    for (const pack of Object.keys(prismBrandPacks) as PrismPackId[]) {
+      expect(() => defineBrandPack(validInput({ pack }))).not.toThrow();
+    }
   });
 
   it('rejects ink that fails AA on the light ground', () => {
@@ -143,11 +165,11 @@ describe('resolvePrimitives(pack, mode)', () => {
     const light = resolvePrimitives('blue', 'light');
     const dark = resolvePrimitives('blue', 'dark');
     expect(light.colorInk).toBe('#2563EB');
-    expect(dark.colorInk).toBe('#3B82F6');
-    expect(light.colorGround).toBe('#F7F9FC');
-    expect(dark.colorGround).toBe('#0B1220');
-    expect(light.colorHairline).toBe('rgba(15, 23, 42, 0.08)');
-    expect(dark.colorHairline).toBe('rgba(147, 178, 255, 0.16)');
+    expect(dark.colorInk).toBe('#4C8DF6');
+    expect(light.colorGround).toBe('#EEF3FC');
+    expect(dark.colorGround).toBe('#0D1730');
+    expect(light.colorHairline).toBe('rgba(30, 64, 158, 0.10)');
+    expect(dark.colorHairline).toBe('rgba(158, 191, 255, 0.18)');
     expect(light.elevationFloating).toContain('0.16');
     expect(dark.elevationFloating).toContain('0.24');
   });
@@ -186,8 +208,9 @@ describe('resolveSemantics(primitives, mode)', () => {
 
   it('derives the focus ring from the pack’s own ink', () => {
     expect(resolveSemantics(resolvePrimitives('blue', 'light'), 'light').focusRing).toBe('rgba(37, 99, 235, 0.35)');
-    expect(resolveSemantics(resolvePrimitives('blue', 'dark'), 'dark').focusRing).toBe('rgba(59, 130, 246, 0.55)');
-    expect(resolveSemantics(resolvePrimitives('green', 'light'), 'light').focusRing).toBe('rgba(13, 92, 48, 0.35)');
+    expect(resolveSemantics(resolvePrimitives('blue', 'dark'), 'dark').focusRing).toBe('rgba(76, 141, 246, 0.55)');
+    expect(resolveSemantics(resolvePrimitives('green', 'light'), 'light').focusRing).toBe('rgba(17, 122, 59, 0.35)');
+    expect(resolveSemantics(resolvePrimitives('lavender', 'light'), 'light').focusRing).toBe('rgba(106, 88, 206, 0.35)');
   });
 
   it('keeps the accent flood a TINT of the ink — never solid ink', () => {
@@ -202,7 +225,7 @@ describe('resolveSemantics(primitives, mode)', () => {
   it('resolves surfaces per mode (dark container = ground, ADR-0002 §3)', () => {
     const dark = resolveSemantics(resolvePrimitives('blue', 'dark'), 'dark');
     expect(dark.surfaceContainer).toBe(dark.surfaceGround);
-    expect(dark.surfaceGround).toBe('#0B1220');
+    expect(dark.surfaceGround).toBe('#0D1730');
   });
 });
 
@@ -239,18 +262,18 @@ describe('createPrismTheme — antd lane', () => {
   it('sets colorBgLayout in light mode only — dark stays pure seed (ADR-0002 §3)', () => {
     const light = createPrismTheme({ pack: 'blue', mode: 'light' }).antd.token;
     const dark = createPrismTheme({ pack: 'blue', mode: 'dark' }).antd.token as Record<string, unknown>;
-    expect(light.colorBgLayout).toBe('#F7F9FC');
+    expect(light.colorBgLayout).toBe('#EEF3FC');
     expect('colorBgLayout' in dark).toBe(false);
   });
 
   it('bases light mode on the container and dark on the ground (ADR-0002 §3)', () => {
     expect(createPrismTheme({ pack: 'blue', mode: 'light' }).antd.token.colorBgBase).toBe('#FFFFFF');
-    expect(createPrismTheme({ pack: 'blue', mode: 'dark' }).antd.token.colorBgBase).toBe('#0B1220');
+    expect(createPrismTheme({ pack: 'blue', mode: 'dark' }).antd.token.colorBgBase).toBe('#0D1730');
   });
 
   it('caps the accent flood and shadow per mode', () => {
     const light = createPrismTheme({ pack: 'green', mode: 'light' }).antd.token;
-    expect(light.controlItemBgActive).toBe('rgba(13, 92, 48, 0.1)');
+    expect(light.controlItemBgActive).toBe('rgba(17, 122, 59, 0.1)');
     expect(light.boxShadow).toBe('0 4px 16px 0 rgba(11, 18, 32, 0.16)');
     expect(light.boxShadowSecondary).toBe('none');
   });
@@ -349,7 +372,7 @@ describe('toDtcg', () => {
   });
 
   it('holds per-mode key parity across the tier-1 trees', () => {
-    for (const pack of ['blue', 'green'] as const) {
+    for (const pack of Object.keys(prismBrandPacks) as PrismPackId[]) {
       expect(leafPaths(toDtcg(pack, 'light').semantic)).toEqual(leafPaths(toDtcg(pack, 'dark').semantic));
     }
   });

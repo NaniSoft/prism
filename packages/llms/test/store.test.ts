@@ -39,8 +39,19 @@ describe('the emitted PrismDocsStore', () => {
     expect(block?.doc).toContain('`code`');
   });
 
-  it('holds four theme atoms and a blog-free page lane', () => {
-    expect(store.themes.map((theme) => theme.slug)).toEqual(['blue-dark', 'blue-light', 'green-dark', 'green-light']);
+  it('holds ten theme atoms and a blog-free page lane', () => {
+    expect(store.themes.map((theme) => theme.slug)).toEqual([
+      'blue-dark',
+      'blue-light',
+      'green-dark',
+      'green-light',
+      'lavender-dark',
+      'lavender-light',
+      'peach-dark',
+      'peach-light',
+      'rose-dark',
+      'rose-light',
+    ]);
     expect(store.themes.every((theme) => theme.markdown.includes('createPrismTheme'))).toBe(true);
     expect(store.pages.every((page) => !page.url.startsWith('/blog'))).toBe(true);
   });

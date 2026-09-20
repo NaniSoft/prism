@@ -51,10 +51,12 @@ exports only); `publint` runs on publish.
 ## Conventions
 
 - **Theming** — `createPrismTheme()` in `@nanisoft/prism-tokens` returns a
-  structured `PrismTheme`: one brand pack (blue | green) in one mode
-  (light | beam-dark). It maps Prism tokens onto antd **seed tokens +
-  algorithms** plus a **closed 8-key map-token allowlist** (ADR-0002: the
-  visual language's radius/motion are not seed-derivable) — anything outside
+  structured `PrismTheme`: one brand pack (blue | green | lavender | rose |
+  peach — the pastel spectrum, ADR-0005) in one mode (light | beam-dark). It
+  maps Prism tokens onto antd **seed tokens +
+  algorithms** plus a **closed 17-key map-token allowlist** (ADR-0002 + the
+  ADR-0005 errata: the visual language's radius/motion, plus placeholder
+  legibility, are not seed-derivable) — anything outside
   the allowlist is not a hand-set map token — and sets `cssVar.key`
   explicitly (`prism-<pack>-<mode>`, `hashed: false`) so dark mode swaps
   without a flash.

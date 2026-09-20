@@ -1,6 +1,12 @@
 // TypeScript types for Prism's token architecture (ADR-0002).
 
-export type PrismPackId = 'blue' | 'green';
+/**
+ * The five registered brand packs (ADR-0005): the two founding hues re-expressed
+ * in pastel voice (blue → sky, green → mint) plus lavender, rose, and peach.
+ * Pack ids are stable API — they key cssVar classes, storage, DTCG output, and
+ * MCP slugs — so the reforged founders keep their ids.
+ */
+export type PrismPackId = 'blue' | 'green' | 'lavender' | 'rose' | 'peach';
 export type PrismMode = 'light' | 'dark';
 
 export interface PrismThemeOptions {
@@ -77,6 +83,7 @@ export type PrismAntdMapKey =
   | 'colorBgTextActive' // accent.live flood
   | 'colorPrimaryTextActive' // accent.live flood
   | 'controlOutline' // focus.ring — antd v6's `focusOutline` is a boolean seed, not a string map token, so the ring color lives here alone (ADR-0002 §2c errata)
+  | 'colorTextPlaceholder' // placeholder text — antd's 25% derivation fails AA on tinted grounds; the pack's textTertiary tint carries the hue (ADR-0005 errata)
   | 'boxShadow' // elevation.floating — the one permitted shadow
   | 'boxShadowSecondary' // elevation.none — in-plane surfaces never shadow
   | 'boxShadowTertiary'; // elevation.none
@@ -101,6 +108,7 @@ export interface PrismAntdMapTokens {
   colorBgTextActive: string;
   colorPrimaryTextActive: string;
   controlOutline: string; // focus.ring (antd v6's focusOutline is a boolean seed — §2c errata)
+  colorTextPlaceholder: string; // placeholder text — the pack's textTertiary tint (ADR-0005 errata)
   boxShadow: string; // elevation.floating — the one permitted shadow
   boxShadowSecondary: string; // elevation.none
   boxShadowTertiary: string; // elevation.none

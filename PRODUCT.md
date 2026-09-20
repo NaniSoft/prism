@@ -42,7 +42,7 @@ The branded, agent-ready antd: a complete opinionated layer over antd v6 — bra
 ## Brand Commitments
 
 - Name: **NaniSoft** (capital S); system name **Prism**. npm scope is lowercase `@nanisoft`.
-- Color: **blue and green** both established as brand color variants (user-pinned).
+- Color: **the pastel five-pack spectrum** — blue, green, lavender, rose, peach; the founding hues kept their ids and were reforged into pastel voice (user-decided 2026-09-20, ADR-0005). Pastel is the atmosphere; inks stay mid-tones so the AA gate holds.
 - Modes: **light and dark** both required (user-pinned).
 - Character: **professional and next-gen** (user-pinned).
 - Anti-goals (user-pinned, binding): never reads as a generic admin template, never toy-startup playful, never heavy-enterprise legacy. Bold expression is NOT ruled out.

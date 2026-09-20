@@ -18,10 +18,12 @@ process.env.NODE_ENV = 'production'; // antd's dev-only deprecation warnings wou
 
 import React from 'react';
 import { extractStyle } from '@ant-design/static-style-extract';
-import { getPrismTheme } from '@nanisoft/prism-tokens';
+import { getPrismTheme, prismBrandPacks } from '@nanisoft/prism-tokens';
 import { PrismProvider } from '@nanisoft/prism-ui/provider';
 
-const PACKS = ['blue', 'green'];
+// Derived from the registered packs — a new pack in prism-tokens pre-bakes its
+// variable rulesets with no edit here.
+const PACKS = Object.keys(prismBrandPacks);
 const MODES = ['light', 'dark'];
 const OUT_FILE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'app', 'antd-vars.css');
 

@@ -21,7 +21,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { buildCatalog } from '@nanisoft/prism-ui/wrapped-registry';
 import { passThroughs } from '@nanisoft/prism-ui/generated/pass-throughs';
-import { getPrismTheme } from '@nanisoft/prism-tokens';
+import { getPrismTheme, prismBrandPacks } from '@nanisoft/prism-tokens';
 
 import { parseMdx, renderComponentDemos, renderPropsSection, renderTable, stripMdxMechanics, fence } from '../dist/index.js';
 import { extractProps } from '../dist/extractor.js';
@@ -33,7 +33,9 @@ const UI_ROOT = path.resolve(REPO_ROOT, 'packages', 'ui');
 const CONTENT_ROOT = path.resolve(REPO_ROOT, 'apps', 'site', 'content');
 
 const BASE_URL = 'https://prism.nanisoft.com';
-const PACKS = ['blue', 'green'];
+// Derived from the registered packs — a new pack in prism-tokens ships theme
+// atoms with no edit here.
+const PACKS = Object.keys(prismBrandPacks);
 const MODES = ['light', 'dark'];
 /** Store kind per catalog layer, in emit order. */
 const LAYERS = [

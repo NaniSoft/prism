@@ -16,9 +16,10 @@ import { Statistic } from '@nanisoft/prism-ui/components/statistic';
 import { Switch } from '@nanisoft/prism-ui/components/switch';
 import { Table, type TableProps } from '@nanisoft/prism-ui/components/table';
 import { Tag } from '@nanisoft/prism-ui/components/tag';
-import { PrismProvider } from '@nanisoft/prism-ui/provider';
-import { getPrismTheme } from '@nanisoft/prism-tokens';
+import { prismBrandPacks } from '@nanisoft/prism-tokens';
+import { DocsDaylight } from '@/components/DocsDaylight';
 import { DisplayTitle, SearchOutlined } from '@/components/prism-client';
+import { PACKS, PACK_LABELS } from '@/lib/theme';
 
 function Note({ children }: { children: ReactNode }): ReactElement {
   return <span className="site-landing__note">{children}</span>;
@@ -114,7 +115,8 @@ function StatBlock(): ReactElement {
     >
       <Note>downloads / month</Note>
       <Statistic value={128} suffix="k" styles={{ content: { fontStretch: '112%', fontWeight: 600 } }} />
-      <Progress percent={72} showInfo={false} size="small" />
+      {/* The accent owns live states — the meter follows the shell pack, never antd's info blue. */}
+      <Progress percent={72} showInfo={false} size="small" strokeColor="var(--prism-color-primary)" />
       <Tag color="success" style={{ marginTop: 8 } as CSSProperties}>
         +12% vs last month
       </Tag>
@@ -218,42 +220,35 @@ function Band({
   );
 }
 
-/** The one light-mode appearance on the page — a counterpoint, not a toggle. */
-function DocsDaylight(): ReactElement {
+/** The spectrum — five refractions of one beam, each cell in its own pack's voice. */
+function SpectrumBand(): ReactElement {
   return (
-    <PrismProvider prismTheme={getPrismTheme('blue', 'light')}>
-      <div className="site-landing__daylight">
-        <div className="site-shell">
-          <Note>docs / components / button</Note>
-          <div className="site-landing__daylight-card" style={{ maxWidth: 980, marginTop: 18 }}>
-            <DisplayTitle level={3} style={{ margin: 0 }}>
-              Button
-            </DisplayTitle>
-            <p style={{ margin: 0, opacity: 0.8, lineHeight: 1.65, maxWidth: '58ch' }}>
-              Every doc page ships as a live demo plus copyable source — the same components, the same
-              theme object, that your app installs from npm.
-            </p>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <Button type="primary">Primary</Button>
-              <Button>Default</Button>
-              <Button type="dashed">Dashed</Button>
-              <Button type="text">Text</Button>
-              <Button type="link">Link</Button>
-            </div>
-            <div className="site-landing__daylight-code">
-              {"import { Button } from '@nanisoft/prism-ui/components';"}
-            </div>
-            <div>
-              <Button type="primary" href="/components/button">
-                Open the Button doc
-              </Button>
-            </div>
-          </div>
-        </div>
+    <section className="site-landing__spectrum">
+      <div className="site-landing__spectrum-head">
+        <Link href="/themes" className="site-landing__band-label" style={{ color: 'inherit' }}>
+          Themes
+        </Link>
+        <p className="site-landing__band-blurb">
+          Five pastel packs, light and beam-dark — one language, ten expressions. Every ink holds WCAG AA
+          on its own ground.
+        </p>
       </div>
-    </PrismProvider>
+      <div className="site-landing__spectrum-strip">
+        {PACKS.map((pack) => (
+          <Link key={pack} href="/themes" className="site-landing__spectrum-cell" style={{ background: prismBrandPacks[pack].ground.light }}>
+            <span className="site-landing__spectrum-dot" style={{ background: prismBrandPacks[pack].ink.light }} aria-hidden />
+            <span className="site-landing__spectrum-name" style={{ color: prismBrandPacks[pack].ink.light }}>
+              {PACK_LABELS[pack]}
+            </span>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
+
+/** The one light-mode appearance on the page — a counterpoint, not a toggle.
+    Lives in components/DocsDaylight.tsx (client) so it can follow the shell pack. */
 
 export default function HomePage(): ReactElement {
   return (
@@ -320,21 +315,27 @@ export default function HomePage(): ReactElement {
 
       <div className="site-landing__dither" aria-hidden />
 
+      <div className="site-shell">
+        <SpectrumBand />
+      </div>
+
+      <div className="site-landing__dither" aria-hidden />
+
       <DocsDaylight />
 
       <div className="site-shell">
         <section className="site-landing__outro">
           <h2>Start refracting.</h2>
           <p>
-            Two brand packs, two modes, one language. Install the packages, wrap your app, and pick your
+            Five brand packs, two modes, one language. Install the packages, wrap your app, and pick your
             expression.
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Button type="primary" size="large" href="/docs">
               Read the docs
             </Button>
-            <Button size="large" type="text" href="/components">
-              npm i @nanisoft/prism-ui
+            <Button size="large" href="/themes">
+              Tour the five packs
             </Button>
           </div>
         </section>

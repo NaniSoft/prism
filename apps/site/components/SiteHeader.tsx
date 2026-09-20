@@ -7,6 +7,7 @@ import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 
 const NAV = [
   { href: '/docs', label: 'Docs' },
+  { href: '/themes', label: 'Themes' },
   { href: '/components', label: 'Components' },
   { href: '/blocks', label: 'Blocks' },
   { href: '/pages', label: 'Pages' },

@@ -30,7 +30,7 @@ Consult before writing code: `ant-design`, `antd` (component APIs, theming, migr
 
 - **The one rule**: apps always import from `@nanisoft/prism-ui`, never from `antd` directly (`@ant-design/icons` arrives via the prism-ui re-export).
 - **Taxonomy**: components → blocks → pages is an organization taxonomy *inside* `prism-ui` — blocks are pre-composed components, pages are full-page compositions; all npm-delivered, never copied into apps.
-- **Theming**: `createPrismTheme()` (prism-tokens) returns one brand pack (blue | green) in one mode (light | beam-dark), mapped to antd seed tokens + algorithms plus a **closed 8-key map-token allowlist** where antd's derivation mathematically can't express the language (ADR-0002).
+- **Theming**: `createPrismTheme()` (prism-tokens) returns one brand pack (blue | green | lavender | rose | peach — the pastel spectrum, ADR-0005) in one mode (light | beam-dark), mapped to antd seed tokens + algorithms plus a **closed map-token allowlist** where antd's derivation mathematically can't express the language (ADR-0002).
 - **Figma**: designs map to prism-ui components; tokens flow one-way code → Figma Variables, never hand-picked — `docs/design-conventions.md`.
 - Full handbook (commands, MCP servers, gotchas): `AGENTS.md`. Both files must agree.
 

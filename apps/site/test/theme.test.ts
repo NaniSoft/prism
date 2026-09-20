@@ -10,6 +10,8 @@ import {
   DEFAULT_MODE,
   DEFAULT_PACK,
   DEFAULT_THEME_ID,
+  MODES,
+  PACKS,
   THEME_STORAGE_KEY,
   THEME_BOOTSTRAP_SCRIPT,
   parseThemeId,
@@ -69,6 +71,15 @@ describe('theme ids', () => {
     expect(parseThemeId('purple-dark')).toBeUndefined();
     expect(parseThemeId(null)).toBeUndefined();
     expect(themeId('blue', 'dark')).toBe('blue-dark');
+  });
+
+  it('round-trips every registered pack × mode (ADR-0005: five packs)', () => {
+    expect(PACKS).toEqual(['blue', 'green', 'lavender', 'rose', 'peach']);
+    for (const pack of PACKS) {
+      for (const mode of MODES) {
+        expect(parseThemeId(themeId(pack, mode))).toEqual({ pack, mode });
+      }
+    }
   });
 });
 

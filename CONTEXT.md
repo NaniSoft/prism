@@ -7,7 +7,7 @@ NaniSoft's design system — one design language (the Spectral Refraction system
 ### Brand structure
 
 **Brand pack**:
-One of the two brand color expressions — blue or green. Each pack generates its own complete atmosphere: primary ramp, variant-tinted neutrals, and mode-specific grounds.
+One of the five brand color expressions — blue, green, lavender, rose, or peach (ADR-0005). Each pack generates its own complete atmosphere: primary ramp, variant-tinted neutrals, and mode-specific grounds.
 _Avoid_: color scheme, palette, variant color
 
 **Mode**:
@@ -21,11 +21,11 @@ _Avoid_: skin, preset
 ### Visual system
 
 **Refraction**:
-The visual world: the neutral surface is white light, and the brand hues (blue, green) are its refractions. Brand-expression gradients are dithered in the two inks, never blended toward gray.
+The visual world: the neutral surface is white light, and the brand hues (the pastel five-pack spectrum, ADR-0005) are its refractions. Brand-expression gradients are dithered in the pack inks, never blended toward gray.
 _Avoid_: gradient mesh, glow
 
 **Variant-tinted neutrals**:
-Neutral ramps generated from the active pack's hue at low chroma — cool grays in the blue pack, green-cast grays in the green pack.
+Neutral ramps generated from the active pack's hue at low chroma — every pack tints its own grays from its own ink (periwinkle-cast in blue, lilac-cast in lavender, and so on).
 _Avoid_: pure gray, antd gray
 
 **Beam dark**:
@@ -33,7 +33,7 @@ Dark mode as light through a medium: tinted near-black grounds, surfaces that li
 _Avoid_: true black, gray dark
 
 **Brand ink**:
-A pack's saturated primary hue, used as flat fields — most visibly as the accent that floods live states (selection, active, pressed).
+A pack's primary hue — a mid-tone that survives the AA gate — used as flat fields and links; the pastel voice lives in the atmosphere (grounds, hairlines, washes), never in the ink.
 _Avoid_: primary color, accent color (unqualified)
 
 **Hairline elevation**:

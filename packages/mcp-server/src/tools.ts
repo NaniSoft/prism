@@ -143,11 +143,13 @@ export function registerPrismTools(server: McpServer, ctx: PrismToolContext): vo
     'get_theme_doc',
     {
       description:
-        `Theme and token documentation for one Prism brand pack × mode (blue | green × light | dark), including the ` +
-        `createPrismTheme() snippet. Prism's multi-pack theming is not answerable by antd's antd_token. ` +
-        `${ANTD_RULE} ${IMPORT_RULE}`,
+        `Theme and token documentation for one Prism brand pack × mode (blue | green | lavender | rose | peach ` +
+        `× light | dark), including the createPrismTheme() snippet. Prism's multi-pack theming is not answerable ` +
+        `by antd's antd_token. ${ANTD_RULE} ${IMPORT_RULE}`,
       inputSchema: {
-        pack: z.enum(['blue', 'green']).optional().describe(`Brand pack (default '${DEFAULT_PACK}').`),
+        // Mirrors prism-tokens' PrismPackId (ADR-0005). Unknown packs take the
+        // graceful miss path below, which lists the corpus's actual atoms.
+        pack: z.enum(['blue', 'green', 'lavender', 'rose', 'peach']).optional().describe(`Brand pack (default '${DEFAULT_PACK}').`),
         mode: z.enum(['light', 'dark']).optional().describe(`Mode (default '${DEFAULT_MODE}').`),
       },
     },

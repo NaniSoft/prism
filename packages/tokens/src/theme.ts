@@ -52,6 +52,9 @@ function buildAntdConfig(mode: PrismMode, semantics: PrismSemanticTokens, modeKe
     // Focus ring — controlOutline only: antd v6's focusOutline is a boolean
     // seed, so the string ring color has exactly one destination (§2c errata).
     controlOutline: semantics.focusRing,
+    // Placeholder text — antd's 25% derivation drops below AA on tinted
+    // grounds; the pack's own 45% text tint keeps hue and legibility.
+    colorTextPlaceholder: semantics.textTertiary,
     // Elevation: the one shadow, or none.
     boxShadow: semantics.elevationFloating,
     boxShadowSecondary: semantics.elevationNone,

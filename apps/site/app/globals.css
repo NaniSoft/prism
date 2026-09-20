@@ -69,6 +69,25 @@ a:hover {
   height: 60px;
 }
 
+/* Phones: nav drops to its own row — six links, five dots, and two mode
+   buttons don't share one 390px line. */
+@media (max-width: 860px) {
+  .site-header__row {
+    flex-wrap: wrap;
+    height: auto;
+    padding-top: 10px;
+    row-gap: 0;
+  }
+
+  .site-nav {
+    order: 3;
+    flex-basis: 100%;
+    margin-left: 0;
+    padding-bottom: 10px;
+    overflow-x: auto;
+  }
+}
+
 .site-brand {
   font-weight: 700;
   font-size: 18px;
@@ -106,6 +125,43 @@ a:hover {
 .site-theme-switcher {
   display: flex;
   gap: 8px;
+}
+
+/* Pack option — the pastel spectrum as swatch dots (ADR-0005). */
+.site-pack-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.site-pack-option__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.28);
+  flex: none;
+}
+
+/* The header carries brand note + nav + 5-pack switcher: shed the note first,
+   then the pack labels (dots alone still identify the spectrum). */
+@media (max-width: 1180px) {
+  .site-brand__note {
+    display: none;
+  }
+}
+
+@media (max-width: 1080px) {
+  .site-pack-option__label {
+    display: none;
+  }
+
+  .site-pack-option {
+    gap: 0;
+  }
+
+  .site-theme-switcher {
+    gap: 6px;
+  }
 }
 
 .site-footer {
@@ -333,7 +389,7 @@ a:hover {
   border-top: 1px solid var(--prism-color-border-secondary);
   overflow: auto;
   font-family: var(--font-jetbrains), ui-monospace, monospace;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.65;
 }
 
@@ -395,7 +451,7 @@ a:hover {
   display: block;
   margin: 18px 0 4px;
   font-family: var(--font-jetbrains), ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 11px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   opacity: 0.6;
@@ -442,7 +498,7 @@ a:hover {
 
 .site-catalog__item span {
   display: block;
-  font-size: 12.5px;
+  font-size: 13px;
   opacity: 0.72;
   margin-top: 4px;
   overflow: hidden;
@@ -603,6 +659,63 @@ a:hover {
   overflow: auto;
 }
 
+/* The spectrum band — five packs shown in their own light voices, one strip. */
+.site-landing__spectrum {
+  padding: 40px 0 72px;
+  display: grid;
+  gap: 22px;
+}
+
+.site-landing__spectrum-head {
+  display: grid;
+  gap: 8px;
+  max-width: 52ch;
+}
+
+.site-landing__spectrum-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--prism-color-border);
+}
+
+.site-landing__spectrum-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 26px 20px;
+  transition: filter 160ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.site-landing__spectrum-cell:hover {
+  filter: saturate(1.35);
+  text-decoration: none;
+}
+
+.site-landing__spectrum-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3);
+}
+
+.site-landing__spectrum-name {
+  font-weight: 600;
+  font-size: 14px;
+  font-variation-settings: 'wdth' 116;
+}
+
+@media (max-width: 720px) {
+  .site-landing__spectrum-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .site-landing__spectrum-cell {
+    padding: 16px 18px;
+  }
+}
+
 .site-landing__outro {
   padding: 88px 0;
   text-align: center;
@@ -622,6 +735,214 @@ a:hover {
   line-height: 1.7;
 }
 
+/* ---------- Theme gallery (ADR-0005) ---------- */
+
+.site-themes {
+  background: var(--prism-color-bg-layout);
+  color: var(--prism-color-text);
+  padding: 64px 0 96px;
+}
+
+.site-themes__title {
+  font-size: clamp(38px, 5.4vw, 52px);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  font-variation-settings: 'wdth' 122, 'wght' 600;
+  margin: 0;
+}
+
+.site-themes__lede {
+  margin: 18px 0 0;
+  font-size: 15px;
+  line-height: 1.7;
+  opacity: 0.82;
+  max-width: 62ch;
+}
+
+.site-themes__lede .site-mono {
+  background: var(--prism-color-bg-container);
+  border: 1px solid var(--prism-color-border-secondary);
+  border-radius: 3px;
+  padding: 1px 6px;
+}
+
+/* The spectrum strip — five inks, light and dark, at a glance. */
+.site-themes__strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border: 1px solid var(--prism-color-border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 40px;
+  background: var(--prism-color-bg-container);
+}
+
+.site-themes__strip-cell {
+  display: grid;
+  gap: 4px;
+  padding: 16px 18px;
+  border-right: 1px solid var(--prism-color-border-secondary);
+}
+
+.site-themes__strip-cell:last-child {
+  border-right: none;
+}
+
+.site-themes__strip-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3);
+  margin-bottom: 4px;
+}
+
+.site-themes__strip-name {
+  font-weight: 600;
+  font-size: 14px;
+  font-variation-settings: 'wdth' 112;
+}
+
+.site-themes__strip-hex {
+  font-size: 11px;
+  opacity: 0.66;
+}
+
+/* The islands below carry every hex — the strip stays dot + name on phones. */
+@media (max-width: 720px) {
+  .site-themes__strip-hex {
+    display: none;
+  }
+
+  .site-themes__strip-cell {
+    padding: 12px 14px;
+  }
+}
+
+/* Ten live islands — each carries its own `prism-<pack>-<mode>` variable class,
+   so every value inside (chrome included) is the island's own theme. */
+.site-themes__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  margin-top: 24px;
+}
+
+@media (min-width: 1080px) {
+  .site-themes__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.site-themes__island {
+  border: 1px solid var(--prism-color-border);
+  border-radius: 6px;
+  /* bg-container, never bg-layout: dark themes emit no layout override
+     (ADR-0002 §3), so the island chrome would fall through to the shell. */
+  background: var(--prism-color-bg-container);
+  color: var(--prism-color-text);
+  display: grid;
+  gap: 16px;
+  padding: 18px 20px 16px;
+}
+
+.site-themes__island-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-themes__island-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  font-variation-settings: 'wdth' 116;
+}
+
+.site-themes__island-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3);
+}
+
+.site-themes__island-mode {
+  opacity: 0.66;
+}
+
+.site-themes__island-try {
+  margin-left: auto;
+}
+
+.site-themes__island-plate {
+  border: 1px solid var(--prism-color-border-secondary);
+  border-radius: 4px;
+  padding: 16px 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.site-themes__island-hexes {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.site-themes__swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  opacity: 0.85;
+}
+
+.site-themes__swatch-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  border: 1px solid var(--prism-color-border);
+}
+
+.site-themes__foot {
+  margin-top: 72px;
+  text-align: center;
+}
+
+.site-themes__foot h2 {
+  font-size: 30px;
+  font-variation-settings: 'wdth' 118, 'wght' 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.site-themes__foot p {
+  margin: 14px auto 0;
+  opacity: 0.75;
+  max-width: 52ch;
+  line-height: 1.7;
+}
+
+.site-themes__foot-code {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  text-align: left;
+  background: var(--prism-color-bg-container);
+  border: 1px solid var(--prism-color-border-secondary);
+  border-radius: 4px;
+  padding: 12px 16px;
+  max-width: 560px;
+  margin: 24px auto 0;
+  overflow: auto;
+  white-space: pre;
+}
+
+.site-themes__foot-cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
 /* ---------- Generated API tables ---------- */
 
 .site-api {
@@ -639,5 +960,5 @@ a:hover {
 
 .site-api__optional {
   opacity: 0.66;
-  font-size: 12.5px;
+  font-size: 13px;
 }
