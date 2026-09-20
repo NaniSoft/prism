@@ -3,7 +3,15 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "out/**", "worker/generated/**", "!.next/cache/**"]
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "out/**",
+        "worker/generated/**",
+        "app/antd-vars.css",
+        "lib/generated/**",
+        "!.next/cache/**"
+      ]
     },
     "generate": {
       "outputs": ["src/generated/**"],

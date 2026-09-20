@@ -5,6 +5,14 @@ allowBuilds:
   core-js-pure: false # transitive of agents → mimetext → @babel/runtime-corejs3; its postinstall is a funding note, nothing to build
   esbuild: false
   workerd: false # wrangler deploy/config needs no workerd postinstall; `wrangler dev` is unused (static assets + remote preview)
+# Supply-chain policy: there is deliberately NO base `minimumReleaseAge` yet
+# (pnpm's default, 0 = no delay) — the runtime deps are pinned by the
+# lockfile, and a base policy would have delayed the bootstrap's toolchain
+# resolutions. The excludes below are forward-protection: toolchain packages
+# whose fresh releases we expect to want before any base policy matures
+# (pnpm's min-release-age setting resolves against npm's publish timestamps).
+# To adopt a base policy, set `minimumReleaseAge: <days>d` here and prune the
+# list to the packages that genuinely need headroom.
 minimumReleaseAgeExclude:
   - antd@6.6.4
   # stale-but-harmless: workers-types left the devDeps, pnpm added the exclusion

@@ -19,7 +19,10 @@
     // serving. `/mcp` is ticket 22's endpoint; the five `.md` globs are
     // ticket 16's one prefix rule, rewritten in worker/router.ts. Glob form
     // (not route-style `:slug*` — the asset router does not expand route
-    // params; verified live: `:slug*` never matches, `*.md` does).
+    // params; verified live: `:slug*` never matches, `*.md` does). Each glob
+    // matches exactly ONE path segment — `*` never crosses `/` — which is
+    // fine: section slugs are flat (`/docs/<slug>.md`); nested paths would
+    // need the router to handle them regardless.
     "run_worker_first": [
       "/mcp",
       "/mcp/*",

@@ -72,26 +72,23 @@ exports only); `publint` runs on publish.
 ## MCP servers (`.mcp.json`)
 
 `.mcp.json` is strict JSON and holds **only real, working servers** — no
-comments, no placeholders; add a server when it exists.
+comments, no placeholders; add a server when it exists. All three below are
+wired (HTTP entries need **both** `type` and `url`, or Claude Code silently
+skips them).
 
 - **`antd`** — offline antd knowledge over stdio from `@ant-design/cli`
   (`npm i -g @ant-design/cli`): `antd_list`, `antd_info`, `antd_doc`,
   `antd_demo`, `antd_token`, `antd_semantic`, `antd_changelog`. The
   `ant-design` skill's `references/antd-cli.md` is its manual.
+- **`figma`** (ticket 14) — remote Dev Mode MCP:
+  `{ "type": "http", "url": "https://mcp.figma.com/mcp" }`.
+- **`prism`** (ADR-0004) — the live Prism MCP at
+  `https://prism.nanisoft.com/mcp`: eight read-only tools over the prism-llms
+  corpus, served by the same Worker as the site. Stdio lane if a client
+  can't do HTTP: `npx mcp-remote https://prism.nanisoft.com/mcp`.
 
-Pending, deliberately **not** in the file yet:
-
-- **Figma Dev Mode MCP** (ticket 14) — remote endpoint, added as
-  `{ "type": "http", "url": "https://mcp.figma.com/mcp" }`. HTTP entries need
-  **both** `type` and `url`, or Claude Code silently skips them.
-- **`prism-mcp-server`** (ticket 13; spec accepted in
-  `docs/adr/0004-mcp-tool-surface.md`) — eight read-only tools over prism-llms
-  output, served as Streamable HTTP at `prism.nanisoft.com/mcp` with an
-  `npx mcp-remote` stdio bridge. Enters `.mcp.json` only when the server
-  actually exists.
-
-Pairing rule once both exist: **Prism MCP for Prism behaviour, antd MCP for
-inherited antd props — and always import from `@nanisoft/prism-ui`.**
+Pairing rule: **Prism MCP for Prism behaviour, antd MCP for inherited antd
+props — and always import from `@nanisoft/prism-ui`.**
 
 ## Working here
 

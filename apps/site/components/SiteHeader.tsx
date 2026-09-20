@@ -38,7 +38,13 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="site-shell site-footer__row">
-        <span className="site-mono">© 2026 NaniSoft · MIT</span>
+        <span className="site-footer__left">
+          <span className="site-mono">© 2026 NaniSoft · MIT</span>
+          {/* Ticket 17: brand protection lives in a policy page, never in license clauses. */}
+          <Link href="/docs/brand" className="site-mono site-footer__link">
+            Brand policy
+          </Link>
+        </span>
         <span className="site-mono site-footer__host">prism.nanisoft.com</span>
       </div>
     </footer>

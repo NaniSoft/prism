@@ -1,6 +1,6 @@
 ---
 Type: task
-Status: open
+Status: claimed
 Labels: wayfinder:task
 Blocked by: 18, 19, 20, 21, 22
 ---
@@ -21,3 +21,4 @@ Deferred here by resolved tickets — execute in this order:
 6. **Brand-policy page + site footer line** (ticket 17: brand protection lives in policy, never license clauses).
 7. **OFL font licenses** (graduated from ticket 21's review): `public/fonts/*.woff2` redistribute Archivo/JetBrains Mono — OFL requires the licence text to accompany distribution; fold into `THIRD-PARTY-NOTICES.md` (item 1's pass).
 8. **`.mcp.json` prism entry** (graduated from ticket 22): prism-mcp-server is real and live — add the HTTP entry (`type: "http"` + `url: https://prism.nanisoft.com/mcp`) per ticket 15's verified shape, and update `AGENTS.md`/`CLAUDE.md` MCP sections so both agree. Optional clean-up while there: a `built` field on prism-llms' store as the proper home for the MCP build-date stamp (currently mtime-stamped via `apps/site/scripts/stamp-mcp-data.mjs`).
+9. **Config-hygiene sweep** (graduated from the tickets-21/22 whole-branch review, all comment/one-line sized): delete the dead `toCatalogGroups` + duplicate `CatalogGroup` in `apps/site/lib/to-prism-tree.ts`; add `app/antd-vars.css` + `lib/generated/**` to root `build.outputs` in `turbo.json` (only `worker/generated/**` is listed); document where the base `minimumReleaseAge` value comes from (`pnpm-workspace.yaml` has excludes but no base policy); comment the one-segment assumption on the `.md` globs in `apps/site/wrangler.jsonc` (router handles nested, globs don't cross `/`).

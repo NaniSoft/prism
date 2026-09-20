@@ -37,30 +37,3 @@ export function toPrismTree(children: Node[]): DocsNavEntry[] {
   }
   return entries;
 }
-
-/** Section index grids: pages grouped under their separators, in tree order. */
-export interface CatalogGroup {
-  group?: string;
-  items: { title: string; description?: string; url: string }[];
-}
-
-export function toCatalogGroups(children: Node[]): CatalogGroup[] {
-  const groups: CatalogGroup[] = [];
-  for (const node of children) {
-    if (node.type === 'separator') {
-      groups.push({ group: nodeName(node), items: [] });
-      continue;
-    }
-    if (node.type === 'folder') {
-      const nested = toCatalogGroups(node.children);
-      for (const nestedGroup of nested) groups.push({ group: nodeName(node), items: nestedGroup.items });
-      continue;
-    }
-    const title = nodeName(node);
-    const last = groups[groups.length - 1];
-    const item = { title, url: node.url };
-    if (last) last.items.push(item);
-    else groups.push({ items: [item] });
-  }
-  return groups;
-}

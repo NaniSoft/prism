@@ -120,6 +120,21 @@ a:hover {
   opacity: 0.78;
 }
 
+.site-footer__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.site-footer__link {
+  color: inherit;
+}
+
+.site-footer__link:hover {
+  color: inherit;
+  opacity: 0.8;
+}
+
 /* ---------- Docs skeleton (prism-ui DocsShell structural classes) ---------- */
 
 .prism-docs-shell__body {

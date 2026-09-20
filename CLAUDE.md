@@ -36,4 +36,4 @@ Consult before writing code: `ant-design`, `antd` (component APIs, theming, migr
 
 ## MCP servers
 
-Repo `.mcp.json` carries only real, working servers. Wired: `antd` (offline antd knowledge via `@ant-design/cli`). Pending tickets 14 (Figma Dev Mode) and 13 (`prism-mcp-server`) stay out of the file until real — HTTP entries need both `type` and `url` or Claude Code skips them.
+Repo `.mcp.json` carries only real, working servers — all three wired: `antd` (offline antd knowledge via `@ant-design/cli`), `figma` (remote Dev Mode MCP), and `prism` (the live eight-tool MCP at `https://prism.nanisoft.com/mcp`; stdio lane via `npx mcp-remote`). HTTP entries need both `type` and `url` or Claude Code skips them. Pairing rule: Prism MCP for Prism behaviour, antd MCP for inherited antd props.
