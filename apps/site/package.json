@@ -4,12 +4,12 @@
   "private": true,
   "description": "prism.nanisoft.com — Fumadocs headless docs, landing page, and blog; static export served by Cloudflare Workers.",
   "scripts": {
-    "dev": "node scripts/generate.mjs && pnpm bake && next dev",
+    "dev": "node scripts/stamp-mcp-data.mjs && node scripts/generate.mjs && pnpm bake && next dev",
     "generate": "node scripts/generate.mjs",
     "bake": "node scripts/bake-antd-css.mjs",
-    "build": "node scripts/generate.mjs && node scripts/bake-antd-css.mjs && next build && node scripts/copy-llms.mjs",
+    "build": "node scripts/stamp-mcp-data.mjs && node scripts/generate.mjs && node scripts/bake-antd-css.mjs && next build && node scripts/copy-llms.mjs",
     "start": "next start",
-    "deploy": "wrangler deploy",
+    "deploy": "node scripts/stamp-mcp-data.mjs && wrangler deploy",
     "lint": "oxlint .",
     "test": "vitest run"
   },

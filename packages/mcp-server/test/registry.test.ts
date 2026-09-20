@@ -65,6 +65,17 @@ describe('registration', () => {
     }
   });
 
+  it('promises the list_items header the ADR-0004 §2 line: version + counts + build date', async () => {
+    const h = await harness();
+    try {
+      const { tools } = await h.client.request({ method: 'tools/list', params: {} });
+      const list = tools.find((tool) => tool.name === 'list_items');
+      expect(list?.description).toContain('Prism version and the corpus build date');
+    } finally {
+      await h.close();
+    }
+  });
+
   it('describes get_item_doc in the ADR-0004 §2 wording', async () => {
     const h = await harness();
     try {

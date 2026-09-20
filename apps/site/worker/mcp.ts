@@ -11,17 +11,8 @@
 import { createMcpHandler } from 'agents/mcp/server';
 import { createPrismMcpServer, parsePrismDocsStore } from '@nanisoft/prism-mcp-server';
 import docsData from '@nanisoft/prism-llms/data.json';
-
-/**
- * The Workers execution context, typed structurally — this file typechecks in
- * the same TS program as the site, which deliberately carries no
- * `@cloudflare/workers-types` (its globals clash with the DOM lib; see
- * router.ts).
- */
-export interface WorkerExecutionContext {
-  waitUntil(promise: Promise<unknown>): void;
-  passThroughOnException(): void;
-}
+import { PRISM_DOCS_BUILT } from './generated/mcp-data-built.js';
+import type { WorkerExecutionContext } from './router.js';
 
 const NOOP_CONTEXT: WorkerExecutionContext = {
   waitUntil() {},
@@ -34,19 +25,26 @@ const NOOP_CONTEXT: WorkerExecutionContext = {
  * literals and hands the factory a real `PrismDocsStore`. The factory runs per
  * request — the stateless handler builds a fresh server each time — so the
  * lookup maps are built per request too, never at isolate scope (ticket 05's
- * 1 s startup rule).
+ * 1 s startup rule). `PRISM_DOCS_BUILT` is generated from the corpus build
+ * output by scripts/stamp-mcp-data.mjs; `undefined` simply omits the header's
+ * `(built …)` clause.
  */
-const handler = createMcpHandler(() => createPrismMcpServer(parsePrismDocsStore(docsData)), {
-  route: '/mcp',
-  allowedHostnames: ['prism.nanisoft.com'],
-  corsOptions: false,
-  responseMode: 'json',
-});
+const handler = createMcpHandler(
+  () => createPrismMcpServer(parsePrismDocsStore(docsData), { built: PRISM_DOCS_BUILT }),
+  {
+    route: '/mcp',
+    allowedHostnames: ['prism.nanisoft.com'],
+    corsOptions: false,
+    responseMode: 'json',
+  },
+);
 
 /**
  * Handle one `/mcp` request. `env` is unused (the corpus is bundled, there are
- * no bindings), and the runtime always supplies a context — the default only
- * exists so tests can call this bare.
+ * no bindings). `ctx` is the runtime's execution context, threaded from
+ * worker/index.ts through router.ts so the handler can schedule background
+ * work with `ctx.waitUntil` — only tests call this bare and fall back to the
+ * no-op context.
  */
 export function handleMcp(request: Request, ctx: WorkerExecutionContext = NOOP_CONTEXT): Promise<Response> {
   return handler(request, undefined, ctx);

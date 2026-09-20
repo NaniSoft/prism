@@ -74,6 +74,13 @@ describe('handleRequest', () => {
 
   it('routes /mcp into the live MCP lane — never to assets (ticket 22)', async () => {
     const { env, calls } = stubEnv();
+    // The runtime's execution context must reach the MCP lane (review round 1):
+    // a caller-supplied context is accepted and threaded, not replaced.
+    const waitUntil = vi.fn();
+    const ctx = { waitUntil, passThroughOnException: vi.fn() };
+    const withCtx = await handleRequest(requestFor('/mcp', 'POST'), env, ctx);
+    expect(withCtx.status).toBe(406); // the lane's own answer (no accept header), not the assets 200
+    expect(calls).toHaveLength(0);
     // A stateless transport answers a bare GET (no server stream to offer) and
     // an unknown method with a protocol-level 405 — proof the lane is wired,
     // not stubbed. Full protocol round-trips: worker-mcp.test.ts.

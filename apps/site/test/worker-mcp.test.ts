@@ -84,7 +84,9 @@ describe('POST /mcp — the MCP protocol round-trip', () => {
     const body = await payload(await handleRequest(rpc(call(3, 'tools/call', { name: 'list_items', arguments: {} })), env));
     const result = body.result as { isError?: boolean; content: Array<{ text: string }> };
     expect(result.isError).toBe(false);
-    expect(result.content[0]!.text).toMatch(/^Prism [\d.]+ — \d+ components?/);
+    // ADR-0004 §2: version + counts + build date. The date comes from the
+    // generated stamp of the bundled corpus's build (scripts/stamp-mcp-data.mjs).
+    expect(result.content[0]!.text).toMatch(/^Prism [\d.]+ — \d+ components?, \d+ blocks?, \d+ pages? \(built \d{4}-\d{2}-\d{2}\)\n/);
 
     const miss = await payload(await handleRequest(rpc(call(4, 'tools/call', { name: 'get_item_doc', arguments: { name: 'Buton' } })), env));
     const missResult = miss.result as { isError: boolean; content: Array<{ text: string }> };

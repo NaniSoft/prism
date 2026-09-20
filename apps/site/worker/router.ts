@@ -22,6 +22,17 @@ export interface Env {
   ASSETS: AssetsFetcher;
 }
 
+/**
+ * The Workers execution context, typed structurally for the same reason as
+ * {@linkcode AssetsFetcher} (no `@cloudflare/workers-types` in this program).
+ * Passed through to the MCP lane so the Agents-SDK handler can schedule
+ * background work with `ctx.waitUntil`.
+ */
+export interface WorkerExecutionContext {
+  waitUntil(promise: Promise<unknown>): void;
+  passThroughOnException(): void;
+}
+
 /** The five content sections whose `.md` URLs negotiate prism-llms artifacts. */
 export const MD_SECTIONS = ['docs', 'components', 'blocks', 'pages', 'blog'] as const;
 
@@ -42,14 +53,14 @@ function isMcpPath(pathname: string): boolean {
   return pathname === '/mcp' || pathname.startsWith('/mcp/');
 }
 
-export async function handleRequest(request: Request, env: Env): Promise<Response> {
+export async function handleRequest(request: Request, env: Env, ctx?: WorkerExecutionContext): Promise<Response> {
   const url = new URL(request.url);
 
   if (isMcpPath(url.pathname)) {
-    // Ticket 22 replaces this stub's module with createMcpHandler over
-    // createPrismMcpServer(data.json) — no config or routing changes needed.
+    // Ticket 22: the MCP lane — tool logic in @nanisoft/prism-mcp-server,
+    // transport wiring in worker/mcp.ts. ctx is threaded, never dropped.
     const { handleMcp } = await import('./mcp.js');
-    return handleMcp(request);
+    return handleMcp(request, ctx);
   }
 
   const mdPath = rewriteMdPathname(url.pathname);

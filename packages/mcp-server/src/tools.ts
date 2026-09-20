@@ -65,8 +65,9 @@ export function registerPrismTools(server: McpServer, ctx: PrismToolContext): vo
     {
       description:
         `Catalog of every Prism item — components, blocks, and pages — with kind, one-liner, and antd base. ` +
-        `Start here to learn Prism's vocabulary; the header carries the Prism version so you can detect a ` +
-        `corpus/installed-version mismatch. ${ANTD_RULE} ${IMPORT_RULE}`,
+        `Start here to learn Prism's vocabulary; the header carries the Prism version and the corpus build ` +
+        `date, so you can detect a corpus/installed-version mismatch before trusting the answer. ` +
+        `${ANTD_RULE} ${IMPORT_RULE}`,
       inputSchema: { kind: Kind.optional().describe('Filter to one kind; omit for the whole catalog.') },
     },
     ({ kind }) => markdown(catalogMarkdown(ctx.docs, kind, ctx.built)),
