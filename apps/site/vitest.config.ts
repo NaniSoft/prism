@@ -16,5 +16,8 @@ export default defineConfig({
     environment: 'jsdom',
     // globals: registers RTL's automatic cleanup between tests.
     globals: true,
+    // Regenerates the gitignored worker stamp before anything imports
+    // worker/mcp.ts — the /mcp tests cannot assume a build ran first.
+    globalSetup: './scripts/vitest.global-setup.mjs',
   },
 });
