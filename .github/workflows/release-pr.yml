@@ -1,23 +1,24 @@
-name: Release (publish)
+name: Changesets
 
-# The npm publish lane (ticket 23). cd.yml owns the "Version Packages" PR;
-# this workflow publishes what that PR merged:
-#   - `pnpm build` first — the packages ship `files: ["dist"]` and their
-#     `prepublishOnly` only runs publint, so dist must exist before
-#     `changeset publish`.
-#   - `changeset publish` ships every package whose local version is ahead of
-#     npm, gated per tarball by publint; a no-op when everything is published.
-# The first run also verifies the org-level GitHub secrets (`NPM_TOKEN`,
-# `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` — ticket 07), which are
-# invisible to non-admin `gh secret list`.
+# On every push to main: consume merged changesets and keep a "Version Packages"
+# PR open. Merging that PR (once the publish workflow is armed) releases the
+# packages — plasma's release shape: independently versioned, non-lockstep.
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
+
+concurrency:
+  group: changesets-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  publish:
+  version:
     if: github.repository == 'NaniSoft/prism'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -25,14 +26,9 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build
       - uses: changesets/action@v1
         with:
           version: pnpm run version
-          publish: pnpm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
