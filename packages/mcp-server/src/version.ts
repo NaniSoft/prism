@@ -7,4 +7,4 @@
  * own `prismVersion` so agents can detect a corpus/installed-version mismatch.
  */
 export const SERVER_NAME = 'prism-mcp-server';
-export const SERVER_VERSION = '0.1.0';
+export const SERVER_VERSION = '0.3.0';

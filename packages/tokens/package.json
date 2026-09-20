@@ -1,6 +1,6 @@
 {
   "name": "@nanisoft/prism-tokens",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Design tokens for Prism — the single source of truth for the Prism design language.",
   "license": "MIT",
   "type": "module",

@@ -1,6 +1,6 @@
 {
   "name": "@nanisoft/prism-ui",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Prism's React surface — components, blocks, and pages over Ant Design v6. Apps import from here, never from antd directly.",
   "license": "MIT",
   "type": "module",
