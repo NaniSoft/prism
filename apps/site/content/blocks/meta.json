@@ -4,6 +4,8 @@
   "pages": [
     "---Prism---",
     "component-demo",
-    "page-header"
+    "page-header",
+    "site-header",
+    "site-footer"
   ]
 }

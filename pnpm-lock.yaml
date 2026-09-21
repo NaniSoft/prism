@@ -157,6 +157,9 @@ importers:
       '@ant-design/icons':
         specifier: ^6.3.4
         version: 6.3.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@ant-design/static-style-extract':
+        specifier: ^2.1.0
+        version: 2.1.0(antd@6.6.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@nanisoft/prism-tokens':
         specifier: workspace:*
         version: link:../tokens

@@ -122,6 +122,8 @@ export const componentCategories: Readonly<Record<string, PrismCategory>> = {
   // Prism group — blocks and pages
   ComponentDemo: 'prism',
   PageHeader: 'prism',
+  SiteHeader: 'prism',
+  SiteFooter: 'prism',
   DocsShell: 'prism',
   BlogLayout: 'prism',
 };
@@ -152,6 +154,8 @@ export interface CatalogEntry {
 const BLOCKS = [
   { name: 'ComponentDemo', id: 'component-demo' },
   { name: 'PageHeader', id: 'page-header' },
+  { name: 'SiteHeader', id: 'site-header' },
+  { name: 'SiteFooter', id: 'site-footer' },
 ] as const;
 
 const PAGES = [

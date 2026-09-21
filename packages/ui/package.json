@@ -41,6 +41,14 @@
       "types": "./dist/pages/*/index.d.ts",
       "import": "./dist/pages/*/index.js"
     },
+    "./products": {
+      "types": "./dist/products/index.d.ts",
+      "import": "./dist/products/index.js"
+    },
+    "./theming": {
+      "types": "./dist/theming/index.d.ts",
+      "import": "./dist/theming/index.js"
+    },
     "./icons": {
       "types": "./dist/generated/icons.d.ts",
       "import": "./dist/generated/icons.js"
@@ -88,6 +96,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.3.4",
+    "@ant-design/static-style-extract": "^2.1.0",
     "@nanisoft/prism-tokens": "workspace:*",
     "antd": "^6.6.4"
   },

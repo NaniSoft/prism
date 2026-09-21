@@ -119,7 +119,7 @@ describe('registry + catalog', () => {
   it('contains exactly one entry per cataloged item, with no duplicates', () => {
     const names = catalog.map((e) => e.name);
     expect(new Set(names).size).toBe(names.length);
-    for (const block of ['ComponentDemo', 'PageHeader']) expect(names).toContain(block);
+    for (const block of ['ComponentDemo', 'PageHeader', 'SiteHeader', 'SiteFooter']) expect(names).toContain(block);
     for (const page of ['DocsShell', 'BlogLayout']) expect(names).toContain(page);
     expect(names).toContain('DisplayTitle');
   });
@@ -130,7 +130,9 @@ describe('registry + catalog', () => {
     }
     const generatedNames = new Set(parseAntdComponents());
     for (const name of Object.keys(componentCategories)) {
-      const known = generatedNames.has(name) || ['DisplayTitle', 'ComponentDemo', 'PageHeader', 'DocsShell', 'BlogLayout'].includes(name);
+      const known =
+        generatedNames.has(name) ||
+        ['DisplayTitle', 'ComponentDemo', 'PageHeader', 'SiteHeader', 'SiteFooter', 'DocsShell', 'BlogLayout'].includes(name);
       expect(known, `${name} in componentCategories but not a prism-ui item`).toBe(true);
     }
   });

@@ -1,5 +1,5 @@
 /* @nanisoft/prism-ui — styles.css
- * Font faces, display width-axis, and dither patterns.
+ * Font faces, display width-axis, dither patterns, and the cross-site chrome.
  * Imported by the app (never by PrismProvider), keeping sideEffects: [] honest.
  *
  * Fonts:
@@ -69,5 +69,304 @@
       url('data:image/svg+xml,%3Csvg viewBox="0 0 4 4" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="bayer2x2-inverse"%3E%3CfeTurbulence type="turbulence" baseFrequency="0.9" numOctaves="1"%3E%3C/filter%3E%3Crect width="4" height="4" filter="url(%23bayer2x2-inverse)"%3E%3C/rect%3E%3C/svg%3E');
     background-size: 4px 4px;
     opacity: 0.04;
+  }
+
+  /* ---------- Cross-site chrome (ADR-0006) ----------
+   * SiteHeader / SiteFooter / the pack dot. Tokens resolve through the
+   * pre-baked `prism-<pack>-<mode>` class on <html> (the boot script's
+   * class-swap recipe); the fallbacks keep the chrome legible when it renders
+   * outside that recipe. Sites cap the chrome's measure with
+   * `--prism-chrome-max-width`.
+   */
+
+  .prism-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .prism-product-dot {
+    display: inline-block;
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px var(--prism-color-border, rgb(0 0 0 / 0.15));
+  }
+
+  /* ----- SiteHeader ----- */
+
+  .prism-site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--prism-color-bg-container, #fff);
+    border-bottom: 1px solid var(--prism-color-border-secondary, transparent);
+  }
+
+  .prism-site-header--static {
+    position: static;
+  }
+
+  .prism-site-header__inner {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    max-width: var(--prism-chrome-max-width, 1120px);
+    min-height: 64px;
+    margin-inline: auto;
+    padding-inline: 24px;
+  }
+
+  .prism-site-header a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .prism-site-header__brand {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    font-weight: 600;
+    font-variation-settings: 'wdth' 110;
+    color: var(--prism-color-text, rgb(0 0 0 / 0.88));
+  }
+
+  .prism-site-header__nav {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .prism-site-header__nav a {
+    padding: 6px 10px;
+    border-radius: var(--prism-border-radius, 4px);
+    color: var(--prism-color-text-secondary, rgb(0 0 0 / 0.65));
+    transition:
+      color var(--prism-motion-duration-mid, 160ms) var(--prism-motion-ease-out, cubic-bezier(0.25, 1, 0.5, 1)),
+      background-color var(--prism-motion-duration-mid, 160ms) var(--prism-motion-ease-out, cubic-bezier(0.25, 1, 0.5, 1));
+  }
+
+  .prism-site-header__nav a:hover {
+    background: var(--prism-color-primary-bg, transparent);
+    color: var(--prism-color-primary, inherit);
+  }
+
+  .prism-site-header__actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-left: auto;
+  }
+
+  .prism-site-header__switcher-trigger {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .prism-site-header__switcher-caret {
+    font-size: 10px;
+  }
+
+  .prism-site-header__switcher a,
+  .prism-site-header__switcher [aria-current] {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .prism-site-header__switcher [aria-current] {
+    font-weight: 600;
+  }
+
+  .prism-site-header__menu-button {
+    display: none;
+  }
+
+  .prism-site-header__drawer {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .prism-site-header__drawer a {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 4px;
+    border-radius: var(--prism-border-radius, 4px);
+    text-decoration: none;
+    color: var(--prism-color-text, inherit);
+  }
+
+  .prism-site-header__drawer a:hover {
+    background: var(--prism-color-primary-bg, transparent);
+    color: var(--prism-color-primary, inherit);
+  }
+
+  .prism-site-header__drawer-nav {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .prism-site-header__drawer-products {
+    display: flex;
+    flex-direction: column;
+    padding-top: 16px;
+    border-top: 1px solid var(--prism-color-border-secondary, transparent);
+  }
+
+  .prism-site-header__drawer-here {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--prism-color-text-quaternary, rgb(0 0 0 / 0.45));
+  }
+
+  @media (max-width: 767.98px) {
+    .prism-site-header__inner {
+      gap: 16px;
+      padding-inline: 16px;
+    }
+
+    .prism-site-header__nav,
+    .prism-site-header__switcher-trigger {
+      display: none;
+    }
+
+    .prism-site-header__menu-button {
+      display: inline-flex;
+    }
+  }
+
+  /* ----- SiteFooter ----- */
+
+  .prism-site-footer {
+    background: var(--prism-color-bg-layout, transparent);
+    border-top: 1px solid var(--prism-color-border-secondary, transparent);
+    color: var(--prism-color-text, rgb(0 0 0 / 0.88));
+  }
+
+  .prism-site-footer__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    max-width: var(--prism-chrome-max-width, 1120px);
+    margin-inline: auto;
+    padding: 48px 24px 32px;
+  }
+
+  .prism-site-footer a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .prism-site-footer__products {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 16px;
+  }
+
+  .prism-site-footer__product {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 100%;
+    padding: 16px;
+    background: var(--prism-color-bg-container, #fff);
+    border: 1px solid var(--prism-color-border-secondary, transparent);
+    border-radius: var(--prism-border-radius, 4px);
+    transition: border-color var(--prism-motion-duration-mid, 160ms) var(--prism-motion-ease-out, cubic-bezier(0.25, 1, 0.5, 1));
+  }
+
+  .prism-site-footer__products a:hover .prism-site-footer__product,
+  .prism-site-footer__product[data-current='true'] {
+    border-color: var(--prism-color-primary-border, var(--prism-color-border, transparent));
+  }
+
+  .prism-site-footer__product-head {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-weight: 600;
+  }
+
+  .prism-site-footer__product-tagline {
+    font-size: 13px;
+    color: var(--prism-color-text-secondary, rgb(0 0 0 / 0.65));
+  }
+
+  .prism-site-footer__columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 24px;
+  }
+
+  .prism-site-footer__column {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .prism-site-footer__column-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--prism-color-text-secondary, rgb(0 0 0 / 0.65));
+  }
+
+  .prism-site-footer__column a {
+    color: var(--prism-color-text-secondary, rgb(0 0 0 / 0.65));
+    transition: color var(--prism-motion-duration-mid, 160ms) var(--prism-motion-ease-out, cubic-bezier(0.25, 1, 0.5, 1));
+  }
+
+  .prism-site-footer__column a:hover {
+    color: var(--prism-color-primary, inherit);
+  }
+
+  .prism-site-footer__base {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 24px;
+    border-top: 1px solid var(--prism-color-border-secondary, transparent);
+  }
+
+  .prism-site-footer__social {
+    display: flex;
+    gap: 8px;
+  }
+
+  .prism-site-footer__social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--prism-border-radius, 4px);
+    color: var(--prism-color-text-secondary, rgb(0 0 0 / 0.65));
+    transition:
+      color var(--prism-motion-duration-mid, 160ms) var(--prism-motion-ease-out, cubic-bezier(0.25, 1, 0.5, 1)),
+      background-color var(--prism-motion-duration-mid, 160ms) var(--prism-motion-ease-out, cubic-bezier(0.25, 1, 0.5, 1));
+  }
+
+  .prism-site-footer__social-link:hover {
+    background: var(--prism-color-primary-bg, transparent);
+    color: var(--prism-color-primary, inherit);
+  }
+
+  .prism-site-footer__legal {
+    font-size: 13px;
+    color: var(--prism-color-text-tertiary, rgb(0 0 0 / 0.45));
   }
 }
