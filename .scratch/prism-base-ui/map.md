@@ -21,6 +21,7 @@ Labels: wayfinder:map
 
 - The replacement is an approved system change, not a second visual identity. Existing visual commitments win over shadcn/shadcnblocks styling.
 - The first catalog is curated around production work: forms, navigation, overlays, feedback, data display, and layout primitives; blocks and pages demonstrate real composition.
+- [06 — System, site, and app composition revamp](issues/06-system-site-apps-revamp.md) is resolved: the code-led Product Window Wall landing, full 43-item catalog search, grouped ten-theme control, sharpened owned recipes, composed page/block demos, generated projections, and responsive evidence ship as one truthful Spectral Refraction system. The finish review returned **ship**.
 
 ## Resolution
 
@@ -29,12 +30,14 @@ Labels: wayfinder:map
 - [03 — Prism blocks and full-page compositions](issues/03-blocks-and-pages.md) is resolved: nine blocks and five pages establish the composition model.
 - [04 — Docs and website rebuild](issues/04-docs-and-website-rebuild.md) is resolved: the static site, live catalog, themes, demos, and responsive visual pass use the owned system.
 - [05 — Agent surface and repository truth sweep](issues/05-agent-surface-and-repo-sweep.md) is resolved: the corpus, MCP, current docs, metadata, history markers, and breaking release notes tell one current truth.
+- [06 — System, site, and app composition revamp](issues/06-system-site-apps-revamp.md) is resolved: the owned recipes, site shell, Product Window Wall landing, complete catalog search, ten-theme control, composed demos, and responsive visual pass are shipped without breaking the public vocabulary.
 
 ## Verification
 
 - `pnpm build`, `pnpm test`, `pnpm check`, and `pnpm lint` pass.
 - The generated corpus reports 43 items, 6 guides, 10 themes, and 62 files; MCP tests report 40 passing tests.
 - Production static screenshots were inspected at desktop and mobile sizes in light and beam-dark modes; the final pass verified primary contrast, theme restoration, and no horizontal overflow.
+- The revamp finish review returned **ship**; fresh dev startup rebuilt the UI package, regenerated the 43-item corpus, and served the landing with HTTP 200.
 
 ## Fog
 

@@ -16,7 +16,7 @@ by Prism.
 ## Active wayfinding
 
 The current migration plan is `.scratch/prism-base-ui/map.md`, with its spec and
-five implementation tickets in that directory. The older
+six implementation tickets in that directory. The older
 `.scratch/prism/map.md` and its Ant Design research/ADRs are historical
 context; do not treat their retired implementation as current truth. Read the
 active map first, then claim an unblocked ticket by setting `Status: claimed`

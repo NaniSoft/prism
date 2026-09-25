@@ -32,17 +32,32 @@ colors:
 typography:
   display:
     fontFamily: "'Archivo Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-    fontSize: "clamp(38px, 5.4vw, 52px)"
+    fontSize: "clamp(38px, 5vw, 52px)"
     fontWeight: 600
     lineHeight: 1.06
     letterSpacing: "-0.015em"
     fontVariation: "'wdth' 125, 'wght' 600"
+  banner:
+    fontFamily: "'Archivo Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    fontSize: "clamp(40px, 6vw, 68px)"
+    fontWeight: 600
+    lineHeight: 1
+    letterSpacing: "-0.018em"
+    fontVariation: "'wdth' 122, 'wght' 600"
   headline:
     fontFamily: "'Archivo Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-    fontSize: "30px"
+    fontSize: "clamp(30px, 3vw, 38px)"
     fontWeight: 600
     lineHeight: 1.08
+    letterSpacing: "-0.012em"
     fontVariation: "'wdth' 118, 'wght' 600"
+  title:
+    fontFamily: "'Archivo Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    fontSize: "22px"
+    fontWeight: 600
+    lineHeight: 1.16
+    letterSpacing: "-0.008em"
+    fontVariation: "'wdth' 114, 'wght' 600"
   body:
     fontFamily: "'Archivo Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
     fontSize: "14px"
@@ -51,9 +66,19 @@ typography:
     fontFamily: "'Archivo Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
     fontSize: "15px"
     lineHeight: 1.72
+  secondary:
+    fontFamily: "'Archivo Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    fontSize: "13px"
+    lineHeight: 1.55
   code:
     fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
     fontSize: "12px"
+  label:
+    fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
+    fontSize: "11px"
+    fontWeight: 600
+    lineHeight: 1.35
+    letterSpacing: "0.055em"
 rounded:
   sm: "2px"
   base: "4px"
@@ -119,24 +144,32 @@ error, and info — stay semantically stable across the spectrum.
 refraction gesture. **Code and machine annotations:** JetBrains Mono.
 
 - Display: 600 weight, `wdth 125`, 38–52px, tight 1.06 leading.
-- Headline: 600 weight, `wdth 118`, 30px, 1.08 leading.
+- Site banner: 600 weight, `wdth 122`, 40–68px, 1.0 leading; this is the one
+  campaign-scale treatment for the marketing shell, not the package display.
+- Headline: 600 weight, `wdth 118`, 30–38px, 1.08 leading.
+- Title: 600 weight, 16–22px, with restrained `wdth 110–114` settings.
 - Body: 14px / 1.65; docs prose: 15px / 1.72.
-- Labels and code: JetBrains Mono, 11–12px, modest positive tracking.
+- Secondary chrome: 12–13px; labels and code: JetBrains Mono, 11–12px, with
+  modest positive tracking.
 - One grotesque carries the interface; mono annotates real content and never
   replaces it.
 
 ## Layout and density
 
-The base grid is 4px. The primary site shell is centered at 1180px with 24px
-gutters. Product layouts should use the smallest layer that owns the job:
-component for one responsibility, block for repeated product structure, and
-page for a complete composition. Layout CSS belongs to the consuming app;
-Prism's recipes own the visual language.
+The base grid is 4px. The primary content and page max-width is 1180px, with
+responsive gutters handled by the composed shell. Reusable controls use a
+28 / 32 / 40px small / default / large height family. Product layouts should
+use the smallest layer that owns the job: component for one responsibility,
+block for repeated product structure, and page for a complete composition.
+Layout CSS belongs to the consuming app; Prism's recipes own the visual
+language.
 
-Responsive behavior is explicit: navigation compresses before it wraps, theme
-grids reduce columns, and data surfaces scroll rather than crushing content.
-Every interactive target retains a visible focus state and a usable touch
-size.
+Responsive behavior is explicit: dense grids compress at 1080px, the landing
+window wall becomes two-column at 980px, navigation and application shells hand
+off to a drawer at 860px, and narrow gutters and stacked actions begin at
+640px. Data surfaces scroll rather than crushing content. Every interactive
+target retains a visible focus state and a usable touch size, including on
+coarse pointers.
 
 ## Elevation and depth
 

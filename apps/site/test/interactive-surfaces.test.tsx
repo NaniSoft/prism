@@ -1,7 +1,8 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { buildCatalog } from '@nanisoft/prism-ui/catalog';
 
-import { LandingSpecimen } from '../components/LandingSpecimen.js';
+import { CatalogSearch, ProductWindowWall, type LandingCatalogItem } from '../components/LandingSpecimen.js';
 import { ThemeControls } from '../components/ThemeControls.js';
 
 Object.defineProperty(window, 'matchMedia', {
@@ -13,23 +14,48 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+const CATALOG: readonly LandingCatalogItem[] = buildCatalog().map((entry) => ({
+  title: entry.name,
+  url: `/${entry.layer}/${entry.id}`,
+  description: entry.description,
+  layer: entry.layer,
+}));
+
 describe('interactive site surfaces', () => {
-  it('filters the component catalog and previews local control state', () => {
+  it('searches every checked catalog item and honors suggested queries', () => {
+    render(<CatalogSearch catalog={CATALOG} />);
+
+    const results = screen.getByRole('region', { name: 'Catalog search results' });
+    expect(within(results).getAllByRole('link')).toHaveLength(43);
+    expect(within(results).getByText('43 of 43 items')).toBeTruthy();
+    expect(within(results).getAllByText('Component')).toHaveLength(29);
+    expect(within(results).getAllByText('Block')).toHaveLength(9);
+    expect(within(results).getAllByText('Page')).toHaveLength(5);
+
+    fireEvent.click(screen.getByRole('button', { name: 'settings' }));
+    const settingsResults = within(results).getAllByRole('link');
+    expect(settingsResults.some((link) => link.textContent?.includes('SettingsPage'))).toBe(true);
+    expect(within(results).getByText(`${settingsResults.length} of 43 items`)).toBeTruthy();
+  });
+
+  it('moves emphasis between real page slots without autoplay', () => {
     render(
-      <LandingSpecimen
-        catalog={[
-          { title: 'Button', url: '/components/button', description: 'A command.' },
-          { title: 'Input', url: '/components/input', description: 'A value.' },
-        ]}
+      <ProductWindowWall
+        dashboard={<div>Dashboard canvas</div>}
+        settings={<div>Settings canvas</div>}
+        docs={<div>Docs canvas</div>}
       />,
     );
 
-    const search = screen.getByRole('textbox', { name: 'Search the owned catalog' });
-    fireEvent.change(search, { target: { value: 'but' } });
-    expect(screen.getByRole('link', { name: /Button/ })).toBeTruthy();
+    expect(screen.getByRole('status').textContent).toContain('DashboardPage');
+    expect(screen.getByRole('link', { name: 'Open DashboardPage source' })).toBeTruthy();
+    expect(screen.getByText('Dashboard canvas').parentElement?.getAttribute('aria-hidden')).toBe(null);
 
-    fireEvent.click(screen.getByRole('switch', { name: 'Live behavior' }));
-    expect(screen.getByText(/Resting specimen/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('radio', { name: /SettingsPage/ }));
+
+    expect(screen.getByRole('status').textContent).toContain('SettingsPage');
+    expect(screen.getByText('Settings canvas').parentElement?.getAttribute('aria-hidden')).toBe(null);
+    expect(screen.getByText('Dashboard canvas').parentElement?.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('makes theme island controls local and announced', () => {

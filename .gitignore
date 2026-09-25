@@ -23,7 +23,9 @@ coverage/
 # local agent/tool state
 .claude/
 .impeccable/
+.opencode/
 .playwright-mcp/
+opencode.exe
 
 # os
 .DS_Store

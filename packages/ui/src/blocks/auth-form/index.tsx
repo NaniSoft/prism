@@ -1,6 +1,6 @@
 'use client';
 
-import type { FormEvent, ReactNode } from 'react';
+import { useId, type FormEvent, type ReactNode } from 'react';
 
 import { Button } from '../../components/button/index.js';
 import { Checkbox } from '../../components/checkbox/index.js';
@@ -27,15 +27,17 @@ export interface AuthFormProps {
 
 export function AuthForm({ mode = 'sign-in', onSubmit, providers = [], submitLabel, footer, className }: AuthFormProps) {
   const creating = mode === 'create-account';
+  const titleId = useId();
+
   return (
-    <form className={cx('prism-auth-form', className)} onSubmit={onSubmit} data-prism="auth-form">
+    <form className={cx('prism-auth-form', className)} onSubmit={onSubmit} aria-labelledby={titleId} data-prism="auth-form">
       <div className="prism-auth-form__intro">
-        <Heading level={1} size="lg">{creating ? 'Create your account' : 'Welcome back'}</Heading>
-        <Text variant="secondary">{creating ? 'Start building with one NaniSoft account.' : 'Sign in to continue to your workspace.'}</Text>
+        <Heading id={titleId} level={1} size="lg">{creating ? 'Create your account' : 'Welcome back'}</Heading>
+        <Text variant="secondary">{creating ? 'Create an account for your workspace.' : 'Sign in to continue to your workspace.'}</Text>
       </div>
 
       {providers.length > 0 ? (
-        <div className="prism-auth-form__providers">
+        <div className="prism-auth-form__providers" role="group" aria-label="Single sign-on">
           {providers.map((provider) => <Button key={provider.label} type="button" iconStart={provider.icon}>{provider.label}</Button>)}
         </div>
       ) : null}
@@ -45,13 +47,14 @@ export function AuthForm({ mode = 'sign-in', onSubmit, providers = [], submitLab
         <Field>
           <FieldLabel>Name</FieldLabel>
           <Input name="name" autoComplete="name" required />
+          <FieldError match="valueMissing">Enter your name.</FieldError>
         </Field>
       ) : null}
 
       <Field>
         <FieldLabel>Email</FieldLabel>
         <Input name="email" type="email" autoComplete="email" required />
-        <FieldDescription>Use the address connected to your NaniSoft account.</FieldDescription>
+        <FieldDescription>Use the address connected to your account.</FieldDescription>
         <FieldError match="valueMissing">Enter your email address.</FieldError>
       </Field>
 
@@ -63,7 +66,7 @@ export function AuthForm({ mode = 'sign-in', onSubmit, providers = [], submitLab
       </Field>
 
       <div className="prism-auth-form__options">
-        <Checkbox name="remember" label="Keep me signed in" defaultChecked />
+        <Checkbox name="remember" label="Keep me signed in on this device" defaultChecked />
       </div>
 
       <Button type="submit" variant="primary" size="lg" className="prism-auth-form__submit">

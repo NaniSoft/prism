@@ -3,10 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getPrismTheme } from '@nanisoft/prism-tokens';
 
 import { ApplicationShell } from '../src/blocks/application-shell/index.js';
+import { AuthForm } from '../src/blocks/auth-form/index.js';
 import { ComponentDemo } from '../src/blocks/component-demo/index.js';
 import { DataTable } from '../src/blocks/data-table/index.js';
 import { PageHeader } from '../src/blocks/page-header/index.js';
+import { SettingsPanel } from '../src/blocks/settings-panel/index.js';
 import { StatCard } from '../src/blocks/stat-card/index.js';
+import { SiteHeader } from '../src/blocks/site-header/index.js';
 import { Button } from '../src/components/button/index.js';
 import { Card, CardHeader, CardTitle } from '../src/components/card/index.js';
 import { Checkbox } from '../src/components/checkbox/index.js';
@@ -15,7 +18,9 @@ import { Input } from '../src/components/input/index.js';
 import { Switch } from '../src/components/switch/index.js';
 import { Table } from '../src/components/table/index.js';
 import { PrismProvider, usePrismTheme } from '../src/provider/index.js';
+import { AuthPage } from '../src/pages/auth-page/index.js';
 import { BlogLayout } from '../src/pages/blog-layout/index.js';
+import { DashboardPage } from '../src/pages/dashboard-page/index.js';
 import { DocsShell } from '../src/pages/docs-shell/index.js';
 
 afterEach(() => {
@@ -114,10 +119,48 @@ describe('blocks and pages', () => {
     expect(screen.getByRole('cell', { name: 'Button' })).toBeTruthy();
   });
 
+  it('AuthForm exposes a named form and task-specific copy', () => {
+    render(<AuthForm mode="create-account" />);
+    expect(screen.getByRole('form', { name: 'Create your account' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Create your account', level: 1 })).toBeTruthy();
+  });
+
+  it('AuthPage can avoid a nested main landmark in a composed demo', () => {
+    const { container } = render(
+      <PrismProvider prismTheme={getPrismTheme('blue', 'dark')}>
+        <AuthPage landmark="region" />
+      </PrismProvider>,
+    );
+    expect(container.querySelector('.prism-auth-page__main[role="region"]')).toBeTruthy();
+    expect(document.querySelector('main')).toBeNull();
+  });
+
+  it('DataTable omits selection controls from a useful empty state', () => {
+    const { container } = render(<DataTable data={[]} columns={[{ key: 'name', header: 'Name' }]} getRowKey={(row: { name: string }) => row.name} empty="Nothing here" />);
+    expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
+    expect(screen.getByText('Nothing here')).toBeTruthy();
+    expect(container.querySelector('[data-prism="data-table"]')?.getAttribute('data-state')).toBe('empty');
+  });
+
+  it('SettingsPanel communicates save state and section changes', () => {
+    const changed = vi.fn();
+    render(<SettingsPanel sections={[{ id: 'profile', title: 'Profile', content: <p>Profile fields</p> }, { id: 'notices', title: 'Notices', content: <p>Notice fields</p> }]} dirty onSectionChange={changed} />);
+    expect(screen.getByRole('status').textContent).toBe('Unsaved changes');
+    fireEvent.click(screen.getByRole('button', { name: 'Notices' }));
+    expect(changed).toHaveBeenCalledWith('notices');
+    expect(screen.getByText('Notice fields')).toBeTruthy();
+  });
+
+  it('DashboardPage uses a neutral activity state when no activity is supplied', () => {
+    render(<DashboardPage title="Overview" nav={[{ items: [{ label: 'Overview', href: '/overview' }] }]} activeUrl="/overview" metrics={[]} />);
+    expect(screen.queryByRole('region', { name: 'Key metrics' })).toBeNull();
+    expect(screen.getByText('No recent activity')).toBeTruthy();
+  });
+
   it('DocsShell renders navigation, TOC, and neighbours from structural data', () => {
     render(<DocsShell title="Button" description="Actions." nav={[{ id: 'a', title: 'Overview', url: '/components' }]} toc={[{ id: 'usage', title: 'Usage', url: '#usage' }]} neighbours={{ next: { title: 'Input', url: '/components/input' } }}><p>Body</p></DocsShell>);
-    expect(screen.getByRole('link', { name: 'Overview' })).toHaveProperty('pathname', '/components');
-    expect(screen.getByRole('link', { name: 'Input' }).getAttribute('rel')).toBe('next');
+    expect(screen.getAllByRole('link', { name: 'Overview' })[0]).toHaveProperty('pathname', '/components');
+    expect(screen.getByRole('link', { name: 'Next: Input' }).getAttribute('rel')).toBe('next');
   });
 
   it('BlogLayout renders article metadata semantically', () => {
@@ -131,5 +174,29 @@ describe('blocks and pages', () => {
     render(<ApplicationShell nav={[{ label: 'Build', items: [{ label: 'Components', href: '/components' }] }]} activeUrl="/components"><p>Work</p></ApplicationShell>);
     expect(screen.getAllByRole('link', { name: 'Components' })[0]).toHaveProperty('pathname', '/components');
     expect(screen.getByText('Work')).toBeTruthy();
+  });
+
+  it('ApplicationShell can avoid a nested main landmark when embedded', () => {
+    const { container } = render(
+      <ApplicationShell
+        nav={[{ items: [{ label: 'Overview', href: '#overview' }] }]}
+        landmark="region"
+      >
+        <p>Embedded page</p>
+      </ApplicationShell>,
+    );
+
+    expect(screen.getByRole('region', { name: 'Application content' })).toBeTruthy();
+    expect(container.querySelector('main')).toBeNull();
+  });
+
+  it('SiteHeader can defer mode selection to an outer multi-pack provider', () => {
+    render(
+      <PrismProvider prismTheme={getPrismTheme('rose', 'light')}>
+        <SiteHeader site="prism" nav={[{ label: 'Catalog', url: '/components' }]} modeSwitch={false} />
+      </PrismProvider>,
+    );
+    expect(screen.getByRole('link', { name: /Catalog/ })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Switch to .* mode/ })).toBeNull();
   });
 });

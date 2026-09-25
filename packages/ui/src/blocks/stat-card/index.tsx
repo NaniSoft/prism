@@ -16,11 +16,17 @@ export interface StatCardProps {
 }
 
 export function StatCard({ label, value, change, trend = 'neutral', detail, footer, className }: StatCardProps) {
+  const changeLabel = trend === 'up' ? 'Increase' : trend === 'down' ? 'Decrease' : 'Change';
+
   return (
-    <Card className={cx('prism-stat-card', className)}>
+    <Card className={cx('prism-stat-card', className)} data-trend={trend}>
       <div className="prism-stat-card__header">
         <Text variant="tertiary">{label}</Text>
-        {change ? <Badge variant={trend === 'down' ? 'destructive' : trend === 'up' ? 'success' : 'neutral'}>{change}</Badge> : null}
+        {change ? (
+          <Badge variant={trend === 'down' ? 'destructive' : trend === 'up' ? 'success' : 'neutral'}>
+            <span className="prism-visually-hidden">{changeLabel}: </span>{change}
+          </Badge>
+        ) : null}
       </div>
       <div className="prism-stat-card__value">{value}</div>
       {detail ? <Text variant="secondary" className="prism-stat-card__detail">{detail}</Text> : null}

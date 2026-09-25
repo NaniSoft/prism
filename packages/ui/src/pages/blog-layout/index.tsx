@@ -22,10 +22,20 @@ export interface BlogLayoutProps {
 
 export function BlogLayout({ children, frontmatter, header, footer, className }: BlogLayoutProps) {
   return (
-    <div className={cx('prism-blog-layout', className)} data-prism="blog-layout">
+    <div className={cx('prism-blog-layout', className)} data-prism="blog-layout" data-has-frontmatter={frontmatter ? 'true' : undefined}>
       {header}
-      <article className="prism-blog-layout__post">
-        {frontmatter ? <header className="prism-blog-layout__meta"><Heading level={1} size="lg">{frontmatter.title}</Heading>{frontmatter.description ? <Text className="prism-blog-layout__description">{frontmatter.description}</Text> : null}<div className="prism-blog-layout__meta-info">{frontmatter.date ? <time dateTime={frontmatter.date}>{frontmatter.date}</time> : null}{frontmatter.draft ? <Badge variant="warning">Draft</Badge> : null}{frontmatter.tags?.map((tag) => <Badge key={tag}>{tag}</Badge>)}</div></header> : null}
+      <article className="prism-blog-layout__post" aria-label={frontmatter?.title ? `${frontmatter.title} article` : undefined}>
+        {frontmatter ? (
+          <header className="prism-blog-layout__meta">
+            <Heading level={1} size="lg">{frontmatter.title}</Heading>
+            {frontmatter.description ? <Text className="prism-blog-layout__description">{frontmatter.description}</Text> : null}
+            <div className="prism-blog-layout__meta-info">
+              {frontmatter.date ? <time dateTime={frontmatter.date}>{frontmatter.date}</time> : null}
+              {frontmatter.draft ? <Badge variant="warning">Draft</Badge> : null}
+              {frontmatter.tags?.map((tag, index) => <Badge key={`${tag}:${index}`}>{tag}</Badge>)}
+            </div>
+          </header>
+        ) : null}
         <div className="prism-blog-layout__content">{children}</div>
       </article>
       {footer}

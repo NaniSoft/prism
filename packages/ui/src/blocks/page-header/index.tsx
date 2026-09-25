@@ -15,13 +15,13 @@ export interface PageHeaderProps {
 export function PageHeader({ title, description, level = 2, breadcrumb, actions, className }: PageHeaderProps) {
   return (
     <header className={cx('prism-page-header', className)} data-prism="page-header">
-      {breadcrumb ? <nav className="prism-page-header__breadcrumb" aria-label="Breadcrumb">{breadcrumb}</nav> : null}
+      {breadcrumb ? <div className="prism-page-header__breadcrumb">{breadcrumb}</div> : null}
       <div className="prism-page-header__row">
         <div className="prism-page-header__copy">
           <Heading level={level} size="lg" className="prism-page-header__title">{title}</Heading>
           {description ? <Text className="prism-page-header__description">{description}</Text> : null}
         </div>
-        {actions ? <div className="prism-page-header__actions">{actions}</div> : null}
+        {actions ? <div className="prism-page-header__actions" aria-label="Page actions">{actions}</div> : null}
       </div>
     </header>
   );

@@ -19,7 +19,7 @@ afterEach(() => {
 });
 
 describe('site theme switcher', () => {
-  it('updates the provider scope and persisted document theme', async () => {
+  it('updates the provider scope and persisted document theme from the grouped trigger', async () => {
     render(
       <SiteThemeProvider>
         <ThemeSwitcher />
@@ -27,7 +27,8 @@ describe('site theme switcher', () => {
     );
 
     expect(screen.getByRole('status').textContent).toContain('Beam-dark');
-    fireEvent.click(screen.getByRole('tab', { name: 'Light' }));
+    fireEvent.click(screen.getByRole('button', { name: /Change brand pack and mode/ }));
+    fireEvent.click(await screen.findByRole('radio', { name: 'Light' }));
 
     await waitFor(() => {
       expect(screen.getByRole('status').textContent).toContain('Light');

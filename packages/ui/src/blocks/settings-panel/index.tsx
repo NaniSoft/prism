@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useId, useState, type ReactNode } from 'react';
 
 import { Button } from '../../components/button/index.js';
+import { Empty } from '../../components/empty/index.js';
 import { Separator } from '../../components/separator/index.js';
 import { Heading, Text } from '../../components/typography/index.js';
 import { cx } from '../../internal/cx.js';
@@ -25,26 +26,52 @@ export interface SettingsPanelProps {
 }
 
 export function SettingsPanel({ sections, initialSectionId, onSectionChange, onSave, saveLabel = 'Save changes', dirty = false, className }: SettingsPanelProps) {
-  const [activeId, setActiveId] = useState(initialSectionId ?? sections[0]?.id ?? '');
-  const active = sections.find((section) => section.id === activeId) ?? sections[0];
-  if (!active) return null;
+  const instanceId = useId();
+  const [selectedId, setSelectedId] = useState(initialSectionId ?? sections[0]?.id ?? '');
+  const active = sections.find((section) => section.id === selectedId) ?? sections[0];
+
+  if (!active) {
+    return (
+      <div className={cx('prism-settings-panel', className)} data-prism="settings-panel" data-state="empty">
+        <Empty icon="panel-left" title="No settings sections" description="There are no workspace preferences to display." />
+      </div>
+    );
+  }
+
+  const contentId = `${instanceId}-${active.id}`;
+  const headingId = `${contentId}-title`;
 
   const select = (id: string) => {
-    setActiveId(id);
+    setSelectedId(id);
     onSectionChange?.(id);
   };
 
   return (
-    <div className={cx('prism-settings-panel', className)} data-prism="settings-panel">
+    <div className={cx('prism-settings-panel', className)} data-prism="settings-panel" data-state="ready">
       <nav className="prism-settings-panel__nav" aria-label="Settings sections">
         {sections.map((section) => (
-          <button key={section.id} type="button" className="prism-settings-panel__nav-item" aria-current={section.id === active.id ? 'page' : undefined} onClick={() => select(section.id)}>{section.title}</button>
+          <button
+            key={section.id}
+            type="button"
+            className="prism-settings-panel__nav-item"
+            aria-current={section.id === active.id ? 'page' : undefined}
+            aria-controls={contentId}
+            onClick={() => select(section.id)}
+          >
+            {section.title}
+          </button>
         ))}
       </nav>
-      <section className="prism-settings-panel__content" aria-labelledby={`prism-settings-${active.id}`}>
+      <section id={contentId} className="prism-settings-panel__content" aria-labelledby={headingId}>
         <div className="prism-settings-panel__heading">
-          <div><Heading level={2} size="md" id={`prism-settings-${active.id}`}>{active.title}</Heading>{active.description ? <Text variant="secondary">{active.description}</Text> : null}</div>
-          <Button variant="primary" onClick={onSave} disabled={!dirty}>{saveLabel}</Button>
+          <div>
+            <Heading level={2} size="md" id={headingId}>{active.title}</Heading>
+            {active.description ? <Text variant="secondary">{active.description}</Text> : null}
+            <Text variant="tertiary" role="status" aria-live="polite" className="prism-settings-panel__save-state">
+              {dirty ? 'Unsaved changes' : 'All changes saved'}
+            </Text>
+          </div>
+          <Button type="button" variant="primary" onClick={onSave} disabled={!dirty}>{saveLabel}</Button>
         </div>
         <Separator />
         <div className="prism-settings-panel__body">{active.content}</div>

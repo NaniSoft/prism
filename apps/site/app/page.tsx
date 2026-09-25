@@ -1,63 +1,197 @@
-// The landing page proves Prism's mechanism in the first viewport: one owned
-// import, live behavior, and the components → blocks → pages composition model.
-
 import Link from 'next/link';
-import type { ReactElement, ReactNode } from 'react';
-import { Badge } from '@nanisoft/prism-ui/components/badge';
+import type { ReactElement } from 'react';
 import { Button } from '@nanisoft/prism-ui/components/button';
+import { Field, FieldDescription, FieldLabel } from '@nanisoft/prism-ui/components/field';
+import { PrismIcon } from '@nanisoft/prism-ui/components/icon';
+import { Input } from '@nanisoft/prism-ui/components/input';
+import { Switch } from '@nanisoft/prism-ui/components/switch';
+import { Table, type TableColumn } from '@nanisoft/prism-ui/components/table';
 import { DisplayTitle } from '@nanisoft/prism-ui/components/typography';
-import { StatCard } from '@nanisoft/prism-ui/blocks/stat-card';
+import type { ApplicationNavGroup } from '@nanisoft/prism-ui/blocks/application-shell';
+import type { SettingsSection } from '@nanisoft/prism-ui/blocks/settings-panel';
+import { DashboardPage } from '@nanisoft/prism-ui/pages/dashboard-page';
+import { DocsShell, type DocsNavEntry } from '@nanisoft/prism-ui/pages/docs-shell';
+import { SettingsPage } from '@nanisoft/prism-ui/pages/settings-page';
 import { prismBrandPacks } from '@nanisoft/prism-tokens';
 
-import { DocsDaylight } from '@/components/DocsDaylight';
-import { LandingSpecimen } from '@/components/LandingSpecimen';
-import { catalogGroups } from '@/lib/section-catalog';
+import { CatalogSearch, ProductWindowWall } from '@/components/LandingSpecimen';
+import { catalogGroups, type CatalogItem } from '@/lib/section-catalog';
 import { PACKS, PACK_LABELS } from '@/lib/theme';
 
-function PartsCluster(): ReactElement {
+const APP_NAV: readonly ApplicationNavGroup[] = [
+  {
+    label: 'Workspace',
+    items: [
+      { label: 'Overview', href: '/pages/dashboard-page', icon: <PrismIcon name="command" size={14} /> },
+      { label: 'Catalog', href: '/components', icon: <PrismIcon name="panel-left" size={14} /> },
+      { label: 'Settings', href: '/pages/settings-page', icon: <PrismIcon name="info" size={14} /> },
+      { label: 'Documentation', href: '/pages/docs-shell', icon: <PrismIcon name="external-link" size={14} /> },
+    ],
+  },
+];
+
+const WORKSTREAMS = [
+  { id: 'components', workstream: 'Component demos', owner: 'Interface', state: 'Ready for review' },
+  { id: 'agent-corpus', workstream: 'Agent corpus', owner: 'Developer tools', state: 'Ready for review' },
+  { id: 'themes', workstream: 'Theme matrix', owner: 'Brand systems', state: 'Ready for review' },
+] as const;
+
+type WorkstreamRow = (typeof WORKSTREAMS)[number];
+const WORKSTREAM_COLUMNS: readonly TableColumn<WorkstreamRow>[] = [
+  { key: 'workstream', header: 'Workstream' },
+  { key: 'owner', header: 'Owner' },
+  { key: 'state', header: 'Status' },
+];
+
+const SETTINGS_SECTIONS: readonly SettingsSection[] = [
+  {
+    id: 'workspace',
+    title: 'Workspace',
+    description: 'Synthetic settings for this landing demonstration.',
+    content: (
+      <div className="site-wall-demo__settings-fields">
+        <Field>
+          <FieldLabel>Workspace name</FieldLabel>
+          <Input name="workspace-name" defaultValue="Northstar demo" />
+          <FieldDescription>Application-owned content passed into the shipped page.</FieldDescription>
+        </Field>
+        <Field>
+          <FieldLabel>Support note</FieldLabel>
+          <Input name="support-note" defaultValue="Synthetic preview" />
+        </Field>
+      </div>
+    ),
+  },
+  {
+    id: 'notifications',
+    title: 'Notifications',
+    description: 'Illustrative preference controls, not account data.',
+    content: (
+      <div className="site-wall-demo__settings-fields">
+        <Switch label="Catalog change notices" description="Synthetic preference shown inside SettingsPage." defaultChecked />
+        <Switch label="Weekly digest" description="A second illustrative setting." />
+      </div>
+    ),
+  },
+  {
+    id: 'access',
+    title: 'Access',
+    description: 'A truthful page structure with sample access copy.',
+    content: (
+      <div className="site-wall-demo__settings-fields">
+        <Field>
+          <FieldLabel>Team URL</FieldLabel>
+          <Input name="team-url" defaultValue="https://example.test/nanisoft" />
+          <FieldDescription>The reserved .test domain makes the demonstration link synthetic.</FieldDescription>
+        </Field>
+      </div>
+    ),
+  },
+];
+
+const DOCS_NAV: DocsNavEntry[] = [
+  {
+    id: 'preview',
+    title: 'This preview',
+    url: '',
+    children: [
+      { id: 'install', title: 'Install', url: '#install' },
+      { id: 'compose', title: 'Compose', url: '#compose' },
+      { id: 'source', title: 'Source of truth', url: '#source' },
+    ],
+  },
+];
+
+const DOCS_TOC: DocsNavEntry[] = [
+  { id: 'install', title: 'Install', url: '#install' },
+  { id: 'compose', title: 'Compose', url: '#compose' },
+  { id: 'source', title: 'Source of truth', url: '#source' },
+];
+
+function SyntheticActivity(): ReactElement {
   return (
-    <div className="site-landing__parts" aria-label="Prism component examples">
-      <Button variant="primary" size="sm" href="/components/button">Primary</Button>
-      <Button size="sm" href="/components/input">Default</Button>
-      <Button variant="ghost" size="sm" href="/components/dialog">Overlay</Button>
-      <Badge>owned source</Badge>
+    <div className="site-wall-demo__activity">
+      <p><strong>Catalog checked</strong><span>All public exports remain grouped components → blocks → pages.</span></p>
+      <p><strong>Theme pass</strong><span>Five brand packs and two modes share one token vocabulary.</span></p>
+      <p className="site-wall-demo__activity-note">Synthetic activity feed for this preview.</p>
     </div>
   );
 }
 
-function MiniPageWire(): ReactElement {
-  const line = (width: string, height = 6): ReactElement => (
-    <span
-      aria-hidden
-      style={{ width, height, background: 'var(--prism-border)', borderRadius: 2 }}
+function DashboardDemo(): ReactElement {
+  return (
+    <DashboardPage
+      title="Catalog operations"
+      description="Synthetic workspace data showing a complete NaniSoft product page."
+      nav={APP_NAV}
+      activeUrl="/pages/dashboard-page"
+      landmark="region"
+      metrics={[]}
+      activityTitle="Recent activity"
+      headerActions={<Button href="#release-queue" variant="primary" size="sm">Open release queue</Button>}
+      activity={<SyntheticActivity />}
+    >
+      <Table
+        data={WORKSTREAMS}
+        columns={WORKSTREAM_COLUMNS}
+        getRowKey={(row) => row.id}
+        caption="Synthetic project data for the landing demonstration."
+      />
+    </DashboardPage>
+  );
+}
+
+function SettingsDemo(): ReactElement {
+  return (
+    <SettingsPage
+      title="Workspace settings"
+      description="Synthetic application-owned settings inside the shipped SettingsPage."
+      nav={APP_NAV}
+      activeUrl="/pages/settings-page"
+      landmark="region"
+      sections={SETTINGS_SECTIONS}
+      initialSectionId="workspace"
     />
   );
-  return (
-    <div className="site-landing__page-wire" aria-label="Page composition diagram">
-      <div className="site-landing__page-wire-top"><span className="site-landing__page-mark" />{line('84px')}<span className="site-landing__page-actions">{line('42px')}{line('42px')}</span></div>
-      <div className="site-landing__page-wire-body">
-        <div className="site-landing__page-wire-nav">{line('72%')}{line('84%')}{line('64%')}{line('78%')}</div>
-        <div className="site-landing__page-wire-content">{line('46%', 12)}{line('92%')}{line('76%')}<div>{line('92px', 28)}{line('92px', 28)}</div></div>
-      </div>
-    </div>
-  );
 }
 
-function LayerSection({ title, description, href, children }: { title: string; description: string; href: string; children: ReactNode }) {
+function DocsDemo(): ReactElement {
   return (
-    <section className="site-landing__layer">
-      <div className="site-landing__layer-copy"><Link href={href}>{title}</Link><p>{description}</p></div>
-      <div className="site-landing__layer-proof">{children}</div>
-    </section>
+    <DocsShell
+      title="Build from owned source"
+      description="A synthetic documentation excerpt rendered by the shipped DocsShell."
+      nav={DOCS_NAV}
+      toc={DOCS_TOC}
+      neighbours={{
+        previous: { title: 'DashboardPage', url: '/pages/dashboard-page' },
+        next: { title: 'SettingsPage', url: '/pages/settings-page' },
+      }}
+      header={(
+        <div className="site-wall-demo__docs-header">
+          <span><PrismIcon name="command" size={14} />NaniSoft developer docs</span>
+          <span>Synthetic excerpt</span>
+        </div>
+      )}
+    >
+      <div className="site-wall-demo__docs-prose">
+        <h2 id="install">Install Prism</h2>
+        <p>Add the one public package beside React. The application keeps its own data and routes.</p>
+        <pre><code>npm install @nanisoft/prism-ui</code></pre>
+        <h2 id="compose">Compose the smallest layer</h2>
+        <p>Use a component for one responsibility, a block for repeated product structure, and a page when the whole composition owns the job.</p>
+        <h2 id="source">Read the same source agents use</h2>
+        <p>The rendered docs, generated corpus, and read-only MCP project this checked catalog rather than a second hand-maintained list.</p>
+      </div>
+    </DocsShell>
   );
 }
 
 function SpectrumBand(): ReactElement {
   return (
-    <section className="site-landing__spectrum">
+    <section className="site-landing__spectrum" aria-labelledby="spectrum-title">
       <div className="site-landing__spectrum-head">
-        <h2>Five pastels. Two modes. One language.</h2>
-        <p>Every pack is a complete atmosphere: tinted grounds and hairlines with AA-safe mid-tone ink. Pick one in the header and feel the whole system re-express itself.</p>
+        <h2 id="spectrum-title">Five packs. Two modes. One grammar.</h2>
+        <p>Pastel atmosphere changes the ground and hairlines; readable ink keeps interaction and meaning stable. The header trigger changes every pack and mode expression together.</p>
       </div>
       <div className="site-landing__spectrum-strip">
         {PACKS.map((pack) => (
@@ -71,62 +205,112 @@ function SpectrumBand(): ReactElement {
   );
 }
 
-function StartHere(): ReactElement {
+interface SourceDoor {
+  title: string;
+  description: string;
+  href: string;
+  code: string;
+  external?: boolean;
+}
+
+const SOURCE_DOORS: readonly SourceDoor[] = [
+  { title: 'Rendered site', description: 'Live examples and copyable public usage for people.', href: '/docs/quickstart', code: 'this page' },
+  { title: 'npm package', description: 'The same components, blocks, pages, provider, and tokens ship to applications.', href: 'https://www.npmjs.com/package/@nanisoft/prism-ui', code: '@nanisoft/prism-ui', external: true },
+  { title: 'Agent corpus', description: 'llms.txt and Markdown mirrors project the checked docs source.', href: '/llms.txt', code: 'llms.txt' },
+  { title: 'Read-only MCP', description: 'Agents query the owned catalog without adopting another UI runtime.', href: '/docs/quickstart#for-agents', code: 'prism /mcp' },
+];
+
+function SourceDoors(): ReactElement {
   return (
-    <section className="site-landing__start" aria-labelledby="start-here-title">
-      <div className="site-landing__start-copy">
-        <h2 id="start-here-title">One import for people and agents.</h2>
-        <p>Install Prism, wrap the app once, and compose from the same public catalog that powers this site. The agent corpus and MCP are generated from that source.</p>
+    <section className="site-landing__source" aria-labelledby="source-title">
+      <div className="site-landing__section-copy">
+        <h2 id="source-title">One checked source. Four useful doors.</h2>
+        <p>The rendered product, npm package, generated corpus, and MCP are projections of the same catalog. There is no second list for agents to reverse-engineer.</p>
         <code className="site-landing__install">npm install @nanisoft/prism-ui</code>
       </div>
-      <div className="site-landing__start-paths">
-        <div><h3>Build an app</h3><p>Follow the quickstart, then open a live component and copy its source.</p><Button variant="primary" href="/docs/quickstart">Read the quickstart</Button></div>
-        <div><h3>Give it to an agent</h3><p>Start with the complete corpus, then query the read-only Prism MCP.</p><div className="site-landing__agent-links"><Button href="/llms.txt">Read llms.txt</Button><Button href="/docs/quickstart#for-agents">MCP setup</Button></div></div>
+      <div className="site-landing__source-list">
+        {SOURCE_DOORS.map((door) => {
+          const content = (
+            <>
+              <span className="site-landing__source-heading"><strong>{door.title}</strong><code>{door.code}</code></span>
+              <span className="site-landing__source-description">{door.description}</span>
+              <PrismIcon name="arrow-right" size={15} />
+            </>
+          );
+          return door.external ? (
+            <a key={door.title} href={door.href} className="site-landing__source-door" rel="noreferrer">{content}</a>
+          ) : (
+            <Link key={door.title} href={door.href} className="site-landing__source-door">{content}</Link>
+          );
+        })}
       </div>
     </section>
   );
 }
 
+function ClosingStatement(): ReactElement {
+  return (
+    <section className="site-landing__close" aria-labelledby="close-title">
+      <code className="site-landing__install">npm install @nanisoft/prism-ui</code>
+      <h2 id="close-title">Build the product, not around it.</h2>
+      <p>Prism gives people and agents the same owned vocabulary: accessible behavior, coherent recipes, complete compositions, and source that can be inspected.</p>
+      <div className="site-landing__close-actions">
+        <Button variant="primary" size="lg" href="/docs/quickstart">Start building</Button>
+        <Button size="lg" href="/components">Browse the catalog</Button>
+      </div>
+    </section>
+  );
+}
+
+function catalogWithLayers(): readonly (CatalogItem & { layer: 'components' | 'blocks' | 'pages' })[] {
+  return (['components', 'blocks', 'pages'] as const).flatMap((layer) => (
+    catalogGroups(layer).flatMap((group) => group.items).map((item) => ({ ...item, layer }))
+  ));
+}
+
+function countLayer(catalog: readonly (CatalogItem & { layer: 'components' | 'blocks' | 'pages' })[], layer: 'components' | 'blocks' | 'pages'): number {
+  return catalog.filter((item) => item.layer === layer).length;
+}
+
 export default function HomePage(): ReactElement {
-  const components = catalogGroups('components').flatMap((group) => group.items);
-  const blockCount = catalogGroups('blocks').flatMap((group) => group.items).length;
-  const pageCount = catalogGroups('pages').flatMap((group) => group.items).length;
+  const catalog = catalogWithLayers();
+  const componentCount = countLayer(catalog, 'components');
+  const blockCount = countLayer(catalog, 'blocks');
+  const pageCount = countLayer(catalog, 'pages');
 
   return (
     <div className="site-landing">
       <div className="site-shell">
-        <section className="site-landing__hero">
+        <section className="site-landing__hero" aria-labelledby="landing-title">
           <div className="site-landing__hero-copy">
-            <DisplayTitle level={1} className="site-landing__title">The interface is owned source.</DisplayTitle>
-            <p className="site-landing__lede">Prism turns accessible Base UI behavior into a NaniSoft system you can read, compose, and ship from one package—without adopting somebody else&apos;s design language.</p>
-            <div className="site-landing__cta"><Button variant="primary" size="lg" href="/docs/quickstart">Start building</Button><Button size="lg" href="/components">Explore the catalog</Button></div>
+            <DisplayTitle level={1} className="site-landing__title" id="landing-title">
+              Components to finished pages.
+            </DisplayTitle>
+            <p className="site-landing__lede">NaniSoft&apos;s React design system turns accessible components into product blocks and complete pages, then gives people and agents the same inspectable source.</p>
+            <div className="site-landing__cta">
+              <Button variant="primary" size="lg" href="/docs/quickstart">Start building</Button>
+              <Button size="lg" href="#catalog">Explore {catalog.length} items</Button>
+            </div>
+            <p className="site-landing__catalog-counts">{componentCount} components · {blockCount} blocks · {pageCount} pages</p>
           </div>
-          <LandingSpecimen catalog={components} />
+          <ProductWindowWall dashboard={<DashboardDemo />} settings={<SettingsDemo />} docs={<DocsDemo />} />
         </section>
       </div>
 
-      <div className="site-landing__dither" aria-hidden />
-
       <div className="site-shell">
-        <div className="site-landing__layers">
-          <LayerSection title={`Components · ${components.length}`} description="Prism-owned accessible controls and recipes. Behavior is complete; the public vocabulary stays small." href="/components"><PartsCluster /></LayerSection>
-          <LayerSection title={`Blocks · ${blockCount}`} description="Repeated product patterns assembled once—from data tables and settings to application chrome." href="/blocks"><StatCard label="Catalog coverage" value="72%" change="+4 this release" trend="up" detail="Measured across the published component, block, and page surface." /></LayerSection>
-          <LayerSection title={`Pages · ${pageCount}`} description="Complete structural compositions for docs, dashboards, settings, auth, and editorial work." href="/pages"><MiniPageWire /></LayerSection>
-        </div>
+        <section className="site-landing__catalog" id="catalog" aria-labelledby="catalog-title">
+          <div className="site-landing__section-copy">
+            <h2 id="catalog-title">Search all {catalog.length} checked items.</h2>
+            <p>Every checked export is here, labeled by the layer it belongs to. Search components, blocks, and pages from the same 43-item source used by navigation, docs, the corpus, and MCP.</p>
+          </div>
+          <CatalogSearch catalog={catalog} />
+        </section>
       </div>
 
-      <div className="site-shell"><StartHere /></div>
-      <div className="site-landing__dither" aria-hidden />
+      <div className="site-landing__seam" aria-hidden />
+      <div className="site-shell"><SourceDoors /></div>
       <div className="site-shell"><SpectrumBand /></div>
-      <DocsDaylight />
-
-      <div className="site-shell">
-        <section className="site-landing__outro">
-          <h2>Build the brand, not around it.</h2>
-          <p>Prism gives agents and developers the same source of truth: accessible behavior, owned recipes, live examples, and a complete composition vocabulary.</p>
-          <div><Button variant="primary" size="lg" href="/docs/quickstart">Install Prism</Button><Button size="lg" href="/themes">See all ten expressions</Button></div>
-        </section>
-      </div>
+      <div className="site-shell"><ClosingStatement /></div>
     </div>
   );
 }

@@ -13,8 +13,9 @@ export interface ComponentDemoProps {
 export function ComponentDemo({ code, children, language = 'tsx', className, style }: ComponentDemoProps) {
   return (
     <figure className={cx('prism-component-demo', className)} style={style} data-prism="component-demo">
-      <div className="prism-component-demo__body">{children}</div>
-      <pre className="prism-component-demo__code" data-language={language}><code>{code}</code></pre>
+      <figcaption className="prism-visually-hidden">Rendered example and verbatim source</figcaption>
+      <div className="prism-component-demo__body" role="group" aria-label="Rendered example">{children}</div>
+      <pre className="prism-component-demo__code" data-language={language} tabIndex={0} aria-label={`${language} example source`}><code>{code}</code></pre>
     </figure>
   );
 }
