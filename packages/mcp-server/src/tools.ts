@@ -2,8 +2,7 @@
  * The eight read-only tools (ADR-0004 §1/§2) — unprefixed names, markdown in
  * and out, `isError: true` for lookup misses (never a throw), tools only (no
  * resources/prompts in v1). Descriptions are the steering surface most clients
- * show, so each carries the scope, the antd delegation rule, and the import
- * invariant.
+ * show, so each carries the owned-surface rule and the import invariant.
  */
 
 import type { McpServer, CallToolResult } from '@modelcontextprotocol/server';
@@ -35,8 +34,9 @@ import {
 import { searchCorpus } from './search.js';
 import type { PrismDocsStore } from './store.js';
 
-/** Prism-owned surface only; the upstream antd surface delegates. */
-const ANTD_RULE = 'Prism answers its own surface only — inherited antd props, demos, and tokens belong to the antd MCP.';
+/** The one ownership rule shared by every tool description. */
+const SURFACE_RULE =
+  'Prism answers its complete owned surface. Base UI and native elements are internal implementation details, never consumer imports.';
 
 const Kind = z.enum(['component', 'block', 'page']);
 const SearchKind = z.enum(['component', 'block', 'page', 'doc']);
@@ -64,10 +64,10 @@ export function registerPrismTools(server: McpServer, ctx: PrismToolContext): vo
     'list_items',
     {
       description:
-        `Catalog of every Prism item — components, blocks, and pages — with kind, one-liner, and antd base. ` +
+        `Catalog of every Prism item — components, blocks, and pages — with kind, one-liner, and internal primitive foundation. ` +
         `Start here to learn Prism's vocabulary; the header carries the Prism version and the corpus build ` +
         `date, so you can detect a corpus/installed-version mismatch before trusting the answer. ` +
-        `${ANTD_RULE} ${IMPORT_RULE}`,
+        `${SURFACE_RULE} ${IMPORT_RULE}`,
       inputSchema: { kind: Kind.optional().describe('Filter to one kind; omit for the whole catalog.') },
     },
     ({ kind }) => markdown(catalogMarkdown(ctx.docs, kind, ctx.built)),
@@ -77,9 +77,9 @@ export function registerPrismTools(server: McpServer, ctx: PrismToolContext): vo
     'get_item_doc',
     {
       description:
-        `Full Prism documentation for one component, block, or page: usage rules (RFC-2119), Prism-added props, ` +
-        `and an example. Covers Prism's own surface only — for inherited antd props on pass-through re-exports ` +
-        `use the antd MCP. ${IMPORT_RULE}`,
+        `Full Prism documentation for one component, block, or page: usage rules (RFC-2119), public Prism props, ` +
+        `and copyable examples. Primitive metadata describes internal implementation and never creates another import path. ` +
+        `${IMPORT_RULE}`,
       inputSchema: { name: z.string().describe(NAME_DESC), kind: Kind.optional().describe(KIND_DESC) },
     },
     ({ name, kind }) => {
@@ -94,8 +94,8 @@ export function registerPrismTools(server: McpServer, ctx: PrismToolContext): vo
     'get_item_props',
     {
       description:
-        `Prism-added props for one component, block, or page, as Markdown — the API delta Prism adds on top of ` +
-        `antd, not the inherited antd table. A pass-through re-export answers with the antd MCP pointer instead. ${IMPORT_RULE}`,
+        `Public Prism props for one component, block, or page, as Markdown. Internal Base UI or native-element props are ` +
+        `not a consumer contract. ${IMPORT_RULE}`,
       inputSchema: { name: z.string().describe(NAME_DESC), kind: Kind.optional().describe(KIND_DESC) },
     },
     ({ name, kind }) => {
@@ -111,8 +111,7 @@ export function registerPrismTools(server: McpServer, ctx: PrismToolContext): vo
     {
       description:
         `Documented example source for one item — verbatim, self-contained TSX in one fenced block, ready to paste. ` +
-        `Returns documented usage, never prism-ui implementation files; raw antd demos belong to the antd MCP's ` +
-        `antd_demo. ${IMPORT_RULE}`,
+        `Returns public Prism usage, never prism-ui implementation files or internal primitive source. ${IMPORT_RULE}`,
       inputSchema: {
         name: z.string().describe(NAME_DESC),
         example: z.string().optional().describe("Example slug; omit for the item's first example."),
@@ -144,8 +143,8 @@ export function registerPrismTools(server: McpServer, ctx: PrismToolContext): vo
     {
       description:
         `Theme and token documentation for one Prism brand pack × mode (blue | green | lavender | rose | peach ` +
-        `× light | dark), including the createPrismTheme() snippet. Prism's multi-pack theming is not answerable ` +
-        `by antd's antd_token. ${ANTD_RULE} ${IMPORT_RULE}`,
+        `× light | beam-dark), including the createPrismTheme() snippet and generated CSS variables. ` +
+        `${SURFACE_RULE} ${IMPORT_RULE}`,
       inputSchema: {
         // Mirrors prism-tokens' PrismPackId (ADR-0005). Unknown packs take the
         // graceful miss path below, which lists the corpus's actual atoms.
@@ -184,7 +183,7 @@ export function registerPrismTools(server: McpServer, ctx: PrismToolContext): vo
     {
       description:
         `One Prism docs page as Markdown, by site pathname (e.g. '/docs/theming') — mirrors fumadocs' get_page ` +
-        `contract exactly. Docs describe Prism behaviour; inherited antd surface stays with the antd MCP. ${IMPORT_RULE}`,
+        `contract exactly. Docs describe Prism behaviour and its one supported consumer import. ${IMPORT_RULE}`,
       inputSchema: { url: z.string().describe("Site pathname, e.g. '/docs/theming'.") },
     },
     ({ url }) => {
@@ -199,7 +198,7 @@ export function registerPrismTools(server: McpServer, ctx: PrismToolContext): vo
     {
       description:
         `One search entry point over the whole Prism corpus — components, blocks, pages, and docs pages. Ranked ` +
-        `hits with kind, snippet, and the suggested follow-up call. ${ANTD_RULE} ${IMPORT_RULE}`,
+        `hits with kind, snippet, and the suggested follow-up call. ${SURFACE_RULE} ${IMPORT_RULE}`,
       inputSchema: {
         query: z.string().describe('Free text — item names, features, guide topics.'),
         kind: SearchKind.optional().describe("'doc' means a docs page; the other three filter catalog items."),

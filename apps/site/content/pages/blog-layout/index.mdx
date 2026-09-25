@@ -1,11 +1,15 @@
 ---
-title: BlogLayout
-description: Prism page — full documentation pending.
+title: "BlogLayout"
+description: "A readable article page with metadata and related navigation."
 ---
-{/* prism:generated-stub v1 */}
+{/* prism:generated-owned v2 */}
 
 ```ts
-import { BlogLayout } from '@nanisoft/prism-ui/pages';
+import { BlogLayout } from '@nanisoft/prism-ui/pages/blog-layout';
 ```
 
-`BlogLayout` is a Prism page. Full documentation is pending — the prism MCP answers API questions in the meantime (`get_item_props`, `get_item_source`).
+BlogLayout is a Prism-owned page. Its behavior, public props, and Spectral Refraction recipe ship together from `@nanisoft/prism-ui`.
+
+- Import only from `@nanisoft/prism-ui`.
+- Keep the component inside `PrismProvider` when it uses an overlay, popup, or nested theme scope.
+- Use `className` for layout composition; visual state stays in the Prism recipe and CSS variables.

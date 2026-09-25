@@ -1,5 +1,15 @@
 # @nanisoft/prism-llms
 
+## Next release — owned-catalog corpus
+
+### Breaking changes
+
+- Regenerate `llms.txt`, Markdown mirrors, and `PrismDocsStore` for the
+  Prism-owned 29-component / 9-block / 5-page catalog.
+- Corpus items now carry internal `primitive` metadata; the previous upstream
+  base/routing field is gone. Consumers should use the public Prism props and
+  import contract.
+
 ## 0.4.0
 
 ### Minor Changes

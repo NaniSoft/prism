@@ -1,105 +1,115 @@
 # AGENTS.md
 
-Prism is NaniSoft's design system: an Ant Design–based, plasma-shaped pnpm +
-Turborepo monorepo. The **map** — the canonical plan of record — lives at
-`.scratch/prism/map.md`; its tickets are under `.scratch/prism/issues/`.
+Prism is NaniSoft's agent-ready React design system: a Prism-owned source catalog
+built on accessible Base UI primitives and plain CSS, with the same source
+projected into the docs site, `llms.txt`, Markdown mirrors, and the read-only
+MCP. The pnpm + Turborepo monorepo is the product workspace.
 
 ## The one rule
 
-Apps always import from `@nanisoft/prism-ui`, **never from `antd` directly**.
-(Plasma's invariant; will be enforced by re-export codegen, not lint, once the
-export surface lands — see the prism-ui conventions ticket.) `@ant-design/icons`
-is re-exported through prism-ui as well — there is deliberately no custom icons
-package.
+Consumer applications import from `@nanisoft/prism-ui` and React only. They do
+not install or import Base UI, and they never import another UI runtime
+directly. Base UI is an implementation detail of `prism-ui`; Prism's public
+vocabulary is the components, blocks, pages, provider, and token types exported
+by Prism.
 
-## Taxonomy: components → blocks → pages
+## Active wayfinding
 
-An organization taxonomy *inside* `prism-ui`: **components** are the antd-backed
-primitives, **blocks** are pre-composed components (a form section, a stat row),
-**pages** are full-page compositions. Everything is npm-delivered — consuming
-apps assemble, never copy, design-system code.
+The current migration plan is `.scratch/prism-base-ui/map.md`, with its spec and
+five implementation tickets in that directory. The older
+`.scratch/prism/map.md` and its Ant Design research/ADRs are historical
+context; do not treat their retired implementation as current truth. Read the
+active map first, then claim an unblocked ticket by setting `Status: claimed`
+before editing it. Tracker conventions live in `docs/agents/issue-tracker.md`.
+
+## Taxonomy
+
+`@nanisoft/prism-ui` organizes its public surface as:
+
+- **components** — accessible, single-responsibility controls and primitives;
+- **blocks** — pre-composed product patterns assembled from components;
+- **pages** — complete structural compositions assembled from blocks and
+  components.
+
+The catalog is curated rather than a one-for-one compatibility mirror. Apps
+assemble Prism exports from npm; they never copy design-system source. The
+checked catalog is `packages/ui/src/catalog.ts` and is the source for docs
+navigation, generated content, the LLM corpus, and MCP metadata.
 
 ## Layout
 
-| Path                  | Package                        | Role                                                        |
-| --------------------- | ------------------------------ | ----------------------------------------------------------- |
-| `packages/tokens`     | `@nanisoft/prism-tokens`       | Token source of truth; `createPrismTheme()`; brand packs    |
-| `packages/ui`         | `@nanisoft/prism-ui`           | components → blocks → pages over antd v6; `PrismProvider`   |
-| `packages/llms`       | `@nanisoft/prism-llms`         | Generated `llms.txt` + per-component MD (data-only)         |
-| `packages/mcp-server` | `@nanisoft/prism-mcp-server`   | MCP tool logic (transport-free factory)                     |
-| `apps/site`           | `@nanisoft/site`               | prism.nanisoft.com — Fumadocs headless, static export       |
+| Path | Package | Role |
+| --- | --- | --- |
+| `packages/tokens` | `@nanisoft/prism-tokens` | Pure primitives, semantics, brand packs, and CSS-variable projection |
+| `packages/ui` | `@nanisoft/prism-ui` | React components → blocks → pages, provider, icons, and plain CSS |
+| `packages/llms` | `@nanisoft/prism-llms` | Generated `llms.txt`, Markdown mirrors, and the MCP corpus |
+| `packages/mcp-server` | `@nanisoft/prism-mcp-server` | Transport-free MCP tool logic and `PrismDocsStore` contract |
+| `apps/site` | `@nanisoft/site` | Static Next.js docs, landing page, themes, and Worker assets |
 
 ## Commands
 
 ```sh
-pnpm build   # turbo run build (packages emit dist/, site exports out/)
-pnpm test    # turbo run test (Vitest; RTL in prism-ui)
-pnpm check   # turbo run check — the prism-llms drift gate (7 corpus invariants; CI runs it)
-pnpm lint    # oxlint . + stylelint
-pnpm changeset  # declare a version bump before merging to main
+pnpm install                 # install the workspace
+pnpm build                   # turbo build; packages emit dist/, site exports out/
+pnpm test                    # turbo test; Vitest/RTL coverage
+pnpm check                   # prism-llms drift gate (7 corpus invariants)
+pnpm lint                    # oxlint + stylelint
+pnpm changeset               # declare a release before merging
 ```
 
-The corpus convention: a prism-ui change that alters the docs corpus ships a
-prism-llms changeset in the same PR, and `pnpm --filter @nanisoft/prism-llms
-generate-content` regenerates stub MDX + `meta.json` into `apps/site/content`
-(only marker-carrying generated stubs are ever rewritten — hand-authored docs
-are never touched).
-
-TS is strict and ESM-only with no bundler for packages (types + `import`
-exports only); `publint` runs on publish.
+For a focused package, use the workspace filter, for example
+`pnpm --filter @nanisoft/prism-ui test`.
 
 ## Conventions
 
-- **Theming** — `createPrismTheme()` in `@nanisoft/prism-tokens` returns a
-  structured `PrismTheme`: one brand pack (blue | green | lavender | rose |
-  peach — the pastel spectrum, ADR-0005) in one mode (light | beam-dark). It
-  maps Prism tokens onto antd **seed tokens +
-  algorithms** plus a **closed 17-key map-token allowlist** (ADR-0002 + the
-  ADR-0005 errata: the visual language's radius/motion, plus placeholder
-  legibility, are not seed-derivable) — anything outside
-  the allowlist is not a hand-set map token — and sets `cssVar.key`
-  explicitly (`prism-<pack>-<mode>`, `hashed: false`) so dark mode swaps
-  without a flash.
-- **`PrismProvider`** wraps antd `ConfigProvider`; it is the theming entry point.
-- **ProComponents cannot take antd v6 on stable** — dashboard blocks build on
-  plain antd v6.
-- **Docs** live in `apps/site` (Fumadocs headless, static export) as rendered
-  demos + copyable source (`ComponentDemo`); that MDX is the single source
-  `@nanisoft/prism-llms` generates `llms.txt` + per-component MD from — never
-  hand-copy content between the two.
-- **Figma** is one-way code → Figma Variables (repo-owned plugin fed by
-  `prism-tokens` build output). No two-way sync, no hand-built UI kit.
-  The full design↔code conventions: `docs/design-conventions.md`.
+- **Theming** — `createPrismTheme({ pack, mode })` returns one frozen
+  `PrismTheme` containing `primitives`, `semantics`, and `cssVariables`. The
+  five registered packs are blue, green, lavender, rose, and peach; modes are
+  light and beam-dark. The stylesheet consumes `--prism-*` variables and ships
+  deterministic scopes for all ten expressions.
+- **Provider** — `PrismProvider` owns the serializable theme scope, theme
+  context, link adapter, and nearest local portal target. It is the only
+  supported theming entry point for Prism components.
+- **Behavior** — Base UI supplies accessible interaction primitives inside
+  `prism-ui`; Prism owns the public wrappers, CSS recipes, types, and visual
+  language. No Base UI symbol is re-exported.
+- **Styling** — plain CSS, no Tailwind requirement. Use Prism semantic
+  variables and documented `className`/`data-prism` hooks; do not reach into
+  internal DOM or copy implementation CSS into an app.
+- **Motion and shape** — preserve the Spectral Refraction commitments: Archivo
+  Variable and JetBrains Mono, hairline elevation, 2/4/6/4 radii, dither rather
+  than blended gradients, and the 80/160/280ms decelerating motion family.
+- **Docs** — MDX in `apps/site/content` is authoritative prose. Live demos and
+  their copyable source are co-located `demos/*.tsx` files. `prism-llms`
+  generates the agent corpus from those sources; do not hand-copy content
+  between lanes.
+- **Figma** — token flow is one-way code → Figma Variables. Never hand-edit a
+  generated token file or introduce a second source of visual truth.
 
-## MCP servers (`.mcp.json`)
+## MCP servers
 
-`.mcp.json` is strict JSON and holds **only real, working servers** — no
-comments, no placeholders; add a server when it exists. All three below are
-wired (HTTP entries need **both** `type` and `url`, or Claude Code silently
-skips them).
+`.mcp.json` is strict JSON and contains only real, working servers:
 
-- **`antd`** — offline antd knowledge over stdio from `@ant-design/cli`
-  (`npm i -g @ant-design/cli`): `antd_list`, `antd_info`, `antd_doc`,
-  `antd_demo`, `antd_token`, `antd_semantic`, `antd_changelog`. The
-  `ant-design` skill's `references/antd-cli.md` is its manual.
-- **`figma`** (ticket 14) — remote Dev Mode MCP:
-  `{ "type": "http", "url": "https://mcp.figma.com/mcp" }`.
-- **`prism`** (ADR-0004) — the live Prism MCP at
-  `https://prism.nanisoft.com/mcp`: eight read-only tools over the prism-llms
-  corpus, served by the same Worker as the site. Stdio lane if a client
-  can't do HTTP: `npx mcp-remote https://prism.nanisoft.com/mcp`.
+- `prism` — the public read-only HTTP endpoint at
+  `https://prism.nanisoft.com/mcp` (stdio clients can use `npx mcp-remote`).
+  It serves eight tools over the generated owned catalog: `list_items`,
+  `get_item_doc`, `get_item_props`, `get_item_source`, `get_theme_doc`,
+  `list_pages`, `get_page`, and `search_docs`.
+- `figma` — the remote Figma Dev Mode MCP at `https://mcp.figma.com/mcp`.
 
-Pairing rule: **Prism MCP for Prism behaviour, antd MCP for inherited antd
-props — and always import from `@nanisoft/prism-ui`.**
+HTTP entries need both `type` and `url` or Claude Code skips them. Project
+scope approval is one-time per user (`/mcp`). The Prism MCP is the source for
+Prism behavior; it never directs consumers to an upstream UI package.
 
 ## Working here
 
-- Read `.scratch/prism/map.md` first; claim a ticket (set `Status: claimed`)
-  before working it — see `docs/agents/issue-tracker.md`.
-- Domain language and standing decisions: `CONTEXT.md`, `PRODUCT.md`,
-  `docs/adr/`, and the map's Notes section.
-- Agent-relevant skills installed in this environment: `ant-design`, `antd`,
-  `cloudflare`, `wrangler`, `workers-best-practices`; `interfaces:*` and
-  `impeccable` for UI direction.
-- Project-scope MCP servers in `.mcp.json` need one-time per-user approval
-  (`/mcp` in a session, or `claude mcp reset-project-choices` to re-prompt).
+- Read the active map, `CONTEXT.md`, `PRODUCT.md`, `docs/design-conventions.md`,
+  and relevant ADRs before changing product language or visual conventions.
+- Keep the existing dirty worktree; do not reset or discard unrelated changes.
+- Prefer the checked catalog and generated projections over hand-maintained
+  duplicate lists.
+- When the UI layer changes in a way that alters the docs corpus, update the
+  docs source and run `pnpm --filter @nanisoft/prism-llms generate-content`
+  when generated stubs are affected, then run the full corpus check.
+- Add a changeset for every published package whose public behavior or docs
+  projection changes.

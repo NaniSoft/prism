@@ -1,26 +1,28 @@
-import { createContext, useContext, type ComponentType, type ReactNode } from 'react';
+'use client';
+
+import { createContext, useContext, type AnchorHTMLAttributes, type ComponentType, type ReactNode } from 'react';
+
+export type PrismLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
+export type PrismLinkComponent = ComponentType<PrismLinkProps>;
 
 export interface PrismLinkContextValue {
-  link?: ComponentType<{ href: string; children: ReactNode }>;
+  link?: PrismLinkComponent;
 }
 
 const PrismLinkContext = createContext<PrismLinkContextValue>({});
 
+const AnchorLink: PrismLinkComponent = ({ children, ...props }) => <a {...props}>{children}</a>;
+
 export function PrismLinkContextProvider({
   children,
-  link,
+  link = AnchorLink,
 }: {
   children: ReactNode;
-  link?: ComponentType<{ href: string; children: ReactNode }>;
+  link?: PrismLinkComponent;
 }): ReactNode {
-  return (
-    <PrismLinkContext.Provider value={{ link }}>
-      {children}
-    </PrismLinkContext.Provider>
-  );
+  return <PrismLinkContext.Provider value={{ link }}>{children}</PrismLinkContext.Provider>;
 }
 
-export function usePrismLink(): ComponentType<{ href: string; children: ReactNode }> {
-  const { link } = useContext(PrismLinkContext);
-  return link ?? ((props) => <a href={props.href}>{props.children}</a>);
+export function usePrismLink(): PrismLinkComponent {
+  return useContext(PrismLinkContext).link ?? AnchorLink;
 }

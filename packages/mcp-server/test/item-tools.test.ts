@@ -1,5 +1,5 @@
 // The four per-item tools: catalog header/count/grouping, verbatim docs,
-// props-delta delegation, example source — plus case-insensitivity, kind
+// public props, and example source — plus case-insensitivity, kind
 // disambiguation, and did-you-mean misses (ADR-0004 §1/§2).
 
 import { afterEach, describe, expect, it } from 'vitest';
@@ -26,15 +26,15 @@ describe('list_items', () => {
     }
   });
 
-  it('groups the catalog by kind and marks pass-throughs with their antd base', async () => {
+  it('groups the catalog by kind and labels internal primitive foundations', async () => {
     h = await harness();
     const text = await h.text('list_items');
     expect(text).toContain('## Components');
     expect(text).toContain('## Blocks');
     expect(text).toContain('## Pages');
-    expect(text).toContain('- **Button** — antd Button, unchanged — a pass-through re-export. Import from \'@nanisoft/prism-ui\'. _(extends antd Button)_');
-    expect(text).toContain('- **PageHeader** — Page-opening block: title, subtitle, breadcrumb, right-aligned actions.');
-    expect(text).toContain("Always import from '@nanisoft/prism-ui', never from antd directly.");
+    expect(text).toContain("- **Button** — The primary action control for commands, links, and loading states. Import from '@nanisoft/prism-ui'. _(Base UI primitive internally)_");
+    expect(text).toContain('- **PageHeader** — Page-opening block: title, subtitle, breadcrumb, right-aligned actions. _(native HTML primitive)_');
+    expect(text).toContain("Always import from '@nanisoft/prism-ui', never from antd or Base UI directly");
   });
 
   it('filters to one kind while the header still describes the whole corpus', async () => {
@@ -42,7 +42,7 @@ describe('list_items', () => {
     const text = await h.text('list_items', { kind: 'block' });
     expect(text).toContain('Filtered to blocks — omit `kind` for the whole catalog.');
     expect(text).toContain('- **PageHeader**');
-    expect(text).toContain('- **StatRow**');
+    expect(text).toContain('- **StatCard**');
     expect(text).not.toContain('## Components');
   });
 });
@@ -52,15 +52,16 @@ describe('get_item_doc', () => {
     h = await harness();
     const text = await h.text('get_item_doc', { name: 'PageHeader' });
     expect(text).toContain('# PageHeader\n\nPrism block. Usage: MUST keep actions right-aligned');
-    expect(text).toContain('Prism-added props only: `get_item_props { "name": "PageHeader" }`');
+    expect(text).toContain('Public Prism props: `get_item_props { "name": "PageHeader" }`');
     expect(text).toContain('Copyable example source: `get_item_source { "name": "PageHeader" }`');
   });
 
-  it('steers pass-throughs to the antd MCP from the data', async () => {
+  it('labels an internal Base UI foundation without turning it into an import path', async () => {
     h = await harness();
     const text = await h.text('get_item_doc', { name: 'Button' });
-    expect(text).toContain('Inherited antd props and demos: antd MCP `antd_info Button`');
-    expect(text).toContain('_No additional props beyond the antd base component._');
+    expect(text).toContain('Foundation: Base UI primitive internally; never import it directly.');
+    expect(text).toContain("Always import from '@nanisoft/prism-ui'");
+    expect(text).not.toContain('antd MCP');
   });
 
   it('resolves names case-insensitively', async () => {
@@ -90,24 +91,27 @@ describe('get_item_doc', () => {
 });
 
 describe('get_item_props', () => {
-  it('returns only the Prism-added props section', async () => {
+  it('returns the public Prism props table and keeps the import boundary', async () => {
     h = await harness();
-    const text = await h.text('get_item_props', { name: 'DisplayTitle' });
-    expect(text).toBe(FIXTURE.items[1]!.props);
+    const text = await h.text('get_item_props', { name: 'Typography' });
+    expect(text).toContain(FIXTURE.items[1]!.props!);
+    expect(text).toContain('This is the public Prism API for `Typography`');
+    expect(text).toContain("Always import from '@nanisoft/prism-ui'");
   });
 
-  it('answers a pass-through with the antd-MCP routing line', async () => {
+  it('points a prop-less item at its full Prism doc', async () => {
     h = await harness();
     const text = await h.text('get_item_props', { name: 'button' });
-    expect(text).toContain('Button — antd Button, unchanged. Props: use the antd MCP (`antd_info Button`).');
-    expect(text).toContain('_No additional props beyond the antd base component._');
+    expect(text).toContain('`Button` declares no additional Prism-authored props in this build.');
+    expect(text).toContain('`get_item_doc { "name": "Button" }`');
+    expect(text).not.toContain('antd MCP');
   });
 
-  it('points a prop-less Prism item at its full doc', async () => {
+  it('points a native prop-less block at its full doc', async () => {
     h = await harness();
-    const text = await h.text('get_item_props', { name: 'StatRow' });
-    expect(text).toContain('`StatRow` documents no Prism-added props in this build.');
-    expect(text).toContain('`get_item_doc { "name": "StatRow" }`');
+    const text = await h.text('get_item_props', { name: 'StatCard' });
+    expect(text).toContain('`StatCard` declares no additional Prism-authored props in this build.');
+    expect(text).toContain('`get_item_doc { "name": "StatCard" }`');
   });
 });
 

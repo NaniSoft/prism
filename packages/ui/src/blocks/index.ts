@@ -1,11 +1,11 @@
-// prism-ui blocks barrel — pre-composed components, npm-delivered, never copied.
+// Pre-composed product patterns. Blocks import downward into components only.
 
-export { ComponentDemo, type ComponentDemoProps } from './component-demo/index.js';
-export { PageHeader, type PageHeaderProps } from './page-header/index.js';
-export { SiteHeader, type SiteHeaderProps, type PrismNavLink } from './site-header/index.js';
-export {
-  SiteFooter,
-  type SiteFooterProps,
-  type SiteFooterColumn,
-  type SiteFooterSocialLink,
-} from './site-footer/index.js';
+export * from './application-shell/index.js';
+export * from './auth-form/index.js';
+export * from './component-demo/index.js';
+export * from './data-table/index.js';
+export * from './page-header/index.js';
+export * from './settings-panel/index.js';
+export * from './site-footer/index.js';
+export * from './site-header/index.js';
+export * from './stat-card/index.js';

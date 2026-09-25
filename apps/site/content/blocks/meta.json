@@ -1,11 +1,16 @@
 {
   "title": "Blocks",
-  "---Prism---": "Prism",
+  "---Compositions---": "Compositions",
   "pages": [
-    "---Prism---",
+    "---Compositions---",
+    "application-shell",
+    "auth-form",
     "component-demo",
+    "data-table",
     "page-header",
+    "settings-panel",
+    "site-footer",
     "site-header",
-    "site-footer"
+    "stat-card"
   ]
 }

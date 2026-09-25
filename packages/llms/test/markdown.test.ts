@@ -3,8 +3,8 @@ import { parseMdx, renderComponentDemos, renderPropsSection, renderTable, stripM
 
 describe('parseMdx', () => {
   it('splits frontmatter from body and unquotes values', () => {
-    const { data, body } = parseMdx("---\ntitle: Button\ndescription: 'antd Button, unchanged'\n---\n\nBody here.\n");
-    expect(data).toEqual({ title: 'Button', description: 'antd Button, unchanged' });
+    const { data, body } = parseMdx("---\ntitle: Button\ndescription: 'Prism action control'\n---\n\nBody here.\n");
+    expect(data).toEqual({ title: 'Button', description: 'Prism action control' });
     expect(body).toBe('Body here.\n');
   });
 
@@ -68,9 +68,9 @@ describe('renderPropsSection', () => {
     expect(section).toContain("| `width` (optional) | 'normal' \\| 'refracted' | — | The width axis. |");
   });
 
-  it('collapses zero-prop interfaces to the antd seam line', () => {
+  it('collapses zero-prop interfaces to the Prism API note', () => {
     expect(renderPropsSection([{ typeName: 'EmptyProps', props: [] }])).toBe(
-      '## Props\n\n_No additional props beyond the antd base component._',
+      '## Props\n\n_No additional Prism-authored props are declared for this item._',
     );
   });
 });

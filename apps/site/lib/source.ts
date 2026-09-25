@@ -4,8 +4,7 @@
 // The fumadocs-mdx Macro API is compile-time: `defineDocs`/`defineCollections`
 // may only appear at top level in this module with literal `dir`s, and the
 // module must not re-export the macro. Frontmatter = fumadocs defaults only —
-// no authored `kind` (the section loader is the kind) and no authored
-// `antdBase` (the generator derives it); `description` is required in practice
+// no authored implementation metadata; `description` is required in practice
 // (prism-llms' drift gate asserts it).
 
 import { defineCollections, defineDocs } from 'fumadocs-mdx/macro';
@@ -18,7 +17,7 @@ export const docs = defineDocs({
   dir: 'content/docs',
 });
 
-/** Thin generated stubs + curated docs for pass-through and wrapped components. */
+/** Owned component documentation and live examples. */
 export const components = defineCollections({
   type: 'doc',
   dir: 'content/components',

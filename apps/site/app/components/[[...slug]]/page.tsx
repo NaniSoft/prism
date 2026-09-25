@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {
       title: 'Components',
       description:
-        'The antd surface, themed by Prism tokens, typed, and re-exported — plus Prism-wrapped additions.',
+        'Prism-owned accessible components, styled from the Spectral Refraction token system and delivered from one package.',
     };
   }
   const page = componentsSource.getPage(slug);
@@ -42,7 +42,7 @@ export default async function ComponentsPage({ params }: PageProps): Promise<Rea
     return (
       <SectionIndex
         title="Components"
-        description="Prism components first, then antd's six canonical categories. Pass-through items are re-exported unchanged — import from '@nanisoft/prism-ui', never from antd."
+        description="Prism-owned components, organized by the job they do. Every public API is available from '@nanisoft/prism-ui'."
         groups={catalogGroups('components')}
         emptyMessage="No component pages yet."
       />

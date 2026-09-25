@@ -1,15 +1,14 @@
-// Section catalog (ticket 12 §1): the components/blocks/pages indexes are
-// grouped by prism-ui's category table — the Prism group first, then antd's
-// six canonical categories — single-sourced from the same `buildCatalog()` the
-// generator and prism-llms read. URLs follow the flat taxonomy
-// (`/<layer>/<item-id>`), which the loaders mirror by construction.
+// One owned catalog groups every docs index, the site navigation, generated
+// content, the LLM corpus, and MCP.
 
-import { buildCatalog, type CatalogLayer, type PrismCategory } from '@nanisoft/prism-ui/wrapped-registry';
-import { passThroughs } from '@nanisoft/prism-ui/generated/pass-throughs';
+import { buildCatalog, type CatalogCategory, type CatalogLayer } from '@nanisoft/prism-ui/catalog';
+
+import { blocksSource, componentsSource, pagesSource } from './source';
 
 export interface CatalogItem {
   title: string;
   url: string;
+  description?: string;
 }
 
 export interface CatalogGroup {
@@ -17,33 +16,36 @@ export interface CatalogGroup {
   items: CatalogItem[];
 }
 
-const GROUP_LABELS: Readonly<Record<PrismCategory, string>> = {
-  prism: 'Prism components',
-  general: 'General',
-  layout: 'Layout',
+const GROUP_LABELS: Readonly<Record<CatalogCategory, string>> = {
+  actions: 'Actions',
+  forms: 'Forms',
   navigation: 'Navigation',
-  'data-entry': 'Data Entry',
-  'data-display': 'Data Display',
+  overlays: 'Overlays',
+  'data-display': 'Data display',
   feedback: 'Feedback',
+  foundations: 'Foundations',
+  layout: 'Layout',
+  composition: 'Compositions',
 };
 
-const GROUP_ORDER: readonly PrismCategory[] = [
-  'prism',
-  'general',
-  'layout',
-  'navigation',
-  'data-entry',
-  'data-display',
-  'feedback',
+const GROUP_ORDER: readonly CatalogCategory[] = [
+  'actions', 'forms', 'navigation', 'overlays', 'data-display', 'feedback', 'foundations', 'layout', 'composition',
 ];
 
-/** The full catalog for a layer, grouped in canonical order, empty groups dropped. */
+function sourceFor(layer: CatalogLayer) {
+  return layer === 'components' ? componentsSource : layer === 'blocks' ? blocksSource : pagesSource;
+}
+
 export function catalogGroups(layer: CatalogLayer): CatalogGroup[] {
-  const entries = buildCatalog(passThroughs).filter((entry) => entry.layer === layer);
+  const entries = buildCatalog().filter((entry) => entry.layer === layer);
   return GROUP_ORDER.map((category) => ({
     group: GROUP_LABELS[category],
     items: entries
       .filter((entry) => entry.category === category)
-      .map((entry) => ({ title: entry.name, url: `/${layer}/${entry.id}` })),
+      .map((entry) => ({
+        title: entry.name,
+        url: `/${layer}/${entry.id}`,
+        description: sourceFor(layer).getPage([entry.id])?.data.description ?? entry.description,
+      })),
   })).filter((group) => group.items.length > 0);
 }

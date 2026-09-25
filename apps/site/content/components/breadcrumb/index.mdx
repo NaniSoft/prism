@@ -1,16 +1,15 @@
 ---
-title: Breadcrumb
-description: antd Breadcrumb, unchanged — a pass-through re-export. Import from '@nanisoft/prism-ui'.
+title: "Breadcrumb"
+description: "A hierarchical path showing where the current page sits."
 ---
-{/* prism:generated-stub v1 */}
+{/* prism:generated-owned v2 */}
 
 ```ts
-import { Breadcrumb } from '@nanisoft/prism-ui/components';
+import { Breadcrumb } from '@nanisoft/prism-ui/components/breadcrumb';
 ```
 
-`Breadcrumb` is antd's [Breadcrumb](https://ant.design/components/breadcrumb), re-exported unchanged.
+Breadcrumb is a Prism-owned component. Its behavior, public props, and Spectral Refraction recipe ship together from `@nanisoft/prism-ui`.
 
-- Extends: antd **Breadcrumb** — for inherited props and demos, use the antd MCP (`antd_info Breadcrumb`).
-- Always import from '@nanisoft/prism-ui', never from `antd` directly.
-
-_No additional props beyond the antd base component._
+- Import only from `@nanisoft/prism-ui`.
+- Keep the component inside `PrismProvider` when it uses an overlay, popup, or nested theme scope.
+- Use `className` for layout composition; visual state stays in the Prism recipe and CSS variables.

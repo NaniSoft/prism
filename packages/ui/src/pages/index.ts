@@ -1,4 +1,7 @@
-// prism-ui pages barrel — full-page compositions taking Prism-owned structural types.
+// Full-page compositions with Prism-owned structural view models.
 
-export { BlogLayout, type BlogLayoutProps, type BlogFrontmatter } from './blog-layout/index.js';
-export { DocsShell, type DocsShellProps, type DocsNavEntry } from './docs-shell/index.js';
+export * from './auth-page/index.js';
+export * from './blog-layout/index.js';
+export * from './dashboard-page/index.js';
+export * from './docs-shell/index.js';
+export * from './settings-page/index.js';

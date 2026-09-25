@@ -1,0 +1,58 @@
+---
+title: Agent workflow
+description: Give an AI agent the same owned catalog, examples, tokens, and source that power the human documentation.
+---
+
+Prism treats agents as first-class consumers. The website, package declarations, docs examples, `llms.txt`, Markdown mirror, and MCP all project the same source.
+
+## Fast path
+
+1. Read [llms.txt](/llms.txt) for the catalog and guide index.
+2. Use `search_docs` when the item name is unknown.
+3. Use `get_item_doc` for rules and examples.
+4. Use `get_item_props` for the public TypeScript surface.
+5. Use `get_item_source` for a complete, copy-ready example.
+6. Use `get_theme_doc` before choosing or overriding a theme.
+
+## Configure the MCP
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "type": "http",
+      "url": "https://prism.nanisoft.com/mcp"
+    }
+  }
+}
+```
+
+The endpoint is public and read-only. It returns Markdown and never writes to a consumer project.
+
+## Eight tools
+
+| Tool | Use |
+| --- | --- |
+| `list_items` | Browse components, blocks, and pages |
+| `get_item_doc` | Read usage rules and examples |
+| `get_item_props` | Read the extracted public props |
+| `get_item_source` | Copy one complete demo source file |
+| `get_theme_doc` | Read a pack, mode, and token tables |
+| `list_pages` | Browse guides |
+| `get_page` | Read one guide as Markdown |
+| `search_docs` | Search the complete corpus |
+
+## Import contract for generated code
+
+Generated applications must import from `@nanisoft/prism-ui`. The internal accessibility primitive is not a consumer dependency and must not appear in application source.
+
+```tsx
+import { Button } from '@nanisoft/prism-ui/components/button';
+import { DashboardPage } from '@nanisoft/prism-ui/pages/dashboard-page';
+```
+
+## Truth rules
+
+- The MCP corpus is versioned with `prism-ui`; compare `prismVersion` in `list_items` with the installed package when behavior looks inconsistent.
+- Demos are single-source files: the same text is rendered live, copied by the site, and returned by `get_item_source`.
+- Product claims still belong to the product team. Prism's corpus documents implementation and usage, not invented customer evidence.

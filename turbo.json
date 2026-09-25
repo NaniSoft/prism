@@ -8,7 +8,6 @@
         ".next/**",
         "out/**",
         "worker/generated/**",
-        "app/antd-vars.css",
         "lib/generated/**",
         "!.next/cache/**"
       ]
@@ -21,7 +20,7 @@
       "dependsOn": ["^build"]
     },
     "check": {
-      "dependsOn": ["^build", "build"]
+      "dependsOn": ["^build", "build", "@nanisoft/site#build"]
     },
     "lint": {}
   }

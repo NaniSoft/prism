@@ -104,13 +104,12 @@ export function renderTable(headers: readonly string[], rows: readonly (readonly
   return [head, rule, ...body].join('\n');
 }
 
-const NO_ADDITIONAL_PROPS = '_No additional props beyond the antd base component._';
+const NO_ADDITIONAL_PROPS = '_No additional Prism-authored props are declared for this item._';
 
 /**
- * The generated props section (ticket 12: API tables from the extractor, never
- * hand-written). Interfaces with no own props collapse to the antd seam line —
- * which is what a wrapper that adds nothing documents. Pass-throughs never
- * reach this function; their MDX carries the Extends pointer instead.
+ * Render the public props section from Prism's built declarations. Items whose
+ * declarations expose no authored props collapse to one explicit API note;
+ * internal accessibility primitives are never presented as consumer props.
  */
 export function renderPropsSection(interfaces: readonly ExtractedInterface[]): string {
   const withProps = interfaces.filter((iface) => iface.props.length > 0);

@@ -8,19 +8,18 @@
  *
  * File-is-truth per artifact: prose from docs MDX, props from prism-ui's built
  * `.d.ts` via the extractor, example code verbatim from `demos/*.tsx`,
- * `antdBase` from the generated catalog, themes from prism-tokens. Emit is
+ * catalog metadata from prism-ui, themes from prism-tokens. Emit is
  * deterministic and byte-stable (sorted, stable order, CRLF normalised);
  * `dist/` is never committed.
  *
  * Usage: node scripts/build.mjs [--out <dir>]  (default `dist/`)
  */
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { buildCatalog } from '@nanisoft/prism-ui/wrapped-registry';
-import { passThroughs } from '@nanisoft/prism-ui/generated/pass-throughs';
+import { buildCatalog } from '@nanisoft/prism-ui/catalog';
 import { getPrismTheme, prismBrandPacks } from '@nanisoft/prism-tokens';
 
 import { parseMdx, renderComponentDemos, renderPropsSection, renderTable, stripMdxMechanics, fence } from '../dist/index.js';
@@ -147,7 +146,7 @@ async function collectContent(catalog) {
   return content;
 }
 
-/** The theme atom for one pack × mode: snippet, tier tables, antd token lane. */
+/** The theme atom for one pack × mode: snippet, tiers, and CSS variables. */
 function renderThemeDoc(pack, mode) {
   const theme = getPrismTheme(pack, mode);
   const modeLabel = mode === 'dark' ? 'beam-dark' : 'light';
@@ -166,7 +165,7 @@ function renderThemeDoc(pack, mode) {
   return [
     `# Theming — ${humanize(pack)} pack · ${modeLabel} mode`,
     '',
-    `> \`createPrismTheme({ pack: '${pack}', mode: '${mode}' })\` returns one frozen \`PrismTheme\`; cssVar key \`${theme.cssVarKey}\`. antd derives everything not listed through its ${mode === 'dark' ? 'dark' : 'default'} algorithm.`,
+    `> \`createPrismTheme({ pack: '${pack}', mode: '${mode}' })\` returns one frozen \`PrismTheme\`; theme class \`${theme.cssVarKey}\`. Every visual recipe reads the CSS custom properties below.`,
     '',
     '## Usage',
     '',
@@ -180,19 +179,23 @@ function renderThemeDoc(pack, mode) {
     '',
     table(theme.semantics),
     '',
-    '## antd token lane (seeds + the closed map-token allowlist)',
+    '## CSS custom properties',
     '',
-    table(theme.antd.token),
-    '',
-    'Component overrides are shadow-zeroing only (Button/Input shadows → `none`); no `algorithm: true` — a flat patch lets each component inherit the pack’s tinted hairlines (ADR-0002 §2c erratum 3).',
+    table(theme.cssVariables),
     '',
   ].join('\n');
 }
 
 /** Emit one full corpus into `outDir`. Deterministic: same inputs, same bytes. */
 export async function emit(outDir) {
+  // Corpus artifacts are a projection, not an append-only cache. Remove only
+  // generator-owned outputs here: `dist/` also holds tsc's compiled JS, which
+  // must survive the script phase of `pnpm build`.
+  for (const artifact of ['md', 'data.json', 'llms.txt', 'llms-full.txt']) {
+    await rm(path.join(outDir, artifact), { recursive: true, force: true });
+  }
   const uiPackage = await readJson(path.join(UI_ROOT, 'package.json'));
-  const catalog = buildCatalog(passThroughs);
+  const catalog = buildCatalog();
   const content = await collectContent(catalog);
   const byName = new Map(catalog.map((entry) => [entry.name, entry]));
 
@@ -232,8 +235,7 @@ export async function emit(outDir) {
       const readDemo = (id) => examples.find((example) => example.slug === id)?.code;
       const docBody = stripMdxMechanics(renderComponentDemos(body, readDemo));
 
-      // Prism-added props from the built declarations; absence is the Extends seam —
-      // pass-throughs never grow a props field (their MDX carries the seam line).
+      // Public props come from the built Prism declarations.
       const extracted = await extractItemProps(layer, entry.id);
       const props = extracted.length > 0 ? renderPropsSection(extracted) : undefined;
 
@@ -277,7 +279,7 @@ export async function emit(outDir) {
               })),
             }
           : {}),
-        ...(entry.antdBase ? { antdBase: entry.antdBase } : {}),
+        primitive: entry.primitive,
       });
       itemDocs.set(entry.id, doc);
       await writeArtifact(path.join('md', layer, `${entry.id}.md`), doc);
@@ -369,14 +371,14 @@ export async function emit(outDir) {
         return bullet(
           `${humanize(pack)} pack · ${mode === 'dark' ? 'beam-dark' : 'light'}`,
           `${BASE_URL}/md/theme/${theme.slug}.md`,
-          `Theming reference for the ${pack} pack in ${mode} mode — the createPrismTheme snippet, token tiers, and the antd token lane.`,
+          `Theming reference for the ${pack} pack in ${mode} mode — the createPrismTheme snippet, token tiers, and CSS variables.`,
         );
       })
       .join('\n')}`,
   );
 
   const tagline =
-    "One design language, many expressions — Ant Design v6 components, blocks, and pages under the Prism theme. Apps always import from '@nanisoft/prism-ui', never from antd directly.";
+    "One design language, many expressions — Prism-owned accessible components, production blocks, and complete pages. Apps import only from '@nanisoft/prism-ui'.";
   const llmsTxt = [`# Prism`, '', `> ${tagline}`, '', ...llmsSections.map((s) => `${s}\n`)].join('\n');
   await writeArtifact('llms.txt', llmsTxt);
 

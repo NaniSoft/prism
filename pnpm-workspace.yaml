@@ -14,7 +14,6 @@ allowBuilds:
 # To adopt a base policy, set `minimumReleaseAge: <days>d` here and prune the
 # list to the packages that genuinely need headroom.
 minimumReleaseAgeExclude:
-  - antd@6.6.4
   # stale-but-harmless: workers-types left the devDeps, pnpm added the exclusion
   # while it was still installed and dropping it makes the lockfile policy reject
   # the existing resolution

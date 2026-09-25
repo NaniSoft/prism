@@ -10,4 +10,4 @@
 
 export { createPrismMcpServer, type PrismMcpServerOptions } from './factory.js';
 export { parsePrismDocsStore } from './store.js';
-export type { PrismDocsStore, PrismDocsItem, PrismDocsPage, PrismDocsTheme } from './store.js';
+export type { PrismDocsStore, PrismDocsItem, PrismDocsPage, PrismDocsTheme, PrismPrimitive } from './store.js';

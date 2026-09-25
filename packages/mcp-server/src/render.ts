@@ -5,23 +5,28 @@
  * elsewhere. Result text always prints the next call to make (§7).
  */
 
-import type { PrismDocsItem, PrismDocsPage, PrismDocsStore, PrismDocsTheme } from './store.js';
+import type { PrismDocsItem, PrismDocsPage, PrismDocsStore, PrismDocsTheme, PrismPrimitive } from './store.js';
 import { ITEM_KINDS, type ItemKind } from './lookup.js';
 import type { SearchHit } from './search.js';
 
 /** The one import rule every description and every miss carries. */
-export const IMPORT_RULE = "Always import from '@nanisoft/prism-ui', never from antd directly.";
+export const IMPORT_RULE =
+  "Always import from '@nanisoft/prism-ui', never from antd or Base UI directly; Base UI is internal to prism-ui.";
 
 const KIND_LABEL: Record<ItemKind, string> = { component: 'component', block: 'block', page: 'page' };
 const KIND_HEADING: Record<ItemKind, string> = { component: 'Components', block: 'Blocks', page: 'Pages' };
+const PRIMITIVE_LABEL: Record<PrismPrimitive, string> = {
+  'base-ui': 'Base UI primitive internally',
+  native: 'native HTML primitive',
+};
 
 const plural = (count: number, noun: string): string => (count === 1 ? `1 ${noun}` : `${count} ${noun}s`);
 
 /**
  * `list_items` — the cold-start catalog. The header line carries the corpus
  * version (mismatch detection) and, when the bundler supplies one, the build
- * date; pass-throughs are marked with their antd base so the delegation seam
- * is visible before any per-item call.
+ * date. Every item also states its internal primitive foundation so agents
+ * understand the implementation without treating it as a second public API.
  */
 export function catalogMarkdown(docs: PrismDocsStore, kind?: ItemKind, built?: string): string {
   const counts = new Map(ITEM_KINDS.map((entry) => [entry, docs.items.filter((item) => item.kind === entry).length] as const));
@@ -42,51 +47,39 @@ export function catalogMarkdown(docs: PrismDocsStore, kind?: ItemKind, built?: s
     lines.push('');
   }
 
-  lines.push('---', '', `Next: \`get_item_doc\` for an item's full doc, \`get_item_props\` for its Prism-added props, \`search_docs\` to search everything. Items marked _(extends antd …)_ are pass-throughs — their inherited antd props live in the antd MCP. ${IMPORT_RULE}`);
+  lines.push(
+    '---',
+    '',
+    `Next: \`get_item_doc\` for an item's full doc, \`get_item_props\` for its public props, \`search_docs\` to search everything. Primitive labels describe internal foundations only. ${IMPORT_RULE}`,
+  );
   return lines.join('\n');
 }
 
 function catalogEntry(item: PrismDocsItem): string {
-  const base = item.antdBase ? ` _(extends antd ${item.antdBase})_` : '';
-  return `- **${item.name}** — ${item.description}${base}`;
+  return `- **${item.name}** — ${item.description} _(${PRIMITIVE_LABEL[item.primitive]})_`;
 }
 
 /**
- * `get_item_doc` — the generator's page verbatim (usage rules, props, example,
- * the `> Extends:` seam), plus at most one steering footer built from the data.
+ * `get_item_doc` — the generator's page verbatim (usage rules, props, and
+ * examples), plus at most one steering footer built from the data.
  */
 export function itemDocMarkdown(item: PrismDocsItem): string {
   const pointers: string[] = [];
-  if (item.props) pointers.push(`Prism-added props only: \`get_item_props { "name": "${item.name}" }\``);
+  if (item.props) pointers.push(`Public Prism props: \`get_item_props { "name": "${item.name}" }\``);
   if ((item.examples?.length ?? 0) > 0) pointers.push(`Copyable example source: \`get_item_source { "name": "${item.name}" }\``);
-  if (item.antdBase) pointers.push(`Inherited antd props and demos: antd MCP \`antd_info ${item.antdBase}\``);
-  return pointers.length > 0 ? `${item.doc}\n\n---\n\n${pointers.join(' · ')}` : item.doc;
+  pointers.push(`Foundation: ${PRIMITIVE_LABEL[item.primitive]}; never import it directly. ${IMPORT_RULE}`);
+  return `${item.doc}\n\n---\n\n${pointers.join(' · ')}`;
 }
 
-/**
- * `get_item_props` — only the Prism-added delta. A pass-through's answer *is*
- * the routing instruction (ADR-0004 §4: plasma's `_No additional props…_` line
- * is the switch-servers signal).
- */
+/** `get_item_props` — the complete public Prism prop table when declared. */
 export function itemPropsMarkdown(item: PrismDocsItem): string {
   if (item.props) {
-    return item.antdBase
-      ? `${item.props}\n\n---\n\nBeyond these Prism-added props, the inherited antd surface lives in the antd MCP (\`antd_info ${item.antdBase}\`). ${IMPORT_RULE}`
-      : item.props;
-  }
-  if (item.antdBase) {
-    return [
-      `## ${item.name} — props`,
-      '',
-      `${item.name} — antd ${item.antdBase}, unchanged. Props: use the antd MCP (\`antd_info ${item.antdBase}\`). ${IMPORT_RULE}`,
-      '',
-      '_No additional props beyond the antd base component._',
-    ].join('\n');
+    return `${item.props}\n\n---\n\nThis is the public Prism API for \`${item.name}\`; internal primitive props are not a consumer contract. ${IMPORT_RULE}`;
   }
   return [
     `## ${item.name} — props`,
     '',
-    `\`${item.name}\` documents no Prism-added props in this build. Its usage rules and example live in the full doc: \`get_item_doc { "name": "${item.name}" }\`.`,
+    `\`${item.name}\` declares no additional Prism-authored props in this build. Its usage rules and examples live in the full doc: \`get_item_doc { "name": "${item.name}" }\`. ${IMPORT_RULE}`,
   ].join('\n');
 }
 
@@ -128,13 +121,13 @@ export function pagesIndexMarkdown(pages: readonly PrismDocsPage[], baseUrl: str
     }
     lines.push('');
   }
-  lines.push('---', '', `Full site index: ${baseUrl}/llms.txt · Catalog: \`list_items\`.`);
+  lines.push('---', '', `Full site index: ${baseUrl}/llms.txt · Catalog: \`list_items\`. ${IMPORT_RULE}`);
   return lines.join('\n');
 }
 
 /** `get_page` — the prerendered page verbatim, cited back to the site. */
 export function pageMarkdown(page: PrismDocsPage, baseUrl: string): string {
-  return `${page.markdown}\n\n---\n\nSource: ${baseUrl}${page.url} · More: \`list_pages\`.`;
+  return `${page.markdown}\n\n---\n\nSource: ${baseUrl}${page.url} · More: \`list_pages\`. ${IMPORT_RULE}`;
 }
 
 /** `search_docs` — ranked hits, each printing its own next call. */
@@ -157,7 +150,7 @@ export function searchResultsMarkdown(query: string, hits: readonly SearchHit[])
 export function missMarkdown(target: string, suggestions: readonly string[], browseHint: string): string {
   const lines = [`\`${target}\` not found.`];
   if (suggestions.length > 0) lines.push('', `Did you mean: ${suggestions.map((name) => `**${name}**`).join(', ')}?`);
-  lines.push('', browseHint);
+  lines.push('', browseHint, '', IMPORT_RULE);
   return lines.join('\n');
 }
 

@@ -41,9 +41,10 @@ export function validateDemoSource(source: string): DemoViolation[] {
 }
 
 /**
- * The prism-ui export names a demo imports (for `## Blocks` / `## Pages`
- * cross-refs). Returns catalog names — the pre-alias original — and skips
- * type-only specifiers, which reference supporting types, not items.
+ * The prism-ui value export names a demo imports. The generator projects any
+ * catalog names into block/page cross-references; the check gate separately
+ * verifies every scanned name against prism-ui's public runtime exports.
+ * Type-only specifiers reference supporting types, not runtime items.
  */
 export function scanPrismImports(source: string): string[] {
   const names = new Set<string>();

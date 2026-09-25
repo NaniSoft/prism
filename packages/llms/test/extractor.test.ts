@@ -2,10 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { extractProps } from '../src/extractor.js';
 
 describe('extractProps', () => {
-  it('extracts props with TSDoc and optionality from a wrapper declaration', () => {
+  it('extracts props with TSDoc and optionality from a Prism declaration', () => {
     const source = [
-      "import type { TitleProps } from 'antd/es/typography/Title.js';",
-      'export interface DisplayTitleProps extends TitleProps {',
+      'export interface DisplayTitleProps {',
       "    /** 'refracted' applies the display width axis (wdth 125). Default. */",
       "    width?: 'normal' | 'refracted';",
       '}',
@@ -15,7 +14,7 @@ describe('extractProps', () => {
     expect(extractProps(source)).toEqual([
       {
         typeName: 'DisplayTitleProps',
-        extendsType: 'TitleProps',
+        extendsType: undefined,
         props: [
           {
             name: 'width',
@@ -56,8 +55,8 @@ describe('extractProps', () => {
     expect(extractProps(source)[0]?.props[0]?.description).toBe('Rows shown.');
   });
 
-  it('returns nothing for a pass-through re-export (the Extends seam)', () => {
-    expect(extractProps("export { Button, type ButtonProps } from 'antd';\n")).toEqual([]);
+  it('returns nothing for a declaration with no authored props interface', () => {
+    expect(extractProps('export declare const Separator: unique symbol;\n')).toEqual([]);
   });
 
   it('ignores supporting types that are not props interfaces', () => {

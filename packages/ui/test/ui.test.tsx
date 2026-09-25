@@ -1,191 +1,135 @@
-// prism-ui surface tests: PrismProvider composition (ADR-0003), the blocks'
-// and pages' documented hooks, and ADR-0002's antd tripwire — every emitted
-// antd key must resolve on the real antd machine, so a rename breaks here
-// instead of silently dropping a token.
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { getPrismTheme } from '@nanisoft/prism-tokens';
 
-import { render, screen } from '@testing-library/react';
-import { theme as antdTheme } from 'antd';
-import { describe, expect, it } from 'vitest';
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { createPrismTheme, getPrismTheme, type PrismPackId, type PrismMode } from '@nanisoft/prism-tokens';
-
+import { ApplicationShell } from '../src/blocks/application-shell/index.js';
 import { ComponentDemo } from '../src/blocks/component-demo/index.js';
+import { DataTable } from '../src/blocks/data-table/index.js';
 import { PageHeader } from '../src/blocks/page-header/index.js';
-import { DocsShell } from '../src/pages/docs-shell/index.js';
+import { StatCard } from '../src/blocks/stat-card/index.js';
+import { Button } from '../src/components/button/index.js';
+import { Card, CardHeader, CardTitle } from '../src/components/card/index.js';
+import { Checkbox } from '../src/components/checkbox/index.js';
+import { Field, FieldDescription, FieldLabel } from '../src/components/field/index.js';
+import { Input } from '../src/components/input/index.js';
+import { Switch } from '../src/components/switch/index.js';
+import { Table } from '../src/components/table/index.js';
+import { PrismProvider, usePrismTheme } from '../src/provider/index.js';
 import { BlogLayout } from '../src/pages/blog-layout/index.js';
-import { DisplayTitle } from '../src/components/display-title/index.js';
-import { PrismProvider } from '../src/provider/PrismProvider.js';
-import { mergePrismTheme, toAntdTheme } from '../src/provider/mergePrismTheme.js';
+import { DocsShell } from '../src/pages/docs-shell/index.js';
 
-const COMBOS: Array<[PrismPackId, PrismMode]> = [
-  ['blue', 'light'],
-  ['blue', 'dark'],
-  ['green', 'light'],
-  ['green', 'dark'],
-];
+afterEach(() => {
+  cleanup();
+  localStorage.clear();
+  document.documentElement.className = '';
+  vi.unstubAllGlobals();
+});
 
-describe('mergePrismTheme', () => {
-  it('attaches exactly one algorithm per theme — darkAlgorithm for beam-dark', () => {
-    expect(toAntdTheme(getPrismTheme('blue', 'light')).algorithm).toBe(antdTheme.defaultAlgorithm);
-    expect(toAntdTheme(getPrismTheme('green', 'dark')).algorithm).toBe(antdTheme.darkAlgorithm);
-  });
-
-  it('carries the antd lane verbatim (cssVar key, hashed: false)', () => {
-    const merged = toAntdTheme(getPrismTheme('green', 'dark'));
-    expect(merged.cssVar).toEqual({ key: 'prism-green-dark', prefix: 'prism' });
-    expect(merged.hashed).toBe(false);
-  });
-
-  it('merges consumer themes per key, consumer last — never replaced by reference', () => {
-    const merged = mergePrismTheme(getPrismTheme('blue', 'light'), {
-      token: { colorPrimary: '#FF00FF' },
-      components: { Button: { primaryShadow: '0 1px 2px rgba(0,0,0,.3)' } },
-    });
-    expect(merged.token?.colorPrimary).toBe('#FF00FF'); // consumer wins
-    expect(merged.token?.colorLink).toBe('#2563EB'); // base survives per key
-    expect(merged.components).toHaveProperty('Button.primaryShadow', '0 1px 2px rgba(0,0,0,.3)'); // consumer wins
-    expect(merged.components).toHaveProperty('Button.defaultShadow', 'none'); // deep-merged per component
-    expect(merged.components).not.toBe(getPrismTheme('blue', 'light').antd.components); // new object, never by reference
-  });
-
-  it('accepts a raw ThemeConfig as the base for full control', () => {
-    const merged = mergePrismTheme({ token: { colorPrimary: '#123456' } }, { token: { borderRadius: 8 } });
-    expect(merged.token?.colorPrimary).toBe('#123456');
-    expect(merged.token?.borderRadius).toBe(8);
-  });
+beforeEach(() => {
+  vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} });
 });
 
 describe('PrismProvider', () => {
-  it('renders children through ConfigProvider → App', () => {
-    render(<PrismProvider><p data-testid="kid">hello</p></PrismProvider>);
-    expect(screen.getByTestId('kid')).toBeTruthy();
+  it('renders a serializable theme scope with the selected class and variables', () => {
+    const theme = getPrismTheme('rose', 'dark');
+    const { container } = render(<PrismProvider prismTheme={theme}><p>content</p></PrismProvider>);
+    const root = container.querySelector('[data-prism="provider"]')!;
+    expect(root.classList.contains('prism-rose-dark')).toBe(true);
+    expect((root as HTMLElement).style.getPropertyValue('--prism-primary')).toBe('#F08CB4');
+    expect(screen.getByText('content')).toBeTruthy();
   });
 
-  it('defaults to the blue pack in light mode (ADR-0003)', () => {
-    render(
-      <PrismProvider>
-        <p data-testid="kid2">x</p>
-      </PrismProvider>,
-    );
-    // The merged theme is opaque from the DOM; assert through the same call the
-    // provider makes.
-    const merged = mergePrismTheme(getPrismTheme('blue', 'light'));
-    expect(merged.cssVar?.key).toBe('prism-blue-light');
+  it('exposes the selected theme to client components', () => {
+    function Probe() { return <span>{usePrismTheme().pack}</span>; }
+    render(<PrismProvider prismTheme={getPrismTheme('green', 'light')}><Probe /></PrismProvider>);
+    expect(screen.getByText('green')).toBeTruthy();
   });
 
-  it('applies the selected pack × mode via prismTheme', () => {
-    const merged = mergePrismTheme(getPrismTheme('green', 'dark'));
-    expect(merged.cssVar?.key).toBe('prism-green-dark');
-    expect(merged.algorithm).toBe(antdTheme.darkAlgorithm);
-  });
+  it('can defer the initial CSS scope to a pre-paint document class', () => {
+    const theme = getPrismTheme('blue', 'light');
+    const { container, rerender } = render(<PrismProvider prismTheme={theme} deferInitialTheme><p>content</p></PrismProvider>);
+    const root = container.querySelector('[data-prism="provider"]')!;
+    expect(root.classList.contains('prism-blue-light')).toBe(false);
+    expect((root as HTMLElement).style.getPropertyValue('--prism-primary')).toBe('');
 
-  it('lets the consumer theme win per key over the default', () => {
-    const merged = mergePrismTheme(getPrismTheme('blue', 'light'), { token: { colorPrimary: '#ABCDEF' } });
-    expect(merged.token?.colorPrimary).toBe('#ABCDEF');
-  });
-
-  it("opens with the 'use client' directive (source-level — RSC boundary)", () => {
-    // A bundler directive can only be asserted on the source: render-time
-    // checks can't see it, and its absence is silent (the merged theme's
-    // algorithm function serializes to undefined across the RSC boundary).
-    const source = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'provider', 'PrismProvider.tsx'), 'utf8');
-    expect(source.startsWith("'use client';")).toBe(true);
+    rerender(<PrismProvider prismTheme={theme}><p>content</p></PrismProvider>);
+    expect(root.classList.contains('prism-blue-light')).toBe(true);
+    expect((root as HTMLElement).style.getPropertyValue('--prism-primary')).toBe('#2563EB');
   });
 });
 
-describe('ADR-0002 tripwire: emitted antd keys resolve on the real antd machine', () => {
-  it('every emitted token key exists in getDesignToken() output for all four themes', () => {
-    for (const [pack, mode] of COMBOS) {
-      const prismTheme = createPrismTheme({ pack, mode });
-      const resolved = antdTheme.getDesignToken(toAntdTheme(prismTheme)) as Record<string, unknown>;
-      for (const key of Object.keys(prismTheme.antd.token)) {
-        expect(resolved, `${pack}/${mode}: token "${key}" missing from resolved antd output`).toHaveProperty(key);
-      }
-      // Spot-check the pass-through identities — in light mode the seeds ride
-      // through verbatim (antd lowercases hex output); beam-dark deliberately
-      // re-derives colorPrimary, so only presence is asserted there.
-      const lower = (v: unknown): string => String(v).toLowerCase();
-      if (mode === 'light') {
-        expect(lower(resolved.colorPrimary)).toBe(prismTheme.semantics.inkPrimary.toLowerCase());
-        expect(lower(resolved.colorLink)).toBe(prismTheme.semantics.inkPrimary.toLowerCase());
-        expect(lower(resolved.colorBgLayout)).toBe(prismTheme.semantics.surfaceGround.toLowerCase());
-      }
-      expect(resolved.boxShadow).toBe(prismTheme.semantics.elevationFloating);
-    }
+describe('components', () => {
+  it('Button renders commands, links, and a busy state', () => {
+    render(<><Button href="/docs">Read docs</Button><Button loading>Saving</Button></>);
+    expect(screen.getByRole('link', { name: 'Read docs' })).toHaveProperty('pathname', '/docs');
+    expect(screen.getByRole('button', { name: 'Saving' }).getAttribute('aria-busy')).toBe('true');
+  });
+
+  it('Field connects its label and description to the input', () => {
+    render(<Field><FieldLabel>Project name</FieldLabel><Input /><FieldDescription>Shown to collaborators.</FieldDescription></Field>);
+    expect(screen.getByLabelText('Project name')).toBeTruthy();
+    expect(screen.getByText('Shown to collaborators.')).toBeTruthy();
+  });
+
+  it('Checkbox and Switch expose checked-change state', () => {
+    const checked = vi.fn();
+    const switched = vi.fn();
+    render(<><Checkbox label="Include drafts" onCheckedChange={checked} /><Switch label="Live mode" onCheckedChange={switched} /></>);
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Include drafts' }));
+    fireEvent.click(screen.getByRole('switch', { name: 'Live mode' }));
+    expect(checked).toHaveBeenCalledWith(true, expect.anything());
+    expect(switched).toHaveBeenCalledWith(true, expect.anything());
+  });
+
+  it('Table renders typed content and a real empty state', () => {
+    const columns = [{ key: 'name', header: 'Name' }];
+    const { rerender } = render(<Table data={[{ name: 'Alpha' }]} columns={columns} getRowKey={(row) => row.name} />);
+    expect(screen.getByRole('cell', { name: 'Alpha' })).toBeTruthy();
+    rerender(<Table data={[]} columns={columns} getRowKey={(row) => row.name} empty="Nothing here" />);
+    expect(screen.getByText('Nothing here')).toBeTruthy();
+  });
+
+  it('CardTitle supports the surrounding heading level', () => {
+    render(<Card><CardHeader><CardTitle level={2}>Recent activity</CardTitle></CardHeader></Card>);
+    expect(screen.getByRole('heading', { name: 'Recent activity', level: 2 })).toBeTruthy();
   });
 });
 
-describe('blocks and pages — documented hooks (class + data-prism markers)', () => {
-  it('ComponentDemo renders the live demo and the raw source', () => {
-    render(
-      <ComponentDemo code={'<Button>hi</Button>'}>
-        <button type="button">hi</button>
-      </ComponentDemo>,
-    );
-    expect(screen.getByText('hi').tagName).toBe('BUTTON');
-    expect(screen.getByText(/<Button>hi<\/Button>/)).toBeTruthy();
-    expect(document.querySelector('[data-prism="component-demo"]')).toBeTruthy();
+describe('blocks and pages', () => {
+  it('ComponentDemo keeps live content and verbatim source', () => {
+    render(<ComponentDemo code="<Button>Save</Button>"><Button>Save</Button></ComponentDemo>);
+    expect(screen.getByRole('button', { name: 'Save' })).toBeTruthy();
+    expect(screen.getByText('<Button>Save</Button>')).toBeTruthy();
   });
 
-  it('PageHeader takes the ADR-0003 contract: title, subtitle, breadcrumb, actions', () => {
-    render(
-      <PageHeader title="Tokens" subtitle="The language" breadcrumb={<span>Docs</span>} actions={<button type="button">Edit</button>} />,
-    );
-    expect(screen.getByText('Tokens')).toBeTruthy();
-    expect(screen.getByText('The language')).toBeTruthy();
-    expect(screen.getByText('Docs')).toBeTruthy();
-    expect(screen.getByText('Edit')).toBeTruthy();
-    expect(document.querySelector('[data-prism="page-header"]')).toBeTruthy();
+  it('PageHeader composes copy and actions without a nested heading shell', () => {
+    render(<PageHeader title="Themes" description="Ten expressions" level={1} actions={<Button>Wear</Button>} />);
+    expect(screen.getByRole('heading', { name: 'Themes', level: 1 })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Wear' })).toBeTruthy();
   });
 
-  it('DocsShell renders nav, toc, and neighbours from structural props', () => {
-    render(
-      <DocsShell
-        title="Button"
-        description="To trigger an operation."
-        nav={[{ id: 'a', title: 'Overview', url: '/components/overview' }]}
-        toc={[{ id: 'when', title: 'When to use', url: '#when' }]}
-        neighbours={{ previous: { title: 'AutoComplete', url: '/components/auto-complete' }, next: { title: 'Calendar', url: '/components/calendar' } }}
-      >
-        <p>body</p>
-      </DocsShell>,
-    );
-    expect(screen.getByText('Button')).toBeTruthy();
-    expect(screen.getByText('Overview').getAttribute('href')).toBe('/components/overview');
-    expect(screen.getByText('When to use').getAttribute('href')).toBe('#when');
-    expect(screen.getByText('AutoComplete').getAttribute('rel')).toBe('prev');
-    expect(screen.getByText('Calendar').getAttribute('rel')).toBe('next');
+  it('StatCard and DataTable expose real product patterns', () => {
+    render(<><StatCard label="Components" value="29" change="+4" trend="up" /><DataTable data={[{ id: 'a', name: 'Button' }]} columns={[{ key: 'name', header: 'Name' }]} getRowKey={(row) => row.id} /></>);
+    expect(screen.getByText('Components')).toBeTruthy();
+    expect(screen.getByRole('cell', { name: 'Button' })).toBeTruthy();
   });
 
-  it('BlogLayout renders date/tags/draft frontmatter as structural data', () => {
-    render(
-      <BlogLayout frontmatter={{ title: 'Hello Prism', date: '2026-09-19', tags: ['tokens'], draft: true }}>
-        <p>post</p>
-      </BlogLayout>,
-    );
-    expect(screen.getByText('Hello Prism')).toBeTruthy();
-    expect(screen.getByText('2026-09-19').tagName).toBe('TIME');
-    expect(screen.getByText('tokens')).toBeTruthy();
+  it('DocsShell renders navigation, TOC, and neighbours from structural data', () => {
+    render(<DocsShell title="Button" description="Actions." nav={[{ id: 'a', title: 'Overview', url: '/components' }]} toc={[{ id: 'usage', title: 'Usage', url: '#usage' }]} neighbours={{ next: { title: 'Input', url: '/components/input' } }}><p>Body</p></DocsShell>);
+    expect(screen.getByRole('link', { name: 'Overview' })).toHaveProperty('pathname', '/components');
+    expect(screen.getByRole('link', { name: 'Input' }).getAttribute('rel')).toBe('next');
+  });
+
+  it('BlogLayout renders article metadata semantically', () => {
+    render(<BlogLayout frontmatter={{ title: 'A post', date: '2026-09-25', tags: ['tokens'], draft: true }}><p>Body</p></BlogLayout>);
+    expect(screen.getByRole('heading', { name: 'A post' })).toBeTruthy();
+    expect(screen.getByText('2026-09-25').tagName).toBe('TIME');
     expect(screen.getByText('Draft')).toBeTruthy();
   });
-});
 
-describe('DisplayTitle — the brand-behavior wrapper', () => {
-  it('applies the width axis by default and on demand', () => {
-    render(
-      <>
-        <DisplayTitle id="t1">Refracted</DisplayTitle>
-        <DisplayTitle id="t2" width="normal">
-          Normal
-        </DisplayTitle>
-      </>,
-    );
-    const refracted = document.querySelector('#t1');
-    const normal = document.querySelector('#t2');
-    expect(refracted?.className).toContain('prism-display--refracted');
-    expect(normal?.className).toContain('prism-display');
-    expect(normal?.className).not.toContain('prism-display--refracted');
+  it('ApplicationShell composes navigation and content', () => {
+    render(<ApplicationShell nav={[{ label: 'Build', items: [{ label: 'Components', href: '/components' }] }]} activeUrl="/components"><p>Work</p></ApplicationShell>);
+    expect(screen.getAllByRole('link', { name: 'Components' })[0]).toHaveProperty('pathname', '/components');
+    expect(screen.getByText('Work')).toBeTruthy();
   });
 });

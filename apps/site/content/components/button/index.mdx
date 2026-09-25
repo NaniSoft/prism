@@ -1,16 +1,17 @@
 ---
-title: Button
-description: antd Button, unchanged — a pass-through re-export. Import from '@nanisoft/prism-ui'.
+title: "Button"
+description: "The primary action control for commands, links, and loading states."
 ---
-{/* prism:generated-stub v1 */}
+{/* prism:generated-owned v2 */}
 
 ```ts
-import { Button } from '@nanisoft/prism-ui/components';
+import { Button } from '@nanisoft/prism-ui/components/button';
 ```
 
-`Button` is antd's [Button](https://ant.design/components/button), re-exported unchanged.
+Button is a Prism-owned component. Its behavior, public props, and Spectral Refraction recipe ship together from `@nanisoft/prism-ui`.
 
-- Extends: antd **Button** — for inherited props and demos, use the antd MCP (`antd_info Button`).
-- Always import from '@nanisoft/prism-ui', never from `antd` directly.
+- Import only from `@nanisoft/prism-ui`.
+- Keep the component inside `PrismProvider` when it uses an overlay, popup, or nested theme scope.
+- Use `className` for layout composition; visual state stays in the Prism recipe and CSS variables.
 
-_No additional props beyond the antd base component._
+<ComponentDemo id="basic" title="Button" />

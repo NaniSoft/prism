@@ -81,10 +81,5 @@ export function getPrismProduct(id: PrismProductId): PrismProduct | undefined {
  */
 export function productDotBackground(product: PrismProduct, mode: PrismMode = 'light'): string {
   if (product.pack) return prismBrandPacks[product.pack].ink[mode];
-  // The five-pack spectrum in ADR-0005 order, closed back onto blue so the
-  // wheel is seamless at 0°.
-  const inks = (['blue', 'green', 'lavender', 'rose', 'peach', 'blue'] as const).map(
-    (pack) => prismBrandPacks[pack].ink[mode],
-  );
-  return `conic-gradient(${inks.join(', ')})`;
+  return 'var(--prism-primary)';
 }

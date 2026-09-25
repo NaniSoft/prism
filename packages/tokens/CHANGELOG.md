@@ -1,5 +1,14 @@
 # @nanisoft/prism-tokens
 
+## Next release — pure Prism token contract
+
+### Breaking changes
+
+- `PrismTheme` now exposes pure `primitives`, `semantics`, and `cssVariables`
+  data. The retired upstream theme lane is removed.
+- Five packs × light/beam-dark remain the registered visual system, with the
+  same AA, radius, typography, motion, and elevation commitments.
+
 ## 0.3.0
 
 ### Minor Changes

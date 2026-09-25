@@ -1,8 +1,14 @@
 ---
-Status: accepted
+Status: partially superseded
+Superseded in part by: ADR-0007
 ---
 
-# Cross-site chrome: the shared site shell as prism-ui blocks
+# Cross-site chrome
+
+> **Partially superseded.** The shared product-chrome intent remains, but the
+> current block API and visual recipes are defined by ADR-0007 and
+> `@nanisoft/prism-ui`; upstream icon and runtime assumptions in this record
+> are historical.
 
 NaniSoft's five web properties (www.nanisoft.com plus the nexus / atlas / alphalens product subdomains — prism.nanisoft.com already live) wear one shared shell shipped from `@nanisoft/prism-ui`: a **SiteHeader** (with product switcher and theme-mode toggle), a **SiteFooter** (with a registry-driven product grid), a **five-entry product registry** both render from, and the **flash-free theme-mode mechanics** (provider + boot-script string + build-time bake helper). Chrome is npm-delivered and never copied into apps, per the standing taxonomy law.
 

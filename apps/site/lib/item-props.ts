@@ -1,7 +1,7 @@
 // The API-table source (ticket 12 §2): generated from prism-ui's built
 // declaration surface via prism-llms' extractor — one extractor, two
-// consumers. Runs at prerender (fs is build-time here); pass-through items
-// extract nothing, which is exactly the "antd X, unchanged" seam.
+// consumers. Runs at prerender (fs is build-time here); every documented item
+// extracts the public Prism-owned interface.
 
 import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -10,9 +10,10 @@ import { extractProps, type ExtractedInterface } from '@nanisoft/prism-llms/extr
 export type { ExtractedInterface, ExtractedProp } from '@nanisoft/prism-llms/extractor';
 
 /**
- * Extract the Prism-added props interfaces for a catalog item.
- * `itemKey` is the flat doc path, e.g. `components/display-title`.
- * Returns an empty array for pass-throughs and unknown items.
+ * Extract the public Prism props interfaces for a catalog item.
+ * `itemKey` is the flat doc path, e.g. `components/alert`.
+ * Returns an empty array for items without an authored props interface and
+ * for unknown items.
  */
 export function itemPropsInterfaces(itemKey: string): ExtractedInterface[] {
   const [layer, itemId] = itemKey.split('/');

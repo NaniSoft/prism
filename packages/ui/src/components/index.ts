@@ -1,8 +1,32 @@
-// prism-ui components barrel — every antd pass-through plus wrapped components.
-// One proxy module per component lives at src/components/<antd-id>/index.ts.
-// The generated pass-throughs point at antd's component modules directly; this
-// aggregate remains public for consumers that need the full catalog (the docs
-// route), while narrow landing imports use their per-component subpaths.
+// Prism's curated component layer. Source is owned here; Base UI supplies
+// accessible behavior without becoming part of the public API.
 
-export * from '../generated/antd-components.js';
-export { DisplayTitle, type DisplayTitleProps } from './display-title/index.js';
+export * from './accordion/index.js';
+export * from './alert/index.js';
+export * from './avatar/index.js';
+export * from './badge/index.js';
+export * from './breadcrumb/index.js';
+export * from './button/index.js';
+export * from './card/index.js';
+export * from './checkbox/index.js';
+export * from './dialog/index.js';
+export * from './drawer/index.js';
+export * from './empty/index.js';
+export * from './field/index.js';
+export * from './icon/index.js';
+export * from './input/index.js';
+export * from './kbd/index.js';
+export * from './pagination/index.js';
+export * from './popover/index.js';
+export * from './progress/index.js';
+export * from './radio-group/index.js';
+export * from './select/index.js';
+export * from './separator/index.js';
+export * from './skeleton/index.js';
+export * from './slider/index.js';
+export * from './switch/index.js';
+export * from './table/index.js';
+export * from './tabs/index.js';
+export * from './textarea/index.js';
+export * from './tooltip/index.js';
+export * from './typography/index.js';

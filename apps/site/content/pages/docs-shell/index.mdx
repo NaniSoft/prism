@@ -1,11 +1,17 @@
 ---
-title: DocsShell
-description: Prism page — full documentation pending.
+title: "DocsShell"
+description: "A documentation frame with section navigation, article, and table of contents."
 ---
-{/* prism:generated-stub v1 */}
+{/* prism:generated-owned v2 */}
 
 ```ts
-import { DocsShell } from '@nanisoft/prism-ui/pages';
+import { DocsShell } from '@nanisoft/prism-ui/pages/docs-shell';
 ```
 
-`DocsShell` is a Prism page. Full documentation is pending — the prism MCP answers API questions in the meantime (`get_item_props`, `get_item_source`).
+DocsShell is a Prism-owned page. Its behavior, public props, and Spectral Refraction recipe ship together from `@nanisoft/prism-ui`.
+
+- Import only from `@nanisoft/prism-ui`.
+- Keep the component inside `PrismProvider` when it uses an overlay, popup, or nested theme scope.
+- Use `className` for layout composition; visual state stays in the Prism recipe and CSS variables.
+
+<ComponentDemo id="basic" title="DocsShell" />

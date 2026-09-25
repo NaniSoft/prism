@@ -1,6 +1,7 @@
 // The flash-free boot (ticket 02's class-swap recipe): the inline script must
 // apply the stored-or-default `prism-<pack>-<mode>` class before paint, and the
-// class must be antd's cssVar key — the two halves of the recipe pinned
+// The applied class must be Prism's stable CSS variable scope — the two
+// halves of the recipe are pinned together.
 // together.
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -61,7 +62,7 @@ describe('theme ids', () => {
     expect([DEFAULT_PACK, DEFAULT_MODE, DEFAULT_THEME_ID]).toEqual(['blue', 'dark', 'blue-dark']);
   });
 
-  it('the applied class is antd\'s cssVar key', () => {
+  it('the applied class is Prism\'s stable cssVar key', () => {
     expect(themeClass('green', 'dark')).toBe(prismCssVarKey('green', 'dark'));
     expect(themeClass('blue', 'dark')).toBe('prism-blue-dark');
   });

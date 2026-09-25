@@ -1,8 +1,13 @@
 ---
-Status: accepted
+Status: superseded
+Superseded by: ADR-0007
 ---
 
 # Token architecture: two Prism tiers in, one antd theme out
+
+> **Historical record.** The token *intent* remains part of Spectral
+> Refraction, but the upstream theme lane described here is retired. ADR-0007
+> replaces it with pure Prism primitives, semantics, and CSS custom properties.
 
 `@nanisoft/prism-tokens` has one job: turn a brand pack plus a mode into the single object antd v6 needs, and expose the tiers that object was compiled from as plain data. The package is pure — no React, no runtime dependency on antd, and no build-time dependency on antd's types. Prism owns exactly two token tiers (**primitives** and **semantics**); antd's own three-tier seed → map → alias machine is treated as a *compiler* that Prism feeds, never as Prism's public vocabulary. `createPrismTheme()` returns one object that serves both consumers at once: an `antd` lane that spreads straight into `<ConfigProvider theme={…}>`, and the two tier lanes that feed the docs site, the MCP server, and the Figma-Variables export. Apps never read or write an antd token; `prism-ui` is the only package allowed to.
 

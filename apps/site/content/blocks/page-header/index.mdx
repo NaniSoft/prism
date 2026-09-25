@@ -1,11 +1,15 @@
 ---
-title: PageHeader
-description: Prism block — full documentation pending.
+title: "PageHeader"
+description: "A page title, context, breadcrumb, and action region."
 ---
-{/* prism:generated-stub v1 */}
+{/* prism:generated-owned v2 */}
 
 ```ts
-import { PageHeader } from '@nanisoft/prism-ui/blocks';
+import { PageHeader } from '@nanisoft/prism-ui/blocks/page-header';
 ```
 
-`PageHeader` is a Prism block. Full documentation is pending — the prism MCP answers API questions in the meantime (`get_item_props`, `get_item_source`).
+PageHeader is a Prism-owned block. Its behavior, public props, and Spectral Refraction recipe ship together from `@nanisoft/prism-ui`.
+
+- Import only from `@nanisoft/prism-ui`.
+- Keep the component inside `PrismProvider` when it uses an overlay, popup, or nested theme scope.
+- Use `className` for layout composition; visual state stays in the Prism recipe and CSS variables.

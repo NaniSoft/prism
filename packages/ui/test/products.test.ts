@@ -60,11 +60,7 @@ describe('productDotBackground', () => {
     expect(productDotBackground(getPrismProduct('alphalens')!, 'dark')).toBe(prismBrandPacks.rose.ink.dark);
   });
 
-  it('www wears the five-pack spectrum (the company carries every pack)', () => {
-    const background = productDotBackground(getPrismProduct('www')!);
-    expect(background).toContain('conic-gradient');
-    for (const pack of Object.keys(prismBrandPacks)) {
-      expect(background).toContain(prismBrandPacks[pack as keyof typeof prismBrandPacks].ink.light);
-    }
+  it('www follows the active Prism accent without introducing a gradient', () => {
+    expect(productDotBackground(getPrismProduct('www')!)).toBe('var(--prism-primary)');
   });
 });

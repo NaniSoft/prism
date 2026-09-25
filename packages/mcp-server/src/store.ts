@@ -6,6 +6,9 @@
  * assumption about the corpus, and it is this interface.
  */
 
+/** The internal accessibility/HTML foundation a catalog item is built on. */
+export type PrismPrimitive = 'base-ui' | 'native';
+
 /** One catalog item — a component, block, or page from prism-ui. */
 export interface PrismDocsItem {
   /** The prism-ui export name, e.g. `Button`, `PageHeader`, `DocsShell`. */
@@ -13,9 +16,14 @@ export interface PrismDocsItem {
   readonly kind: 'component' | 'block' | 'page';
   /** The one-liner that becomes the llms.txt bullet and the search hit. */
   readonly description: string;
-  /** Full per-item Markdown: usage rules, Prism props, example. */
+  /**
+   * Internal implementation foundation. This is descriptive corpus metadata,
+   * never a consumer import: Base UI remains private to `prism-ui`.
+   */
+  readonly primitive: PrismPrimitive;
+  /** Full per-item Markdown: usage rules, public Prism props, and examples. */
   readonly doc: string;
-  /** The extracted Prism-added props section — absent for pass-throughs. */
+  /** The extracted public Prism props section, when the item declares one. */
   readonly props?: string;
   /** Documented examples; `code` is the verbatim `demos/<slug>.tsx` source. */
   readonly examples?: ReadonlyArray<{
@@ -23,12 +31,6 @@ export interface PrismDocsItem {
     readonly title?: string;
     readonly code: string;
   }>;
-  /**
-   * The antd surface this item passes through unchanged (`Button`), absent for
-   * wrappers and prism-original items — a wrapper's base rides its doc's
-   * `> Extends:` note.
-   */
-  readonly antdBase?: string;
 }
 
 /** One docs page (guides only — blog is lane-only, excluded from the store). */
@@ -79,6 +81,11 @@ export function parsePrismDocsStore(value: unknown): PrismDocsStore {
     const rawKind = str(`items[${index}].kind`, item.kind);
     const kind: PrismDocsItem['kind'] =
       rawKind === 'component' || rawKind === 'block' || rawKind === 'page' ? rawKind : fail(`items[${index}].kind`, "one of 'component' | 'block' | 'page'");
+    const rawPrimitive = str(`items[${index}].primitive`, item.primitive);
+    const primitive: PrismPrimitive =
+      rawPrimitive === 'base-ui' || rawPrimitive === 'native'
+        ? rawPrimitive
+        : fail(`items[${index}].primitive`, "one of 'base-ui' | 'native'");
     const examples = item.examples === undefined
       ? undefined
       : arr(`items[${index}].examples`, item.examples).map((example, exampleIndex) => {
@@ -94,10 +101,10 @@ export function parsePrismDocsStore(value: unknown): PrismDocsStore {
       name: str(`items[${index}].name`, item.name),
       kind,
       description: str(`items[${index}].description`, item.description),
+      primitive,
       doc: str(`items[${index}].doc`, item.doc),
       ...(item.props !== undefined ? { props: str(`items[${index}].props`, item.props) } : {}),
       ...(examples !== undefined ? { examples } : {}),
-      ...(item.antdBase !== undefined ? { antdBase: str(`items[${index}].antdBase`, item.antdBase) } : {}),
     };
   });
 

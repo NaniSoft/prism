@@ -1,8 +1,13 @@
 ---
-Status: accepted
+Status: superseded
+Superseded by: ADR-0007
 ---
 
 # prism-ui API conventions
+
+> **Historical record.** The generated pass-through and upstream-wrapper model
+> described here is retired. ADR-0007 defines the current Prism-owned catalog
+> and internal Base UI boundary.
 
 `@nanisoft/prism-ui` is the only UI surface Prism consumers touch: apps import components, blocks, and pages from it and never from `antd` or `@ant-design/*` at runtime (plasma's invariant, adopted in ticket 01 and restated in `AGENTS.md`). The package carries a **three-layer taxonomy — components → blocks → pages — inside one npm package**, separated by subpath exports rather than by package or version, because the layers change together and independent-versioning them would manufacture lockstep churn (ticket 01's release model). Fidelity to antd is **generated, not maintained**: every antd component Prism does not wrap gets a codegen'd proxy re-export, which is what keeps the "always import from `prism-ui`" invariant satisfiable and self-healing across antd upgrades. Hand-written wrappers are the exception, gated by a closed list of justifications — every wrapper is a parity liability the package pays for at each antd bump. `PrismProvider` is a transparent wrapper over antd `ConfigProvider`: it owns theme composition, mounts antd's `App`, and adapts routing; it owns nothing else.
 

@@ -1,84 +1,65 @@
 # Prism × Figma conventions
 
-One page. Read it before touching a Figma-derived design or component. The
-setup these conventions govern was executed in map ticket 14; the full guide
-they summarize is `.scratch/prism/research/04-figma-greenfield-setup.md`.
+Read this before touching a Figma-derived design or a Prism component. The
+current token contract lives in `@nanisoft/prism-tokens`; the older setup
+research under `.scratch/prism/research/` is historical context.
 
 ## The three laws
 
-1. **Designs map to prism-ui components.** A Figma frame is a specification
-   for `@nanisoft/prism-ui` components, never a description of DOM to write
-   by hand. Apps import from `prism-ui`; antd is never imported directly.
-2. **Tokens come from Figma Variables.** Every colour, radius, spacing and
-   type value in a design resolves to a `prism.*` variable. If
-   `get_variable_defs` returns nothing for a node, the design is wrong — fix
-   the design, not the code.
-3. **Never hand-pick colors.** No hex, no "close enough". A value missing
-   from `prism.semantic` is a missing token: add it to
-   `@nanisoft/prism-tokens`, re-run the sync, publish the library, then use
-   it.
+1. **Designs map to Prism components.** A Figma frame specifies behavior and
+   composition from `@nanisoft/prism-ui`; it is not a hand-written DOM
+   description. Consumer apps import Prism and React only.
+2. **Tokens come from Prism Variables.** Every color, radius, spacing, motion,
+   and type value resolves to a `prism.*` variable. If a design needs a value
+   that is not in the token package, add and validate the token rather than
+   hand-picking a value in Figma.
+3. **Code remains the source of truth.** Figma receives a one-way projection of
+   the built DTCG output. Never edit a generated token file or expect a Figma
+   edit to flow back into code.
 
-## Team + seats
+## Team and library
 
-- Team **NaniSoft**, Figma **Professional** (paid for libraries + variable
-  modes — not for MCP). One **Full seat** owns the library; **Dev seats** for
-  engineers; Collab/View are read-only and rate-limited to 6 MCP calls/month —
-  anyone running an agent against Figma needs a Dev seat.
-- Library source file: **`NaniSoft Design System`**. Only that file publishes.
-
-## The base kit is scaffolding, not truth
-
-There is no official antd Figma kit (the antd team has declined to build one).
-The library started as the free **"Ant Design Open Source"** community file,
-duplicated into the team and restyled through Prism Variables. Components come
-from the published library, never copy-pasted between files. If the stale
-scaffold's variants block real work, the paid third-party v6 file is the
-fallback — its token layer still gets stripped in favour of Prism's.
+- Team: **NaniSoft**.
+- Library: **NaniSoft Design System**.
+- Use a Figma plan that supports the team's library and variable needs; the
+  remote Dev Mode MCP is available at `https://mcp.figma.com/mcp`.
+- A community component file may be used as disposable structural scaffolding
+  during setup, but it is never a second visual source. Historical research
+  about an older scaffold is not an active package or architecture decision.
 
 ## Variables
 
-- **`prism.primitive`** — raw values, no modes. Nothing references it
-  directly except `prism.semantic`.
-- **`prism.semantic`** — aliases into primitives; the only collection with
-  modes: **Light** (default) and **Dark**. An alias resolves per active mode.
-- Shadows are the one exception to "tokens are Variables": Figma cannot bind
-  a STRING variable to an effect. The floating shadow is *recorded* as a
-  STRING variable (Dev Mode parity) and applied to layers as a normal effect —
-  per-field variable binding (FLOAT offsets/blur/spread + COLOR for the
-  shadow colour) is available if wanted.
+- `prism.primitive` contains raw, mode-independent values.
+- `prism.semantic` contains named meanings and mode aliases; it is the only
+  collection consumers should reference in product code.
+- Prism ships five packs and two modes. The Figma library may organize modes by
+  pack and appearance, but the names must remain traceable to the code contract.
+- Shadows are recorded as a string variable for documentation parity and
+  applied as a normal effect; Figma cannot bind a string variable to every
+  shadow field.
 
-## How tokens flow (one-way only)
+## One-way flow
 
-`@nanisoft/prism-tokens` source → `pnpm build` → `dist/figma/<pack>/`
-(DTCG-shaped tiers 0–1: one modeless `primitive.tokens.json`, one
-`semantic.<mode>.tokens.json` per mode, plus the importer `manifest.json` —
-ADR-0002 §2d) → sync plugin run inside `NaniSoft Design System` → **publish
-the library**. Bring-up uses Microsoft's open-source **Variables Import**
-plugin; the durable path is the repo-owned `prism-figma-sync` plugin once the
-token shape stabilises. Publishing is manual and deliberate — the
-design-side release gate, mirroring changesets on the code side.
+`@nanisoft/prism-tokens` source → `pnpm build` → DTCG-shaped output under
+`dist/figma/` → Variables Import / the repo-owned sync plugin → published Figma
+library.
 
-Never edit variables in Figma and expect them to reach code. Never edit the
-generated JSON. Two-way sync is out of scope by decision.
+Bring-up may use a proven open-source importer while the token shape settles.
+The durable path is a repo-owned plugin, not a hand-edited library. Publishing
+is deliberate and mirrors the code release gate.
 
 ## Agents
 
-- Remote Dev Mode MCP server `https://mcp.figma.com/mcp`, wired in the repo
-  `.mcp.json` (both `type: "http"` and `url`, or Claude Code silently skips
-  the entry). One-time per-user approval + OAuth via `/mcp`.
-- Paste a **link to selection** (right-click layer → *Copy link to
-  selection*), never a file link or a prose description — the server has no
-  "browse the file" tool.
-- `get_variable_defs` is the Prism-critical tool: expect `prism.*` names,
-  mapped 1:1 to `@nanisoft/prism-tokens` keys.
-- Budget: 200 read calls/day, 15/min on a Dev seat (200/day, 10/min on
-  Starter). One frame per ask. `whoami` is exempt from rate limits and reports
-  seat + email — run it first when a call fails.
-- `create_design_system_rules` output is reviewed and committed, not trusted
-  blind.
+- Configure the Figma Dev Mode MCP with both `type: "http"` and `url`.
+- Paste a link to a selection, not a file link or prose-only description.
+- `get_variable_defs` should return `prism.*` names. If it does not, fix the
+  design-to-token mapping instead of inventing a CSS value.
+- Run `whoami` first when a call fails; seat and account details affect limits.
+- Review generated design-system rules before committing them.
 
 ## Escalation
 
-A design that needs a value, token, or component prism-ui doesn't have gets
-filed against the token package first — never fork the value locally, never
-hand-pick it in Figma.
+A design that needs a new value or component starts as a token or catalog
+change in the code repository. It is then rebuilt, contrast-checked, generated,
+and published to Figma. Never fork a value locally or hand-pick a color to
+make a frame look finished.

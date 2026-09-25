@@ -1,16 +1,15 @@
 ---
-title: Popover
-description: antd Popover, unchanged — a pass-through re-export. Import from '@nanisoft/prism-ui'.
+title: "Popover"
+description: "An anchored surface for related controls or contextual detail."
 ---
-{/* prism:generated-stub v1 */}
+{/* prism:generated-owned v2 */}
 
 ```ts
-import { Popover } from '@nanisoft/prism-ui/components';
+import { Popover } from '@nanisoft/prism-ui/components/popover';
 ```
 
-`Popover` is antd's [Popover](https://ant.design/components/popover), re-exported unchanged.
+Popover is a Prism-owned component. Its behavior, public props, and Spectral Refraction recipe ship together from `@nanisoft/prism-ui`.
 
-- Extends: antd **Popover** — for inherited props and demos, use the antd MCP (`antd_info Popover`).
-- Always import from '@nanisoft/prism-ui', never from `antd` directly.
-
-_No additional props beyond the antd base component._
+- Import only from `@nanisoft/prism-ui`.
+- Keep the component inside `PrismProvider` when it uses an overlay, popup, or nested theme scope.
+- Use `className` for layout composition; visual state stays in the Prism recipe and CSS variables.

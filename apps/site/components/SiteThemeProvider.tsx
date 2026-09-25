@@ -1,13 +1,8 @@
 'use client';
 
-// Shell-level theme state (ticket 12 §2): one pack × mode selection for the
-// whole site, defaulting to beam-dark blue. The bootstrap script in layout.tsx
-// has already applied the right class before first paint — this provider only
-// syncs React onto it and drives the switcher, swapping both the class and the
-// PrismProvider theme when the choice changes (ticket 02's class-swap recipe).
-
-import { useCallback, createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { PrismProvider } from '@nanisoft/prism-ui/provider';
+import Link from 'next/link';
+import { useCallback, createContext, useContext, useEffect, useLayoutEffect, useState, type ReactNode } from 'react';
+import { PrismLinkContextProvider, PrismProvider } from '@nanisoft/prism-ui/provider';
 import { getPrismTheme, type PrismMode, type PrismPackId } from '@nanisoft/prism-tokens';
 
 import {
@@ -26,36 +21,40 @@ interface ThemeState {
 }
 
 const ThemeStateContext = createContext<ThemeState | undefined>(undefined);
+const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
-/** Apply a selection to the document: swap the pre-baked variable class, persist, re-render. */
 export function applyThemeClass(selection: PrismThemeSelection): void {
-  const el = document.documentElement;
-  for (const className of Array.from(el.classList)) {
-    if (className.startsWith('prism-')) el.classList.remove(className);
+  const element = document.documentElement;
+  for (const className of Array.from(element.classList)) {
+    if (className.startsWith('prism-')) element.classList.remove(className);
   }
-  el.classList.add(themeClass(selection.pack, selection.mode));
+  element.classList.add(themeClass(selection.pack, selection.mode));
   try {
     localStorage.setItem(THEME_STORAGE_KEY, themeId(selection.pack, selection.mode));
   } catch {
-    // Private mode / storage disabled — the session keeps the in-memory choice.
+    // The session keeps its in-memory choice when storage is unavailable.
   }
 }
 
 export function SiteThemeProvider({ children }: { children: ReactNode }) {
   const [selection, setSelectionState] = useState<PrismThemeSelection>({ pack: DEFAULT_PACK, mode: DEFAULT_MODE });
+  const [themeReady, setThemeReady] = useState(false);
 
-  // SSR renders the default; the bootstrap script may have restored a stored
-  // theme before paint — sync React onto it after mount (no visual impact:
-  // colors come from the class, not from React).
-  useEffect(() => {
-    let stored: string | null = null;
+  // The document class is set before paint; mirror that stored choice into the
+  // provider before the first client paint as well, so nested variables cannot
+  // briefly render the default scope over a restored theme.
+  useIsomorphicLayoutEffect(() => {
     try {
-      stored = localStorage.getItem(THEME_STORAGE_KEY);
+      const parsed = parseThemeId(localStorage.getItem(THEME_STORAGE_KEY));
+      if (parsed) {
+        applyThemeClass(parsed);
+        setSelectionState(parsed);
+      }
     } catch {
-      return;
+      // The blocking script already selected the available theme.
+    } finally {
+      setThemeReady(true);
     }
-    const parsed = parseThemeId(stored);
-    if (parsed) setSelectionState(parsed);
   }, []);
 
   const setSelection = useCallback((next: PrismThemeSelection) => {
@@ -65,7 +64,11 @@ export function SiteThemeProvider({ children }: { children: ReactNode }) {
 
   return (
     <ThemeStateContext.Provider value={{ selection, setSelection }}>
-      <PrismProvider prismTheme={getPrismTheme(selection.pack, selection.mode)}>{children}</PrismProvider>
+      <PrismLinkContextProvider link={Link}>
+        <PrismProvider prismTheme={getPrismTheme(selection.pack, selection.mode)} deferInitialTheme={!themeReady}>
+          {children}
+        </PrismProvider>
+      </PrismLinkContextProvider>
     </ThemeStateContext.Provider>
   );
 }

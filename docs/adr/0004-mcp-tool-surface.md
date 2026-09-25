@@ -1,8 +1,13 @@
 ---
-Status: accepted
+Status: superseded
+Superseded by: ADR-0007
 ---
 
 # The MCP tool surface: eight read-only tools over prism-llms output
+
+> **Historical record.** The eight-tool names remain useful, but the upstream
+> delegation and `antdBase` contract described here is retired. ADR-0007 and
+> the current `PrismDocsStore` implementation define the Prism-only corpus.
 
 `@nanisoft/prism-mcp-server` exposes **eight read-only, stateless tools** over one build-time-bundled corpus: `list_items`, `get_item_doc`, `get_item_props`, `get_item_source`, `get_theme_doc`, `list_pages`, `get_page`, `search_docs`. Tool logic is written once in the pure `createPrismMcpServer(docs)` factory (ticket 05); the site Worker serves it over Streamable HTTP at `https://prism.nanisoft.com/mcp` via `createMcpHandler(factory)`, and stdio-only clients bridge with `npx mcp-remote` — no second implementation. The surface is optimized for the primary client, a Claude Code session building a NaniSoft app: one search entry point over the whole corpus, three narrowing tools per catalog item so the loop pulls prose, API, or code as needed, markdown-in/markdown-out, and error text that puts the agent back on rails in one round trip. Everything Prism does not own — inherited antd props, antd demos, antd tokens, antd migration notes, fumadocs' runtime page machinery — is deliberately absent and delegated (§4). Auth v1 = none per ticket 05, with the Cloudflare Access escalation pre-written (§6). The corpus contract every tool reads is `PrismDocsStore`, specified here (§5) as the interface **ticket 16 must satisfy**; its generator side is still open and nothing in this ADR assumes an answer from it.
 

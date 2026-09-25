@@ -1,16 +1,15 @@
 ---
-title: Drawer
-description: antd Drawer, unchanged — a pass-through re-export. Import from '@nanisoft/prism-ui'.
+title: "Drawer"
+description: "A gesture-aware edge or bottom surface for focused mobile work."
 ---
-{/* prism:generated-stub v1 */}
+{/* prism:generated-owned v2 */}
 
 ```ts
-import { Drawer } from '@nanisoft/prism-ui/components';
+import { Drawer } from '@nanisoft/prism-ui/components/drawer';
 ```
 
-`Drawer` is antd's [Drawer](https://ant.design/components/drawer), re-exported unchanged.
+Drawer is a Prism-owned component. Its behavior, public props, and Spectral Refraction recipe ship together from `@nanisoft/prism-ui`.
 
-- Extends: antd **Drawer** — for inherited props and demos, use the antd MCP (`antd_info Drawer`).
-- Always import from '@nanisoft/prism-ui', never from `antd` directly.
-
-_No additional props beyond the antd base component._
+- Import only from `@nanisoft/prism-ui`.
+- Keep the component inside `PrismProvider` when it uses an overlay, popup, or nested theme scope.
+- Use `className` for layout composition; visual state stays in the Prism recipe and CSS variables.

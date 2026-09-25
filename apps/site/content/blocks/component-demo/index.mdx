@@ -1,11 +1,15 @@
 ---
-title: ComponentDemo
-description: Prism block — full documentation pending.
+title: "ComponentDemo"
+description: "A live example paired with its verbatim source."
 ---
-{/* prism:generated-stub v1 */}
+{/* prism:generated-owned v2 */}
 
 ```ts
-import { ComponentDemo } from '@nanisoft/prism-ui/blocks';
+import { ComponentDemo } from '@nanisoft/prism-ui/blocks/component-demo';
 ```
 
-`ComponentDemo` is a Prism block. Full documentation is pending — the prism MCP answers API questions in the meantime (`get_item_props`, `get_item_source`).
+ComponentDemo is a Prism-owned block. Its behavior, public props, and Spectral Refraction recipe ship together from `@nanisoft/prism-ui`.
+
+- Import only from `@nanisoft/prism-ui`.
+- Keep the component inside `PrismProvider` when it uses an overlay, popup, or nested theme scope.
+- Use `className` for layout composition; visual state stays in the Prism recipe and CSS variables.

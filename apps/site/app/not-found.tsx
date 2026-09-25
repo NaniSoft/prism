@@ -15,7 +15,7 @@ export default function NotFound(): ReactElement {
         <Link href="/llms.txt">/llms.txt</Link>.
       </p>
       <div className="site-landing__cta">
-        <Button type="primary" href="/">
+        <Button variant="primary" href="/">
           Back to the landing
         </Button>
       </div>

@@ -1,7 +1,7 @@
 {
   "name": "@nanisoft/prism-ui",
   "version": "0.4.0",
-  "description": "Prism's React surface — components, blocks, and pages over Ant Design v6. Apps import from here, never from antd directly.",
+  "description": "Prism's React design system — owned components, blocks, and pages with accessible Base UI behavior behind one import.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -49,17 +49,9 @@
       "types": "./dist/theming/index.d.ts",
       "import": "./dist/theming/index.js"
     },
-    "./icons": {
-      "types": "./dist/generated/icons.d.ts",
-      "import": "./dist/generated/icons.js"
-    },
-    "./wrapped-registry": {
-      "types": "./dist/wrapped-registry.d.ts",
-      "import": "./dist/wrapped-registry.js"
-    },
-    "./generated/pass-throughs": {
-      "types": "./dist/generated/pass-throughs.d.ts",
-      "import": "./dist/generated/pass-throughs.js"
+    "./catalog": {
+      "types": "./dist/catalog.d.ts",
+      "import": "./dist/catalog.js"
     },
     "./styles.css": "./dist/styles.css",
     "./package.json": "./package.json"
@@ -68,8 +60,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json && node scripts/copy-styles.mjs",
-    "generate": "tsx scripts/generateAntdExports.mjs",
+    "build": "node scripts/clean-dist.mjs && tsc -p tsconfig.json && node scripts/copy-styles.mjs",
     "lint": "oxlint .",
     "test": "vitest run",
     "prepublishOnly": "publint"
@@ -86,15 +77,13 @@
     "publint": "^0.3.24",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "typescript": "^7.0.2",
     "tsx": "^4.0.0",
+    "typescript": "^7.0.2",
     "vitest": "^5.0.0"
   },
   "dependencies": {
-    "@ant-design/icons": "^6.3.4",
-    "@ant-design/static-style-extract": "^2.1.0",
-    "@nanisoft/prism-tokens": "workspace:*",
-    "antd": "^6.6.4"
+    "@base-ui/react": "^1.8.0",
+    "@nanisoft/prism-tokens": "workspace:*"
   },
   "author": "NaniSoft",
   "homepage": "https://prism.nanisoft.com",

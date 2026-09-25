@@ -1,0 +1,88 @@
+---
+title: Quickstart
+description: Install Prism, wrap an app once, and ship the first accessible themed component from one package.
+---
+
+Prism is one npm boundary for accessible behavior, Spectral Refraction tokens, components, blocks, and pages. Humans and agents follow the same contract.
+
+## Install Prism
+
+```sh
+npm install @nanisoft/prism-ui
+```
+
+React remains the host application's dependency. Consumers do not install or import the accessibility primitive layer.
+
+## Load the owned stylesheet
+
+Import Prism's stylesheet once, beside the application's global CSS:
+
+```ts
+import '@nanisoft/prism-ui/styles.css';
+import './globals.css';
+```
+
+The stylesheet carries the component recipes, self-hosted fonts, dither texture, and all five pack × mode variable scopes.
+
+## Wrap the app
+
+`PrismProvider` writes one resolved theme, provides the local portal target for overlays, and exposes the theme to client components.
+
+```tsx
+import type { ReactNode } from 'react';
+import {
+  createPrismTheme,
+  PrismProvider,
+} from '@nanisoft/prism-ui';
+
+export function App({ children }: { children: ReactNode }) {
+  return (
+    <PrismProvider prismTheme={createPrismTheme({ pack: 'blue', mode: 'dark' })}>
+      {children}
+    </PrismProvider>
+  );
+}
+```
+
+The five supported packs are `blue`, `green`, `lavender`, `rose`, and `peach`; the modes are `light` and `dark`. Visit [the theme gallery](/themes) to compare all ten live expressions.
+
+## Import the first component
+
+```tsx
+import { Button } from '@nanisoft/prism-ui/components/button';
+
+export function SaveAction() {
+  return <Button variant="primary">Save changes</Button>;
+}
+```
+
+Open the [live Button example](/components/button) to inspect its rendered states and copy the exact demo source. Prefer per-item subpaths in application code; the root export is convenient for small surfaces and token utilities.
+
+## Compose upward
+
+Prism's organization is deliberate:
+
+- **Components** own accessible behavior and one visual responsibility.
+- **Blocks** compose components into repeated product patterns such as `DataTable`, `AuthForm`, and `SettingsPanel`.
+- **Pages** compose blocks and components into complete structural surfaces such as `DashboardPage`, `DocsShell`, and `AuthPage`.
+
+Build the smallest layer that owns the job. Do not copy a block into an application when a page can compose it.
+
+## For agents
+
+The machine-readable front door is [llms.txt](/llms.txt). It indexes the same catalog, theme atoms, guides, and per-item Markdown served by this site.
+
+The read-only Prism MCP exposes the same source through `list_items`, `get_item_doc`, `get_item_props`, `get_item_source`, `get_theme_doc`, `list_pages`, `get_page`, and `search_docs`. Configure it with:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "type": "http",
+      "url": "https://prism.nanisoft.com/mcp"
+    }
+  }
+}
+```
+
+The routing rule is now one lane: query Prism MCP for Prism behavior and source, and keep every generated import on `@nanisoft/prism-ui`.

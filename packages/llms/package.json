@@ -1,7 +1,7 @@
 {
   "name": "@nanisoft/prism-llms",
   "version": "0.4.0",
-  "description": "Prism's LLM surface — generated llms.txt, per-item Markdown, and the PrismDocsStore projection. Data-only; one dist/ serves npm, the site, and the MCP server.",
+  "description": "Prism's generated agent surface — llms.txt, owned-catalog Markdown, theme references, and the PrismDocsStore projection. Data-only; one dist/ serves npm, the site, and the MCP server.",
   "license": "MIT",
   "type": "module",
   "engines": {

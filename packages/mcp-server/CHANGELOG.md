@@ -1,5 +1,15 @@
 # @nanisoft/prism-mcp-server
 
+## Next release — Prism-only MCP surface
+
+### Breaking changes
+
+- `PrismDocsItem` replaces the retired upstream base field with required
+  `primitive: 'base-ui' | 'native'` metadata.
+- All eight tools now describe the complete Prism-owned surface and keep the
+  single `@nanisoft/prism-ui` import boundary; they no longer route questions
+  to another component library.
+
 ## 0.3.0
 
 ### Minor Changes

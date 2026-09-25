@@ -1,258 +1,69 @@
-// The Specimen landing (ticket 11's direction) as a real prism-ui page: the
-// hero *is* a live themed specimen plate — antd worn loudly, not repainted —
-// the taxonomy reads as three spatial progression bands (01 components → 02
-// blocks → 03 pages), and light mode appears exactly once as the "docs in
-// daylight" peek. Every color rides the ambient theme's cssVar tokens, so the
-// page re-expresses itself with the shell switcher.
+// The landing page proves Prism's mechanism in the first viewport: one owned
+// import, live behavior, and the components → blocks → pages composition model.
 
 import Link from 'next/link';
-import type { CSSProperties, ReactElement, ReactNode } from 'react';
-
+import type { ReactElement, ReactNode } from 'react';
+import { Badge } from '@nanisoft/prism-ui/components/badge';
 import { Button } from '@nanisoft/prism-ui/components/button';
-import { Input } from '@nanisoft/prism-ui/components/input';
-import { Progress } from '@nanisoft/prism-ui/components/progress';
-import { Slider } from '@nanisoft/prism-ui/components/slider';
-import { Statistic } from '@nanisoft/prism-ui/components/statistic';
-import { Switch } from '@nanisoft/prism-ui/components/switch';
-import { Table, type TableProps } from '@nanisoft/prism-ui/components/table';
-import { Tag } from '@nanisoft/prism-ui/components/tag';
+import { DisplayTitle } from '@nanisoft/prism-ui/components/typography';
+import { StatCard } from '@nanisoft/prism-ui/blocks/stat-card';
 import { prismBrandPacks } from '@nanisoft/prism-tokens';
+
 import { DocsDaylight } from '@/components/DocsDaylight';
-import { DisplayTitle, SearchOutlined } from '@/components/prism-client';
+import { LandingSpecimen } from '@/components/LandingSpecimen';
+import { catalogGroups } from '@/lib/section-catalog';
 import { PACKS, PACK_LABELS } from '@/lib/theme';
 
-function Note({ children }: { children: ReactNode }): ReactElement {
-  return <span className="site-landing__note">{children}</span>;
-}
-
-function PlateSection({ note, children }: { note: string; children: ReactNode }): ReactElement {
-  return (
-    <div className="site-landing__plate-section">
-      <Note>{note}</Note>
-      {children}
-    </div>
-  );
-}
-
-/** The hero image — the real library, themed, annotated in mono. */
-function HeroSpecimen(): ReactElement {
-  type Row = { key: string; part: string; acts: string };
-  const rows: Row[] = [
-    { key: '1', part: 'Button', acts: 'presses a command' },
-    { key: '2', part: 'Input', acts: 'takes a value' },
-    { key: '3', part: 'Table', acts: 'shows many rows' },
-  ];
-  const columns: TableProps<Row>['columns'] = [
-    { title: 'Part', dataIndex: 'part', key: 'part' },
-    { title: 'Acts', dataIndex: 'acts', key: 'acts' },
-  ];
-
-  return (
-    <div className="site-landing__plate">
-      <PlateSection note="<Button />">
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <Button type="primary">Get started</Button>
-          <Button>Components</Button>
-          <Button type="dashed">Import</Button>
-          <Button type="text">Docs</Button>
-        </div>
-      </PlateSection>
-      <PlateSection note="<Input />">
-        <Input placeholder="Search components…" prefix={<SearchOutlined />} aria-label="Search components" />
-      </PlateSection>
-      <PlateSection note="<Switch /> <Slider />">
-        <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-          <Switch defaultChecked aria-label="Preview live state" />
-          <div style={{ flex: 1 }}>
-            <Slider defaultValue={40} aria-label="Preview progress value" />
-          </div>
-        </div>
-      </PlateSection>
-      <PlateSection note="<Tag />">
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {/* The accent owns the pack identity — a hardcoded `color="blue"` would
-              stay blue under green/lavender/rose/peach. Ride the tinted wash. */}
-          <Tag
-            style={{
-              background: 'var(--prism-color-primary-bg)',
-              color: 'var(--prism-color-primary)',
-              borderColor: 'var(--prism-color-primary-border)',
-            }}
-          >
-            v1.0
-          </Tag>
-          <Tag className="prism-state-tag prism-state-tag--success">beam-dark</Tag>
-          <Tag>MCP</Tag>
-          <Tag closable>refract</Tag>
-        </div>
-      </PlateSection>
-      <PlateSection note={'<Table size="small" />'}>
-        <Table<Row> size="small" pagination={false} dataSource={rows} columns={columns} />
-      </PlateSection>
-      <p className="site-specimen-note">
-        A static specimen — these are the real themed components, but the controls are not wired to page
-        behaviour.
-      </p>
-    </div>
-  );
-}
-/** Band 1 — raw parts, loose in the plane. */
 function PartsCluster(): ReactElement {
   return (
-    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-      <Button type="primary" size="small">
-        primary
-      </Button>
-      <Button size="small">default</Button>
-      <Button size="small" type="text">
-        text
-      </Button>
-      <Tag>size</Tag>
-      <Tag>type</Tag>
-      <Tag>state</Tag>
+    <div className="site-landing__parts" aria-label="Prism component examples">
+      <Button variant="primary" size="sm" href="/components/button">Primary</Button>
+      <Button size="sm" href="/components/input">Default</Button>
+      <Button variant="ghost" size="sm" href="/components/dialog">Overlay</Button>
+      <Badge>owned source</Badge>
     </div>
   );
 }
 
-/** Band 2 — parts pre-composed into one reusable unit. */
-function StatBlock(): ReactElement {
-  return (
-    <div
-      style={{
-        border: '1px solid var(--prism-color-border-secondary)',
-        borderRadius: 4,
-        background: 'var(--prism-color-bg-container)',
-        padding: '14px 18px',
-        width: 260,
-      }}
-    >
-      <Note>downloads / month</Note>
-      <Statistic value={128} suffix="k" styles={{ content: { fontStretch: '112%', fontWeight: 600 } }} />
-      {/* The accent owns live states — the meter follows the shell pack, never antd's info blue. */}
-      <Progress percent={72} showInfo={false} size="small" strokeColor="var(--prism-color-primary)" />
-      <Tag className="prism-state-tag prism-state-tag--success" style={{ marginTop: 8 } as CSSProperties}>
-        +12% vs last month
-      </Tag>
-    </div>
-  );
-}
-
-/** Band 3 — the full-page composition, drawn as a hairline wire. */
 function MiniPageWire(): ReactElement {
-  const line = (width: string, height = 6): CSSProperties => ({
-    width,
-    height,
-    background: 'var(--prism-color-border-secondary)',
-    borderRadius: 2,
-  });
+  const line = (width: string, height = 6): ReactElement => (
+    <span
+      aria-hidden
+      style={{ width, height, background: 'var(--prism-border)', borderRadius: 2 }}
+    />
+  );
   return (
-    <div
-      style={{
-        border: '1px solid var(--prism-color-border-secondary)',
-        borderRadius: 4,
-        overflow: 'hidden',
-        background: 'var(--prism-color-bg-container)',
-        width: '100%',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          gap: 6,
-          alignItems: 'center',
-          padding: '6px 10px',
-          borderBottom: '1px solid var(--prism-color-border-secondary)',
-        }}
-      >
-        <div style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--prism-color-primary)' }} />
-        <div style={line('28px')} />
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
-          <div style={line('22px')} />
-          <div style={line('22px')} />
-        </div>
-      </div>
-      <div style={{ display: 'flex', minHeight: 88 }}>
-        <div
-          style={{
-            width: 56,
-            borderRight: '1px solid var(--prism-color-border-secondary)',
-            padding: 8,
-            display: 'grid',
-            gap: 6,
-            alignContent: 'start',
-          }}
-        >
-          <div style={line('40px')} />
-          <div style={line('32px')} />
-          <div style={line('36px')} />
-        </div>
-        <div style={{ flex: 1, padding: 10, display: 'grid', gap: 8, alignContent: 'start' }}>
-          <div style={line('60%', 10)} />
-          <div style={line('85%')} />
-          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-            <div style={{ height: 22, width: 64, borderRadius: 4, background: 'var(--prism-color-primary)' }} />
-            <div
-              style={{
-                height: 22,
-                width: 52,
-                borderRadius: 4,
-                border: '1px solid var(--prism-color-border-secondary)',
-              }}
-            />
-          </div>
-        </div>
+    <div className="site-landing__page-wire" aria-label="Page composition diagram">
+      <div className="site-landing__page-wire-top"><span className="site-landing__page-mark" />{line('84px')}<span className="site-landing__page-actions">{line('42px')}{line('42px')}</span></div>
+      <div className="site-landing__page-wire-body">
+        <div className="site-landing__page-wire-nav">{line('72%')}{line('84%')}{line('64%')}{line('78%')}</div>
+        <div className="site-landing__page-wire-content">{line('46%', 12)}{line('92%')}{line('76%')}<div>{line('92px', 28)}{line('92px', 28)}</div></div>
       </div>
     </div>
   );
 }
 
-function Band({
-  index,
-  label,
-  blurb,
-  href,
-  children,
-}: {
-  index: string;
-  label: string;
-  blurb: string;
-  href: string;
-  children: ReactNode;
-}): ReactElement {
+function LayerSection({ title, description, href, children }: { title: string; description: string; href: string; children: ReactNode }) {
   return (
-    <section className="site-landing__band">
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-        <span className="site-landing__band-index">{index}</span>
-        <Link href={href} className="site-landing__band-label" style={{ color: 'inherit' }}>
-          {label}
-        </Link>
-      </div>
-      <p className="site-landing__band-blurb">{blurb}</p>
-      <div>{children}</div>
+    <section className="site-landing__layer">
+      <div className="site-landing__layer-copy"><Link href={href}>{title}</Link><p>{description}</p></div>
+      <div className="site-landing__layer-proof">{children}</div>
     </section>
   );
 }
 
-/** The spectrum — five refractions of one beam, each cell in its own pack's voice. */
 function SpectrumBand(): ReactElement {
   return (
     <section className="site-landing__spectrum">
       <div className="site-landing__spectrum-head">
-        <Link href="/themes" className="site-landing__band-label" style={{ color: 'inherit' }}>
-          Themes
-        </Link>
-        <p className="site-landing__band-blurb">
-          Five pastel packs, light and beam-dark — one language, ten expressions. Every ink holds WCAG AA
-          on its own ground.
-        </p>
+        <h2>Five pastels. Two modes. One language.</h2>
+        <p>Every pack is a complete atmosphere: tinted grounds and hairlines with AA-safe mid-tone ink. Pick one in the header and feel the whole system re-express itself.</p>
       </div>
       <div className="site-landing__spectrum-strip">
         {PACKS.map((pack) => (
           <Link key={pack} href="/themes" className="site-landing__spectrum-cell" style={{ background: prismBrandPacks[pack].ground.light }}>
             <span className="site-landing__spectrum-dot" style={{ background: prismBrandPacks[pack].ink.light }} aria-hidden />
-            <span className="site-landing__spectrum-name" style={{ color: prismBrandPacks[pack].ink.light }}>
-              {PACK_LABELS[pack]}
-            </span>
+            <span className="site-landing__spectrum-name" style={{ color: prismBrandPacks[pack].ink.light }}>{PACK_LABELS[pack]}</span>
           </Link>
         ))}
       </div>
@@ -260,97 +71,60 @@ function SpectrumBand(): ReactElement {
   );
 }
 
-/** The one light-mode appearance on the page — a counterpoint, not a toggle.
-    Lives in components/DocsDaylight.tsx (client) so it can follow the shell pack. */
+function StartHere(): ReactElement {
+  return (
+    <section className="site-landing__start" aria-labelledby="start-here-title">
+      <div className="site-landing__start-copy">
+        <h2 id="start-here-title">One import for people and agents.</h2>
+        <p>Install Prism, wrap the app once, and compose from the same public catalog that powers this site. The agent corpus and MCP are generated from that source.</p>
+        <code className="site-landing__install">npm install @nanisoft/prism-ui</code>
+      </div>
+      <div className="site-landing__start-paths">
+        <div><h3>Build an app</h3><p>Follow the quickstart, then open a live component and copy its source.</p><Button variant="primary" href="/docs/quickstart">Read the quickstart</Button></div>
+        <div><h3>Give it to an agent</h3><p>Start with the complete corpus, then query the read-only Prism MCP.</p><div className="site-landing__agent-links"><Button href="/llms.txt">Read llms.txt</Button><Button href="/docs/quickstart#for-agents">MCP setup</Button></div></div>
+      </div>
+    </section>
+  );
+}
 
 export default function HomePage(): ReactElement {
+  const components = catalogGroups('components').flatMap((group) => group.items);
+  const blockCount = catalogGroups('blocks').flatMap((group) => group.items).length;
+  const pageCount = catalogGroups('pages').flatMap((group) => group.items).length;
+
   return (
     <div className="site-landing">
-      {/* Hero — the specimen plate is the thesis. */}
       <div className="site-shell">
         <section className="site-landing__hero">
-          <div>
-            <Note>ONE DESIGN LANGUAGE, MANY EXPRESSIONS</Note>
-            <DisplayTitle level={1} className="site-landing__title">
-              The beam is neutral.
-              <br />
-              Refraction is the brand.
-            </DisplayTitle>
-            <p className="site-landing__lede">
-              Prism is NaniSoft&apos;s Ant Design–based design system — tokens, components, blocks, and
-              pages, shipped as npm packages with docs and an agent surface. Everything on this plate is
-              the real library, themed.
-            </p>
-            <div className="site-landing__cta">
-              <Button type="primary" size="large" href="/docs">
-                Get started
-              </Button>
-              <Button size="large" href="/components">
-                Browse components
-              </Button>
-            </div>
+          <div className="site-landing__hero-copy">
+            <DisplayTitle level={1} className="site-landing__title">The interface is owned source.</DisplayTitle>
+            <p className="site-landing__lede">Prism turns accessible Base UI behavior into a NaniSoft system you can read, compose, and ship from one package—without adopting somebody else&apos;s design language.</p>
+            <div className="site-landing__cta"><Button variant="primary" size="lg" href="/docs/quickstart">Start building</Button><Button size="lg" href="/components">Explore the catalog</Button></div>
           </div>
-          <HeroSpecimen />
+          <LandingSpecimen catalog={components} />
         </section>
       </div>
 
       <div className="site-landing__dither" aria-hidden />
 
-      {/* Taxonomy as spatial progression: parts → pre-composed → full page. */}
       <div className="site-shell">
-        <div className="site-landing__bands">
-          <Band
-            index="01"
-            label="Components"
-            href="/components"
-            blurb="The antd surface, themed by Prism tokens, typed, and re-exported — apps never import antd directly."
-          >
-            <PartsCluster />
-          </Band>
-          <Band
-            index="02"
-            label="Blocks"
-            href="/blocks"
-            blurb="Pre-composed components — a stat card, a demo plate — assembled once, delivered from npm."
-          >
-            <StatBlock />
-          </Band>
-          <Band
-            index="03"
-            label="Pages"
-            href="/pages"
-            blurb="Full-page compositions — docs shells, blog layouts — that apps compose, never copy."
-          >
-            <MiniPageWire />
-          </Band>
+        <div className="site-landing__layers">
+          <LayerSection title={`Components · ${components.length}`} description="Prism-owned accessible controls and recipes. Behavior is complete; the public vocabulary stays small." href="/components"><PartsCluster /></LayerSection>
+          <LayerSection title={`Blocks · ${blockCount}`} description="Repeated product patterns assembled once—from data tables and settings to application chrome." href="/blocks"><StatCard label="Catalog coverage" value="72%" change="+4 this release" trend="up" detail="Measured across the published component, block, and page surface." /></LayerSection>
+          <LayerSection title={`Pages · ${pageCount}`} description="Complete structural compositions for docs, dashboards, settings, auth, and editorial work." href="/pages"><MiniPageWire /></LayerSection>
         </div>
       </div>
 
+      <div className="site-shell"><StartHere /></div>
       <div className="site-landing__dither" aria-hidden />
-
-      <div className="site-shell">
-        <SpectrumBand />
-      </div>
-
-      <div className="site-landing__dither" aria-hidden />
-
+      <div className="site-shell"><SpectrumBand /></div>
       <DocsDaylight />
 
       <div className="site-shell">
         <section className="site-landing__outro">
-          <h2>Start refracting.</h2>
-          <p>
-            Five brand packs, two modes, one language. Install the packages, wrap your app, and pick your
-            expression.
-          </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Button type="primary" size="large" href="/docs">
-              Read the docs
-            </Button>
-            <Button size="large" href="/themes">
-              Tour the five packs
-            </Button>
-          </div>
+          <h2>Build the brand, not around it.</h2>
+          <p>Prism gives agents and developers the same source of truth: accessible behavior, owned recipes, live examples, and a complete composition vocabulary.</p>
+          <div><Button variant="primary" size="lg" href="/docs/quickstart">Install Prism</Button><Button size="lg" href="/themes">See all ten expressions</Button></div>
         </section>
       </div>
     </div>

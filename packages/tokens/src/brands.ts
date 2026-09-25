@@ -44,8 +44,8 @@ const STATE_INFO = '#2563EB'; // the blue ink; 5.17:1 on white
 // ──────────────────────────────────────────────────────────────────────────────
 // Shared tier-0 constants — the system shape a pack cannot change (ADR-0002 §4).
 // The floating shadow is the single cool-tinted shadow (ADR-0001 §3); the CSS
-// string carries an explicit `0` spread and is byte-identical across the antd
-// boxShadow map token, prism-ui CSS, and the DTCG STRING export.
+// string carries an explicit `0` spread and stays byte-identical across Prism CSS,
+// the theme object, and the DTCG string export.
 // ──────────────────────────────────────────────────────────────────────────────
 
 const SHARED = {
@@ -77,7 +77,7 @@ const bluePackInput: BrandPackInput = {
   pack: 'blue',
   ink: { light: BLUE_INK_LIGHT, dark: BLUE_INK_DARK },
   ground: { light: '#EEF3FC', dark: '#0D1730' },
-  surface: { light: '#FFFFFF' },
+  surface: { light: '#FFFFFF', dark: '#0E2358' },
   text: { light: '#1A2A4A', dark: '#E8EEF9' },
   hairline: { light: 'rgba(30, 64, 158, 0.10)', dark: 'rgba(158, 191, 255, 0.18)' },
   state: { success: STATE_SUCCESS, info: BLUE_INK_LIGHT, warning: STATE_WARNING, error: STATE_ERROR },
@@ -87,7 +87,7 @@ const greenPackInput: BrandPackInput = {
   pack: 'green',
   ink: { light: GREEN_INK_LIGHT, dark: GREEN_INK_DARK },
   ground: { light: '#E9F6EF', dark: '#0C1812' },
-  surface: { light: '#FFFFFF' },
+  surface: { light: '#FFFFFF', dark: '#133A26' },
   text: { light: '#162A1A', dark: '#E8EEF9' },
   hairline: { light: 'rgba(17, 90, 47, 0.10)', dark: 'rgba(134, 239, 172, 0.16)' },
   state: { success: STATE_SUCCESS, info: STATE_INFO, warning: STATE_WARNING, error: STATE_ERROR },
@@ -97,7 +97,7 @@ const lavenderPackInput: BrandPackInput = {
   pack: 'lavender',
   ink: { light: LAVENDER_INK_LIGHT, dark: LAVENDER_INK_DARK },
   ground: { light: '#F2F1FB', dark: '#131022' },
-  surface: { light: '#FFFFFF' },
+  surface: { light: '#FFFFFF', dark: '#1D1545' },
   text: { light: '#262044', dark: '#ECE9FA' },
   hairline: { light: 'rgba(84, 70, 176, 0.10)', dark: 'rgba(157, 141, 244, 0.17)' },
   state: { success: STATE_SUCCESS, info: STATE_INFO, warning: STATE_WARNING, error: STATE_ERROR },
@@ -107,7 +107,7 @@ const rosePackInput: BrandPackInput = {
   pack: 'rose',
   ink: { light: ROSE_INK_LIGHT, dark: ROSE_INK_DARK },
   ground: { light: '#FBF1F5', dark: '#1A111C' },
-  surface: { light: '#FFFFFF' },
+  surface: { light: '#FFFFFF', dark: '#361A3C' },
   text: { light: '#331B29', dark: '#F9EAF1' },
   hairline: { light: 'rgba(150, 48, 92, 0.10)', dark: 'rgba(240, 140, 180, 0.17)' },
   state: { success: STATE_SUCCESS, info: STATE_INFO, warning: STATE_WARNING, error: STATE_ERROR },
@@ -117,7 +117,7 @@ const peachPackInput: BrandPackInput = {
   pack: 'peach',
   ink: { light: PEACH_INK_LIGHT, dark: PEACH_INK_DARK },
   ground: { light: '#FBF3EA', dark: '#1D140D' },
-  surface: { light: '#FFFFFF' },
+  surface: { light: '#FFFFFF', dark: '#402613' },
   text: { light: '#3A241A', dark: '#FAF0E4' },
   hairline: { light: 'rgba(146, 62, 24, 0.10)', dark: 'rgba(242, 160, 92, 0.17)' },
   state: { success: STATE_SUCCESS, info: STATE_INFO, warning: STATE_WARNING, error: STATE_ERROR },
@@ -200,7 +200,7 @@ function buildBrandPack(input: BrandPackInput): BrandPack {
     pack: input.pack,
     ink: { light: input.ink.light, dark: input.ink.dark },
     ground: { light: input.ground.light, dark: input.ground.dark },
-    surface: { light: input.surface.light },
+    surface: { light: input.surface.light, dark: input.surface.dark },
     text: { light: input.text.light, dark: input.text.dark },
     hairline: { light: input.hairline.light, dark: input.hairline.dark },
     state: { success: input.state.success, info: input.state.info, warning: input.state.warning, error: input.state.error },

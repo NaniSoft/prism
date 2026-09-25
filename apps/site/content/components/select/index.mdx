@@ -1,16 +1,17 @@
 ---
-title: Select
-description: antd Select, unchanged — a pass-through re-export. Import from '@nanisoft/prism-ui'.
+title: "Select"
+description: "A type-safe popup select for predefined values."
 ---
-{/* prism:generated-stub v1 */}
+{/* prism:generated-owned v2 */}
 
 ```ts
-import { Select } from '@nanisoft/prism-ui/components';
+import { Select } from '@nanisoft/prism-ui/components/select';
 ```
 
-`Select` is antd's [Select](https://ant.design/components/select), re-exported unchanged.
+Select is a Prism-owned component. Its behavior, public props, and Spectral Refraction recipe ship together from `@nanisoft/prism-ui`.
 
-- Extends: antd **Select** — for inherited props and demos, use the antd MCP (`antd_info Select`).
-- Always import from '@nanisoft/prism-ui', never from `antd` directly.
+- Import only from `@nanisoft/prism-ui`.
+- Keep the component inside `PrismProvider` when it uses an overlay, popup, or nested theme scope.
+- Use `className` for layout composition; visual state stays in the Prism recipe and CSS variables.
 
-_No additional props beyond the antd base component._
+<ComponentDemo id="basic" title="Select" />

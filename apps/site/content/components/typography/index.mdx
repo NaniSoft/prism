@@ -1,16 +1,15 @@
 ---
-title: Typography
-description: antd Typography, unchanged — a pass-through re-export. Import from '@nanisoft/prism-ui'.
+title: "Typography"
+description: "Prism text, heading, and refracted display primitives."
 ---
-{/* prism:generated-stub v1 */}
+{/* prism:generated-owned v2 */}
 
 ```ts
-import { Typography } from '@nanisoft/prism-ui/components';
+import { Typography } from '@nanisoft/prism-ui/components/typography';
 ```
 
-`Typography` is antd's [Typography](https://ant.design/components/typography), re-exported unchanged.
+Typography is a Prism-owned component. Its behavior, public props, and Spectral Refraction recipe ship together from `@nanisoft/prism-ui`.
 
-- Extends: antd **Typography** — for inherited props and demos, use the antd MCP (`antd_info Typography`).
-- Always import from '@nanisoft/prism-ui', never from `antd` directly.
-
-_No additional props beyond the antd base component._
+- Import only from `@nanisoft/prism-ui`.
+- Keep the component inside `PrismProvider` when it uses an overlay, popup, or nested theme scope.
+- Use `className` for layout composition; visual state stays in the Prism recipe and CSS variables.

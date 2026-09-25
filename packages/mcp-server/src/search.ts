@@ -45,7 +45,7 @@ export function searchCorpus(docs: PrismDocsStore, { query, kind, limit = DEFAUL
         total +
         WEIGHTS.name * countOccurrences(item.name.toLowerCase(), term) +
         WEIGHTS.summary * countOccurrences(item.description.toLowerCase(), term) +
-        WEIGHTS.body * countOccurrences(item.doc.toLowerCase(), term),
+        WEIGHTS.body * countOccurrences(`${item.doc} ${item.primitive}`.toLowerCase(), term),
       0,
     );
 
@@ -86,7 +86,7 @@ export function searchCorpus(docs: PrismDocsStore, { query, kind, limit = DEFAUL
 /** The next call a search hit (or doc footer) prints, steered by the data. */
 export function followUpForItem(item: PrismDocsItem): string {
   if ((item.examples?.length ?? 0) > 0) return `get_item_source { "name": "${item.name}" }`;
-  if (item.antdBase) return `antd_info ${item.antdBase} (antd MCP)`;
+  if (item.props) return `get_item_props { "name": "${item.name}" }`;
   return `get_item_doc { "name": "${item.name}" }`;
 }
 

@@ -1,9 +1,12 @@
 {
   "title": "Pages",
-  "---Prism---": "Prism",
+  "---Compositions---": "Compositions",
   "pages": [
-    "---Prism---",
+    "---Compositions---",
+    "auth-page",
+    "blog-layout",
+    "dashboard-page",
     "docs-shell",
-    "blog-layout"
+    "settings-page"
   ]
 }

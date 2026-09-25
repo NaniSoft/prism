@@ -76,7 +76,7 @@ describe('prismThemeBootScript', () => {
     ]);
   });
 
-  it('the applied class is antd’s cssVar key — boot and bake pinned together', () => {
+  it('the applied class is the Prism theme key used by the generated stylesheet', () => {
     expect(boot('rose', 'light', {})).toEqual(['other-class', prismCssVarKey('rose', 'light')]);
   });
 

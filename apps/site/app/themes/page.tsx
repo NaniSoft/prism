@@ -1,7 +1,7 @@
 // The theme gallery (ADR-0005): the pastel spectrum worn live. Each of the ten
-// pack × mode expressions renders as a real themed island — the pre-baked
-// `prism-<pack>-<mode>` variable class scopes the CSS variables, the nested
-// PrismProvider scopes the antd context — so nothing on this page is a mockup.
+// pack × mode expressions renders as a real themed island — the generated
+// `prism-<pack>-<mode>` class and nested provider scope the complete theme —
+// so nothing on this page is a mockup.
 // "Wear this theme" hands an island's selection to the shell provider.
 //
 // FORM: extension of the established Spectral Refraction world (ADR-0001) —
@@ -11,13 +11,10 @@
 import type { ReactElement } from 'react';
 
 import { Button } from '@nanisoft/prism-ui/components/button';
-import { Input } from '@nanisoft/prism-ui/components/input';
-import { Progress } from '@nanisoft/prism-ui/components/progress';
-import { Switch } from '@nanisoft/prism-ui/components/switch';
-import { Tag } from '@nanisoft/prism-ui/components/tag';
 import { PrismProvider } from '@nanisoft/prism-ui/provider';
 import { getPrismTheme, prismBrandPacks, type PrismMode, type PrismPackId } from '@nanisoft/prism-tokens';
 
+import { ThemeControls } from '@/components/ThemeControls';
 import { TryThemeButton } from '@/components/TryThemeButton';
 import { MODES, MODE_LABELS, PACKS, PACK_LABELS, packSwatch, themeClass } from '@/lib/theme';
 
@@ -63,24 +60,7 @@ function ThemeIsland({ pack, mode }: { pack: PrismPackId; mode: PrismMode }): Re
         </div>
 
         <div className="site-themes__island-plate">
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Button type="primary">Primary</Button>
-            <Button>Default</Button>
-            <Button type="dashed">Dashed</Button>
-            <Button type="text">Text</Button>
-          </div>
-          <Input placeholder="Search the spectrum…" />
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Tag className="prism-state-tag prism-state-tag--success">success</Tag>
-            <Tag className="prism-state-tag prism-state-tag--warning">warning</Tag>
-            <Tag className="prism-state-tag prism-state-tag--error">error</Tag>
-            <Tag className="prism-state-tag prism-state-tag--info">info</Tag>
-            <Switch defaultChecked size="small" aria-label="Live state" />
-            <div style={{ flex: 1, minWidth: 120 }}>
-              {/* The accent owns live states — the meter wears the island's ink, never antd's info blue. */}
-              <Progress percent={64} size="small" strokeColor="var(--prism-color-primary)" />
-            </div>
-          </div>
+          <ThemeControls pack={pack} mode={mode} />
         </div>
 
         <div className="site-themes__island-hexes">
@@ -90,6 +70,27 @@ function ThemeIsland({ pack, mode }: { pack: PrismPackId; mode: PrismMode }): Re
         </div>
       </div>
     </PrismProvider>
+  );
+}
+
+/** One pack, its two modes side by side: comparison before repetition. */
+function ThemePair({ pack }: { pack: PrismPackId }): ReactElement {
+  const headingId = `theme-pair-${pack}`;
+  return (
+    <section className="site-themes__pair" aria-labelledby={headingId}>
+      <div className="site-themes__pair-head">
+        <h2 id={headingId} className="site-themes__pair-name">
+          <span className="site-themes__island-dot" style={{ background: packSwatch(pack) }} aria-hidden />
+          {PACK_LABELS[pack]}
+        </h2>
+        <span className="site-mono site-themes__pair-note">light + beam-dark</span>
+      </div>
+      <div className="site-themes__pair-grid">
+        {MODES.map((mode) => (
+          <ThemeIsland key={`${pack}-${mode}`} pack={pack} mode={mode} />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -131,14 +132,14 @@ export default function ThemesPage(): ReactElement {
         <SpectrumStrip />
 
         <p className="site-specimen-note">
-          A static gallery — each island is the real theme and real components, but the controls are not
-          wired to page behaviour.
+          Every island is live: try the local controls, then choose Wear this theme to hand the pack and
+          mode to the whole site.
         </p>
 
         <div className="site-themes__grid">
-          {PACKS.map((pack) =>
-            MODES.map((mode) => <ThemeIsland key={`${pack}-${mode}`} pack={pack} mode={mode} />),
-          )}
+          {PACKS.map((pack) => (
+            <ThemePair key={pack} pack={pack} />
+          ))}
         </div>
 
         <section className="site-themes__foot">
@@ -153,7 +154,7 @@ export default function ThemesPage(): ReactElement {
             }
           </div>
           <div className="site-themes__foot-cta">
-            <Button type="primary" size="large" href="/docs">
+            <Button variant="primary" size="lg" href="/docs">
               Read the docs
             </Button>
           </div>

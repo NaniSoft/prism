@@ -15,22 +15,21 @@ describe('the emitted PrismDocsStore', () => {
     expect(store.baseUrl).toBe('https://prism.nanisoft.com');
   });
 
-  it('projects the whole catalog: components, blocks, pages', () => {
+  it('projects the curated component → block → page catalog', () => {
     const kinds = store.items.map((item) => item.kind);
-    expect(kinds.filter((kind) => kind === 'component').length).toBeGreaterThanOrEqual(70);
-    expect(kinds.filter((kind) => kind === 'block').length).toBe(4);
-    expect(kinds.filter((kind) => kind === 'page').length).toBe(2);
+    expect(kinds.filter((kind) => kind === 'component').length).toBe(29);
+    expect(kinds.filter((kind) => kind === 'block').length).toBe(9);
+    expect(kinds.filter((kind) => kind === 'page').length).toBe(5);
     expect(new Set(store.items.map((item) => item.name)).size).toBe(store.items.length);
   });
 
-  it('marks pass-throughs with antdBase and leaves wrappers bare', () => {
+  it('marks internal primitive foundations without exposing an upstream API', () => {
     const button = store.items.find((item) => item.name === 'Button');
-    expect(button?.antdBase).toBe('Button');
-    expect(button?.props).toBeUndefined();
+    expect(button?.primitive).toBe('base-ui');
 
-    const displayTitle = store.items.find((item) => item.name === 'DisplayTitle');
-    expect(displayTitle?.antdBase).toBeUndefined();
-    expect(displayTitle?.props).toContain('`width`');
+    const table = store.items.find((item) => item.name === 'Table');
+    expect(table?.primitive).toBe('native');
+    expect(store.items.every((item) => item.primitive === 'base-ui' || item.primitive === 'native')).toBe(true);
   });
 
   it('ships verbatim example code under the item', () => {

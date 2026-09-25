@@ -9,9 +9,9 @@
  * longer ships the JS compiler API, and ADR-0003 already accepts cosmetic
  * fidelity risk on gnarly unions. This is a small structural scanner for the
  * declaration shape prism-ui emits — `export interface XProps [extends Y]`
- * with JSDoc-carried descriptions. Pass-through re-exports never match, and
- * that absence IS the Extends seam (ADR-0004): no extracted props means the
- * item is "antd X, unchanged".
+ * with JSDoc-carried descriptions. Re-export-only files have no authored
+ * interface, and that absence simply means there is no separate Prism props
+ * table to emit.
  */
 
 export interface ExtractedProp {
@@ -27,18 +27,18 @@ export interface ExtractedProp {
 
 export interface ExtractedInterface {
   readonly typeName: string;
-  /** The type this interface extends, when declared (e.g. `TitleProps`). */
+  /** The type expression this interface extends, when declared. */
   readonly extendsType?: string;
   readonly props: readonly ExtractedProp[];
 }
 
 /**
  * Extract every exported `*Props` interface from a `.d.ts` source, in source
- * order. Returns an empty array for re-export-only files (pass-throughs).
+ * order. Returns an empty array when a declaration has no authored props.
  */
 export function extractProps(source: string): ExtractedInterface[] {
   const results: ExtractedInterface[] = [];
-  const interfacePattern = /export\s+interface\s+(\w+)(?:\s+extends\s+([\w.]+))?\s*\{/g;
+  const interfacePattern = /export\s+interface\s+(\w+)(?:\s+extends\s+([^{}]+?))?\s*\{/g;
   let match: RegExpExecArray | null;
   while ((match = interfacePattern.exec(source)) !== null) {
     if (!(match[1] ?? '').endsWith('Props')) continue; // supporting types (DocsNavEntry, BlogFrontmatter) are not props

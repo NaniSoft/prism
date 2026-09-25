@@ -57,7 +57,7 @@ describe('DemoView', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'Copied' })).toBeTruthy());
   });
 
-  it('stays quiet when the clipboard is unavailable', async () => {
+  it('offers a manual recovery when the clipboard is unavailable', async () => {
     Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
     render(
       <DemoView code="x">
@@ -65,6 +65,8 @@ describe('DemoView', () => {
       </DemoView>,
     );
     fireEvent.click(screen.getByRole('button', { name: 'Copy' }));
-    expect(screen.getByRole('button', { name: 'Copy' })).toBeTruthy(); // no false feedback
+    expect(screen.getByRole('button', { name: 'Select code' })).toBeTruthy();
+    expect(screen.getByRole('status').textContent).toContain('Select the code panel and copy it manually.');
+    expect(screen.getByText('Select the code panel to copy it.')).toBeTruthy();
   });
 });

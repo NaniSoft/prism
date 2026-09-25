@@ -2,7 +2,7 @@
 // returns the inline script string a site drops into its root layout's <head>.
 // It applies the stored-or-default `prism-<pack>-<mode>` class to <html>
 // before first paint — the exact class that carries the pre-baked variable
-// rulesets (the bake helper) and antd's cssVar key. Dependency-free by
+// rulesets (the bake helper) and the stable theme scope class. Dependency-free by
 // construction: it must never wait on the bundle.
 
 import type { PrismMode, PrismPackId } from '@nanisoft/prism-tokens';

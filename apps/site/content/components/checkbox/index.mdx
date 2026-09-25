@@ -1,16 +1,15 @@
 ---
-title: Checkbox
-description: antd Checkbox, unchanged — a pass-through re-export. Import from '@nanisoft/prism-ui'.
+title: "Checkbox"
+description: "An accessible binary control with label and description slots."
 ---
-{/* prism:generated-stub v1 */}
+{/* prism:generated-owned v2 */}
 
 ```ts
-import { Checkbox } from '@nanisoft/prism-ui/components';
+import { Checkbox } from '@nanisoft/prism-ui/components/checkbox';
 ```
 
-`Checkbox` is antd's [Checkbox](https://ant.design/components/checkbox), re-exported unchanged.
+Checkbox is a Prism-owned component. Its behavior, public props, and Spectral Refraction recipe ship together from `@nanisoft/prism-ui`.
 
-- Extends: antd **Checkbox** — for inherited props and demos, use the antd MCP (`antd_info Checkbox`).
-- Always import from '@nanisoft/prism-ui', never from `antd` directly.
-
-_No additional props beyond the antd base component._
+- Import only from `@nanisoft/prism-ui`.
+- Keep the component inside `PrismProvider` when it uses an overlay, popup, or nested theme scope.
+- Use `className` for layout composition; visual state stays in the Prism recipe and CSS variables.

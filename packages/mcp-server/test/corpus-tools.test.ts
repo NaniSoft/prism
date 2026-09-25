@@ -1,4 +1,4 @@
-// The corpus-wide tools: theme pass-through, the docs-page lane (list_pages /
+// The corpus-wide tools: theme atoms, the docs-page lane (list_pages /
 // get_page, mirroring fumadocs' contracts), and term-frequency search with its
 // cap and follow-up pointers (ADR-0004 §1/§3).
 
@@ -22,7 +22,7 @@ describe('get_theme_doc', () => {
   it('resolves an explicit pack and mode', async () => {
     h = await harness();
     const text = await h.text('get_theme_doc', { pack: 'green', mode: 'dark' });
-    expect(text).toContain('# Theming — green pack · dark mode');
+    expect(text).toContain('# Theming — green pack · beam-dark mode');
   });
 
   it('misses an atom the corpus does not have, suggesting the ones it does', async () => {
@@ -42,7 +42,7 @@ describe('list_pages', () => {
     const text = await h.text('list_pages');
     expect(text).toContain('# Prism docs pages');
     expect(text).toContain('Found 2:');
-    expect(text).toContain('- **Theming** — `/docs/theming` — Brand packs and modes; createPrismTheme().');
+    expect(text).toContain('- **Theming** — `/docs/theming` — Five Spectral Refraction packs, modes, and createPrismTheme().');
     expect(text).toContain('  → `get_page { "url": "/docs/theming" }`');
     expect(text).toContain('Full site index: https://prism.nanisoft.com/llms.txt');
   });
@@ -96,11 +96,12 @@ describe('search_docs', () => {
     expect(text).toContain('→ `get_page { "url": "/docs/theming" }`');
   });
 
-  it('steers a pass-through hit to the antd MCP', async () => {
+  it('keeps an internal Base UI-backed hit inside the Prism tool surface', async () => {
     h = await harness();
-    const text = await h.text('search_docs', { query: 'pass-through re-export' });
+    const text = await h.text('search_docs', { query: 'Base UI internal' });
     expect(text).toContain('## Button (component)');
-    expect(text).toContain('→ `antd_info Button (antd MCP)`');
+    expect(text).toContain('→ `get_item_doc { "name": "Button" }`');
+    expect(text).not.toContain('antd_info');
   });
 
   it('defaults to 5 hits and honours the limit parameter', async () => {

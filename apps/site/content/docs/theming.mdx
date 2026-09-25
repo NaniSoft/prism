@@ -1,0 +1,71 @@
+---
+title: Theming
+description: Use Prism's five pastel packs, light and beam-dark modes, semantic overrides, and flash-free theme delivery.
+---
+
+Prism themes are complete atmospheres, not primary-color swaps. A pack changes the page ground, container surfaces, hairlines, text bases, and focus treatment together.
+
+## Registered packs
+
+| Pack | Character |
+| --- | --- |
+| `blue` | Azure ink over a pastel sky ground |
+| `green` | Spring ink over a mint ground |
+| `lavender` | Violet ink over a pale lilac ground |
+| `rose` | Magenta-rose ink over a blush ground |
+| `peach` | Coral-terracotta ink over a peach ground |
+
+Each pack ships in `light` and `dark` mode. Dark mode is called **beam-dark** in visible product copy.
+
+## Create a theme
+
+```tsx
+import {
+  createPrismTheme,
+  PrismProvider,
+} from '@nanisoft/prism-ui';
+
+const theme = createPrismTheme({ pack: 'lavender', mode: 'dark' });
+
+export function App({ children }) {
+  return <PrismProvider prismTheme={theme}>{children}</PrismProvider>;
+}
+```
+
+The returned object is serializable and deeply frozen. It contains resolved primitives, semantic roles, a stable class key, and the complete CSS custom-property set.
+
+## Semantic overrides
+
+Override meaning, not component internals:
+
+```ts
+const productTheme = createPrismTheme({
+  pack: 'blue',
+  mode: 'light',
+  overrides: {
+    semantics: {
+      inkPrimary: '#0F5BAA',
+    },
+  },
+});
+```
+
+Prism recomputes the CSS variables after applying semantic overrides. Validation still owns contrast, mode, and pack identity.
+
+## Flash-free switching
+
+The package stylesheet includes all ten theme scopes under stable classes such as `prism-blue-light` and `prism-rose-dark`. A site can apply the chosen class to `<html>` before first paint, then let React follow the same selection.
+
+The repo's site demonstrates the full recipe in `apps/site/lib/theme.ts` and `SiteThemeProvider`. Consumer applications can use the same class scheme without adopting the site's storage policy.
+
+## What not to theme
+
+Do not replace component colors with page-level CSS or import raw framework variables. The supported path is:
+
+1. Select a pack and mode.
+2. Override semantic tokens when a product meaning changes.
+3. Use `className` only for layout composition.
+
+## Theme gallery
+
+The [live theme gallery](/themes) renders all ten expressions with real controls. Choosing **Wear this theme** hands that exact selection to the whole site.

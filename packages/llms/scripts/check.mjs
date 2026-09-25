@@ -16,8 +16,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
-import { buildCatalog } from '@nanisoft/prism-ui/wrapped-registry';
-import { passThroughs } from '@nanisoft/prism-ui/generated/pass-throughs';
+import * as prismUi from '@nanisoft/prism-ui';
+import { buildCatalog } from '@nanisoft/prism-ui/catalog';
 
 import { emit } from './build.mjs';
 import { scanPrismImports, validateDemoSource } from '../dist/demo-graph.js';
@@ -116,8 +116,7 @@ async function validateStoreAgainstType(emitDir) {
   return { ok: result.status === 0, output: `${result.stdout}${result.stderr}`.trim() };
 }
 
-const catalog = buildCatalog(passThroughs);
-const byName = new Map(catalog.map((entry) => [entry.name, entry]));
+const catalog = buildCatalog();
 
 // --- 1 + 7: build-fresh emits, byte-compare -------------------------------
 
@@ -153,7 +152,7 @@ for (const demo of await collectDemos()) {
 
 for (const demo of await collectDemos()) {
   for (const name of scanPrismImports(demo.code)) {
-    if (!byName.has(name)) fail('cross-refs', `${demo.file} imports '${name}', which is not a prism-ui catalog item`);
+    if (!(name in prismUi)) fail('cross-refs', `${demo.file} imports '${name}', which is not a public prism-ui runtime export`);
   }
 }
 for (const { layer } of [{ layer: 'components' }, { layer: 'blocks' }, { layer: 'pages' }]) {

@@ -1,12 +1,8 @@
-// Site theme state (ticket 12 §2): the shell-level pack × mode switcher.
+// Site theme state: one shell-level pack × mode selection.
 //
-// The switcher defaults to beam-dark blue, persists to localStorage, and is
-// applied flash-free by ticket 02's class-swap recipe: every theme's CSS
-// variables are pre-baked under its `prism-<pack>-<mode>` class (antd
-// `cssVar.key`, `hashed: false` — see scripts/bake-antd-css.mjs), and
-// THEME_BOOTSTRAP_SCRIPT swaps that class on <html> before first paint. React
-// only follows the class — component CSS is theme-agnostic, so the swap is the
-// whole repaint.
+// The switcher defaults to beam-dark blue, persists to localStorage, and uses
+// Prism's pre-baked `prism-<pack>-<mode>` classes. THEME_BOOTSTRAP_SCRIPT swaps
+// that class on <html> before first paint; React follows the same selection.
 
 import { prismBrandPacks, prismCssVarKey, type PrismMode, type PrismPackId } from '@nanisoft/prism-tokens';
 
@@ -54,7 +50,7 @@ export function parseThemeId(value: string | null | undefined): PrismThemeSelect
   return undefined;
 }
 
-/** The class that carries a theme's pre-baked CSS variables — antd's `cssVar.key`. */
+/** The class that carries a theme's pre-baked CSS variables. */
 export function themeClass(pack: PrismPackId, mode: PrismMode): string {
   return prismCssVarKey(pack, mode);
 }
@@ -65,9 +61,8 @@ const THEME_IDS = PACKS.flatMap((pack) => MODES.map((mode) => themeId(pack, mode
 
 /**
  * Blocking boot script inlined into <head>: applies the stored theme (or the
- * beam-dark-blue default) as the <html> class before first paint. It must stay
- * dependency-free — the `prism-` prefix is antd's cssVar prefix (prism-tokens'
- * `prismCssVarKey`); the theme-class test pins the two together.
+ * beam-dark-blue default) as the <html> class before first paint. It stays
+ * dependency-free and shares the key scheme with prism-tokens.
  */
 export const THEME_BOOTSTRAP_SCRIPT = [
   '(()=>{',

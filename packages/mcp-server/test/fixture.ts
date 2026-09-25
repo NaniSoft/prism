@@ -1,8 +1,9 @@
 /**
  * A representative `PrismDocsStore` for the tool tests — one of every shape
- * the corpus can hold: a pass-through re-export (`antdBase`, no props), a
- * Prism wrapper with its own props, a block with two documented examples, a
- * page-kind composition, plus docs pages and the four theme atoms.
+ * the corpus can hold: an internally Base UI-backed component with no authored
+ * props table, a native component with public props, a block with two documented
+ * examples, another prop-less block, and a page-kind composition, plus docs pages
+ * and four representative theme atoms.
  *
  * These are tests' hand-written data, not prism-llms output — the factory only
  * ever reads the shape.
@@ -17,34 +18,34 @@ export const FIXTURE: PrismDocsStore = {
     {
       name: 'Button',
       kind: 'component',
-      description: "antd Button, unchanged — a pass-through re-export. Import from '@nanisoft/prism-ui'.",
+      primitive: 'base-ui',
+      description: "The primary action control for commands, links, and loading states. Import from '@nanisoft/prism-ui'.",
       doc: [
         '# Button',
         '',
-        "antd Button, unchanged — a pass-through re-export. Import from '@nanisoft/prism-ui'.",
+        "The primary action control for commands, links, and loading states. Import from '@nanisoft/prism-ui'.",
         '',
-        '- Extends: antd **Button** — for inherited props and demos, use the antd MCP (`antd_info Button`).',
-        '',
-        '_No additional props beyond the antd base component._',
+        'Use one primary action per region and keep command labels explicit.',
       ].join('\n'),
-      antdBase: 'Button',
     },
     {
-      name: 'DisplayTitle',
+      name: 'Typography',
       kind: 'component',
-      description: 'Prism wrapper that layers Prism type tokens over antd Typography.',
-      doc: '# DisplayTitle\n\nA Prism wrapper. MUST set `level` explicitly — never rely on antd defaults.',
+      primitive: 'native',
+      description: 'Prism text, heading, and refracted display primitives on native elements.',
+      doc: '# Typography\n\nUse one semantic level per heading. Prism owns the visual type scale.',
       props: [
         '## Props',
         '',
         '| Prop | Type | Default | Description |',
         '| --- | --- | --- | --- |',
-        '| `level` | number | — | Heading level. |',
+        "| `as` | 'p' | 'p' | The native semantic element. |",
       ].join('\n'),
     },
     {
       name: 'PageHeader',
       kind: 'block',
+      primitive: 'native',
       description: 'Page-opening block: title, subtitle, breadcrumb, right-aligned actions.',
       doc: '# PageHeader\n\nPrism block. Usage: MUST keep actions right-aligned; SHOULD pass `breadcrumb` on deep pages.',
       props: [
@@ -67,36 +68,38 @@ export const FIXTURE: PrismDocsStore = {
       ],
     },
     {
-      name: 'StatRow',
+      name: 'StatCard',
       kind: 'block',
-      description: 'Row of stat tiles for dashboard summaries.',
-      doc: '# StatRow\n\nPrism block. Full documentation pending.',
+      primitive: 'native',
+      description: 'A labelled business signal with context and directional change.',
+      doc: '# StatCard\n\nPrism block. Pair every metric with a comparison period and a useful empty state.',
     },
     {
       name: 'SettingsPage',
       kind: 'page',
-      description: 'Full-page settings composition: header, sectioned form, action table.',
-      doc: '# SettingsPage\n\nFull-page composition over PageHeader and sectioned forms.',
-      examples: [{ slug: 'green-dark', code: "import { SettingsPage } from '@nanisoft/prism-ui';\n\nexport const Demo = () => <SettingsPage />;" }],
+      primitive: 'native',
+      description: 'A complete settings page composed from navigation, settings blocks, and form actions.',
+      doc: '# SettingsPage\n\nFull-page composition over SettingsPanel and native form controls.',
+      examples: [{ slug: 'profile', code: "import { SettingsPage } from '@nanisoft/prism-ui';\n\nexport const Demo = () => <SettingsPage />;" }],
     },
   ],
   pages: [
     {
       url: '/docs/theming',
       title: 'Theming',
-      description: 'Brand packs and modes; createPrismTheme().',
+      description: 'Five Spectral Refraction packs, modes, and createPrismTheme().',
       markdown: '# Theming\n\nBrand packs and modes; `createPrismTheme({ pack: "green", mode: "dark" })`.',
     },
     {
       url: '/docs/getting-started',
       title: 'Getting started',
-      markdown: '# Getting started\n\nInstall the packages from the nanisoft scope.',
+      markdown: '# Getting started\n\nInstall React and Prism, then import components from one package.',
     },
   ],
   themes: [
     { slug: 'blue-light', markdown: '# Theming — blue pack · light mode' },
-    { slug: 'blue-dark', markdown: '# Theming — blue pack · dark mode' },
+    { slug: 'blue-dark', markdown: '# Theming — blue pack · beam-dark mode' },
     { slug: 'green-light', markdown: '# Theming — green pack · light mode' },
-    { slug: 'green-dark', markdown: '# Theming — green pack · dark mode' },
+    { slug: 'green-dark', markdown: '# Theming — green pack · beam-dark mode' },
   ],
 };

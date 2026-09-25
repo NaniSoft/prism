@@ -1,6 +1,5 @@
-// Generated API tables (ticket 12 §2): the Prism-added props only — one
-// section per extracted interface, "Extends" noted for antd bases.
-// Pass-through items render nothing (the doc's own seam line covers them).
+// Generated API tables: one section per public Prism interface extracted from
+// the built declarations.
 
 import type { ReactElement } from 'react';
 
@@ -28,7 +27,7 @@ function PropsTable({ entry }: { entry: ExtractedInterface }): ReactElement {
       </h3>
       {entry.extendsType && (
         <p>
-          Extends <code>{entry.extendsType}</code> — see the antd base for inherited props.
+          Inherits <code>{entry.extendsType}</code>.
         </p>
       )}
       <table>

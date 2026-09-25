@@ -16,6 +16,9 @@ describe('createPrismMcpServer', () => {
     expect(() => createPrismMcpServer({ ...FIXTURE, items: [{ ...FIXTURE.items[0]!, kind: 'widget' as never }] })).toThrow(
       /items\[0\]\.kind/,
     );
+    expect(() => createPrismMcpServer({ ...FIXTURE, items: [{ ...FIXTURE.items[0]!, primitive: 'custom' as never }] })).toThrow(
+      /items\[0\]\.primitive/,
+    );
   });
 
   it('produces independent servers over the same docs', async () => {

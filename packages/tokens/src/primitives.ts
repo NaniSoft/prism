@@ -1,9 +1,4 @@
-/**
- * Tier 0 — primitive resolution per mode (ADR-0002 §2a).
- * Raw values with no meaning attached: the inputs to antd's generators plus the
- * raw values antd cannot derive. `PrismTheme.primitives` is resolved FOR a mode
- * (§1b) — the brand pack carries both modes, this picks one.
- */
+// Tier 0 — primitive resolution for one pack and mode.
 
 import { prismBrandPacks } from './brands.js';
 import type { PrismMode, PrismPackId, PrismPrimitiveTokens } from './types.js';
@@ -12,11 +7,10 @@ export function resolvePrimitives(pack: PrismPackId, mode: PrismMode): PrismPrim
   const brand = prismBrandPacks[pack];
   const light = mode === 'light';
 
-  const primitives: PrismPrimitiveTokens = {
+  return Object.freeze({
     colorInk: light ? brand.ink.light : brand.ink.dark,
     colorGround: light ? brand.ground.light : brand.ground.dark,
-    // Dark mode needs no container primitive (ADR-0002 §3).
-    ...(light ? { colorSurface: brand.surface.light } : {}),
+    colorContainer: light ? brand.surface.light : brand.surface.dark,
     colorText: light ? brand.text.light : brand.text.dark,
     colorHairline: light ? brand.hairline.light : brand.hairline.dark,
     colorSuccess: brand.state.success,
@@ -39,7 +33,5 @@ export function resolvePrimitives(pack: PrismPackId, mode: PrismMode): PrismPrim
     motionCurveStandard: brand.motion.curveStandard,
     motionCurveOpacity: brand.motion.curveOpacity,
     elevationFloating: light ? brand.elevation.floatingLight : brand.elevation.floatingDark,
-  };
-
-  return Object.freeze(primitives);
+  });
 }

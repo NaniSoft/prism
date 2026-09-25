@@ -37,8 +37,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 function docGroups(): CatalogGroup[] {
   const guides = docsSource
     .getPages()
-    .map((page) => ({ title: page.data.title ?? page.url, url: page.url }))
-    .sort((a, b) => a.title.localeCompare(b.title));
+    .map((page) => ({
+      title: page.data.title ?? page.url,
+      url: page.url,
+      description: page.data.description,
+    }))
+    .sort((a, b) => {
+      if (a.url === '/docs/quickstart') return -1;
+      if (b.url === '/docs/quickstart') return 1;
+      return a.title.localeCompare(b.title);
+    });
   return guides.length > 0 ? [{ group: 'Guides', items: guides }] : [];
 }
 
@@ -49,7 +57,7 @@ export default async function DocsPage({ params }: PageProps): Promise<ReactElem
     return (
       <SectionIndex
         title="Docs"
-        description="Guides and theming prose — start here, then take the taxonomy tour: components → blocks → pages."
+        description="Start with the install-and-import quickstart, then take the owned-source tour: components → blocks → pages. Agents begin at llms.txt or the Prism MCP."
         groups={docGroups()}
         emptyMessage="No guides yet. The agent surface (llms.txt and the prism MCP) is live today; prose arrives with the first guide."
       />

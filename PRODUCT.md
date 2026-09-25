@@ -8,55 +8,100 @@ web
 
 ## Stack
 
-Decided upstream in the Prism effort map (`.scratch/prism/map.md`), not by this interview: pnpm + Turborepo monorepo; antd v6 on React 19; Next.js 16 static export for the site; TypeScript strict, ESM-only; changesets + GitHub Actions; Cloudflare Workers Static Assets, with the site Worker also serving `/mcp`.
+Prism is a pnpm + Turborepo monorepo built on React 19 and TypeScript strict,
+ESM-only packages. `@nanisoft/prism-ui` owns the React source catalog and uses
+Base UI internally for accessible behavior; `@nanisoft/prism-tokens` is pure
+data and emits CSS custom properties. The docs site is a Next.js 16 static
+export on Cloudflare Workers Static Assets, and the same Worker serves the
+read-only MCP at `/mcp`. Changesets and GitHub Actions govern releases.
 
 ## Users
 
-- **AI agents** are the primary user of the design system itself: in the agentic era, apps are developed *by* AI agents (Claude Code and peers) that consume Prism's MCP server, `llms.txt`, per-component MD, and agent docs to build complete, branded apps. The system must be machine-legible end to end.
-- **NaniSoft developers** supervise that work and build NaniSoft's own apps (prism.nanisoft.com, internal tools) on the same packages.
-- Public npm consumers (`@nanisoft` scope, public availability) are secondary — beneficiaries, not the target.
+- **AI agents** are the primary users of the system's knowledge surface. They
+  consume the MCP, `llms.txt`, per-item Markdown, theme references, and live
+  demos to build complete branded applications without reverse-engineering a
+  visual language.
+- **NaniSoft developers** supervise that work and build NaniSoft products on
+  the same packages.
+- **Public npm consumers** receive the same MIT-licensed packages and can
+  compose the system in their own React applications.
 
 ## Product Purpose
 
-Prism is NaniSoft's design system: one design language, many expressions. Apps import from `@nanisoft/prism-ui` (never antd directly), getting themed antd v6 components plus pre-composed blocks and full pages, a docs site (prism.nanisoft.com), and a generated LLM/agent surface. Success: an agent can sit down with Prism alone and produce a NaniSoft-branded, production-quality app; a human can sit down with the site and understand the system in minutes.
+Prism is NaniSoft's design system: one design language, many expressions. Apps
+install React and `@nanisoft/prism-ui`, then assemble owned components, blocks,
+and pages without adopting a second UI vocabulary. The package ships the
+Spectral Refraction visual language, accessible behavior, docs, generated
+agent references, and one supported import boundary.
+
+Success means an agent can read Prism's public source of truth and produce a
+production-quality NaniSoft-branded app, while a human can understand the
+system's visual rules and composition model in minutes.
 
 ## Positioning
 
-The branded, agent-ready antd: a complete opinionated layer over antd v6 — brand themes, docs, MCP + LLM surfaces, codegen-enforced import invariants — that no raw antd install or generic component kit truthfully copies. Built so AI agents compose the brand instead of approximating it.
+Prism is the branded, agent-ready alternative to a generic component kit: a
+small, curated React system whose implementation details stay private and whose
+behavior, recipes, examples, and token tables are all inspectable. It does not
+attempt to mirror a large upstream component catalog. Every public item earns
+its place in a coherent workflow from components to blocks to pages.
 
 ## Operating Context
 
-- Agentic development workflows: IDE/CLI agents reading MCP tools (`/mcp` on the site Worker), `llms.txt`, and agent docs as their primary interface to the system.
-- Docs at prism.nanisoft.com (Fumadocs headless, static on Cloudflare Workers): rendered demos + copyable source.
-- Figma: one-way code → Variables token sync via a repo-owned plugin; no hand-built UI kit.
-- npm distribution public under the `nanisoft` scope.
+- The docs site is the human door: rendered examples, copyable source, live
+  theme controls, and a searchable catalog.
+- The generated corpus is the agent door: the site source, `llms.txt`, Markdown
+  mirrors, and MCP all project the same checked catalog and co-located demos.
+- Figma is a one-way token consumer: code-built DTCG output flows to Variables;
+  there is no hand-built UI kit and no two-way sync.
+- npm distribution is public under the `@nanisoft` scope.
 
 ## Capabilities and Constraints
 
-- antd v6 + React 19 foundation; `PrismProvider` wraps antd `ConfigProvider`; `@ant-design/icons` re-exported (no custom icons package).
-- Taxonomy inside `prism-ui`: components → blocks → pages; everything npm-delivered, never copied into apps.
-- Multi-brand theming from day one (`createPrismTheme()`); v1 ships the NaniSoft brand in blue and green color variants, light and dark modes.
-- ProComponents' stable line cannot take antd v6 — dashboard blocks build on plain antd v6.
-- Explicitly undecided (recorded, not invented): dashboard/admin catalog and visual-regression tooling wait on later map tickets.
+- React 19 is the consumer peer. Base UI is a direct implementation dependency
+  of `prism-ui` only; consumers do not install it.
+- The first catalog is intentionally curated: 29 components, 9 blocks, and 5
+  pages, organized as components → blocks → pages.
+- `PrismProvider` owns the serializable theme scope, theme context, link
+  adapter, and nearest local portal target.
+- Five brand packs ship in light and beam-dark modes, with AA contrast gates,
+  hairline elevation, the 2/4/6/4 radius family, dither texture, and the
+  established Archivo Variable / JetBrains Mono typography.
+- Styling is plain Prism CSS and generated custom properties. Tailwind is not
+  required.
+- The static site and MCP remain one product surface: the same generated corpus
+  is served to humans and agents.
 
 ## Brand Commitments
 
-- Name: **NaniSoft** (capital S); system name **Prism**. npm scope is lowercase `@nanisoft`.
-- Color: **the pastel five-pack spectrum** — blue, green, lavender, rose, peach; the founding hues kept their ids and were reforged into pastel voice (user-decided 2026-09-20, ADR-0005). Pastel is the atmosphere; inks stay mid-tones so the AA gate holds.
-- Modes: **light and dark** both required (user-pinned).
-- Character: **professional and next-gen** (user-pinned).
-- Anti-goals (user-pinned, binding): never reads as a generic admin template, never toy-startup playful, never heavy-enterprise legacy. Bold expression is NOT ruled out.
-- Greenfield: no pre-existing logo, palette, or typeface to honor.
+- Name: **NaniSoft**; system name: **Prism**; npm scope: `@nanisoft`.
+- Spectrum: five pastel packs — blue, green, lavender, rose, peach. Pastel is
+  atmosphere; mid-tone ink carries meaning and passes AA gates.
+- Modes: light and beam-dark.
+- Character: professional, precise, and next-generation.
+- Anti-goals: generic admin-template appearance, toy-startup playfulness, and
+  heavy-enterprise legacy.
+- Greenfield: no pre-existing logo, palette, or typeface constrains the system.
 
 ## Evidence on Hand
 
-- Effort map + research findings under `.scratch/prism/` (wayfinder decisions: plasma conventions, antd v6 stack, Fumadocs on Workers, Figma setup, remote MCP on Workers).
-- **Absences future work must not fabricate**: no logo, no marketing copy, no customer evidence, no benchmarks, no testimonials. Anything demo-shaped is synthetic until replaced.
+- The active migration map at `.scratch/prism-base-ui/` records the clean-break
+  decision, catalog shape, and acceptance gates.
+- Historical research and ADRs under `docs/adr/` and `.scratch/prism/` explain
+  earlier explorations; they are not evidence that the retired implementation
+  remains active.
+- Synthetic demos demonstrate composition but are not customer evidence,
+  benchmarks, testimonials, or adoption claims.
 
 ## Product Principles
 
-1. **Agents are first-class users.** Everything an agent needs — tokens, docs, component APIs, block source — is generated from one source of truth and never hand-copied.
-2. **One design language, many expressions.** Blue/green, light/dark are re-expressions of one system, not separate looks; theming proves the language, it doesn't fork it.
-3. **The brand layer is the product.** Prism diverges from stock antd on purpose — the divergence is the brand, and it's encoded in tokens, not overrides scattered through apps.
-4. **Assemble, never copy.** Components, blocks, and pages ship as npm packages; consuming apps own no design-system code.
-5. **Decisions are recorded, not remembered.** Maps, tickets, and ADRs carry the reasoning so any agent (or human) can pick up the why.
+1. **Agents are first-class users.** Every public API, token, example, and
+   usage rule is available in a form an agent can read and verify.
+2. **One design language, many expressions.** A pack or mode changes the
+   atmosphere, not the system's grammar.
+3. **The brand layer is the product.** Color, type, shape, motion, and texture
+   are encoded in Prism's own source and recipes.
+4. **Assemble, never copy.** Components, blocks, and pages ship as npm exports;
+   applications own their data and composition, not a fork of the system.
+5. **Decisions are recorded.** Active maps, tickets, and superseding ADRs carry
+   the reasoning so a human or agent can pick up the work.

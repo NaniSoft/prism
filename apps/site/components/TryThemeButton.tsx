@@ -7,13 +7,21 @@
 import { Button } from '@nanisoft/prism-ui/components/button';
 
 import { useThemeSelection } from '@/components/SiteThemeProvider';
-import type { PrismThemeSelection } from '@/lib/theme';
+import { MODE_LABELS, PACK_LABELS, type PrismThemeSelection } from '@/lib/theme';
 
 export function TryThemeButton({ selection }: { selection: PrismThemeSelection }) {
-  const { setSelection } = useThemeSelection();
+  const { selection: current, setSelection } = useThemeSelection();
+  const isCurrent = current.pack === selection.pack && current.mode === selection.mode;
+  const label = `${PACK_LABELS[selection.pack]} ${MODE_LABELS[selection.mode]}`;
+
   return (
-    <Button size="small" onClick={() => setSelection(selection)}>
-      Wear this theme
+    <Button
+      size="sm"
+      onClick={() => setSelection(selection)}
+      disabled={isCurrent}
+      aria-label={isCurrent ? `${label} theme is active` : `Wear ${label} theme`}
+    >
+      {isCurrent ? 'Wearing this theme' : 'Wear this theme'}
     </Button>
   );
 }

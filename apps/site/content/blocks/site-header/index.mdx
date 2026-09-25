@@ -1,11 +1,15 @@
 ---
-title: SiteHeader
-description: Prism block — full documentation pending.
+title: "SiteHeader"
+description: "A responsive product header with theme controls and mobile navigation."
 ---
-{/* prism:generated-stub v1 */}
+{/* prism:generated-owned v2 */}
 
 ```ts
-import { SiteHeader } from '@nanisoft/prism-ui/blocks';
+import { SiteHeader } from '@nanisoft/prism-ui/blocks/site-header';
 ```
 
-`SiteHeader` is a Prism block. Full documentation is pending — the prism MCP answers API questions in the meantime (`get_item_props`, `get_item_source`).
+SiteHeader is a Prism-owned block. Its behavior, public props, and Spectral Refraction recipe ship together from `@nanisoft/prism-ui`.
+
+- Import only from `@nanisoft/prism-ui`.
+- Keep the component inside `PrismProvider` when it uses an overlay, popup, or nested theme scope.
+- Use `className` for layout composition; visual state stays in the Prism recipe and CSS variables.

@@ -1,6 +1,6 @@
 // The registration contract (ADR-0004 §2): exactly the eight unprefixed tools,
-// tools only, and descriptions that carry the steering surface (import
-// invariant + antd delegation rule) every client shows.
+// tools only, and descriptions that carry the steering surface (owned surface +
+// import invariant) every client shows.
 
 import { describe, expect, it } from 'vitest';
 
@@ -52,13 +52,14 @@ describe('registration', () => {
     }
   });
 
-  it('carries the import invariant and antd delegation in every description', async () => {
+  it('carries the owned-surface and import invariants in every description', async () => {
     const h = await harness();
     try {
       const { tools } = await h.client.request({ method: 'tools/list', params: {} });
       for (const tool of tools) {
         expect(tool.description, tool.name).toContain("import from '@nanisoft/prism-ui'");
-        expect(tool.description, tool.name).toMatch(/antd/);
+        expect(tool.description, tool.name).toContain('Base UI');
+        expect(tool.description, tool.name).not.toContain('antd MCP');
       }
     } finally {
       await h.close();
@@ -82,7 +83,7 @@ describe('registration', () => {
       const { tools } = await h.client.request({ method: 'tools/list', params: {} });
       const doc = tools.find((tool) => tool.name === 'get_item_doc');
       expect(doc?.description).toContain('usage rules (RFC-2119)');
-      expect(doc?.description).toContain('use the antd MCP');
+      expect(doc?.description).toContain('never creates another import path');
     } finally {
       await h.close();
     }

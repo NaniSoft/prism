@@ -1,7 +1,7 @@
 {
   "name": "@nanisoft/prism-tokens",
   "version": "0.3.0",
-  "description": "Design tokens for Prism — the single source of truth for the Prism design language.",
+  "description": "Prism's pure token foundation — five brand packs, two modes, semantic CSS variables, and DTCG output for the Spectral Refraction design language.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,

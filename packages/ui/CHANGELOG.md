@@ -1,5 +1,16 @@
 # @nanisoft/prism-ui
 
+## Next release — Prism-owned Base UI runtime
+
+### Breaking changes
+
+- Replace the retired generated component layer with the curated Prism-owned
+  components → blocks → pages catalog. Base UI remains an internal accessibility
+  dependency; no Base UI symbols are re-exported in public declarations.
+- `PrismProvider`, theme objects, and the plain-CSS variable surface are the
+  supported theming API. Migrate consumers from the previous runtime and theme
+  lane before upgrading.
+
 ## 0.4.0
 
 ### Minor Changes

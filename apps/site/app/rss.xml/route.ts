@@ -19,7 +19,7 @@ export function GET(): Response {
   const feed = new Feed({
     title: 'Prism — one design language, many expressions',
     description:
-      "NaniSoft's Ant Design–based design system: tokens, components, blocks, and pages, with docs and an LLM/agent surface.",
+      "NaniSoft's Prism-owned design system: tokens, components, blocks, pages, and an agent-ready docs surface.",
     id: `${BASE_URL}/blog`,
     link: `${BASE_URL}/blog`,
     language: 'en',
