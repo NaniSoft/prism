@@ -4,11 +4,21 @@
 // this only renders it.
 
 import type { CSSProperties, ReactNode } from 'react';
+import type { PrismMode } from '@nanisoft/prism-tokens';
 
 import { productDotBackground, type PrismProduct } from './index.js';
 
-export function ProductDot({ product, className }: { product: PrismProduct; className?: string }): ReactNode {
-  const style: CSSProperties = { background: productDotBackground(product) };
+export function ProductDot({
+  product,
+  mode = 'light',
+  className,
+}: {
+  product: PrismProduct;
+  /** Ambient mode — beam-dark dots wear the lightened pack inks. */
+  mode?: PrismMode;
+  className?: string;
+}): ReactNode {
+  const style: CSSProperties = { background: productDotBackground(product, mode) };
   return (
     <span
       className={['prism-product-dot', className].filter(Boolean).join(' ')}

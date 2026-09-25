@@ -42,12 +42,12 @@ export function SiteHeader({ site, nav, cta, sticky = true, className }: SiteHea
     label:
       product.id === site ? (
         <span className="prism-site-header__switcher-current" aria-current="true">
-          <ProductDot product={product} />
+          <ProductDot product={product} mode={mode} />
           {product.name}
         </span>
       ) : (
         <Link href={product.url}>
-          <ProductDot product={product} />
+          <ProductDot product={product} mode={mode} />
           {product.name}
         </Link>
       ),
@@ -66,7 +66,7 @@ export function SiteHeader({ site, nav, cta, sticky = true, className }: SiteHea
         {/* Link carries only { href, children } — brand styling wraps inside. */}
         <Link href="/">
           <span className="prism-site-header__brand">
-            <ProductDot product={current} />
+            <ProductDot product={current} mode={mode} />
             {current.name}
           </span>
         </Link>
@@ -132,7 +132,7 @@ export function SiteHeader({ site, nav, cta, sticky = true, className }: SiteHea
           <div className="prism-site-header__drawer-products">
             {prismProducts.map((product) => (
               <Link key={product.id} href={product.url}>
-                <ProductDot product={product} />
+                <ProductDot product={product} mode={mode} />
                 {product.name}
                 {product.id === site ? <span className="prism-site-header__drawer-here">here</span> : null}
               </Link>

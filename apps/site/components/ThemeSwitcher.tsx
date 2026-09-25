@@ -4,7 +4,9 @@
 // with each pack's own ink as its swatch dot — plus the mode (light | beam-dark)
 // control, driving SiteThemeProvider.
 
-import { Segmented } from '@nanisoft/prism-ui/components';
+// Keep this on the per-component subpath: the aggregate components barrel
+// pulls the full antd client surface into Turbopack's client graph.
+import { Segmented } from '@nanisoft/prism-ui/components/segmented';
 
 import { useThemeSelection } from '@/components/SiteThemeProvider';
 import { MODES, MODE_LABELS, PACKS, PACK_LABELS, packSwatch } from '@/lib/theme';
@@ -22,7 +24,7 @@ export function ThemeSwitcher() {
           value: pack,
           label: (
             <span className="site-pack-option">
-              <span className="site-pack-option__dot" style={{ background: packSwatch(pack) }} aria-hidden />
+              <span className="site-pack-option__dot" style={{ background: packSwatch(pack, selection.mode) }} aria-hidden />
               <span className="site-pack-option__label">{PACK_LABELS[pack]}</span>
             </span>
           ),

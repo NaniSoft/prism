@@ -44,6 +44,10 @@ export function DemoView({ code, children }: DemoViewProps) {
           <CopyOutlined aria-hidden />
           {copied ? 'Copied' : 'Copy'}
         </Button>
+        {/* Announce the copy for screen readers — the label swap alone is silent. */}
+        <span className="prism-visually-hidden" role="status" aria-live="polite">
+          {copied ? 'Copied to clipboard' : ''}
+        </span>
       </div>
     </div>
   );

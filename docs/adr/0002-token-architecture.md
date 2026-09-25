@@ -94,7 +94,7 @@ Raw values with no meaning attached. Prism's primitive tier is intentionally *sm
 
 ### 2b. Tier 1 — semantics (`prism.semantic.*`)
 
-Named for meaning; the only tier `prism-ui` components, blocks, pages, and consuming apps read. Every semantic resolves in both modes and every semantic names its antd destination (or explicitly declares none). ~35 tokens total against antd's 234 documented global tokens.
+Named for meaning; the only tier `prism-ui` components, blocks, pages, and consuming apps read. Every semantic resolves in both modes and every semantic names its antd destination (or explicitly declares none). ~39 tokens total against antd's 234 documented global tokens.
 
 | Semantic | antd destination | Lane |
 | --- | --- | --- |
@@ -110,6 +110,7 @@ Named for meaning; the only tier `prism-ui` components, blocks, pages, and consu
 | `accent.live` (selection/active/pressed flood) | `controlItemBgActive`, `controlItemBgActiveHover`, `colorBgTextActive`, `colorPrimaryTextActive` | map allowlist |
 | `focus.ring` | `controlOutline`, `controlOutlineWidth`, `focusOutline`, `lineWidthFocus`, seed `lineWidth` | map allowlist + seed |
 | `state.success` / `.warning` / `.error` / `.info` | `colorSuccess` / `colorWarning` / `colorError` / `colorInfo` | seed |
+| `state.successText` / `.warningText` / `.errorText` / `.infoText` | `colorSuccessText` / `colorWarningText` / `colorErrorText` / `colorInfoText` | map allowlist |
 | `shape.radius.sm` / `.base` / `.lg` / `.outer` | `borderRadius` (seed) + `borderRadiusSM`, `borderRadiusLG` (map allowlist — see §2c) | seed + map allowlist |
 | `type.*` | `fontFamily`, `fontFamilyCode`, `fontSize`, `fontWeightStrong` | seed + alias |
 | `space.unit` / `.step` | `sizeUnit`, `sizeStep` | seed |
@@ -123,7 +124,7 @@ Named for meaning; the only tier `prism-ui` components, blocks, pages, and consu
 
 Three lanes, in priority order:
 
-1. **Seed tokens.** Where antd offers a seed, Prism sets the seed and lets the algorithm derive: `colorPrimary`, `colorLink`, `colorSuccess`, `colorWarning`, `colorError`, `colorInfo`, `colorBgBase`, `colorTextBase`, `borderRadius`, `lineWidth`, `sizeUnit`, `sizeStep`, `motionUnit`, `motionBase`, `motionEaseOut`, `motionEaseInOut`, `motionEaseOutQuint`, `motionEaseOutCirc`, `fontFamily`, `fontFamilyCode`, `fontSize`. Never `colorBgBase`/`colorTextBase`-adjacent map tokens by hand.
+1. **Seed tokens.** Where antd offers a seed, Prism sets the seed and lets the algorithm derive: `colorPrimary`, `colorLink`, `colorSuccess`, `colorWarning`, `colorError`, `colorInfo`, `colorBgBase`, `colorTextBase`, `borderRadius`, `lineWidth`, `sizeUnit`, `sizeStep`, `motionUnit`, `motionBase`, `motionEaseOut`, `motionEaseInOut`, `motionEaseOutQuint`, `motionEaseOutCirc`, `motionEaseOutBack`, `motionEaseInBack`, `fontFamily`, `fontFamilyCode`, `fontSize`. Never `colorBgBase`/`colorTextBase`-adjacent map tokens by hand. (The two `*Back` curves are included because antd's defaults overshoot and the brand bans overshoot — erratum 3.)
 2. **The map-token allowlist (`PrismAntdMapKey`).** Hand-setting map tokens is forbidden *except* where antd's derivation provably cannot express the value. The allowlist is a closed union type, every entry carries a written justification, and a test asserts the emitted keys are a subset of it:
 
    ```ts
@@ -132,22 +133,24 @@ Three lanes, in priority order:
      | 'motionDurationSlow'                     // motionUnit 0.08 → 240ms, not 280ms
      | 'colorBgLayout' | 'colorBgMask'          // light-mode ground + scrim
      | 'colorBorder' | 'colorBorderSecondary' | 'colorSplit'  // cool hairlines
+     | 'colorPrimaryBorder'                         // antd's genFocusOutline() hardcodes this as the :focus-visible outline colour — its derived stop fails 1.4.11
+     | 'colorSuccessText' | 'colorWarningText' | 'colorErrorText' | 'colorInfoText' // accessible state-tag labels
      | 'controlItemBgActive' | 'controlItemBgActiveHover' | 'colorBgTextActive' | 'colorPrimaryTextActive' // accent flood
      | 'controlOutline' | 'focusOutline'        // hairline focus ring
      | 'boxShadow' | 'boxShadowSecondary' | 'boxShadowTertiary'; // one shadow, or none
    ```
 
    The two mathematical entries are the reason the allowlist exists and the reason it cannot be waived away. From antd's own source: `genRadius(4)` returns `borderRadiusSM: 4`, `borderRadiusLG: 4`, `borderRadiusOuter: 4` (the `< 6` branch only bumps LG at ≥5), so the Spectral 2/4/6/4 family needs `borderRadius: 4` as a seed plus `borderRadiusSM: 2`, `borderRadiusLG: 6` by hand. And `genCommonMapToken` derives `motionDurationFast/Mid/Slow` as `motionBase + motionUnit × {1,2,3}` seconds, so `motionUnit: 0.08` yields 80/160/**240**ms — the locked 280ms slow duration must be set directly.
-3. **`components` overrides.** Only where a *component* token is the only surface that exists, and only with `algorithm: true` set (antd does not re-derive component tokens from seeds unless told to, so a bare override silently behaves as a flat patch):
+3. **`components` overrides.** Only where a *component* token is the only surface that exists. Overrides are flat patches — deliberately **without** `algorithm: true` (erratum 3):
 
    ```ts
    components: {
-     Button: { primaryShadow: 'none', defaultShadow: 'none', dangerShadow: 'none', algorithm: true },
-     Input:  { activeShadow: 'none', errorActiveShadow: 'none', warningActiveShadow: 'none', algorithm: true },
+     Button: { primaryShadow: 'none', defaultShadow: 'none', dangerShadow: 'none', primaryColor: semantics.textOnInk },
+     Input:  { activeShadow: 'none', errorActiveShadow: 'none', warningActiveShadow: 'none' },
    }
    ```
 
-   Beam-crisp means flat buttons and hairline focus rings, so every component-level shadow is zeroed; the focus ring comes from `controlOutline`/`focusOutline` instead. Component overrides are enumerated in the pack, never appended ad hoc, and the `algorithm: true` companion is lint-enforced.
+   Beam-crisp means flat buttons and hairline focus rings, so every component-level shadow is zeroed; the focus ring comes from `controlOutline`/`focusOutline` instead. Component overrides are enumerated in the pack, never appended ad hoc. The original `algorithm: true` companion is removed by erratum 3 — it caused the component scope to re-derive from antd's defaults and discard the pack's map-token hairlines. `Button.primaryColor` is added by erratum 6 — antd defaults it to `colorTextLightSolid` (`#fff`), which fails AA on every lightened beam-dark ink.
 
 ### 2d. Where the DTCG / Figma export slots in
 
@@ -239,3 +242,56 @@ Carried as decision points in the ticket (`.scratch/prism/issues/09-token-archit
 5. The light-mode `surface.container` primitive (§3) — recommendation: add it.
 6. The `wireframe` seed — recommendation: leave `false`; hairline elevation is expressed per component, not by flipping antd's global wireframe mode.
 7. The four brand-ink values (§2a) — recommendation: pin them in the pack's implementation pass, not in this ADR.
+
+## Errata
+
+### Erratum 3 — component overrides drop `algorithm: true` (2026-09-25)
+
+**Supersedes §2c lane 3.** The original rule made `algorithm: true` mandatory on every `components` override. That flag is now removed from `Button` and `Input`; the overrides are flat patches (shadow-zeroing only).
+
+Evidence: with `algorithm: true`, antd emitted component-scoped rulesets (`.prism-<pack>-<mode>.ant-btn`, `.ant-input`, `.ant-input-search`, `.ant-otp`) that re-declared `--prism-color-border` and `--prism-button-default-border-color` from antd's **default** tokens, discarding the pack's map-token overrides. In light mode this produced stock greys (`#d9d9d9`, `#f0f0f0`) instead of the variant-tinted hairlines the whole visual language is built on; dark mode happened to be tinted but was still the wrong value. Removing the flag lets each component scope inherit the pack's `colorBorder`/`defaultBorderColor`, and `Button`'s own `defaultBorderColor` resolves to `semantics.hairlineStrong`.
+
+Both `theme.ts` and the bake are covered by tests (`tokens.test.ts` asserts no `algorithm` key and the tinted component borders; `theming-bake.test.ts` pins the extraction).
+
+### Erratum 4 — antd's `*Back` easing presets are overridden (2026-09-25)
+
+antd's seed `motionEaseOutBack` (`cubic-bezier(0.12, 0.4, 0.29, 1.46)`) and `motionEaseInBack` (`cubic-bezier(0.71, -0.46, 0.88, 0.6)`) overshoot, and antd consumes them in `Badge` and `Form`. DESIGN.md bans bounce/overshoot easing, so both seeds now carry `semantics.motionCurveStandard` — the brand's single decelerating bezier.
+
+### Erratum 5 — state hues darkened and gated for text contrast (2026-09-25)
+
+**Supersedes the `color.success` / `color.warning` rows in §2a and ADR-0001 §8's values.** The shared state hues double as text (tags, status lines), but the old success `#16A34A` (3.30:1) and warning `#D97706` (3.19:1) failed WCAG AA on the white surface, and neither was checked by any gate. They are now:
+
+| token | was | now | rationale |
+| --- | --- | --- | --- |
+| `state.success` | `#16A34A` | `#15803D` | 5.02:1 on white, 3.54:1 on the darkest beam ground |
+| `state.warning` | `#D97706` | `#B45309` | 5.02:1 on white, 3.54:1 on the darkest beam ground |
+
+`state.error` (`#DC2626`, 4.83:1) and `state.info` (`#2563EB`, 5.17:1) already passed and are unchanged. `validateBrandPack()` now gates every state hue at ≥4.5:1 on `surface.light` and ≥3:1 on `ground.dark`.
+
+**Known residual — not a seed problem.** antd's *preset* `Tag` colours (`color="success"` etc.) derive their background from the seed and fail AA for **every** seed tested: `#16A34A` 2.47:1, `#15803D` 2.64:1, `#166534` 2.84:1 (light). No seed can satisfy it, because antd mixes the tag background toward the *seed* rather than toward the surface, so a darker seed drags the background down with it. Accessible state tags must therefore be rendered on Prism's own tinted-wash pattern (a tint of the ink plus a `stateXText` at ≥4.5:1), not via antd's preset.
+
+### Erratum 6 — focus outline and solid-button text routed to accessible tokens (2026-09-25)
+
+Two contrast defects survived the first audit because both live in antd components the token gates never inspect:
+
+1. **Focus outline.** antd v6's `genFocusOutline()` hardcodes `colorPrimaryBorder` as the `:focus-visible` outline colour. Its derived stop is a mid-tint that measures **1.53:1** against our grounds (blue beam-dark) and 1.70:1 against the light container — failing WCAG 1.4.11. `controlOutline` is never used for it. `colorPrimaryBorder` is now allowlisted (17 → 18 keys) and set to `semantics.inkPrimary`, which holds ≥4.6:1 on every ground and container across all ten themes. A side benefit: a focused input now reads "ink", which is what the design always described.
+2. **Solid-button label.** `Button.primaryColor` defaults to `colorTextLightSolid`, which antd resolves to `colorWhite` (`#fff`). On the lightened beam-dark inks that yields 2.79–4.18:1 — a fail in every dark pack. `colorWhite` is a **map** token, not a seed, so overriding it would have leaked into every "white" role. Instead `Button.primaryColor` now carries `semantics.textOnInk` (white in light, `#0A0F1C` in beam-dark), which clears 4.5:1 on all ten. The beam-dark ink was nudged from `#0B1220` to `#0A0F1C` because blue's beam-dark button sat at 4.48:1.
+
+Both are covered by tests in `tokens.test.ts`.
+
+### Erratum 7 — state tags use Prism's accessible tinted-wash recipe (2026-09-25)
+
+**Supersedes the residual in Erratum 5.** Antd's preset state `Tag` is not a seed problem: every success seed tested fails WCAG AA in light mode — `#16A34A` measures 2.47:1, `#15803D` 2.64:1, and `#166534` 2.84:1. The rendered rule makes the reason visible:
+
+```css
+.ant-tag-success:not(.ant-tag-disabled).ant-tag-filled {
+  background-color: var(--prism-color-success-bg);
+  color: var(--prism-color-success);
+}
+```
+
+The label is the raw `colorSuccess` seed, not `colorSuccessText`; the selector is `(0,3,0)`, so a plain single-class token override cannot win. Changing the seed also cannot fix the tag because antd mixes the background toward that seed rather than toward the surface. This is a component-recipe problem, not another state-hue gate.
+
+Prism therefore adds four mode-aware tier-1 semantics, `stateSuccessText`, `stateWarningText`, `stateErrorText`, and `stateInfoText`. Light labels darken the raw hue 5% toward black; beam-dark labels lighten it 50% toward white. Each is allowlisted to its corresponding antd `colorXText` map token: antd's derived mid-tint is below AA on Prism's own tinted tag surface. The four new map entries grow the closed allowlist from **18 to 22 keys**. The CSS recipe mixes 10% of the state hue into the container in light mode and 22% in beam-dark, and all Prism status tags render without antd's `color` preset so the recipe, rather than antd's higher-specificity preset rule, owns the color roles.
+
+The resulting token-level contrast gate covers all ten pack × mode expressions: the worst light case is error at **4.51:1**, and the full beam-dark matrix bottoms out at green info at **5.02:1** (the peach-warning sample is 5.35:1), against the respective washed container surfaces. Both are covered by `tokens.test.ts` and the rendered sites use the new `.prism-state-tag` modifiers.

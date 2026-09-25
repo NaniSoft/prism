@@ -17,6 +17,16 @@ export function tintRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+/** Mix two 6-digit hex colors in sRGB; `t` is the weight of `a`. */
+export function mixHex(a: string, b: string, t: number): string {
+  const channel = (offset: number): string => {
+    const aChannel = Number.parseInt(a.slice(offset, offset + 2), 16);
+    const bChannel = Number.parseInt(b.slice(offset, offset + 2), 16);
+    return Math.round(aChannel * t + bChannel * (1 - t)).toString(16).padStart(2, '0').toUpperCase();
+  };
+  return `#${channel(1)}${channel(3)}${channel(5)}`;
+}
+
 export function resolveSemantics(primitives: PrismPrimitiveTokens, mode: PrismMode): PrismSemanticTokens {
   const light = mode === 'light';
   const ink = primitives.colorInk;
@@ -33,7 +43,7 @@ export function resolveSemantics(primitives: PrismPrimitiveTokens, mode: PrismMo
     textSecondary: tintRgba(text, 0.68),
     textTertiary: tintRgba(text, 0.45),
     textFaint: tintRgba(text, 0.3),
-    textOnInk: light ? '#FFFFFF' : '#0B1220',
+    textOnInk: light ? '#FFFFFF' : '#0A0F1C',
 
     // The accent that owns live states is the ink itself (ADR-0001 §7).
     inkPrimary: ink,
@@ -47,11 +57,18 @@ export function resolveSemantics(primitives: PrismPrimitiveTokens, mode: PrismMo
     accentLive: tintRgba(ink, light ? 0.1 : 0.2),
     focusRing: tintRgba(ink, light ? 0.35 : 0.55),
 
-    // States
+    // States — the hue is the seed; the text color is deliberately mode-aware.
+    // antd's preset Tag paints the raw seed on its own derived wash, which is
+    // below AA; the Prism tag recipe uses these dedicated text tokens instead
+    // (ADR-0002 erratum 7).
     stateSuccess: primitives.colorSuccess,
     stateWarning: primitives.colorWarning,
     stateError: primitives.colorError,
     stateInfo: primitives.colorInfo,
+    stateSuccessText: mixHex(primitives.colorSuccess, light ? '#000000' : '#FFFFFF', light ? 0.95 : 0.5),
+    stateWarningText: mixHex(primitives.colorWarning, light ? '#000000' : '#FFFFFF', light ? 0.95 : 0.5),
+    stateErrorText: mixHex(primitives.colorError, light ? '#000000' : '#FFFFFF', light ? 0.95 : 0.5),
+    stateInfoText: mixHex(primitives.colorInfo, light ? '#000000' : '#FFFFFF', light ? 0.95 : 0.5),
 
     // Shape
     shapeRadiusSm: primitives.shapeRadiusSm.toString(),

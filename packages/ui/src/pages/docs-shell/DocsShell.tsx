@@ -37,7 +37,13 @@ function DocsNav({ entries, className }: { entries: DocsNavEntry[]; className: s
     <ul className={className}>
       {entries.map((entry) => (
         <li key={entry.id}>
-          <a href={entry.url}>{entry.title}</a>
+          {/* Separators and index-less folders carry no destination: render them
+              as a non-link label, never an empty `<a href="">` (WCAG 4.1.2). */}
+          {entry.url ? (
+            <a href={entry.url}>{entry.title}</a>
+          ) : (
+            <span className="prism-docs-shell__nav-label">{entry.title}</span>
+          )}
           {entry.children && entry.children.length > 0 && <DocsNav entries={entry.children} className={`${className}__nested`} />}
         </li>
       ))}
@@ -51,7 +57,7 @@ export function DocsShell({ children, title, description, nav, toc, neighbours, 
       {header}
       <div className="prism-docs-shell__body">
         {nav && nav.length > 0 && (
-          <aside className="prism-docs-shell__sidebar">
+          <aside className="prism-docs-shell__sidebar" aria-label="Section navigation">
             <DocsNav entries={nav} className="prism-docs-shell__nav" />
           </aside>
         )}
@@ -79,7 +85,7 @@ export function DocsShell({ children, title, description, nav, toc, neighbours, 
           )}
         </article>
         {toc && toc.length > 0 && (
-          <aside className="prism-docs-shell__toc">
+          <aside className="prism-docs-shell__toc" aria-label="On this page">
             <DocsNav entries={toc} className="prism-docs-shell__toc-list" />
           </aside>
         )}

@@ -44,7 +44,9 @@ function parseAntdComponents(): string[] {
 function parseGeneratedBarrel(): { values: string[]; proxyDirs: string[] } {
   const content = fs.readFileSync(path.join(root, 'src', 'generated', 'antd-components.ts'), 'utf8');
   const values: string[] = [];
-  for (const match of content.matchAll(/export\s*\{\s*([A-Za-z][A-Za-z0-9]*)\s*\}\s*from\s+'antd';/g)) {
+  for (const match of content.matchAll(
+    /export\s*\{\s*(?:default as\s+)?([A-Za-z][A-Za-z0-9]*)\s*\}\s*from\s+'antd(?:\/es\/[^']+)?';/g,
+  )) {
     values.push(match[1]);
   }
   const proxyDirs = fs

@@ -93,6 +93,22 @@ for (const pack of PACKS) {
   }
 }
 
+const css = chunks.join('\n');
+const totalBytes = Buffer.byteLength(css, 'utf8');
+
+// Byte-budget guard (audit 2026-09-25): the single pre-baked file keeps the
+// class-swap flash-free for every stored theme and covers every component the
+// docs demo. Splitting per theme would trade that guarantee away for stored
+// non-default themes, so growth is capped here instead of silently drifting.
+const MAX_TOTAL_BYTES = 640 * 1024;
+if (totalBytes > MAX_TOTAL_BYTES) {
+  throw new Error(
+    `bake-antd-css: ${totalBytes} bytes exceeds the ${MAX_TOTAL_BYTES}-byte budget — trim the bake or ship per-theme chunks with a synchronous loader`,
+  );
+}
+
 await mkdir(path.dirname(OUT_FILE), { recursive: true });
-await writeFile(OUT_FILE, chunks.join('\n'));
-console.log(`bake-antd-css: wrote ${path.relative(process.cwd(), OUT_FILE)}`);
+await writeFile(OUT_FILE, css);
+console.log(
+  `bake-antd-css: wrote ${path.relative(process.cwd(), OUT_FILE)} (${(totalBytes / 1024).toFixed(0)} KB of ${MAX_TOTAL_BYTES / 1024} KB budget)`,
+);

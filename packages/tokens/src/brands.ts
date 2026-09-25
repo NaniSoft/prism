@@ -30,6 +30,18 @@ const PEACH_INK_LIGHT = '#B04A17'; // coral terracotta — 4.98:1 on the peach-c
 const PEACH_INK_DARK = '#F2A05C'; // lightened apricot for the amber-dusk beam ground
 
 // ──────────────────────────────────────────────────────────────────────────────
+// Shared state hues (ADR-0001 §8) — one meaning across the whole spectrum.
+// Darkened one step from the stock 600-shades so they hold AA (4.5:1) as text on
+// the white surface: the old #16A34A/#D97706 read 3.30:1/3.19:1 and failed.
+// Enforced by the state-contrast gate in validateBrandPack().
+// ──────────────────────────────────────────────────────────────────────────────
+
+const STATE_SUCCESS = '#15803D'; // green-700 — 5.02:1 on white, 3.54:1 on the darkest beam ground
+const STATE_WARNING = '#B45309'; // amber-700 — 5.02:1 on white, 3.54:1 on the darkest beam ground
+const STATE_ERROR = '#DC2626'; // red-600 — 4.83:1 on white (unchanged)
+const STATE_INFO = '#2563EB'; // the blue ink; 5.17:1 on white
+
+// ──────────────────────────────────────────────────────────────────────────────
 // Shared tier-0 constants — the system shape a pack cannot change (ADR-0002 §4).
 // The floating shadow is the single cool-tinted shadow (ADR-0001 §3); the CSS
 // string carries an explicit `0` spread and is byte-identical across the antd
@@ -68,7 +80,7 @@ const bluePackInput: BrandPackInput = {
   surface: { light: '#FFFFFF' },
   text: { light: '#1A2A4A', dark: '#E8EEF9' },
   hairline: { light: 'rgba(30, 64, 158, 0.10)', dark: 'rgba(158, 191, 255, 0.18)' },
-  state: { success: '#16A34A', info: BLUE_INK_LIGHT, warning: '#D97706', error: '#DC2626' },
+  state: { success: STATE_SUCCESS, info: BLUE_INK_LIGHT, warning: STATE_WARNING, error: STATE_ERROR },
 };
 
 const greenPackInput: BrandPackInput = {
@@ -78,7 +90,7 @@ const greenPackInput: BrandPackInput = {
   surface: { light: '#FFFFFF' },
   text: { light: '#162A1A', dark: '#E8EEF9' },
   hairline: { light: 'rgba(17, 90, 47, 0.10)', dark: 'rgba(134, 239, 172, 0.16)' },
-  state: { success: '#16A34A', info: '#2563EB', warning: '#D97706', error: '#DC2626' },
+  state: { success: STATE_SUCCESS, info: STATE_INFO, warning: STATE_WARNING, error: STATE_ERROR },
 };
 
 const lavenderPackInput: BrandPackInput = {
@@ -88,7 +100,7 @@ const lavenderPackInput: BrandPackInput = {
   surface: { light: '#FFFFFF' },
   text: { light: '#262044', dark: '#ECE9FA' },
   hairline: { light: 'rgba(84, 70, 176, 0.10)', dark: 'rgba(157, 141, 244, 0.17)' },
-  state: { success: '#16A34A', info: '#2563EB', warning: '#D97706', error: '#DC2626' },
+  state: { success: STATE_SUCCESS, info: STATE_INFO, warning: STATE_WARNING, error: STATE_ERROR },
 };
 
 const rosePackInput: BrandPackInput = {
@@ -98,7 +110,7 @@ const rosePackInput: BrandPackInput = {
   surface: { light: '#FFFFFF' },
   text: { light: '#331B29', dark: '#F9EAF1' },
   hairline: { light: 'rgba(150, 48, 92, 0.10)', dark: 'rgba(240, 140, 180, 0.17)' },
-  state: { success: '#16A34A', info: '#2563EB', warning: '#D97706', error: '#DC2626' },
+  state: { success: STATE_SUCCESS, info: STATE_INFO, warning: STATE_WARNING, error: STATE_ERROR },
 };
 
 const peachPackInput: BrandPackInput = {
@@ -108,7 +120,7 @@ const peachPackInput: BrandPackInput = {
   surface: { light: '#FFFFFF' },
   text: { light: '#3A241A', dark: '#FAF0E4' },
   hairline: { light: 'rgba(146, 62, 24, 0.10)', dark: 'rgba(242, 160, 92, 0.17)' },
-  state: { success: '#16A34A', info: '#2563EB', warning: '#D97706', error: '#DC2626' },
+  state: { success: STATE_SUCCESS, info: STATE_INFO, warning: STATE_WARNING, error: STATE_ERROR },
 };
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -155,7 +167,20 @@ function validateBrandPack(input: BrandPackInput): void {
     throw new Error(`Brand pack "${pack}": ink.dark vs ground.dark contrast ${inkDark.toFixed(2)}:1 fails WCAG AA large (3:1)`);
   }
 
-  // 3. No ground is pure black or pure white (beam rule).
+  // 3. State hues double as text (tags, status lines): AA on the light surface,
+  //    and no lower than the 3:1 UI floor on the beam ground.
+  for (const [name, value] of Object.entries(input.state)) {
+    const onSurface = contrastRatio(value, surface.light);
+    if (onSurface < 4.5) {
+      throw new Error(`Brand pack "${pack}": state.${name} on surface.light contrast ${onSurface.toFixed(2)}:1 fails WCAG AA (4.5:1)`);
+    }
+    const onBeam = contrastRatio(value, ground.dark);
+    if (onBeam < 3) {
+      throw new Error(`Brand pack "${pack}": state.${name} on ground.dark contrast ${onBeam.toFixed(2)}:1 fails WCAG AA large (3:1)`);
+    }
+  }
+
+  // 4. No ground is pure black or pure white (beam rule).
   for (const mode of ['light', 'dark'] as const) {
     const g = ground[mode].toUpperCase();
     if (g === '#FFFFFF' || g === '#000000') {

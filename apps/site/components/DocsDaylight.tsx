@@ -20,7 +20,7 @@ export function DocsDaylight() {
         <div className="site-shell">
           <span className="site-landing__note">docs / components / button</span>
           <div className="site-landing__daylight-card" style={{ maxWidth: 980, marginTop: 18 }}>
-            <DisplayTitle level={3} style={{ margin: 0 }}>
+            <DisplayTitle level={2} style={{ margin: 0 }}>
               Button
             </DisplayTitle>
             <p style={{ margin: 0, opacity: 0.8, lineHeight: 1.65, maxWidth: '58ch' }}>

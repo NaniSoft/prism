@@ -53,7 +53,7 @@ function ThemeIsland({ pack, mode }: { pack: PrismPackId; mode: PrismMode }): Re
       <div className={`site-themes__island ${themeClass(pack, mode)}`}>
         <div className="site-themes__island-head">
           <span className="site-themes__island-name">
-            <span className="site-themes__island-dot" style={{ background: packSwatch(pack) }} aria-hidden />
+            <span className="site-themes__island-dot" style={{ background: packSwatch(pack, mode) }} aria-hidden />
             {PACK_LABELS[pack]}
           </span>
           <span className="site-mono site-themes__island-mode">{MODE_LABELS[mode]}</span>
@@ -71,10 +71,10 @@ function ThemeIsland({ pack, mode }: { pack: PrismPackId; mode: PrismMode }): Re
           </div>
           <Input placeholder="Search the spectrum…" />
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Tag color="success">success</Tag>
-            <Tag color="warning">warning</Tag>
-            <Tag color="error">error</Tag>
-            <Tag color="processing">info</Tag>
+            <Tag className="prism-state-tag prism-state-tag--success">success</Tag>
+            <Tag className="prism-state-tag prism-state-tag--warning">warning</Tag>
+            <Tag className="prism-state-tag prism-state-tag--error">error</Tag>
+            <Tag className="prism-state-tag prism-state-tag--info">info</Tag>
             <Switch defaultChecked size="small" aria-label="Live state" />
             <div style={{ flex: 1, minWidth: 120 }}>
               {/* The accent owns live states — the meter wears the island's ink, never antd's info blue. */}
@@ -129,6 +129,11 @@ export default function ThemesPage(): ReactElement {
         </section>
 
         <SpectrumStrip />
+
+        <p className="site-specimen-note">
+          A static gallery — each island is the real theme and real components, but the controls are not
+          wired to page behaviour.
+        </p>
 
         <div className="site-themes__grid">
           {PACKS.map((pack) =>

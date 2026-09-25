@@ -58,20 +58,30 @@ function HeroSpecimen(): ReactElement {
         </div>
       </PlateSection>
       <PlateSection note="<Input />">
-        <Input placeholder="Search components…" prefix={<SearchOutlined />} />
+        <Input placeholder="Search components…" prefix={<SearchOutlined />} aria-label="Search components" />
       </PlateSection>
       <PlateSection note="<Switch /> <Slider />">
         <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-          <Switch defaultChecked />
+          <Switch defaultChecked aria-label="Preview live state" />
           <div style={{ flex: 1 }}>
-            <Slider defaultValue={40} />
+            <Slider defaultValue={40} aria-label="Preview progress value" />
           </div>
         </div>
       </PlateSection>
       <PlateSection note="<Tag />">
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <Tag color="blue">v1.0</Tag>
-          <Tag color="success">beam-dark</Tag>
+          {/* The accent owns the pack identity — a hardcoded `color="blue"` would
+              stay blue under green/lavender/rose/peach. Ride the tinted wash. */}
+          <Tag
+            style={{
+              background: 'var(--prism-color-primary-bg)',
+              color: 'var(--prism-color-primary)',
+              borderColor: 'var(--prism-color-primary-border)',
+            }}
+          >
+            v1.0
+          </Tag>
+          <Tag className="prism-state-tag prism-state-tag--success">beam-dark</Tag>
           <Tag>MCP</Tag>
           <Tag closable>refract</Tag>
         </div>
@@ -79,10 +89,13 @@ function HeroSpecimen(): ReactElement {
       <PlateSection note={'<Table size="small" />'}>
         <Table<Row> size="small" pagination={false} dataSource={rows} columns={columns} />
       </PlateSection>
+      <p className="site-specimen-note">
+        A static specimen — these are the real themed components, but the controls are not wired to page
+        behaviour.
+      </p>
     </div>
   );
 }
-
 /** Band 1 — raw parts, loose in the plane. */
 function PartsCluster(): ReactElement {
   return (
@@ -117,7 +130,7 @@ function StatBlock(): ReactElement {
       <Statistic value={128} suffix="k" styles={{ content: { fontStretch: '112%', fontWeight: 600 } }} />
       {/* The accent owns live states — the meter follows the shell pack, never antd's info blue. */}
       <Progress percent={72} showInfo={false} size="small" strokeColor="var(--prism-color-primary)" />
-      <Tag color="success" style={{ marginTop: 8 } as CSSProperties}>
+      <Tag className="prism-state-tag prism-state-tag--success" style={{ marginTop: 8 } as CSSProperties}>
         +12% vs last month
       </Tag>
     </div>

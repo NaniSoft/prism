@@ -55,6 +55,11 @@ describe('productDotBackground', () => {
     expect(productDotBackground(getPrismProduct('alphalens')!)).toBe(prismBrandPacks.rose.ink.light);
   });
 
+  it('resolves the pack ink for the ambient mode (beam-dark dots use the lightened inks)', () => {
+    expect(productDotBackground(getPrismProduct('nexus')!, 'dark')).toBe(prismBrandPacks.lavender.ink.dark);
+    expect(productDotBackground(getPrismProduct('alphalens')!, 'dark')).toBe(prismBrandPacks.rose.ink.dark);
+  });
+
   it('www wears the five-pack spectrum (the company carries every pack)', () => {
     const background = productDotBackground(getPrismProduct('www')!);
     expect(background).toContain('conic-gradient');

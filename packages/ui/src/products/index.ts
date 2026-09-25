@@ -8,7 +8,7 @@
 // company root (every product site's switcher needs the way back) and carries
 // no single pack — it layers all five.
 
-import { prismBrandPacks, type PrismPackId } from '@nanisoft/prism-tokens';
+import { prismBrandPacks, type PrismMode, type PrismPackId } from '@nanisoft/prism-tokens';
 
 export type PrismProductId = 'www' | 'nexus' | 'atlas' | 'alphalens' | 'prism';
 
@@ -76,14 +76,15 @@ export function getPrismProduct(id: PrismProductId): PrismProduct | undefined {
 /**
  * The pack-colour dot's CSS `background`: a product wears its own pack ink;
  * www wears the five-pack spectrum (a conic sweep of every ink), because the
- * company is the one entry that has no single colour.
+ * company is the one entry that has no single colour. Resolved for the ambient
+ * `mode` so beam-dark dots wear the lightened inks, not the light-mode inks.
  */
-export function productDotBackground(product: PrismProduct): string {
-  if (product.pack) return prismBrandPacks[product.pack].ink.light;
+export function productDotBackground(product: PrismProduct, mode: PrismMode = 'light'): string {
+  if (product.pack) return prismBrandPacks[product.pack].ink[mode];
   // The five-pack spectrum in ADR-0005 order, closed back onto blue so the
   // wheel is seamless at 0°.
   const inks = (['blue', 'green', 'lavender', 'rose', 'peach', 'blue'] as const).map(
-    (pack) => prismBrandPacks[pack].ink.light,
+    (pack) => prismBrandPacks[pack].ink[mode],
   );
   return `conic-gradient(${inks.join(', ')})`;
 }

@@ -4,9 +4,12 @@
 // the boot script swaps.
 
 import { beforeAll, describe, expect, it, vi } from 'vitest';
-import { getPrismTheme, prismCssVarKey } from '@nanisoft/prism-tokens';
+import { getPrismTheme, prismBrandPacks, prismCssVarKey } from '@nanisoft/prism-tokens';
 
 import { bakePrismThemeCss, bakePrismThemeRules, keepThemeVariableRules } from '../src/theming/index.js';
+
+const PACKS = Object.keys(prismBrandPacks) as Array<keyof typeof prismBrandPacks>;
+const MODES = ['light', 'dark'] as const;
 
 beforeAll(() => {
   // antd's dev-only warnings would pollute extraction otherwise (the site's
@@ -74,5 +77,37 @@ describe('bakePrismThemeCss', () => {
     expect(css).toContain('prism-green-light');
     expect(css).toContain('prism-green-dark');
     expect(css).toContain('--prism-color-primary');
+  });
+});
+
+// Banned-value gates over the real generated output — the half the AA gate does
+// not cover (ADR-0002 erratum 3/4). These fail loudly if a token change
+// reintroduces a documented anti-pattern.
+describe('baked output invariants', () => {
+  it('never emits an overshoot easing curve (no cubic-bezier control point outside [0,1])', () => {
+    for (const pack of PACKS) {
+      const css = bakePrismThemeCss({ pack });
+      for (const match of css.matchAll(/cubic-bezier\(([^)]*)\)/g)) {
+        for (const point of match[1].split(',').map((value) => Number(value.trim()))) {
+          expect(point).toBeGreaterThanOrEqual(0);
+          expect(point).toBeLessThanOrEqual(1);
+        }
+      }
+    }
+  });
+
+  it('keeps the pack’s tinted hairlines in component scopes — no stock grey fallback', () => {
+    for (const pack of PACKS) {
+      for (const mode of MODES) {
+        const theme = getPrismTheme(pack, mode);
+        const rules = bakePrismThemeRules({ theme });
+        // The component algorithm used to re-derive these to antd's default
+        // greys (#d9d9d9) — see erratum 3. The bare/derived tinted value must
+        // win for the button's default border.
+        expect(rules).toContain(`--prism-button-default-border-color:${theme.semantics.hairlineStrong}`);
+        expect(rules).not.toContain('--prism-color-border:#d9d9d9');
+        expect(rules).not.toContain('--prism-button-default-border-color:#d9d9d9');
+      }
+    }
   });
 });

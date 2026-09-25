@@ -184,7 +184,7 @@ function renderThemeDoc(pack, mode) {
     '',
     table(theme.antd.token),
     '',
-    'Component overrides are shadow-zeroing only (Button/Input shadows → `none`, always with `algorithm: true`).',
+    'Component overrides are shadow-zeroing only (Button/Input shadows → `none`); no `algorithm: true` — a flat patch lets each component inherit the pack’s tinted hairlines (ADR-0002 §2c erratum 3).',
     '',
   ].join('\n');
 }

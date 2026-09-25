@@ -44,6 +44,12 @@ function buildAntdConfig(mode: PrismMode, semantics: PrismSemanticTokens, modeKe
     colorBorder: semantics.hairlineStrong,
     colorBorderSecondary: semantics.hairlineFaint,
     colorSplit: semantics.hairlineFaint,
+    // Focus ring. antd's genFocusOutline() hardcodes `colorPrimaryBorder` as the
+    // :focus-visible outline colour; antd's derived stop is a mid-tint that
+    // fails WCAG 1.4.11 (1.5:1 on our grounds). Route it to the ink, which
+    // holds ≥4.5:1 on every ground/container, and makes a focused input read
+    // "ink" as the design intends (ADR-0002 §2c erratum 6).
+    colorPrimaryBorder: semantics.inkPrimary,
     // Accent flood (selection/active/pressed) — the tinted wash, never solid ink.
     controlItemBgActive: semantics.accentLive,
     controlItemBgActiveHover: semantics.accentLive,
@@ -55,6 +61,13 @@ function buildAntdConfig(mode: PrismMode, semantics: PrismSemanticTokens, modeKe
     // Placeholder text — antd's 25% derivation drops below AA on tinted
     // grounds; the pack's own 45% text tint keeps hue and legibility.
     colorTextPlaceholder: semantics.textTertiary,
+    // State-tag text — antd's derived colorXText is a mid-tint that fails AA
+    // on Prism's tinted tag surface. Route the map token to the mode-aware
+    // semantic so the tag recipe can use a dedicated accessible label color.
+    colorSuccessText: semantics.stateSuccessText,
+    colorWarningText: semantics.stateWarningText,
+    colorErrorText: semantics.stateErrorText,
+    colorInfoText: semantics.stateInfoText,
     // Elevation: the one shadow, or none.
     boxShadow: semantics.elevationFloating,
     boxShadowSecondary: semantics.elevationNone,
@@ -88,6 +101,11 @@ function buildAntdConfig(mode: PrismMode, semantics: PrismSemanticTokens, modeKe
       motionEaseInOut: semantics.motionCurveStandard,
       motionEaseOutQuint: semantics.motionCurveStandard,
       motionEaseOutCirc: semantics.motionCurveStandard,
+      // antd's two "Back" presets overshoot; DESIGN.md bans bounce/overshoot
+      // easing, and antd consumes these in Badge/Form. Pinned to the brand's
+      // single decelerating bezier (ADR-0002 §2c erratum 4).
+      motionEaseOutBack: semantics.motionCurveStandard,
+      motionEaseInBack: semantics.motionCurveStandard,
       fontFamily: semantics.typeFamily,
       fontFamilyCode: semantics.typeFamilyCode,
       fontSize: 14,
@@ -97,9 +115,15 @@ function buildAntdConfig(mode: PrismMode, semantics: PrismSemanticTokens, modeKe
     }),
     components: deepFreeze({
       // Beam-crisp: flat buttons/inputs, hairline focus rings — shadow-zeroing
-      // only, always with algorithm: true so antd re-derives the rest (§2c lane 3).
-      Button: { primaryShadow: 'none', defaultShadow: 'none', dangerShadow: 'none', algorithm: true },
-      Input: { activeShadow: 'none', errorActiveShadow: 'none', warningActiveShadow: 'none', algorithm: true },
+      // only. Deliberately NO `algorithm: true` (ADR-0002 §2c erratum 3): the
+      // component algorithm discards the top-level map overrides and re-derives
+      // from antd defaults, which turns light-mode hairlines into stock greys
+      // (#d9d9d9/#f0f0f0). Merging flat lets each component inherit the pack's
+      // tinted `colorBorder`/`defaultBorderColor`. `primaryColor` routes the
+      // solid-button label to `textOnInk` (dark text on the light beam ink);
+      // antd's default (colorTextLightSolid = #fff) fails AA in every dark pack.
+      Button: { primaryShadow: 'none', defaultShadow: 'none', dangerShadow: 'none', primaryColor: semantics.textOnInk },
+      Input: { activeShadow: 'none', errorActiveShadow: 'none', warningActiveShadow: 'none' },
     }),
     cssVar: { key: modeKey, prefix: 'prism' },
     hashed: false,

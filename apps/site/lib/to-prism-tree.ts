@@ -12,10 +12,10 @@ function nodeName(node: Item | Folder | Separator): string {
 }
 
 /**
- * Flatten a section's page tree into sidebar entries. Separators become
- * group headers (a link-less entry — DocsShell renders it as an anchor without
- * href, which the site CSS styles as a label); folders carry their index page's
- * URL and nest their children.
+ * Flatten a section's page tree into sidebar entries. Separators and
+ * index-less folders become group headers (a link-less entry — DocsShell renders
+ * a `prism-docs-shell__nav-label` span, which the site CSS styles as a label);
+ * folders carry their index page's URL and nest their children.
  */
 export function toPrismTree(children: Node[]): DocsNavEntry[] {
   const entries: DocsNavEntry[] = [];

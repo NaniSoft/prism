@@ -5,7 +5,7 @@
 import Link from 'next/link';
 import type { ReactElement } from 'react';
 
-import { PageHeader } from '@/components/prism-client';
+import { PageHeader } from '@/components/page-header-client';
 import type { CatalogGroup } from '@/lib/section-catalog';
 
 export interface SectionIndexProps {
@@ -21,22 +21,27 @@ export function SectionIndex({ title, description, groups, emptyMessage }: Secti
 
   return (
     <div className="site-catalog">
-      <PageHeader title={title} subtitle={description} />
+      <PageHeader title={title} subtitle={description} level={1} />
       {total === 0 ? (
         <p className="site-empty">{emptyMessage}</p>
       ) : (
-        groups.map((group) => (
-          <section key={group.group}>
-            <h2 className="site-catalog__group">{group.group}</h2>
-            <div className="site-catalog__grid">
-              {group.items.map((item) => (
-                <Link key={item.url} href={item.url} className="site-catalog__item">
-                  <strong>{item.title}</strong>
-                </Link>
-              ))}
-            </div>
-          </section>
-        ))
+        groups.map((group, index) => {
+          const headingId = `catalog-group-${index}`;
+          return (
+            <section key={group.group} aria-labelledby={headingId}>
+              <h2 id={headingId} className="site-catalog__group">
+                {group.group}
+              </h2>
+              <div className="site-catalog__grid">
+                {group.items.map((item) => (
+                  <Link key={item.url} href={item.url} className="site-catalog__item">
+                    <strong>{item.title}</strong>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          );
+        })
       )}
     </div>
   );

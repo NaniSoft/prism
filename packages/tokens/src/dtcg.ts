@@ -171,9 +171,13 @@ export function toDtcg(pack: PrismPackId, mode: PrismMode): PrismDtcgDocument {
     },
     state: {
       success: alias('color.success', 'color', undefined, { 'prism.antd': { seed: 'colorSuccess' } }),
+      successText: token(semantics.stateSuccessText, 'color', 'Accessible success-tag text (→ antd colorSuccessText; derived, no primitive alias).', { 'prism.antd': { map: 'colorSuccessText' } }),
       warning: alias('color.warning', 'color', undefined, { 'prism.antd': { seed: 'colorWarning' } }),
+      warningText: token(semantics.stateWarningText, 'color', 'Accessible warning-tag text (→ antd colorWarningText; derived, no primitive alias).', { 'prism.antd': { map: 'colorWarningText' } }),
       error: alias('color.error', 'color', undefined, { 'prism.antd': { seed: 'colorError' } }),
+      errorText: token(semantics.stateErrorText, 'color', 'Accessible error-tag text (→ antd colorErrorText; derived, no primitive alias).', { 'prism.antd': { map: 'colorErrorText' } }),
       info: alias('color.info', 'color', undefined, { 'prism.antd': { seed: 'colorInfo' } }),
+      infoText: token(semantics.stateInfoText, 'color', 'Accessible info-tag text (→ antd colorInfoText; derived, no primitive alias).', { 'prism.antd': { map: 'colorInfoText' } }),
     },
     radius: {
       sm: alias('shape.radius.sm', 'dimension', undefined, { 'prism.antd': { map: 'borderRadiusSM' } }),

@@ -24,8 +24,8 @@ colors:
   peach-beam-ground: "#1D140D"
   surface: "#FFFFFF"
   text-on-ink: "#FFFFFF"
-  state-success: "#16A34A"
-  state-warning: "#D97706"
+  state-success: "#15803D"
+  state-warning: "#B45309"
   state-error: "#DC2626"
   state-info: "#2563EB"
 typography:
@@ -177,7 +177,7 @@ Beam-dark inks are each lightened one step of the same hue — the tinted dark g
 
 **The Tinted-Wash Rule.** The accent floods live states — selection, active, pressed — as a tinted wash of the ink (`accentLive`: ink at 10% in light, 20% in beam-dark), never solid ink, so text on a selected surface stays legible. The focus ring is the same wash at 35% / 55%.
 
-**The Shared-State-Hues Rule.** Success green (#16A34A), warning amber (#D97706), error red (#DC2626), and info blue (#2563EB) are identical across all five packs — meaning never shifts with the spectrum. Only the blue pack's info is its own ink.
+**The Shared-State-Hues Rule.** Success green (#15803D), warning amber (#B45309), error red (#DC2626), and info blue (#2563EB) are identical across all five packs — meaning never shifts with the spectrum. Only the blue pack's info is its own ink. Success and warning were darkened from their stock 600-shades so they hold AA (4.5:1) as text on the white surface; `defineBrandPack()` now gates state hues on both the light surface and the beam ground.
 
 ## Typography
 
@@ -229,7 +229,7 @@ Hairline elevation with exactly one shadow. In-plane separation is 1px variant-t
 
 ## Shapes
 
-The radius family is 2 / 4 / 6 / 4 (`borderRadiusSM` 2, seed `borderRadius` 4, `borderRadiusLG` 6, outer 4) — beam-crisp: softly squared, never pill-shaped surfaces (the only pill is a progress track, 100px). It is hand-set in the closed map-token allowlist because antd's `genRadius(4)` cannot produce it. Borders are always 1px (`lineWidth: 1`); dashed borders are the dashed-button affordance, not decoration. Swatch dots are the recurring circular silhouette — 9–14px circles carrying an inset white hairline (`inset 0 0 0 1px rgb(255 255 255 / 0.3)`) so pale pastels read on white — and rounded swatch squares (3px) appear in the gallery's hex readouts.
+The radius family is 2 / 4 / 6 / 4 (`borderRadiusSM` 2, seed `borderRadius` 4, `borderRadiusLG` 6, outer 4) — beam-crisp: softly squared, never pill-shaped surfaces (the only pill is a progress track, 100px). It is hand-set in the closed map-token allowlist because antd's `genRadius(4)` cannot produce it. Borders are always 1px (`lineWidth: 1`); dashed borders are the dashed-button affordance, not decoration. Swatch dots are the recurring circular silhouette — 9–14px circles carrying an inset white hairline (`inset 0 0 0 1px rgb(255 255 255 / 0.3)`) so pale pastels read on white — and rounded swatch squares (2px, the `sm` radius) appear in the gallery's hex readouts.
 
 ## Components
 

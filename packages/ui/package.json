@@ -61,10 +61,6 @@
       "types": "./dist/generated/pass-throughs.d.ts",
       "import": "./dist/generated/pass-throughs.js"
     },
-    "./prototype": {
-      "types": "./dist/prototype/index.d.ts",
-      "import": "./dist/prototype/index.js"
-    },
     "./styles.css": "./dist/styles.css",
     "./package.json": "./package.json"
   },

@@ -1,7 +1,10 @@
+'use client';
+
 // Site chrome — the shell header every page wears, landing included
 // (ticket 12 §1: the pack × mode switcher is shell-level, not per-page).
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 
@@ -15,6 +18,9 @@ const NAV = [
 ] as const;
 
 export function SiteHeader() {
+  const pathname = usePathname();
+  const isCurrent = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+
   return (
     <header className="site-header">
       <div className="site-shell site-header__row">
@@ -24,7 +30,12 @@ export function SiteHeader() {
         <span className="site-mono site-brand__note">NANISOFT · DESIGN SYSTEM</span>
         <nav className="site-nav" aria-label="Sections">
           {NAV.map((item) => (
-            <Link key={item.href} href={item.href}>
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={isCurrent(item.href) ? 'page' : undefined}
+              className={isCurrent(item.href) ? 'site-nav__link--current' : undefined}
+            >
               {item.label}
             </Link>
           ))}

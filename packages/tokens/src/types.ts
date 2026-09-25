@@ -58,6 +58,8 @@ export interface PrismAntdSeedTokens {
   motionEaseInOut: string; // motion.curve.standard
   motionEaseOutQuint: string; // motion.curve.standard
   motionEaseOutCirc: string; // motion.curve.standard
+  motionEaseOutBack: string; // motion.curve.standard — antd's default overshoots; banned
+  motionEaseInBack: string; // motion.curve.standard — antd's default overshoots; banned
   fontFamily: string; // type.family.ui
   fontFamilyCode: string; // type.family.mono
   fontSize: number; // type.size.ui
@@ -78,6 +80,11 @@ export type PrismAntdMapKey =
   | 'colorBorder' // hairline.strong
   | 'colorBorderSecondary' // hairline.faint
   | 'colorSplit' // hairline.faint
+  | 'colorPrimaryBorder' // focus outline — antd's genFocusOutline() hardcodes this token
+  | 'colorSuccessText' // accessible text for Prism's tinted success tag surface
+  | 'colorWarningText' // accessible text for Prism's tinted warning tag surface
+  | 'colorErrorText' // accessible text for Prism's tinted error tag surface
+  | 'colorInfoText' // accessible text for Prism's tinted info tag surface
   | 'controlItemBgActive' // accent.live flood
   | 'controlItemBgActiveHover' // accent.live flood
   | 'colorBgTextActive' // accent.live flood
@@ -103,6 +110,11 @@ export interface PrismAntdMapTokens {
   colorBorder: string; // hairline.strong
   colorBorderSecondary: string; // hairline.faint
   colorSplit: string; // hairline.faint
+  colorPrimaryBorder: string; // focus outline — antd hardcodes genFocusOutline() to this token (erratum 6)
+  colorSuccessText: string; // state.successText — accessible text for Prism's tinted tag
+  colorWarningText: string; // state.warningText — accessible text for Prism's tinted tag
+  colorErrorText: string; // state.errorText — accessible text for Prism's tinted tag
+  colorInfoText: string; // state.infoText — accessible text for Prism's tinted tag
   controlItemBgActive: string; // accent.live flood
   controlItemBgActiveHover: string;
   colorBgTextActive: string;
@@ -114,19 +126,25 @@ export interface PrismAntdMapTokens {
   boxShadowTertiary: string; // elevation.none
 }
 
-/** Antd component overrides — shadow-zeroing only, always with `algorithm: true`. */
+/**
+ * Antd component overrides. `Button.primaryShadow/defaultShadow/dangerShadow`
+ * zero the component shadows; `Button.primaryColor` routes the solid-button
+ * label to the mode's `textOnInk`. No `algorithm: true`: antd's component
+ * algorithm re-derives the global map overrides away (light mode falls back to
+ * stock greys), so a flat patch merged onto the pack's derived tokens is both
+ * correct and the whole intent (ADR-0002 §2c erratum 3).
+ */
 export interface PrismAntdComponentsOverrides {
   Button: {
     primaryShadow: string;
     defaultShadow: string;
     dangerShadow: string;
-    algorithm: true;
+    primaryColor: string; // text.on-ink (white in light, dark ink in beam-dark)
   };
   Input: {
     activeShadow: string;
     errorActiveShadow: string;
     warningActiveShadow: string;
-    algorithm: true;
   };
 }
 
@@ -195,6 +213,10 @@ export interface PrismSemanticTokens {
   stateWarning: string; // → colorWarning (seed)
   stateError: string; // → colorError (seed)
   stateInfo: string; // → colorInfo (seed)
+  stateSuccessText: string; // → colorSuccessText (map; mode-aware tag label)
+  stateWarningText: string; // → colorWarningText (map; mode-aware tag label)
+  stateErrorText: string; // → colorErrorText (map; mode-aware tag label)
+  stateInfoText: string; // → colorInfoText (map; mode-aware tag label)
   shapeRadiusSm: string; // → borderRadiusSM (map; borderRadius is the seed)
   shapeRadiusBase: string; // → borderRadius (seed)
   shapeRadiusLg: string; // → borderRadiusLG (map)

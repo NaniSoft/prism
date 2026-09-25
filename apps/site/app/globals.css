@@ -9,6 +9,12 @@
  * own; radius and hairlines follow ADR-0001.
  */
 
+/*
+ * Text de-emphasis uses its composited token color, not CSS opacity: stacking
+ * opacity onto an alpha-composited text token lowers WCAG 1.4.3 contrast.
+ * Opacity is reserved for non-text decoration.
+ */
+
 * {
   box-sizing: border-box;
 }
@@ -17,9 +23,15 @@ html {
   scroll-behavior: smooth;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 body {
   margin: 0;
-  font-family: var(--font-archivo), sans-serif;
+  font-family: 'Archivo Variable', sans-serif;
   background: var(--prism-color-bg-layout);
   color: var(--prism-color-text);
 }
@@ -42,9 +54,22 @@ a:hover {
 }
 
 .site-mono {
-  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
   letter-spacing: 0.04em;
+}
+
+/* Honest caption for the static specimen regions (landing plate, theme gallery):
+   the controls render the real themed components but are not wired to page
+   behaviour. Full-contrast text (no opacity) so it stays readable. */
+.site-specimen-note {
+  margin: 14px 0 0;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  line-height: 1.6;
+  color: var(--prism-color-text);
+  max-width: 62ch;
 }
 
 .site-main {
@@ -100,10 +125,6 @@ a:hover {
   color: var(--prism-color-primary);
 }
 
-.site-brand__note {
-  opacity: 0.66;
-}
-
 .site-nav {
   margin-left: auto;
   display: flex;
@@ -112,14 +133,40 @@ a:hover {
 }
 
 .site-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
   color: var(--prism-color-text);
-  opacity: 0.82;
 }
 
 .site-nav a:hover {
-  opacity: 1;
   text-decoration: none;
   color: var(--prism-color-primary);
+}
+
+/* Current section (WCAG 2.4.8 Location) — ink + weight, not a new grey or fade. */
+.site-nav__link--current {
+  color: var(--prism-color-primary);
+  font-weight: 600;
+}
+
+/* Touch: the shell Segmented groups measure ~24px on coarse pointers — the
+   primary theme controls must be comfortably tappable (WCAG 2.5.8). */
+@media (pointer: coarse) {
+  .site-nav a {
+    padding: 0 6px;
+    min-height: 44px;
+  }
+
+  .site-theme-switcher .ant-segmented,
+  .site-theme-switcher .ant-segmented-item-label {
+    min-height: 44px;
+  }
+
+  .site-theme-switcher .ant-segmented-item-label {
+    display: inline-flex;
+    align-items: center;
+  }
 }
 
 .site-theme-switcher {
@@ -151,8 +198,19 @@ a:hover {
 }
 
 @media (max-width: 1080px) {
+  /* Collapse the label visually but keep it in the accessible name — `display: none`
+     would strip the radio's only text (the swatch dot is aria-hidden), leaving five
+     unnamed options for screen readers (WCAG 4.1.2). */
   .site-pack-option__label {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
   }
 
   .site-pack-option {
@@ -173,7 +231,6 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   height: 60px;
-  opacity: 0.78;
 }
 
 .site-footer__left {
@@ -183,12 +240,21 @@ a:hover {
 }
 
 .site-footer__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
   color: inherit;
 }
 
 .site-footer__link:hover {
   color: inherit;
-  opacity: 0.8;
+}
+
+@media (pointer: coarse) {
+  .site-footer__link {
+    min-height: 44px;
+    padding: 0 6px;
+  }
 }
 
 /* ---------- Docs skeleton (prism-ui DocsShell structural classes) ---------- */
@@ -226,12 +292,10 @@ a:hover {
 .prism-docs-shell__nav a,
 .prism-docs-shell__toc-list a {
   color: var(--prism-color-text);
-  opacity: 0.78;
 }
 
 .prism-docs-shell__nav a:hover,
 .prism-docs-shell__toc-list a:hover {
-  opacity: 1;
   text-decoration: none;
   color: var(--prism-color-primary);
 }
@@ -257,6 +321,36 @@ a:hover {
   }
 }
 
+/* Phones/tablets: the 240px sidebar + 48px gap left the article ~54px wide at
+   390px. Collapse to one column and let the article own the full width
+   (WCAG 1.4.10 Reflow). The sidebar becomes a compact, non-sticky block above
+   the article — everything stays reachable without a JS disclosure. */
+@media (max-width: 900px) {
+  .prism-docs-shell__body,
+  .prism-docs-shell__body:has(+ .prism-docs-shell__toc),
+  .prism-docs-shell__body:has(~ .prism-docs-shell__toc) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    padding: 24px 16px 64px;
+  }
+
+  .prism-docs-shell__sidebar {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .prism-docs-shell__nav {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 4px 12px;
+  }
+
+  .prism-docs-shell__nav a,
+  .prism-docs-shell__nav .prism-docs-shell__nav-label {
+    min-height: 24px;
+  }
+}
+
 .prism-docs-shell__title {
   font-variation-settings: 'wdth' 118, 'wght' 600;
   letter-spacing: -0.01em;
@@ -265,7 +359,6 @@ a:hover {
 
 .prism-docs-shell__description {
   margin: 0 0 8px;
-  opacity: 0.78;
   line-height: 1.65;
 }
 
@@ -316,7 +409,7 @@ a:hover {
 }
 
 .site-prose code {
-  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 13px;
   background: var(--prism-color-fill-tertiary);
   border-radius: 4px;
@@ -388,7 +481,7 @@ a:hover {
   background: var(--prism-color-bg-layout);
   border-top: 1px solid var(--prism-color-border-secondary);
   overflow: auto;
-  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12px;
   line-height: 1.65;
 }
@@ -411,7 +504,6 @@ a:hover {
   border: 1px dashed var(--prism-color-border);
   border-radius: 4px;
   padding: 12px 16px;
-  opacity: 0.8;
 }
 
 .site-catalog__title {
@@ -436,29 +528,26 @@ a:hover {
 
 .site-blog-list__description {
   margin: 6px 0;
-  opacity: 0.78;
   line-height: 1.65;
   max-width: 64ch;
 }
 
 .site-blog-list__meta {
   margin: 0;
-  opacity: 0.66;
 }
 
-/* Sidebar group headers — DocsShell renders separators as links without href. */
-.prism-docs-shell__nav a:not([href]) {
+/* Sidebar group headers — DocsShell renders separators and index-less folders
+   as non-link `.prism-docs-shell__nav-label` spans (never an empty `<a>`). */
+.prism-docs-shell__nav .prism-docs-shell__nav-label {
   display: block;
   margin: 18px 0 4px;
-  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  opacity: 0.6;
-  pointer-events: none;
 }
 
-.prism-docs-shell__nav a:not([href]):first-child {
+.prism-docs-shell__nav > li:first-child .prism-docs-shell__nav-label {
   margin-top: 0;
 }
 
@@ -499,7 +588,6 @@ a:hover {
 .site-catalog__item span {
   display: block;
   font-size: 13px;
-  opacity: 0.72;
   margin-top: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -507,16 +595,14 @@ a:hover {
 
 .site-catalog__group {
   margin-top: 36px;
-  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  opacity: 0.66;
 }
 
 .site-empty {
   margin-top: 20px;
-  opacity: 0.72;
   max-width: 52ch;
   line-height: 1.7;
 }
@@ -529,11 +615,12 @@ a:hover {
 }
 
 .site-landing__note {
-  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
   letter-spacing: 0.04em;
   color: var(--prism-color-primary);
-  opacity: 0.82;
+  /* Full ink, no opacity: an ink@0.82 wash composites to ~3.5:1 on the pastel
+     light grounds (WCAG 1.4.3). Hierarchy comes from mono + size, not fade. */
 }
 
 .site-landing__hero {
@@ -562,7 +649,6 @@ a:hover {
   margin: 22px 0 0;
   font-size: 15px;
   line-height: 1.7;
-  opacity: 0.82;
   max-width: 46ch;
 }
 
@@ -604,7 +690,7 @@ a:hover {
 }
 
 .site-landing__band-index {
-  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12px;
   color: var(--prism-color-primary);
 }
@@ -617,7 +703,6 @@ a:hover {
 
 .site-landing__band-blurb {
   margin: 0;
-  opacity: 0.78;
   font-size: 13px;
   line-height: 1.6;
   max-width: 40ch;
@@ -650,7 +735,7 @@ a:hover {
 }
 
 .site-landing__daylight-code {
-  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12px;
   background: var(--prism-color-bg-layout);
   border: 1px solid var(--prism-color-border-secondary);
@@ -686,6 +771,14 @@ a:hover {
   gap: 10px;
   padding: 26px 20px;
   transition: filter 160ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Placed AFTER the base rule so source order lets the override win (equal
+   specificity — a media query placed earlier is overridden by the base rule). */
+@media (prefers-reduced-motion: reduce) {
+  .site-landing__spectrum-cell {
+    transition: none;
+  }
 }
 
 .site-landing__spectrum-cell:hover {
@@ -730,7 +823,6 @@ a:hover {
 
 .site-landing__outro p {
   margin: 14px auto 28px;
-  opacity: 0.75;
   max-width: 44ch;
   line-height: 1.7;
 }
@@ -755,14 +847,13 @@ a:hover {
   margin: 18px 0 0;
   font-size: 15px;
   line-height: 1.7;
-  opacity: 0.82;
   max-width: 62ch;
 }
 
 .site-themes__lede .site-mono {
   background: var(--prism-color-bg-container);
   border: 1px solid var(--prism-color-border-secondary);
-  border-radius: 3px;
+  border-radius: 2px;
   padding: 1px 6px;
 }
 
@@ -804,17 +895,29 @@ a:hover {
 
 .site-themes__strip-hex {
   font-size: 11px;
-  opacity: 0.66;
+  color: var(--prism-color-text);
 }
 
 /* The islands below carry every hex — the strip stays dot + name on phones. */
 @media (max-width: 720px) {
-  .site-themes__strip-hex {
-    display: none;
+  /* Stack to one column (DESIGN.md "spectrum and themes strip stack on phones").
+     Five ~68px columns clipped the Peach cell and its label at 390px. */
+  .site-themes__strip {
+    grid-template-columns: 1fr;
   }
 
   .site-themes__strip-cell {
     padding: 12px 14px;
+    border-right: none;
+    border-bottom: 1px solid var(--prism-color-border-secondary);
+  }
+
+  .site-themes__strip-cell:last-child {
+    border-bottom: none;
+  }
+
+  .site-themes__strip-hex {
+    display: none;
   }
 }
 
@@ -867,10 +970,6 @@ a:hover {
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3);
 }
 
-.site-themes__island-mode {
-  opacity: 0.66;
-}
-
 .site-themes__island-try {
   margin-left: auto;
 }
@@ -893,13 +992,12 @@ a:hover {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  opacity: 0.85;
 }
 
 .site-themes__swatch-dot {
   width: 10px;
   height: 10px;
-  border-radius: 3px;
+  border-radius: 2px;
   border: 1px solid var(--prism-color-border);
 }
 
@@ -917,13 +1015,12 @@ a:hover {
 
 .site-themes__foot p {
   margin: 14px auto 0;
-  opacity: 0.75;
   max-width: 52ch;
   line-height: 1.7;
 }
 
 .site-themes__foot-code {
-  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12px;
   line-height: 1.7;
   text-align: left;
@@ -959,6 +1056,5 @@ a:hover {
 }
 
 .site-api__optional {
-  opacity: 0.66;
   font-size: 13px;
 }

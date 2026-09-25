@@ -11,7 +11,7 @@ import type { ReactNode } from 'react';
 
 import { prismProducts, type PrismProductId } from '../../products/index.js';
 import { ProductDot } from '../../products/ProductDot.js';
-import { usePrismLink } from '../../provider/index.js';
+import { usePrismLink, usePrismThemeMode } from '../../provider/index.js';
 import type { PrismNavLink } from '../site-header/index.js';
 
 export interface SiteFooterColumn {
@@ -40,6 +40,7 @@ export interface SiteFooterProps {
 
 export function SiteFooter({ site, columns, social, legal, className }: SiteFooterProps): ReactNode {
   const Link = usePrismLink();
+  const { mode } = usePrismThemeMode();
 
   return (
     <footer
@@ -59,7 +60,7 @@ export function SiteFooter({ site, columns, social, legal, className }: SiteFoot
                 data-current={product.id === site ? 'true' : undefined}
               >
                 <span className="prism-site-footer__product-head">
-                  <ProductDot product={product} />
+                  <ProductDot product={product} mode={mode} />
                   <span className="prism-site-footer__product-name">{product.name}</span>
                 </span>
                 <span className="prism-site-footer__product-tagline">{product.tagline}</span>

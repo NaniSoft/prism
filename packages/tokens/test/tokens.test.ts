@@ -9,6 +9,7 @@ import {
   resolveSemantics,
   toDtcg,
 } from '../src/index.js';
+import { mixHex } from '../src/semantics.js';
 import type { BrandPackInput, PrismAntdMapKey, PrismDtcgDocument, PrismMode, PrismPackId } from '../src/types.js';
 
 const COMBOS: Array<[PrismPackId, PrismMode]> = [
@@ -24,6 +25,31 @@ const COMBOS: Array<[PrismPackId, PrismMode]> = [
   ['peach', 'dark'],
 ];
 
+// antd's dark algorithm lifts colorBgBase by 8% into colorBgContainer. These
+// are the rendered dark containers the tag recipe actually mixes into; keeping
+// the small contract table local preserves prism-tokens' zero-antd dependency.
+const DARK_CONTAINERS: Record<PrismPackId, string> = {
+  blue: '#0E2358',
+  green: '#133A26',
+  lavender: '#1D1545',
+  rose: '#361A3C',
+  peach: '#402613',
+};
+
+function luminance(hex: string): number {
+  const channels = [1, 3, 5].map((offset) => Number.parseInt(hex.slice(offset, offset + 2), 16) / 255);
+  const [r, g, b] = channels.map((channel) =>
+    channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
+  );
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function contrastRatio(fg: string, bg: string): number {
+  const fgLuminance = luminance(fg);
+  const bgLuminance = luminance(bg);
+  return (Math.max(fgLuminance, bgLuminance) + 0.05) / (Math.min(fgLuminance, bgLuminance) + 0.05);
+}
+
 // The closed map-token allowlist, mirrored for runtime assertions. The
 // exhaustiveness checks below fail compilation if the union grows without
 // this list being updated (ADR-0002 §2c: the allowlist is closed).
@@ -36,6 +62,11 @@ const ANTD_MAP_KEYS = [
   'colorBorder',
   'colorBorderSecondary',
   'colorSplit',
+  'colorPrimaryBorder',
+  'colorSuccessText',
+  'colorWarningText',
+  'colorErrorText',
+  'colorInfoText',
   'controlItemBgActive',
   'controlItemBgActiveHover',
   'colorBgTextActive',
@@ -86,7 +117,8 @@ describe('brand packs', () => {
   });
 
   it('carves the state bands per ADR-0001 §8 (success joins the green pack)', () => {
-    expect(prismBrandPacks.blue.state.success).toBe('#16A34A');
+    expect(prismBrandPacks.blue.state.success).toBe('#15803D');
+    expect(prismBrandPacks.blue.state.warning).toBe('#B45309');
     expect(prismBrandPacks.blue.state.info).toBe(prismBrandPacks.blue.ink.light);
     for (const pack of ['green', 'lavender', 'rose', 'peach'] as const) {
       expect(prismBrandPacks[pack].state.info).toBe('#2563EB');
@@ -124,7 +156,7 @@ describe('AA contrast gate at defineBrandPack()', () => {
     surface: { light: '#FFFFFF' },
     text: { light: '#1A2A4A', dark: '#E8EEF9' },
     hairline: { light: 'rgba(15, 23, 42, 0.08)', dark: 'rgba(147, 178, 255, 0.16)' },
-    state: { success: '#16A34A', info: '#2563EB', warning: '#D97706', error: '#DC2626' },
+    state: { success: '#15803D', info: '#2563EB', warning: '#B45309', error: '#DC2626' },
     ...over,
   });
 
@@ -145,6 +177,18 @@ describe('AA contrast gate at defineBrandPack()', () => {
   it('rejects text that fails AA on its surface (the gate is text-on-surface, not just ink)', () => {
     expect(() => defineBrandPack(validInput({ text: { light: '#93B2FF', dark: '#E8EEF9' } }))).toThrow(/fails WCAG AA/);
     expect(() => defineBrandPack(validInput({ text: { light: '#1A2A4A', dark: '#1A2A4A' } }))).toThrow(/fails WCAG AA/);
+  });
+
+  it('rejects state hues that fail AA as text on the surface', () => {
+    expect(() =>
+      defineBrandPack(validInput({ state: { success: '#16A34A', info: '#2563EB', warning: '#B45309', error: '#DC2626' } })),
+    ).toThrow(/state\.success on surface\.light .* fails WCAG AA/);
+  });
+
+  it('rejects state hues that fall below the UI floor on the beam ground', () => {
+    expect(() =>
+      defineBrandPack(validInput({ state: { success: '#166534', info: '#2563EB', warning: '#B45309', error: '#DC2626' } })),
+    ).toThrow(/state\.success on ground\.dark .* fails WCAG AA large/);
   });
 
   it('rejects pure black or white grounds (beam rule)', () => {
@@ -196,6 +240,11 @@ describe('resolvePrimitives(pack, mode)', () => {
 // ──────────────────────────────────────────────────────────────────────────────
 
 describe('resolveSemantics(primitives, mode)', () => {
+  it('mixes state text toward the requested endpoint with 8-bit hex rounding', () => {
+    expect(mixHex('#15803D', '#000000', 0.95)).toBe('#147A3A');
+    expect(mixHex('#15803D', '#FFFFFF', 0.5)).toBe('#8AC09E');
+  });
+
   it('derives text tints from the pack’s own text base — not a hardcoded hue', () => {
     const green = resolveSemantics(resolvePrimitives('green', 'light'), 'light');
     const blue = resolveSemantics(resolvePrimitives('blue', 'light'), 'light');
@@ -227,6 +276,27 @@ describe('resolveSemantics(primitives, mode)', () => {
     expect(dark.surfaceContainer).toBe(dark.surfaceGround);
     expect(dark.surfaceGround).toBe('#0D1730');
   });
+
+  it('keeps every mode-aware state-tag label at WCAG AA on its washed surface', () => {
+    const states = [
+      ['success', 'stateSuccess', 'stateSuccessText'],
+      ['warning', 'stateWarning', 'stateWarningText'],
+      ['error', 'stateError', 'stateErrorText'],
+      ['info', 'stateInfo', 'stateInfoText'],
+    ] as const;
+
+    for (const [pack, mode] of COMBOS) {
+      const theme = createPrismTheme({ pack, mode });
+      const container = mode === 'light' ? theme.semantics.surfaceContainer : DARK_CONTAINERS[pack];
+      const wash = mode === 'light' ? 0.1 : 0.22;
+
+      for (const [state, hueKey, textKey] of states) {
+        const surface = mixHex(theme.semantics[hueKey], container, wash);
+        const ratio = contrastRatio(theme.semantics[textKey], surface);
+        expect(ratio, `${pack}/${mode} ${state} state tag`).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
 });
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -249,6 +319,7 @@ describe('createPrismTheme — antd lane', () => {
   });
 
   it('emits only allowlisted map keys, and always the two math-backed ones', () => {
+    expect(ANTD_MAP_KEYS).toHaveLength(22);
     for (const [pack, mode] of COMBOS) {
       const token = createPrismTheme({ pack, mode }).antd.token as Record<string, unknown>;
       const emitted = Object.keys(token).filter((k): k is PrismAntdMapKey => ANTD_MAP_KEYS.includes(k as PrismAntdMapKey));
@@ -271,6 +342,16 @@ describe('createPrismTheme — antd lane', () => {
     expect(createPrismTheme({ pack: 'blue', mode: 'dark' }).antd.token.colorBgBase).toBe('#0D1730');
   });
 
+  it('routes every state-tag text map token to its mode-aware semantic', () => {
+    for (const [pack, mode] of COMBOS) {
+      const theme = createPrismTheme({ pack, mode });
+      expect(theme.antd.token.colorSuccessText).toBe(theme.semantics.stateSuccessText);
+      expect(theme.antd.token.colorWarningText).toBe(theme.semantics.stateWarningText);
+      expect(theme.antd.token.colorErrorText).toBe(theme.semantics.stateErrorText);
+      expect(theme.antd.token.colorInfoText).toBe(theme.semantics.stateInfoText);
+    }
+  });
+
   it('caps the accent flood and shadow per mode', () => {
     const light = createPrismTheme({ pack: 'green', mode: 'light' }).antd.token;
     expect(light.controlItemBgActive).toBe('rgba(17, 122, 59, 0.1)');
@@ -284,10 +365,45 @@ describe('createPrismTheme — antd lane', () => {
     expect(antd.cssVar).toEqual({ key: 'prism-green-dark', prefix: 'prism' });
   });
 
-  it('zeroes component shadows with algorithm: true (ADR-0002 §2c lane 3)', () => {
-    const components = createPrismTheme({ pack: 'blue', mode: 'light' }).antd.components;
-    expect(components.Button).toEqual({ primaryShadow: 'none', defaultShadow: 'none', dangerShadow: 'none', algorithm: true });
-    expect(components.Input).toEqual({ activeShadow: 'none', errorActiveShadow: 'none', warningActiveShadow: 'none', algorithm: true });
+  it('zeroes component shadows without algorithm: true (ADR-0002 §2c erratum 3)', () => {
+    const theme = createPrismTheme({ pack: 'blue', mode: 'light' });
+    const components = theme.antd.components;
+    expect(components.Button).toEqual({
+      primaryShadow: 'none',
+      defaultShadow: 'none',
+      dangerShadow: 'none',
+      primaryColor: theme.semantics.textOnInk,
+    });
+    expect(components.Input).toEqual({ activeShadow: 'none', errorActiveShadow: 'none', warningActiveShadow: 'none' });
+    // The algorithm flag is what discards the pack's map-token hairlines — a flat
+    // patch is required for component scopes to inherit the tinted border values.
+    expect('algorithm' in components.Button).toBe(false);
+    expect('algorithm' in components.Input).toBe(false);
+  });
+
+  it('routes the solid-button label to textOnInk (white in light, dark ink in beam-dark)', () => {
+    // antd's default is colorTextLightSolid (#fff), which fails AA on every
+    // lightened beam-dark ink (blue 4.18:1, peach 3.62:1).
+    for (const [pack, mode] of COMBOS) {
+      const theme = createPrismTheme({ pack, mode });
+      expect(theme.antd.components.Button.primaryColor).toBe(theme.semantics.textOnInk);
+      expect(theme.semantics.textOnInk).toBe(mode === 'light' ? '#FFFFFF' : '#0A0F1C');
+    }
+  });
+
+  it('routes antd’s hardcoded focus outline through the ink, not its mid-tint border (erratum 6)', () => {
+    for (const [pack, mode] of COMBOS) {
+      const token = createPrismTheme({ pack, mode }).antd.token;
+      expect(token.colorPrimaryBorder).toBe(createPrismTheme({ pack, mode }).semantics.inkPrimary);
+    }
+  });
+
+  it('pins antd’s overshoot easing presets to the single brand curve (bounce is banned)', () => {
+    for (const [pack, mode] of COMBOS) {
+      const token = createPrismTheme({ pack, mode }).antd.token;
+      expect(token.motionEaseOutBack).toBe('cubic-bezier(0.25, 1, 0.5, 1)');
+      expect(token.motionEaseInBack).toBe('cubic-bezier(0.25, 1, 0.5, 1)');
+    }
   });
 });
 
@@ -351,6 +467,11 @@ describe('toDtcg', () => {
     expect(semantic.ink.primary.$value).toBe('{color.ink.dark}');
     expect(semantic.text.primary.$value).toBe('{color.text.dark}');
     expect(semantic.state.success.$value).toBe('{color.success}');
+    expect(semantic.state.successText.$value).toBe('#8AC09E');
+    expect(semantic.state.successText.$extensions['prism.antd']).toEqual({ map: 'colorSuccessText' });
+    expect(semantic.state.warningText.$value).toMatch(/^#[0-9A-F]{6}$/);
+    expect(semantic.state.errorText.$value).toMatch(/^#[0-9A-F]{6}$/);
+    expect(semantic.state.infoText.$value).toMatch(/^#[0-9A-F]{6}$/);
     expect(semantic.radius.base.$value).toBe('{shape.radius.base}');
     expect(semantic.typography.family.ui.$value).toBe('{type.family.ui}');
     expect(semantic.spacing.unit.$value).toBe('{space.unit}');

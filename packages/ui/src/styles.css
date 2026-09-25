@@ -23,6 +23,7 @@
   font-family: 'Archivo Variable';
   font-style: normal;
   font-weight: 400 700;
+  font-display: swap;
   src: local('Archivo Variable'),
        url('/fonts/archivo-variable.woff2') format('woff2-variations'),
        url('/fonts/archivo-variable.woff') format('woff2');
@@ -32,6 +33,7 @@
   font-family: 'JetBrains Mono';
   font-style: normal;
   font-weight: 400 700;
+  font-display: swap;
   src: local('JetBrains Mono'),
        url('/fonts/jbmono-var.woff2') format('woff2-variations'),
        url('/fonts/jbmono-var.woff') format('woff2');
@@ -69,6 +71,62 @@
       url('data:image/svg+xml,%3Csvg viewBox="0 0 4 4" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="bayer2x2-inverse"%3E%3CfeTurbulence type="turbulence" baseFrequency="0.9" numOctaves="1"%3E%3C/filter%3E%3Crect width="4" height="4" filter="url(%23bayer2x2-inverse)"%3E%3C/rect%3E%3C/svg%3E');
     background-size: 4px 4px;
     opacity: 0.04;
+  }
+
+  /* ---------- Accessible state tags ----------
+   * antd's preset Tag mixes its background toward the seed and paints the raw
+   * seed as its label. That pair fails WCAG AA, so Prism owns the surface/text
+   * roles here. The 10% (light) and 22% (beam-dark) color-mix percentages are
+   * the solved AA-safe washes against the mode's container surface; the
+   * state-text tokens carry the corresponding mode-aware label color. The
+   * border keeps a slightly stronger 22% tint so the 1px edge stays visible.
+   */
+
+  .prism-state-tag {
+    --prism-state-tag-wash: var(--prism-state-tag-mode-wash, 10%);
+  }
+
+  /* The ten cssVar classes are the single source of mode selection. Defining
+   * both modes also makes a light island nested inside a dark shell reset the
+   * inherited dark wash instead of inheriting it by accident. */
+  .prism-blue-light,
+  .prism-green-light,
+  .prism-lavender-light,
+  .prism-rose-light,
+  .prism-peach-light {
+    --prism-state-tag-mode-wash: 10%;
+  }
+
+  .prism-blue-dark,
+  .prism-green-dark,
+  .prism-lavender-dark,
+  .prism-rose-dark,
+  .prism-peach-dark {
+    --prism-state-tag-mode-wash: 22%;
+  }
+
+  .prism-state-tag.prism-state-tag--success {
+    background: color-mix(in srgb, var(--prism-color-success) var(--prism-state-tag-wash, 10%), var(--prism-color-bg-container));
+    color: var(--prism-color-success-text);
+    border-color: color-mix(in srgb, var(--prism-color-success) 22%, var(--prism-color-bg-container));
+  }
+
+  .prism-state-tag.prism-state-tag--warning {
+    background: color-mix(in srgb, var(--prism-color-warning) var(--prism-state-tag-wash, 10%), var(--prism-color-bg-container));
+    color: var(--prism-color-warning-text);
+    border-color: color-mix(in srgb, var(--prism-color-warning) 22%, var(--prism-color-bg-container));
+  }
+
+  .prism-state-tag.prism-state-tag--error {
+    background: color-mix(in srgb, var(--prism-color-error) var(--prism-state-tag-wash, 10%), var(--prism-color-bg-container));
+    color: var(--prism-color-error-text);
+    border-color: color-mix(in srgb, var(--prism-color-error) 22%, var(--prism-color-bg-container));
+  }
+
+  .prism-state-tag.prism-state-tag--info {
+    background: color-mix(in srgb, var(--prism-color-info) var(--prism-state-tag-wash, 10%), var(--prism-color-bg-container));
+    color: var(--prism-color-info-text);
+    border-color: color-mix(in srgb, var(--prism-color-info) 22%, var(--prism-color-bg-container));
   }
 
   /* ---------- Cross-site chrome (ADR-0006) ----------
@@ -172,7 +230,7 @@
   }
 
   .prism-site-header__switcher-caret {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .prism-site-header__switcher a,
@@ -368,5 +426,35 @@
   .prism-site-footer__legal {
     font-size: 13px;
     color: var(--prism-color-text-tertiary, rgb(0 0 0 / 0.45));
+  }
+
+  /* ----- Touch targets (WCAG 2.5.8) ----- */
+
+  .prism-site-header__nav a,
+  .prism-site-footer__column a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+  }
+
+  @media (pointer: coarse) {
+    .prism-site-header__nav a,
+    .prism-site-header__drawer a,
+    .prism-site-footer__column a {
+      min-height: 44px;
+    }
+  }
+
+  /* ----- Reduced motion (WCAG 2.3.3) -----
+   * Keep the state feedback (color/background/border still resolve), but drop
+   * the interpolation. Opacity changes keep their legibility contract because
+   * the end state is unchanged — only the tween is removed. */
+  @media (prefers-reduced-motion: reduce) {
+    .prism-site-header__nav a,
+    .prism-site-footer__product,
+    .prism-site-footer__column a,
+    .prism-site-footer__social-link {
+      transition-duration: 0.01ms;
+    }
   }
 }

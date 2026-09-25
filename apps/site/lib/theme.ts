@@ -28,9 +28,9 @@ export const PACK_LABELS: Record<PrismPackId, string> = {
 };
 export const MODE_LABELS: Record<PrismMode, string> = { light: 'Light', dark: 'Beam-dark' };
 
-/** The pack's own light-mode ink — the swatch dot in the switcher and gallery. */
-export function packSwatch(pack: PrismPackId): string {
-  return prismBrandPacks[pack].ink.light;
+/** The pack's ink for a mode — the swatch dot in the switcher and gallery. */
+export function packSwatch(pack: PrismPackId, mode: PrismMode = 'light'): string {
+  return prismBrandPacks[pack].ink[mode];
 }
 
 /** `<pack>-<mode>` — the localStorage value; the applied class is `prism-<id>`. */
