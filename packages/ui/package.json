@@ -1,6 +1,6 @@
 {
   "name": "@nanisoft/prism-ui",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "description": "Prism's React design system — owned components, blocks, and pages with accessible Base UI behavior behind one import.",
   "license": "MIT",
   "type": "module",

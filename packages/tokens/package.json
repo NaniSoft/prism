@@ -1,6 +1,6 @@
 {
   "name": "@nanisoft/prism-tokens",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Prism's pure token foundation — five brand packs, two modes, semantic CSS variables, and DTCG output for the Spectral Refraction design language.",
   "license": "MIT",
   "type": "module",

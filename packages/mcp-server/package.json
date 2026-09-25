@@ -1,6 +1,6 @@
 {
   "name": "@nanisoft/prism-mcp-server",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Transport-free tool logic for Prism's read-only MCP — eight owned-catalog tools fed by prism-llms output. The HTTP transport lives in the apps/site Worker at /mcp.",
   "license": "MIT",
   "type": "module",
