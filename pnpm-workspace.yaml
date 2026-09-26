@@ -27,3 +27,7 @@ allowBuilds:
   # Wrangler's Workers runtime ships a platform binary and its install script
   # materializes it. The site deploy lane needs it.
   workerd: true
+  # Playwright's postinstall downloads browser binaries. The visual-regression
+  # job is report-only (ticket 15 Q11) and its browsers are installed by the CI
+  # job rather than at `pnpm install`, so the download is skipped here.
+  playwright: false

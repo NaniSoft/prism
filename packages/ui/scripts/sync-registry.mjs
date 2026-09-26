@@ -125,7 +125,7 @@ const items = []
 for (const entry of (await readdir(UI, { withFileTypes: true })).sort((a, b) =>
   a.name.localeCompare(b.name),
 )) {
-  if (!entry.isFile() || !entry.name.endsWith('.tsx')) continue
+  if (!entry.isFile() || !entry.name.endsWith('.tsx') || entry.name.endsWith('.test.tsx')) continue
 
   const name = entry.name.replace(/\.tsx$/, '')
   const file = path.join(UI, entry.name)

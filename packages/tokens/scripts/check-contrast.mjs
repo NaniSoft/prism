@@ -75,13 +75,48 @@ let failures = 0
 let advisories = 0
 const rows = []
 
+/**
+ * The new-`-foreground` pair rule (ticket 15 section 2).
+ *
+ * A semantic colour whose name ends in `-foreground` carries text on a surface.
+ * If it is not the foreground of a checked pair, it ships without contrast
+ * coverage. The base semantic source is the place a new one appears, so the rule
+ * reads it directly and fails on an unpaired name. The current source omits
+ * `$type`, so "colour" here means any root token that is not `radius`; the
+ * explicit `$type: color` form is also accepted when it is later authored.
+ */
+const pairedForegrounds = new Set(PAIRS.map(([fg]) => fg))
+const semanticLightFile = path.join(HERE, '..', 'src', 'semantic', 'light.tokens.json')
+const semanticLight = JSON.parse(
+  (await readFile(semanticLightFile, 'utf8')).replace(/^\uFEFF/, ''),
+)
+for (const [name, token] of Object.entries(semanticLight)) {
+  if (name.startsWith('$') || name === 'radius') continue
+  const isColor = token?.$type === undefined || token.$type === 'color'
+  if (isColor && name.endsWith('-foreground') && !pairedForegrounds.has(name)) {
+    failures++
+    console.error(
+      `  FAIL pair-rule  ${name}: a -foreground token must be the first element of a PAIRS entry`,
+    )
+  }
+}
+
 for (const source of sources) {
   for (const mode of ['light', 'dark']) {
     const tokens = JSON.parse(await readFile(path.join(DIST, source[mode]), 'utf8'))
     for (const [fg, bg, min, label, severity] of PAIRS) {
       const f = tokens[fg]?.value
       const b = tokens[bg]?.value
-      if (!f?.startsWith('#') || !b?.startsWith('#')) continue
+      if (!f?.startsWith('#') || !b?.startsWith('#')) {
+        // A required pair with a missing or non-hex value is an error, not a
+        // silent skip: a forgotten token must fail rather than disappear. An
+        // advisory pair may still skip.
+        if (severity === 'required') {
+          failures++
+          rows.push({ theme: source.label, mode, label, ratio: 0, min, ok: false, fg, bg, severity })
+        }
+        continue
+      }
       const r = ratio(f, b)
       const ok = r >= min
       if (!ok) {

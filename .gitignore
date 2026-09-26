@@ -44,3 +44,9 @@ packages/*/THIRD-PARTY-NOTICES.md
 
 # The project-local pnpm store (see .npmrc).
 .pnpm-store/
+
+# Playwright run artifacts. The committed baselines live in
+# apps/site/e2e/__screenshots__ and are not ignored.
+apps/site/playwright-report/
+apps/site/test-results/
+apps/site/blob-report/

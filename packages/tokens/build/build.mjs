@@ -25,7 +25,14 @@ import { writeDtcg } from './dtcg.mjs'
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const PKG = path.join(HERE, '..')
 const SRC = path.join(PKG, 'src')
-const DIST = path.join(PKG, 'dist')
+/**
+ * Output root. `PRISM_TOKENS_DIST` redirects it so the determinism gate can
+ * build twice into two temporary directories and byte-compare without touching
+ * the live `dist/` a dev server may be holding.
+ */
+const DIST = process.env.PRISM_TOKENS_DIST
+  ? path.resolve(process.env.PRISM_TOKENS_DIST)
+  : path.join(PKG, 'dist')
 /** Generated staging area. Not committed — the descriptors are the source of truth. */
 const STAGE = path.join(PKG, '.generated')
 

@@ -73,9 +73,11 @@ settled target.
   dev server loses its module graph.
 - **The shadcn registry is internal.** Never serve it or document it as an install
   lane.
-- **Root documentation is not yet inside the dash gate.** Keep it free of em and
-  en dashes anyway; the quality-gate work adds the root documents to
-  `scripts/check-dashes.mjs`.
+- **Root documentation is inside the dash gate.** `scripts/check-dashes.mjs`
+  scans `README.md`, `DESIGN.md`, `PRODUCT.md`, `CONTEXT.md`, `AGENTS.md`,
+  `CONTRIBUTING.md` and `docs/**` alongside the package sources, and fails on an
+  em or en dash or a `???` sequence in reader-facing copy. Keep them free of
+  all three.
 - **Package scope and layout.** The npm scope is `@nanisoft`; the library
   packages are `@nanisoft/prism-tokens` in `packages/tokens` and
   `@nanisoft/prism-ui` in `packages/ui`, and the site is `@nanisoft/site` in

@@ -222,6 +222,25 @@ for (const item of registry.items ?? []) {
   if (!hasExport(subpath)) {
     errors.push(`items (${item.name}): type ${item.type} has no "${subpath}" in the exports map`)
   }
+
+  /*
+   * The published file list (ticket 15 section 6). A registry item must map to a
+   * real emitted module and declaration, not merely to an `exports` wildcard
+   * whose directory exists. This is the library-only form of "a renamed file
+   * leaves the catalogue entry pointing at a module the package no longer
+   * publishes".
+   */
+  const emitted =
+    item.type === 'registry:component'
+      ? path.join('dist', 'components', 'ui', `${item.name}.js`)
+      : item.type === 'registry:block'
+        ? path.join('dist', 'blocks', item.name, 'index.js')
+        : path.join('dist', 'pages', item.name, 'index.js')
+  for (const artifact of [emitted, emitted.replace(/\.js$/, '.d.ts')]) {
+    if (!(await exists(artifact))) {
+      errors.push(`items (${item.name}): emitted artifact "${artifact}" is missing from the package`)
+    }
+  }
 }
 
 for (const [key, value] of Object.entries(exportsField)) {

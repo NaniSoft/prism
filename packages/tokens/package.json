@@ -32,7 +32,9 @@
   "scripts": {
     "build": "node build/build.mjs && pnpm check",
     "watch": "node build/build.mjs --watch",
-    "check": "node scripts/check-contrast.mjs && node scripts/check-emitted-contract.mjs",
+    "check": "node scripts/check-contrast.mjs && node scripts/check-emitted-contract.mjs && node scripts/check-determinism.mjs",
+    "pretest": "node build/build.mjs",
+    "test": "vitest run",
     "gen": "node scripts/gen-pastel.mjs",
     "prepack": "node ../../scripts/stage-package-files.mjs",
     "prepublishOnly": "publint"
@@ -40,6 +42,7 @@
   "devDependencies": {
     "style-dictionary": "^4.4.0",
     "tailwindcss": "4.3.3",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^3.2.4"
   }
 }

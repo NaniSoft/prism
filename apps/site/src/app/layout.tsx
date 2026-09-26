@@ -5,8 +5,11 @@ import { ThemeSwitcher } from '@/components/theme-switcher'
 import { SearchEntry } from '@/components/search-entry'
 import { MobileMenu, SiteNav } from '@/components/site-nav'
 
-import '@nanisoft/prism-ui/styles.css'
+// Order matters: the site's own Tailwind build emits `.h-9` and friends for the
+// chrome, and the Prism stylesheet must come after it so a variant rule such as
+// `pointer-coarse:h-11` wins the tie instead of losing to a later base utility.
 import './globals.css'
+import '@nanisoft/prism-ui/styles.css'
 
 export const metadata: Metadata = {
   title: 'Design System',

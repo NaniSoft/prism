@@ -33,6 +33,63 @@ jobs:
       - name: Verify the published tarballs
         run: node scripts/verify-tarballs.mjs --mode=verify
 
+  # Report-only visual regression (ticket 15 Q11). The promotion rule is written
+  # in apps/site/playwright.config.ts: two consecutive weeks with no unexplained
+  # diff (target ten merges) and the `continue-on-error` line comes off.
+  visual:
+    name: visual
+    needs: verify
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build
+        uses: ./.github/actions/build
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @nanisoft/site exec playwright install --with-deps chromium
+
+      - name: Run visual regression
+        id: visual
+        continue-on-error: true
+        run: pnpm --filter @nanisoft/site run visual
+
+      - name: Upload the Playwright report and diffs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: playwright-report
+          path: apps/site/playwright-report
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Write the comment body
+        if: github.event_name == 'pull_request'
+        run: |
+          {
+            echo "Visual regression is report-only (ticket 15 Q11). Promotion needs two consecutive weeks with no unexplained diff."
+            echo
+            echo "Result: ${{ steps.visual.outcome }}"
+            echo
+            echo "The HTML report and diff images are attached as the playwright-report artifact."
+          } > "${{ runner.temp }}/prism-visual.md"
+
+      - name: Comment on the pull request
+        if: github.event_name == 'pull_request'
+        uses: ./.github/actions/comment-on-pr
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          body-path: ${{ runner.temp }}/prism-visual.md
+          marker: '<!-- prism-visual -->'
+
   release-preview:
     name: release-preview
     if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'changeset-release/')
