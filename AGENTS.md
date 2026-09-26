@@ -18,7 +18,7 @@ and avoid the words it retires.
 | `packages/mcp-server` | `@nanisoft/prism-mcp-server` | read-only MCP tool logic, served from the site Worker |
 | `apps/site` | `@nanisoft/site` | static docs site, landing page, themes, and the Worker |
 | `scripts` | - | repository gates and release scripts |
-| `.scratch/prism-shadcn` | - | the active rebuild map and its tickets |
+| `.scratch/prism-shadcn` | - | the rebuild map and its tickets (closed; kept as the decision record) |
 
 ## Commands
 
@@ -34,8 +34,7 @@ pnpm changeset      # declare a release before merging
 ```
 
 Run one package with `pnpm --filter @nanisoft/prism-ui <task>`. `package.json` is
-the source of truth for what a script does today; the command set above is the
-settled target.
+the source of truth for what a script does today.
 
 ## Conventions
 
@@ -88,7 +87,8 @@ settled target.
 ### Issue tracker
 
 Issues are markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
-The active map is `.scratch/prism-shadcn/map.md`.
+The rebuild map at `.scratch/prism-shadcn/map.md` is closed and kept as the
+decision record.
 
 ### Triage labels
 

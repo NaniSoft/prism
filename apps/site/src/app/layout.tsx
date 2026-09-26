@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ThemeSwitcher } from '@/components/theme-switcher'
 import { SearchEntry } from '@/components/search-entry'
 import { MobileMenu, SiteNav } from '@/components/site-nav'
+import { inter } from '@/lib/fonts'
 
 // Order matters: the site's own Tailwind build emits `.h-9` and friends for the
 // chrome, and the Prism stylesheet must come after it so a variant rule such as
@@ -39,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
-      <body className="min-h-screen antialiased">
+      <body className={`${inter.variable} min-h-screen antialiased`}>
         {/*
           Skip link, first in the document on purpose.
 

@@ -280,5 +280,8 @@ belongs to a fresh map rather than this one.
 **Complete.** All nineteen tickets are resolved and the map is closed. Tickets
 01 to 05 and the research they rest on charted it; 06 to 16, 18 and 19 decided
 it; and 17 is the staged runbook for execution. No fog remains that the
-destination needs. The next move is not a ticket on this map: it is the
-implementation the spec describes, starting from the plan this map produced.
+destination needs. The implementation the spec describes has since been
+completed in this repository: the four packages build under their final names,
+the 42-item catalogue, the site and the agent surface are built, and the quality
+gates run. What remains is outside this map's write scope: the human-executed
+cutover steps and the v1.1 roster tail.

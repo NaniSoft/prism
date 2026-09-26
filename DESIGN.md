@@ -7,7 +7,7 @@ colors:
   base-primary: "#171717"
   base-primary-foreground: "#ffffff"
   base-muted: "#f5f5f5"
-  base-muted-foreground: "#737373"
+  base-muted-foreground: "#525252"
   base-border: "#e5e5e5"
   base-ring: "#737373"
   base-destructive: "#dc2626"
@@ -147,10 +147,9 @@ components:
 
 Prism is NaniSoft's design system. It is one design language expressed through a
 token pipeline, a React component library, a documentation site, and a
-machine-readable agent surface. This document describes the system the rebuild
-map has settled, and the visual and structural rules the rest of the repository
-is accountable to. It is written for this repository, not adapted from the old
-one.
+machine-readable agent surface. This document describes the system as built and
+the visual and structural rules the rest of the repository is accountable to. It
+is written for this repository, not adapted from the old one.
 
 **The constraint.** Semantic token names are emitted verbatim as CSS custom
 properties, byte for byte identical to shadcn's variable contract. This is the
@@ -192,9 +191,9 @@ interface face.
 - The site is built with the system it documents.
 
 **Register of this document.** It states the design system's rules, not the v1
-roster. The Component, Block and Page roster is a separate open question, listed
-under Known Open Items. Where the map has not decided something, this document
-says so rather than guessing.
+roster. The roster is settled and lives in the checked catalogue; this document
+does not restate it. Where a rule is still deferred, this document says so under
+Known Open Items rather than guessing.
 
 ## Colors
 
@@ -210,7 +209,10 @@ ink, not colour. `background`, `card` and `popover` all resolve to the same
 value, so a surface is separated from the page by a border and a shadow rather
 than by a fill change. `secondary`, `muted` and `accent` also resolve to one
 value, so those three roles are visually identical in the base pack and diverge
-only in the pastels.
+only in the pastels. `muted-foreground` is pinned to neutral 600 rather than
+neutral 500: helper text sits on the tinted `muted` surface as well as on the
+page ground, and neutral 500 cleared 4.5:1 on white but fell to 4.34:1 on
+`muted`.
 
 ### The five pastels
 
@@ -422,7 +424,7 @@ to transparent, is always `aria-hidden`, and is never applied to text.
 ## Components
 
 The taxonomy is Component, Block and Page, and nothing else. This section states
-the contract; the v1 roster is not settled here.
+the contract; the catalogue is the one list of the items that ship.
 
 ### The composition layers
 
@@ -548,8 +550,8 @@ entry points.
   afterwards; see Token Contract.
 - **Don't** add a keyframe animation or an entrance or scroll effect. The motion
   doctrine is state feedback, shortened rather than removed under reduced motion.
-- **Don't** assume the dash gate covers this file. It gates an explicit list, and
-  root documentation is not yet on it. See Known Open Items.
+- **Don't** add an em dash or an en dash to reader-facing copy. The dash gate
+  covers this file and the other root documents.
 
 ## Token Contract
 
@@ -627,13 +629,15 @@ under `dist/dtcg/` for a future Figma Variables sync. The site never imports it.
 Two-way Figma sync is out of scope. A one-way sync and its plugin ownership are
 not built in this effort.
 
-**The contrast gate.** The gate evaluates a fixed pair table per theme: 14
+**The contrast gate.** The gate evaluates a fixed pair table per theme: 15
 required pairs at 4.5:1 or 3:1, and 2 advisory pairs (`border` and `input` on the
-background, reported and never failed). That is 28 required assertions per theme
+background, reported and never failed). That is 30 required assertions per theme
 across the two modes. Motion, typography and spacing are not colour pairs and are
-not contrast-checkable. One rule tightens the gate: a new root-level colour token
+not contrast-checkable. Two rules tighten the gate: a new root-level colour token
 whose name ends in `-foreground` must be the first element of a pair, so a new
-semantic colour cannot ship unchecked.
+semantic colour cannot ship unchecked; and `muted-foreground` is checked on
+`muted` as well as on `background`, because the pill, avatar fallback, kbd and
+tab-list pattern sits on the tinted surface rather than the page ground.
 
 **The grep gates.** A motion gate fails on a `cubic-bezier(...)` literal, an
 arbitrary duration or easing utility, or a bare millisecond value in component
@@ -685,31 +689,33 @@ the ramp file and the manifest are generated from it, never authored by hand.
 
 Recorded as facts. None of these is fixed in this document.
 
-- **The rebuild is not executed.** The four published packages do not exist under
-  their final names yet, `packages/ui` has not become `packages/ui`,
-  `apps/site` has not become `apps/site`, and the site and the agent surface are
-  not rebuilt. This document describes the settled target; the map is the list of
-  work.
-- **The v1 roster is not settled.** The seven categories, the composition layers
-  and the authoring contract are settled; the explicit list of Components, Blocks
-  and Pages is not.
-- **The newly authored token groups are not emitted yet.** Motion, typography,
-  spacing, elevation, breakpoints and containers are settled, but the token build
-  does not emit them all today, and the emitted-contract test and the motion,
-  surface and elevation and layout gates are not written yet.
-- **The dash gate does not cover root documentation, including this file.** This
-  document and every root document are written without em or en dashes
-  deliberately. Making that a checked result means adding the root documents to
-  both `ROOTS` and `GATED` in `scripts/check-dashes.mjs`; adding them to `ROOTS`
-  alone would report without gating. Until that happens, dash-freedom here is a
-  property of how it was written, not a checked result.
-- **The shadcn `components.json` style identifier is unverified.** The value
-  `"base-nova"` must be established before any gate depends on it.
+- **The cutover is not executed.** The implementation is complete in this
+  repository, but publishing the four packages, deprecating the old `0.3.0` and
+  `0.4.0` lines, and moving `prism.nanisoft.com` to the new site are staged,
+  human-executed steps rather than done work. `MIGRATION.md` is the draft that
+  goes live at cutover.
 - **`CODEOWNERS` carries a placeholder owner line.** The project has one
-  maintainer and no confirmed team handle yet; the repository cutover confirms
-  it.
-- **The design summary at `.impeccable/design.json` is stale.** It was generated
-  from the previous `DESIGN.md` and should be regenerated after the token
-  rebuild.
-- **Visual regression is not adopted in this effort** unless a later quality-gate
-  decision adopts it.
+  maintainer and no confirmed team handle yet; the cutover confirms it.
+- **The v1.1 roster tail is deferred, not dropped.** The v1 catalogue is 28
+  Components, 10 Blocks and 4 Pages, 42 items. The deferred components, blocks
+  and pages are enumerated in ticket 19, and every one is additive because no
+  new upstream engine is needed for it.
+- **Visual regression is report-only.** The Playwright job is committed with a
+  written promotion rule (two stable weeks, target ten merges); until the rule
+  fires, a visual diff is reported and does not fail the build.
+- **The client-JavaScript budget reports per item and fails only in total.** A
+  per-item figure over ticket 19's estimate is reported; the deduplicated
+  all-client bundle is held to the 90 KB gzip ceiling.
+- **`styles.css` has no byte budget.** The client analyzer measures source, not
+  the compiled bytes a consumer downloads; a gzip budget is the strongest
+  candidate for a future fail gate and is not adopted.
+- **No cross-browser or cross-engine testing.** jsdom is not a browser, and the
+  visual and real-browser axe checks are Chromium only.
+- **The registry validator proves internal consistency, not installability.**
+  The tarball verifier proves contents, not runtime compatibility.
+- **Supply-chain and dependency automation is deferred.** CodeQL, OSSF
+  Scorecard, `dependency-review-action`, Renovate and pnpm `minimumReleaseAge`
+  are named in ticket 16 and not adopted.
+- **A one-way Figma Variables sync is not built.** The DTCG projection under
+  `dist/dtcg/` exists; the sync and its plugin ownership do not, and two-way
+  sync is out of scope.

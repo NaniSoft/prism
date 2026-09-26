@@ -105,7 +105,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@nanisoft/prism-ui/com
 // Blocks and Pages import the same way, from ./blocks/* and ./pages/*.
 ```
 
-The v1 roster is settled separately. This README states the contract, not the
+The v1 roster is 28 Components, 10 Blocks and 4 Pages, 42 catalogue items. The
+checked catalogue is the one list; this README states the contract, not the
 list.
 
 ## The agent surface
@@ -152,11 +153,13 @@ The constitution lives at the root: `PRODUCT.md`, `CONTEXT.md`, `DESIGN.md`,
 
 ## Status
 
-Prism is being rebuilt from this repository. The packages, subpaths and commands
-above are the settled target; the rebuild map at `.scratch/prism-shadcn/map.md`
-is the work list, and `DESIGN.md` records the open items. The previous public
-system is archived at `github.com/NaniSoft/prism` and is not the source of this
-system.
+The system is built. The four packages exist under their final names, the
+component library ships the 42-item v1 catalogue, the docs site builds and
+exports statically, and the quality-gate set runs in CI. The rebuild map at
+`.scratch/prism-shadcn/map.md` is closed. `DESIGN.md` records the open items,
+which are the cutover steps and the v1.1 roster tail rather than missing work.
+The previous public system is archived at `github.com/NaniSoft/prism` and is not
+the source of this system.
 
 ## Contributing
 

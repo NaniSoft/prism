@@ -11,7 +11,7 @@
   "secondary": { "$value": "{color.neutral.100}", "$description": "Lower-emphasis filled actions." },
   "secondary-foreground": { "$value": "{color.neutral.900}", "$description": "Text on a secondary surface." },
   "muted": { "$value": "{color.neutral.100}", "$description": "Subtle surfaces." },
-  "muted-foreground": { "$value": "{color.neutral.500}", "$description": "Helper and placeholder text." },
+  "muted-foreground": { "$value": "{color.neutral.600}", "$description": "Helper and placeholder text. Pinned to a step that clears 4.5:1 on both `background` and the `muted` surface it is paired with in pills and fallbacks." },
   "accent": { "$value": "{color.neutral.100}", "$description": "Hover, focus and active surfaces." },
   "accent-foreground": { "$value": "{color.neutral.900}", "$description": "Text on an accent surface." },
   "destructive": { "$value": "{color.red.600}", "$description": "Destructive actions and error emphasis." },

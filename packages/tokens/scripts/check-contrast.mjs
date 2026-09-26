@@ -48,6 +48,11 @@ const PAIRS = [
   ['secondary-foreground', 'secondary', 4.5, 'secondary button', 'required'],
   ['accent-foreground', 'accent', 4.5, 'accent surface', 'required'],
   ['muted-foreground', 'background', 4.5, 'muted text', 'required'],
+  // The pill, avatar fallback, kbd and tab-list pattern pairs muted text with
+  // the muted surface, not the page ground, so it is a distinct pair. Without
+  // this row the gate held the base pack at 4.74:1 on white while the muted
+  // surface composited to 4.34:1 and the real-browser axe run caught it.
+  ['muted-foreground', 'muted', 4.5, 'muted text on muted surface', 'required'],
   ['destructive-foreground', 'destructive', 4.5, 'destructive button', 'required'],
   ['success-foreground', 'success', 4.5, 'success badge', 'required'],
   ['warning-foreground', 'warning', 4.5, 'warning badge', 'required'],

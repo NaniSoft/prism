@@ -32,9 +32,12 @@ compiled output is part of the component package's precompiled `styles.css`.
 
 ## Fonts
 
-The documentation site self-hosts Inter under `apps/site/src/fonts/`, under the
-**SIL Open Font License, Version 1.1**. The license text accompanies the
-distributed font files. Inter is copyright The Inter Project Authors
+The documentation site self-hosts Inter under `apps/site/src/fonts/`, loaded
+through `next/font/local`. The shipped files are `InterVariable.woff2` and
+`InterVariable-Italic.woff2` from the official Inter release 4.1, and the site
+is the only consumer. Inter is licensed under the **SIL Open Font License,
+Version 1.1**; the license text is committed at
+`apps/site/src/fonts/LICENSE.txt`. Inter is copyright The Inter Project Authors
 (rsms.me/inter).
 
 ## Build and development toolchain
