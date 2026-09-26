@@ -1,0 +1,46 @@
+{
+  "name": "@nanisoft/prism-llms",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Prism's agent-facing corpus: llms.txt, the Markdown mirror, prism-skill.md and the PrismDocsStore projection. One build-fresh dist/ serves npm, the site and the MCP server.",
+  "license": "MIT",
+  "author": "NaniSoft",
+  "homepage": "https://prism.nanisoft.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NaniSoft/prism.git",
+    "directory": "packages/llms"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./extractor": {
+      "types": "./dist/extractor.d.ts",
+      "default": "./dist/extractor.js"
+    },
+    "./data.json": "./dist/data.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs",
+    "pretest": "pnpm build",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@nanisoft/prism-tokens": "workspace:*",
+    "@nanisoft/prism-ui": "workspace:*",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.2.4"
+  }
+}

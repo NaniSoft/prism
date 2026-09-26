@@ -4,14 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "predev": "pnpm --filter @nanisoft/prism-tokens build && pnpm --filter @nanisoft/prism-ui build && node ../../scripts/dev-cache-guard.mjs && node scripts/generate-demos.mjs && node scripts/generate-api.mjs",
+    "predev": "pnpm --filter @nanisoft/prism-tokens build && pnpm --filter @nanisoft/prism-ui build && pnpm --filter @nanisoft/prism-llms build && node ../../scripts/dev-cache-guard.mjs && node scripts/generate-demos.mjs && node scripts/generate-api.mjs",
     "dev": "next dev --turbopack",
-    "prebuild": "pnpm --filter @nanisoft/prism-tokens build && node scripts/generate-demos.mjs && node scripts/generate-api.mjs",
+    "prebuild": "pnpm --filter @nanisoft/prism-tokens build && pnpm --filter @nanisoft/prism-llms build && node scripts/generate-demos.mjs && node scripts/generate-api.mjs",
     "build": "next build",
-    "postbuild": "node scripts/check-search-budget.mjs",
+    "postbuild": "node scripts/copy-agent-surface.mjs && node scripts/check-search-budget.mjs",
     "start": "next start",
     "catalog:analyze": "node scripts/analyze-blocks.mjs",
-    "pretypecheck": "node scripts/generate-demos.mjs && node scripts/generate-api.mjs",
+    "pretypecheck": "pnpm --filter @nanisoft/prism-llms build && node scripts/generate-demos.mjs && node scripts/generate-api.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ."
   },
@@ -26,6 +26,7 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@nanisoft/prism-llms": "workspace:*",
     "@tailwindcss/postcss": "^4.1.12",
     "@types/node": "^22.0.0",
     "@types/react": "^19.2.0",
