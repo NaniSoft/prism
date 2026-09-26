@@ -1,0 +1,74 @@
+---
+title: Alert
+---
+
+## Overview
+
+An Alert is a static callout that carries an important message in place. It
+ships as `Alert`, `AlertTitle` and `AlertDescription`, all from the same module.
+
+The root renders a `<div role="alert">`, so assistive technology announces it
+when it enters the document. `variant="destructive"` switches the border and
+text to the destructive token for an error; the default is the neutral surface.
+The icon, when one is passed as the first child, is placed beside the text and
+takes the variant's colour.
+
+## Usage
+
+```tsx
+import { Alert, AlertDescription, AlertTitle } from '@nanisoft/prism-ui/components/alert'
+
+<Alert variant="destructive">
+  <AlertTitle>Publish failed</AlertTitle>
+  <AlertDescription>
+    The build did not finish. Fix the type error and publish again.
+  </AlertDescription>
+</Alert>
+```
+
+<ComponentDemo slug="alert" />
+
+## Guidelines
+
+### When to use
+
+Use an Alert for a message that must be read before the reader continues: a
+failed publish, a failed connection, a maintenance window, a consequence of the
+action they are about to take.
+
+### When not to use
+
+Do not use an Alert for a transient success. A message that confirms something
+happened should not occupy the page afterwards; a toast covers that case, and
+toasts are not in v1.
+
+Do not use an Alert for a field-level problem. A FieldError sits beside the
+control it belongs to.
+
+Do not use an Alert for a decision the reader must make before continuing. A
+dialog blocks the page and takes focus; an inline callout does neither.
+
+### Best practices
+
+- Lead with the condition in `AlertTitle` and put the next step in
+  `AlertDescription`. A reader scanning the page should get the point from the
+  title alone.
+- Keep the whole callout to two short sentences. Anything longer is documentation
+  and belongs in the page body.
+- Reserve `variant="destructive"` for a real failure. Using it for a warning
+  spends the one emphasis the system has.
+- Pair the colour with the word. The title carries the meaning; the variant
+  reinforces it.
+- Mark a decorative icon `aria-hidden` so it does not enter the announced text,
+  and never use the icon as the only signal of severity.
+- Place any action the message calls for just after the callout, not inside the
+  description, so the reading order stays simple.
+
+### Content guidelines
+
+- State the condition and the next step: "Publish failed. Fix the type error and
+  publish again."
+- Do not prefix the title with "Error" or "Warning". The variant and the words
+  already say it.
+- Use sentence case and no period in the title. The description takes full
+  sentences.

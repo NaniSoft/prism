@@ -1,0 +1,65 @@
+---
+title: Typography
+---
+
+## Overview
+
+Typography is the pair of text exports that apply the type scale. `Heading`
+renders a document heading and `Text` renders a run of body copy, both from the
+same module.
+
+`Heading` separates the element from the visual step. The `as` prop chooses the
+outline, and `size` chooses the scale, so a section that needs an `h2` attuned
+to a compact card keeps the outline while taking a smaller visual size. `Text`
+offers `size` and a `tone`, where `tone="muted"` is the supporting copy that
+sits beside a heading.
+
+## Usage
+
+```tsx
+import { Heading, Text } from '@nanisoft/prism-ui/components/typography'
+
+<Heading as="h2" size="2xl">
+  Release notes
+</Heading>
+<Text tone="muted">What shipped in the last two weeks.</Text>
+```
+
+<ComponentDemo slug="typography" />
+
+## Guidelines
+
+### When to use
+
+Use `Heading` and `Text` for long-form content and documentation, where the
+outline and the scale are the structure the reader navigates by.
+
+Use the `as` and `size` split when a heading's place in the outline and its
+visual weight are not the same decision.
+
+### When not to use
+
+Do not use Typography for a control label or a card title. Components such as
+Button and CardTitle own their own text treatment, and restyling them from the
+outside is the override the system forbids.
+
+Do not use `Heading` to make text bigger. A paragraph that is important is still
+a paragraph; emphasis comes from placement and copy.
+
+Do not use Typography to fix spacing. Rhythm comes from the container, not from
+a text size chosen to close a gap.
+
+### Best practices
+
+- Choose `as` by the document outline and `size` by the layout. One page has one
+  `h1`, and the levels below it never skip a step.
+- Let `Heading` default to `h2`. A block or an article body is composed under a
+  page heading, so the surrounding document already owns the top level.
+- Keep a prose measure near the container token. A line that runs the full
+  window is hard to track back to its start.
+- Use `tone="muted"` for supporting copy and keep it to a sentence or two. If
+  the muted text carries the point, promote it.
+- Keep headings in sentence case and leave the full stop off. A heading is a
+  label, not a sentence.
+- Do not scale text with `className`. Size is a token decision, and a one-off
+  value breaks the scale for the next reader.

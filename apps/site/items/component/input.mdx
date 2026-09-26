@@ -1,0 +1,68 @@
+---
+title: Input
+---
+
+## Overview
+
+An Input is the single-line text control. It renders a native `<input>`, so it
+submits, validates, autocompletes and takes focus without extra work, and it
+accepts every standard input type.
+
+The focus ring is drawn at full strength rather than at half alpha, so it clears
+the 3:1 non-text threshold on every surface. When the control is marked with
+`aria-invalid`, the border and the ring switch to the destructive token, which
+makes a failed field visible as well as announced.
+
+## Usage
+
+```tsx
+import { Input } from '@nanisoft/prism-ui/components/input'
+
+<Input type="email" placeholder="name@example.com" />
+```
+
+<ComponentDemo slug="input" />
+
+## Guidelines
+
+### When to use
+
+Use an Input for a short, single-line value: a name, an address, a search term,
+a quantity, a date or a password.
+
+Pair it with a Field so the control keeps a visible label, and pass the correct
+`type` so mobile keyboards and browser validation both do their job.
+
+### When not to use
+
+Do not use an Input for free-form text longer than a line. A Textarea gives the
+reader room to see what they have written.
+
+Do not use one for a choice between options. A radio group, a select or a
+switch states the options and their current state; a text box asks the reader to
+remember them.
+
+Do not use an Input as a display field for a value the reader cannot change.
+Render the value as text.
+
+### Best practices
+
+- Keep a visible label. A placeholder is a hint, not a name, and it vanishes on
+  the first keystroke.
+- Choose the `type` and `inputMode` that match the value, and set `autoComplete`
+  so the browser can fill it. Getting this right saves more effort than any
+  visual detail.
+- Show the error beside the field and mark the control with `aria-invalid`.
+  Colour alone never carries the failure.
+- Disable a control only when the reason is visible nearby. A disabled input
+  with no explanation is a dead end.
+- Keep the default height and radius. Size is a token decision, and a taller
+  input breaks alignment with every other control on the row.
+
+### Content guidelines
+
+- A placeholder may show the expected format, for example `name@example.com`,
+  and nothing more.
+- A helper line states the rule, not the field's name: "At least eight
+  characters", not "Password".
+- Do not write an error in the imperative twice. One instruction per message.

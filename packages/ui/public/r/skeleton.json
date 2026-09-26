@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "skeleton",
+  "title": "Skeleton",
+  "description": "Shared skeleton primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/skeleton.tsx",
+      "content": "import type { ComponentProps } from 'react'\n\nimport { cn } from '../../lib/utils'\n\n/**\n * A placeholder surface that mirrors the shape of content while it loads.\n *\n * It ships without a shimmer on purpose. Prism authors no keyframes, so the\n * placeholder is a static muted block and the shape, not a pulse, is what tells\n * the reader content is coming. Set its size with `className`, which is layout\n * and therefore permitted.\n */\nfunction Skeleton({ className, ...props }: ComponentProps<'div'>) {\n  return (\n    <div\n      data-slot=\"skeleton\"\n      aria-hidden=\"true\"\n      className={cn('bg-muted rounded-md', className)}\n      {...props}\n    />\n  )\n}\n\nexport { Skeleton }\n",
+      "type": "registry:component",
+      "target": "components/ui/skeleton.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

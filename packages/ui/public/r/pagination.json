@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "pagination",
+  "title": "Pagination",
+  "description": "Shared pagination primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "clsx",
+    "lucide-react",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/pagination.tsx",
+      "content": "import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react'\nimport type { ComponentProps } from 'react'\n\nimport { cn } from '../../lib/utils'\n\ntype PaginationSize = 'default' | 'sm' | 'lg' | 'icon'\n\n/**\n * The control that moves between pages of a paged collection.\n *\n * The root is a `<nav>` with an accessible name, so the page links are grouped\n * as one navigation region.\n */\nfunction Pagination({ className, ...props }: ComponentProps<'nav'>) {\n  return (\n    <nav\n      aria-label=\"Pagination\"\n      data-slot=\"pagination\"\n      className={cn('mx-auto flex w-full justify-center', className)}\n      {...props}\n    />\n  )\n}\n\n/** The list that holds the page links. */\nfunction PaginationContent({ className, ...props }: ComponentProps<'ul'>) {\n  return (\n    <ul\n      data-slot=\"pagination-content\"\n      className={cn('flex flex-row items-center gap-1', className)}\n      {...props}\n    />\n  )\n}\n\n/** One slot in the list: a page link, a step control or an ellipsis. */\nfunction PaginationItem({ className, ...props }: ComponentProps<'li'>) {\n  return <li data-slot=\"pagination-item\" className={cn(className)} {...props} />\n}\n\n/**\n * A link to one page.\n *\n * Renders a native `<a>`; set `isActive` on the current page so it is marked\n * with `aria-current=\"page\"`.\n */\nfunction PaginationLink({\n  className,\n  isActive,\n  size = 'icon',\n  ...props\n}: ComponentProps<'a'> & { isActive?: boolean; size?: PaginationSize }) {\n  return (\n    <a\n      aria-current={isActive ? 'page' : undefined}\n      data-slot=\"pagination-link\"\n      data-active={isActive ? 'true' : undefined}\n      className={cn(\n        'inline-flex items-center justify-center rounded-md text-sm font-medium whitespace-nowrap outline-none transition-colors duration-fast ease-out focus-visible:ring-ring focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50',\n        size === 'default' && 'h-9 px-4 py-2',\n        size === 'sm' && 'h-8 px-3',\n        size === 'lg' && 'h-10 px-6',\n        size === 'icon' && 'size-9',\n        isActive\n          ? 'border-border bg-background text-foreground border'\n          : 'text-foreground hover:bg-accent hover:text-accent-foreground',\n        className,\n      )}\n      {...props}\n    />\n  )\n}\n\n/** The step back to the previous page, with a hidden label on narrow layouts. */\nfunction PaginationPrevious({\n  className,\n  text = 'Previous',\n  ...props\n}: ComponentProps<typeof PaginationLink> & { text?: string }) {\n  return (\n    <PaginationLink\n      aria-label=\"Go to the previous page\"\n      size=\"default\"\n      className={cn('gap-1 px-2.5 sm:pl-2.5', className)}\n      {...props}\n    >\n      <ChevronLeft />\n      <span className=\"hidden sm:block\">{text}</span>\n    </PaginationLink>\n  )\n}\n\n/** The step forward to the next page, with a hidden label on narrow layouts. */\nfunction PaginationNext({\n  className,\n  text = 'Next',\n  ...props\n}: ComponentProps<typeof PaginationLink> & { text?: string }) {\n  return (\n    <PaginationLink\n      aria-label=\"Go to the next page\"\n      size=\"default\"\n      className={cn('gap-1 px-2.5 sm:pr-2.5', className)}\n      {...props}\n    >\n      <span className=\"hidden sm:block\">{text}</span>\n      <ChevronRight />\n    </PaginationLink>\n  )\n}\n\n/**\n * A held-back run of page numbers.\n *\n * It is hidden from assistive technology because the page links around it\n * already name the range, and it is not focusable.\n */\nfunction PaginationEllipsis({ className, ...props }: ComponentProps<'span'>) {\n  return (\n    <span\n      data-slot=\"pagination-ellipsis\"\n      aria-hidden=\"true\"\n      className={cn('flex size-9 items-center justify-center', className)}\n      {...props}\n    >\n      <MoreHorizontal className=\"size-4\" />\n    </span>\n  )\n}\n\nexport {\n  Pagination,\n  PaginationContent,\n  PaginationItem,\n  PaginationLink,\n  PaginationPrevious,\n  PaginationNext,\n  PaginationEllipsis,\n}\n",
+      "type": "registry:component",
+      "target": "components/ui/pagination.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

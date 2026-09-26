@@ -1,0 +1,84 @@
+---
+title: Pagination
+---
+
+## Overview
+
+A Pagination moves between the pages of a paged collection. It ships as a
+parent and six parts: `Pagination`, `PaginationContent`, `PaginationItem`,
+`PaginationLink`, `PaginationPrevious`, `PaginationNext` and
+`PaginationEllipsis`, all from the same module.
+
+`Pagination` is a labelled `<nav>`, and `PaginationContent` is a `<ul>` so the
+page numbers form one list for assistive technology. The current page is marked
+with `aria-current="page"`, the step controls carry their own accessible names,
+and the ellipsis is hidden from the accessibility tree because the links around
+it already name the range.
+
+## Usage
+
+```tsx
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@nanisoft/prism-ui/components/pagination'
+
+<Pagination>
+  <PaginationContent>
+    <PaginationItem>
+      <PaginationPrevious href="/items?page=1" />
+    </PaginationItem>
+    <PaginationItem>
+      <PaginationLink href="/items?page=1">1</PaginationLink>
+    </PaginationItem>
+    <PaginationItem>
+      <PaginationLink href="/items?page=2" isActive>
+        2
+      </PaginationLink>
+    </PaginationItem>
+    <PaginationItem>
+      <PaginationNext href="/items?page=3" />
+    </PaginationItem>
+  </PaginationContent>
+</Pagination>
+```
+
+<ComponentDemo slug="pagination" />
+
+## Guidelines
+
+### When to use
+
+Use a Pagination when a result set is longer than one screen and the total is
+known. The page a reader is on, and how many pages exist, are both part of the
+information the control carries.
+
+### When not to use
+
+Do not use it for a short list that fits on one page. A single page link is
+furniture around nothing.
+
+Do not use it as a step control in a wizard. A checkout or an onboarding flow
+has a fixed order and no page numbers, so a pair of previous and next buttons
+describes it better.
+
+Do not replace it with infinite scroll and no page numbers. A reader who cannot
+return to a position loses their place.
+
+### Best practices
+
+- Render the current page as a link with `isActive`, so it is announced with
+  `aria-current="page"` and stays consistent in the row.
+- Show a window of pages, not every page. Use `PaginationEllipsis` for the
+  hidden run and keep the first, last and neighbours visible.
+- Keep `PaginationPrevious` and `PaginationNext` at the ends of the row. On
+  narrow layouts their labels collapse to the chevron and the accessible name
+  stays complete.
+- Pass a real `href` on each link. A page of results is a location, so the link
+  should be right-clickable and openable in a new tab.
+- State the range near the control, for example "1 to 20 of 348". Page numbers
+  alone do not tell the reader how much remains.

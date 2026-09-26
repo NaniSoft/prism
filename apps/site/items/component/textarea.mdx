@@ -1,0 +1,67 @@
+---
+title: Textarea
+---
+
+## Overview
+
+A Textarea is the multi-line text control. It renders a native `<textarea>` with
+a minimum height and a resize grip, so a reader can see more than one line of
+what they have written.
+
+It shares the Input's focus treatment: a full-strength ring on focus and a
+destructive border and ring when the control is marked with `aria-invalid`. The
+height follows the content where the browser supports field sizing, and `rows`
+remains the fallback.
+
+## Usage
+
+```tsx
+import { Textarea } from '@nanisoft/prism-ui/components/textarea'
+
+<Textarea rows={4} placeholder="What changed, and who it affects." />
+```
+
+<ComponentDemo slug="textarea" />
+
+## Guidelines
+
+### When to use
+
+Use a Textarea for free-form text that runs past a line: a note, a comment, a
+bio, a support message, a release description.
+
+Pair it with a Field label and a helper line, and set `rows` to a height that
+shows the expected answer rather than one line.
+
+### When not to use
+
+Do not use a Textarea for a single-line value. A name or a search term does not
+need a resize grip.
+
+Do not use one for structured data the product can model as separate fields. If
+the parts have names, they deserve their own controls and validation.
+
+Do not use a Textarea for rich text. Formatting, links and embeds need an
+editor the design system does not ship.
+
+### Best practices
+
+- Set a minimum height that matches the expected answer. A box that shows one
+  line suggests the answer is one line.
+- Keep the label above the control and the helper line below it, exactly as an
+  Input does, so a form reads as one pattern.
+- Leave the resize grip available. Readers with motor or vision differences
+  often size the box to the draft they are writing.
+- Show the current and maximum length next to the field when there is a limit,
+  and count down rather than up so the remaining space is obvious.
+- Mark a failed field with `aria-invalid` and put the reason in a FieldError.
+  The border is not the message.
+
+### Content guidelines
+
+- A helper line may state the limit or the format: "Up to 500 characters",
+  "Plain text only".
+- A placeholder may sketch the expected answer, and should be shorter than the
+  label it sits under.
+- Do not repeat the label inside the placeholder. The two are read together by
+  a screen reader.

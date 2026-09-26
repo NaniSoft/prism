@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "kbd",
+  "title": "Kbd",
+  "description": "Shared kbd primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/kbd.tsx",
+      "content": "import type { ComponentProps } from 'react'\n\nimport { cn } from '../../lib/utils'\n\n/**\n * An inline label for a keyboard key or shortcut.\n *\n * Renders a native `<kbd>`, so a screen reader can identify it as input the\n * reader types rather than as text to read. Use one element per key.\n */\nfunction Kbd({ className, ...props }: ComponentProps<'kbd'>) {\n  return (\n    <kbd\n      data-slot=\"kbd\"\n      className={cn(\n        'bg-muted text-muted-foreground pointer-events-none inline-flex h-5 min-w-5 items-center justify-center gap-1 rounded-sm px-1 font-sans text-xs font-medium select-none',\n        className,\n      )}\n      {...props}\n    />\n  )\n}\n\nexport { Kbd }\n",
+      "type": "registry:component",
+      "target": "components/ui/kbd.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

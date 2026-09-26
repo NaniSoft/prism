@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "table",
+  "title": "Table",
+  "description": "Shared table primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/table.tsx",
+      "content": "import type { ComponentProps } from 'react'\n\nimport { cn } from '../../lib/utils'\n\n/**\n * The semantic table components for tabular data.\n *\n * `Table` renders a real `<table>` inside a horizontally scrollable container,\n * so a wide set of columns stays reachable without breaking the page. Compose\n * it from `TableHeader`, `TableBody` and `TableRow`, name the columns with\n * `TableHead` and give the table a `TableCaption` unless an adjacent heading\n * already names it.\n */\nfunction Table({ className, ...props }: ComponentProps<'table'>) {\n  return (\n    <div\n      data-slot=\"table-container\"\n      className=\"relative w-full overflow-x-auto\"\n    >\n      <table\n        data-slot=\"table\"\n        className={cn('w-full caption-bottom text-sm', className)}\n        {...props}\n      />\n    </div>\n  )\n}\n\n/** The column header row. */\nfunction TableHeader({ className, ...props }: ComponentProps<'thead'>) {\n  return (\n    <thead\n      data-slot=\"table-header\"\n      className={cn('[&_tr]:border-b', className)}\n      {...props}\n    />\n  )\n}\n\n/** The data rows. */\nfunction TableBody({ className, ...props }: ComponentProps<'tbody'>) {\n  return (\n    <tbody\n      data-slot=\"table-body\"\n      className={cn('[&_tr:last-child]:border-0', className)}\n      {...props}\n    />\n  )\n}\n\n/** A summary row, for totals or a running count. */\nfunction TableFooter({ className, ...props }: ComponentProps<'tfoot'>) {\n  return (\n    <tfoot\n      data-slot=\"table-footer\"\n      className={cn(\n        'bg-muted/50 border-t font-medium [&_tr:last-child]:border-0',\n        className,\n      )}\n      {...props}\n    />\n  )\n}\n\n/** One row, which highlights on hover and while selected. */\nfunction TableRow({ className, ...props }: ComponentProps<'tr'>) {\n  return (\n    <tr\n      data-slot=\"table-row\"\n      className={cn(\n        'hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors duration-fast ease-out',\n        className,\n      )}\n      {...props}\n    />\n  )\n}\n\n/** A column header cell. */\nfunction TableHead({ className, ...props }: ComponentProps<'th'>) {\n  return (\n    <th\n      data-slot=\"table-head\"\n      className={cn(\n        'text-muted-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap',\n        className,\n      )}\n      {...props}\n    />\n  )\n}\n\n/** A data cell. */\nfunction TableCell({ className, ...props }: ComponentProps<'td'>) {\n  return (\n    <td\n      data-slot=\"table-cell\"\n      className={cn('p-2 align-middle whitespace-nowrap', className)}\n      {...props}\n    />\n  )\n}\n\n/** The table's caption, which names it for every reader. */\nfunction TableCaption({ className, ...props }: ComponentProps<'caption'>) {\n  return (\n    <caption\n      data-slot=\"table-caption\"\n      className={cn('text-muted-foreground mt-4 text-sm', className)}\n      {...props}\n    />\n  )\n}\n\nexport {\n  Table,\n  TableHeader,\n  TableBody,\n  TableFooter,\n  TableRow,\n  TableHead,\n  TableCell,\n  TableCaption,\n}\n",
+      "type": "registry:component",
+      "target": "components/ui/table.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

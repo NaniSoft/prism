@@ -1,0 +1,58 @@
+---
+title: Kbd
+---
+
+## Overview
+
+A Kbd is the inline label for a keyboard key or shortcut. It renders a native
+`<kbd>`, so assistive technology can identify it as input the reader types
+rather than as text to read.
+
+It sits inline with surrounding copy and takes its surface from the muted token.
+Shortcuts are written with one element per key, so `Ctrl` and `K` are two Kbd
+elements with a space between them.
+
+## Usage
+
+```tsx
+import { Kbd } from '@nanisoft/prism-ui/components/kbd'
+
+<p>
+  Open the command menu <Kbd>Ctrl</Kbd> <Kbd>K</Kbd>
+</p>
+```
+
+<ComponentDemo slug="kbd" />
+
+## Guidelines
+
+### When to use
+
+Use a Kbd when the reader must press a key to do something: a documented
+shortcut, a hint in a menu or a tooltip, or an onboarding step that names the
+keys.
+
+### When not to use
+
+Do not use a Kbd for a piece of code or a filename. Inline code already has its
+own treatment.
+
+Do not use one as a button label. A control that can be clicked shows a verb; a
+keyboard shortcut is an alternative, not the action.
+
+Do not use a Kbd for input the reader does not type, such as the name of a menu
+command.
+
+### Best practices
+
+- Use one Kbd per key. A single element holding the whole chord hides the
+  individual keys from anyone scanning or reading by element.
+- Name the modifier as the keyboard shows it and say which platform you assume.
+  There is no server-safe way to detect the reader's platform, so "Ctrl on
+  Windows and Linux, Cmd on macOS" is more honest than picking one.
+- Keep the hint inside a sentence that already states the action, so the keys
+  are never the only instruction.
+- Do not style a Kbd to look pressable. It reports a key, it does not receive a
+  press, and it is excluded from pointer events on purpose.
+- Keep the label to the key itself. Do not add the word "key" after it, because
+  the element already says what it is.

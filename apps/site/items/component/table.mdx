@@ -1,0 +1,81 @@
+---
+title: Table
+---
+
+## Overview
+
+A Table presents tabular data: records compared across named columns. It ships
+as `Table`, `TableHeader`, `TableBody`, `TableFooter`, `TableRow`, `TableHead`,
+`TableCell` and `TableCaption`, all from the same module.
+
+`Table` renders a real `<table>` inside a container that scrolls horizontally at
+narrow widths, so a wide set of columns stays reachable. `TableHeader`,
+`TableBody` and `TableFooter` map to `<thead>`, `<tbody>` and `<tfoot>`;
+`TableHead` is a `<th>` and `TableCell` is a `<td>`. `TableCaption` names the
+table for every reader, and it is read before the data.
+
+## Usage
+
+```tsx
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@nanisoft/prism-ui/components/table'
+
+<Table>
+  <TableCaption>Invoices from the current quarter.</TableCaption>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Invoice</TableHead>
+      <TableHead>Status</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell>INV-001</TableCell>
+      <TableCell>Paid</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
+```
+
+<ComponentDemo slug="table" />
+
+## Guidelines
+
+### When to use
+
+Use a Table when records share the same set of attributes and the reader needs
+to compare them down a column: invoices, members, deployments, line items.
+
+### When not to use
+
+Do not use a Table for page layout. It was a layout tool once, and every reader
+and crawler now interprets a table as data.
+
+Do not use one for a few key and value pairs. A description list states a record
+better than a table with two columns.
+
+Do not use a Table for a list where every row shows the same fields as prose.
+If there is nothing to compare across columns, a list is the honest unit.
+
+### Best practices
+
+- Name the table. Use `TableCaption` or an adjacent heading, and do not leave a
+  reader to infer the subject from the column labels.
+- Put the identifying column first, so a row is recognisable before it is read
+  across.
+- Align numbers to the right through `className` and text to the left. The
+  alignment is layout, which is the one use of `className` the system permits.
+- Keep cells terse. A paragraph in a cell is a row that has outgrown the table.
+- Use `TableFooter` for a total or a count, so the summary is part of the table
+  rather than a paragraph after it.
+- Add `scope="col"` to `TableHead` and `scope="row"` to a row header when a
+  control supplies it. The generated markup makes each cell identifiable.
+- Avoid horizontal scrolling where you can. A table that fits its container is
+  easier to read than one the reader has to drag.

@@ -1,0 +1,85 @@
+---
+title: Field
+---
+
+## Overview
+
+A Field pairs a form control with its label, its helper text and its error. It
+ships as `Field`, `FieldLabel`, `FieldDescription`, `FieldError` and
+`FieldGroup`, all from the same module.
+
+The parts are presentational, and the consumer owns the wiring. `FieldLabel`
+renders a native `<label>` and takes the control's `id` as `htmlFor`.
+`FieldDescription` and `FieldError` take an `id` that the control references
+through `aria-describedby`. Nothing generates an `id`, so a field stays a
+Server Component and the markup is settled before it reaches the browser.
+
+`FieldError` carries `role="alert"`, so it is announced when it appears. Render
+it only while the field is invalid, and mark the control itself with
+`aria-invalid` so the failure is visible as well as spoken.
+
+## Usage
+
+```tsx
+import {
+  Field,
+  FieldDescription,
+  FieldLabel,
+} from '@nanisoft/prism-ui/components/field'
+import { Input } from '@nanisoft/prism-ui/components/input'
+
+<Field>
+  <FieldLabel htmlFor="email">Email</FieldLabel>
+  <Input id="email" type="email" aria-describedby="email-hint" />
+  <FieldDescription id="email-hint">
+    We use this address for sign-in only.
+  </FieldDescription>
+</Field>
+```
+
+<ComponentDemo slug="field" />
+
+## Guidelines
+
+### When to use
+
+Use a Field around any form control that needs a visible label. Pair it with
+`Input`, `Textarea` or a future control that does not ship its own label.
+
+Use `FieldGroup` when several fields belong to one decision, such as an address
+or a notification preference, so the set reads as one block.
+
+### When not to use
+
+Do not use a Field as a layout grid. It controls label, control, helper and
+error order, not column placement; wrap fields in your own grid for that.
+
+Do not use `FieldDescription` as the only label. A placeholder or a hint is not
+an accessible name, and it disappears as soon as the reader types.
+
+Do not render `FieldError` alongside valid content. An error that is always
+present stops meaning anything.
+
+### Best practices
+
+- Put the label above the control. It survives zoom and translation better than
+  a label to the side.
+- Point `htmlFor` at the control's `id`, and keep those two values stable so the
+  label is programmatically attached rather than merely adjacent.
+- Reference both the description and the error from `aria-describedby`, and put
+  the error first when both are present.
+- Replace the helper text with the error while the field is invalid instead of
+  stacking both. The reader needs one instruction at a time.
+- Mark the control with `aria-invalid` and let the error sentence say what to do
+  next. The colour is a reinforcement, never the message.
+- Group related fields with `FieldGroup` and give the group a heading when it
+  helps a screen reader move through a long form.
+
+### Content guidelines
+
+- Start an error with what is wrong and how to fix it: "Enter an address in the
+  form name@example.com", not "Invalid input".
+- Keep a helper line to one sentence. A paragraph belongs above the field, not
+  under it.
+- Do not label a field with an instruction. "Email" is a name; "Enter your
+  email address to continue" is copy that belongs beside the control.

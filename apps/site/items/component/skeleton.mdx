@@ -1,0 +1,61 @@
+---
+title: Skeleton
+---
+
+## Overview
+
+A Skeleton is a placeholder surface that mirrors the shape of content while it
+loads. It renders a single muted `<div>` whose size comes from `className`, so
+one component stands in for a title, a line of text, an avatar or an action.
+
+It ships without a shimmer on purpose. Prism authors no keyframes, so the
+placeholder is static and the shape, not a pulse, is what tells the reader that
+content is coming. The element is hidden from assistive technology, so a screen
+reader hears the finished content when it arrives rather than an empty box.
+
+## Usage
+
+```tsx
+import { Skeleton } from '@nanisoft/prism-ui/components/skeleton'
+
+<Skeleton className="h-5 w-40" />
+<Skeleton className="h-4 w-full" />
+```
+
+<ComponentDemo slug="skeleton" />
+
+## Guidelines
+
+### When to use
+
+Use a Skeleton when content is loading into a layout the reader already knows,
+such as a list, a card grid or a detail panel that reloads in place. The
+placeholder keeps the page from jumping when the content lands.
+
+### When not to use
+
+Do not use a Skeleton for work the reader has just started. A button that is
+submitting shows its own loading state; a placeholder elsewhere on the page
+implies a different region is loading.
+
+Do not use a Skeleton as a loading indicator for the whole application. A
+first paint with no known layout is better served by a spinner or a simple
+progress bar.
+
+Do not use one when the load is near instant. A placeholder that appears and
+disappears within a frame reads as a glitch.
+
+### Best practices
+
+- Match the final shape and size. A skeleton smaller than the content it
+  replaces causes a layout shift, which is the problem it exists to prevent.
+- Group the placeholders of one region into a single block, and mirror the real
+  structure: a title line, two body lines, an action.
+- Keep the surrounding layout identical to the loaded state, so only the content
+  changes.
+- Render the same number of placeholder rows as the content the layout will
+  hold. A grid that collapses from six boxes to two is a lie in both states.
+- Do not add a spinner inside a skeleton. One loading signal per region is
+  enough.
+- Keep the placeholder decorative. The live region around it, or the arriving
+  content, should carry the announcement.

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "typography",
+  "title": "Typography",
+  "description": "Shared typography primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "class-variance-authority",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/typography.tsx",
+      "content": "import { cva, type VariantProps } from 'class-variance-authority'\nimport type { ComponentProps, ElementType } from 'react'\n\nimport { cn } from '../../lib/utils'\n\n/** The six heading elements `Heading` can render. */\nexport type HeadingElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'\n\nconst headingVariants = cva('font-semibold tracking-tight text-balance', {\n  variants: {\n    size: {\n      '4xl': 'text-3xl sm:text-4xl',\n      '3xl': 'text-3xl',\n      '2xl': 'text-2xl',\n      xl: 'text-xl',\n      lg: 'text-lg',\n    },\n  },\n  defaultVariants: { size: '2xl' },\n})\n\n/**\n * A heading at one step of the type scale.\n *\n * `as` chooses the element and therefore the document outline; `size` chooses\n * the visual step. The two are separate on purpose: a section that needs an\n * `h2` attuned to a compact card can keep the outline while taking `size=\"lg\"`.\n */\nfunction Heading({\n  className,\n  size,\n  as: Tag = 'h2',\n  ...props\n}: ComponentProps<'h2'> &\n  VariantProps<typeof headingVariants> & { as?: HeadingElement }) {\n  const Element = Tag as ElementType\n  return (\n    <Element\n      data-slot=\"heading\"\n      className={cn(headingVariants({ size }), className)}\n      {...props}\n    />\n  )\n}\n\nconst textVariants = cva('text-pretty', {\n  variants: {\n    size: {\n      sm: 'text-sm leading-relaxed',\n      base: 'text-base leading-relaxed',\n      lg: 'text-lg leading-relaxed',\n    },\n    tone: {\n      default: 'text-foreground',\n      muted: 'text-muted-foreground',\n    },\n  },\n  defaultVariants: { size: 'base', tone: 'default' },\n})\n\n/**\n * A run of body text at one step of the type scale.\n *\n * `as` defaults to `p`; pass `span` for an inline run. `tone=\"muted\"` is the\n * supporting copy that sits beside a heading.\n */\nfunction Text({\n  className,\n  size,\n  tone,\n  as: Tag = 'p',\n  ...props\n}: ComponentProps<'p'> &\n  VariantProps<typeof textVariants> & { as?: 'p' | 'span' }) {\n  const Element = Tag as ElementType\n  return (\n    <Element\n      data-slot=\"text\"\n      className={cn(textVariants({ size, tone }), className)}\n      {...props}\n    />\n  )\n}\n\nexport { Heading, Text }\n",
+      "type": "registry:component",
+      "target": "components/ui/typography.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

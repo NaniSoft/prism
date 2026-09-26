@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "field",
+  "title": "Field",
+  "description": "Shared field primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/field.tsx",
+      "content": "import type { ComponentProps } from 'react'\n\nimport { cn } from '../../lib/utils'\n\n/**\n * The layout and labelling components that wrap a form control.\n *\n * The module ships `Field`, `FieldLabel`, `FieldDescription`, `FieldError` and\n * `FieldGroup`, and each is presentational: the consumer owns the control's\n * `id` and wires it to the label's `htmlFor` and to the description or error's\n * `id` through `aria-describedby`. Nothing here generates an `id`, so a field\n * stays a Server Component and no markup is decided at hydration time.\n */\nfunction Field({ className, ...props }: ComponentProps<'div'>) {\n  return (\n    <div\n      data-slot=\"field\"\n      role=\"group\"\n      className={cn('flex w-full flex-col gap-1.5', className)}\n      {...props}\n    />\n  )\n}\n\n/** Groups several related fields, for example one row of a settings form. */\nfunction FieldGroup({ className, ...props }: ComponentProps<'div'>) {\n  return (\n    <div\n      data-slot=\"field-group\"\n      role=\"group\"\n      className={cn('flex w-full flex-col gap-6', className)}\n      {...props}\n    />\n  )\n}\n\n/**\n * The control's accessible name.\n *\n * Renders a native `<label>`; pass the control's `id` as `htmlFor` so the name\n * is programmatically attached rather than merely adjacent.\n */\nfunction FieldLabel({ className, ...props }: ComponentProps<'label'>) {\n  return (\n    <label\n      data-slot=\"field-label\"\n      className={cn(\n        'text-foreground text-sm leading-none font-medium',\n        className,\n      )}\n      {...props}\n    />\n  )\n}\n\n/**\n * A short helper line under the control.\n *\n * Give it an `id` and reference it from the control's `aria-describedby`; the\n * text is an explanation, not the accessible name.\n */\nfunction FieldDescription({ className, ...props }: ComponentProps<'p'>) {\n  return (\n    <p\n      data-slot=\"field-description\"\n      className={cn('text-muted-foreground text-sm', className)}\n      {...props}\n    />\n  )\n}\n\n/**\n * The field's error message.\n *\n * Carries `role=\"alert\"`, so it is announced when it appears. It is shown only\n * while the field is invalid; render nothing otherwise.\n */\nfunction FieldError({ className, ...props }: ComponentProps<'p'>) {\n  return (\n    <p\n      data-slot=\"field-error\"\n      role=\"alert\"\n      className={cn('text-destructive text-sm font-medium', className)}\n      {...props}\n    />\n  )\n}\n\nexport { Field, FieldLabel, FieldDescription, FieldError, FieldGroup }\n",
+      "type": "registry:component",
+      "target": "components/ui/field.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

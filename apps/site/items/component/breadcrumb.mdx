@@ -1,0 +1,76 @@
+---
+title: Breadcrumb
+---
+
+## Overview
+
+A Breadcrumb shows the reader where the current page sits in a hierarchy and
+offers a way back up it. It ships as a parent and five parts: `Breadcrumb`,
+`BreadcrumbList`, `BreadcrumbItem`, `BreadcrumbLink`, `BreadcrumbPage` and
+`BreadcrumbSeparator`, all from the same module.
+
+The parts keep the native list semantics a screen reader expects. `Breadcrumb`
+is a labelled `<nav>`, `BreadcrumbList` is an `<ol>`, and each `BreadcrumbItem`
+is an `<li>`. The last item is a `BreadcrumbPage`, which renders text carrying
+`aria-current="page"` rather than a dead link. Separators are decorative and
+hidden from assistive technology, so the trail reads as a list of destinations
+instead of a list of glyphs.
+
+## Usage
+
+```tsx
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@nanisoft/prism-ui/components/breadcrumb'
+
+<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink href="/">Home</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
+    </BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
+```
+
+<ComponentDemo slug="breadcrumb" />
+
+## Guidelines
+
+### When to use
+
+Use a Breadcrumb when the reader can be more than one step deep: a catalog item
+inside a category, a record inside a project, or a settings page inside an
+account. It answers two questions at once, which section this page belongs to
+and how to leave it.
+
+### When not to use
+
+Do not use a Breadcrumb on a top-level page. A trail with one step restates the
+page title and adds nothing.
+
+Do not use it as the page's primary navigation. A Breadcrumb is a secondary
+affordance; the header or side navigation still owns the main routes.
+
+Do not use it to model a linear flow. A checkout or a wizard moves forward and
+back in a fixed order, so previous and next controls express that better.
+
+### Best practices
+
+- Ship one Breadcrumb per page and place it above the page title.
+- Link every ancestor and render only the current page as plain text with
+  `aria-current="page"`. A link to the page you are already on wastes a stop.
+- Keep the labels the same as the destinations they point at, so the trail
+  matches the navigation the reader came from.
+- Let the trail wrap rather than truncate the middle. A label a reader cannot
+  finish reading is not a label.
+- Use `BreadcrumbSeparator`'s default chevron and leave it decorative. If a
+  separator carries meaning in the copy, it belongs in the link text instead.

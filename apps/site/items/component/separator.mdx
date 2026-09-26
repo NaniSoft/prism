@@ -1,0 +1,56 @@
+---
+title: Separator
+---
+
+## Overview
+
+A Separator is a hairline rule that divides content. It renders a single
+`<div>` at either `horizontal` or `vertical` orientation, drawn with the border
+token.
+
+The rule is decorative by default, so it is hidden from assistive technology and
+does not enter the reading order. Pass `decorative={false}` when the rule marks a
+real separation in a set of controls, such as between groups in a toolbar, and
+it becomes an ARIA separator with a matching orientation.
+
+## Usage
+
+```tsx
+import { Separator } from '@nanisoft/prism-ui/components/separator'
+
+<Separator />
+<Separator orientation="vertical" />
+```
+
+<ComponentDemo slug="separator" />
+
+## Guidelines
+
+### When to use
+
+Use a Separator to divide two groups of content in a stack, or two items inside
+a horizontal row such as a toolbar or a breadcrumb-style meta line.
+
+### When not to use
+
+Do not use a Separator where whitespace would do. A rule between two paragraphs
+adds ink without adding structure; space already separates them.
+
+Do not use one as a card border or a panel edge. A surface boundary is a border
+on the surface itself, not a rule placed beside it.
+
+Do not use a Separator as decoration. A rule that does not divide anything is
+noise the reader has to interpret.
+
+### Best practices
+
+- Keep the default `horizontal` orientation for stacked content and switch to
+  `vertical` only inside a row.
+- Give a vertical Separator a height through its parent. It fills the parent's
+  height, so a parent with no height collapses the rule to nothing.
+- Leave the rule decorative unless it marks a boundary a screen reader needs,
+  and pass `decorative={false}` only in that case.
+- Use one orientation per region. Mixing rules in a single stack reads as two
+  different structures.
+- Prefer the token's hairline and colour. A thicker or tinted rule is a second
+  visual language for the same job.
