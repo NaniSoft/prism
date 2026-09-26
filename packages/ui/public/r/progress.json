@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "progress",
+  "title": "Progress",
+  "description": "Shared progress primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "@base-ui/react",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/progress.tsx",
+      "content": "'use client'\n\nimport { Progress as ProgressPrimitive } from '@base-ui/react/progress'\nimport type { ComponentProps } from 'react'\n\nimport { cn } from '../../lib/utils'\n\n/**\n * The props the Progress forwards to its Base UI root.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface ProgressProps extends ComponentProps<'div'> {\n  /**\n   * The current value. Pass `null` for an indeterminate task.\n   *\n   * There is no default: a progress bar without a value is a claim, so the\n   * consumer states where the task is.\n   */\n  value: number | null\n  /** The maximum value. @defaultValue 100 */\n  max?: number\n  /** The minimum value. @defaultValue 0 */\n  min?: number\n  /** Options passed to `Intl.NumberFormat` when the value is rendered. */\n  format?: Intl.NumberFormatOptions\n  /** The locale used when formatting the value. */\n  locale?: Intl.LocalesArgument\n  /** Returns the text alternative announced for a value. */\n  getAriaValueText?: (formattedValue: string, value: number | null) => string\n}\n\n/**\n * A bar that reports how far a task has progressed.\n *\n * The bar exposes its value, minimum and maximum through ARIA, so a screen\n * reader announces the position rather than the pixels. It is a status, not a\n * control: the reader watches it, and an interrupting task uses an Alert\n * instead. Pass `value={null}` for a task of unknown length, where the bar is\n * announced as indeterminate.\n */\nfunction Progress({ className, ...props }: ProgressProps) {\n  return (\n    <ProgressPrimitive.Root\n      data-slot=\"progress\"\n      className={cn('flex w-full flex-col gap-2', className)}\n      {...props}\n    >\n      <ProgressPrimitive.Track\n        data-slot=\"progress-track\"\n        className=\"bg-muted relative h-2 w-full overflow-hidden rounded-full\"\n      >\n        <ProgressPrimitive.Indicator\n          data-slot=\"progress-indicator\"\n          className=\"bg-primary h-full rounded-full transition-[width] duration-base ease-out\"\n        />\n      </ProgressPrimitive.Track>\n    </ProgressPrimitive.Root>\n  )\n}\n\nexport { Progress }\n",
+      "type": "registry:component",
+      "target": "components/ui/progress.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

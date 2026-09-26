@@ -1,0 +1,65 @@
+---
+title: Progress
+---
+
+## Overview
+
+A Progress bar reports how far a task has progressed. It exposes its value, its
+minimum and its maximum through ARIA, so a screen reader announces the position
+rather than the width of a coloured bar. Pass a number for a task of known
+length, or `value={null}` for a task whose end is unknown, which is announced as
+indeterminate.
+
+The bar is a status, not a control. The reader watches it; nothing about it is
+clickable or focusable. Decorative movement is deliberately absent: the bar
+changes width only when the value changes.
+
+## Usage
+
+```tsx
+import { Progress } from '@nanisoft/prism-ui/components/progress'
+
+<Progress value={68} aria-label="Uploading assets" />
+<Progress value={null} aria-label="Preparing preview" />
+<Progress value={100} aria-label="Build complete" />
+```
+
+<ComponentDemo slug="progress" />
+
+## Guidelines
+
+### When to use
+
+Use Progress when a process has measurable steps and the reader benefits from
+knowing how much is left: an upload, a build, a migration, a batch import.
+
+### When not to use
+
+Do not use Progress for a short wait under about a second. A spinner or a
+disabled control is quieter and more honest.
+
+Do not use it as a loading placeholder for content whose shape you know. A
+Skeleton mirrors the layout that is coming and reduces the sense of waiting.
+
+Do not use an indeterminate bar for a task of known length. Showing a moving bar
+for a countable task hides real information.
+
+### Best practices
+
+- Give the bar an accessible name with `aria-label` or an adjacent heading, so
+  the value is announced against a subject.
+- Show the value as text next to the bar when the reader needs the number, and
+  keep it in step with the bar.
+- Use `value={null}` only while the length is genuinely unknown, and switch to a
+  number as soon as one is available.
+- Announce completion in the surrounding UI. A bar that disappears at 100
+  percent leaves the reader unsure whether it finished or failed.
+- For a task that fails partway, replace the bar with an Alert that names the
+  failure rather than leaving it frozen.
+
+### Content guidelines
+
+- Name the task in progress, not the component: "Uploading assets", "Preparing
+  preview".
+- Use sentence case and a verb ending in "ing" for the in-progress label.
+- Keep the completion message separate and past tense: "Upload complete".

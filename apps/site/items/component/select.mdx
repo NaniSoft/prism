@@ -1,0 +1,80 @@
+---
+title: Select
+---
+
+## Overview
+
+A Select chooses one option from a list that opens on demand. It ships as
+`Select`, `SelectTrigger`, `SelectValue`, `SelectContent`, `SelectItem`,
+`SelectGroup`, `SelectLabel` and `SelectSeparator`. `Select` holds the value,
+`SelectTrigger` shows the current choice, and `SelectContent` carries the
+options. Pass the options to the root as `items` too, so the trigger can render
+a label before any option has mounted.
+
+The trigger is a button with a combobox role, so it is reachable by Tab. In the
+open popup the arrow keys move through the options, typing letters jumps to a
+match, Enter chooses, and Escape closes without changing the value.
+
+## Usage
+
+```tsx
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@nanisoft/prism-ui/components/select'
+
+<Select
+  defaultValue="editor"
+  items={{ viewer: 'Viewer', editor: 'Editor', admin: 'Admin' }}
+>
+  <SelectTrigger className="w-56">
+    <SelectValue placeholder="Choose a role" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="viewer">Viewer</SelectItem>
+    <SelectItem value="editor">Editor</SelectItem>
+    <SelectItem value="admin">Admin</SelectItem>
+  </SelectContent>
+</Select>
+```
+
+<ComponentDemo slug="select" />
+
+## Guidelines
+
+### When to use
+
+Use a Select when the option set is long enough that a radio group would
+overwhelm the form, or when only the chosen value needs to stay visible. It fits
+settings and filters where the reader picks one value from a known list.
+
+### When not to use
+
+Do not use a Select for two or three mutually exclusive options. A RadioGroup
+shows every choice at once and needs no opening click.
+
+Do not use it when the reader may choose more than one value, or for navigation.
+Checkboxes state independence; a link handles a route change.
+
+### Best practices
+
+- Pair the Select with a `FieldLabel` whose `htmlFor` matches the trigger's
+  `id`. The value shows in the trigger, so the label names the field.
+- Pass `items` so the trigger can resolve a label before an option has mounted.
+  Without it, Base UI falls back to the raw value.
+- Give `SelectValue` a placeholder that says what to do, such as "Choose a
+  region", rather than naming a default the reader did not choose.
+- Add `SelectGroup` and `SelectLabel` once a list passes roughly eight options,
+  so the reader can scan by group.
+- A disabled option is still readable. Explain why it cannot be chosen in
+  adjacent text rather than leaving a dead row unexplained.
+
+### Content guidelines
+
+- Write option labels as sentence-case nouns: "Europe West", not "EUROPE WEST".
+- Order options by the reader's expectation: size, plan, region, or product.
+- Reserve the first option for a real choice. Do not add an empty "Select one"
+  row when the placeholder already asks the question.

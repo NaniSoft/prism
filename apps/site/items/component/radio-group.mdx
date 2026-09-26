@@ -1,0 +1,67 @@
+---
+title: RadioGroup
+---
+
+## Overview
+
+A RadioGroup chooses exactly one option from a small set that stays visible. It
+ships as `RadioGroup` and `RadioGroupItem`. The group owns the value and the
+keyboard model; each item contributes one value.
+
+The group is a single Tab stop. Once focus is inside, the arrow keys move
+between items and select as they move, Home and End jump to the ends, and Space
+selects the focused item. The selected item is exposed through the native radio
+input beside each control.
+
+## Usage
+
+```tsx
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from '@nanisoft/prism-ui/components/radio-group'
+
+<RadioGroup defaultValue="daily" aria-label="Notification frequency">
+  <RadioGroupItem id="radio-daily" value="daily" />
+  <RadioGroupItem id="radio-weekly" value="weekly" />
+  <RadioGroupItem id="radio-never" value="never" />
+</RadioGroup>
+```
+
+<ComponentDemo slug="radio-group" />
+
+## Guidelines
+
+### When to use
+
+Use a RadioGroup when the options are mutually exclusive and few enough that
+showing them all at once helps the reader compare. Two to five options is the
+comfortable range.
+
+### When not to use
+
+Do not use a RadioGroup for a long list. Past roughly seven options, a Select
+keeps the form compact and adds typeahead.
+
+Do not use one when several answers may stand together. Checkboxes state that
+each choice is independent; radio items imply a single answer.
+
+### Best practices
+
+- Give the group a visible legend or an `aria-label`. The group's name is what
+  the reader hears when focus enters, so it must describe the question.
+- Put one item per row with the label beside its control, and point `FieldLabel`
+  at the item's `id` so the whole row is clickable.
+- Do not pre-check an option the reader has not chosen unless it is a genuine
+  default you would defend.
+- Use `disabled` only with nearby text that explains why, not to hide an option
+  that should not be offered.
+- Keep the item order stable across renders. Reordering radio items when a
+  value changes makes the group feel unpredictable.
+
+### Content guidelines
+
+- Keep option labels parallel in form and length, so the differences are easy
+  to weigh.
+- Use sentence case and no trailing periods on the option labels.
+- Put an explanation in a helper line under the label, not in the label itself.

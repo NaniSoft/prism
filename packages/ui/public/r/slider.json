@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "slider",
+  "title": "Slider",
+  "description": "Shared slider primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "@base-ui/react",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/slider.tsx",
+      "content": "'use client'\n\nimport { Slider as SliderPrimitive } from '@base-ui/react/slider'\nimport type { ComponentProps } from 'react'\n\nimport { cn } from '../../lib/utils'\n\n/**\n * The props the Slider forwards to its Base UI root.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface SliderProps extends Omit<ComponentProps<'div'>, 'onChange' | 'defaultValue'> {\n  /** The current value, when the slider is controlled. */\n  value?: number\n  /** The value the slider starts at, for an uncontrolled slider. */\n  defaultValue?: number\n  /** The minimum allowed value. @defaultValue 0 */\n  min?: number\n  /** The maximum allowed value. @defaultValue 100 */\n  max?: number\n  /** The granularity the slider steps by. @defaultValue 1 */\n  step?: number\n  /** Whether the slider ignores user interaction. */\n  disabled?: boolean\n  /** The axis the slider moves along. @defaultValue horizontal */\n  orientation?: 'horizontal' | 'vertical'\n  /** The form field name submitted with the form. */\n  name?: string\n  /** Identifies the form that owns the hidden input. */\n  form?: string\n  /** The slider's accessible name when no visible label is used. */\n  'aria-label'?: string\n  /** Called as the value changes. */\n  onValueChange?: (value: number) => void\n}\n\n/**\n * A control for choosing a number along a range.\n *\n * The slider renders a real range input beside the styled track, so it is\n * reachable by Tab and moved by arrow keys, with Home and End jumping to the\n * ends. Give it an `aria-label` or a visible label. Use a Slider for a value\n * that is approximate and continuous; when the exact number matters, use an\n * Input of type number.\n */\nfunction Slider({\n  className,\n  'aria-label': ariaLabel,\n  ...props\n}: SliderProps) {\n  return (\n    <SliderPrimitive.Root<number>\n      data-slot=\"slider\"\n      className={cn(\n        'relative flex w-full touch-none items-center select-none',\n        'data-[orientation=vertical]:h-full data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col',\n        'data-[disabled]:opacity-50',\n        className,\n      )}\n      {...props}\n    >\n      <SliderPrimitive.Control className=\"flex w-full items-center data-[orientation=vertical]:h-full data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col\">\n        <SliderPrimitive.Track className=\"bg-muted relative grow overflow-hidden rounded-full data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5\">\n          <SliderPrimitive.Indicator className=\"bg-primary absolute rounded-full data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full\" />\n        </SliderPrimitive.Track>\n        <SliderPrimitive.Thumb\n          aria-label={ariaLabel}\n          className={cn(\n            'border-primary bg-background shadow-xs ring-ring/50 block size-4 shrink-0 rounded-full border outline-none',\n            'transition-[color,box-shadow] duration-fast ease-out',\n            'hover:ring-4 focus-visible:ring-4',\n            'data-[disabled]:pointer-events-none',\n          )}\n        />\n      </SliderPrimitive.Control>\n    </SliderPrimitive.Root>\n  )\n}\n\nexport { Slider }\n",
+      "type": "registry:component",
+      "target": "components/ui/slider.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

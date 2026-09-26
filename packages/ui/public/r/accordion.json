@@ -1,0 +1,27 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "accordion",
+  "title": "Accordion",
+  "description": "Shared accordion primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "@base-ui/react",
+    "clsx",
+    "lucide-react",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/accordion.tsx",
+      "content": "'use client'\n\nimport { Accordion as AccordionPrimitive } from '@base-ui/react/accordion'\nimport { ChevronDownIcon } from 'lucide-react'\nimport type { ComponentProps } from 'react'\n\nimport { cn } from '../../lib/utils'\n\n/**\n * The props the Accordion root forwards to Base UI.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface AccordionProps extends Omit<ComponentProps<'div'>, 'onChange'> {\n  /** The open item values, when the accordion is controlled. */\n  value?: string[]\n  /** The item values open initially, for an uncontrolled accordion. */\n  defaultValue?: string[]\n  /** Called when the open set changes. */\n  onValueChange?: (value: string[]) => void\n  /** Whether more than one item may be open at once. */\n  multiple?: boolean\n  /** Whether every item ignores user interaction. */\n  disabled?: boolean\n  /** Whether the browser's page search may expand a panel. */\n  hiddenUntilFound?: boolean\n  /** Whether a closed panel stays in the DOM. */\n  keepMounted?: boolean\n}\n\n/**\n * The props the AccordionItem forwards to Base UI.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface AccordionItemProps extends Omit<ComponentProps<'div'>, 'onChange'> {\n  /** A stable value identifying this item within the accordion. */\n  value?: string\n  /** Whether this item ignores user interaction. */\n  disabled?: boolean\n  /** Called when this item opens or closes. */\n  onOpenChange?: (open: boolean) => void\n}\n\n/** The props the AccordionTrigger forwards to Base UI. */\nexport interface AccordionTriggerProps extends ComponentProps<'button'> {}\n\n/** The props the AccordionContent forwards to Base UI. */\nexport interface AccordionContentProps extends ComponentProps<'div'> {\n  /** Whether the browser's page search may expand this panel. */\n  hiddenUntilFound?: boolean\n  /** Whether the closed panel stays in the DOM. */\n  keepMounted?: boolean\n}\n\n/**\n * A stack of headers that each reveal a panel.\n *\n * The trigger is a real button and the panel is linked to it by the library,\n * so Enter or Space opens the focused item and the header announces its\n * expanded state. By default one item is open at a time; pass `multiple` to\n * allow several. Use an Accordion to reveal a long answer in place, and a\n * Tabs set when the sections are peers rather than a progression.\n */\nfunction Accordion({ className, ...props }: AccordionProps) {\n  return (\n    <AccordionPrimitive.Root<string>\n      data-slot=\"accordion\"\n      className={cn('w-full', className)}\n      {...props}\n    />\n  )\n}\n\n/** One header-and-panel pair inside an Accordion. */\nfunction AccordionItem({ className, ...props }: AccordionItemProps) {\n  return (\n    <AccordionPrimitive.Item\n      data-slot=\"accordion-item\"\n      className={cn('border-b border-border', className)}\n      {...props}\n    />\n  )\n}\n\n/** The button that opens and closes its panel. */\nfunction AccordionTrigger({ className, children, ...props }: AccordionTriggerProps) {\n  return (\n    <AccordionPrimitive.Header className=\"flex\">\n      <AccordionPrimitive.Trigger\n        data-slot=\"accordion-trigger\"\n        className={cn(\n          'focus-visible:border-ring focus-visible:ring-ring flex flex-1 items-start justify-between gap-4 rounded-md py-4 text-left text-sm font-medium outline-none',\n          'transition-[color,box-shadow] duration-fast ease-out hover:underline focus-visible:ring-[3px]',\n          'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',\n          className,\n        )}\n        {...props}\n      >\n        {children}\n        <ChevronDownIcon className=\"text-muted-foreground pointer-events-none size-4 shrink-0 translate-y-0.5 transition-transform duration-base ease-out data-[panel-open]:rotate-180\" />\n      </AccordionPrimitive.Trigger>\n    </AccordionPrimitive.Header>\n  )\n}\n\n/** The panel an AccordionTrigger reveals. */\nfunction AccordionContent({ className, ...props }: AccordionContentProps) {\n  return (\n    <AccordionPrimitive.Panel\n      data-slot=\"accordion-content\"\n      className={cn(\n        'h-(--accordion-panel-height) overflow-hidden text-sm',\n        'transition-[height] duration-base ease-out data-[starting-style]:h-0 data-[ending-style]:h-0',\n        className,\n      )}\n      {...props}\n    >\n      <div className=\"pt-0 pb-4\">{props.children}</div>\n    </AccordionPrimitive.Panel>\n  )\n}\n\nexport { Accordion, AccordionItem, AccordionTrigger, AccordionContent }\n",
+      "type": "registry:component",
+      "target": "components/ui/accordion.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

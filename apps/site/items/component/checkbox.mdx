@@ -1,0 +1,68 @@
+---
+title: Checkbox
+---
+
+## Overview
+
+A Checkbox is an independent choice that is either ticked, unticked, or mixed.
+It renders as a styled control with a hidden native checkbox beside it, so it
+submits with a form and validates like the element it stands in for. Space
+toggles the focused control, and a mixed state is announced as "mixed" rather
+than as checked or unchecked.
+
+Use the `indeterminate` prop for a parent choice that summarizes children, such
+as a select-all control. The mixed state is a summary, not a third answer: a
+click should move it to ticked or unticked.
+
+## Usage
+
+```tsx
+import { Checkbox } from '@nanisoft/prism-ui/components/checkbox'
+
+<Checkbox id="checkbox-news" defaultChecked />
+<Checkbox id="checkbox-all" indeterminate />
+<Checkbox id="checkbox-sso" disabled />
+```
+
+<ComponentDemo slug="checkbox" />
+
+## Guidelines
+
+### When to use
+
+Use a Checkbox when each choice stands on its own and several may be ticked, or
+when one choice confirms something, such as accepting terms or selecting a row
+in a table.
+
+### When not to use
+
+Do not use a Checkbox for a setting that takes effect the moment it changes.
+That is a Switch, which reads as immediate rather than as pending a save.
+
+Do not use one when exactly one of several options must be chosen. A RadioGroup
+announces the single answer; a set of checkboxes implies that all, some or none
+may be ticked.
+
+Do not use a Checkbox as a button that performs an action. It holds a state, it
+does not do a thing.
+
+### Best practices
+
+- Give every Checkbox a label through `FieldLabel` and `htmlFor`, or an
+  `aria-label` when the design has no room for visible text. A bare box is
+  unlabelled to a screen reader.
+- Make the label the click target where you can, so the reader does not have to
+  hit the small control.
+- Use `indeterminate` only to summarize child checkboxes, and update it from the
+  children rather than setting it by hand in unrelated places.
+- Keep the state in the consumer. Pass `checked` with `onCheckedChange` for a
+  controlled box, or `defaultChecked` when the form owns it.
+- Show a required checkbox's consequence in the label, not as a separate error
+  after submission.
+
+### Content guidelines
+
+- Write the label as a positive statement of what is true when ticked:
+  "Email me release notes", not "Do not email me release notes".
+- Use sentence case and no trailing period on a short label.
+- Put an explanation in an adjacent helper line, not inside the label.

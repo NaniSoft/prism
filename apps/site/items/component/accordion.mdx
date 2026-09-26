@@ -1,0 +1,74 @@
+---
+title: Accordion
+---
+
+## Overview
+
+An Accordion is a stack of headers that each reveal a panel in place. It ships
+as `Accordion`, `AccordionItem`, `AccordionTrigger` and `AccordionContent`, all
+from the same module. Only one item is open at a time unless `multiple` is set.
+
+Each trigger is a real button, and the library ties it to its panel, so the
+header announces whether the item is expanded. Enter or Space opens the focused
+item, and the header text stays visible when the panel is closed.
+
+## Usage
+
+```tsx
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@nanisoft/prism-ui/components/accordion'
+
+<Accordion defaultValue={['shipping']}>
+  <AccordionItem value="shipping">
+    <AccordionTrigger>How long does shipping take?</AccordionTrigger>
+    <AccordionContent>
+      Orders leave the warehouse within one working day.
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+<ComponentDemo slug="accordion" />
+
+## Guidelines
+
+### When to use
+
+Use an Accordion when a page holds several long sections that a reader opens
+selectively: frequently asked questions, advanced settings, or a policy split
+into questions.
+
+### When not to use
+
+Do not use an Accordion when the reader needs two sections side by side. Only
+one is open at a time by default, so comparison is impossible.
+
+Do not use it to hide the primary content of a page. If a section is essential,
+it should be open, not behind a click.
+
+Do not use an Accordion for a short list of statements. A definition list reads
+better and needs no interaction.
+
+### Best practices
+
+- Give every `AccordionItem` a stable `value`, and control the open set with
+  `value` and `onValueChange` when the state matters beyond the component.
+- Open the item a reader most likely wants first, or none at all. Opening all of
+  them restores the wall of text the accordion was meant to break up.
+- Use one heading level for the triggers. Each header is a heading element, so
+  the accordion participates in the page outline.
+- Keep the trigger text a short question or label the reader can scan without
+  opening the panel.
+- Set `multiple` only when the sections are truly independent and comparing them
+  is a normal task.
+
+### Content guidelines
+
+- Phrase the trigger as the question or the topic, not as "Click to expand".
+- Use sentence case and a question mark on a question, no period on a label.
+- Keep the panel prose self-contained. A reader who opens one item should not
+  need another to make sense of it.

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "tooltip",
+  "title": "Tooltip",
+  "description": "Shared tooltip primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "@base-ui/react",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/tooltip.tsx",
+      "content": "'use client'\n\nimport { Tooltip as TooltipPrimitive } from '@base-ui/react/tooltip'\nimport type { ComponentProps } from 'react'\n\nimport { cn } from '../../lib/utils'\n\n/**\n * The props the Tooltip root forwards to Base UI.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface TooltipProps {\n  /** The controlled open state. */\n  open?: boolean\n  /** The initially open state, for an uncontrolled tooltip. */\n  defaultOpen?: boolean\n  /** Called when the open state changes. */\n  onOpenChange?: (open: boolean) => void\n  /** Whether the tooltip is disabled. */\n  disabled?: boolean\n  /** The trigger and content. */\n  children?: React.ReactNode\n}\n\n/**\n * The props TooltipTrigger forwards to Base UI.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface TooltipTriggerProps extends ComponentProps<'button'> {\n  /** How long to wait before opening on hover, in milliseconds. @defaultValue 600 */\n  delay?: number\n  /** How long to wait before closing, in milliseconds. @defaultValue 0 */\n  closeDelay?: number\n  /** Whether the tooltip does not open from this trigger. */\n  disabled?: boolean\n}\n\n/**\n * The props TooltipContent forwards to Base UI.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface TooltipContentProps extends ComponentProps<'div'> {\n  /** Which side of the trigger the tooltip is placed on. @defaultValue top */\n  side?: 'top' | 'right' | 'bottom' | 'left'\n  /** How the tooltip aligns against the trigger. @defaultValue center */\n  align?: 'start' | 'center' | 'end'\n  /** The distance in pixels between the trigger and the tooltip. @defaultValue 4 */\n  sideOffset?: number\n}\n\n/**\n * A short label shown on hover or focus.\n *\n * A tooltip names or explains the control it is attached to; it never carries\n * the only copy of information a reader needs, because it is unavailable to\n * touch users. The trigger stays focusable, and the tooltip opens on focus as\n * well as hover. Keep the content to a short phrase, and put anything longer\n * in visible text or a Popover.\n */\nfunction Tooltip({ ...props }: TooltipProps) {\n  return <TooltipPrimitive.Root {...props} />\n}\n\n/** The element the tooltip is attached to. */\nfunction TooltipTrigger({ className, ...props }: TooltipTriggerProps) {\n  return (\n    <TooltipPrimitive.Trigger\n      data-slot=\"tooltip-trigger\"\n      className={cn('outline-none', className)}\n      {...props}\n    />\n  )\n}\n\n/** The floating tooltip surface. */\nfunction TooltipContent({\n  className,\n  side = 'top',\n  align = 'center',\n  sideOffset = 4,\n  children,\n  ...props\n}: TooltipContentProps) {\n  return (\n    <TooltipPrimitive.Portal>\n      <TooltipPrimitive.Positioner\n        side={side}\n        align={align}\n        sideOffset={sideOffset}\n        className=\"z-50\"\n      >\n        <TooltipPrimitive.Popup\n          data-slot=\"tooltip-content\"\n          className={cn(\n            'bg-foreground text-background w-fit rounded-md px-3 py-1.5 text-xs text-balance shadow-md',\n            'transition-[opacity,transform] duration-fast ease-out',\n            'data-[starting-style]:scale-95 data-[starting-style]:opacity-0',\n            'data-[ending-style]:scale-95 data-[ending-style]:opacity-0',\n            className,\n          )}\n          {...props}\n        >\n          {children}\n        </TooltipPrimitive.Popup>\n      </TooltipPrimitive.Positioner>\n    </TooltipPrimitive.Portal>\n  )\n}\n\nexport { Tooltip, TooltipTrigger, TooltipContent }\n",
+      "type": "registry:component",
+      "target": "components/ui/tooltip.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

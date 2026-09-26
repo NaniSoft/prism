@@ -61,6 +61,56 @@ export {
   PaginationEllipsis,
 } from './components/ui/pagination'
 
+export {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  SelectGroup,
+  SelectLabel,
+  SelectSeparator,
+} from './components/ui/select'
+export { Checkbox } from './components/ui/checkbox'
+export { RadioGroup, RadioGroupItem } from './components/ui/radio-group'
+export { Switch } from './components/ui/switch'
+export { Slider } from './components/ui/slider'
+export { Progress } from './components/ui/progress'
+export { Tooltip, TooltipTrigger, TooltipContent } from './components/ui/tooltip'
+export {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from './components/ui/accordion'
+export {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from './components/ui/dialog'
+export {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuGroup,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+} from './components/ui/dropdown-menu'
+export { Popover, PopoverTrigger, PopoverContent } from './components/ui/popover'
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs'
+export { Avatar, AvatarImage, AvatarFallback } from './components/ui/avatar'
+
 export { Hero01 } from './blocks/hero-01'
 export { FeatureGrid01 } from './blocks/feature-grid-01'
 export { Stats01 } from './blocks/stats-01'

@@ -1,0 +1,64 @@
+---
+title: Slider
+---
+
+## Overview
+
+A Slider chooses a number along a range. It renders a styled track with a real
+range input beside it, so it is reachable by Tab and moved by the arrow keys,
+with Home and End jumping to the ends. The current value is exposed to assistive
+technology through the input's range semantics.
+
+Use the `min`, `max` and `step` props to describe the range, and give the
+control an `aria-label` or a visible label, because a slider with no name tells
+a screen reader nothing about what it changes.
+
+## Usage
+
+```tsx
+import { Slider } from '@nanisoft/prism-ui/components/slider'
+
+<Slider defaultValue={75} aria-label="Opacity" />
+<Slider defaultValue={40} aria-label="Export size" min={0} max={100} step={10} />
+<Slider defaultValue={60} aria-label="Frame rate" disabled />
+```
+
+<ComponentDemo slug="slider" />
+
+## Guidelines
+
+### When to use
+
+Use a Slider when the value is approximate and the reader benefits from seeing
+where it sits in a range: volume, opacity, a threshold, a size with a sensible
+middle.
+
+### When not to use
+
+Do not use a Slider when the exact number matters. An Input of type number lets
+the reader type or step to the value and is easier to make precise.
+
+Do not use one for a range with only two or three meaningful positions. A
+RadioGroup or a Select names each choice; a slider makes the reader hunt.
+
+Do not use a Slider for a value you cannot plot, such as a colour name. Pick the
+control that matches the kind of value.
+
+### Best practices
+
+- Pair the control with a visible label and an `aria-label`. The label names the
+  quantity; the value is read from the control.
+- Snap the range to meaningful steps. `step` should divide the span from `min`
+  to `max` evenly, so every reachable value is one the reader would want.
+- Show the current value near the slider when precision matters, and update it
+  as the value changes.
+- Set sensible `min` and `max` for the task. An unbounded slider invites values
+  the rest of the product cannot use.
+- Use the disabled state with a nearby reason, as with any other control.
+
+### Content guidelines
+
+- Name the quantity, not the control: "Opacity", "Export size".
+- Keep units out of the label when they can live in the value readout, and
+  include them in the readout when they are needed.
+- Avoid phrasing the label as a question. State the value being set.

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "tabs",
+  "title": "Tabs",
+  "description": "Shared tabs primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "@base-ui/react",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/tabs.tsx",
+      "content": "'use client'\n\nimport { Tabs as TabsPrimitive } from '@base-ui/react/tabs'\nimport type { ComponentProps } from 'react'\n\nimport { cn } from '../../lib/utils'\n\n/**\n * The props the Tabs root forwards to Base UI.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface TabsProps extends Omit<ComponentProps<'div'>, 'onChange'> {\n  /** The active panel's value, when the tabs are controlled. */\n  value?: string\n  /** The panel shown initially, for uncontrolled tabs. */\n  defaultValue?: string\n  /** Called when the active panel changes. */\n  onValueChange?: (value: string) => void\n  /** The direction the tab list flows. @defaultValue horizontal */\n  orientation?: 'horizontal' | 'vertical'\n}\n\n/** The props TabsList forwards to Base UI. */\nexport interface TabsListProps extends ComponentProps<'div'> {\n  /** Whether arrow-key focus also activates the tab. @defaultValue false */\n  activateOnFocus?: boolean\n  /** Whether arrow keys wrap at the ends of the list. @defaultValue true */\n  loopFocus?: boolean\n}\n\n/**\n * The props TabsTrigger forwards to Base UI.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface TabsTriggerProps extends Omit<ComponentProps<'button'>, 'value'> {\n  /** The value of the panel this trigger shows. */\n  value: string\n  /** Whether the trigger ignores user interaction. */\n  disabled?: boolean\n}\n\n/**\n * The props TabsContent forwards to Base UI.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface TabsContentProps extends Omit<ComponentProps<'div'>, 'value'> {\n  /** The tab value this panel belongs to. */\n  value: string\n  /** Whether the panel stays in the DOM while hidden. @defaultValue false */\n  keepMounted?: boolean\n}\n\n/**\n * A set of layered panels shown one at a time.\n *\n * The tab list is a single keyboard stop: arrow keys move between triggers\n * and update the active panel, while Tab moves into the panel itself. Every\n * `TabsTrigger` needs a matching `TabsContent` with the same value. Use Tabs\n * to switch between peer views of the same subject, not to order steps in a\n * process.\n */\nfunction Tabs({ className, ...props }: TabsProps) {\n  return (\n    <TabsPrimitive.Root\n      data-slot=\"tabs\"\n      className={cn('flex flex-col gap-2', className)}\n      {...props}\n    />\n  )\n}\n\n/** The row or column of tab triggers. */\nfunction TabsList({ className, ...props }: TabsListProps) {\n  return (\n    <TabsPrimitive.List\n      data-slot=\"tabs-list\"\n      className={cn(\n        'bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center gap-1 rounded-lg p-1',\n        'data-[orientation=vertical]:h-fit data-[orientation=vertical]:flex-col',\n        className,\n      )}\n      {...props}\n    />\n  )\n}\n\n/** One trigger in the tab list. */\nfunction TabsTrigger({ className, ...props }: TabsTriggerProps) {\n  return (\n    <TabsPrimitive.Tab\n      data-slot=\"tabs-trigger\"\n      className={cn(\n        'text-foreground inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1 text-sm font-medium whitespace-nowrap outline-none',\n        'transition-[color,box-shadow,background-color] duration-fast ease-out',\n        'focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px]',\n        'data-[active]:bg-background data-[active]:shadow-xs',\n        'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',\n        \"[&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0\",\n        className,\n      )}\n      {...props}\n    />\n  )\n}\n\n/** The panel a trigger reveals. */\nfunction TabsContent({ className, ...props }: TabsContentProps) {\n  return (\n    <TabsPrimitive.Panel\n      data-slot=\"tabs-content\"\n      className={cn('flex-1 outline-none', className)}\n      {...props}\n    />\n  )\n}\n\nexport { Tabs, TabsList, TabsTrigger, TabsContent }\n",
+      "type": "registry:component",
+      "target": "components/ui/tabs.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

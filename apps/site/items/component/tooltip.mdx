@@ -1,0 +1,70 @@
+---
+title: Tooltip
+---
+
+## Overview
+
+A Tooltip is a short label that appears on hover or focus beside the control it
+explains. It ships as `Tooltip`, `TooltipTrigger` and `TooltipContent`, all from
+the same module. The trigger stays focusable, and the tooltip opens on keyboard
+focus as well as on hover, so it is not a mouse-only affordance.
+
+The content is positioned by the library and flips when there is no room on the
+chosen side. Escape dismisses it. Because it is unavailable on touch, a tooltip
+never carries the only copy of information a reader needs.
+
+## Usage
+
+```tsx
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@nanisoft/prism-ui/components/tooltip'
+
+<Tooltip>
+  <TooltipTrigger>Beta feature</TooltipTrigger>
+  <TooltipContent>Not covered by the uptime target.</TooltipContent>
+</Tooltip>
+```
+
+<ComponentDemo slug="tooltip" />
+
+## Guidelines
+
+### When to use
+
+Use a Tooltip to name or briefly explain a control that is already visible: an
+icon-only button, an abbreviated label, or a term a reader may not know.
+
+### When not to use
+
+Do not put essential content in a Tooltip. Keyboard and pointer users can reach
+it, but touch users cannot, so anything required belongs in visible text.
+
+Do not use a Tooltip for a form field's validation message. Errors need to be
+persistent and programmatically tied to the field; a tooltip disappears.
+
+Do not use one for rich content such as a form or a menu. That is a Popover.
+
+### Best practices
+
+- Keep the content to a short phrase. A sentence is the ceiling; a paragraph
+  belongs in a Popover or on the page.
+- Attach the Tooltip to a focusable trigger. A tooltip on a plain span is
+  unreachable by keyboard.
+- Give an icon-only trigger an `aria-label` as well. The tooltip is visual help;
+  the accessible name must stand on its own.
+- Choose a side that does not cover the content the reader is looking at, and
+  let the library flip it near an edge.
+- Do not nest interactive content in a Tooltip. It opens on focus and closes on
+  blur, so anything inside it is hard to reach.
+
+### Content guidelines
+
+- Write a noun phrase or one short sentence that adds information, not a repeat
+  of the trigger's label.
+- Use sentence case and no closing period on a fragment; use one on a full
+  sentence.
+- Never make the tooltip the first place a key term appears. Explain the term
+  where it is introduced, and let the tooltip remind.

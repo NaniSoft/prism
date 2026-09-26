@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "popover",
+  "title": "Popover",
+  "description": "Shared popover primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "@base-ui/react",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/popover.tsx",
+      "content": "'use client'\n\nimport { Popover as PopoverPrimitive } from '@base-ui/react/popover'\nimport type { ComponentProps } from 'react'\n\nimport { cn } from '../../lib/utils'\n\n/**\n * The props the Popover root forwards to Base UI.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface PopoverProps {\n  /** The controlled open state. */\n  open?: boolean\n  /** The initially open state, for an uncontrolled popover. */\n  defaultOpen?: boolean\n  /** Called when the open state changes. */\n  onOpenChange?: (open: boolean) => void\n  /** Whether the popover traps interaction while open. @defaultValue false */\n  modal?: boolean | 'trap-focus'\n  /** The trigger and content. */\n  children?: React.ReactNode\n}\n\n/** The props PopoverTrigger forwards to Base UI. */\nexport interface PopoverTriggerProps extends ComponentProps<'button'> {\n  /** Whether the trigger should also open the popover on hover. */\n  openOnHover?: boolean\n}\n\n/**\n * The props PopoverContent forwards to Base UI.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface PopoverContentProps extends ComponentProps<'div'> {\n  /** Which side of the trigger the popover is placed on. @defaultValue bottom */\n  side?: 'top' | 'right' | 'bottom' | 'left'\n  /** How the popover aligns against the trigger. @defaultValue center */\n  align?: 'start' | 'center' | 'end'\n  /** The distance in pixels between the trigger and the popover. @defaultValue 4 */\n  sideOffset?: number\n  /** The offset in pixels along the alignment axis. @defaultValue 0 */\n  alignOffset?: number\n}\n\n/**\n * A floating surface opened by a trigger.\n *\n * Use a Popover for content that is richer than a tooltip but not a full\n * screen: a settings form, a filter panel, a small detail view. It is\n * dismissible with Escape and an outside press, and it returns focus to the\n * trigger when it closes. Do not put a required step in a Popover, because an\n * outside press can close it.\n */\nfunction Popover({ ...props }: PopoverProps) {\n  return <PopoverPrimitive.Root {...props} />\n}\n\n/** The element that opens the popover. */\nfunction PopoverTrigger({ className, ...props }: PopoverTriggerProps) {\n  return (\n    <PopoverPrimitive.Trigger\n      data-slot=\"popover-trigger\"\n      className={cn(\n        'bg-background shadow-xs inline-flex h-9 items-center justify-center gap-2 rounded-md border px-3 text-sm font-medium outline-none',\n        'transition-[color,box-shadow,background-color] duration-fast ease-out',\n        'hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px]',\n        'disabled:pointer-events-none disabled:opacity-50',\n        className,\n      )}\n      {...props}\n    />\n  )\n}\n\n/** The floating popover surface. */\nfunction PopoverContent({\n  className,\n  side = 'bottom',\n  align = 'center',\n  sideOffset = 4,\n  alignOffset = 0,\n  children,\n  ...props\n}: PopoverContentProps) {\n  return (\n    <PopoverPrimitive.Portal>\n      <PopoverPrimitive.Positioner\n        side={side}\n        align={align}\n        sideOffset={sideOffset}\n        alignOffset={alignOffset}\n        className=\"z-50\"\n      >\n        <PopoverPrimitive.Popup\n          data-slot=\"popover-content\"\n          className={cn(\n            'bg-popover text-popover-foreground z-50 w-72 rounded-md border p-4 shadow-md outline-none',\n            'transition-[opacity,transform] duration-fast ease-out',\n            'data-[starting-style]:scale-95 data-[starting-style]:opacity-0',\n            'data-[ending-style]:scale-95 data-[ending-style]:opacity-0',\n            className,\n          )}\n          {...props}\n        >\n          {children}\n        </PopoverPrimitive.Popup>\n      </PopoverPrimitive.Positioner>\n    </PopoverPrimitive.Portal>\n  )\n}\n\nexport { Popover, PopoverTrigger, PopoverContent }\n",
+      "type": "registry:component",
+      "target": "components/ui/popover.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

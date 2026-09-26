@@ -1,0 +1,71 @@
+---
+title: Popover
+---
+
+## Overview
+
+A Popover is a floating surface opened by a trigger. It ships as `Popover`,
+`PopoverTrigger` and `PopoverContent`, all from the same module. It is
+positioned by the library, flips near an edge, closes on Escape or an outside
+press, and returns focus to the trigger when it closes.
+
+A Popover is richer than a Tooltip and lighter than a Dialog. It can hold a
+small form, a filter set, or a compact detail view without covering the page the
+way a modal does.
+
+## Usage
+
+```tsx
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@nanisoft/prism-ui/components/popover'
+
+<Popover>
+  <PopoverTrigger>Share</PopoverTrigger>
+  <PopoverContent>
+    <p className="text-sm font-medium">Share this view</p>
+  </PopoverContent>
+</Popover>
+```
+
+<ComponentDemo slug="popover" />
+
+## Guidelines
+
+### When to use
+
+Use a Popover for content that is more than a label but not a whole screen: a
+share form, a filter panel, a date range, a small preview. It keeps the reader
+in context while offering more than the page shows.
+
+### When not to use
+
+Do not use a Popover for a required decision. An outside press can close it, so
+a flow that must be completed needs a Dialog.
+
+Do not put a single short explanation in a Popover. That is a Tooltip, which
+needs no click.
+
+Do not use a Popover as a menu of commands. A DropdownMenu carries the menu
+semantics and the keyboard model a reader expects for actions.
+
+### Best practices
+
+- Use `side` and `align` to keep the panel near its trigger and clear of the
+  content it annotates, and let the library flip it near an edge.
+- Keep one task per Popover. If it needs its own tabs or steps, it has outgrown
+  the surface.
+- Use the trigger's `openOnHover` only when hovering is a convenience on top of
+  a click, never as the only way to open.
+- Because an outside press closes the popover, save or apply changes as they
+  happen, or ask before discarding.
+- Keep the trigger labelled. The popover's content does not name the trigger for
+  assistive technology.
+
+### Content guidelines
+
+- Lead with a short heading that names the panel, such as "Share this view".
+- Keep body copy to one or two sentences, and put detail in the form itself.
+- Use sentence case for the heading and no closing period on a fragment.

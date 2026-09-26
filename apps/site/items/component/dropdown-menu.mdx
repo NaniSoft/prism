@@ -1,0 +1,73 @@
+---
+title: DropdownMenu
+---
+
+## Overview
+
+A DropdownMenu is a list of actions and choices opened from one trigger. It
+ships as `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuContent`,
+`DropdownMenuItem`, `DropdownMenuCheckboxItem`, `DropdownMenuRadioItem`,
+`DropdownMenuLabel`, `DropdownMenuSeparator`, `DropdownMenuGroup`,
+`DropdownMenuSub`, `DropdownMenuSubTrigger` and `DropdownMenuSubContent`.
+
+The menu supports arrow-key navigation, typeahead by item label, Home and End,
+and Escape to close. A submenu opens from its trigger with the right arrow, and
+focus returns to the trigger when the menu closes.
+
+## Usage
+
+```tsx
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@nanisoft/prism-ui/components/dropdown-menu'
+
+<DropdownMenu>
+  <DropdownMenuTrigger>Open menu</DropdownMenuTrigger>
+  <DropdownMenuContent className="w-56">
+    <DropdownMenuItem>Profile</DropdownMenuItem>
+    <DropdownMenuItem>Settings</DropdownMenuItem>
+    <DropdownMenuItem variant="destructive">Sign out</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+<ComponentDemo slug="dropdown-menu" />
+
+## Guidelines
+
+### When to use
+
+Use a DropdownMenu for a short list of commands attached to one control: a row's
+actions, an account menu, or a toolbar overflow. It keeps secondary actions out
+of the way without losing them.
+
+### When not to use
+
+Do not hide a primary action in a menu. If it is the main thing a view is for,
+keep it visible as a Button.
+
+Do not use a DropdownMenu for navigation between pages, and do not nest menus
+more than one level deep. Both cases want a page or a sidebar.
+
+### Best practices
+
+- Put a `DropdownMenuLabel` inside a `DropdownMenuGroup`. The label is tied to
+  its group, so it must have one.
+- Use `DropdownMenuCheckboxItem` for toggles that do not close the menu, so the
+  reader can change several in a row.
+- Put a destructive action last, after a `DropdownMenuSeparator`, with
+  `variant="destructive"`.
+- Keep items to a verb or a short noun phrase, and name the object when the
+  action is ambiguous: "Duplicate project" beats "Duplicate".
+- One level of `DropdownMenuSub` is the ceiling. Beyond that, promote the
+  commands to a page.
+
+### Content guidelines
+
+- Write items as imperative commands: "Duplicate", "Archive", "Sign out".
+- Use sentence case and no trailing periods.
+- Group related commands and label the group in sentence case, such as
+  "Account" or "Danger zone".

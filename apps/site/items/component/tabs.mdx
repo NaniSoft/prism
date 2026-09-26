@@ -1,0 +1,77 @@
+---
+title: Tabs
+---
+
+## Overview
+
+Tabs show a set of peer views one at a time. It ships as `Tabs`, `TabsList`,
+`TabsTrigger` and `TabsContent`, all from the same module. Each trigger names a
+panel, and the matching panel shares the trigger's value.
+
+The tab list is a single Tab stop. Arrow keys move between triggers and show the
+matching panel, while Tab moves into the panel itself. The active trigger is
+marked with an active state, and the panel it controls is tied to it for
+assistive technology.
+
+## Usage
+
+```tsx
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@nanisoft/prism-ui/components/tabs'
+
+<Tabs defaultValue="overview">
+  <TabsList>
+    <TabsTrigger value="overview">Overview</TabsTrigger>
+    <TabsTrigger value="activity">Activity</TabsTrigger>
+  </TabsList>
+  <TabsContent value="overview">Three fixes shipped this week.</TabsContent>
+  <TabsContent value="activity">Four deploys, all from main.</TabsContent>
+</Tabs>
+```
+
+<ComponentDemo slug="tabs" />
+
+## Guidelines
+
+### When to use
+
+Use Tabs to switch between views of the same subject when the reader only needs
+one at a time: overview and activity, code and preview, one setting group among
+several.
+
+### When not to use
+
+Do not use Tabs for steps in a process. Order matters there, and steps belong in
+a form or a wizard where progress is visible.
+
+Do not use Tabs to hide content that a reader needs to compare across panels.
+Side-by-side sections compare better than tabs.
+
+Do not use more tabs than fit on one line. If the list wraps, a Select or a
+sidebar section is the better control.
+
+### Best practices
+
+- Give every `TabsTrigger` a matching `TabsContent` with the same value, and
+  keep the order the same in both.
+- Choose a sensible default panel. The first tab is a fine default only if it is
+  the view most readers want.
+- Keep panel content structurally similar so switching does not move the
+  reader's place on the page.
+- On a narrow screen, let a long tab list scroll rather than wrap, and keep the
+  active tab in view.
+- Do not nest tabs inside tabs. One tab set per region keeps the keyboard model
+  predictable.
+
+### Content guidelines
+
+- Label tabs with a noun or a short noun phrase: "Overview", "Activity",
+  "Settings".
+- Use sentence case and no trailing periods.
+- Keep labels to one or two words so the row scans at a glance.
+- If a tab needs a count, keep it short and place it after the label, such as
+  "Activity 4".

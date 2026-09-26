@@ -1,0 +1,65 @@
+---
+title: Switch
+---
+
+## Overview
+
+A Switch turns a single setting on or off, and the change takes effect at once.
+It renders a styled track with a hidden native checkbox beside it, so it submits
+with a form while reading as a physical toggle. Space toggles the focused
+control, and its on and off states are announced to assistive technology.
+
+The difference from a Checkbox is timing, not shape. A Switch is a setting that
+is already in force; a Checkbox is a choice collected before a save.
+
+## Usage
+
+```tsx
+import { Switch } from '@nanisoft/prism-ui/components/switch'
+
+<Switch id="switch-notifications" defaultChecked />
+<Switch id="switch-preview" />
+<Switch id="switch-sso" disabled />
+```
+
+<ComponentDemo slug="switch" />
+
+## Guidelines
+
+### When to use
+
+Use a Switch when flipping the control applies the change immediately and the
+reader expects no further step: enabling notifications, publishing a preview, or
+turning a feature on.
+
+### When not to use
+
+Do not use a Switch inside a form that still needs a Save action. If the change
+is pending a submit, a Checkbox is the honest control.
+
+Do not use one to choose between two named options, such as Light and Dark. That
+is a choice between values, and a RadioGroup or a Select names both.
+
+Do not use a Switch for an action that cannot be undone with the same control. A
+one-way action is a Button.
+
+### Best practices
+
+- Label the setting, not the state. The label describes what the switch
+  controls; the on and off positions are conveyed by the control itself.
+- Pair each Switch with a `FieldLabel` and `htmlFor`, and put the consequence in
+  an adjacent helper line rather than in the label.
+- For a change that affects a shared resource, confirm or offer an undo. An
+  immediate setting with wide effect is easy to flip by accident.
+- Keep the on state visually distinct beyond position alone, so the state is
+  legible to a reader who cannot rely on the thumb's movement.
+- Use `disabled` with a reason in reach, and prefer an explanatory line over a
+  silent greyed row.
+
+### Content guidelines
+
+- Write the label as the thing being controlled, in sentence case: "Release
+  notifications", "Preview builds".
+- Keep helper text to one sentence that states the effect, including who is
+  affected when it is shared.
+- Avoid "Enable" or "Turn on" in the label; the control already says that.

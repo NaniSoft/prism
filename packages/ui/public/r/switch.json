@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "switch",
+  "title": "Switch",
+  "description": "Shared switch primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "@base-ui/react",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/switch.tsx",
+      "content": "'use client'\n\nimport { Switch as SwitchPrimitive } from '@base-ui/react/switch'\nimport type { ComponentProps } from 'react'\n\nimport { cn } from '../../lib/utils'\n\n/**\n * The props the Switch forwards to its Base UI root.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface SwitchProps extends Omit<ComponentProps<'span'>, 'onChange'> {\n  /** The control's accessible name when no visible label is used. */\n  'aria-label'?: string\n  /** The controlled active state. */\n  checked?: boolean\n  /** The initially active state, for an uncontrolled switch. */\n  defaultChecked?: boolean\n  /** Whether the control ignores user interaction. */\n  disabled?: boolean\n  /** Whether the user may not change the state. */\n  readOnly?: boolean\n  /** Whether the state must be active before the form submits. */\n  required?: boolean\n  /** The form field name submitted with the form. */\n  name?: string\n  /** The value submitted when the switch is on. */\n  value?: string\n  /** The value submitted when the switch is off. */\n  uncheckedValue?: string\n  /** Identifies the form that owns the hidden input. */\n  form?: string\n  /** Called when the active state changes. */\n  onCheckedChange?: (checked: boolean) => void\n}\n\n/**\n * A binary control that takes effect immediately.\n *\n * Use a Switch when flipping it applies the change at once, without a submit\n * step: enabling notifications, turning a feature on. The control renders a\n * hidden native input, so it submits with a form, and Space toggles it while\n * focused. When the change needs an explicit save, use a Checkbox instead.\n */\nfunction Switch({ className, ...props }: SwitchProps) {\n  return (\n    <SwitchPrimitive.Root\n      data-slot=\"switch\"\n      className={cn(\n        'border-transparent bg-input shadow-xs inline-flex h-5 w-9 shrink-0 items-center rounded-full border p-0.5 outline-none',\n        'transition-[color,box-shadow,background-color] duration-fast ease-out',\n        'data-[checked]:bg-primary data-[unchecked]:bg-input',\n        'focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px]',\n        'aria-invalid:border-destructive aria-invalid:ring-destructive/20',\n        'disabled:cursor-not-allowed disabled:opacity-50',\n        className,\n      )}\n      {...props}\n    >\n      <SwitchPrimitive.Thumb\n        data-slot=\"switch-thumb\"\n        className={cn(\n          'bg-background pointer-events-none block size-4 rounded-full shadow-xs',\n          'transition-transform duration-base ease-out',\n          'data-[checked]:translate-x-4 data-[unchecked]:translate-x-0',\n        )}\n      />\n    </SwitchPrimitive.Root>\n  )\n}\n\nexport { Switch }\n",
+      "type": "registry:component",
+      "target": "components/ui/switch.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

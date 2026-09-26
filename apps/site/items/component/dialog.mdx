@@ -1,0 +1,82 @@
+---
+title: Dialog
+---
+
+## Overview
+
+A Dialog is a modal surface for a decision or a short task. It ships as
+`Dialog`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogFooter`,
+`DialogTitle`, `DialogDescription` and `DialogClose`. It also covers the old
+drawer pattern through the `side` prop on `DialogContent`: `center` is the modal
+card, and `top`, `bottom`, `left` and `right` anchor the panel to an edge as a
+sheet.
+
+While it is open the dialog traps focus, locks page scroll, closes on Escape and
+on an outside press, and returns focus to its trigger when it closes. Always
+render a `DialogTitle`: it names the dialog and is announced on open.
+
+## Usage
+
+```tsx
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@nanisoft/prism-ui/components/dialog'
+
+<Dialog>
+  <DialogTrigger>Rename workspace</DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Rename workspace</DialogTitle>
+      <DialogDescription>The new name appears in every menu.</DialogDescription>
+    </DialogHeader>
+    <DialogFooter>
+      <DialogClose>Cancel</DialogClose>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+```
+
+<ComponentDemo slug="dialog" />
+
+## Guidelines
+
+### When to use
+
+Use a Dialog when the reader must stop and make a decision before continuing, or
+when a short task needs focus without losing the page behind it: a confirmation,
+a rename, or a compact form.
+
+### When not to use
+
+Do not use a Dialog for content that is not a task. Reading material or settings
+belong on a page or in a Popover.
+
+Do not stack dialogs, and do not use a centered Dialog for a long list or a
+full-screen form. The side variant covers a sheet.
+
+### Best practices
+
+- Always include a `DialogTitle`. It is the dialog's accessible name, and
+  without it a screen reader announces an unnamed dialog.
+- Put the primary action last in `DialogFooter`, and keep one primary action per
+  dialog.
+- For a destructive action, state the consequence in the `DialogDescription`,
+  not only in the button label.
+- The component returns focus to the trigger on close, so the reader resumes
+  where they left off. Do not move focus yourself.
+- Prefer the side variant on narrow screens when the reader is deciding about
+  content the centered card would cover.
+
+### Content guidelines
+
+- Make the title a short statement of the task: "Rename workspace", not "Are you
+  sure?".
+- Put the consequence in the description, in one sentence, before the actions.
+- Name the action in the confirming button: "Delete project", not "Confirm".

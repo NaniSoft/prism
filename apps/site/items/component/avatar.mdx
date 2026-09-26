@@ -1,0 +1,72 @@
+---
+title: Avatar
+---
+
+## Overview
+
+An Avatar shows a person or entity's image, with an initials fallback when the
+image is missing or still loading. It ships as `Avatar`, `AvatarImage` and
+`AvatarFallback`, all from the same module. The fallback covers the moment
+before the image arrives and the case where it never does, so the control is
+never an empty circle.
+
+Size the root with `className`; the image and the fallback fill it. The image is
+a real `<img>`, so give it a meaningful `alt`, or leave `alt` empty when the
+adjacent name already identifies the person.
+
+## Usage
+
+```tsx
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@nanisoft/prism-ui/components/avatar'
+
+<Avatar>
+  <AvatarImage src="/ada.png" alt="Ada Lovelace" />
+  <AvatarFallback>AL</AvatarFallback>
+</Avatar>
+```
+
+<ComponentDemo slug="avatar" />
+
+## Guidelines
+
+### When to use
+
+Use an Avatar to represent a person or an entity in a list, a header, a comment
+or a member row, where a face or initials helps the reader identify the subject
+at a glance.
+
+### When not to use
+
+Do not use an Avatar as a control on its own. A clickable avatar is a Button or
+a link; wrap the Avatar rather than making the image interactive.
+
+Do not use one when the name alone is enough, such as a single signed-in user's
+own settings page. The name carries the meaning; the image adds noise.
+
+Do not use an Avatar for a decorative mark. A logo or an icon tile is a
+different job.
+
+### Best practices
+
+- Always render an `AvatarFallback`. Without it, a slow or missing image leaves
+  an empty circle.
+- Keep the fallback to one or two initials, derived from the name, and set
+  `text-xs` or smaller on a small avatar.
+- Give the image a name when it stands alone, and an empty `alt` when the name
+  sits beside it, so a screen reader does not read it twice.
+- Use one size per context. A list of avatars at mixed sizes makes the rows
+  harder to compare.
+- Do not encode status in the avatar alone. A presence dot needs a text
+  alternative nearby.
+
+### Content guidelines
+
+- Fall back to initials, not a generic icon, so the circle still identifies the
+  person.
+- Use the same name form in the fallback as in the adjacent label, so the two
+  read as one subject.
+- Keep the `alt` text to the person's name, without titles or roles.

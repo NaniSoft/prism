@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "avatar",
+  "title": "Avatar",
+  "description": "Shared avatar primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "@base-ui/react",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/avatar.tsx",
+      "content": "'use client'\n\nimport { Avatar as AvatarPrimitive } from '@base-ui/react/avatar'\nimport type { ComponentProps } from 'react'\n\nimport { cn } from '../../lib/utils'\n\n/** The props the Avatar forwards to its Base UI root. */\nexport interface AvatarProps extends ComponentProps<'span'> {}\n\n/**\n * The props the AvatarImage forwards to Base UI.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface AvatarImageProps extends ComponentProps<'img'> {\n  /** Called when the image loading status changes. */\n  onLoadingStatusChange?: (status: 'idle' | 'loading' | 'loaded' | 'error') => void\n  /** Whether the image stays mounted and loads in place. @defaultValue false */\n  keepMounted?: boolean\n}\n\n/**\n * The props the AvatarFallback forwards to Base UI.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface AvatarFallbackProps extends ComponentProps<'span'> {\n  /** How long to wait before showing the fallback, in milliseconds. @defaultValue 0 */\n  delay?: number\n}\n\n/**\n * A person or entity's image, with initials as the fallback.\n *\n * Always render an `AvatarFallback`: it covers the moment before the image\n * loads and the case where it never does, so the control is never an empty\n * circle. Give `AvatarImage` a meaningful `alt`, or leave it empty when the\n * adjacent name already identifies the person. Size the root with\n * `className`; the image and fallback fill it.\n */\nfunction Avatar({ className, ...props }: AvatarProps) {\n  return (\n    <AvatarPrimitive.Root\n      data-slot=\"avatar\"\n      className={cn(\n        'relative flex size-10 shrink-0 overflow-hidden rounded-full',\n        className,\n      )}\n      {...props}\n    />\n  )\n}\n\n/** The Avatar's image. Renders an `<img>` and reports its loading status. */\nfunction AvatarImage({ className, ...props }: AvatarImageProps) {\n  return (\n    <AvatarPrimitive.Image\n      data-slot=\"avatar-image\"\n      className={cn('aspect-square size-full object-cover', className)}\n      {...props}\n    />\n  )\n}\n\n/**\n * What the Avatar shows when the image is missing or still loading.\n *\n * Typically initials, but any short node works. It is only rendered while the\n * image is unavailable, so it is not read twice by a screen reader.\n */\nfunction AvatarFallback({ className, ...props }: AvatarFallbackProps) {\n  return (\n    <AvatarPrimitive.Fallback\n      data-slot=\"avatar-fallback\"\n      className={cn(\n        'bg-muted text-muted-foreground flex size-full items-center justify-center rounded-full text-xs font-medium',\n        className,\n      )}\n      {...props}\n    />\n  )\n}\n\nexport { Avatar, AvatarImage, AvatarFallback }\n",
+      "type": "registry:component",
+      "target": "components/ui/avatar.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

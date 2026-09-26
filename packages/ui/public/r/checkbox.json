@@ -1,0 +1,27 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "checkbox",
+  "title": "Checkbox",
+  "description": "Shared checkbox primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "@base-ui/react",
+    "clsx",
+    "lucide-react",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/checkbox.tsx",
+      "content": "'use client'\n\nimport { Checkbox as CheckboxPrimitive } from '@base-ui/react/checkbox'\nimport { CheckIcon, MinusIcon } from 'lucide-react'\nimport type { ComponentProps } from 'react'\n\nimport { cn } from '../../lib/utils'\n\n/**\n * The props the Checkbox forwards to its Base UI root.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface CheckboxProps extends Omit<ComponentProps<'span'>, 'onChange'> {\n  /** The control's accessible name when no visible label is used. */\n  'aria-label'?: string\n  /** The controlled ticked state. */\n  checked?: boolean\n  /** The initially ticked state, for an uncontrolled checkbox. */\n  defaultChecked?: boolean\n  /** Whether the checkbox shows a mixed state: neither ticked nor unticked. */\n  indeterminate?: boolean\n  /** Whether the control ignores user interaction. */\n  disabled?: boolean\n  /** Whether the value must be ticked before the form submits. */\n  readOnly?: boolean\n  /** Whether the value must be ticked before the form submits. */\n  required?: boolean\n  /** The form field name submitted with the form. */\n  name?: string\n  /** The value submitted when the checkbox is ticked. */\n  value?: string\n  /** Identifies the form that owns the hidden input. */\n  form?: string\n  /** Called when the ticked state changes. */\n  onCheckedChange?: (checked: boolean) => void\n}\n\n/**\n * A ticked or unticked choice, with an optional mixed state.\n *\n * The Checkbox renders as a span with a hidden native input beside it, so it\n * submits and validates like a checkbox while accepting Prism's styling. Space\n * toggles the focused control, and the indeterminate state is announced as\n * `mixed` to assistive technology. Pair it with a `FieldLabel` in a `Field`,\n * and mark it invalid with `aria-invalid` when the value is rejected.\n */\nfunction Checkbox({ className, indeterminate, ...props }: CheckboxProps) {\n  return (\n    <CheckboxPrimitive.Root\n      data-slot=\"checkbox\"\n      indeterminate={indeterminate}\n      className={cn(\n        'border-input bg-background text-primary-foreground shadow-xs peer size-4 shrink-0 rounded-sm border outline-none',\n        'transition-[color,box-shadow,background-color] duration-fast ease-out',\n        'data-[checked]:border-primary data-[checked]:bg-primary data-[indeterminate]:border-primary data-[indeterminate]:bg-primary',\n        'focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px]',\n        'aria-invalid:border-destructive aria-invalid:ring-destructive/20',\n        'disabled:cursor-not-allowed disabled:opacity-50',\n        className,\n      )}\n      {...props}\n    >\n      <CheckboxPrimitive.Indicator\n        data-slot=\"checkbox-indicator\"\n        className=\"flex items-center justify-center text-current\"\n      >\n        {indeterminate ? (\n          <MinusIcon className=\"size-3.5\" />\n        ) : (\n          <CheckIcon className=\"size-3.5\" />\n        )}\n      </CheckboxPrimitive.Indicator>\n    </CheckboxPrimitive.Root>\n  )\n}\n\nexport { Checkbox }\n",
+      "type": "registry:component",
+      "target": "components/ui/checkbox.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

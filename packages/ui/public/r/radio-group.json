@@ -1,0 +1,27 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "radio-group",
+  "title": "Radio-group",
+  "description": "Shared radio-group primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "@base-ui/react",
+    "clsx",
+    "lucide-react",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/radio-group.tsx",
+      "content": "'use client'\n\nimport { Radio as RadioPrimitive } from '@base-ui/react/radio'\nimport { RadioGroup as RadioGroupPrimitive } from '@base-ui/react/radio-group'\nimport { CircleIcon } from 'lucide-react'\nimport type { ComponentProps } from 'react'\n\nimport { cn } from '../../lib/utils'\n\n/**\n * The props the RadioGroup forwards to its Base UI root.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface RadioGroupProps extends Omit<ComponentProps<'div'>, 'onChange'> {\n  /** The selected item's value, when the group is controlled. */\n  value?: string\n  /** The item selected initially, for an uncontrolled group. */\n  defaultValue?: string\n  /** Called when the selection changes. */\n  onValueChange?: (value: string) => void\n  /** The form field name submitted with the form. */\n  name?: string\n  /** Identifies the form that owns the hidden inputs. */\n  form?: string\n  /** Whether every item ignores user interaction. */\n  disabled?: boolean\n  /** Whether the user may not change the selection. */\n  readOnly?: boolean\n  /** Whether a value must be chosen before the form submits. */\n  required?: boolean\n  /** The group's accessible name when no visible legend is used. */\n  'aria-label'?: string\n}\n\n/**\n * The props the RadioGroupItem forwards to its Base UI radio.\n *\n * Declared here rather than re-exported from Base UI so no upstream type\n * crosses the package seam (ticket 07 section 6).\n */\nexport interface RadioGroupItemProps extends Omit<ComponentProps<'span'>, 'onChange'> {\n  /** The value this item contributes to the group. */\n  value: string\n  /** Whether this item ignores user interaction. */\n  disabled?: boolean\n  /** Whether this item must be chosen before the form submits. */\n  required?: boolean\n  /** Whether the user may not change this item's selection. */\n  readOnly?: boolean\n  /** The item's accessible name when no visible label is used. */\n  'aria-label'?: string\n}\n\n/**\n * A set of radio items where exactly one may be chosen.\n *\n * The group owns the value and the keyboard model: arrow keys move between\n * items inside the group, while Tab moves into and out of the group as one\n * stop. Always give the group a visible legend or an `aria-label`, and use a\n * RadioGroup rather than a set of checkboxes when the choices are mutually\n * exclusive.\n */\nfunction RadioGroup({ className, ...props }: RadioGroupProps) {\n  return (\n    <RadioGroupPrimitive<string>\n      data-slot=\"radio-group\"\n      className={cn('grid gap-3', className)}\n      {...props}\n    />\n  )\n}\n\n/**\n * One choice inside a RadioGroup.\n *\n * Renders a circular control with a hidden native radio beside it, so it\n * submits with the form. Space selects the focused item when arrow-key\n * navigation has not already selected it. Put the item beside its\n * `FieldLabel`, and keep the group's name on the RadioGroup itself.\n */\nfunction RadioGroupItem({ className, value, ...props }: RadioGroupItemProps) {\n  return (\n    <RadioPrimitive.Root\n      value={value}\n      data-slot=\"radio-group-item\"\n      className={cn(\n        'border-input text-primary shadow-xs aspect-square size-4 shrink-0 rounded-full border outline-none',\n        'transition-[color,box-shadow,border-color] duration-fast ease-out',\n        'data-[checked]:border-primary',\n        'focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px]',\n        'aria-invalid:border-destructive aria-invalid:ring-destructive/20',\n        'disabled:cursor-not-allowed disabled:opacity-50',\n        className,\n      )}\n      {...props}\n    >\n      <RadioPrimitive.Indicator\n        data-slot=\"radio-group-indicator\"\n        className=\"relative flex items-center justify-center\"\n      >\n        <CircleIcon className=\"fill-primary absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2\" />\n      </RadioPrimitive.Indicator>\n    </RadioPrimitive.Root>\n  )\n}\n\nexport { RadioGroup, RadioGroupItem }\n",
+      "type": "registry:component",
+      "target": "components/ui/radio-group.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}
