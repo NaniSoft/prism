@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import { ArrowRight, Blocks, Palette, ShieldCheck, Zap } from 'lucide-react'
 
-import { Hero01 } from '@nanisoft/prism-ui/components/ds/blocks/hero-01/hero'
-import { Stats01 } from '@nanisoft/prism-ui/components/ds/blocks/stats-01/stats'
-import { FeatureGrid01 } from '@nanisoft/prism-ui/components/ds/blocks/feature-grid-01/feature-grid'
-import { Cta01 } from '@nanisoft/prism-ui/components/ds/blocks/cta-01/cta'
+import { Hero01 } from '@nanisoft/prism-ui/blocks/hero-01'
+import { Stats01 } from '@nanisoft/prism-ui/blocks/stats-01'
+import { FeatureGrid01 } from '@nanisoft/prism-ui/blocks/feature-grid-01'
+import { Cta01 } from '@nanisoft/prism-ui/blocks/cta-01'
 
 import { blocks } from '@/lib/catalog'
 

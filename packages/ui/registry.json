@@ -72,6 +72,28 @@
       ]
     },
     {
+      "name": "section",
+      "title": "Section",
+      "description": "Shared section primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "cta-01",
       "title": "CTA 01 - Filled Banner",
       "description": "A closing call to action on a filled primary surface. Headline, supporting line and the action are passed in as props.",
@@ -89,19 +111,19 @@
       ],
       "files": [
         {
-          "path": "src/components/ds/blocks/cta-01/cta.tsx",
+          "path": "src/blocks/cta-01/cta.tsx",
           "type": "registry:component",
-          "target": "components/ds/blocks/cta-01/cta.tsx"
+          "target": "components/blocks/cta-01/cta.tsx"
         },
         {
-          "path": "src/components/ds/blocks/cta-01/index.tsx",
+          "path": "src/blocks/cta-01/index.tsx",
           "type": "registry:component",
-          "target": "components/ds/blocks/cta-01/index.tsx"
+          "target": "components/blocks/cta-01/index.tsx"
         },
         {
-          "path": "src/components/ds/blocks/section.tsx",
+          "path": "src/components/ui/section.tsx",
           "type": "registry:component",
-          "target": "components/ds/blocks/section.tsx"
+          "target": "components/ui/section.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -128,19 +150,19 @@
       ],
       "files": [
         {
-          "path": "src/components/ds/blocks/feature-grid-01/feature-grid.tsx",
+          "path": "src/blocks/feature-grid-01/feature-grid.tsx",
           "type": "registry:component",
-          "target": "components/ds/blocks/feature-grid-01/feature-grid.tsx"
+          "target": "components/blocks/feature-grid-01/feature-grid.tsx"
         },
         {
-          "path": "src/components/ds/blocks/feature-grid-01/index.tsx",
+          "path": "src/blocks/feature-grid-01/index.tsx",
           "type": "registry:component",
-          "target": "components/ds/blocks/feature-grid-01/index.tsx"
+          "target": "components/blocks/feature-grid-01/index.tsx"
         },
         {
-          "path": "src/components/ds/blocks/section.tsx",
+          "path": "src/components/ui/section.tsx",
           "type": "registry:component",
-          "target": "components/ds/blocks/section.tsx"
+          "target": "components/ui/section.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -167,19 +189,19 @@
       ],
       "files": [
         {
-          "path": "src/components/ds/blocks/hero-01/hero.tsx",
+          "path": "src/blocks/hero-01/hero.tsx",
           "type": "registry:component",
-          "target": "components/ds/blocks/hero-01/hero.tsx"
+          "target": "components/blocks/hero-01/hero.tsx"
         },
         {
-          "path": "src/components/ds/blocks/hero-01/index.tsx",
+          "path": "src/blocks/hero-01/index.tsx",
           "type": "registry:component",
-          "target": "components/ds/blocks/hero-01/index.tsx"
+          "target": "components/blocks/hero-01/index.tsx"
         },
         {
-          "path": "src/components/ds/blocks/section.tsx",
+          "path": "src/components/ui/section.tsx",
           "type": "registry:component",
-          "target": "components/ds/blocks/section.tsx"
+          "target": "components/ui/section.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -208,41 +230,19 @@
       ],
       "files": [
         {
-          "path": "src/components/ds/blocks/pricing-01/index.tsx",
+          "path": "src/blocks/pricing-01/index.tsx",
           "type": "registry:component",
-          "target": "components/ds/blocks/pricing-01/index.tsx"
+          "target": "components/blocks/pricing-01/index.tsx"
         },
         {
-          "path": "src/components/ds/blocks/pricing-01/pricing.tsx",
+          "path": "src/blocks/pricing-01/pricing.tsx",
           "type": "registry:component",
-          "target": "components/ds/blocks/pricing-01/pricing.tsx"
+          "target": "components/blocks/pricing-01/pricing.tsx"
         },
         {
-          "path": "src/components/ds/blocks/section.tsx",
+          "path": "src/components/ui/section.tsx",
           "type": "registry:component",
-          "target": "components/ds/blocks/section.tsx"
-        },
-        {
-          "path": "src/lib/utils.ts",
-          "type": "registry:lib",
-          "target": "lib/utils.ts"
-        }
-      ]
-    },
-    {
-      "name": "section",
-      "title": "Section",
-      "description": "Container and heading primitives that give every block a consistent vertical rhythm.",
-      "type": "registry:component",
-      "dependencies": [
-        "clsx",
-        "tailwind-merge"
-      ],
-      "files": [
-        {
-          "path": "src/components/ds/blocks/section.tsx",
-          "type": "registry:component",
-          "target": "components/ds/blocks/section.tsx"
+          "target": "components/ui/section.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -269,19 +269,19 @@
       ],
       "files": [
         {
-          "path": "src/components/ds/blocks/stats-01/index.tsx",
+          "path": "src/blocks/stats-01/index.tsx",
           "type": "registry:component",
-          "target": "components/ds/blocks/stats-01/index.tsx"
+          "target": "components/blocks/stats-01/index.tsx"
         },
         {
-          "path": "src/components/ds/blocks/stats-01/stats.tsx",
+          "path": "src/blocks/stats-01/stats.tsx",
           "type": "registry:component",
-          "target": "components/ds/blocks/stats-01/stats.tsx"
+          "target": "components/blocks/stats-01/stats.tsx"
         },
         {
-          "path": "src/components/ds/blocks/section.tsx",
+          "path": "src/components/ui/section.tsx",
           "type": "registry:component",
-          "target": "components/ds/blocks/section.tsx"
+          "target": "components/ui/section.tsx"
         },
         {
           "path": "src/lib/utils.ts",

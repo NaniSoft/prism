@@ -1,7 +1,7 @@
 import { Check } from 'lucide-react'
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Badge } from '../../components/ui/badge'
+import { Button } from '../../components/ui/button'
 import {
   Card,
   CardContent,
@@ -9,8 +9,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Section, SectionHeading, type HeadingLevel } from '@/components/ds/blocks/section'
+} from '../../components/ui/card'
+import { Section, SectionHeading, type HeadingLevel } from '../../components/ui/section'
 
 export type Plan = {
   name: string

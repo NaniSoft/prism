@@ -2,7 +2,7 @@
   "name": "@nanisoft/prism-ui",
   "version": "0.5.0",
   "type": "module",
-  "description": "Component + block source of truth, published as a shadcn registry.",
+  "description": "Prism's React component, block and page library.",
   "license": "MIT",
   "author": "NaniSoft",
   "homepage": "https://prism.nanisoft.com",
@@ -11,16 +11,56 @@
     "url": "https://github.com/NaniSoft/prism.git",
     "directory": "packages/ui"
   },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "types": "./dist/index.d.ts",
   "exports": {
-    "./components/*": "./src/components/*.tsx",
-    "./registry.json": "./registry.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./provider": {
+      "types": "./dist/provider/index.d.ts",
+      "default": "./dist/provider/index.js"
+    },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "default": "./dist/components/index.js"
+    },
+    "./components/*": {
+      "types": "./dist/components/ui/*.d.ts",
+      "default": "./dist/components/ui/*.js"
+    },
+    "./blocks": {
+      "types": "./dist/blocks/index.d.ts",
+      "default": "./dist/blocks/index.js"
+    },
+    "./blocks/*": {
+      "types": "./dist/blocks/*/index.d.ts",
+      "default": "./dist/blocks/*/index.js"
+    },
+    "./pages": {
+      "types": "./dist/pages/index.d.ts",
+      "default": "./dist/pages/index.js"
+    },
+    "./pages/*": {
+      "types": "./dist/pages/*/index.d.ts",
+      "default": "./dist/pages/*/index.js"
+    },
+    "./theming": {
+      "types": "./dist/theming/index.d.ts",
+      "default": "./dist/theming/index.js"
+    },
+    "./catalog": {
+      "types": "./dist/catalog.d.ts",
+      "default": "./dist/catalog.js"
+    },
+    "./styles.css": "./dist/styles.css",
     "./package.json": "./package.json"
   },
   "files": [
-    "src",
-    "registry.json",
-    "public/r",
-    "components.json"
+    "dist"
   ],
   "publishConfig": {
     "access": "public"
@@ -28,21 +68,26 @@
   "scripts": {
     "sync": "node scripts/sync-registry.mjs",
     "validate": "node scripts/validate-registry.mjs",
-    "build": "pnpm sync && pnpm validate && shadcn build",
+    "build": "node scripts/build.mjs && pnpm sync && pnpm validate && shadcn build && node scripts/check-surface.mjs",
+    "check": "node scripts/validate-registry.mjs && node scripts/check-surface.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",
+    "@nanisoft/prism-tokens": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.545.0",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "postcss": "^8.5.28",
     "shadcn": "^3.6.0",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5.7.0"
   }
 }

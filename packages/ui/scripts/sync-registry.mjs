@@ -5,9 +5,9 @@
  * directory with a `block.json` and its components ??? there is no second list to keep
  * in sync, which is the failure mode that quietly rots a catalog over time.
  *
- *   blocks/<name>/block.json    -> a registry:block / registry:page item
- *   blocks/<name>.meta.json     -> a shared registry:component item
- *   components/ui/*.tsx         -> a registry:component item, one per primitive
+ *   src/blocks/<name>/block.json    -> a registry:block item
+ *   src/pages/<name>/               -> a registry:page item
+ *   components/ui/*.tsx             -> a registry:component item, one per component
  *
  * The ui primitives are scanned rather than hand-listed because blocks reference
  * them through `registryDependencies`. A dependency that is declared but never
@@ -24,8 +24,9 @@ import { fileURLToPath } from 'node:url'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const PKG = path.join(HERE, '..')
-const BLOCKS = path.join(PKG, 'src', 'components', 'ds', 'blocks')
+const BLOCKS = path.join(PKG, 'src', 'blocks')
 const UI = path.join(PKG, 'src', 'components', 'ui')
+const PAGES = path.join(PKG, 'src', 'pages')
 const OUT = path.join(PKG, 'registry.json')
 
 const toPosix = (p) => p.split(path.sep).join('/')
@@ -62,9 +63,9 @@ const IMPLICIT = new Set(['react', 'react-dom', 'next', 'next-themes'])
 /** Every block imports the shared Section primitives, so they always ship together. */
 const SHARED = [
   {
-    path: 'src/components/ds/blocks/section.tsx',
+    path: 'src/components/ui/section.tsx',
     type: 'registry:component',
-    target: 'components/ds/blocks/section.tsx',
+    target: 'components/ui/section.tsx',
   },
 ]
 
@@ -150,30 +151,6 @@ for (const entry of (await readdir(UI, { withFileTypes: true })).sort((a, b) =>
 for (const entry of (await readdir(BLOCKS, { withFileTypes: true })).sort((a, b) =>
   a.name.localeCompare(b.name),
 )) {
-  // Shared component: blocks/<name>.meta.json
-  if (entry.isFile() && entry.name.endsWith('.meta.json')) {
-    const meta = await readJson(path.join(BLOCKS, entry.name))
-    const componentName = entry.name.replace('.meta.json', '.tsx')
-    const deps = dependenciesFor(
-      meta.dependencies ?? await npmDependencies(path.join(BLOCKS, componentName)),
-    )
-    items.push({
-      name: meta.name,
-      title: meta.title,
-      description: meta.description,
-      type: meta.type ?? 'registry:component',
-      ...(deps ? { dependencies: deps } : {}),
-      files: [
-        {
-          path: `src/components/ds/blocks/${componentName}`,
-          type: 'registry:component',
-          target: `components/ds/blocks/${componentName}`,
-        },        UTILS,
-      ],
-    })
-    continue
-  }
-
   if (!entry.isDirectory()) continue
 
   const dir = path.join(BLOCKS, entry.name)
@@ -182,14 +159,14 @@ for (const entry of (await readdir(BLOCKS, { withFileTypes: true })).sort((a, b)
   try {
     meta = await readJson(metaPath)
   } catch {
-    console.error(`error blocks/${entry.name}: missing or malformed block.json`)
+    console.error(`error src/blocks/${entry.name}: missing or malformed block.json`)
     process.exit(1)
   }
 
   const files = (await collectFiles(dir)).map((file) => ({
     path: rel(path.join(dir, file)),
-    type: file === 'page.tsx' ? 'registry:page' : 'registry:component',
-    target: `components/ds/blocks/${entry.name}/${file}`,
+    type: 'registry:component',
+    target: `components/blocks/${entry.name}/${file}`,
   }))
 
   // Dedupe: a block that also owns section.tsx must not ship it twice.
@@ -230,6 +207,50 @@ for (const entry of (await readdir(BLOCKS, { withFileTypes: true })).sort((a, b)
       : {}),
     ...(deps ? { dependencies: deps } : {}),
     files: all,
+  })
+}
+
+/**
+ * Pages: src/pages/<name>/ -> a registry:page item.
+ *
+ * The v1 Pages directory starts empty (ticket 07 settles the layer before its
+ * roster), so this loop running zero times is the expected state rather than a
+ * failure. A Page that lands owns an index and a `block.json`, like a Block.
+ */
+for (const entry of (await readdir(PAGES, { withFileTypes: true })).sort((a, b) =>
+  a.name.localeCompare(b.name),
+)) {
+  if (!entry.isDirectory()) continue
+
+  const dir = path.join(PAGES, entry.name)
+  const metaPath = path.join(dir, 'block.json')
+  let meta
+  try {
+    meta = await readJson(metaPath)
+  } catch {
+    console.error(`error src/pages/${entry.name}: missing or malformed block.json`)
+    process.exit(1)
+  }
+
+  const files = (await collectFiles(dir)).map((file) => ({
+    path: rel(path.join(dir, file)),
+    type: 'registry:page',
+    target: `components/pages/${entry.name}/${file}`,
+  }))
+
+  const ownDeps = []
+  for (const file of await collectFiles(dir)) {
+    ownDeps.push(...(await npmDependencies(path.join(dir, file))))
+  }
+  const deps = dependenciesFor([...ownDeps, ...(meta.dependencies ?? [])])
+
+  items.push({
+    name: meta.name,
+    title: meta.title,
+    description: meta.description,
+    type: 'registry:page',
+    ...(deps ? { dependencies: deps } : {}),
+    files: [...files, UTILS],
   })
 }
 

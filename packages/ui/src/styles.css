@@ -1,0 +1,58 @@
+/*
+ * The Prism stylesheet source, compiled once into `dist/styles.css`.
+ *
+ * This file is internal to the build. A consumer imports
+ * `@nanisoft/prism-ui/styles.css`, never this path, and installs no Tailwind.
+ *
+ * Structure:
+ *   tailwindcss        the framework and its preflight
+ *   @source            Prism's own component and block source
+ *   token CSS          the emitted `:root`/`.dark`/`[data-pack=...]` variables
+ *   token theme        the `@theme` bindings that produce the semantic utilities
+ *   base layer         Prism's own defaults, not a consumer's globals
+ */
+@import 'tailwindcss';
+
+/* Prism's component and block source is the only thing that must be scanned. */
+@source './';
+
+/* Semantic variables: the shadcn-compatible neutral default and the five packs. */
+@import '@nanisoft/prism-tokens/dist/light.css';
+@import '@nanisoft/prism-tokens/dist/dark.css';
+@import '@nanisoft/prism-tokens/dist/themes/blush/light.css';
+@import '@nanisoft/prism-tokens/dist/themes/blush/dark.css';
+@import '@nanisoft/prism-tokens/dist/themes/mint/light.css';
+@import '@nanisoft/prism-tokens/dist/themes/mint/dark.css';
+@import '@nanisoft/prism-tokens/dist/themes/lavender/light.css';
+@import '@nanisoft/prism-tokens/dist/themes/lavender/dark.css';
+@import '@nanisoft/prism-tokens/dist/themes/sky/light.css';
+@import '@nanisoft/prism-tokens/dist/themes/sky/dark.css';
+@import '@nanisoft/prism-tokens/dist/themes/peach/light.css';
+@import '@nanisoft/prism-tokens/dist/themes/peach/dark.css';
+
+/* The `@theme inline`/`@theme static` bindings that generate semantic utilities. */
+@import '@nanisoft/prism-tokens/dist/theme.css';
+
+/* Class-based dark mode, matching the `.dark` axis the tokens emit. */
+@custom-variant dark (&:is(.dark *));
+
+@layer base {
+  /*
+   * A default border colour. Components use the `border` utility for a hairline
+   * and only sometimes name the colour, so the base must point the default at
+   * the token rather than at `currentColor`.
+   */
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
+
+  /* The page ground and ink, so a consumer's <body> inherits the pack. */
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}

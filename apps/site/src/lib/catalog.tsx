@@ -1,15 +1,13 @@
 import { Blocks, Palette, ShieldCheck, Zap } from 'lucide-react'
 
-import registry from '@nanisoft/prism-ui/registry.json'
-
 import blockMeta from '@/generated/block-meta.json'
 
-import { Cta01 } from '@nanisoft/prism-ui/components/ds/blocks/cta-01/cta'
-import { FeatureGrid01 } from '@nanisoft/prism-ui/components/ds/blocks/feature-grid-01/feature-grid'
-import { Hero01 } from '@nanisoft/prism-ui/components/ds/blocks/hero-01/hero'
-import { Pricing01 } from '@nanisoft/prism-ui/components/ds/blocks/pricing-01/pricing'
-import { Stats01 } from '@nanisoft/prism-ui/components/ds/blocks/stats-01/stats'
-import type { HeadingLevel } from '@nanisoft/prism-ui/components/ds/blocks/section'
+import { Cta01 } from '@nanisoft/prism-ui/blocks/cta-01'
+import { FeatureGrid01 } from '@nanisoft/prism-ui/blocks/feature-grid-01'
+import { Hero01 } from '@nanisoft/prism-ui/blocks/hero-01'
+import { Pricing01 } from '@nanisoft/prism-ui/blocks/pricing-01'
+import { Stats01 } from '@nanisoft/prism-ui/blocks/stats-01'
+import type { HeadingLevel } from '@nanisoft/prism-ui/components/section'
 
 type Preview = { element: React.ReactElement }
 
@@ -119,6 +117,10 @@ const PREVIEWS: Record<string, Preview> = {
   },
 }
 
+export type CatalogFile = { target: string; type: string }
+
+type BlockMeta = (typeof blockMeta)['blocks'][keyof (typeof blockMeta)['blocks']]
+
 export type CatalogBlock = {
   name: string
   title: string
@@ -126,7 +128,9 @@ export type CatalogBlock = {
   categories: string[]
   dependencies: string[]
   registryDependencies: string[]
-  files: { target: string; type: string }[]
+  files: CatalogFile[]
+  /** Shared `registry:lib` files the block pulls in but does not own. */
+  shared: CatalogFile[]
   preview?: React.ReactElement
   /**
    * What the install actually costs, measured from source by
@@ -149,30 +153,27 @@ export type CatalogBlock = {
   }
 }
 
-export const blocks: CatalogBlock[] = registry.items
-  .filter((item) => item.type === 'registry:block')
-  .map((item) => {
-    const meta = blockMeta.blocks[item.name as keyof typeof blockMeta.blocks]
-    return {
-      name: item.name,
-      title: item.title ?? item.name,
-      description: item.description ?? '',
-      categories: item.categories ?? [],
-      dependencies: item.dependencies ?? [],
-      registryDependencies: item.registryDependencies ?? [],
-      files: (item.files ?? []).map((f) => ({ target: f.target ?? f.path, type: f.type })),
-      preview: PREVIEWS[item.name]?.element,
-      cost: {
-        client: meta?.client ?? false,
-        clientSource: meta?.clientSource ?? null,
-        // A block with no generated meta has not been measured at all, so it is
-        // unverified by default rather than quietly counted as server-safe.
-        verified: meta?.verified ?? false,
-        code: meta?.code ?? 0,
-        fileCount: meta?.files.length ?? 0,
-      },
-    }
-  })
+export const blocks: CatalogBlock[] = Object.entries(
+  blockMeta.blocks as Record<string, BlockMeta>,
+)
+  .map(([name, meta]) => ({
+    name,
+    title: meta.title,
+    description: meta.description,
+    categories: meta.categories,
+    dependencies: meta.dependencies,
+    registryDependencies: meta.registryDependencies,
+    files: meta.files.map((file) => ({ target: file.target, type: file.type })),
+    shared: meta.shared,
+    preview: PREVIEWS[name]?.element,
+    cost: {
+      client: meta.client,
+      clientSource: meta.clientSource,
+      verified: meta.verified,
+      code: meta.code,
+      fileCount: meta.files.length,
+    },
+  }))
   .sort((a, b) => a.name.localeCompare(b.name))
 
 export const categories = [...new Set(blocks.flatMap((b) => b.categories))].sort()

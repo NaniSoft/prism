@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ThemeSwitcher } from '@/components/theme-switcher'
 import { MobileMenu, SiteNav } from '@/components/site-nav'
 
+import '@nanisoft/prism-ui/styles.css'
 import './globals.css'
 
 export const metadata: Metadata = {

@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
-import { Section, SectionHeading, type HeadingLevel } from '@/components/ds/blocks/section'
+import { Button } from '../../components/ui/button'
+import { Section, SectionHeading, type HeadingLevel } from '../../components/ui/section'
 
 export type HeroAction = {
   label: string

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "predev": "pnpm --filter @nanisoft/prism-tokens build && node ../../scripts/dev-cache-guard.mjs && node scripts/analyze-blocks.mjs",
+    "predev": "pnpm --filter @nanisoft/prism-tokens build && pnpm --filter @nanisoft/prism-ui build && node ../../scripts/dev-cache-guard.mjs && node scripts/analyze-blocks.mjs",
     "dev": "next dev --turbopack",
     "prebuild": "pnpm --filter @nanisoft/prism-tokens build && node scripts/analyze-blocks.mjs",
     "build": "next build",

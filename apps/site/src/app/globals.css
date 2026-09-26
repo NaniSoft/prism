@@ -1,94 +1,36 @@
 /*
- * Token CSS is generated into @nanisoft/prism-tokens/dist by `pnpm tokens:build`.
- * This app never defines a color or radius by hand — it only consumes the build.
+ * The site's own Tailwind build.
  *
- * Base theme  -> :root / .dark          (the shadcn-compatible neutral default)
- * Pastel set -> [data-pack=...]        (runtime-switchable, five packs)
+ * Prism's compiled stylesheet, `@nanisoft/prism-ui/styles.css`, is imported once
+ * in `app/layout.tsx`. It carries the token custom properties, the five packs,
+ * the `@theme` bindings and every utility the Prism components use. This file
+ * therefore scans only the site's own source: pointing a second build at the
+ * library would emit Prism's utilities twice, which is exactly the collision the
+ * adoption contract forbids.
+ *
+ * `theme.css` stays imported here because this build needs the `@theme` bindings
+ * to generate the semantic utilities the site's chrome uses (`bg-muted/30`,
+ * `text-success` and friends) for classes that appear only in site markup.
  */
 @import 'tailwindcss';
 
-/*
- * Source detection must be declared, not inferred.
- *
- * Every block on this site is authored in `packages/ui` and rendered from
- * there — the catalog *is* that package. But Tailwind's automatic detection roots
- * itself at the detected project root, and this workspace is not a git
- * repository, so the scan never crossed out of `apps/site`. The symptom was
- * silent: a utility was emitted only if some file inside `apps/site` happened to
- * use it too. `text-pretty` shipped because the footer used it; `rounded-2xl`,
- * `shadow-md`, `text-balance` and `group-hover:` did not, so the CTA, pricing
- * and hero blocks rendered with their styling missing and nothing errored.
- *
- * Paths are relative to this file. Both entries are needed: `src` covers the
- * components, and the explicit package root keeps working if the registry ever
- * grows source outside `src` (e.g. stylesheets it imports).
- */
-@source '../../../../packages/ui/src';
+@source '../app';
+@source '../components';
+@source '../lib';
 
-@import '@nanisoft/prism-tokens/dist/light.css';
-@import '@nanisoft/prism-tokens/dist/dark.css';
 @import '@nanisoft/prism-tokens/dist/theme.css';
-
-@import '@nanisoft/prism-tokens/dist/themes/blush/light.css';
-@import '@nanisoft/prism-tokens/dist/themes/blush/dark.css';
-@import '@nanisoft/prism-tokens/dist/themes/mint/light.css';
-@import '@nanisoft/prism-tokens/dist/themes/mint/dark.css';
-@import '@nanisoft/prism-tokens/dist/themes/lavender/light.css';
-@import '@nanisoft/prism-tokens/dist/themes/lavender/dark.css';
-@import '@nanisoft/prism-tokens/dist/themes/sky/light.css';
-@import '@nanisoft/prism-tokens/dist/themes/sky/dark.css';
-@import '@nanisoft/prism-tokens/dist/themes/peach/light.css';
-@import '@nanisoft/prism-tokens/dist/themes/peach/dark.css';
 
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Motion policy, split by what the property does.
- *
- * Every `transition-*` in this catalog is a Tailwind utility, and the utilities
- * are generated into `@layer utilities`. A stylesheet rule cannot reliably undo
- * one of them from `@layer base` — the layer order alone loses the comparison,
- * and a selector specific enough to win turns into a specificity fight against
- * generated class names. So the two kinds of transition are handled in the two
- * places that can actually win:
- *
- *   Transform  -> guarded at the call site with `motion-safe:transition-transform`.
- *                 Tailwind emits that utility inside
- *                 `@media (prefers-reduced-motion: no-preference)`, so under
- *                 `reduce` the transition simply does not exist: the chevron
- *                 snaps and the arrow steps, with no movement over time to
- *                 provoke anything. The element still moves — a 2px instant
- *                 shift is a position, not a motion — so the affordance survives.
- *                 This lives in the component because the block source ships to
- *                 consumers through `shadcn add` and cannot depend on this file.
- *
- *   Colour / opacity / box-shadow -> handled here. These carry state change and
- *                 focus feedback, so they are shortened, never removed. The
- *                 duration they read is `var(--tw-duration,
- *                 var(--default-transition-duration))`, and the fallback is a
- *                 plain inherited custom property, so retuning it on `:root`
- *                 reaches every transition that does not pin its own
- *                 `duration-*`. 160ms is the base token; 80ms is the fast token,
- *                 which sits inside the "immediate feedback" band and keeps
- *                 hover, active and focus readable while taking the lag out of it.
- *
- * A blanket `*, *::before, *::after { animation-duration: 0.01ms !important }`
- * is the thing to avoid: it is `!important` to beat the same cascade, and it
- * flattens colour feedback along with spatial movement. This rule is neither
- * important nor global — it is one inherited variable.
+ * Motion policy for the site's own colour and opacity transitions. The property
+ * they read is `var(--tw-duration, var(--default-transition-duration))`, so
+ * retuning the inherited fallback shortens every transition that does not pin
+ * its own duration. 80ms is the fast token, inside the immediate-feedback band.
+ * Spatial movement is guarded at the call site with `motion-safe:`, not here.
  */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --default-transition-duration: var(--duration-fast);
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
   }
 }

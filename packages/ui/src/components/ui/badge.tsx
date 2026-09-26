@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 import type { ComponentProps } from 'react'
 
-import { cn } from '@/lib/utils'
+import { cn } from '../../lib/utils'
 
 const badgeVariants = cva(
   'inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md border px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-colors',
@@ -20,6 +20,12 @@ const badgeVariants = cva(
   },
 )
 
+/**
+ * A compact status or category label.
+ *
+ * Renders a `<span>`; `variant` selects the surface treatment and the default
+ * is the filled primary style.
+ */
 function Badge({
   className,
   variant,
@@ -34,4 +40,4 @@ function Badge({
   )
 }
 
-export { Badge, badgeVariants }
+export { Badge }

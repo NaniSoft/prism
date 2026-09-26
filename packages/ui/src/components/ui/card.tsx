@@ -1,7 +1,14 @@
 import type { ComponentProps } from 'react'
 
-import { cn } from '@/lib/utils'
+import { cn } from '../../lib/utils'
 
+/**
+ * A bordered surface for a small group of related content.
+ *
+ * Compose it from `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`
+ * and `CardFooter`. Those parts ship from this module rather than as separate
+ * subpaths.
+ */
 function Card({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div

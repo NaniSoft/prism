@@ -21,7 +21,7 @@ const EXT = /\.(tsx?|js|mjs|css)$/
 const SELF = path.normalize('scripts/check-elevation-layout.mjs')
 
 /** `Section` owns the container contract; the ticket exempts it explicitly. */
-const SECTION = path.normalize('packages/ui/src/components/ds/blocks/section.tsx')
+const SECTION = path.normalize('packages/ui/src/components/ui/section.tsx')
 
 const RULES = [
   {

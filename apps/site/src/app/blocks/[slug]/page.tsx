@@ -66,8 +66,8 @@ export default async function BlockPage({
   const block = getBlock(slug)
   if (!block) notFound()
 
-  const own = block.files.filter((f) => f.type !== 'registry:lib')
-  const shared = block.files.filter((f) => f.type === 'registry:lib')
+  const own = block.files
+  const shared = block.shared
   const depCount = block.registryDependencies.length + block.dependencies.length
 
   return (

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '../../lib/utils'
 
 /**
  * Container primitive. Every block composes its own section from this so vertical

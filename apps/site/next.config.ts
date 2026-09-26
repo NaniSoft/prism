@@ -1,8 +1,8 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  // The registry ships un-built TSX so its source can be both published and rendered.
-  transpilePackages: ['@nanisoft/prism-ui'],
+  // The library is consumed as built output (`dist/**` JS plus declarations)
+  // through its `exports` map, so there is no raw TSX to transpile.
 }
 
 export default nextConfig

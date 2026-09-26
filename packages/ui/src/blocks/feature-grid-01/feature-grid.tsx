@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Section, SectionHeading, type HeadingLevel } from '@/components/ds/blocks/section'
+import { Card, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
+import { Section, SectionHeading, type HeadingLevel } from '../../components/ui/section'
 
 export type Feature = {
   icon: LucideIcon

@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 import type { ComponentProps } from 'react'
 
-import { cn } from '@/lib/utils'
+import { cn } from '../../lib/utils'
 
 const buttonVariants = cva(
   // The focus ring is `ring-ring` at full strength, not shadcn's stock
@@ -59,6 +59,13 @@ const buttonVariants = cva(
   },
 )
 
+/**
+ * The primary action control.
+ *
+ * Renders a native `<button>` and takes the standard React button props plus
+ * `variant` and `size`. The coarse-pointer media query grows the target to 44px
+ * on touch input without changing the desktop metrics.
+ */
 function Button({
   className,
   variant,
@@ -74,4 +81,4 @@ function Button({
   )
 }
 
-export { Button, buttonVariants }
+export { Button }

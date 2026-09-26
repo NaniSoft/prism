@@ -1,7 +1,7 @@
 import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react'
 
-import { Card, CardContent } from '@/components/ui/card'
-import { Section, SectionHeading, type HeadingLevel } from '@/components/ds/blocks/section'
+import { Card, CardContent } from '../../components/ui/card'
+import { Section, SectionHeading, type HeadingLevel } from '../../components/ui/section'
 
 export type Stat = {
   label: string

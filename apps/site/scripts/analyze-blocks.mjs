@@ -605,13 +605,17 @@ for (const item of registry.items) {
   // `files[]` keeps reporting only the block's own non-shared files, so `code`
   // totals and `fileCount` mean what they meant before this walk existed.
   const files = []
+  const sharedFiles = []
   const seeds = []
 
   for (const { file, shared } of surface.files) {
     const abs = path.join(REGISTRY, file.path)
     seeds.push(abs)
-    if (shared || file.type === 'registry:lib') continue
-    files.push({ target: file.target, ...(await analyzeFile(abs)) })
+    if (shared || file.type === 'registry:lib') {
+      sharedFiles.push({ target: file.target ?? file.path, type: file.type })
+      continue
+    }
+    files.push({ target: file.target ?? file.path, type: file.type, ...(await analyzeFile(abs)) })
   }
 
   const walk = await walkBlock(seeds, surface.declared)
@@ -629,6 +633,14 @@ for (const item of registry.items) {
   }
 
   blocks[item.name] = {
+    // Catalogue metadata, read from registry.json so the site never keeps a
+    // second list. The registry is internal, so this build script reads it from
+    // disk rather than through the package's public subpaths.
+    title: item.title ?? item.name,
+    description: item.description ?? '',
+    categories: item.categories ?? [],
+    dependencies: item.dependencies ?? [],
+    registryDependencies: item.registryDependencies ?? [],
     // A block is a client block if any file it installs, or any file reachable from
     // one, crosses the boundary.
     client: Boolean(walk.trigger) || files.some((f) => f.client),
@@ -642,6 +654,7 @@ for (const item of registry.items) {
      */
     verified: walk.unresolved.length === 0 && !walk.truncated,
     files,
+    shared: sharedFiles,
     code: files.reduce((sum, f) => sum + f.code, 0),
     deps: {
       /** Every package the block's graph reached, in specifier order. */

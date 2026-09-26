@@ -150,6 +150,113 @@ for (const file of covered) {
   if (!owned) warn.push(`file "${file}" is not referenced by any item`)
 }
 
+/**
+ * The library-only equivalent of "a renamed file leaves the install 404ing".
+ *
+ * Under npm-only distribution the registry is internal, but the failure mode
+ * survives: a catalogue item can point at a module the package no longer
+ * publishes. Every item must map to a package `exports` subpath and to an
+ * emitted `dist/**` declaration and module (ticket 15).
+ */
+let manifest = null
+try {
+  manifest = JSON.parse((await readFile(path.join(PKG, 'package.json'), 'utf8')).replace(/^\uFEFF/, ''))
+} catch (cause) {
+  errors.push(`package.json: not valid JSON — ${cause.message}`)
+}
+
+const exportsField = manifest?.exports ?? {}
+const resolveExportTarget = (value) => {
+  if (typeof value === 'string') return value
+  if (value && typeof value === 'object') {
+    for (const condition of ['types', 'import', 'default', 'node', 'require']) {
+      const target = resolveExportTarget(value[condition])
+      if (target) return target
+    }
+    for (const nested of Object.values(value)) {
+      const target = resolveExportTarget(nested)
+      if (target) return target
+    }
+  }
+  return null
+}
+
+for (const key of Object.keys(exportsField)) {
+  const target = resolveExportTarget(exportsField[key])
+  if (!target) {
+    errors.push(`exports["${key}"]: no resolvable target`)
+    continue
+  }
+  const probe = target.includes('*') ? path.dirname(target.split('*')[0]) : target
+  if (!(await exists(probe))) {
+    errors.push(`exports["${key}"]: target "${target}" is not on disk`)
+  }
+}
+
+const subpathFor = (item) => {
+  if (item.type === 'registry:component') return `./components/${item.name}`
+  if (item.type === 'registry:block') return `./blocks/${item.name}`
+  if (item.type === 'registry:page') return `./pages/${item.name}`
+  return null
+}
+
+/** Exact key, or a wildcard key whose prefix and suffix match the subpath. */
+const hasExport = (subpath) => {
+  if (Object.prototype.hasOwnProperty.call(exportsField, subpath)) return true
+  return Object.keys(exportsField).some((key) => {
+    const star = key.indexOf('*')
+    if (star === -1) return false
+    const head = key.slice(0, star)
+    const tail = key.slice(star + 1)
+    return (
+      subpath.length >= head.length + tail.length &&
+      subpath.startsWith(head) &&
+      subpath.endsWith(tail)
+    )
+  })
+}
+
+for (const item of registry.items ?? []) {
+  const subpath = subpathFor(item)
+  if (!subpath) continue
+  if (!hasExport(subpath)) {
+    errors.push(`items (${item.name}): type ${item.type} has no "${subpath}" in the exports map`)
+  }
+}
+
+for (const [key, value] of Object.entries(exportsField)) {
+  const target = resolveExportTarget(value)
+  if (!target || !target.endsWith('.js') || target.includes('*')) continue
+  const declaration = target.replace(/\.js$/, '.d.ts')
+  if (!(await exists(target))) errors.push(`exports["${key}"]: emitted module "${target}" is missing`)
+  if (!(await exists(declaration))) {
+    errors.push(`exports["${key}"]: emitted declaration "${declaration}" is missing`)
+  }
+}
+
+/**
+ * `public/r` and the registry manifests are internal integrity artifacts and
+ * must never ship. `files` is `["dist"]`, `dist` does not contain them, and
+ * neither does the published package (also asserted by verify-tarballs).
+ */
+for (const forbidden of ['registry.json', 'components.json', 'public/r']) {
+  if ((manifest?.files ?? []).some((entry) => entry.startsWith(forbidden))) {
+    errors.push(`package.json: "files" must not include the internal registry artifact "${forbidden}"`)
+  }
+}
+if ((manifest?.files ?? []).includes('public') || (manifest?.files ?? []).includes('public/r')) {
+  errors.push('package.json: "files" must not include "public"')
+}
+
+try {
+  const components = JSON.parse(
+    (await readFile(path.join(PKG, 'components.json'), 'utf8')).replace(/^\uFEFF/, ''),
+  )
+  if (!components.style) errors.push('components.json: missing "style"')
+} catch (cause) {
+  errors.push(`components.json: does not parse — ${cause.message}`)
+}
+
 for (const w of warn) console.warn(`warn  ${w}`)
 for (const e of errors) console.error(`error ${e}`)
 
