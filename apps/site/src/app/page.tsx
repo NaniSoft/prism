@@ -1,98 +1,105 @@
 import Link from 'next/link'
-import { ArrowRight, Blocks, Palette, ShieldCheck, Zap } from 'lucide-react'
+import { ArrowRight, Blocks, Layers, Palette, ShieldCheck } from 'lucide-react'
 
+import { buildCatalog } from '@nanisoft/prism-ui/catalog'
 import { Hero01 } from '@nanisoft/prism-ui/blocks/hero-01'
 import { Stats01 } from '@nanisoft/prism-ui/blocks/stats-01'
 import { FeatureGrid01 } from '@nanisoft/prism-ui/blocks/feature-grid-01'
 import { Cta01 } from '@nanisoft/prism-ui/blocks/cta-01'
 
-import { blocks } from '@/lib/catalog'
-
 /**
- * The homepage is the consumer of the blocks, not their author.
+ * The marketing landing.
  *
- * Content lives here at the call site rather than inside the components, which is
- * the whole point of the blocks taking props: `/blocks` can render the same
- * components with neutral placeholder data, and an app that installs one gets a
- * primitive rather than this page's copy.
+ * It is composed from live Blocks, with all copy at the call site, because a
+ * Block takes its content as props. It is a site page, not a catalogue Page: it
+ * would be meaningless installed in a consumer's product.
  */
+const catalogue = buildCatalog()
+const components = catalogue.filter((item) => item.kind === 'component').length
+const blocks = catalogue.filter((item) => item.kind === 'block').length
 
 const STATS = [
-  { label: 'Blocks', value: String(blocks.length) },
-  { label: 'Themes', value: '6' },
-  { label: 'Contrast pairs gated', value: '28' },
-  { label: 'Install command', value: 'shadcn add' },
+  { label: 'Components', value: String(components) },
+  { label: 'Blocks', value: String(blocks) },
+  { label: 'Packs', value: '6' },
+  { label: 'Modes', value: '2' },
 ]
 
 const FEATURES = [
   {
     icon: Palette,
     title: 'Token-driven',
-    body: 'Every color, radius and font resolves through a design token, so a new theme is a token swap rather than a refactor.',
+    body: 'Every colour, radius and type size resolves through a design token, so a new pack is a token swap rather than a refactor.',
+  },
+  {
+    icon: Layers,
+    title: 'Three layers',
+    body: 'Components, Blocks and Pages answer three questions. Take the smallest layer that owns the job and compose upward only when repetition earns it.',
   },
   {
     icon: Blocks,
-    title: 'Composable blocks',
-    body: 'Sections are assembled from primitives that share one vertical rhythm, so pages stay consistent as the catalog grows.',
-  },
-  {
-    icon: Zap,
-    title: 'Own the source',
-    body: 'Blocks install as plain files in your repo. No runtime package, no wrapper layer, nothing to upgrade around.',
+    title: 'One stylesheet',
+    body: 'A consumer imports one compiled stylesheet and writes no CSS. Tailwind and Base UI stay internal to the package.',
   },
   {
     icon: ShieldCheck,
     title: 'Gated on quality',
-    body: 'Contrast ratios and registry integrity are checked in CI, so a palette change cannot quietly break accessibility.',
+    body: 'Contrast, the emitted token contract and the catalogue integrity are build gates, so a change that breaks accessibility fails before it ships.',
   },
 ]
 
 export default function HomePage() {
   return (
     <>
-      {/*
-        The homepage is the one page where this block *is* the page heading, so it
-        opts into `h1`. Everywhere else (catalog previews, `/blocks/[slug]`) the
-        block renders at its own `h2` default and the page supplies the `h1`.
-      */}
       <Hero01
         headingLevel="h1"
-        title="Ship your interface faster"
-        description="A production-ready component and block catalog. Every piece is themeable through design tokens and installs as source you own."
+        eyebrow="NaniSoft design system"
+        title="One design system, composed without CSS"
+        description="Prism is a token pipeline, a React library you compose, and documentation that reads the build. Choose a pack and a mode, and ship."
         actions={[
-          { label: 'Get started' },
-          { label: 'Browse blocks', variant: 'outline' },
+          { label: 'Read the quickstart' },
+          { label: 'Browse components', variant: 'outline' },
         ]}
       />
-      <Stats01 title="This month" eyebrow="By the numbers" stats={STATS} />
+      <Stats01 title="The catalogue today" eyebrow="By the numbers" stats={STATS} />
       <FeatureGrid01
-        eyebrow="Why this catalog"
-        title="Built to be taken apart"
+        eyebrow="Why Prism"
+        title="Built to be composed"
         description="A small set of well-made pieces, each one legible and easy to reshape."
         features={FEATURES}
       />
       <Cta01
-        title="Start with one block, keep the tokens"
-        description="Install a single block, restyle it with your own tokens, and nothing about the catalog holds you back."
-        action={{ label: 'Browse the catalog' }}
+        title="Start with one component, keep the tokens"
+        description="Install the package, import one stylesheet, and choose a pack. Nothing about Prism holds your product back."
+        action={{ label: 'Browse the catalogue' }}
       />
 
       <section className="border-t">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-16">
           <h2 className="text-2xl font-semibold tracking-tight">
-            {blocks.length} blocks in the registry
+            {components + blocks} documented items
           </h2>
           <p className="text-muted-foreground max-w-xl text-sm">
-            Every block on this page is live from the registry, rendered against whichever
-            theme you pick in the header.
+            Every item on this page is rendered live from the published package, against
+            whichever pack you choose in the header. Each has a guide, a live demo and a
+            generated API table.
           </p>
-          <Link
-            href="/blocks"
-            className="text-foreground inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
-          >
-            Browse the catalog
-            <ArrowRight className="size-3.5" />
-          </Link>
+          <div className="flex flex-wrap gap-4">
+            <Link
+              href="/components"
+              className="text-foreground inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
+            >
+              Browse components
+              <ArrowRight className="size-3.5" />
+            </Link>
+            <Link
+              href="/docs/quickstart"
+              className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
+            >
+              Read the quickstart
+              <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
         </div>
       </section>
     </>

@@ -1,0 +1,70 @@
+---
+title: Section
+---
+
+## Overview
+
+`Section` is the container primitive every Block composes. It owns the page
+container width and the vertical rhythm (`py-16 sm:py-24`), so one page keeps one
+rhythm instead of each block re-deriving its own padding.
+
+`SectionHeading` is the heading that sits inside it: an optional eyebrow, a
+title, and an optional description. Its `as` prop selects the heading level, and
+it defaults to `h2` because a Block is composed rather than a page.
+
+## Usage
+
+```tsx
+import {
+  Section,
+  SectionHeading,
+} from '@nanisoft/prism-ui/components/section'
+
+<Section>
+  <SectionHeading
+    eyebrow="Release 2.4"
+    title="What changed"
+    description="Three fixes and one new block."
+  />
+</Section>
+```
+
+<ComponentDemo slug="section" />
+
+## Guidelines
+
+### When to use
+
+Use `Section` for any full-width band of a page, and `SectionHeading` for the
+heading that introduces it. A Block uses both, and a page composition uses them
+between blocks to keep the rhythm continuous.
+
+Use `SectionHeading` with `as="h1"` when the section is the page's primary
+heading, and with a deeper level when the document already names the content.
+
+### When not to use
+
+Do not use `Section` for a card or an inline group. It is a page-level band, and
+its padding is the page's vertical rhythm; nesting it produces uneven spacing.
+
+Do not re-declare the container width or the section padding at a call site. If
+a band needs a different width, that is a token or a component change, not a
+`max-w-*` on the section.
+
+### Best practices
+
+- One `h1` per page. Every other heading nests under it, and `SectionHeading`'s
+  default `h2` is the level below the page title.
+- Pass `headingLevel` or `as` at the call site when a Block sits under a heading
+  the document already owns, so the outline stays single-rooted.
+- Keep `eyebrow` opt-in. It has no default, because a hardcoded eyebrow makes
+  every consumer inherit a claim about their product.
+- Use `align="left"` for data sections and the centered default for hero and
+  closing sections, and keep the choice consistent within a page.
+
+### Content guidelines
+
+- A heading is a noun phrase in sentence case.
+- A description is one or two sentences and states the section's job.
+- An eyebrow is a short label, three words at most, and it never repeats the
+  heading.

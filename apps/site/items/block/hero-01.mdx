@@ -1,0 +1,67 @@
+---
+title: Hero01
+---
+
+## Overview
+
+Hero01 is the opening band of a marketing page: an optional eyebrow, a headline,
+an optional supporting line, and up to two actions. The `01` suffix is the
+variant ordinal of the hero family, and this one is the centered form.
+
+Every string is a prop. The block ships no eyebrow and no headline, because a
+hero with hardcoded copy makes every consumer inherit a claim about their own
+product.
+
+## Usage
+
+```tsx
+import { Hero01 } from '@nanisoft/prism-ui/blocks/hero-01'
+
+<Hero01
+  eyebrow="Now available"
+  title="Ship your interface faster"
+  description="A token-driven component library you compose without writing CSS."
+  actions={[{ label: 'Get started' }, { label: 'Read the guides', variant: 'outline' }]}
+/>
+```
+
+<ComponentDemo slug="hero-01" />
+
+## Guidelines
+
+### When to use
+
+Use Hero01 as the first band of a page whose purpose is to introduce a product
+or a release. It works when there is one clear headline and one clear next
+action.
+
+### When not to use
+
+Do not use Hero01 inside an application screen. It is a marketing composition,
+and its centered, generous layout competes with the task the screen exists to
+support.
+
+Do not use it twice on one page. A second hero splits the reader's attention and
+leaves two claims competing for the same position.
+
+Do not use it when the headline is really a section heading. Use `SectionHeading`
+inside `Section` instead.
+
+### Best practices
+
+- Pass one primary action and at most one supporting action. More than two
+  actions turn a decision into a menu.
+- Give the first action `default` and the second `outline`. The block already
+  defaults to that order.
+- Set `headingLevel="h1"` when the hero is the page's top-level heading. Use the
+  default `h2` when the page already owns an `h1`.
+- Pass an eyebrow only when it is true and current. It renders nothing when
+  absent, so the honest state is no eyebrow.
+
+### Content guidelines
+
+- Keep the headline under about eight words and let it wrap to two lines at
+  most.
+- Write the headline as an outcome, not a feature name.
+- The description is one sentence and states who the product is for or what
+  changes if the reader continues.

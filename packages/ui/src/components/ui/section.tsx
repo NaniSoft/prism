@@ -53,7 +53,7 @@ export function SectionHeading({
   align?: 'center' | 'left'
   /**
    * Heading level. Defaults to `h2` because blocks compose under a page heading.
-   * A page that renders a block as its primary heading passes `as="h1"` — a
+   * A page that renders a block as its primary heading passes `as="h1"`; a
    * document with no `h1` gives screen-reader and search engines no top-level
    * entry point.
    */

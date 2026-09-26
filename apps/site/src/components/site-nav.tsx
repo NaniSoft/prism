@@ -7,9 +7,13 @@ import { Menu, X } from 'lucide-react'
 
 const NAV = [
   { href: '/', label: 'Overview' },
+  { href: '/docs', label: 'Guides' },
+  { href: '/foundations', label: 'Foundations' },
+  { href: '/components', label: 'Components' },
   { href: '/blocks', label: 'Blocks' },
+  { href: '/pages', label: 'Pages' },
+  { href: '/content', label: 'Content' },
   { href: '/themes', label: 'Themes' },
-  { href: '/tokens', label: 'Tokens' },
 ] as const
 
 /**

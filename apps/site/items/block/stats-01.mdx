@@ -1,0 +1,67 @@
+---
+title: Stats01
+---
+
+## Overview
+
+Stats01 is a row of key figures. Each stat carries a label, a value, and
+optionally a delta and a hint. The delta renders a direction and a percentage;
+the hint names the period it compares against.
+
+Every number is a prop. The block previously carried invented figures and a
+hardcoded heading, which meant a consumer who installed it shipped fabricated
+metrics into their own dashboard.
+
+## Usage
+
+```tsx
+import { Stats01 } from '@nanisoft/prism-ui/blocks/stats-01'
+
+<Stats01
+  eyebrow="This month"
+  title="Delivery"
+  stats={[
+    { label: 'Active projects', value: '1,284', delta: 12, hint: 'vs last month' },
+    { label: 'On track', value: '47.2%', delta: -3, hint: 'vs last month' },
+    { label: 'Open issues', value: '138' },
+  ]}
+/>
+```
+
+<ComponentDemo slug="stats-01" />
+
+## Guidelines
+
+### When to use
+
+Use Stats01 to summarise two to four figures that a reader should compare at a
+glance. It works best when the figures share a unit and a period.
+
+### When not to use
+
+Do not use it for a single figure. One stat in a four-column grid leaves an
+awkward empty row and overstates the number's importance.
+
+Do not use it for figures that need a trend over time. A delta is a comparison
+between two points, not a series; use a chart for a series.
+
+Do not use it when the numbers do not share a period. Mixing "this month" with
+"this quarter" in one row invites a false comparison.
+
+### Best practices
+
+- Give every delta a hint. A percentage with no period is unreadable, because
+  the reader cannot tell what it compares against.
+- Omit `delta` rather than passing `0` when a figure has no meaningful change.
+  A zero delta renders a neutral marker, which is correct only when the value
+  truly held.
+- Keep the label short and the value exact. The reader is scanning, not reading.
+- Use three or four stats. Two fits, one does not.
+
+### Content guidelines
+
+- A label is a noun phrase in sentence case: "Active projects".
+- A hint names the comparison and the period: "vs last month", "vs last
+  quarter".
+- Format the value for the reader: thousands separators, one unit, and no more
+  precision than the source supports.

@@ -1,0 +1,77 @@
+---
+title: Card
+---
+
+## Overview
+
+A Card is a bordered surface that groups a small set of related content. It
+ships as a parent and five parts: `Card`, `CardHeader`, `CardTitle`,
+`CardDescription`, `CardContent` and `CardFooter`, all from the same module.
+
+The parts are optional and their order is the reading order. A card with a title
+and a body uses `CardHeader`, `CardTitle` and `CardContent`; a card that ends in
+an action adds `CardFooter`.
+
+## Usage
+
+```tsx
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@nanisoft/prism-ui/components/card'
+
+<Card>
+  <CardHeader>
+    <CardTitle>Release 2.4</CardTitle>
+    <CardDescription>Shipped to production on 12 August.</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <p>Three fixes and one new block.</p>
+  </CardContent>
+</Card>
+```
+
+<ComponentDemo slug="card" />
+
+## Guidelines
+
+### When to use
+
+Use a Card when a small group of related content needs a shared boundary: a
+summary tile, a settings group, a list item with a title and a body, or one item
+in a grid.
+
+### When not to use
+
+Do not use a Card for the page's own frame. A Card inside a Card, or a Card used
+as a section wrapper, produces a border inside a border and flattens the
+hierarchy. Use `Section` for page rhythm.
+
+Do not use a Card for a single field or a single line of text. A boundary around
+one thing adds weight without grouping anything.
+
+Do not use a Card as a link by wrapping it in an anchor with a nested button. If
+the whole card is navigable, make the title the link and keep any action a
+sibling of it.
+
+### Best practices
+
+- Use one heading per card. `CardTitle` is a title, not a second heading level
+  in the page outline; the card's own section provides that.
+- Keep `CardDescription` to a single sentence. A paragraph belongs in
+  `CardContent`.
+- Put the card's action in `CardFooter` so a grid of cards aligns its actions on
+  one line.
+- In a grid, make cards the same height and keep the action at the end, so the
+  eye can compare rows.
+
+### Content guidelines
+
+- A title is a noun phrase and takes sentence case: "Release notes", not
+  "Release Notes".
+- A description states what the group is, not what to do with it.
+- A footer action uses the same verb-first, sentence-case rule as a Button
+  label.

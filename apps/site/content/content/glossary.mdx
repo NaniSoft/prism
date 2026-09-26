@@ -1,0 +1,70 @@
+---
+title: Glossary
+description: "Definitions for the terms used across Prism. The terms come from CONTEXT.md and this page hosts them."
+---
+
+These definitions are the design system's vocabulary. They are the same terms
+the repository's `CONTEXT.md` defines, and they are the reason the docs and the
+code use one word for one thing.
+
+## Theming
+
+- **Pack**: one of the authored palettes, the neutral base `default` and the
+  five pastels Blush, Mint, Lavender, Sky and Peach. A pack owns a generated
+  OKLCH ramp family and its own radius.
+- **Mode**: the appearance of a pack, `light` or `dark`.
+- **Theme**: one pack in one mode. A theme is a fully resolved token set, not an
+  object and not an API.
+- **Pack id**: the string that selects a pack at runtime, such as `blush`.
+  Absence of a pack id means the default pack.
+
+## Tokens
+
+- **Foundation token**: a raw ramp value that carries no meaning.
+- **Semantic token**: a named intent, authored as an alias into the foundation
+  tier. Its name is emitted verbatim as a CSS custom property.
+- **Token contract**: the set of semantic names emitted as CSS custom
+  properties, byte for byte identical to shadcn's variable contract.
+- **Token**: a value in the DTCG source, either foundation or semantic.
+
+## Composition
+
+- **Component**: a focused, accessible, product-agnostic export with one job,
+  and a catalogue item of kind `component`.
+- **Block**: a pre-composed, product-agnostic section assembled from Components.
+  A Block takes its content as props and fetches no application data.
+- **Page**: a complete structural composition of Blocks and Components that
+  models a whole screen.
+- **Item**: one entry in the catalogue, of any kind.
+- **Kind**: the closed discriminator on an item: `component`, `block` or `page`.
+- **Category**: one of the seven role groups a Component is assigned to. A Block
+  or a Page has no category.
+
+## Catalogue and source
+
+- **Catalogue**: the checked list of every Component, Block and Page, and the
+  single source for navigation, item documentation, the corpus and the agent
+  surface.
+- **Registry**: the shadcn registry inside the component package. It is an
+  internal integrity artifact, never a public install lane.
+- **Owned source**: Prism-authored code a consumer composes through documented
+  package exports.
+- **Internal dependency**: a dependency used inside a package to provide
+  behaviour or structure, such as Base UI. It is never public API.
+- **Provider**: the optional client module that carries pack and mode through
+  context and writes the two document-element attributes.
+
+## Agents
+
+- **Corpus**: the deterministic projection of the catalogue and the
+  documentation into `llms.txt`, the Markdown mirror and the store.
+- **Store**: the type-checked projection of the corpus that the MCP server reads
+  at runtime. It is generated, never hand-edited.
+- **Agent surface**: the corpus and the read-only MCP endpoint through which an
+  agent reads the same catalogue, props, examples and tokens as this site.
+
+## Words retired
+
+These words are historical and MUST NOT be revived: primitive (as a unit noun),
+colourway, variant (as a unit noun), beam-dark, pass-through, wrapper, agent
+door, internal primitive, catalog (in prose) and layer (as a unit noun).

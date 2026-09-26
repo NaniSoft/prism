@@ -1,0 +1,70 @@
+---
+title: FeatureGrid01
+---
+
+## Overview
+
+FeatureGrid01 is a grid of short feature blurbs under an optional section
+heading. Each feature carries an icon, a title and a body, and the whole list is
+a prop.
+
+The `variant` prop chooses between `icon` tiles and a bare `bare` layout that
+leans on the type alone. The list was previously hardcoded, which meant an
+installed block argued for the library inside the consumer's product; it is a
+prop now.
+
+## Usage
+
+```tsx
+import { Palette, ShieldCheck } from 'lucide-react'
+import { FeatureGrid01 } from '@nanisoft/prism-ui/blocks/feature-grid-01'
+
+<FeatureGrid01
+  eyebrow="Why this library"
+  title="Built to be taken apart"
+  description="A small set of well-made pieces, each one legible and easy to reshape."
+  features={[
+    { icon: Palette, title: 'Token-driven', body: 'Every colour resolves through a token.' },
+    { icon: ShieldCheck, title: 'Gated on quality', body: 'Contrast is a build gate, not a review step.' },
+  ]}
+/>
+```
+
+<ComponentDemo slug="feature-grid-01" />
+
+## Guidelines
+
+### When to use
+
+Use FeatureGrid01 to summarise a small set of peer features whose blurbs are
+short. It reads best with two to four items, and it aligns to two columns from
+the `sm` breakpoint.
+
+### When not to use
+
+Do not use it for a list that is actually a set of steps. Order matters in a
+process, and a grid communicates that order does not.
+
+Do not use it for long descriptions. A body longer than two sentences turns the
+grid into a wall of text; use separate sections instead.
+
+Do not use the `icon` variant when the icons are decorative and unrelated. Use
+`variant="bare"` so the type carries the structure.
+
+### Best practices
+
+- Keep every body to the same approximate length so the tiles stay the same
+  height and a reader can scan the column edges.
+- Use two to four features. Five items leave one orphan on its own row unless the
+  grid is full-bleed.
+- Pass a `title` only when the section needs a heading. The grid renders
+  without one, which is correct when the surrounding page already introduces it.
+- Keep icons from `lucide-react` and give each one a distinct silhouette, so the
+  tiles are distinguishable at a glance.
+
+### Content guidelines
+
+- A feature title is two or three words in sentence case.
+- A feature body is one sentence and states what the feature does for the
+  reader, not how it is implemented.
+- Do not repeat the section description in a feature body.

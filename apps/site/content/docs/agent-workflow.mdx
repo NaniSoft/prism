@@ -1,0 +1,75 @@
+---
+title: Agent workflow
+description: "Give an AI agent the same owned catalogue, props, demos and tokens that power the human documentation."
+---
+
+Prism treats agents as first-class consumers. The site, the package declarations,
+the demo sources, the Markdown mirror and the MCP endpoint all project the same
+source, so an agent and a human cannot be told different things.
+
+## Fast path
+
+1. Read `llms.txt` for the catalogue and the guide index.
+2. Use `search_docs` when the item name is unknown.
+3. Use `get_item_doc` for the assembled item documentation and its rules.
+4. Use `get_item_props` for the public TypeScript surface.
+5. Use `get_item_source` for the verbatim demo and the public import line.
+6. Use `get_theme_doc` before choosing a pack or reading a token scale.
+
+## The MCP endpoint
+
+The endpoint is public and read-only. It returns Markdown and never writes to a
+consumer project.
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "type": "http",
+      "url": "https://prism.nanisoft.com/mcp"
+    }
+  }
+}
+```
+
+## The eight tools
+
+| Tool | Use |
+| --- | --- |
+| `list_items` | Browse the catalogue, filtered by `kind` and `category` |
+| `get_item_doc` | Read the assembled item documentation |
+| `get_item_props` | Read the `## Props` subset of an item |
+| `get_item_source` | Copy the verbatim demo plus the import line |
+| `get_theme_doc` | Read the token contract and the bound scales |
+| `list_pages` | Browse the non-item pages: guides, foundations, content |
+| `get_page` | Read one non-item page as Markdown |
+| `search_docs` | Search the complete corpus and return references |
+
+`list_items` is the one tool that exists because a kind exists; the other seven
+exist because a retrieval pattern exists. Search returns references, not page
+bodies, so an agent follows a hit with `get_item_doc` or `get_page`.
+
+## Import contract for generated code
+
+Generated applications import from `@nanisoft/prism-ui`. The internal Base UI
+dependency is not a consumer dependency and must not appear in application
+source.
+
+```tsx
+import { Button } from '@nanisoft/prism-ui/components/button'
+import { Hero01 } from '@nanisoft/prism-ui/blocks/hero-01'
+```
+
+The internal shadcn registry never appears in generated code. It is an integrity
+artifact inside the package, not an install lane.
+
+## Truth rules
+
+- The corpus is versioned with `prism-ui`. Compare the version echoed by
+  `list_items` with the installed package when behaviour looks inconsistent.
+- Demos are single-source files: the same text is rendered live, copied by the
+  site, and returned by `get_item_source`.
+- A generated item has exactly one demo. When an item has no demo, the tool says
+  so rather than fabricating one.
+- Product claims belong to the product team. The corpus documents implementation
+  and usage, never invented customer evidence.

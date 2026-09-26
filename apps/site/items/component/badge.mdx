@@ -1,0 +1,65 @@
+---
+title: Badge
+---
+
+## Overview
+
+A Badge is a compact label for a short status or category. It renders a
+`<span>` with a filled or outlined surface, and it is not interactive: it
+carries meaning next to something else rather than being a control itself.
+
+`variant` selects the surface treatment. `default` is the neutral filled badge,
+`secondary` is a quieter fill, `outline` is a bordered badge for a surface that
+already has a fill, and `destructive`, `success` and `warning` carry the three
+status colours.
+
+## Usage
+
+```tsx
+import { Badge } from '@nanisoft/prism-ui/components/badge'
+
+<Badge>New</Badge>
+<Badge variant="success">Active</Badge>
+<Badge variant="warning">Past due</Badge>
+```
+
+<ComponentDemo slug="badge" />
+
+## Guidelines
+
+### When to use
+
+Use a Badge to mark a row, a card or a heading with one short fact: a status, a
+plan name, a count or a category.
+
+### When not to use
+
+Do not use a Badge as a control. It does not take focus and it does not respond
+to a press; use a Button for an action and a link for navigation.
+
+Do not use a Badge for a sentence or a long phrase. A badge is a label, and a
+label that wraps stops reading as one.
+
+Do not use `destructive`, `success` or `warning` for decoration. Those three
+carry status meaning, and colour alone never carries it for a reader who cannot
+distinguish it.
+
+### Best practices
+
+- Pair the colour with the word. A status is communicated by the label first;
+  the variant reinforces it.
+- Use at most one status Badge per row. Two statuses on one row make the reader
+  decide which is current.
+- Keep the variant to a small, consistent set across a product, so `success`
+  always means the same thing.
+- Place a status Badge beside the name it qualifies, not at the far edge of the
+  row where it can be read as belonging to a neighbour.
+
+### Content guidelines
+
+- Keep a Badge to one or two words.
+- Use sentence case: "Past due", not "Past Due".
+- Prefer a noun or an adjective. "Active" and "Trial" read as states; "Started"
+  reads as an action that already happened.
+- Do not invent a status the product does not have. If the set is unclear, the
+  status vocabulary belongs above the component.

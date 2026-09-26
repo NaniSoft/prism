@@ -1,0 +1,74 @@
+---
+title: Button
+---
+
+## Overview
+
+The Button is the control for an action the reader takes deliberately. It
+renders a native `<button>` and takes the standard React button props plus
+`variant` and `size`, so it behaves like the element it is: it submits, it is
+focusable, and it is reachable by keyboard without extra work.
+
+The `variant` prop carries the action hierarchy. `default` is the primary
+action, `secondary` and `outline` are supporting actions, `ghost` is for a quiet
+action inside a surface that already carries weight, `destructive` marks an
+action that cannot be undone, and `link` is an action styled as a link for the
+rare case where an action sits inside a sentence.
+
+## Usage
+
+```tsx
+import { Button } from '@nanisoft/prism-ui/components/button'
+
+<Button>Save changes</Button>
+<Button variant="outline">Cancel</Button>
+<Button variant="destructive">Delete project</Button>
+```
+
+<ComponentDemo slug="button" />
+
+## Guidelines
+
+### When to use
+
+Use a Button when the reader's intent is to make something happen: submit a
+form, save a change, delete a record, open a dialog, or start a process.
+
+Use one `default` Button per view for the action the view exists to perform.
+Supporting actions take `secondary` or `outline`.
+
+### When not to use
+
+Do not use a Button to navigate. A route change is a link, and a link is
+right-clickable, openable in a new tab, and announced as a link. Use an anchor
+with the link styling instead.
+
+Do not use a `ghost` Button as the only affordance on an empty surface. With no
+surface to sit against, a ghost control reads as text; use `outline`.
+
+Do not use a `destructive` Button for an action that can be undone. Reserve it
+for the action that cannot.
+
+### Best practices
+
+- Keep one `default` Button visible at a time. Two primaries make neither of
+  them primary.
+- Put the primary action last in reading order in a left-to-right layout, after
+  the supporting actions.
+- For a destructive action, put the consequence in the confirmation, not in the
+  button label. The label names the thing, not the warning.
+- A loading or disabled Button should explain why it is unavailable through
+  adjacent text or a tooltip. A disabled control with no reason in reach is a
+  dead end.
+- The coarse-pointer media query grows the target to 44px on touch input
+  automatically. Do not add a second size rule for touch.
+
+### Content guidelines
+
+- Start a label with a verb in the imperative: "Save", "Delete project", "Add member".
+- Use sentence case and no period.
+- Name the object when the action is ambiguous: "Delete project" is better than
+  "Delete".
+- Never use "Click here" or "Submit". The button's own label should state its
+  outcome.
+- Keep a label to three words where possible.

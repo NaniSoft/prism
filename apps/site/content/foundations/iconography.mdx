@@ -1,0 +1,15 @@
+---
+title: Iconography
+description: "Prism uses Lucide for interface icons, sized on the spacing scale."
+---
+
+Prism does not ship an icon font or a bespoke icon set. Interface icons come from
+Lucide, which the component package already depends on, and a component that
+needs an icon imports it from `lucide-react`.
+
+Icons are sized with `size-4` (1rem) in a control and `size-5` (1.25rem) in a
+tile. Both resolve through the authored spacing scale, so an icon stays in step
+with the control it sits in. Decorative icons carry `aria-hidden`, and an
+icon-only control carries an accessible name.
+
+<IconographyGrid />

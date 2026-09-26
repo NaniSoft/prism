@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "prism-site",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash",
+    "run_worker_first": [
+      "/mcp",
+      "/mcp/*",
+      "/docs/*.md",
+      "/components/*.md",
+      "/blocks/*.md",
+      "/pages/*.md",
+      "/foundations/*.md",
+      "/content/*.md"
+    ]
+  },
+  "routes": [{ "pattern": "prism.nanisoft.com", "custom_domain": true }]
+}

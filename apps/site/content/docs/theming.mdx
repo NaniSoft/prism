@@ -1,0 +1,90 @@
+---
+title: Theming
+description: "Packs and modes are two independent axes, delivered as markup attributes with no override path."
+---
+
+Prism themes are complete atmospheres, not a primary-colour swap. A pack changes
+the page ground, the surfaces, the hairlines, the text bases and the focus
+treatment together.
+
+## Two axes
+
+Theming is two independent axes:
+
+- **Pack** selects the palette: `default`, `blush`, `mint`, `lavender`, `sky`
+  or `peach`.
+- **Mode** selects the appearance: `light` or `dark`.
+
+A **theme** is one pack in one mode, such as Blush dark. It is a fully resolved
+token set, not an object and not an API. There is no theme factory.
+
+| Pack | Character |
+| --- | --- |
+| `default` | The neutral base. `primary` reads as ink, not colour. |
+| `blush` | Soft rose, with the softest radius of the set. |
+| `mint` | Soft green, calm and low-energy. |
+| `lavender` | Soft violet, the most saturated brand ramp. |
+| `sky` | Soft blue, the crispest hue and the smallest radius. |
+| `peach` | Soft orange, the warmest hue and the roundest corners. |
+
+## Declarative selection
+
+Put `data-pack` on any element to make it, and its subtree, a theme boundary.
+Add the `dark` class for dark mode. The neutral base pack is the absence of
+`data-pack`, so it is expressed by omitting the attribute.
+
+```tsx
+<!-- the default pack, light -->
+<html lang="en">
+
+<!-- Lavender, dark -->
+<html lang="en" data-pack="lavender" class="dark">
+```
+
+This form is server-rendered and needs no JavaScript. It is also the cheapest
+way to show several packs at once: any subtree can carry its own `data-pack`.
+See the [themes page](/themes) for all packs side by side.
+
+## Programmatic selection
+
+When a user needs to switch and persist a choice, mount the optional provider
+and read the hook.
+
+```tsx
+import { PrismProvider, usePrismTheme } from '@nanisoft/prism-ui/provider'
+
+function PackPicker() {
+  const { pack, setPack, mode, toggleMode } = usePrismTheme()
+  return (
+    <button onClick={() => setPack('peach')}>
+      {pack} / {mode}
+    </button>
+  )
+}
+
+export function App({ children }: { children: React.ReactNode }) {
+  return <PrismProvider>{children}</PrismProvider>
+}
+```
+
+The provider's only outputs are the two document-element attributes and the
+context. It has no override parameter, no token object and no merge.
+
+## Flash-free first paint
+
+Under a static export there is no server and no middleware, so a blocking inline
+script in `<head>` is what honours a stored choice before first paint. The
+provider's package includes `PrismThemeScript` for exactly this, and the root
+element carries `suppressHydrationWarning` because the script may set the
+attributes before React hydrates.
+
+## There is no consumer theming
+
+Prism does not expose `createPrismTheme`, a per-key merge or semantic overrides.
+The supported path is to select a pack and a mode. A product that needs a
+different palette, a new semantic token or a changed component should request it
+upstream, so every consumer benefits from the change and no project carries a
+private fork.
+
+`className` is for layout composition only. Changing a Prism-owned visual
+property through a class is not supported.

@@ -1,0 +1,77 @@
+---
+title: Architecture
+description: "How Prism keeps tokens, the component library, the docs site and the agent surface on one source of truth."
+---
+
+Prism is owned source. It uses Base UI for accessible interaction behavior
+internally, then applies its own props, anatomy, tokens and composition
+patterns. None of the internal dependency is public API.
+
+## The package boundary
+
+`@nanisoft/prism-ui` is the only UI package an application imports. It ships
+compiled JavaScript and declarations, and its `exports` map is the public
+surface. The token package, `@nanisoft/prism-tokens`, is a pure data package;
+you normally do not import it directly because the compiled CSS reaches you
+through the one stylesheet.
+
+That boundary gives a consuming project three guarantees:
+
+1. No direct dependency on a second component library.
+2. No upstream visual defaults leaking into your product.
+3. One version line for behavior, design, documentation and machine-readable
+   source.
+
+## Three composition layers
+
+- **Component**: a focused, accessible, product-agnostic export with one job.
+  Compound parts, such as the pieces of a card, stay inside the parent module.
+- **Block**: a pre-composed, product-agnostic section assembled from Components.
+  It takes its content as props and fetches nothing.
+- **Page**: a complete structural composition of Blocks and Components that
+  models a whole screen and receives application-owned data.
+
+The dependency direction is one-way. Sibling layers do not import each other,
+and shared UI moves downward.
+
+```text
+Pages -> Blocks -> Components -> semantic tokens
+```
+
+## The catalogue
+
+The catalogue is one checked module, `packages/ui/src/catalog.ts`, exposed as
+`@nanisoft/prism-ui/catalog`. It is the only list. Navigation, the generated
+item documentation, the corpus and the agent surface all consume it, and none
+keeps a second list. An entry carries the item's name, slug, kind, category,
+description, source, public exports and status.
+
+The internal shadcn registry is derived from, or validated against, the
+catalogue. It is an integrity artifact and is never a public install lane.
+
+## The styling contract
+
+Prism ships one precompiled stylesheet and semantic custom properties. A
+component consumes semantic utilities only (`bg-background`,
+`text-muted-foreground`), never a ramp step and never a raw value. Because the
+semantic names are shadcn's variable contract, an unmodified shadcn block or
+theme works against the packs with no rename.
+
+There is no override path. A consumer composes, passes content and data, and
+chooses a pack and a mode. When Prism lacks something, it is requested upstream
+rather than patched locally.
+
+## Source to corpus
+
+The corpus is a deterministic projection of the same inputs the site renders:
+
+```text
+catalogue + emitted declarations + authored MDX + demo sources
+                            |
+                            v
+        llms.txt, the Markdown mirror, and the MCP store
+```
+
+The agent surface and the documentation site therefore cannot disagree about
+what an item is: both read the catalogue, the types and the same demo files.
+The detailed pipeline is in [Agent workflow](/docs/agent-workflow).

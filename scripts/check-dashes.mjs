@@ -15,6 +15,8 @@ import path from 'node:path'
 
 const ROOTS = [
   'apps/site/src',
+  'apps/site/content',
+  'apps/site/items',
   'packages/ui/src',
   'packages/tokens/src',
   'packages/tokens/build',
@@ -36,6 +38,8 @@ const GATED = [
   'apps/site/src/app/page.tsx',
   'apps/site/src/app/blocks',
   'apps/site/src/app/layout.tsx',
+  'apps/site/content',
+  'apps/site/items',
   'packages/ui/src/blocks',
   'packages/ui/src/components/ui',
   'packages/ui/src/catalog.ts',

@@ -1,0 +1,98 @@
+---
+title: Quickstart
+description: "Install Prism, load one stylesheet, choose a pack, and render your first Component and Block."
+---
+
+Prism is one npm boundary for tokens, components, blocks and pages. This guide
+takes you from an empty project to a rendered block, and it names the one
+stylesheet and the two attributes that do the theming.
+
+## Install
+
+```sh
+npm install @nanisoft/prism-ui
+```
+
+React stays your application's dependency. Prism's Base UI runtime and Tailwind
+are internal dependencies of the package; you install neither, and you import
+neither.
+
+## Load the one stylesheet
+
+Import Prism's stylesheet once, beside your own global CSS. It carries the token
+custom properties, all six packs, both modes, and every utility the components
+use.
+
+```ts
+import '@nanisoft/prism-ui/styles.css'
+import './globals.css'
+```
+
+If your project uses Tailwind, Prism's stylesheet is still a separate import.
+Prism is not a Tailwind plugin, and it is not merged into your Tailwind build.
+
+## Choose a pack and a mode
+
+Theming is two markup attributes, and it works without JavaScript. `data-pack`
+selects the palette, and the `dark` class selects the mode. The neutral base
+pack is the absence of `data-pack`.
+
+```tsx
+// app/layout.tsx
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" data-pack="lavender">
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+To persist a choice and switch at runtime, mount `PrismProvider` and use
+`usePrismTheme`. The provider is optional; the declarative attributes above need
+no client runtime. See [Theming](/docs/theming) for the full model.
+
+## Render the first Component
+
+```tsx
+import { Button } from '@nanisoft/prism-ui/components/button'
+
+export function SaveAction() {
+  return <Button onClick={save}>Save changes</Button>
+}
+```
+
+A component is imported from its own subpath. The curated root barrel
+(`@nanisoft/prism-ui`) is convenient for an app that uses most of the set, but a
+single import is the smaller pull. The [Button page](/components/button) shows
+its live demo and generated props table.
+
+## Compose the first Block
+
+A Block is a pre-composed section that takes its content as props. It ships no
+copy of its own, so the heading, the actions and the numbers all come from you.
+
+```tsx
+import { Cta01 } from '@nanisoft/prism-ui/blocks/cta-01'
+
+export function Closing() {
+  return (
+    <Cta01
+      title="Start with one block"
+      description="Keep the tokens and reshape the rest."
+      action={{ label: 'Read the guides' }}
+    />
+  )
+}
+```
+
+The block's own page lists the props it accepts and renders the same component
+live. A Page composes blocks and components into a whole screen; see
+[Composition](/docs/composition) for when to reach for each layer.
+
+## What is next
+
+- [Architecture](/docs/architecture) explains the package boundary and the
+  catalogue.
+- [Theming](/docs/theming) covers packs, modes and flash-free switching.
+- [Agent workflow](/docs/agent-workflow) wires an agent to the same source.

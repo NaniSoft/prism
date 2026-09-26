@@ -1,0 +1,78 @@
+---
+title: Composition
+description: "Choose the smallest Prism layer that owns the job, and promote repetition upward only when it earns it."
+---
+
+Prism's three layers answer three different questions. The skill is starting at
+the bottom and moving up only when the product asks for it.
+
+## Start with a Component
+
+Reach for a Component when the product needs one accessible control or one
+visual responsibility.
+
+```tsx
+import { Button } from '@nanisoft/prism-ui/components/button'
+
+<Button onClick={save}>Save changes</Button>
+```
+
+Do not build a local button variant when the action differs only by consequence.
+The `variant` prop already encodes the action hierarchy, and a local variant is
+the start of a second design system.
+
+## Promote repetition into a Block
+
+A Block earns its place when the same section appears across routes or products.
+It is pre-composed and product-agnostic, so the copy and the data stay at your
+call site.
+
+```tsx
+import { Stats01 } from '@nanisoft/prism-ui/blocks/stats-01'
+
+<Stats01
+  title="This month"
+  stats={[
+    { label: 'Active projects', value: '1,284', delta: 12, hint: 'vs last month' },
+    { label: 'On track', value: '47.2%', delta: -3, hint: 'vs last month' },
+  ]}
+/>
+```
+
+Good Block candidates are sections that repeat: a hero, a metric row, a pricing
+comparison, a closing call to action. A section that appears once is a local
+composition, not a Block.
+
+## Compose a Page last
+
+A Page coordinates regions and a whole screen. It does not recreate component
+behavior; it arranges what the lower layers already own.
+
+```tsx
+import { Pricing01 } from '@nanisoft/prism-ui/blocks/pricing-01'
+
+export function Plans() {
+  return (
+    <Pricing01
+      title="Pick a plan"
+      plans={plans}
+    />
+  )
+}
+```
+
+## The composition rules
+
+- Dependencies point downward: Pages, then Blocks, then Components.
+- Keep behavior in the lowest layer that owns it.
+- Keep brand colour in tokens, not in page CSS.
+- Keep application data and routing in the application.
+- Prefer a documented prop over a chain of local class overrides.
+- Pass the heading level explicitly when a Block is the page's top-level
+  heading, and leave it at its default when a Block is composed under one.
+
+## Where to go next
+
+- Browse the [Components](/components) for the controls.
+- Browse the [Blocks](/blocks) for the sections.
+- Read [Theming](/docs/theming) before restyling anything.

@@ -12,3 +12,7 @@ allowBuilds:
   # postinstall only verifies what is already there. `false` keeps the script from
   # running; verified that eslint resolves imports with it skipped.
   unrs-resolver: false
+  # Same shape as unrs-resolver: the native binary arrives as a platform-specific
+  # optional dependency, so the postinstall only verifies it. `false` keeps the
+  # script from running; the binary is already on disk.
+  esbuild: false

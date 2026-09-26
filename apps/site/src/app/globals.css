@@ -34,3 +34,120 @@
     --default-transition-duration: var(--duration-fast);
   }
 }
+
+/*
+ * The article prose.
+ *
+ * MDX renders plain elements, so the only place their typography can live is a
+ * class the article carries. Every rule here consumes a semantic utility, never
+ * a raw value, and the measure comes from the authored container token.
+ */
+@layer components {
+  .prose {
+    max-width: var(--container-measure);
+  }
+
+  .prose > * + * {
+    margin-top: calc(var(--spacing) * 4);
+  }
+
+  .prose h2 {
+    margin-top: calc(var(--spacing) * 10);
+    font-size: var(--text-2xl);
+    line-height: var(--text-2xl--line-height);
+    font-weight: 600;
+    letter-spacing: var(--tracking-tight);
+        color: var(--foreground);
+  }
+
+  .prose h3 {
+    margin-top: calc(var(--spacing) * 8);
+    font-size: var(--text-lg);
+    line-height: var(--text-lg--line-height);
+    font-weight: 600;
+    letter-spacing: var(--tracking-tight);
+    color: var(--foreground);
+  }
+
+  .prose p,
+  .prose li,
+  .prose td {
+    color: var(--muted-foreground);
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+  }
+
+  .prose ul {
+    list-style: disc;
+    padding-left: calc(var(--spacing) * 6);
+  }
+
+  .prose ol {
+    list-style: decimal;
+    padding-left: calc(var(--spacing) * 6);
+  }
+
+  .prose li + li {
+    margin-top: var(--spacing-1);
+  }
+
+  .prose a {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .prose strong {
+    color: var(--foreground);
+    font-weight: 600;
+  }
+
+  .prose code {
+    background: var(--muted);
+    border-radius: var(--radius-sm);
+    padding: 0 var(--spacing-1);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+  }
+
+  .prose pre {
+    background: color-mix(in oklab, var(--muted) 50%, transparent);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-4);
+    overflow-x: auto;
+    font-size: var(--text-xs);
+    line-height: var(--leading-relaxed);
+  }
+
+  .prose pre code {
+    background: transparent;
+    padding: 0;
+    font-size: var(--text-xs);
+  }
+
+  .prose table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: var(--text-sm);
+  }
+
+  .prose th {
+    border-bottom: 1px solid var(--border);
+    padding: var(--spacing-2) var(--spacing-3);
+    font-weight: 500;
+    color: var(--foreground);
+  }
+
+  .prose td {
+    border-bottom: 1px solid var(--border);
+    padding: var(--spacing-2) var(--spacing-3);
+  }
+
+  .prose blockquote {
+    border-left: 2px solid var(--primary);
+    padding-left: var(--spacing-4);
+    color: var(--muted-foreground);
+  }
+}

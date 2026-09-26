@@ -1,0 +1,69 @@
+---
+title: Pricing01
+---
+
+## Overview
+
+Pricing01 is a plan comparison: up to three plans side by side, one of which may
+be featured with a primary border, a filled action and a badge. Each plan
+carries a name, a price, an optional period, an optional body, a feature list
+and an action label.
+
+Every string is a prop, including the prices and the call to action. The block
+previously hardcoded a price set and shipped a heading above a title that
+already said the same thing.
+
+## Usage
+
+```tsx
+import { Pricing01 } from '@nanisoft/prism-ui/blocks/pricing-01'
+
+<Pricing01
+  title="Pick a plan"
+  description="Change or cancel at any time."
+  plans={[
+    { name: 'Starter', price: '$0', period: ' / month', features: ['One project', 'Community support'], cta: 'Start' },
+    { name: 'Team', price: '$24', period: ' / month', features: ['Unlimited projects', 'Email support'], cta: 'Choose Team', featured: true },
+    { name: 'Business', price: '$68', period: ' / month', features: ['Everything in Team', 'Priority support'], cta: 'Contact sales' },
+  ]}
+/>
+```
+
+<ComponentDemo slug="pricing-01" />
+
+## Guidelines
+
+### When to use
+
+Use Pricing01 when a reader compares a small, fixed number of plans on the same
+features. It lays the plans out for comparison and lifts the recommended one.
+
+### When not to use
+
+Do not use it for a usage-based price or a quote. A table of fixed prices cannot
+represent a metered plan honestly.
+
+Do not feature more than one plan. Two highlighted plans read as no
+recommendation at all.
+
+Do not use the block on a dense application screen. It is a marketing
+composition with a lot of vertical space.
+
+### Best practices
+
+- Put the recommended plan in the middle when there are three, so the eye lands
+  on it after the first.
+- Keep the feature lists the same length across plans. Uneven lists make the
+  shorter plan look thinner than it is.
+- State the period on every price, or on none. A period on one plan and not
+  another invites a wrong total.
+- Override the badge only when the default "Popular" is wrong; the default is
+  neutral and short.
+
+### Content guidelines
+
+- A plan name is one word where possible and takes sentence case.
+- Write a feature as an outcome, not a limit: "Unlimited projects" reads better
+  than "Projects: unlimited".
+- A call to action is verb-first and sentence case: "Choose Team", "Contact
+  sales".

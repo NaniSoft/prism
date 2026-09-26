@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { ThemeSwitcher } from '@/components/theme-switcher'
+import { SearchEntry } from '@/components/search-entry'
 import { MobileMenu, SiteNav } from '@/components/site-nav'
 
 import '@nanisoft/prism-ui/styles.css'
@@ -109,6 +110,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               against the edge without the header needing a second breakpoint.
             */}
             <div className="ml-auto flex items-center gap-2">
+              <SearchEntry />
               <ThemeSwitcher />
               <MobileMenu />
             </div>
@@ -162,15 +164,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <footer className="border-border border-t">
           <div className="mx-auto grid w-full max-w-6xl gap-6 px-6 py-16 sm:grid-cols-2 sm:gap-16 sm:py-24">
             <p className="text-muted-foreground text-sm text-pretty">
-              Token-driven component and block catalog. Tokens compile from a DTCG source
-              of truth; the registry is what <code className="font-mono">shadcn add</code>{' '}
-              installs.
+              Prism is NaniSoft&apos;s design system: a DTCG token pipeline, a published React
+              library you compose without writing CSS, and this documentation site.
             </p>
             <p className="text-muted-foreground text-sm text-pretty">
-              What is shown here is read from that build rather than retyped.{' '}
-              <code className="font-mono">registry.json</code> is generated, and the
-              contrast gate runs on every build, so a block&rsquo;s metadata cannot drift
-              from what installs.
+              The site is built with the system it documents. Every token, flag and API table
+              on these pages is read from the package build rather than retyped, and the
+              catalogue is the one list behind the navigation, the corpus and the agent
+              surface.
             </p>
           </div>
         </footer>

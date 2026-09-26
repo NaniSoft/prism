@@ -1,0 +1,64 @@
+---
+title: Cta01
+---
+
+## Overview
+
+Cta01 is the closing band of a page: a headline, an optional supporting line and
+one action, on a filled primary surface. It is the last thing a reader sees, so
+it carries exactly one decision.
+
+The copy and the action are props. The block previously shipped the library's
+own pitch, which described the library rather than whatever product installed
+it.
+
+## Usage
+
+```tsx
+import { Cta01 } from '@nanisoft/prism-ui/blocks/cta-01'
+
+<Cta01
+  title="Start with one block"
+  description="Keep the tokens and reshape the rest."
+  action={{ label: 'Read the guides' }}
+/>
+```
+
+<ComponentDemo slug="cta-01" />
+
+## Guidelines
+
+### When to use
+
+Use Cta01 at the end of a marketing page, after the reader has seen the product
+and is ready to act. It works when there is one clear next step.
+
+### When not to use
+
+Do not use it more than once on a page. A second closing band tells the reader
+the page ended twice.
+
+Do not use it inside an application screen. Its filled surface is a marketing
+emphasis, and inside a task flow it competes with the working surface.
+
+Do not use it when the action is a download or an external link with no landing
+page. The band promises a next step; the action must deliver one.
+
+### Best practices
+
+- Keep the description optional and short. The headline and the action carry the
+  band.
+- Use one action. This block takes a single action object rather than a list,
+  because two equal choices at the end of a page cancel each other out.
+- Set `headingLevel` to match the page outline, and leave the default when the
+  band is composed under a heading the page already owns.
+- Keep the headline shorter than the hero's. The reader has already read the
+  page; the closing line reminds rather than introduces.
+
+### Content guidelines
+
+- The headline states the next step, not a repeat of the page title.
+- The description adds one concrete detail: what the reader gets, or what it
+  costs.
+- The action label is verb-first and sentence case: "Read the guides", "Start
+  free".

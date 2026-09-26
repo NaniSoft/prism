@@ -22,7 +22,7 @@ export type Hero01Props = {
   actions?: HeroAction[]
   /**
    * Heading level for the title. Defaults to `h2` because a block is composed,
-   * not a page: it installs into a consumer's layout via `shadcn add` and renders
+   * not a page: it installs into a consumer's layout and renders
    * inside catalog previews, so the surrounding document already owns the `h1`.
    * A page that uses this block as its top-level heading opts in with
    * `headingLevel="h1"`; a document that already names this section in its own
