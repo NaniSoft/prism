@@ -470,6 +470,50 @@ export const catalog: readonly CatalogItem[] = [
     exports: ['AppShell01'],
     status: 'stable',
   },
+  {
+    name: 'MarketingPage',
+    slug: 'marketing-page',
+    kind: 'page',
+    category: null,
+    description:
+      'A complete marketing page composing a hero, a feature grid, a KPI row, a plan comparison and a closing call to action.',
+    source: 'src/pages/marketing-page/index.tsx',
+    exports: ['MarketingPage'],
+    status: 'stable',
+  },
+  {
+    name: 'DashboardPage',
+    slug: 'dashboard-page',
+    kind: 'page',
+    category: null,
+    description:
+      'A full dashboard screen composing the app shell, a page header, a KPI row and a data table.',
+    source: 'src/pages/dashboard-page/index.tsx',
+    exports: ['DashboardPage'],
+    status: 'stable',
+  },
+  {
+    name: 'SettingsPage',
+    slug: 'settings-page',
+    kind: 'page',
+    category: null,
+    description:
+      'A full settings screen composing the app shell, a page header and tabs of grouped settings forms.',
+    source: 'src/pages/settings-page/index.tsx',
+    exports: ['SettingsPage'],
+    status: 'stable',
+  },
+  {
+    name: 'AuthPage',
+    slug: 'auth-page',
+    kind: 'page',
+    category: null,
+    description:
+      'A full authentication screen composing a sign-in form with an optional supporting card.',
+    source: 'src/pages/auth-page/index.tsx',
+    exports: ['AuthPage'],
+    status: 'stable',
+  },
 ]
 
 /** Returns the catalogue ordered for display and keyed for lookup. */

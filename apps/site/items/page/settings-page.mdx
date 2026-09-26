@@ -1,0 +1,84 @@
+---
+title: SettingsPage
+---
+
+## Overview
+
+SettingsPage is a complete settings screen. It composes the shell, a page header
+and a set of tabs, where each tab is either a saved settings form or a read-only
+panel. The page owns the sequence and the tab wiring only.
+
+The page composes these parts:
+
+| Region | Piece | Role |
+| --- | --- | --- |
+| Frame | AppShell01 | the navigation rail, the top bar and the mobile navigation sheet |
+| Header | PageHeader01 | the trail, the screen title and its actions |
+| Tabs | Tabs, TabsList, TabsTrigger, TabsContent | the peer settings groups |
+| Forms | SettingsPanel01 | the grouped and saved form for one tab |
+
+A tab that carries `panel` renders `SettingsPanel01`: a titled card with grouped
+sections, a save footer and one submit. A tab that carries `content` renders the
+node as-is, which suits a read-only summary or a view that is not a form. Sections,
+fields, options and labels are all props, and the page fetches nothing.
+
+## Usage
+
+```tsx
+import { SettingsPage } from '@nanisoft/prism-ui/pages/settings-page'
+
+<SettingsPage
+  shell={{
+    navigationLabel: 'Primary',
+    brand: <ProductMark />,
+    navigation: <AppNavigation />,
+    breadcrumbs: [{ label: 'Settings', href: '/settings' }, { label: 'Workspace' }],
+  }}
+  header={{ title: 'Workspace settings', description: 'How this workspace behaves.' }}
+  tabs={[
+    {
+      value: 'general',
+      label: 'General',
+      panel: { title: 'General', submitLabel: 'Save changes', sections: generalSections },
+    },
+    { value: 'members', label: 'Members', content: <MembersTable /> },
+  ]}
+/>
+```
+
+<ComponentDemo slug="settings-page" />
+
+## Guidelines
+
+### When to use
+
+Use SettingsPage when a screen changes several settings that group naturally, and
+each group can be saved on its own. It works when the tabs are stable and a reader
+returns to one group rather than scanning the whole screen.
+
+### When not to use
+
+Do not use it for a single setting. One field behind a tab is a heavier frame
+than the choice deserves; put the control on the screen that owns it.
+
+Do not use it when the settings must be compared side by side. Tabs hide one
+group to show another, so a choice that depends on another group's value belongs
+on one page, not behind a tab.
+
+### Best practices
+
+- Keep one save per panel. A mixed model, where some fields save and others apply
+  immediately, makes the footer's promise unclear.
+- Give every field a stable `id`, so the label is linked to the control.
+- Use `content` for a read-only group. A panel with no `submitLabel` renders no
+  footer, which is the honest shape for a view that does not save.
+- Set `defaultValue` to the group a reader is most likely to want, rather than
+  relying on the first tab by luck.
+- Pass the same navigation node to both the rail and the sheet, and keep its ids
+  unique because AppShell01 renders it twice.
+
+### Content guidelines
+
+- A tab label is one word in sentence case: "General", "Notifications".
+- A section title is one or two words and a field label is a short noun phrase.
+- A description states the effect of the group, not a policy for it.

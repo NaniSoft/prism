@@ -123,5 +123,10 @@ export { SettingsPanel01 } from './blocks/settings-panel-01'
 export { AuthForm01 } from './blocks/auth-form-01'
 export { AppShell01 } from './blocks/app-shell-01'
 
+export { MarketingPage } from './pages/marketing-page'
+export { DashboardPage } from './pages/dashboard-page'
+export { SettingsPage } from './pages/settings-page'
+export { AuthPage } from './pages/auth-page'
+
 export { PACKS, MODES, parseStoredTheme, themeAttributes } from './theming'
 export type { PackId, Mode } from './theming'

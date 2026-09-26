@@ -1,0 +1,83 @@
+---
+title: AuthPage
+---
+
+## Overview
+
+AuthPage is a complete authentication screen. It composes a sign-in form with an
+optional supporting card, and it owns the centering, the breakpoint and the
+fallback column only. The form carries the credentials, the error slot and the
+submit; the card carries product context beside it.
+
+The page composes these parts:
+
+| Region | Piece | Role |
+| --- | --- | --- |
+| Form | AuthForm01 | the title, the credential fields, the remember row and the submit |
+| Support | Card | an optional surface beside the form for context or reassurance |
+| Footer | footer | a line under the form, such as a legal note or a link |
+
+Every field, label, handler, error and supporting string is a prop. The page
+fetches nothing and imports no router, so the consumer owns the request and the
+links. When no `aside` is passed the layout is one centered column; with one it
+is a two-column split from the large breakpoint up, and the card falls below the
+form on a narrow screen.
+
+## Usage
+
+```tsx
+import { AuthPage } from '@nanisoft/prism-ui/pages/auth-page'
+
+<AuthPage
+  form={{
+    title: 'Sign in',
+    description: 'Welcome back.',
+    error,
+    submitLabel: 'Sign in',
+    fields: credentialFields,
+    remember: { id: 'remember', label: 'Remember me for 30 days' },
+    onSubmit: handleSubmit,
+  }}
+  aside={{ title: 'Everything in one workspace', children: <BenefitList /> }}
+  footer={<p>No account yet? Create one.</p>}
+/>
+```
+
+<ComponentDemo slug="auth-page" />
+
+## Guidelines
+
+### When to use
+
+Use AuthPage for a sign-in screen whose only task is to collect one email and one
+secret. It works when the screen is the first thing a returning reader sees and
+the supporting card answers a question they are likely to have at that moment.
+
+### When not to use
+
+Do not use it for registration, password reset or profile editing. Those have
+different field sets, and a sign-in card with the wrong fields is a dead end;
+compose a form from the same parts instead.
+
+Do not use it when the screen must carry more than a few words of supporting
+content. The card is context beside a form, not a second page; a longer story
+belongs on a marketing route the reader saw before signing in.
+
+### Best practices
+
+- Set `type`, `autoComplete` and `required` on every field. Browsers use them to
+  fill and validate, so the typing is the whole reason the field is typed.
+- Keep the error to one sentence and mark the failed fields. AuthForm01 sets
+  `aria-invalid` when an error is present, so the form and the message agree.
+- Disable the submit control while a request is in flight and pass `pendingLabel`,
+  so the reader sees that work is happening.
+- Omit `aside` when there is nothing true to say. An empty card is worse than a
+  single centered form.
+- Keep the footer to one line, such as a legal note or a route to create an
+  account, and pass the link in as a node so the consumer owns it.
+
+### Content guidelines
+
+- The title is a short verb phrase in sentence case: "Sign in", "Continue".
+- The description states the outcome, not a policy.
+- An error says what to do next: "Enter your email and password to continue."

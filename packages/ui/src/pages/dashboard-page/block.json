@@ -1,0 +1,7 @@
+{
+  "name": "dashboard-page",
+  "title": "Dashboard Page - Shell, Header, Stats and Table",
+  "description": "A complete dashboard screen composing the application shell, a page header, a KPI row and a data table. Navigation, rows, columns, labels and callbacks are all passed in as props.",
+  "categories": ["application"],
+  "dependencies": []
+}

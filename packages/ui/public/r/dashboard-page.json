@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "dashboard-page",
+  "title": "Dashboard Page - Shell, Header, Stats and Table",
+  "description": "A complete dashboard screen composing the application shell, a page header, a KPI row and a data table. Navigation, rows, columns, labels and callbacks are all passed in as props.",
+  "dependencies": [
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/pages/dashboard-page/index.tsx",
+      "content": "'use client'\n\nimport type { ComponentProps } from 'react'\n\nimport { AppShell01 } from '../../blocks/app-shell-01'\nimport { DataTable01 } from '../../blocks/data-table-01'\nimport { PageHeader01 } from '../../blocks/page-header-01'\nimport { Stats01 } from '../../blocks/stats-01'\n\nexport type DashboardPageProps = {\n  /**\n   * The frame: the navigation rail, the top bar and the mobile navigation\n   * sheet. Navigation, actions and the rail slots are passed as nodes, so the\n   * page never imports a router.\n   */\n  shell: Omit<ComponentProps<typeof AppShell01>, 'children'>\n  /** The page title band. */\n  header: ComponentProps<typeof PageHeader01>\n  /** The key-figure row above the table. */\n  stats: ComponentProps<typeof Stats01>\n  /** The main table, with its rows, columns, labels and callbacks. */\n  table: ComponentProps<typeof DataTable01>\n}\n\n/**\n * A complete dashboard screen.\n *\n * It composes `AppShell01`, `PageHeader01`, `Stats01` and `DataTable01`: the\n * shell provides the frame, the header names the screen, the stats summarise it\n * and the table carries the working set. The page owns the sequence and the\n * spacing only. Every row, column, label and handler is a prop, and the page\n * fetches nothing.\n *\n * The page is a client component because the blocks it composes are stateful.\n * That is a property of this composition, not of the data: the consumer still\n * owns the rows and the callbacks, and can drive the table from a server render\n * or a client cache by the same props.\n */\nexport function DashboardPage({ shell, header, stats, table }: DashboardPageProps) {\n  return (\n    <AppShell01 {...shell}>\n      <div className=\"mx-auto flex w-full max-w-page flex-col gap-8\">\n        <PageHeader01 {...header} headingLevel={header.headingLevel ?? 'h1'} />\n        <Stats01 {...stats} />\n        <DataTable01 {...table} />\n      </div>\n    </AppShell01>\n  )\n}\n\nexport default DashboardPage\n",
+      "type": "registry:page",
+      "target": "components/pages/dashboard-page/index.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:page"
+}

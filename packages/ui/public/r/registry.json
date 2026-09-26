@@ -1057,6 +1057,94 @@
           "target": "lib/utils.ts"
         }
       ]
+    },
+    {
+      "name": "auth-page",
+      "title": "Auth Page - Centered Sign-In Screen",
+      "description": "A complete authentication screen composing a sign-in form with an optional supporting card. Fields, labels, handlers, the error and the supporting content are all passed in as props.",
+      "type": "registry:page",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/auth-page/index.tsx",
+          "type": "registry:page",
+          "target": "components/pages/auth-page/index.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "dashboard-page",
+      "title": "Dashboard Page - Shell, Header, Stats and Table",
+      "description": "A complete dashboard screen composing the application shell, a page header, a KPI row and a data table. Navigation, rows, columns, labels and callbacks are all passed in as props.",
+      "type": "registry:page",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/dashboard-page/index.tsx",
+          "type": "registry:page",
+          "target": "components/pages/dashboard-page/index.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "marketing-page",
+      "title": "Marketing Page - Full Landing Composition",
+      "description": "A complete marketing landing screen composing a hero, a feature grid, a KPI row, a plan comparison and a closing call to action. Every string, number and action is passed in as a prop.",
+      "type": "registry:page",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/marketing-page/index.tsx",
+          "type": "registry:page",
+          "target": "components/pages/marketing-page/index.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "settings-page",
+      "title": "Settings Page - Tabbed Settings Forms",
+      "description": "A complete settings screen composing the application shell, a page header and tabs of grouped settings forms. Sections, fields, options and labels are all passed in as props.",
+      "type": "registry:page",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/settings-page/index.tsx",
+          "type": "registry:page",
+          "target": "components/pages/settings-page/index.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
     }
   ]
 }

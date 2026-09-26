@@ -1,0 +1,87 @@
+---
+title: MarketingPage
+---
+
+## Overview
+
+MarketingPage is a complete marketing screen. It composes five blocks in reading
+order and passes each one its own content, so the page adds the sequence and
+nothing else: an opening hero, a capability grid, a row of key figures, a plan
+comparison and a closing call to action.
+
+The page composes these blocks:
+
+| Section | Block | Role |
+| --- | --- | --- |
+| Opening | Hero01 | the headline, the supporting line and one or two actions |
+| Capabilities | FeatureGrid01 | a grid of short feature blurbs, with or without icons |
+| Figures | Stats01 | two to four key numbers, each with an optional delta |
+| Plans | Pricing01 | a plan comparison with one highlighted tier |
+| Closing | Cta01 | the final call to action on a filled surface |
+
+Every string, number, icon, price and action is a prop. The page ships no sample
+copy and fetches nothing. It is a product-agnostic screen model, so a consumer
+installs it, passes their own content and owns the links. It is not this site's
+own landing route: that page is site-owned and composes the same blocks at the
+call site.
+
+## Usage
+
+```tsx
+import { MarketingPage } from '@nanisoft/prism-ui/pages/marketing-page'
+
+<MarketingPage
+  hero={{
+    title: 'Ship your interface faster',
+    description: 'A token-driven library you compose without writing CSS.',
+    actions: [{ label: 'Get started' }, { label: 'Read the guides', variant: 'outline' }],
+  }}
+  features={{ title: 'What you get', features: featureList }}
+  stats={{ title: 'By the numbers', stats: statList }}
+  pricing={{ title: 'Plans', plans: planList }}
+  cta={{ title: 'Start today', action: { label: 'Create an account' } }}
+/>
+```
+
+<ComponentDemo slug="marketing-page" />
+
+## Guidelines
+
+### When to use
+
+Use MarketingPage for a public landing route whose job is to introduce a product
+and move a reader to one next step. It works when the five sections form one
+argument from the headline to the closing action.
+
+### When not to use
+
+Do not use it inside an authenticated screen. A hero and a plan comparison carry
+marketing weight that competes with the task an application screen exists to
+support; compose the blocks you need directly instead.
+
+Do not use it as a documentation page. Guides and item pages have their own
+shell, and a marketing hero would sit above content that is already scoped.
+
+Do not use it when the sequence is not the five sections. The page is a fixed
+composition; a different order or a missing section is a page the consumer
+builds from the blocks.
+
+### Best practices
+
+- Pass every block its own props. The page does not merge or default them, so
+  omitting a section's content renders an empty section rather than a fallback.
+- Keep the hero as the only `h1`. The page defaults `headingLevel` to `h1`; when
+  it is embedded under a heading the consumer already owns, pass one level
+  deeper and the rest of the outline follows.
+- Put the primary action on the hero and the secondary action on the closing
+  band, not both in each. One decision per band keeps the page from reading as
+  two pitches.
+- Keep the figures real. Stats01 renders exactly the numbers it is given, so the
+  page makes no claim the consumer did not make.
+
+### Content guidelines
+
+- The hero headline states an outcome, not a feature name.
+- The feature titles are the four or five things the product does; the bodies
+  are one sentence each.
+- The closing line is a verb phrase and the action names what the reader gets.

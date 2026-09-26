@@ -1,0 +1,7 @@
+{
+  "name": "settings-page",
+  "title": "Settings Page - Tabbed Settings Forms",
+  "description": "A complete settings screen composing the application shell, a page header and tabs of grouped settings forms. Sections, fields, options and labels are all passed in as props.",
+  "categories": ["application"],
+  "dependencies": []
+}

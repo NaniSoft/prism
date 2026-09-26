@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "auth-page",
+  "title": "Auth Page - Centered Sign-In Screen",
+  "description": "A complete authentication screen composing a sign-in form with an optional supporting card. Fields, labels, handlers, the error and the supporting content are all passed in as props.",
+  "dependencies": [
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/pages/auth-page/index.tsx",
+      "content": "'use client'\n\nimport type { ComponentProps, ReactNode } from 'react'\n\nimport { AuthForm01 } from '../../blocks/auth-form-01'\nimport {\n  Card,\n  CardContent,\n  CardDescription,\n  CardHeader,\n  CardTitle,\n} from '../../components/ui/card'\n\nexport type AuthPageAside = {\n  /** The supporting card's title. */\n  title: string\n  /** One line under the title. */\n  description?: string\n  /** The card body: product context, a short list or a supporting note. */\n  children?: ReactNode\n}\n\nexport type AuthPageProps = {\n  /** The credential form. */\n  form: ComponentProps<typeof AuthForm01>\n  /**\n   * A supporting card beside the form. Omit it for a single centered column.\n   */\n  aside?: AuthPageAside\n  /** A node under the form, such as a legal line or a link to another screen. */\n  footer?: ReactNode\n}\n\n/**\n * A complete authentication screen.\n *\n * It composes `AuthForm01` with `Card`: the form carries the credentials and an\n * optional supporting card sits beside it with product context. The page owns\n * the layout, the centering and the breakpoint only. Every field, label,\n * handler and error is a prop through `form`, and the page fetches nothing and\n * imports no router, so the consumer owns the links and the request.\n *\n * The layout is one centered column when no `aside` is passed, and a two-column\n * split from the large breakpoint up when one is. That keeps the docs preview\n * and a narrow screen on the same, readable path.\n */\nexport function AuthPage({ form, aside, footer }: AuthPageProps) {\n  return (\n    <div className=\"bg-background text-foreground flex min-h-svh w-full items-center justify-center px-6 py-16\">\n      <div\n        className={\n          aside\n            ? 'grid w-full max-w-page items-center gap-10 lg:grid-cols-2'\n            : 'w-full max-w-measure-narrow'\n        }\n      >\n        {aside ? (\n          <Card>\n            <CardHeader>\n              <CardTitle>{aside.title}</CardTitle>\n              {aside.description ? (\n                <CardDescription>{aside.description}</CardDescription>\n              ) : null}\n            </CardHeader>\n            {aside.children ? <CardContent>{aside.children}</CardContent> : null}\n          </Card>\n        ) : null}\n\n        <div className=\"mx-auto w-full max-w-measure-narrow\">\n          <AuthForm01 {...form} />\n          {footer ? (\n            <div className=\"text-muted-foreground mt-4 text-center text-sm\">{footer}</div>\n          ) : null}\n        </div>\n      </div>\n    </div>\n  )\n}\n\nexport default AuthPage\n",
+      "type": "registry:page",
+      "target": "components/pages/auth-page/index.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:page"
+}

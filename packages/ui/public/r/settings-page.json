@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "settings-page",
+  "title": "Settings Page - Tabbed Settings Forms",
+  "description": "A complete settings screen composing the application shell, a page header and tabs of grouped settings forms. Sections, fields, options and labels are all passed in as props.",
+  "dependencies": [
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/pages/settings-page/index.tsx",
+      "content": "'use client'\n\nimport type { ComponentProps, ReactNode } from 'react'\n\nimport { AppShell01 } from '../../blocks/app-shell-01'\nimport { PageHeader01 } from '../../blocks/page-header-01'\nimport { SettingsPanel01 } from '../../blocks/settings-panel-01'\nimport { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'\n\nexport type SettingsPageTab = {\n  /** The value shared by the trigger and its panel. */\n  value: string\n  /** The trigger label. */\n  label: string\n  /**\n   * A saved settings form for this tab. Rendered through `SettingsPanel01`, so\n   * the tab inherits the grouped sections, the field kinds and the save footer.\n   */\n  panel?: ComponentProps<typeof SettingsPanel01>\n  /** Content for a tab that is not a saved form, such as a read-only summary. */\n  content?: ReactNode\n}\n\nexport type SettingsPageProps = {\n  /** The frame: rail, top bar and mobile navigation sheet. */\n  shell: Omit<ComponentProps<typeof AppShell01>, 'children'>\n  /** The page title band. */\n  header: ComponentProps<typeof PageHeader01>\n  /** The tabs, in order. At least one is required. */\n  tabs: SettingsPageTab[]\n  /** The tab shown first, for uncontrolled tabs. Defaults to the first tab. */\n  defaultValue?: string\n  /** The controlled active tab. */\n  value?: string\n  onValueChange?: (value: string) => void\n}\n\n/**\n * A complete settings screen.\n *\n * It composes `AppShell01`, `PageHeader01`, `Tabs` and `SettingsPanel01`: the\n * shell provides the frame, the header names the screen, and each tab is a\n * saved settings form or a read-only panel. The page owns the sequence and the\n * tab wiring only. Every section, field, option and label is a prop, and the\n * page fetches nothing.\n *\n * A tab that carries a `panel` renders `SettingsPanel01`, so a settings screen\n * is a set of grouped forms rather than one long page. A tab that carries\n * `content` instead renders the node as-is. Both are optional, so a caller can\n * mix forms and read-only views in one screen.\n */\nexport function SettingsPage({\n  shell,\n  header,\n  tabs,\n  defaultValue,\n  value,\n  onValueChange,\n}: SettingsPageProps) {\n  return (\n    <AppShell01 {...shell}>\n      <div className=\"mx-auto flex w-full max-w-page flex-col gap-8\">\n        <PageHeader01 {...header} headingLevel={header.headingLevel ?? 'h1'} />\n\n        <Tabs\n          defaultValue={defaultValue ?? tabs[0]?.value}\n          value={value}\n          onValueChange={onValueChange}\n        >\n          <TabsList>\n            {tabs.map((tab) => (\n              <TabsTrigger key={tab.value} value={tab.value}>\n                {tab.label}\n              </TabsTrigger>\n            ))}\n          </TabsList>\n\n          {tabs.map((tab) => (\n            <TabsContent key={tab.value} value={tab.value}>\n              {tab.panel ? <SettingsPanel01 {...tab.panel} /> : tab.content}\n            </TabsContent>\n          ))}\n        </Tabs>\n      </div>\n    </AppShell01>\n  )\n}\n\nexport default SettingsPage\n",
+      "type": "registry:page",
+      "target": "components/pages/settings-page/index.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:page"
+}

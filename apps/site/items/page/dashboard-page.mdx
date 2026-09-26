@@ -1,0 +1,81 @@
+---
+title: DashboardPage
+---
+
+## Overview
+
+DashboardPage is a complete application screen. It composes the shell, a page
+header, a row of key figures and a data table, and it owns the sequence and the
+spacing only. The frame comes from the shell, the screen's name from the header,
+the summary from the stats and the working set from the table.
+
+The page composes these blocks:
+
+| Region | Block | Role |
+| --- | --- | --- |
+| Frame | AppShell01 | the navigation rail, the top bar and the mobile navigation sheet |
+| Header | PageHeader01 | the trail, the page title and the page actions |
+| Summary | Stats01 | the key figures above the table |
+| Working set | DataTable01 | the toolbar, filters, selection and pagination |
+
+Navigation, rows, columns, labels and every callback are props. The page fetches
+nothing and imports no router, so the consumer owns the links and the data. The
+table's search, page, filters and selection are controlled by the consumer, so
+the same page can be driven by a server render or a client cache.
+
+## Usage
+
+```tsx
+import { DashboardPage } from '@nanisoft/prism-ui/pages/dashboard-page'
+
+<DashboardPage
+  shell={{
+    navigationLabel: 'Primary',
+    brand: <ProductMark />,
+    navigation: <AppNavigation />,
+    breadcrumbs: [{ label: 'Dashboard', href: '/dashboard' }, { label: 'Overview' }],
+  }}
+  header={{ title: 'Overview', description: 'Accounts and usage.', actions: [{ label: 'New account' }] }}
+  stats={{ title: 'This month', stats: statList }}
+  table={tableProps}
+/>
+```
+
+<ComponentDemo slug="dashboard-page" />
+
+## Guidelines
+
+### When to use
+
+Use DashboardPage for the landing screen of an application, where a reader checks
+the state of a workspace and acts on a collection. It works when the navigation
+is stable across screens and the table is the reason the reader came.
+
+### When not to use
+
+Do not use it for a single-purpose screen with no collection. A dashboard with an
+empty table is a header and a stat row around nothing; compose the header and the
+stats directly instead.
+
+Do not use it for a read-only report. The table's toolbar promises search,
+filters and selection; a screen that does not offer them should not render the
+toolbar.
+
+### Best practices
+
+- Pass the same navigation node to both the rail and the sheet. AppShell01 renders
+  it twice, so keep ids in the navigation unique or avoid ids there.
+- Keep the page's own controls in the header, not the table toolbar. The header
+  action belongs to the screen; the toolbar belongs to the rows.
+- Own the table state at the call site. Pass `page`, `searchValue`, `filterValues`
+  and `selectedIds`, and reset the page to one when the search or a filter
+  changes, so the view and the data never disagree.
+- Give every row a stable `getRowId`. An index-based id loses the selection when
+  the page changes.
+- Pass every string the table needs in `labels`. The page supplies none of them.
+
+### Content guidelines
+
+- The title names the screen: "Overview", not "View overview".
+- A stat label is a noun phrase in sentence case, and the figure keeps one unit.
+- A table column header is a short noun and a row action is a verb phrase.

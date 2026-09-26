@@ -1,0 +1,7 @@
+{
+  "name": "auth-page",
+  "title": "Auth Page - Centered Sign-In Screen",
+  "description": "A complete authentication screen composing a sign-in form with an optional supporting card. Fields, labels, handlers, the error and the supporting content are all passed in as props.",
+  "categories": ["application"],
+  "dependencies": []
+}

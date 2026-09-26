@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "marketing-page",
+  "title": "Marketing Page - Full Landing Composition",
+  "description": "A complete marketing landing screen composing a hero, a feature grid, a KPI row, a plan comparison and a closing call to action. Every string, number and action is passed in as a prop.",
+  "dependencies": [
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/pages/marketing-page/index.tsx",
+      "content": "import type { ComponentProps } from 'react'\n\nimport { Cta01 } from '../../blocks/cta-01'\nimport { FeatureGrid01 } from '../../blocks/feature-grid-01'\nimport { Hero01 } from '../../blocks/hero-01'\nimport { Pricing01 } from '../../blocks/pricing-01'\nimport { Stats01 } from '../../blocks/stats-01'\nimport type { HeadingLevel } from '../../components/ui/section'\n\nexport type MarketingPageProps = {\n  /** The opening band: an optional eyebrow, the headline and one or two actions. */\n  hero: ComponentProps<typeof Hero01>\n  /** The capability grid below the hero. */\n  features: ComponentProps<typeof FeatureGrid01>\n  /** The key-figure row. */\n  stats: ComponentProps<typeof Stats01>\n  /** The plan comparison. */\n  pricing: ComponentProps<typeof Pricing01>\n  /** The closing call to action. */\n  cta: ComponentProps<typeof Cta01>\n  /**\n   * The heading level for the hero. Defaults to `h1`, because a page owns the\n   * top of the document outline. A consumer that embeds the page under a\n   * heading it already owns passes one level deeper.\n   */\n  headingLevel?: HeadingLevel\n}\n\n/**\n * A complete marketing page.\n *\n * It composes `Hero01`, `FeatureGrid01`, `Stats01`, `Pricing01` and `Cta01` in\n * reading order and passes each block its own props unchanged, so the page adds\n * the sequence and nothing else. Every string, number and action is a prop, and\n * the page ships no sample copy and fetches nothing. It is a product-agnostic\n * screen model, not this site's own landing route: a consumer installs it,\n * passes their own content and owns the links.\n *\n * The hero is the page's primary heading, so it defaults to `h1`; set\n * `headingLevel` when the page is embedded rather than rendered as a screen.\n * The composed blocks keep their own `h2` defaults, so the outline stays one\n * heading per section below the hero.\n */\nexport function MarketingPage({\n  hero,\n  features,\n  stats,\n  pricing,\n  cta,\n  headingLevel = 'h1',\n}: MarketingPageProps) {\n  return (\n    <div className=\"bg-background text-foreground\">\n      <Hero01 {...hero} headingLevel={headingLevel} />\n      <FeatureGrid01 {...features} />\n      <Stats01 {...stats} />\n      <Pricing01 {...pricing} />\n      <Cta01 {...cta} />\n    </div>\n  )\n}\n\nexport default MarketingPage\n",
+      "type": "registry:page",
+      "target": "components/pages/marketing-page/index.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:page"
+}
