@@ -12,6 +12,49 @@
  * softer step, because muted text still has to clear 4.5:1.
  */
 
+/**
+ * The runtime attribute that names a pack. Ticket 06 renamed the vocabulary
+ * (`data-theme` named a pack all along); ticket 08 fixed the selector shape.
+ */
+export const PACK_ATTR = 'data-pack'
+
+/**
+ * The selector shape is an output switch, so changing it never means forking the
+ * build or hand-editing `dist`. Ticket 06's default stays root-scoped; the token
+ * build ships `attribute-agnostic` (ticket 08's decision), which matches the root
+ * or any descendant and so makes a themed subtree expressible in markup alone.
+ */
+const THEME_SELECTOR_STYLES = {
+  'root-attribute': {
+    light: (id) => `:root[${PACK_ATTR}="${id}"]`,
+    dark: (id) => `.dark[${PACK_ATTR}="${id}"]`,
+  },
+  'root-class': {
+    light: (id) => `.prism-pack-${id}`,
+    dark: (id) => `.dark.prism-pack-${id}`,
+  },
+  'attribute-agnostic': {
+    light: (id) => `[${PACK_ATTR}="${id}"]`,
+    dark: (id) => `[${PACK_ATTR}="${id}"].dark`,
+  },
+}
+
+/** Today's root-scoped template, kept as the switch default (ticket 06). */
+export const DEFAULT_THEME_SELECTOR_STYLE = 'root-attribute'
+
+/** The value the token build calls the switch with (ticket 08). */
+export const THEME_SELECTOR_STYLE = 'attribute-agnostic'
+
+/**
+ * The single output switch: `<id>` is a pack id, `mode` is 'light' | 'dark'.
+ * The base pack is the absence of an attribute, so it keeps `:root` / `.dark`
+ * and is not emitted per id.
+ */
+export function themeSelector(id, mode, style = DEFAULT_THEME_SELECTOR_STYLE) {
+  const selected = THEME_SELECTOR_STYLES[style] ?? THEME_SELECTOR_STYLES[DEFAULT_THEME_SELECTOR_STYLE]
+  return mode === 'dark' ? selected.dark(id) : selected.light(id)
+}
+
 /** @param {string} id theme id, e.g. 'blush' */
 export function expandTheme(id) {
   const N = `color.${id}-neutral`

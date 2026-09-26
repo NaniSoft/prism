@@ -1,31 +1,29 @@
 {
-  "dimension": {
+  "spacing": {
     "$type": "dimension",
-    "$description": "Primitive spacing and sizing values. Use the rem scale; Tailwind's spacing utilities map to these directly.",
-    "spacing": {
-      "0": { "$value": { "value": 0, "unit": "px" } },
-      "0.5": { "$value": { "value": 0.125, "unit": "rem" } },
-      "1": { "$value": { "value": 0.25, "unit": "rem" } },
-      "1.5": { "$value": { "value": 0.375, "unit": "rem" } },
-      "2": { "$value": { "value": 0.5, "unit": "rem" } },
-      "2.5": { "$value": { "value": 0.625, "unit": "rem" } },
-      "3": { "$value": { "value": 0.75, "unit": "rem" } },
-      "3.5": { "$value": { "value": 0.875, "unit": "rem" } },
-      "4": { "$value": { "value": 1, "unit": "rem" } },
-      "5": { "$value": { "value": 1.25, "unit": "rem" } },
-      "6": { "$value": { "value": 1.5, "unit": "rem" } },
-      "7": { "$value": { "value": 1.75, "unit": "rem" } },
-      "8": { "$value": { "value": 2, "unit": "rem" } },
-      "9": { "$value": { "value": 2.25, "unit": "rem" } },
-      "10": { "$value": { "value": 2.5, "unit": "rem" } },
-      "12": { "$value": { "value": 3, "unit": "rem" } },
-      "14": { "$value": { "value": 3.5, "unit": "rem" } },
-      "16": { "$value": { "value": 4, "unit": "rem" } },
-      "20": { "$value": { "value": 5, "unit": "rem" } },
-      "24": { "$value": { "value": 6, "unit": "rem" } }
-    }
+    "$description": "Primitive spacing steps. Step 1 is the base multiplier (0.25rem); every other step is that multiplier times its own key, which is what Tailwind's spacing utilities compute. The fractional keys survive into CSS with the dot escaped.",
+    "0": { "$value": { "value": 0, "unit": "px" } },
+    "0.5": { "$value": { "value": 0.125, "unit": "rem" } },
+    "1": { "$value": { "value": 0.25, "unit": "rem" } },
+    "1.5": { "$value": { "value": 0.375, "unit": "rem" } },
+    "2": { "$value": { "value": 0.5, "unit": "rem" } },
+    "2.5": { "$value": { "value": 0.625, "unit": "rem" } },
+    "3": { "$value": { "value": 0.75, "unit": "rem" } },
+    "3.5": { "$value": { "value": 0.875, "unit": "rem" } },
+    "4": { "$value": { "value": 1, "unit": "rem" } },
+    "5": { "$value": { "value": 1.25, "unit": "rem" } },
+    "6": { "$value": { "value": 1.5, "unit": "rem" } },
+    "7": { "$value": { "value": 1.75, "unit": "rem" } },
+    "8": { "$value": { "value": 2, "unit": "rem" } },
+    "9": { "$value": { "value": 2.25, "unit": "rem" } },
+    "10": { "$value": { "value": 2.5, "unit": "rem" } },
+    "12": { "$value": { "value": 3, "unit": "rem" } },
+    "14": { "$value": { "value": 3.5, "unit": "rem" } },
+    "16": { "$value": { "value": 4, "unit": "rem" } },
+    "20": { "$value": { "value": 5, "unit": "rem" } },
+    "24": { "$value": { "value": 6, "unit": "rem" } }
   },
-  "fontFamily": {
+  "font": {
     "$type": "fontFamily",
     "$description": "Typeface stacks. The sans stack is a variable font; the mono stack is fixed-width.",
     "sans": {
@@ -53,28 +51,85 @@
       ]
     }
   },
-  "fontWeight": {
+  "font-weight": {
     "$type": "fontWeight",
-    "$description": "Numeric weights matching the Inter variable font axes.",
-    "regular": { "$value": 400 },
+    "$description": "Numeric weights matching the Inter variable font axes. `normal` is named to match the utility it generates rather than `regular`.",
+    "normal": { "$value": 400 },
     "medium": { "$value": 500 },
     "semibold": { "$value": 600 },
     "bold": { "$value": 700 }
   },
+  "text": {
+    "$type": "dimension",
+    "$description": "Type scale. Each step carries its own line-height in $extensions so the emitted `--text-*--line-height` companion is authored here, not left to Tailwind's default.",
+    "xs": {
+      "$value": { "value": 0.75, "unit": "rem" },
+      "$extensions": { "com.nanisoft.prism": { "lineHeight": 1.333 } }
+    },
+    "sm": {
+      "$value": { "value": 0.875, "unit": "rem" },
+      "$extensions": { "com.nanisoft.prism": { "lineHeight": 1.429 } }
+    },
+    "base": {
+      "$value": { "value": 1, "unit": "rem" },
+      "$extensions": { "com.nanisoft.prism": { "lineHeight": 1.5 } }
+    },
+    "lg": {
+      "$value": { "value": 1.125, "unit": "rem" },
+      "$extensions": { "com.nanisoft.prism": { "lineHeight": 1.556 } }
+    },
+    "xl": {
+      "$value": { "value": 1.25, "unit": "rem" },
+      "$extensions": { "com.nanisoft.prism": { "lineHeight": 1.4 } }
+    },
+    "2xl": {
+      "$value": { "value": 1.5, "unit": "rem" },
+      "$extensions": { "com.nanisoft.prism": { "lineHeight": 1.333 } }
+    },
+    "3xl": {
+      "$value": { "value": 1.875, "unit": "rem" },
+      "$extensions": { "com.nanisoft.prism": { "lineHeight": 1.2 } }
+    },
+    "4xl": {
+      "$value": { "value": 2.25, "unit": "rem" },
+      "$extensions": { "com.nanisoft.prism": { "lineHeight": 1.111 } }
+    },
+    "mono": {
+      "$value": { "value": 0.625, "unit": "rem" },
+      "$extensions": { "com.nanisoft.prism": { "lineHeight": 1 } }
+    }
+  },
+  "leading": {
+    "$type": "number",
+    "$description": "Unitless line-heights. Use these with the text scale where a step's own line-height is not the one wanted.",
+    "none": { "$value": 1 },
+    "tight": { "$value": 1.25 },
+    "snug": { "$value": 1.375 },
+    "normal": { "$value": 1.5 },
+    "relaxed": { "$value": 1.625 },
+    "loose": { "$value": 2 }
+  },
+  "tracking": {
+    "$type": "dimension",
+    "$description": "Letter-spacing steps, in em so they scale with the type size.",
+    "tighter": { "$value": { "value": -0.05, "unit": "em" } },
+    "tight": { "$value": { "value": -0.025, "unit": "em" } },
+    "normal": { "$value": { "value": 0, "unit": "em" } },
+    "wide": { "$value": { "value": 0.025, "unit": "em" } },
+    "wider": { "$value": { "value": 0.05, "unit": "em" } },
+    "widest": { "$value": { "value": 0.1, "unit": "em" } }
+  },
   "duration": {
     "$type": "duration",
     "$description": "Motion durations. Pair with the easing tokens below; never hardcode a duration in a component.",
-    "instant": { "$value": { "value": 80, "unit": "ms" } },
-    "fast": { "$value": { "value": 150, "unit": "ms" } },
-    "normal": { "$value": { "value": 250, "unit": "ms" } },
-    "slow": { "$value": { "value": 400, "unit": "ms" } }
+    "fast": { "$value": { "value": 80, "unit": "ms" } },
+    "base": { "$value": { "value": 160, "unit": "ms" } },
+    "slow": { "$value": { "value": 280, "unit": "ms" } }
   },
-  "cubicBezier": {
+  "ease": {
     "$type": "cubicBezier",
-    "$description": "Easing curves. `standard` is the default for UI transitions; `emphasized` is for entry/exit and larger movement.",
-    "linear": { "$value": [0, 0, 1, 1] },
-    "standard": { "$value": [0.2, 0, 0, 1] },
-    "emphasized": { "$value": [0.2, 0, 0, 1.05] },
-    "exit": { "$value": [0.4, 0, 1, 1] }
+    "$description": "Easing curves. `out` is the default for state feedback; `in-out` is for a state that moves both ways. No control point overshoots.",
+    "out": { "$value": [0.16, 1, 0.3, 1] },
+    "in-out": { "$value": [0.65, 0, 0.35, 1] }
   }
 }

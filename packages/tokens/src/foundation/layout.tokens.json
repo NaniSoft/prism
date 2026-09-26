@@ -1,0 +1,16 @@
+{
+  "breakpoint": {
+    "$type": "dimension",
+    "$description": "Breakpoint thresholds. The authored set is exhaustive: sm, md and lg are real thresholds, and xl and 2xl are closed in the emitted theme so an xl: or 2xl: utility cannot silently resolve to a value this repository never authored.",
+    "sm": { "$value": { "value": 40, "unit": "rem" } },
+    "md": { "$value": { "value": 48, "unit": "rem" } },
+    "lg": { "$value": { "value": 64, "unit": "rem" } }
+  },
+  "container": {
+    "$type": "dimension",
+    "$description": "Container width and prose measures. `page` is the page column; `measure` and `measure-narrow` cap running text. Gutters are spacing tokens, not container tokens.",
+    "page": { "$value": { "value": 72, "unit": "rem" } },
+    "measure": { "$value": { "value": 42, "unit": "rem" } },
+    "measure-narrow": { "$value": { "value": 36, "unit": "rem" } }
+  }
+}

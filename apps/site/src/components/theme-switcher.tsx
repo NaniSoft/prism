@@ -19,9 +19,9 @@ const OPTIONS = [{ id: 'default', name: 'Default' }, ...themes]
 export function applyTheme(id: string, mode: Mode) {
   const root = document.documentElement
   if (id === 'default') {
-    delete root.dataset.theme
+    delete root.dataset.pack
   } else {
-    root.dataset.theme = id
+    root.dataset.pack = id
   }
   root.classList.toggle('dark', mode === 'dark')
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ id, mode }))
@@ -35,18 +35,13 @@ const THEME_TOKENS_DARK = themeTokensDark as Record<string, TokenMap>
 /**
  * The colour a theme's swatch shows.
  *
- * Every `[data-theme]` selector the token build emits is root-scoped, either
- * `:root[data-theme="<id>"]` or `.dark[data-theme="<id>"]`, so putting the
- * attribute on a `<span>` matches nothing and the swatch silently inherits the
- * *active* theme's `--primary`. All six options then render the same dot, which
- * is the one thing a colour swatch must never do.
- *
- * So the swatch takes the literal compiled value, the same way the swatches on
- * `/themes` do. The literal is read per mode, because an inline style has no
- * cascade to fall back on: publishing only the light values left the five pastel
- * dots holding their light colours in dark mode, so the dots disagreed with the
- * theme they named while the one swatch that did track the mode was `default`,
- * the only row with no literal on it.
+ * The token build emits attribute-agnostic `[data-pack="<id>"]` selectors, so a
+ * pack can be scoped to any subtree. The swatch still takes the literal compiled
+ * value: it is an inline style with no cascade, and reading the value per mode is
+ * what keeps the dot in step with the mode the page is in. Publishing only the
+ * light values left the five pastel dots holding their light colours in dark mode,
+ * so the dots disagreed with the theme they named while the one swatch that did
+ * track the mode was `default`, the only row with no literal on it.
  *
  * The default theme has no entry in `themeTokens`, because the token build only
  * emits the five pastel themes; it resolves through the normal cascade, so

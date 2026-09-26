@@ -9,7 +9,8 @@
   },
   "scripts": {
     "dev": "pnpm --filter @nanisoft/site dev",
-    "build": "node scripts/check-dashes.mjs && pnpm --filter @nanisoft/prism-ui build && pnpm --filter @nanisoft/site build",
+    "build": "node scripts/check-dashes.mjs && node scripts/check-elevation-layout.mjs && pnpm --filter @nanisoft/prism-ui build && pnpm --filter @nanisoft/site build",
+    "check": "node scripts/check-elevation-layout.mjs && pnpm --filter @nanisoft/prism-tokens check",
     "check:copy": "node scripts/check-dashes.mjs",
     "tokens:build": "pnpm --filter @nanisoft/prism-tokens build",
     "tokens:watch": "pnpm --filter @nanisoft/prism-tokens watch",

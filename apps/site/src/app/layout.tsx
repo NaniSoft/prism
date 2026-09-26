@@ -22,7 +22,7 @@ const THEME_SCRIPT = `
     var raw = localStorage.getItem('ds-theme');
     if (!raw) return;
     var s = JSON.parse(raw);
-    if (s.id && s.id !== 'default') document.documentElement.dataset.theme = s.id;
+    if (s.id && s.id !== 'default') document.documentElement.dataset.pack = s.id;
     if (s.mode === 'dark') document.documentElement.classList.add('dark');
   } catch (e) {}
 })();

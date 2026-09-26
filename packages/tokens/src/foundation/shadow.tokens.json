@@ -1,0 +1,51 @@
+{
+  "shadow": {
+    "$type": "shadow",
+    "$description": "Elevation steps. Untinted, soft-blurred and hard-offset-free: the Three-Step Rule is a property of this source, not an observation about the registry. Values are exactly Tailwind's stock xs, sm and md, so no rendered shadow changes. The docs-only floating-panel shadow-lg is deliberately not authored.",
+    "xs": {
+      "$value": {
+        "offsetX": { "value": 0, "unit": "px" },
+        "offsetY": { "value": 1, "unit": "px" },
+        "blur": { "value": 2, "unit": "px" },
+        "spread": { "value": 0, "unit": "px" },
+        "color": "rgb(0 0 0 / 0.05)"
+      }
+    },
+    "sm": {
+      "$value": [
+        {
+          "offsetX": { "value": 0, "unit": "px" },
+          "offsetY": { "value": 1, "unit": "px" },
+          "blur": { "value": 3, "unit": "px" },
+          "spread": { "value": 0, "unit": "px" },
+          "color": "rgb(0 0 0 / 0.1)"
+        },
+        {
+          "offsetX": { "value": 0, "unit": "px" },
+          "offsetY": { "value": 1, "unit": "px" },
+          "blur": { "value": 2, "unit": "px" },
+          "spread": { "value": -1, "unit": "px" },
+          "color": "rgb(0 0 0 / 0.1)"
+        }
+      ]
+    },
+    "md": {
+      "$value": [
+        {
+          "offsetX": { "value": 0, "unit": "px" },
+          "offsetY": { "value": 4, "unit": "px" },
+          "blur": { "value": 6, "unit": "px" },
+          "spread": { "value": -1, "unit": "px" },
+          "color": "rgb(0 0 0 / 0.1)"
+        },
+        {
+          "offsetX": { "value": 0, "unit": "px" },
+          "offsetY": { "value": 2, "unit": "px" },
+          "blur": { "value": 4, "unit": "px" },
+          "spread": { "value": -2, "unit": "px" },
+          "color": "rgb(0 0 0 / 0.1)"
+        }
+      ]
+    }
+  }
+}

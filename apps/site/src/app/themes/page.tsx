@@ -28,9 +28,10 @@ function tokenStyle(tokens: TokenMap, bg: string, fg: string) {
 /**
  * Each card uses its own compiled token values.
  *
- * The `data-theme` wrapper only re-points *utility classes*; an inline
- * `style={{ background }}` is a literal, so a swatch has to be handed the value that
- * theme actually compiles to or every card renders the same palette.
+ * The `data-pack` wrapper re-points the custom properties for its subtree, so a
+ * `bg-primary` chip inside it resolves to this pack. The swatches below still take
+ * literals: an inline `style={{ background }}` is what the grid reads, and it
+ * keeps one value path for the whole card.
  */
 export default function ThemesPage() {
   return (
@@ -50,7 +51,7 @@ export default function ThemesPage() {
           return (
           <section
             key={theme.id}
-            data-theme={theme.id}
+            data-pack={theme.id}
             className="bg-card flex flex-col gap-4 rounded-xl border p-5"
           >
             <div className="flex flex-col gap-1">
@@ -67,12 +68,10 @@ export default function ThemesPage() {
               Each theme's real button styling, taken from that theme's compiled
               values rather than from a utility class.
 
-              The `data-theme` attribute above cannot do this job: every
-              `[data-theme]` selector the token build emits is root-scoped, so it
-              only ever matches the attribute on `<html>`. A `bg-primary` chip in
-              this card resolves against the *active* theme, so all five cards
-              would show identical chips. These use the literal values the swatch
-              grid below already uses.
+              The `data-pack` attribute above scopes the card and its subtree, so
+              the utility classes resolve to this pack. These chips keep the
+              literal values the swatch grid below already uses, so the card reads
+              from one source even where no class is involved.
             */}
             <div className="flex flex-wrap items-center gap-2">
               <span
@@ -118,7 +117,7 @@ export default function ThemesPage() {
             </div>
 
             <code className="text-muted-foreground bg-muted rounded px-2 py-1 font-mono text-[10px]">
-              [data-theme=&quot;{theme.id}&quot;]
+              [data-pack=&quot;{theme.id}&quot;]
             </code>
           </section>
           )

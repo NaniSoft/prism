@@ -25,7 +25,7 @@
   "scripts": {
     "build": "node build/build.mjs && pnpm check",
     "watch": "node build/build.mjs --watch",
-    "check": "node scripts/check-contrast.mjs",
+    "check": "node scripts/check-contrast.mjs && node scripts/check-emitted-contract.mjs",
     "gen": "node scripts/gen-pastel.mjs"
   },
   "devDependencies": {

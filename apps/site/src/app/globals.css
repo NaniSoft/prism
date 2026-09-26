@@ -3,7 +3,7 @@
  * This app never defines a color or radius by hand — it only consumes the build.
  *
  * Base theme  -> :root / .dark          (the shadcn-compatible neutral default)
- * Pastel set -> :root[data-theme=...]  (runtime-switchable, five themes)
+ * Pastel set -> [data-pack=...]        (runtime-switchable, five packs)
  */
 @import 'tailwindcss';
 
@@ -68,9 +68,9 @@
  *                 var(--default-transition-duration))`, and the fallback is a
  *                 plain inherited custom property, so retuning it on `:root`
  *                 reaches every transition that does not pin its own
- *                 `duration-*`. 150ms is the tail of the "immediate feedback"
- *                 band; 80ms sits inside it, which keeps hover, active and focus
- *                 readable while taking the lag out of it.
+ *                 `duration-*`. 160ms is the base token; 80ms is the fast token,
+ *                 which sits inside the "immediate feedback" band and keeps
+ *                 hover, active and focus readable while taking the lag out of it.
  *
  * A blanket `*, *::before, *::after { animation-duration: 0.01ms !important }`
  * is the thing to avoid: it is `!important` to beat the same cascade, and it
@@ -79,7 +79,7 @@
  */
 @media (prefers-reduced-motion: reduce) {
   :root {
-    --default-transition-duration: 80ms;
+    --default-transition-duration: var(--duration-fast);
   }
 }
 
