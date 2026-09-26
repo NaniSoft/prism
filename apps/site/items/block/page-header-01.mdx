@@ -1,0 +1,72 @@
+---
+title: PageHeader01
+---
+
+## Overview
+
+PageHeader01 is the title band at the top of an application screen: a
+breadcrumb trail, a row of actions, the page title and one supporting line,
+closed by a hairline rule.
+
+The block composes these components:
+
+| Part | Component | Role |
+| --- | --- | --- |
+| Trail | Breadcrumb | the ancestor path, ending on the current page |
+| Actions | Button | one primary action and supporting actions |
+| Title | Typography | the page heading and its supporting line |
+| Rule | Separator | closes the band before the working content |
+
+Every step and action is a prop. The trail renders native anchors, so the
+consumer owns the destination; a router link or a stateful control goes through
+`actionsSlot` instead.
+
+## Usage
+
+```tsx
+import { PageHeader01 } from '@nanisoft/prism-ui/blocks/page-header-01'
+
+<PageHeader01
+  headingLevel="h1"
+  breadcrumbs={[
+    { label: 'Projects', href: '/projects' },
+    { label: 'Northwind', href: '/projects/northwind' },
+    { label: 'Overview' },
+  ]}
+  title="Overview"
+  description="Deployments, usage and the people on this project."
+  actions={[{ label: 'Share' }, { label: 'New deployment', variant: 'outline' }]}
+/>
+```
+
+<ComponentDemo slug="page-header-01" />
+
+## Guidelines
+
+### When to use
+
+Use PageHeader01 at the top of a page whose content sits under the app shell. It
+works when the page has one name, one short description and a small set of
+actions that belong to the page rather than to a single row.
+
+### When not to use
+
+Do not use it as a section heading inside a page. It carries the page title and
+a rule that closes a band, so using it mid-page splits one screen into two.
+
+Do not use it in a marketing page. A hero introduces a product; a page header
+orients a returning user, and the two carry different weight.
+
+### Best practices
+
+- Set `headingLevel="h1"` on a real page. The default `h2` suits a header
+  composed under a heading the document already owns.
+- Keep the trail to the ancestors plus the current page. Repeating the title as
+  the last step reads as noise.
+- Pass one primary action and at most two supporting ones, and put a link or a
+  menu in `actionsSlot` when it needs its own router or state.
+
+### Content guidelines
+
+- A breadcrumb label is the destination's display name: "Projects", "Settings".
+- The title names the screen, not the action: "Overview", not "View overview".

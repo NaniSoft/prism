@@ -1,0 +1,8 @@
+{
+  "name": "page-header-01",
+  "title": "Page Header 01 - Title Band",
+  "description": "A page title band with a breadcrumb trail, a supporting line and a row of actions. Every step, string and action is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["breadcrumb", "separator", "typography", "button"],
+  "dependencies": []
+}

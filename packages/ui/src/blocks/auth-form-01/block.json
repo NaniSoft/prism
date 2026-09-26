@@ -1,0 +1,8 @@
+{
+  "name": "auth-form-01",
+  "title": "Auth Form 01 - Sign-In Card",
+  "description": "A sign-in card with labelled credential fields, a remember control and an error slot. Field values, labels and the submit handler are all passed in as props.",
+  "categories": ["application"],
+  "registryDependencies": ["card", "field", "input", "checkbox", "alert", "button"],
+  "dependencies": ["lucide-react"]
+}

@@ -1,0 +1,78 @@
+---
+title: DataTable01
+---
+
+## Overview
+
+DataTable01 is a table section for a paged collection: a toolbar, a search
+field, a filter popover, optional row selection, a per-row action menu and
+pagination. It renders the rows it is given and reports every interaction
+through a callback.
+
+The block composes these components:
+
+| Part | Component | Role |
+| --- | --- | --- |
+| Toolbar | Input, Button, DropdownMenu, Popover | search, filters, column visibility |
+| Grid | Table, Checkbox | the rows, with an optional selection column |
+| Row menu | DropdownMenu | the actions for one row |
+| Paging | Pagination, Button | the page window and the step controls |
+
+The block owns no data and does no filtering, sorting or fetching. The page
+number, the search text, the filter values and the selected ids are controlled
+props, so a server page or a client cache drives it by the same contract. When a
+controlled prop is omitted, that interaction falls back to internal state.
+
+## Usage
+
+```tsx
+import { DataTable01 } from '@nanisoft/prism-ui/blocks/data-table-01'
+
+<DataTable01
+  columns={[
+    { id: 'name', header: 'Account', cell: (row) => String(row.name) },
+    { id: 'status', header: 'Status', cell: (row) => String(row.status) },
+  ]}
+  rows={pageRows}
+  getRowId={(row) => String(row.id)}
+  selectable
+  selectedIds={selected}
+  onSelectedIdsChange={setSelected}
+  page={page}
+  pageCount={pageCount}
+  onPageChange={setPage}
+  labels={labels}
+/>
+```
+
+<ComponentDemo slug="data-table-01" />
+
+## Guidelines
+
+### When to use
+
+Use DataTable01 for a collection a reader scans, compares and acts on. It earns
+its space when there is more than one column, a set that pages, and at least one
+of search, filters or row selection.
+
+### When not to use
+
+Do not use it for fewer than a dozen rows with no paging. A plain `Table` with a
+heading is lighter and reads the same.
+
+Do not hide the page's primary action in the row menu. Keep the main action on
+the screen and reserve the menu for secondary commands.
+
+### Best practices
+
+- Own the data at the call site. Filter and page there, and pass only the
+  current page in, so the table stays a view rather than a state store.
+- Give every row a stable `getRowId`. An index-based id loses the selection
+  when the page changes.
+- Pass every string in `labels`, and reset the page to one when the search or a
+  filter changes.
+
+### Content guidelines
+
+- A column header is a short noun: "Account", "Seats".
+- A row action is a verb phrase: "View details", "Rename", "Delete".

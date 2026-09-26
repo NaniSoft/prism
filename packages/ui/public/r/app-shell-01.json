@@ -1,0 +1,47 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "app-shell-01",
+  "title": "App Shell 01 - Rail, Top Bar and Mobile Sheet",
+  "description": "An application shell with a desktop navigation rail, a top bar and a mobile navigation sheet. Navigation, actions and content are passed in as slots.",
+  "dependencies": [
+    "clsx",
+    "lucide-react",
+    "tailwind-merge"
+  ],
+  "registryDependencies": [
+    "dialog",
+    "breadcrumb",
+    "button",
+    "separator"
+  ],
+  "files": [
+    {
+      "path": "src/blocks/app-shell-01/app-shell.tsx",
+      "content": "'use client'\n\nimport { Menu } from 'lucide-react'\nimport { Fragment, useState, type ReactNode } from 'react'\n\nimport {\n  Breadcrumb,\n  BreadcrumbItem,\n  BreadcrumbLink,\n  BreadcrumbList,\n  BreadcrumbPage,\n  BreadcrumbSeparator,\n} from '../../components/ui/breadcrumb'\nimport { Button } from '../../components/ui/button'\nimport { Dialog, DialogContent, DialogTitle } from '../../components/ui/dialog'\nimport { Separator } from '../../components/ui/separator'\n\nexport type AppShellCrumb = {\n  label: ReactNode\n  /** Renders a native anchor. Omit on the current, final step. */\n  href?: string\n}\n\nexport type AppShell01Props = {\n  /**\n   * The navigation rendered in the desktop rail and in the mobile sheet. Pass\n   * nodes rather than a route table: the block never imports a router.\n   */\n  navigation: ReactNode\n  /** The accessible name for the navigation regions and the sheet trigger. */\n  navigationLabel: string\n  /** The brand or product mark at the top of the rail and the sheet. */\n  brand?: ReactNode\n  /** The trail shown in the top bar. */\n  breadcrumbs?: AppShellCrumb[]\n  /** Actions at the end of the top bar, e.g. an account menu. */\n  actions?: ReactNode\n  /** A slot above the navigation, e.g. a workspace switcher. */\n  railHeader?: ReactNode\n  /** A slot below the navigation, e.g. a user menu. */\n  railFooter?: ReactNode\n  children: ReactNode\n}\n\n/**\n * An application shell.\n *\n * It owns the frame every application screen repeats: a fixed rail from the\n * `lg` breakpoint up, a top bar with a breadcrumb trail and actions, and a\n * left-anchored Dialog sheet that carries the same navigation on narrow\n * screens. The navigation and the content are slots, so the app keeps its own\n * links, router and data. The block fetches nothing and imports no router.\n */\nexport function AppShell01({\n  navigation,\n  navigationLabel,\n  brand,\n  breadcrumbs,\n  actions,\n  railHeader,\n  railFooter,\n  children,\n}: AppShell01Props) {\n  const [navOpen, setNavOpen] = useState(false)\n\n  return (\n    <div className=\"bg-background text-foreground flex min-h-svh w-full\">\n      <aside className=\"border-border hidden w-64 shrink-0 flex-col border-r lg:flex\">\n        {brand ? <div className=\"flex h-14 items-center px-4\">{brand}</div> : null}\n        <Separator />\n        {railHeader ? <div className=\"p-4\">{railHeader}</div> : null}\n        <nav aria-label={navigationLabel} className=\"flex-1 overflow-y-auto p-4\">\n          {navigation}\n        </nav>\n        {railFooter ? (\n          <>\n            <Separator />\n            <div className=\"p-4\">{railFooter}</div>\n          </>\n        ) : null}\n      </aside>\n\n      <div className=\"flex min-w-0 flex-1 flex-col\">\n        <header className=\"border-border flex h-14 items-center gap-3 border-b px-4\">\n          <Dialog open={navOpen} onOpenChange={setNavOpen}>\n            <Button\n              type=\"button\"\n              variant=\"ghost\"\n              size=\"icon\"\n              className=\"lg:hidden\"\n              aria-label={navigationLabel}\n              onClick={() => setNavOpen(true)}\n            >\n              <Menu className=\"size-5\" />\n            </Button>\n            <DialogContent side=\"left\" className=\"w-72 gap-0 p-0\">\n              <DialogTitle className=\"sr-only\">{navigationLabel}</DialogTitle>\n              <div className=\"flex h-full flex-col p-4\">\n                {brand ? <div className=\"mb-4\">{brand}</div> : null}\n                {railHeader ? <div className=\"mb-4\">{railHeader}</div> : null}\n                <nav aria-label={navigationLabel} className=\"flex-1 overflow-y-auto\">\n                  {navigation}\n                </nav>\n                {railFooter ? <div className=\"mt-4\">{railFooter}</div> : null}\n              </div>\n            </DialogContent>\n          </Dialog>\n\n          {breadcrumbs?.length ? (\n            <Breadcrumb>\n              <BreadcrumbList>\n                {breadcrumbs.map((crumb, index) => {\n                  const last = index === breadcrumbs.length - 1\n                  return (\n                    // Positional, for the same reason as the other blocks.\n                    <Fragment key={index}>\n                      {index > 0 ? <BreadcrumbSeparator /> : null}\n                      <BreadcrumbItem>\n                        {last || !crumb.href ? (\n                          <BreadcrumbPage>{crumb.label}</BreadcrumbPage>\n                        ) : (\n                          <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>\n                        )}\n                      </BreadcrumbItem>\n                    </Fragment>\n                  )\n                })}\n              </BreadcrumbList>\n            </Breadcrumb>\n          ) : null}\n\n          <div className=\"ml-auto flex items-center gap-2\">{actions}</div>\n        </header>\n\n        <main className=\"flex-1 p-4 lg:p-6\">{children}</main>\n      </div>\n    </div>\n  )\n}\n\nexport default AppShell01\n",
+      "type": "registry:component",
+      "target": "components/blocks/app-shell-01/app-shell.tsx"
+    },
+    {
+      "path": "src/blocks/app-shell-01/index.tsx",
+      "content": "export { AppShell01, default } from './app-shell'\nexport type { AppShell01Props, AppShellCrumb } from './app-shell'\n",
+      "type": "registry:component",
+      "target": "components/blocks/app-shell-01/index.tsx"
+    },
+    {
+      "path": "src/components/ui/section.tsx",
+      "content": "import type { ReactNode } from 'react'\nimport { cn } from '../../lib/utils'\n\n/**\n * Container primitive. Every block composes its own section from this so vertical\n * rhythm stays consistent across the catalog instead of being re-invented per block.\n */\nexport function Section({\n  className,\n  children,\n  ...props\n}: React.ComponentProps<'section'>) {\n  return (\n    <section\n      className={cn('py-16 sm:py-24', className)}\n      {...props}\n    >\n      <div className=\"mx-auto w-full max-w-6xl px-6 lg:px-8\">\n        {children}\n      </div>\n    </section>\n  )\n}\n\n/**\n * The six heading levels a block can be composed at.\n *\n * Every block takes a `headingLevel` prop typed with this and forwards it to the\n * one heading it renders, so the surrounding document decides where the block\n * sits in the outline rather than the block deciding for itself. `h2` is the\n * default because a block is composed, not a page.\n *\n * A block rendered where the document *already* owns a heading for the same\n * content passes one level deeper. A catalog card already names the block in its\n * own `h2`, so the copy of the block embedded inside that card passes `h3`: the\n * embedded heading then reads as a child of the card that introduces it instead\n * of as a second, competing sibling. This is a fact about where the block was\n * placed, not about the block, which is why it is a prop and not a default.\n */\nexport type HeadingLevel = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'\n\nexport function SectionHeading({\n  eyebrow,\n  title,\n  as: Heading = 'h2',\n  description,\n  align = 'center',\n  className,\n}: {\n  eyebrow?: ReactNode\n  title: ReactNode\n  description?: ReactNode\n  align?: 'center' | 'left'\n  /**\n   * Heading level. Defaults to `h2` because blocks compose under a page heading.\n   * A page that renders a block as its primary heading passes `as=\"h1\"`; a\n   * document with no `h1` gives screen-reader and search engines no top-level\n   * entry point.\n   */\n  as?: HeadingLevel\n  className?: string\n}) {\n  return (\n    <div\n      className={cn(\n        'flex flex-col gap-4',\n        align === 'center' ? 'items-center text-center' : 'items-start text-left',\n        className,\n      )}\n    >\n      {eyebrow ? (\n        <span className=\"text-muted-foreground text-sm font-medium tracking-wide uppercase\">\n          {eyebrow}\n        </span>\n      ) : null}\n      <Heading className=\"text-3xl font-semibold tracking-tight text-balance sm:text-4xl\">\n        {title}\n      </Heading>\n      {description ? (\n        <p className=\"text-muted-foreground max-w-2xl text-lg text-pretty\">\n          {description}\n        </p>\n      ) : null}\n    </div>\n  )\n}\n",
+      "type": "registry:component",
+      "target": "components/ui/section.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "categories": [
+    "application"
+  ],
+  "type": "registry:block"
+}

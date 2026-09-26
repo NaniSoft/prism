@@ -1,0 +1,74 @@
+---
+title: AuthForm01
+---
+
+## Overview
+
+AuthForm01 is a sign-in card: a title, a supporting line, an error slot, the
+credential fields, an optional remember row and the submit control.
+
+The block composes these components:
+
+| Part | Component | Role |
+| --- | --- | --- |
+| Surface | Card | the panel that centres the form |
+| Fields | Field, Input | labelled email and password controls |
+| Choices | Checkbox | the remember-me row |
+| Feedback | Alert | the error message above the fields |
+| Submit | Button | the one action on the card |
+
+The block owns no credentials and makes no request. Each field value and the
+submit handler come from the consumer, and the error line is a prop, so the
+consumer's validation decides when it appears.
+
+## Usage
+
+```tsx
+import { AuthForm01 } from '@nanisoft/prism-ui/blocks/auth-form-01'
+
+<AuthForm01
+  title="Sign in"
+  description="Welcome back. Enter your details to continue."
+  error={error}
+  submitLabel="Sign in"
+  fields={[
+    { id: 'email', label: 'Email', type: 'email', value: email, onChange: setEmail, required: true },
+    { id: 'password', label: 'Password', type: 'password', value: password, onChange: setPassword, required: true },
+  ]}
+  remember={{ id: 'remember', label: 'Remember me for 30 days' }}
+  onSubmit={handleSubmit}
+/>
+```
+
+<ComponentDemo slug="auth-form-01" />
+
+## Guidelines
+
+### When to use
+
+Use AuthForm01 for a sign-in or a similar single-step credential screen. It
+works when the screen exists to collect one email and one secret and send them
+somewhere.
+
+### When not to use
+
+Do not use it for registration, password reset or profile editing. Those have
+different field sets; compose a form from the same parts.
+
+Do not use it for an account picker or single sign-on landing; that is a
+different shape, and `footer` is not the place for it.
+
+### Best practices
+
+- Set `type`, `autoComplete` and `required` on every field. Browsers use them to
+  fill and validate, so the typing is the whole reason the field is typed.
+- Keep the error to one sentence and mark the failed fields. The Alert names the
+  problem; `aria-invalid` on each input is what a screen reader announces.
+- Disable the submit control while `pending` and pass `pendingLabel`, so the
+  reader sees that work is happening.
+
+### Content guidelines
+
+- The title is a short verb phrase in sentence case: "Sign in", "Continue".
+- The description states the outcome, not a policy.
+- An error says what to do next: "Enter your email and password to continue."

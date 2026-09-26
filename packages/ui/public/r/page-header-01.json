@@ -1,0 +1,46 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "page-header-01",
+  "title": "Page Header 01 - Title Band",
+  "description": "A page title band with a breadcrumb trail, a supporting line and a row of actions. Every step, string and action is passed in as a prop.",
+  "dependencies": [
+    "clsx",
+    "tailwind-merge"
+  ],
+  "registryDependencies": [
+    "breadcrumb",
+    "separator",
+    "typography",
+    "button"
+  ],
+  "files": [
+    {
+      "path": "src/blocks/page-header-01/index.tsx",
+      "content": "export { PageHeader01, default } from './page-header'\nexport type { PageHeader01Props, PageHeaderAction, PageHeaderCrumb } from './page-header'\n",
+      "type": "registry:component",
+      "target": "components/blocks/page-header-01/index.tsx"
+    },
+    {
+      "path": "src/blocks/page-header-01/page-header.tsx",
+      "content": "import { Fragment, type ReactNode } from 'react'\n\nimport {\n  Breadcrumb,\n  BreadcrumbItem,\n  BreadcrumbLink,\n  BreadcrumbList,\n  BreadcrumbPage,\n  BreadcrumbSeparator,\n} from '../../components/ui/breadcrumb'\nimport { Button } from '../../components/ui/button'\nimport { Separator } from '../../components/ui/separator'\nimport { Heading, Text, type HeadingElement } from '../../components/ui/typography'\n\nexport type PageHeaderCrumb = {\n  label: ReactNode\n  /** Renders a native anchor. Omit on the current, final step. */\n  href?: string\n}\n\nexport type PageHeaderAction = {\n  label: string\n  variant?: 'default' | 'outline' | 'secondary' | 'ghost'\n  size?: 'default' | 'sm' | 'lg'\n}\n\nexport type PageHeader01Props = {\n  /**\n   * The trail above the title. The final item always renders as the current\n   * page, whether or not it carries an `href`.\n   */\n  breadcrumbs?: PageHeaderCrumb[]\n  /** The page title. */\n  title: ReactNode\n  /** One supporting line under the title. */\n  description?: ReactNode\n  /**\n   * Declarative actions rendered as Prism Buttons. Use `actionsSlot` for a\n   * control that needs its own behaviour, such as a router link or a menu.\n   */\n  actions?: PageHeaderAction[]\n  /** A slot for consumer-provided controls on the action row. */\n  actionsSlot?: ReactNode\n  /**\n   * The heading element for the title. Defaults to `h2` because a block is\n   * composed; a page whose own document outline this header opens passes\n   * `h1`. See `HeadingElement`.\n   */\n  headingLevel?: HeadingElement\n}\n\n/**\n * A page title band.\n *\n * It places a breadcrumb trail and a row of actions above the title, then a\n * rule below the header. The trail is passed in as props and renders native\n * anchors, so the consumer owns navigation and can substitute their own\n * router by passing `actionsSlot` and breadcrumb labels. Every string and\n * every step is a prop; the block ships none of its own.\n */\nexport function PageHeader01({\n  breadcrumbs,\n  title,\n  description,\n  actions = [],\n  actionsSlot,\n  headingLevel = 'h2',\n}: PageHeader01Props) {\n  const hasTrail = Boolean(breadcrumbs?.length)\n  const hasActions = actions.length > 0 || Boolean(actionsSlot)\n\n  return (\n    <header className=\"flex flex-col gap-4\">\n      {hasTrail || hasActions ? (\n        <div className=\"flex flex-wrap items-center justify-between gap-4\">\n          {hasTrail ? (\n            <Breadcrumb>\n              <BreadcrumbList>\n                {breadcrumbs?.map((crumb, index) => {\n                  const last = index === breadcrumbs.length - 1\n                  return (\n                    // Positional, for the same reason as the other blocks: the\n                    // label is display content and two steps may share one.\n                    <Fragment key={index}>\n                      {index > 0 ? <BreadcrumbSeparator /> : null}\n                      <BreadcrumbItem>\n                        {last || !crumb.href ? (\n                          <BreadcrumbPage>{crumb.label}</BreadcrumbPage>\n                        ) : (\n                          <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>\n                        )}\n                      </BreadcrumbItem>\n                    </Fragment>\n                  )\n                })}\n              </BreadcrumbList>\n            </Breadcrumb>\n          ) : (\n            <span />\n          )}\n\n          {hasActions ? (\n            <div className=\"flex items-center gap-2\">\n              {actionsSlot}\n              {actions.map((action, index) => (\n                <Button\n                  key={index}\n                  variant={action.variant ?? (index === 0 ? 'default' : 'outline')}\n                  size={action.size}\n                >\n                  {action.label}\n                </Button>\n              ))}\n            </div>\n          ) : null}\n        </div>\n      ) : null}\n\n      <div className=\"flex flex-col gap-1.5\">\n        <Heading as={headingLevel} size=\"3xl\">\n          {title}\n        </Heading>\n        {description ? (\n          <Text size=\"lg\" tone=\"muted\">\n            {description}\n          </Text>\n        ) : null}\n      </div>\n\n      <Separator />\n    </header>\n  )\n}\n\nexport default PageHeader01\n",
+      "type": "registry:component",
+      "target": "components/blocks/page-header-01/page-header.tsx"
+    },
+    {
+      "path": "src/components/ui/section.tsx",
+      "content": "import type { ReactNode } from 'react'\nimport { cn } from '../../lib/utils'\n\n/**\n * Container primitive. Every block composes its own section from this so vertical\n * rhythm stays consistent across the catalog instead of being re-invented per block.\n */\nexport function Section({\n  className,\n  children,\n  ...props\n}: React.ComponentProps<'section'>) {\n  return (\n    <section\n      className={cn('py-16 sm:py-24', className)}\n      {...props}\n    >\n      <div className=\"mx-auto w-full max-w-6xl px-6 lg:px-8\">\n        {children}\n      </div>\n    </section>\n  )\n}\n\n/**\n * The six heading levels a block can be composed at.\n *\n * Every block takes a `headingLevel` prop typed with this and forwards it to the\n * one heading it renders, so the surrounding document decides where the block\n * sits in the outline rather than the block deciding for itself. `h2` is the\n * default because a block is composed, not a page.\n *\n * A block rendered where the document *already* owns a heading for the same\n * content passes one level deeper. A catalog card already names the block in its\n * own `h2`, so the copy of the block embedded inside that card passes `h3`: the\n * embedded heading then reads as a child of the card that introduces it instead\n * of as a second, competing sibling. This is a fact about where the block was\n * placed, not about the block, which is why it is a prop and not a default.\n */\nexport type HeadingLevel = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'\n\nexport function SectionHeading({\n  eyebrow,\n  title,\n  as: Heading = 'h2',\n  description,\n  align = 'center',\n  className,\n}: {\n  eyebrow?: ReactNode\n  title: ReactNode\n  description?: ReactNode\n  align?: 'center' | 'left'\n  /**\n   * Heading level. Defaults to `h2` because blocks compose under a page heading.\n   * A page that renders a block as its primary heading passes `as=\"h1\"`; a\n   * document with no `h1` gives screen-reader and search engines no top-level\n   * entry point.\n   */\n  as?: HeadingLevel\n  className?: string\n}) {\n  return (\n    <div\n      className={cn(\n        'flex flex-col gap-4',\n        align === 'center' ? 'items-center text-center' : 'items-start text-left',\n        className,\n      )}\n    >\n      {eyebrow ? (\n        <span className=\"text-muted-foreground text-sm font-medium tracking-wide uppercase\">\n          {eyebrow}\n        </span>\n      ) : null}\n      <Heading className=\"text-3xl font-semibold tracking-tight text-balance sm:text-4xl\">\n        {title}\n      </Heading>\n      {description ? (\n        <p className=\"text-muted-foreground max-w-2xl text-lg text-pretty\">\n          {description}\n        </p>\n      ) : null}\n    </div>\n  )\n}\n",
+      "type": "registry:component",
+      "target": "components/ui/section.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "categories": [
+    "application"
+  ],
+  "type": "registry:block"
+}

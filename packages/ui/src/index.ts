@@ -99,6 +99,7 @@ export {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -116,6 +117,11 @@ export { FeatureGrid01 } from './blocks/feature-grid-01'
 export { Stats01 } from './blocks/stats-01'
 export { Pricing01 } from './blocks/pricing-01'
 export { Cta01 } from './blocks/cta-01'
+export { PageHeader01 } from './blocks/page-header-01'
+export { DataTable01 } from './blocks/data-table-01'
+export { SettingsPanel01 } from './blocks/settings-panel-01'
+export { AuthForm01 } from './blocks/auth-form-01'
+export { AppShell01 } from './blocks/app-shell-01'
 
 export { PACKS, MODES, parseStoredTheme, themeAttributes } from './theming'
 export type { PackId, Mode } from './theming'

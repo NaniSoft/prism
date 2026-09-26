@@ -1,0 +1,8 @@
+{
+  "name": "app-shell-01",
+  "title": "App Shell 01 - Rail, Top Bar and Mobile Sheet",
+  "description": "An application shell with a desktop navigation rail, a top bar and a mobile navigation sheet. Navigation, actions and content are passed in as slots.",
+  "categories": ["application"],
+  "registryDependencies": ["dialog", "breadcrumb", "button", "separator"],
+  "dependencies": ["lucide-react"]
+}

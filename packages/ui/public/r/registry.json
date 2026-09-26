@@ -645,6 +645,92 @@
       ]
     },
     {
+      "name": "app-shell-01",
+      "title": "App Shell 01 - Rail, Top Bar and Mobile Sheet",
+      "description": "An application shell with a desktop navigation rail, a top bar and a mobile navigation sheet. Navigation, actions and content are passed in as slots.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "dialog",
+        "breadcrumb",
+        "button",
+        "separator"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/app-shell-01/app-shell.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/app-shell-01/app-shell.tsx"
+        },
+        {
+          "path": "src/blocks/app-shell-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/app-shell-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "auth-form-01",
+      "title": "Auth Form 01 - Sign-In Card",
+      "description": "A sign-in card with labelled credential fields, a remember control and an error slot. Field values, labels and the submit handler are all passed in as props.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "card",
+        "field",
+        "input",
+        "checkbox",
+        "alert",
+        "button"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/auth-form-01/auth-form.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/auth-form-01/auth-form.tsx"
+        },
+        {
+          "path": "src/blocks/auth-form-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/auth-form-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "cta-01",
       "title": "CTA 01 - Filled Banner",
       "description": "A closing call to action on a filled primary surface. Headline, supporting line and the action are passed in as props.",
@@ -670,6 +756,51 @@
           "path": "src/blocks/cta-01/index.tsx",
           "type": "registry:component",
           "target": "components/blocks/cta-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "data-table-01",
+      "title": "Data Table 01 - Toolbar, Filters and Pagination",
+      "description": "A table section with a toolbar, filters, row selection and pagination. Rows, columns, labels and all state callbacks are passed in as props.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "table",
+        "checkbox",
+        "dropdown-menu",
+        "popover",
+        "pagination",
+        "input",
+        "button"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/data-table-01/data-table.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/data-table-01/data-table.tsx"
+        },
+        {
+          "path": "src/blocks/data-table-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/data-table-01/index.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",
@@ -762,6 +893,47 @@
       ]
     },
     {
+      "name": "page-header-01",
+      "title": "Page Header 01 - Title Band",
+      "description": "A page title band with a breadcrumb trail, a supporting line and a row of actions. Every step, string and action is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "breadcrumb",
+        "separator",
+        "typography",
+        "button"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/page-header-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/page-header-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/page-header-01/page-header.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/page-header-01/page-header.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "pricing-01",
       "title": "Pricing 01 - Three Tier With Highlight",
       "description": "A three-up plan comparison with one plan lifted. Plans, prices, features and actions are all passed in as props.",
@@ -789,6 +961,51 @@
           "path": "src/blocks/pricing-01/pricing.tsx",
           "type": "registry:component",
           "target": "components/blocks/pricing-01/pricing.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "settings-panel-01",
+      "title": "Settings Panel 01 - Grouped Form",
+      "description": "A settings form grouped into sections of text, select and switch fields. Labels, options and value handlers are all passed in as props.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "card",
+        "field",
+        "input",
+        "textarea",
+        "switch",
+        "select",
+        "button",
+        "separator"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/settings-panel-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/settings-panel-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/settings-panel-01/settings-panel.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/settings-panel-01/settings-panel.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",

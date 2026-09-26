@@ -82,6 +82,25 @@ export interface DropdownMenuCheckboxItemProps extends Omit<ComponentProps<'div'
 }
 
 /**
+ * The props DropdownMenuRadioGroup forwards to Base UI.
+ *
+ * Declared here rather than re-exported from Base UI so no upstream type
+ * crosses the package seam (ticket 07 section 6). A radio item needs this
+ * group to hold its selected value; without it the item's `value` has no
+ * owning state and selection never moves.
+ */
+export interface DropdownMenuRadioGroupProps extends Omit<ComponentProps<'div'>, 'onChange'> {
+  /** The controlled value of the selected radio item. */
+  value?: string
+  /** The initially selected value, for an uncontrolled group. */
+  defaultValue?: string
+  /** Called when the selected value changes. */
+  onValueChange?: (value: string) => void
+  /** Whether the group ignores user interaction. */
+  disabled?: boolean
+}
+
+/**
  * The props DropdownMenuRadioItem forwards to Base UI.
  *
  * Declared here rather than re-exported from Base UI so no upstream type
@@ -259,6 +278,17 @@ function DropdownMenuCheckboxItem({
   )
 }
 
+/** A set of radio items that selects exactly one value. */
+function DropdownMenuRadioGroup({ className, ...props }: DropdownMenuRadioGroupProps) {
+  return (
+    <MenuPrimitive.RadioGroup
+      data-slot="dropdown-menu-radio-group"
+      className={cn(className)}
+      {...props}
+    />
+  )
+}
+
 /** A menu item that selects one value from an implicit radio group. */
 function DropdownMenuRadioItem({
   className,
@@ -361,6 +391,7 @@ export {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,

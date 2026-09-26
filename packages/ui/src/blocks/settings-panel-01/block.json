@@ -1,0 +1,8 @@
+{
+  "name": "settings-panel-01",
+  "title": "Settings Panel 01 - Grouped Form",
+  "description": "A settings form grouped into sections of text, select and switch fields. Labels, options and value handlers are all passed in as props.",
+  "categories": ["application"],
+  "registryDependencies": ["card", "field", "input", "textarea", "switch", "select", "button", "separator"],
+  "dependencies": []
+}

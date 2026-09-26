@@ -1,0 +1,73 @@
+---
+title: AppShell01
+---
+
+## Overview
+
+AppShell01 is the frame an application screen repeats: a navigation rail from
+the large breakpoint up, a top bar with a breadcrumb trail and actions, and a
+left-anchored sheet that carries the same navigation on narrow screens. The page
+content is a slot, so the shell never decides what a screen contains.
+
+The block composes these components:
+
+| Part | Component | Role |
+| --- | --- | --- |
+| Rail | Separator | the fixed navigation column and its dividers |
+| Top bar | Breadcrumb, Button | the trail and the sheet trigger |
+| Sheet | Dialog | the left drawer that holds navigation on small screens |
+| Content | children | the application-owned main region |
+
+The navigation is passed as a node rather than a route table. The block never
+imports a router and fetches nothing, so the application keeps its own links and
+data.
+
+## Usage
+
+```tsx
+import { AppShell01 } from '@nanisoft/prism-ui/blocks/app-shell-01'
+
+<AppShell01
+  navigationLabel="Primary"
+  brand={<ProductMark />}
+  breadcrumbs={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Projects' }]}
+  navigation={<AppNavigation />}
+>
+  <DashboardContent />
+</AppShell01>
+```
+
+<ComponentDemo slug="app-shell-01" />
+
+## Guidelines
+
+### When to use
+
+Use AppShell01 when several screens share one navigation frame. It works when
+the navigation is stable across routes and the top bar carries the current
+location rather than a page's own controls.
+
+### When not to use
+
+Do not use it on a marketing page or a docs article. Those pages have no
+authenticated navigation rail, and the frame would collapse around content that
+does not need it.
+
+Do not use it for a single screen. One page does not justify a shell; render the
+navigation directly.
+
+### Best practices
+
+- Pass the same navigation node to both the rail and the sheet. The block
+  renders it twice, so keep ids in the navigation unique or avoid ids there.
+- Keep the breadcrumb to the ancestors and the current page. The page's own
+  title belongs in the page header, not the top bar.
+- Put account controls, a theme switch or a search in `actions`.
+- Give the shell a real `navigationLabel`: it names two navigation landmarks
+  and the sheet trigger, and it is the only required string.
+
+### Content guidelines
+
+- A brand mark is a wordmark or a short product name, not a headline.
+- A breadcrumb label is the destination's display name.
+- `navigationLabel` names the area for assistive technology, such as "Primary".

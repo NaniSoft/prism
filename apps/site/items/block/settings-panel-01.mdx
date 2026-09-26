@@ -1,0 +1,78 @@
+---
+title: SettingsPanel01
+---
+
+## Overview
+
+SettingsPanel01 is a settings form grouped into named sections. The card holds
+the title and description, each section holds a heading and its fields, and the
+footer holds the save and cancel controls, with a rule between sections.
+
+The block composes these components:
+
+| Part | Component | Role |
+| --- | --- | --- |
+| Surface | Card, Separator | the panel and the rule between sections |
+| Fields | Field, Input, Textarea | labelled text controls |
+| Choices | Select, Switch | one-of-many and on-or-off fields |
+| Footer | Button | the save and secondary actions |
+
+A field is a small object that describes one control: its `kind`, its label, an
+optional description and its value handlers. The block owns no values and no
+copy. Omitting `submitLabel` renders no footer, the right shape for a read-only
+view.
+
+## Usage
+
+```tsx
+import { SettingsPanel01 } from '@nanisoft/prism-ui/blocks/settings-panel-01'
+
+<SettingsPanel01
+  title="Workspace settings"
+  description="Manage how this workspace behaves for everyone on the team."
+  submitLabel="Save changes"
+  sections={[
+    {
+      id: 'general',
+      title: 'General',
+      fields: [
+        { kind: 'text', id: 'name', label: 'Workspace name', defaultValue: 'Northwind' },
+        { kind: 'switch', id: 'digest', label: 'Weekly digest', defaultChecked: true },
+      ],
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="settings-panel-01" />
+
+## Guidelines
+
+### When to use
+
+Use SettingsPanel01 when a screen changes several settings that share one save.
+It works when the groups are stable and a reader scans them top to bottom.
+
+### When not to use
+
+Do not use it for a single setting. One field in a card is a heavier frame than
+the choice deserves; put the control in the page.
+
+Do not use it when each change should apply immediately with no save. A switch
+inside a saved form reads as applied; use standalone switches with their own
+handler instead.
+
+### Best practices
+
+- Give every field a stable `id`, so the label is linked to the control.
+- Keep one save per panel. A mixed model, where some fields save and others do
+  not, makes the footer's promise unclear.
+- Put the consequential choice first in its section, so a reader does not hunt
+  for the setting that matters most.
+- Disable the submit control while a save is in flight.
+
+### Content guidelines
+
+- A section title is one or two words in sentence case: "General",
+  "Notifications".
+- A field label is a short noun phrase and does not end in a colon.

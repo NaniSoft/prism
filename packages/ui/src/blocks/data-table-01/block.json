@@ -1,0 +1,8 @@
+{
+  "name": "data-table-01",
+  "title": "Data Table 01 - Toolbar, Filters and Pagination",
+  "description": "A table section with a toolbar, filters, row selection and pagination. Rows, columns, labels and all state callbacks are passed in as props.",
+  "categories": ["application"],
+  "registryDependencies": ["table", "checkbox", "dropdown-menu", "popover", "pagination", "input", "button"],
+  "dependencies": ["lucide-react"]
+}
