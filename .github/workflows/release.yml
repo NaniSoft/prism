@@ -1,0 +1,58 @@
+name: Release (version)
+
+# The version pull request lane. It never publishes. Publishing is a separate,
+# manual, environment-gated run of publish.yml.
+#
+# main: open or update the "Version Packages" pull request from the changesets on
+#       main.
+# next: the prerelease lane. If .changeset/pre.json is absent, enter pre mode
+#       first, then version. Versions become 1.0.0-next.0 and so on.
+#
+# Exiting the prerelease lane: run `pnpm changeset pre exit` on next, commit the
+# removal of .changeset/pre.json, and merge next into main. The next version pull
+# request collapses the accumulated prerelease changes into a single stable
+# release, and a publish run on main publishes it to latest.
+#
+# Precondition: the repository must allow GitHub Actions to create and approve
+# pull requests, because this job opens the version pull request.
+
+on:
+  push:
+    branches: [main, next]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Enter the prerelease lane
+        if: github.ref == 'refs/heads/next'
+        shell: bash
+        run: |
+          if [ ! -f .changeset/pre.json ]; then
+            pnpm changeset pre enter next
+          fi
+
+      - name: Create or update the version pull request
+        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1
+        with:
+          commit: 'chore(release): version packages [skip ci]'
+          title: 'chore(release): version packages'
+          version: pnpm changeset:version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

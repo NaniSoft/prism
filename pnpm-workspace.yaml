@@ -2,6 +2,11 @@ packages:
   - apps/*
   - packages/*
 
+# pnpm 11 keeps non-registry settings here, not in .npmrc. The project-local
+# store survives store corruption and is cached in CI. The directory is
+# gitignored.
+storeDir: .pnpm-store
+
 # pnpm >=11 replaced `onlyBuiltDependencies` with an `allowBuilds` map.
 # Anything not listed here fails the install with ERR_PNPM_IGNORED_BUILDS.
 allowBuilds:
@@ -19,3 +24,6 @@ allowBuilds:
   # Transitive of the Agents SDK. Its postinstall only prints a funding message;
   # `false` keeps the script from running.
   core-js-pure: false
+  # Wrangler's Workers runtime ships a platform binary and its install script
+  # materializes it. The site deploy lane needs it.
+  workerd: true

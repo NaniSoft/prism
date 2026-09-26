@@ -1,0 +1,58 @@
+name: Setup
+description: Install the pinned Node and pnpm, restore the caches, and install with a frozen lockfile.
+
+inputs:
+  node-version:
+    description: Override the Node version. Defaults to the repository .node-version.
+    required: false
+    default: ''
+  registry-url:
+    description: npm registry URL for the token fallback path. Leave empty for OIDC.
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node (from .node-version)
+      if: inputs.node-version == ''
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      with:
+        node-version-file: .node-version
+        registry-url: ${{ inputs.registry-url }}
+
+    - name: Setup Node (explicit version)
+      if: inputs.node-version != ''
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        registry-url: ${{ inputs.registry-url }}
+
+    - name: Enable pnpm from packageManager
+      shell: bash
+      run: corepack enable pnpm
+
+    - name: Resolve the pnpm store path
+      id: store
+      shell: bash
+      run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+    - name: Cache the pnpm store
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+      with:
+        path: ${{ steps.store.outputs.path }}
+        key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-
+
+    - name: Cache the turbo local cache
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+      with:
+        path: node_modules/.cache/turbo
+        key: ${{ runner.os }}-turbo-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-turbo-
+
+    - name: Install
+      shell: bash
+      run: pnpm install --frozen-lockfile

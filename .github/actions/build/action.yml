@@ -1,0 +1,9 @@
+name: Build
+description: Build every package and the site through the turbo task graph.
+
+runs:
+  using: composite
+  steps:
+    - name: Build
+      shell: bash
+      run: pnpm build

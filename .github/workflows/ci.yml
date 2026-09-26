@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Supply-chain note: every third-party action is pinned to a full commit SHA with
+# the release in a trailing comment. The deferred supply-chain workflows are named
+# in this file's comment rather than omitted:
+#   .github/workflows/codeql.yml            CodeQL code scanning (deferred)
+#   .github/workflows/scorecards.yml        OSSF Scorecard (deferred)
+#   .github/workflows/dependency-review.yml actions/dependency-review-action (deferred)
+#   renovate.json                           Renovate (deferred)
+#   pnpm minimumReleaseAge                  pnpm dependency-age floor (deferred)
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Gates
+        uses: ./.github/actions/gates
+
+      - name: Verify the published tarballs
+        run: node scripts/verify-tarballs.mjs --mode=verify
+
+  release-preview:
+    name: release-preview
+    if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'changeset-release/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Render the release preview
+        run: node scripts/release-preview.mjs --base "${{ github.event.pull_request.base.sha }}" > "${{ runner.temp }}/prism-release-preview.md"
+
+      - name: Comment on the pull request
+        uses: ./.github/actions/comment-on-pr
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          body-path: ${{ runner.temp }}/prism-release-preview.md
+
+  deploy-site:
+    name: deploy-site
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build
+        uses: ./.github/actions/build
+
+      # The site ships on every merge to main, after the gates pass. It is not tied
+      # to a release: docs and content ship faster than versions. The Worker name
+      # and the custom domain live in apps/site/wrangler.jsonc. Secrets are
+      # repository-level, never org-scoped (an org secret scoped to private
+      # repositories never reaches a public repository's CI).
+      - name: Deploy to Cloudflare
+        run: pnpm --filter @nanisoft/site run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

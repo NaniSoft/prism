@@ -1,0 +1,18 @@
+name: Gates
+description: Run the whole gate set in one place so ci.yml and publish.yml cannot drift.
+
+runs:
+  using: composite
+  steps:
+    - name: Lint, typecheck, test, build and check
+      shell: bash
+      run: |
+        pnpm lint
+        pnpm typecheck
+        pnpm test
+        pnpm build
+        pnpm check
+
+    - name: Validate the changesets
+      shell: bash
+      run: pnpm changeset:validate

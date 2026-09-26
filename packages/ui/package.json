@@ -8,7 +8,7 @@
   "homepage": "https://prism.nanisoft.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/NaniSoft/prism.git",
+    "url": "git+https://github.com/NaniSoft/prism.git",
     "directory": "packages/ui"
   },
   "sideEffects": [
@@ -60,8 +60,12 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "THIRD-PARTY-NOTICES.md"
   ],
+  "engines": {
+    "node": ">=22.14.0"
+  },
   "publishConfig": {
     "access": "public"
   },
@@ -70,7 +74,9 @@
     "validate": "node scripts/validate-registry.mjs",
     "build": "node scripts/build.mjs && pnpm sync && pnpm validate && shadcn build && node scripts/check-surface.mjs",
     "check": "node scripts/validate-registry.mjs && node scripts/check-surface.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepack": "node ../../scripts/stage-package-files.mjs",
+    "prepublishOnly": "publint"
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",

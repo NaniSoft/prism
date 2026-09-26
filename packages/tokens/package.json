@@ -8,17 +8,24 @@
   "homepage": "https://prism.nanisoft.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/NaniSoft/prism.git",
+    "url": "git+https://github.com/NaniSoft/prism.git",
     "directory": "packages/tokens"
   },
+  "sideEffects": [
+    "**/*.css"
+  ],
   "exports": {
     ".": "./dist/index.js",
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "THIRD-PARTY-NOTICES.md"
   ],
+  "engines": {
+    "node": ">=22.14.0"
+  },
   "publishConfig": {
     "access": "public"
   },
@@ -26,7 +33,9 @@
     "build": "node build/build.mjs && pnpm check",
     "watch": "node build/build.mjs --watch",
     "check": "node scripts/check-contrast.mjs && node scripts/check-emitted-contract.mjs",
-    "gen": "node scripts/gen-pastel.mjs"
+    "gen": "node scripts/gen-pastel.mjs",
+    "prepack": "node ../../scripts/stage-package-files.mjs",
+    "prepublishOnly": "publint"
   },
   "devDependencies": {
     "style-dictionary": "^4.4.0",

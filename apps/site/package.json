@@ -3,6 +3,18 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "description": "The Prism documentation site and the /mcp Worker.",
+  "license": "MIT",
+  "author": "NaniSoft",
+  "homepage": "https://prism.nanisoft.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NaniSoft/prism.git",
+    "directory": "apps/site"
+  },
+  "engines": {
+    "node": ">=22.14.0"
+  },
   "scripts": {
     "predev": "pnpm --filter @nanisoft/prism-tokens build && pnpm --filter @nanisoft/prism-ui build && pnpm --filter @nanisoft/prism-llms build && pnpm --filter @nanisoft/prism-mcp-server build && node ../../scripts/dev-cache-guard.mjs && node scripts/generate-demos.mjs && node scripts/generate-api.mjs",
     "dev": "next dev --turbopack",
@@ -11,15 +23,16 @@
     "postbuild": "node scripts/copy-agent-surface.mjs && node scripts/check-search-budget.mjs",
     "test": "vitest run",
     "start": "next start",
+    "deploy": "wrangler deploy",
     "catalog:analyze": "node scripts/analyze-blocks.mjs",
     "pretypecheck": "pnpm --filter @nanisoft/prism-llms build && pnpm --filter @nanisoft/prism-mcp-server build && node scripts/generate-demos.mjs && node scripts/generate-api.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ."
   },
   "dependencies": {
-    "@nanisoft/prism-ui": "workspace:*",
-    "@nanisoft/prism-tokens": "workspace:*",
     "@nanisoft/prism-mcp-server": "workspace:*",
+    "@nanisoft/prism-tokens": "workspace:*",
+    "@nanisoft/prism-ui": "workspace:*",
     "agents": "^0.24.0",
     "fumadocs-core": "16.15.14",
     "fumadocs-mdx": "15.4.5",
@@ -29,9 +42,9 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    "@nanisoft/prism-llms": "workspace:*",
     "@modelcontextprotocol/client": "2.0.0",
     "@modelcontextprotocol/server": "2.0.0",
+    "@nanisoft/prism-llms": "workspace:*",
     "@tailwindcss/postcss": "^4.1.12",
     "@types/node": "^22.0.0",
     "@types/react": "^19.2.0",
@@ -40,6 +53,7 @@
     "eslint-config-next": "16.3.6",
     "tailwindcss": "^4.1.12",
     "typescript": "^5.7.0",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "wrangler": "^4.140.0"
   }
 }

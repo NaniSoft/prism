@@ -1,0 +1,106 @@
+name: Release (publish)
+
+# The only publisher. Manual dispatch, behind the `npm-publish` environment so a
+# merge alone never publishes and a required reviewer is in front of the job.
+#
+# Release procedure:
+#   1. Merge the "Version Packages" pull request into main.
+#   2. Actions -> Release (publish) -> Run workflow, on main, channel latest,
+#      dry_run false.
+#
+# dry_run true is the rehearsal and the escape hatch: it builds, verifies the
+# tarballs and runs a full `pnpm publish --dry-run` without touching the registry.
+#
+# Auth is npm trusted publishing over OIDC. There is no long-lived token and no
+# auth key in the root .npmrc. `setup` is called with no registry-url on purpose:
+# actions/setup-node with a registry-url writes
+# `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}` into .npmrc, and
+# `registry=https://registry.npmjs.org` already routes pnpm correctly without it.
+#
+# Fallback token path, if OIDC is ever unavailable: create a granular access token
+# with Packages read and write, scoped to @nanisoft, with 2FA bypass, owned by a
+# member of the nanisoft org. Store it as a repository secret NPM_TOKEN (a secret
+# scoped to private repositories never reaches this public repository). Then pass
+# registry-url: https://registry.npmjs.org to setup and NODE_AUTH_TOKEN from the
+# secret. The two recorded old failures are exactly these preconditions.
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: The npm dist-tag to publish under.
+        type: choice
+        options: [latest, next]
+        default: latest
+      dry_run:
+        description: Rehearse the full publish without touching the registry.
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: write # push the git tags
+      id-token: write # OIDC: trusted publishing and provenance
+    env:
+      # changeset publish runs pnpm publish; pnpm reads pnpm_config_* (npm_config_*
+      # is no longer read by pnpm 11) and attaches provenance. Both are set so the
+      # flag survives a pnpm or npm CLI invoker.
+      pnpm_config_provenance: 'true'
+      npm_config_provenance: 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Gates
+        uses: ./.github/actions/gates
+
+      # The rehearsal. No tag assertions: a rehearsal must run even when a tag
+      # from an interrupted earlier attempt exists.
+      - name: Rehearse the publish
+        if: inputs.dry_run
+        run: |
+          node scripts/verify-tarballs.mjs --mode=verify
+          pnpm -r --filter "./packages/*" publish --dry-run --no-git-checks
+
+      # Every version about to publish must not already have a tag, so the publish
+      # is guaranteed to create one. If the version pull request was merged but a
+      # package was already published, this fails loudly instead of exiting green
+      # as a no-op.
+      - name: Verify the versions are unpublished
+        if: ${{ !inputs.dry_run }}
+        run: node scripts/verify-tarballs.mjs --mode=prepublish
+
+      - name: Publish
+        if: ${{ !inputs.dry_run }}
+        shell: bash
+        run: |
+          # changesets rejects a custom --tag while it is in pre mode: in pre
+          # mode it publishes under the prerelease tag (next) on its own.
+          if [ -f .changeset/pre.json ]; then
+            pnpm changeset publish
+          else
+            pnpm changeset publish --tag "${{ inputs.channel }}"
+          fi
+
+      # changeset publish creates the tags locally but does not push them.
+      - name: Push the tags
+        if: ${{ !inputs.dry_run }}
+        run: git push origin --tags
+
+      # The tag now existing is the proof that bytes landed.
+      - name: Verify the tags exist
+        if: ${{ !inputs.dry_run }}
+        run: node scripts/verify-tarballs.mjs --mode=postpublish

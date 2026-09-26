@@ -5,23 +5,32 @@
   "type": "module",
   "packageManager": "pnpm@11.18.0",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.14.0"
   },
   "scripts": {
-    "dev": "pnpm --filter @nanisoft/site dev",
-    "build": "node scripts/check-dashes.mjs && node scripts/check-elevation-layout.mjs && pnpm --filter @nanisoft/prism-tokens build && pnpm --filter @nanisoft/prism-ui build && pnpm --filter @nanisoft/prism-llms build && pnpm --filter @nanisoft/prism-mcp-server build && pnpm --filter @nanisoft/site build",
-    "check": "node scripts/check-elevation-layout.mjs && pnpm --filter @nanisoft/prism-ui check && pnpm --filter @nanisoft/prism-tokens check && pnpm --filter @nanisoft/prism-llms check",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "check": "node scripts/check-dashes.mjs && node scripts/check-elevation-layout.mjs && turbo run check",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "clean": "node scripts/clean.mjs",
     "check:copy": "node scripts/check-dashes.mjs",
-    "tokens:build": "pnpm --filter @nanisoft/prism-tokens build",
-    "tokens:watch": "pnpm --filter @nanisoft/prism-tokens watch",
-    "registry:build": "pnpm --filter @nanisoft/prism-ui build",
-    "registry:validate": "pnpm --filter @nanisoft/prism-ui validate",
-    "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r test",
-    "lint": "pnpm -r lint",
-    "clean": "node scripts/clean.mjs"
+    "changeset": "changeset",
+    "changeset:validate": "node scripts/validate-changesets.mjs",
+    "changeset:version": "changeset version",
+    "release": "changeset publish",
+    "release:pre:enter": "changeset pre enter next",
+    "release:pre:exit": "changeset pre exit",
+    "release:dry": "node scripts/verify-tarballs.mjs --mode=verify && pnpm -r --filter \"./packages/*\" publish --dry-run --no-git-checks",
+    "release:verify": "node scripts/verify-tarballs.mjs"
   },
   "devDependencies": {
+    "@changesets/assemble-release-plan": "^7.0.0",
+    "@changesets/cli": "^3.0.3",
+    "@changesets/read": "^1.0.1",
+    "publint": "^0.3.24",
+    "turbo": "^2.11.4",
     "typescript": "^5.7.0"
   }
 }

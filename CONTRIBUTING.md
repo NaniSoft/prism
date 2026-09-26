@@ -137,6 +137,71 @@ CI runs the gates on every pull request. A version pull request is opened on
 `main` by the release lane; publishing is a separate, manual, environment-gated
 step described in `.github/workflows/publish.yml`.
 
+## Releases
+
+Publishing is manual and environment-gated. Merging a pull request never
+publishes on its own.
+
+1. The release lane opens or updates a "Version Packages" pull request on `main`
+   from the changesets. Merge it once the versions and the `CHANGELOG.md` entries
+   are right.
+2. Rehearse first: Actions -> Release (publish) -> Run workflow, on `main`,
+   `channel: latest`, `dry_run: true`. The rehearsal builds, verifies the
+   tarballs and runs `pnpm publish --dry-run` without touching the registry.
+3. Publish: run the same workflow with `dry_run: false`. The `npm-publish`
+   environment puts a required reviewer in front of the job.
+
+`@nanisoft/prism-tokens` and `@nanisoft/prism-ui` are a linked pair and share a
+version. `@nanisoft/prism-llms` and `@nanisoft/prism-mcp-server` version
+independently. `@nanisoft/site` is private and is never versioned or tagged.
+
+The publish job uses npm trusted publishing over OIDC and enables provenance, so
+it carries no long-lived token. If OIDC is ever unavailable, the fallback is a
+granular access token with `Packages: Read and write`, scoped to `@nanisoft`,
+with 2FA bypass, owned by an account that is a member of the `nanisoft` org with
+publish rights, stored as a repository secret `NPM_TOKEN`. A secret scoped to
+private repositories never reaches this public repository, and a token owned by
+an account outside the org presents as a 404 rather than a 403.
+
+Run the release floor directly with `pnpm release:verify`, which packs every
+publishable package and asserts its contents.
+
+### Before the first publish
+
+Each item is checked once, by a human, before the first publish from this
+repository:
+
+- `NaniSoft/prism` exists, is public, and has `main` as its default branch.
+- The npm account that owns the four packages has two-factor authentication on.
+- Each of `@nanisoft/prism-tokens`, `@nanisoft/prism-ui`,
+  `@nanisoft/prism-llms` and `@nanisoft/prism-mcp-server` has a trusted publisher
+  on npmjs.com: **Organization or user** `NaniSoft`, **Repository** `prism`,
+  **Workflow filename** `publish.yml`, **Environment name** `npm-publish`, and
+  allowed action direct `npm publish`.
+- Each package sets `repository.url` to
+  `git+https://github.com/NaniSoft/prism.git` exactly (case-sensitive, or
+  provenance fails silently) and the matching `repository.directory`.
+- GitHub allows Actions to create and approve pull requests, so the release lane
+  can open the version pull request.
+- `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are repository secrets, not
+  org secrets.
+- Branch protection on `main` requires the `ci.yml` `verify` check.
+- The rehearsal passes: dispatch the publish workflow with `dry_run: true` and
+  confirm `node scripts/verify-tarballs.mjs` passes.
+
+### Prereleases
+
+The `next` branch is the prerelease lane.
+
+- Enter it once: `git switch -c next && pnpm changeset pre enter next`, then
+  commit `.changeset/pre.json` to `next`.
+- The release lane versions pushes to `next` as `1.0.0-next.0`, `1.0.0-next.1`
+  and so on. Dispatch the publish workflow on `next` with `channel: next` to
+  publish under the `next` dist-tag. `latest` is untouched.
+- Exit it: `pnpm changeset pre exit` on `next`, commit the removal of
+  `.changeset/pre.json`, and merge `next` into `main`. The next version pull
+  request collapses the prereleases into a single stable release.
+
 ## Governance
 
 Prism has one maintainer, and `CODEOWNERS` carries a single catch-all owner

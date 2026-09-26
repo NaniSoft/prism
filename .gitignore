@@ -36,3 +36,11 @@ apps/site/src/generated/
 # the corpus source commit date plus the corpus version. Kept out of the corpus
 # dist so build-twice determinism never sees it.
 packages/mcp-server/src/generated/
+
+# Staged into each package by scripts/stage-package-files.mjs at pack time so a
+# published tarball carries LICENSE and THIRD-PARTY-NOTICES.md.
+packages/*/LICENSE
+packages/*/THIRD-PARTY-NOTICES.md
+
+# The project-local pnpm store (see .npmrc).
+.pnpm-store/
