@@ -18,7 +18,6 @@ and avoid the words it retires.
 | `packages/mcp-server` | `@nanisoft/prism-mcp-server` | read-only MCP tool logic, served from the site Worker |
 | `apps/site` | `@nanisoft/site` | static docs site, landing page, themes, and the Worker |
 | `scripts` | - | repository gates and release scripts |
-| `.scratch/prism-shadcn` | - | the rebuild map and its tickets (closed; kept as the decision record) |
 
 ## Commands
 
@@ -86,9 +85,10 @@ the source of truth for what a script does today.
 
 ### Issue tracker
 
-Issues are markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
-The rebuild map at `.scratch/prism-shadcn/map.md` is closed and kept as the
-decision record.
+Issues are GitHub issues at `github.com/NaniSoft/prism/issues`; a change lands as
+a pull request. There is no file-based ticket tree in the repository. A decision
+is recorded in the constitution at the root, not in a ticket.
+See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
@@ -97,4 +97,6 @@ Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-
 
 ### Domain docs
 
-Single-context: one `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+Single-context: one `CONTEXT.md` at the repo root. `docs/adr/` is the convention
+if an architecture decision needs its own file, and it does not exist yet.
+See `docs/agents/domain.md`.

@@ -155,11 +155,10 @@ The constitution lives at the root: `PRODUCT.md`, `CONTEXT.md`, `DESIGN.md`,
 
 The system is built. The four packages exist under their final names, the
 component library ships the 42-item v1 catalogue, the docs site builds and
-exports statically, and the quality-gate set runs in CI. The rebuild map at
-`.scratch/prism-shadcn/map.md` is closed. `DESIGN.md` records the open items,
-which are the cutover steps and the v1.1 roster tail rather than missing work.
-The previous public system is archived at `github.com/NaniSoft/prism` and is not
-the source of this system.
+exports statically, and the quality-gate set runs in CI. `DESIGN.md` records the
+open items, which are the cutover steps and the v1.1 roster tail rather than
+missing work. The previous public system is archived at `github.com/NaniSoft/prism`
+and is not the source of this system.
 
 ## Contributing
 

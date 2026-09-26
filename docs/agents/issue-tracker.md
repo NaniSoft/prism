@@ -1,30 +1,36 @@
-# Issue tracker: Local Markdown
+# Issue tracker: GitHub
 
-Issues and specs for this repo live as markdown files in `.scratch/`.
+Issues for this repo are GitHub issues at `github.com/NaniSoft/prism/issues`. A
+change lands as a pull request against `main`, reviewed through the gates in
+`docs/quality-gates.md`.
 
 ## Conventions
 
-- One feature per directory: `.scratch/<feature-slug>/`
-- The spec is `.scratch/<feature-slug>/spec.md`
-- Implementation issues are one file per ticket at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`, never a single combined tickets file
-- Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
-- Comments and conversation history append to the bottom of the file under a `## Comments` heading
+- One issue per need, not per implementation step. Describe the product need,
+  not the patch; the maintainer owns the decision (see `CONTRIBUTING.md`).
+- The issue carries its reasoning. `PRODUCT.md`, `CONTEXT.md` and `DESIGN.md`
+  carry the rules a decision settles; a decision that changes one of them
+  updates it in the same pull request.
+- Triage state is a label on the issue (see `triage-labels.md`), not a line in a
+  file.
+- Comment and conversation history live on the issue thread.
 
 ## When a skill says "publish to the issue tracker"
 
-Create a new file under `.scratch/<feature-slug>/` (creating the directory if needed).
+Open an issue at `github.com/NaniSoft/prism/issues`, or open a pull request
+against `main` when the work is already done. Confirm the remote with
+`git remote -v` before writing a URL.
 
 ## When a skill says "fetch the relevant ticket"
 
-Read the file at the referenced path. The user will normally pass the path or the issue number directly.
+Fetch the issue by number or URL. `gh issue view <number> --repo NaniSoft/prism`
+reads one; the user will normally pass the number or the link directly.
 
-## Wayfinding operations
+## What is not here
 
-Used by `/wayfinder`. The **map** is a file with one **child** file per ticket.
-
-- **Map**: `.scratch/<effort>/map.md` (the Notes / Decisions-so-far / Fog body).
-- **Child ticket**: `.scratch/<effort>/issues/NN-<slug>.md`, numbered from `01`, with the question in the body. A `Type:` line records the ticket type (`research`/`prototype`/`grilling`/`task`); a `Status:` line records `claimed`/`resolved`.
-- **Blocking**: a `Blocked by: NN, NN` line near the top. A ticket is unblocked when every file it lists is `resolved`.
-- **Frontier**: scan `.scratch/<effort>/issues/` for files that are open, unblocked, and unclaimed; first by number wins.
-- **Claim**: set `Status: claimed` and save before any work.
-- **Resolve**: append the answer under an `## Answer` heading, set `Status: resolved`, then append a context pointer (gist + link) to the map's Decisions-so-far in `map.md`.
+There is no per-feature directory, no numbered ticket file, and no planning map
+in the repository. A multi-session effort is a branch and a pull request, and
+what it decides is written into the root documents as it is decided. If a skill
+tells you to write `map.md`, a `spec.md`, or `issues/NN-<slug>.md`, do not
+create those paths: put the question and its answer in the pull request
+description or in the document the decision belongs to.

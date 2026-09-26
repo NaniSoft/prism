@@ -697,15 +697,32 @@ Recorded as facts. None of these is fixed in this document.
 - **`CODEOWNERS` carries a placeholder owner line.** The project has one
   maintainer and no confirmed team handle yet; the cutover confirms it.
 - **The v1.1 roster tail is deferred, not dropped.** The v1 catalogue is 28
-  Components, 10 Blocks and 4 Pages, 42 items. The deferred components, blocks
-  and pages are enumerated in ticket 19, and every one is additive because no
-  new upstream engine is needed for it.
+  Components, 10 Blocks and 4 Pages, 42 items. Every deferred item is additive
+  and non-breaking, because Base UI already ships each primitive it needs, so
+  v1.1 introduces no new upstream engine:
+
+  | Kind | Deferred to v1.1 |
+  | --- | --- |
+  | Components | the shadcn baseline tail: `empty`, `collapsible`, `spinner`, `toast`, `alert-dialog`, `sheet`, `command`, `combobox`, `calendar`, `date-picker`, `scroll-area`, `aspect-ratio`, `hover-card`, `context-menu`, `menubar`, `navigation-menu`, `toggle`, `toggle-group`, `input-otp`, `item`, `button-group`, `input-group`, `carousel`, `chart`, `sidebar`, `form` (the react-hook-form binding), `number-field`, `meter`, `resizable`, `native-select`, and a standalone `label` |
+  | Blocks | `faq-01`, `logo-cloud-01`, `testimonial-01`, `footer-01`, `newsletter-01` |
+  | Pages | `onboarding-page`, `pricing-page`, `error-page` |
+
+  Three more items are settled rather than deferred, so v1.1 does not
+  re-express them blindly. The old `stat-card` Block folds into `stats-01` and is
+  not a separate item. The old `icon` item, `blog-layout` and `docs-shell` never
+  ship: a custom icon package is out of scope because Lucide is the icon lane,
+  the blog does not exist, and the docs shell is site chrome rather than
+  catalogue surface. The old `empty` Component returns as `empty-state-01`, a
+  Block, because the old item was already a composition of icon, title, body
+  and action, which is a Block's shape.
 - **Visual regression is report-only.** The Playwright job is committed with a
   written promotion rule (two stable weeks, target ten merges); until the rule
   fires, a visual diff is reported and does not fail the build.
-- **The client-JavaScript budget reports per item and fails only in total.** A
-  per-item figure over ticket 19's estimate is reported; the deduplicated
-  all-client bundle is held to the 90 KB gzip ceiling.
+- **The client-JavaScript budget reports per item and fails only in total.** The
+  per-item thresholds live in the `BUDGETS` table in
+  `packages/ui/scripts/check-client-budget.mjs`; a component over its figure is
+  reported, and the deduplicated all-client bundle is held to the 90 KB gzip
+  ceiling and fails.
 - **`styles.css` has no byte budget.** The client analyzer measures source, not
   the compiled bytes a consumer downloads; a gzip budget is the strongest
   candidate for a future fail gate and is not adopted.
@@ -715,7 +732,8 @@ Recorded as facts. None of these is fixed in this document.
   The tarball verifier proves contents, not runtime compatibility.
 - **Supply-chain and dependency automation is deferred.** CodeQL, OSSF
   Scorecard, `dependency-review-action`, Renovate and pnpm `minimumReleaseAge`
-  are named in ticket 16 and not adopted.
+  are named as deferred in the header comment of `.github/workflows/ci.yml` and
+  are not adopted.
 - **A one-way Figma Variables sync is not built.** The DTCG projection under
   `dist/dtcg/` exists; the sync and its plugin ownership do not, and two-way
   sync is out of scope.

@@ -74,11 +74,12 @@ downstream code own a style, a token or an animation, it is out of scope.
    decelerating, zero overshoot, no decorative or entrance animation.
 5. **Agents are first-class.** Every public rule is available in a form an agent
    can read and verify.
-6. **Decisions are recorded.** The rebuild map, its tickets and the constitution
-   documents carry the reasoning.
+6. **Decisions are recorded.** The constitution documents carry the reasoning,
+   and a pull request that changes a rule changes the document with it.
 
 ## Evidence
 
-The rebuild is planned in `.scratch/prism-shadcn/map.md`. The previous public
-system lives at `github.com/NaniSoft/prism` as an untouched archive; its prose is
-carried over as content, and its implementation is not.
+The previous public system lives at `github.com/NaniSoft/prism` as an untouched
+archive; its prose is carried over as content, and its implementation is not.
+What this repository still owes the consumer is the cutover, which `MIGRATION.md`
+drafts.
