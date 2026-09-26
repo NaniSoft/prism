@@ -16,3 +16,6 @@ allowBuilds:
   # optional dependency, so the postinstall only verifies it. `false` keeps the
   # script from running; the binary is already on disk.
   esbuild: false
+  # Transitive of the Agents SDK. Its postinstall only prints a funding message;
+  # `false` keeps the script from running.
+  core-js-pure: false

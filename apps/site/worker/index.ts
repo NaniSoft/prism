@@ -1,4 +1,5 @@
-import { rewriteMdPathname } from './router'
+import { handleMcp } from './mcp'
+import { isMcpPathname, rewriteMdPathname } from './router'
 
 interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> }
@@ -7,25 +8,20 @@ interface Env {
 /**
  * The site Worker.
  *
- * Static assets are served asset-first, so only the two things that cannot be an
- * asset come through here: the `/mcp` endpoint, which needs POST and DELETE, and
- * the pretty `.md` rewrite, which has to catch a path before
- * `not_found_handling` turns it into a 404.
+ * Static assets are served asset-first, so only the lanes that cannot be an
+ * asset come through here: the `/mcp` endpoint, which needs POST and DELETE and
+ * is served by the MCP handler (ticket 13), and the pretty `.md` rewrite, which
+ * has to catch a path before `not_found_handling` turns it into a 404.
  *
- * The MCP tool surface is ticket 13's; until it lands the endpoint answers 501
- * rather than pretending to be a 404 of a missing asset.
+ * `/mcp` and `/mcp/*` are also in `wrangler.jsonc`'s `run_worker_first`, so the
+ * request reaches this Worker before asset serving can answer it.
  */
 const worker = {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url)
 
-    if (url.pathname === '/mcp' || url.pathname.startsWith('/mcp/')) {
-      return new Response(
-        JSON.stringify({
-          error: 'The MCP endpoint ships with the corpus projection (ticket 13).',
-        }),
-        { status: 501, headers: { 'content-type': 'application/json' } },
-      )
+    if (isMcpPathname(url.pathname)) {
+      return handleMcp(request, env, ctx)
     }
 
     const mirrored = rewriteMdPathname(url.pathname)
@@ -37,4 +33,5 @@ const worker = {
   },
 }
 
+export const handleRequest = worker.fetch
 export default worker

@@ -21,6 +21,7 @@ const ROOTS = [
   'packages/tokens/src',
   'packages/tokens/build',
   'packages/ui/scripts',
+  'packages/mcp-server/src',
   'scripts',
 ]
 const EXT = /\.(tsx?|json|css|mjs|md)$/
@@ -43,6 +44,7 @@ const GATED = [
   'packages/ui/src/blocks',
   'packages/ui/src/components/ui',
   'packages/ui/src/catalog.ts',
+  'packages/mcp-server/src',
   'packages/tokens/src/themes',
   'packages/tokens/src/semantic',
   'packages/tokens/src/foundation',

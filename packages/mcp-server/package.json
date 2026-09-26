@@ -1,0 +1,46 @@
+{
+  "name": "@nanisoft/prism-mcp-server",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Prism's read-only MCP tool surface: eight retrieval tools over the bundled PrismDocsStore corpus. Transport-free: one factory serves the site Worker at /mcp.",
+  "license": "MIT",
+  "author": "NaniSoft",
+  "homepage": "https://prism.nanisoft.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NaniSoft/prism.git",
+    "directory": "packages/mcp-server"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prebuild": "node scripts/stamp-built.mjs",
+    "build": "tsc -p tsconfig.build.json",
+    "pretypecheck": "node scripts/stamp-built.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "pretest": "node scripts/stamp-built.mjs && tsc -p tsconfig.build.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.0.0",
+    "@nanisoft/prism-llms": "workspace:*",
+    "zod": "^4.2.0"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "2.0.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.2.4"
+  }
+}

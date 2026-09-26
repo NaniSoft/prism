@@ -31,3 +31,8 @@ packages/tokens/.generated/
 # Derived from the registry source on every predev/prebuild/pretypecheck, so it is
 # never edited by hand and never committed stale. See apps/docs/scripts/analyze-blocks.mjs
 apps/site/src/generated/
+
+# The MCP lane's build stamp: generated before the package build and derived from
+# the corpus source commit date plus the corpus version. Kept out of the corpus
+# dist so build-twice determinism never sees it.
+packages/mcp-server/src/generated/

@@ -129,6 +129,11 @@ feeds the human site and the agent surface:
   }
   ```
 
+  The server exposes eight read-only tools: `list_items`, `get_item_doc`,
+  `get_item_props`, `get_item_source`, `get_theme_doc`, `list_pages`, `get_page`
+  and `search_docs`. A stdio-only client bridges with
+  `npx mcp-remote https://prism.nanisoft.com/mcp`.
+
 Generated code always imports from `@nanisoft/prism-ui`.
 
 ## Repository map

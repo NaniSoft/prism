@@ -1,5 +1,10 @@
 /**
- * The pretty Markdown mirror, rewritten before asset serving.
+ * The site Worker's routing predicates.
+ *
+ * Static assets are served asset-first, so the Worker is invoked only for the
+ * lanes that cannot be an asset: the MCP endpoint (which needs POST and DELETE)
+ * and the pretty `.md` mirror rewrite (which has to catch a path before
+ * `not_found_handling` turns it into a 404).
  *
  * The mirror is a copied tree under `out/md/**`, and Cloudflare serves it only
  * if the Worker is invoked first. These section slugs and the globs in
@@ -15,6 +20,11 @@ export const MD_SECTIONS = [
   'foundations',
   'content',
 ] as const
+
+/** The exact MCP route, plus its subtree. `/mcp/` is not the route. */
+export function isMcpPathname(pathname: string): boolean {
+  return pathname === '/mcp' || pathname.startsWith('/mcp/')
+}
 
 export function rewriteMdPathname(pathname: string): string | null {
   const match = /^\/([^/]+)\/(.+)\.md$/.exec(pathname)
