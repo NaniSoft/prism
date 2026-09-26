@@ -1,0 +1,28 @@
+{
+  "root-attribute": {
+    "selectors": 12,
+    "allRaw": 12263,
+    "allGz": 1852,
+    "fiveRaw": 10269,
+    "fiveGz": 1611
+  },
+  "root-class": {
+    "selectors": 12,
+    "allRaw": 12218,
+    "allGz": 1841,
+    "fiveRaw": 10224,
+    "fiveGz": 1601
+  },
+  "attribute-agnostic": {
+    "selectors": 12,
+    "allRaw": 12238,
+    "allGz": 1842,
+    "fiveRaw": 10244,
+    "fiveGz": 1598
+  },
+  "inline-values": {
+    "selectors": 0,
+    "jsRaw": 20223,
+    "jsGz": 1756
+  }
+}

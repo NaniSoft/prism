@@ -1,0 +1,5 @@
+{
+  "$description": "Soft violet. Slightly more saturated than the others for emphasis.",
+  "name": "Lavender",
+  "radius": { "value": 0.75, "unit": "rem" }
+}

@@ -1,0 +1,5 @@
+{
+  "$description": "Soft orange. Warmest of the set; pairs with the roundest corners.",
+  "name": "Peach",
+  "radius": { "value": 1, "unit": "rem" }
+}

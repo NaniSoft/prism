@@ -1,107 +1,84 @@
 # Product
 
-<!-- impeccable:product-schema 1 -->
-
-## Platform
-
-web
-
-## Stack
-
-Prism is a pnpm + Turborepo monorepo built on React 19 and TypeScript strict,
-ESM-only packages. `@nanisoft/prism-ui` owns the React source catalog and uses
-Base UI internally for accessible behavior; `@nanisoft/prism-tokens` is pure
-data and emits CSS custom properties. The docs site is a Next.js 16 static
-export on Cloudflare Workers Static Assets, and the same Worker serves the
-read-only MCP at `/mcp`. Changesets and GitHub Actions govern releases.
-
-## Users
-
-- **AI agents** are the primary users of the system's knowledge surface. They
-  consume the MCP, `llms.txt`, per-item Markdown, theme references, and live
-  demos to build complete branded applications without reverse-engineering a
-  visual language.
-- **NaniSoft developers** supervise that work and build NaniSoft products on
-  the same packages.
-- **Public npm consumers** receive the same MIT-licensed packages and can
-  compose the system in their own React applications.
-
-## Product Purpose
-
-Prism is NaniSoft's design system: one design language, many expressions. Apps
-install React and `@nanisoft/prism-ui`, then assemble owned components, blocks,
-and pages without adopting a second UI vocabulary. The package ships the
-Spectral Refraction visual language, accessible behavior, docs, generated
-agent references, and one supported import boundary.
-
-Success means an agent can read Prism's public source of truth and produce a
-production-quality NaniSoft-branded app, while a human can understand the
-system's visual rules and composition model in minutes.
-
 ## Positioning
 
-Prism is the branded, agent-ready alternative to a generic component kit: a
-small, curated React system whose implementation details stay private and whose
-behavior, recipes, examples, and token tables are all inspectable. It does not
-attempt to mirror a large upstream component catalog. Every public item earns
-its place in a coherent workflow from components to blocks to pages.
+Prism is where NaniSoft products start: a design system whose token pipeline,
+React component library and agent surface are the single source of truth, so a
+downstream product composes accessible, themed React components and never
+writes, imports or overrides a line of CSS.
 
-## Operating Context
+That one sentence is the test every decision answers to. If a proposal would let
+downstream code own a style, a token or an animation, it is out of scope.
 
-- The docs site is the human door: rendered examples, copyable source, live
-  theme controls, and a searchable catalog.
-- The generated corpus is the agent door: the site source, `llms.txt`, Markdown
-  mirrors, and MCP all project the same checked catalog and co-located demos.
-- Figma is a one-way token consumer: code-built DTCG output flows to Variables;
-  there is no hand-built UI kit and no two-way sync.
-- npm distribution is public under the `@nanisoft` scope.
+## Who it is for
 
-## Capabilities and Constraints
+- **NaniSoft product teams.** The first audience. Every subsequent NaniSoft
+  product is expected to be built on Prism rather than on a local component
+  folder or a second UI kit.
+- **AI agents.** The system publishes a machine-readable corpus and a read-only
+  MCP endpoint, so an agent can read the same catalogue, props, examples and
+  tokens a human reads and write code that imports Prism correctly.
+- **Public npm consumers.** The four packages are MIT and public under
+  `@nanisoft`. A consumer outside NaniSoft gets the same components, the same
+  contract and the same no-override posture.
 
-- React 19 is the consumer peer. Base UI is a direct implementation dependency
-  of `prism-ui` only; consumers do not install it.
-- The first catalog is intentionally curated: 29 components, 9 blocks, and 5
-  pages, organized as components → blocks → pages.
-- `PrismProvider` owns the serializable theme scope, theme context, link
-  adapter, and nearest local portal target.
-- Five brand packs ship in light and beam-dark modes, with AA contrast gates,
-  hairline elevation, the 2/4/6/4 radius family, dither texture, and the
-  established Archivo Variable / JetBrains Mono typography.
-- Styling is plain Prism CSS and generated custom properties. Tailwind is not
-  required.
-- The static site and MCP remain one product surface: the same generated corpus
-  is served to humans and agents.
+## What it is
 
-## Brand Commitments
+- A DTCG token pipeline (`@nanisoft/prism-tokens`) that authors every design
+  value and emits the shadcn-compatible CSS variable contract. Colour, radius,
+  typography, spacing, motion, elevation, breakpoints and containers all
+  originate there.
+- A React component library (`@nanisoft/prism-ui`) of Components, Blocks and
+  Pages over Base UI and Tailwind 4, published with one precompiled stylesheet
+  and no consumer tooling requirement.
+- A documentation site and a generated corpus (`@nanisoft/prism-llms`) that
+  project the same checked catalogue.
+- A read-only MCP server (`@nanisoft/prism-mcp-server`) served from the same
+  Worker as the site.
 
-- Name: **NaniSoft**; system name: **Prism**; npm scope: `@nanisoft`.
-- Spectrum: five pastel packs — blue, green, lavender, rose, peach. Pastel is
-  atmosphere; mid-tone ink carries meaning and passes AA gates.
-- Modes: light and beam-dark.
-- Character: professional, precise, and next-generation.
-- Anti-goals: generic admin-template appearance, toy-startup playfulness, and
-  heavy-enterprise legacy.
-- Greenfield: no pre-existing logo, palette, or typeface constrains the system.
+## What it refuses to be
 
-## Evidence on Hand
+- **A copy-out registry.** Copy-out and the shadcn registry as a public install
+  lane are out of scope. Distribution is the npm package alone, because a copied
+  component is a fork with no upgrade path.
+- **An override surface.** There is no consumer merge, no token override, no
+  per-key theme object and no wrapper-theme seam. The prohibition is enumerated
+  in the adoption contract and enforced where it can be, not left to taste.
+- **A multi-platform toolkit.** React is the target. React Native and other
+  platform outputs are out of scope.
+- **A mirror of a large upstream catalogue.** Prism is curated. An item earns
+  its place; the library does not track Base UI, shadcn or any other upstream
+  one for one.
+- **A second visual system for its own docs.** The documentation site is built
+  with the system it documents.
 
-- The active migration map at `.scratch/prism-base-ui/` records the clean-break
-  decision, catalog shape, and acceptance gates.
-- Historical research and ADRs under `docs/adr/` and `.scratch/prism/` explain
-  earlier explorations; they are not evidence that the retired implementation
-  remains active.
-- Synthetic demos demonstrate composition but are not customer evidence,
-  benchmarks, testimonials, or adoption claims.
+## What a reader can do after reading this
 
-## Product Principles
+- Know whether Prism fits their product, and what adopting it commits them to.
+- Find the install command and the provider and theming entry points in
+  `README.md`.
+- Know the contract they must not break, and where to read it (`DESIGN.md` for
+  the visual and token rules, `CONTEXT.md` for the vocabulary).
+- Know what to do when Prism lacks something: request it upstream, never wrap or
+  fork (`CONTRIBUTING.md`).
 
-1. **Agents are first-class users.** Every public API, token, example, and
-   usage rule is available in a form an agent can read and verify.
-2. **One design language, many expressions.** A pack or mode changes the
-   atmosphere, not the system's grammar.
-3. **The brand layer is the product.** Color, type, shape, motion, and texture
-   are encoded in Prism's own source and recipes.
-4. **Assemble, never copy.** Components, blocks, and pages ship as npm exports;
-   applications own their data and composition, not a fork of the system.
-5. **Decisions are recorded.** Active maps, tickets, and superseding ADRs carry
-   the reasoning so a human or agent can pick up the work.
+## Principles
+
+1. **One source of truth.** Every token, style and animation is owned by Prism
+   and reaches the consumer through the packages.
+2. **Compose, never copy.** A consumer assembles Components, Blocks and Pages;
+   it does not fork source or write CSS.
+3. **Contrast is a build gate, not a review step.** A palette change that fails
+   is a failed build.
+4. **Motion is state feedback.** 80, 160 and 280 milliseconds, strongly
+   decelerating, zero overshoot, no decorative or entrance animation.
+5. **Agents are first-class.** Every public rule is available in a form an agent
+   can read and verify.
+6. **Decisions are recorded.** The rebuild map, its tickets and the constitution
+   documents carry the reasoning.
+
+## Evidence
+
+The rebuild is planned in `.scratch/prism-shadcn/map.md`. The previous public
+system lives at `github.com/NaniSoft/prism` as an untouched archive; its prose is
+carried over as content, and its implementation is not.

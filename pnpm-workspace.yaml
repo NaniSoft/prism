@@ -1,23 +1,14 @@
 packages:
-  - packages/*
   - apps/*
+  - packages/*
+
+# pnpm >=11 replaced `onlyBuiltDependencies` with an `allowBuilds` map.
+# Anything not listed here fails the install with ERR_PNPM_IGNORED_BUILDS.
 allowBuilds:
-  core-js-pure: false # transitive of agents → mimetext → @babel/runtime-corejs3; its postinstall is a funding note, nothing to build
-  esbuild: false
-  workerd: false # wrangler deploy/config needs no workerd postinstall; `wrangler dev` is unused (static assets + remote preview)
-# Supply-chain policy: there is deliberately NO base `minimumReleaseAge` yet
-# (pnpm's default, 0 = no delay) — the runtime deps are pinned by the
-# lockfile, and a base policy would have delayed the bootstrap's toolchain
-# resolutions. The excludes below are forward-protection: toolchain packages
-# whose fresh releases we expect to want before any base policy matures
-# (pnpm's min-release-age setting resolves against npm's publish timestamps).
-# To adopt a base policy, set `minimumReleaseAge: <days>d` here and prune the
-# list to the packages that genuinely need headroom.
-minimumReleaseAgeExclude:
-  # stale-but-harmless: workers-types left the devDeps, pnpm added the exclusion
-  # while it was still installed and dropping it makes the lockfile policy reject
-  # the existing resolution
-  - '@cloudflare/workers-types@5.20260919.1'
-  - miniflare@5.20260918.0-alpha
-  - wrangler@4.135.0
-  - agents@0.24.0
+  style-dictionary: true
+  '@bundled-es-modules/glob': true
+  msw: true # transitive dep of the shadcn CLI
+  # Ships its native binding as a platform-specific optional dependency, so the
+  # postinstall only verifies what is already there. `false` keeps the script from
+  # running; verified that eslint resolves imports with it skipped.
+  unrs-resolver: false

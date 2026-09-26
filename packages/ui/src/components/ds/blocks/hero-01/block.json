@@ -1,0 +1,8 @@
+{
+  "name": "hero-01",
+  "title": "Hero 01 - Centered Marketing Hero",
+  "description": "A centered hero with an optional eyebrow, headline, supporting line and one or two actions. All copy is passed in as props.",
+  "categories": ["marketing"],
+  "registryDependencies": ["button"],
+  "dependencies": ["lucide-react"]
+}

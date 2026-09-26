@@ -1,0 +1,8 @@
+# CODEOWNERS
+#
+# Prism has a single maintainer, so a catch-all owner line is the only
+# meaningful content until there is more than one team. GitHub requires a user
+# or a team handle here, and the repository cutover confirms the final handle;
+# @NaniSoft/maintainers is the placeholder used until then.
+
+* @NaniSoft/maintainers

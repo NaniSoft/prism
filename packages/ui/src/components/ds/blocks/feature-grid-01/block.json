@@ -1,0 +1,8 @@
+{
+  "name": "feature-grid-01",
+  "title": "Feature Grid 01 - Four Up With Icons",
+  "description": "A four-up feature grid with icon tiles. Pass the items in; the section heading is optional.",
+  "categories": ["marketing"],
+  "registryDependencies": ["card"],
+  "dependencies": ["lucide-react"]
+}

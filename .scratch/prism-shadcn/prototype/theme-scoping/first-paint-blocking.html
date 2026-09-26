@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>First paint — blocking head script</title>
+    <link rel="stylesheet" href="candidates/attribute-agnostic.css" />
+    <style>
+      html { background: var(--background); color: var(--foreground); font: 14px/1.5 system-ui, sans-serif; }
+      body { margin: 0; padding: 24px; }
+      .box { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--card-foreground); padding: 16px; max-width: 640px; }
+      pre { white-space: pre-wrap; }
+    </style>
+    <script>
+window.__frames = [];
+(function sample() {
+  const bg = getComputedStyle(document.documentElement).backgroundColor;
+  window.__frames.push(bg);
+  if (window.__frames.length < 24) requestAnimationFrame(sample);
+  else render();
+})();
+function render() {
+  const f = window.__frames;
+  const first = f[0];
+  const settled = f[f.length - 1];
+  const lightFrames = f.filter((x) => x === "rgb(255, 255, 255)").length;
+  const out = [
+    'first frame: ' + first,
+    'last frame:  ' + settled,
+    'frames observed: ' + f.length,
+    'light frames before settle: ' + lightFrames,
+    lightFrames === 0 ? 'RESULT: no flash' : 'RESULT: flash, ' + lightFrames + ' frame(s) at the wrong value',
+  ].join('\n');
+  window.__firstPaint = { frames: f, first, settled, lightFrames };
+  const el = document.getElementById('result');
+  if (el) el.textContent = out;
+}
+</script>
+    <script>
+(function () {
+  var stored = { pack: 'peach', mode: 'dark' };
+  var root = document.documentElement;
+  if (stored.pack !== 'default') root.setAttribute('data-pack', stored.pack);
+  if (stored.mode === 'dark') root.classList.add('dark');
+})();
+</script>
+  </head>
+  <body>
+    <div class="box">
+      <h1>First paint — blocking head script</h1>
+      <p>Stored preference: pack=<strong>peach</strong>, mode=<strong>dark</strong>. Base fallback is light (<code>rgb(255, 255, 255)</code>); the preferred paint is peach dark (<code>rgb(27, 23, 21)</code>).</p>
+      <pre id="result">sampling…</pre>
+    </div>
+    undefined
+  </body>
+</html>

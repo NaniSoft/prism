@@ -1,32 +1,32 @@
-# dependencies
 node_modules/
-
-# builds
 dist/
 .next/
 out/
+.turbo/
 *.tsbuildinfo
 
-# tooling
-.turbo/
-coverage/
-.eslintcache
-.oxlint-cache/
-.pnpm-store/
-
-
-# env & secrets
 .env
-.env.*
-!.env.example
+.env.local
+.env.*.local
 
-# local agent/tool state
+.DS_Store
+Thumbs.db
+
+.vercel/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# local agent/tool state, never committed
 .claude/
 .impeccable/
 .opencode/
 .playwright-mcp/
+.superpowers/
 opencode.exe
 
-# os
-.DS_Store
-Thumbs.db
+packages/tokens/.generated/
+
+# Derived from the registry source on every predev/prebuild/pretypecheck, so it is
+# never edited by hand and never committed stale. See apps/docs/scripts/analyze-blocks.mjs
+apps/site/src/generated/

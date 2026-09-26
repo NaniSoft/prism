@@ -1,0 +1,8 @@
+{
+  "name": "pricing-01",
+  "title": "Pricing 01 - Three Tier With Highlight",
+  "description": "A three-up plan comparison with one plan lifted. Plans, prices, features and actions are all passed in as props.",
+  "categories": ["marketing"],
+  "registryDependencies": ["button", "badge", "card"],
+  "dependencies": ["lucide-react"]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "stats-01",
+  "title": "Stats 01 - KPI Row With Trend",
+  "description": "A four-up KPI row with optional directional deltas. Every metric is passed in; the block ships no sample data.",
+  "categories": ["application"],
+  "registryDependencies": ["card"],
+  "dependencies": ["lucide-react"]
+}

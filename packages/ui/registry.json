@@ -1,0 +1,294 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "nanisoft",
+  "homepage": "https://prism.nanisoft.com",
+  "items": [
+    {
+      "name": "badge",
+      "title": "Badge",
+      "description": "Shared badge primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/badge.tsx",
+          "type": "registry:component",
+          "target": "components/ui/badge.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "button",
+      "title": "Button",
+      "description": "Shared button primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/button.tsx",
+          "type": "registry:component",
+          "target": "components/ui/button.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "card",
+      "title": "Card",
+      "description": "Shared card primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/card.tsx",
+          "type": "registry:component",
+          "target": "components/ui/card.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "cta-01",
+      "title": "CTA 01 - Filled Banner",
+      "description": "A closing call to action on a filled primary surface. Headline, supporting line and the action are passed in as props.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "button"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ds/blocks/cta-01/cta.tsx",
+          "type": "registry:component",
+          "target": "components/ds/blocks/cta-01/cta.tsx"
+        },
+        {
+          "path": "src/components/ds/blocks/cta-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/ds/blocks/cta-01/index.tsx"
+        },
+        {
+          "path": "src/components/ds/blocks/section.tsx",
+          "type": "registry:component",
+          "target": "components/ds/blocks/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "feature-grid-01",
+      "title": "Feature Grid 01 - Four Up With Icons",
+      "description": "A four-up feature grid with icon tiles. Pass the items in; the section heading is optional.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "card"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ds/blocks/feature-grid-01/feature-grid.tsx",
+          "type": "registry:component",
+          "target": "components/ds/blocks/feature-grid-01/feature-grid.tsx"
+        },
+        {
+          "path": "src/components/ds/blocks/feature-grid-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/ds/blocks/feature-grid-01/index.tsx"
+        },
+        {
+          "path": "src/components/ds/blocks/section.tsx",
+          "type": "registry:component",
+          "target": "components/ds/blocks/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "hero-01",
+      "title": "Hero 01 - Centered Marketing Hero",
+      "description": "A centered hero with an optional eyebrow, headline, supporting line and one or two actions. All copy is passed in as props.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "button"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ds/blocks/hero-01/hero.tsx",
+          "type": "registry:component",
+          "target": "components/ds/blocks/hero-01/hero.tsx"
+        },
+        {
+          "path": "src/components/ds/blocks/hero-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/ds/blocks/hero-01/index.tsx"
+        },
+        {
+          "path": "src/components/ds/blocks/section.tsx",
+          "type": "registry:component",
+          "target": "components/ds/blocks/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "pricing-01",
+      "title": "Pricing 01 - Three Tier With Highlight",
+      "description": "A three-up plan comparison with one plan lifted. Plans, prices, features and actions are all passed in as props.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "button",
+        "badge",
+        "card"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ds/blocks/pricing-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/ds/blocks/pricing-01/index.tsx"
+        },
+        {
+          "path": "src/components/ds/blocks/pricing-01/pricing.tsx",
+          "type": "registry:component",
+          "target": "components/ds/blocks/pricing-01/pricing.tsx"
+        },
+        {
+          "path": "src/components/ds/blocks/section.tsx",
+          "type": "registry:component",
+          "target": "components/ds/blocks/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "section",
+      "title": "Section",
+      "description": "Container and heading primitives that give every block a consistent vertical rhythm.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ds/blocks/section.tsx",
+          "type": "registry:component",
+          "target": "components/ds/blocks/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "stats-01",
+      "title": "Stats 01 - KPI Row With Trend",
+      "description": "A four-up KPI row with optional directional deltas. Every metric is passed in; the block ships no sample data.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "card"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ds/blocks/stats-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/ds/blocks/stats-01/index.tsx"
+        },
+        {
+          "path": "src/components/ds/blocks/stats-01/stats.tsx",
+          "type": "registry:component",
+          "target": "components/ds/blocks/stats-01/stats.tsx"
+        },
+        {
+          "path": "src/components/ds/blocks/section.tsx",
+          "type": "registry:component",
+          "target": "components/ds/blocks/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    }
+  ]
+}

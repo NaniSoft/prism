@@ -1,111 +1,158 @@
 # Prism
 
-NaniSoft's design system — one Spectral Refraction language expressed through
-five pastel brand packs and two modes. Applications build on
-`@nanisoft/prism-ui`; they do not depend on the implementation primitives that
-make the package accessible.
+Prism is NaniSoft's design system: design tokens, a published React component
+library that downstream products compose without writing CSS, a documentation
+site, and a machine-readable agent surface. This file is the vocabulary. It
+defines the words this repository uses and names the words it has retired. It is
+a glossary and nothing else.
 
 ## Language
 
-### Brand structure
+### Theming
 
-**Brand pack**:
-One of the five registered brand expressions — blue, green, lavender, rose, or
-peach. A pack owns its ink, tinted grounds, text base, hairlines, and state
-washes. _Avoid_: color scheme, palette, variant color.
+**Pack**:
+One of the authored palettes: the neutral base pack `default`, and the five
+pastels Blush, Mint, Lavender, Sky and Peach. A pack owns a generated OKLCH ramp
+family and its own radius.
+_Avoid_: brand pack, colourway, color scheme, theme.
 
 **Mode**:
-The appearance of a pack: light or beam-dark. _Avoid_: theme (a theme encodes
-a pack and a mode).
+The appearance of a pack: `light` or `dark`.
+_Avoid_: beam-dark, theme, appearance.
 
 **Theme**:
-A frozen `PrismTheme` returned by `createPrismTheme({ pack, mode })`, including
-resolved primitives, semantic meanings, and CSS custom properties. _Avoid_:
-skin, preset.
+One pack in one mode (pack times mode), such as Blush dark or the default light.
+A theme is a fully resolved token set, not an object and not an API; there is no
+theme factory.
+_Avoid_: skin, preset, pack, mode.
 
-**Spectral Refraction**:
-The visual world in which the neutral beam remains a surface and the five brand
-hues tint its grounds, hairlines, washes, and dark atmosphere. Pastel is the
-voice of the atmosphere; mid-tone ink carries interaction and text meaning.
-_Avoid_: gradient mesh, glow.
+**Pack id**:
+The string that selects a pack at runtime: `default`, `blush`, `mint`,
+`lavender`, `sky` or `peach`. Absence of a pack id means the default pack.
+_Avoid_: theme id, colour key.
 
-**Beam dark**:
-Dark mode as light passing through a medium: tinted near-black grounds, surfaces
-that lift as they elevate, and cool hairlines. _Avoid_: true black, generic gray
-dark.
+### Tokens
 
-**Brand ink**:
-A pack's AA-safe mid-tone hue, used for links, primary actions, focus, and
-selected meaning. _Avoid_: pastel accent, unqualified primary color.
+**Foundation token**:
+A raw ramp value that carries no meaning, authored in the foundation tier of the
+token source.
+_Avoid_: primitive, primitive token, base value.
 
-**Hairline elevation**:
-Depth in the plane expressed with a one-pixel border and a surface tint shift.
-The single permitted shadow is reserved for genuinely floating layers such as
-dialogs and popovers. _Avoid_: ambient shadow, glow, stacked card shadows.
+**Semantic token**:
+A named intent, authored as an alias into the foundation tier. Its name is
+emitted verbatim as a CSS custom property, and components reach meaning through
+semantic tokens only.
+_Avoid_: primitive, variable, theme variable.
+
+**Token contract**:
+The set of semantic token names emitted verbatim as CSS custom properties, byte
+for byte identical to shadcn's variable contract. A name in the contract is
+stable across versions and changes only in a breaking release.
+_Avoid_: theme API, variable map.
+
+**Token**:
+A value in the DTCG source, either foundation or semantic. A token is the
+source; a CSS custom property is its emitted form.
+_Avoid_: variable (when the token source is meant).
 
 ### Composition
 
 **Component**:
-A focused, accessible Prism export that owns one interaction or visual
-responsibility. Compound parts such as dialog or select parts remain inside the
-component's public module and do not create a second catalog vocabulary.
-_Avoid_: pass-through, raw upstream component.
+A focused, accessible, product-agnostic export with one job, and a catalogue
+item of kind `component`. Compound parts, such as the pieces of a dialog, stay
+inside the parent module and do not form a second vocabulary.
+_Avoid_: primitive, widget, pass-through, wrapper, control.
 
 **Block**:
-A pre-composed product pattern assembled from components, such as
-`ApplicationShell`, `DataTable`, or `SettingsPanel`. Blocks accept data and
-content slots but do not fetch application data. _Avoid_: widget, copied
-template.
+A pre-composed, product-agnostic section assembled from components. A Block
+takes its content as props and fetches no application data.
+_Avoid_: widget, template, pattern, section.
 
 **Page**:
-A complete structural composition assembled from blocks and components, such as
-`DashboardPage` or `DocsShell`. Pages receive application-owned navigation,
-content, and data. _Avoid_: layout, screen.
+A complete structural composition of Blocks and Components that models a whole
+screen. A Page receives application-owned navigation, content and data.
+_Avoid_: layout, screen, template.
 
-**Catalog**:
-The checked, curated list of Prism components, blocks, and pages in
-`packages/ui/src/catalog.ts`. It is the source for navigation, docs generation,
-the LLM corpus, and MCP metadata. _Avoid_: registry of upstream exports,
-compatibility list.
+**Item**:
+One entry in the catalogue, of any kind. The corpus and the agent surface
+address catalogue entries as items, and `kind` says which of Component, Block or
+Page it is.
+_Avoid_: entry, doc, component (when any kind is meant).
+
+**Kind**:
+The closed discriminator on an item: `component`, `block` or `page`, always
+singular.
+_Avoid_: type, category, layer.
+
+**Category**:
+One of the seven role groups a Component is assigned to: Call to action, Forms
+and inputs, Feedback, Layout, Data display, Typography and Miscellaneous. A
+Block or a Page has no category.
+_Avoid_: kind, group, folder.
+
+**Catalogue**:
+The checked list of every Component, Block and Page, and the single source for
+navigation, generated item documentation, the corpus and the agent surface. Its
+code identifiers keep the `catalog` spelling; prose uses catalogue.
+_Avoid_: catalog (in prose), registry, index.
+
+**Registry**:
+The shadcn registry inside the component package: its manifest, config and
+scripts. It is an internal integrity artifact, never a public install lane, and
+never a second catalogue.
+_Avoid_: distribution lane, public registry, catalogue.
+
+**Owned source**:
+Prism-authored TypeScript, CSS and tokens that a consumer composes through
+documented package exports. It names the public system, not permission to fork a
+copy of it.
+_Avoid_: wrapper around another design system, generated proxy, copied source.
+
+**Internal dependency**:
+A dependency used inside a package to provide behaviour or structure, such as
+Base UI or Tailwind in the component package. It is never part of the public
+surface.
+_Avoid_: internal primitive, public dependency, extension API.
+
+**Provider**:
+The optional client module that carries pack and mode through context and writes
+the two document-element attributes. It has no override path.
+_Avoid_: theme factory, override surface, theme object.
 
 ### Source and agents
 
-**Owned source**:
-Prism-authored TypeScript and CSS that consumers can inspect, compose, and copy
-through documented package exports. The phrase describes the public system, not
-permission to fork implementation files into an app. _Avoid_: wrapper around
-another design system, generated proxy.
-
-**Internal primitive**:
-Base UI or a native HTML element used inside `prism-ui` to provide behavior or
-structure. It is descriptive implementation metadata, never a second consumer
-import. _Avoid_: public dependency, extension API.
-
 **Corpus**:
-The deterministic projection of the docs source into `llms.txt`, per-item
-Markdown, guide mirrors, and `PrismDocsStore`. _Avoid_: hand-maintained API
-reference, duplicated documentation.
+The deterministic projection of the catalogue and the documentation into
+`llms.txt`, the Markdown mirror tree, and the store the MCP server serves.
+_Avoid_: hand-maintained reference, duplicated documentation, data dump.
 
-**Agent door**:
-The MCP and generated corpus entry points that give an agent the same catalog,
-usage rules, props, examples, and theme data as the human site. _Avoid_: a
-second product or a telemetry surface.
+**Store**:
+The type-checked projection of the corpus that the MCP server reads at runtime.
+It is generated, never hand-edited.
+_Avoid_: database, cache.
 
-## Visual commitments
+**Agent surface**:
+The corpus and the read-only MCP endpoint through which an agent reads the same
+catalogue, props, examples and tokens as the documentation site.
+_Avoid_: agent door, second product, telemetry surface.
 
-- Five pastel packs × light and beam-dark, with AA contrast gates.
-- Archivo Variable for the interface and JetBrains Mono for code and machine
-  annotations.
-- Radii 2 / 4 / 6 / 4 pixels, one-pixel hairlines, and one cool-tinted floating
-  shadow.
-- Dither fields and dot patterns instead of blended brand gradients.
-- Strongly decelerating motion at 80 / 160 / 280 milliseconds; no bounce or
-  overshoot.
-- Flash-free theme scopes based on stable `prism-<pack>-<mode>` classes.
+## Retired words
 
-## Vocabulary guardrails
+These words are historical. Do not revive them in code, comments, issues or
+prose.
 
-When writing code, tests, issues, or prose, use **component**, **block**,
-**page**, **brand pack**, **mode**, **theme**, **semantic token**, **owned
-source**, and **agent door**. Do not revive pass-through, wrapper, antd lane, or
-upstream delegation language from the historical implementation.
+- **primitive** as a unit noun: the units are Component, Block and Page, and the
+  raw ramps are foundation tokens.
+- **colourway**: say pack.
+- **variant** as a unit noun: a component may take a `variant` prop, but a
+  variant is never a catalogue unit and never a synonym for item.
+- **beam-dark**: the mode is `dark`.
+- **pass-through** and **wrapper**: a component that re-exports an internal
+  dependency unchanged is still a Component.
+- **agent door**: say agent surface.
+- **internal primitive**: say internal dependency.
+- **catalog**: in prose, say catalogue.
+- **layer** as a unit noun: the units are Component, Block and Page, and "tier"
+  names the token levels.
+- **Spectral Refraction**, **Archivo Variable** and **JetBrains Mono**: the
+  dropped visual identity. The system uses Inter and the packs named above.

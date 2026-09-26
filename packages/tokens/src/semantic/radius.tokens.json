@@ -1,0 +1,7 @@
+{
+  "radius": {
+    "$type": "dimension",
+    "$description": "Base corner radius. The full scale (sm through 4xl) is derived from this single value at build time, so changing it rescales every component in the system.",
+    "$value": { "value": 0.5, "unit": "rem" }
+  }
+}

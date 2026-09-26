@@ -1,0 +1,6 @@
+{
+  "name": "section",
+  "title": "Section",
+  "description": "Container and heading primitives that give every block a consistent vertical rhythm.",
+  "type": "registry:component"
+}

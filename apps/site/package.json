@@ -2,38 +2,34 @@
   "name": "@nanisoft/site",
   "version": "0.0.0",
   "private": true,
-  "description": "prism.nanisoft.com — Fumadocs headless docs, landing page, and blog; static export served by Cloudflare Workers.",
+  "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @nanisoft/prism-ui build && node scripts/stamp-mcp-data.mjs && node scripts/generate.mjs && next dev",
-    "generate": "node scripts/generate.mjs",
-    "build": "node scripts/stamp-mcp-data.mjs && node scripts/generate.mjs && next build && node scripts/copy-llms.mjs",
+    "predev": "pnpm --filter @nanisoft/prism-tokens build && node ../../scripts/dev-cache-guard.mjs && node scripts/analyze-blocks.mjs",
+    "dev": "next dev --turbopack",
+    "prebuild": "pnpm --filter @nanisoft/prism-tokens build && node scripts/analyze-blocks.mjs",
+    "build": "next build",
     "start": "next start",
-    "deploy": "node scripts/stamp-mcp-data.mjs && wrangler deploy",
-    "lint": "oxlint .",
-    "test": "vitest run"
+    "catalog:analyze": "node scripts/analyze-blocks.mjs",
+    "pretypecheck": "node scripts/analyze-blocks.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
   },
   "dependencies": {
-    "@nanisoft/prism-llms": "workspace:*",
-    "@nanisoft/prism-mcp-server": "workspace:*",
-    "@nanisoft/prism-tokens": "workspace:*",
     "@nanisoft/prism-ui": "workspace:*",
-    "agents": "0.24.0",
-    "feed": "^6.0.0",
-    "fumadocs-core": "^16.15.11",
-    "fumadocs-mdx": "^15.4.1",
-    "next": "^16.3.5",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
-    "zod": "^4.1.0"
+    "@nanisoft/prism-tokens": "workspace:*",
+    "lucide-react": "^0.545.0",
+    "next": "^16.2.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    "@testing-library/dom": "^10.4.1",
-    "@testing-library/react": "^16.3.3",
-    "@types/node": "^26.5.1",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
-    "jsdom": "^30.0.1",
-    "vitest": "^5.0.0",
-    "wrangler": "^4.135.0"
+    "@tailwindcss/postcss": "^4.1.12",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.3.6",
+    "tailwindcss": "^4.1.12",
+    "typescript": "^5.7.0"
   }
 }

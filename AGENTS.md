@@ -1,115 +1,98 @@
 # AGENTS.md
 
-Prism is NaniSoft's agent-ready React design system: a Prism-owned source catalog
-built on accessible Base UI primitives and plain CSS, with the same source
-projected into the docs site, `llms.txt`, Markdown mirrors, and the read-only
-MCP. The pnpm + Turborepo monorepo is the product workspace.
+Prism is NaniSoft's design system: a DTCG token pipeline, a published React
+component library that downstream products compose without writing CSS, a
+documentation site, and a machine-readable agent surface.
 
-## The one rule
+Read `CONTEXT.md` for the vocabulary, `DESIGN.md` for the visual and token
+rules, and `PRODUCT.md` for why the system exists. Use the terms in `CONTEXT.md`
+and avoid the words it retires.
 
-Consumer applications import from `@nanisoft/prism-ui` and React only. They do
-not install or import Base UI, and they never import another UI runtime
-directly. Base UI is an implementation detail of `prism-ui`; Prism's public
-vocabulary is the components, blocks, pages, provider, and token types exported
-by Prism.
-
-## Active wayfinding
-
-The current migration plan is `.scratch/prism-base-ui/map.md`, with its spec and
-six implementation tickets in that directory. The older
-`.scratch/prism/map.md` and its Ant Design research/ADRs are historical
-context; do not treat their retired implementation as current truth. Read the
-active map first, then claim an unblocked ticket by setting `Status: claimed`
-before editing it. Tracker conventions live in `docs/agents/issue-tracker.md`.
-
-## Taxonomy
-
-`@nanisoft/prism-ui` organizes its public surface as:
-
-- **components** — accessible, single-responsibility controls and primitives;
-- **blocks** — pre-composed product patterns assembled from components;
-- **pages** — complete structural compositions assembled from blocks and
-  components.
-
-The catalog is curated rather than a one-for-one compatibility mirror. Apps
-assemble Prism exports from npm; they never copy design-system source. The
-checked catalog is `packages/ui/src/catalog.ts` and is the source for docs
-navigation, generated content, the LLM corpus, and MCP metadata.
-
-## Layout
+## Where things are
 
 | Path | Package | Role |
 | --- | --- | --- |
-| `packages/tokens` | `@nanisoft/prism-tokens` | Pure primitives, semantics, brand packs, and CSS-variable projection |
-| `packages/ui` | `@nanisoft/prism-ui` | React components → blocks → pages, provider, icons, and plain CSS |
-| `packages/llms` | `@nanisoft/prism-llms` | Generated `llms.txt`, Markdown mirrors, and the MCP corpus |
-| `packages/mcp-server` | `@nanisoft/prism-mcp-server` | Transport-free MCP tool logic and `PrismDocsStore` contract |
-| `apps/site` | `@nanisoft/site` | Static Next.js docs, landing page, themes, and Worker assets |
+| `packages/tokens` | `@nanisoft/prism-tokens` | foundation and semantic tokens, pack descriptors, the CSS variable contract |
+| `packages/ui` | `@nanisoft/prism-ui` | Components, Blocks, Pages, the provider, and the one stylesheet |
+| `packages/llms` | `@nanisoft/prism-llms` | generated `llms.txt`, the Markdown mirror, and the store |
+| `packages/mcp-server` | `@nanisoft/prism-mcp-server` | read-only MCP tool logic, served from the site Worker |
+| `apps/site` | `@nanisoft/site` | static docs site, landing page, themes, and the Worker |
+| `scripts` | - | repository gates and release scripts |
+| `.scratch/prism-shadcn` | - | the active rebuild map and its tickets |
 
 ## Commands
 
 ```sh
-pnpm install                 # install the workspace
-pnpm build                   # turbo build; packages emit dist/, site exports out/
-pnpm test                    # turbo test; Vitest/RTL coverage
-pnpm check                   # prism-llms drift gate (7 corpus invariants)
-pnpm lint                    # oxlint + stylelint
-pnpm changeset               # declare a release before merging
+pnpm install
+pnpm dev            # docs site
+pnpm build          # turbo build; packages emit dist/, the site exports out/
+pnpm test           # Vitest
+pnpm check          # contrast, emitted-contract, motion, surface, layout, dash, corpus drift
+pnpm lint           # oxlint
+pnpm typecheck
+pnpm changeset      # declare a release before merging
 ```
 
-For a focused package, use the workspace filter, for example
-`pnpm --filter @nanisoft/prism-ui test`.
+Run one package with `pnpm --filter @nanisoft/prism-ui <task>`. `package.json` is
+the source of truth for what a script does today; the command set above is the
+settled target.
 
 ## Conventions
 
-- **Theming** — `createPrismTheme({ pack, mode })` returns one frozen
-  `PrismTheme` containing `primitives`, `semantics`, and `cssVariables`. The
-  five registered packs are blue, green, lavender, rose, and peach; modes are
-  light and beam-dark. The stylesheet consumes `--prism-*` variables and ships
-  deterministic scopes for all ten expressions.
-- **Provider** — `PrismProvider` owns the serializable theme scope, theme
-  context, link adapter, and nearest local portal target. It is the only
-  supported theming entry point for Prism components.
-- **Behavior** — Base UI supplies accessible interaction primitives inside
-  `prism-ui`; Prism owns the public wrappers, CSS recipes, types, and visual
-  language. No Base UI symbol is re-exported.
-- **Styling** — plain CSS, no Tailwind requirement. Use Prism semantic
-  variables and documented `className`/`data-prism` hooks; do not reach into
-  internal DOM or copy implementation CSS into an app.
-- **Motion and shape** — preserve the Spectral Refraction commitments: Archivo
-  Variable and JetBrains Mono, hairline elevation, 2/4/6/4 radii, dither rather
-  than blended gradients, and the 80/160/280ms decelerating motion family.
-- **Docs** — MDX in `apps/site/content` is authoritative prose. Live demos and
-  their copyable source are co-located `demos/*.tsx` files. `prism-llms`
-  generates the agent corpus from those sources; do not hand-copy content
-  between lanes.
-- **Figma** — token flow is one-way code → Figma Variables. Never hand-edit a
-  generated token file or introduce a second source of visual truth.
+- **One source of truth.** Every token, style and animation is authored here and
+  reaches a consumer through the packages. A component consumes semantic
+  utilities (`bg-background`, `text-muted-foreground`) and never a ramp step or a
+  raw value.
+- **No raw hex outside the token foundation tier**, and no raw ramp utility in a
+  component.
+- **Motion is by token only.** Name `duration-fast`, `duration-base` or
+  `duration-slow` and `ease-out` or `ease-in-out`; never a millisecond value or a
+  `cubic-bezier(...)` literal, and never a keyframe.
+- **One stylesheet.** A consumer imports `@nanisoft/prism-ui/styles.css` once.
+  Tailwind is an internal build dependency of the component package and the site,
+  never the consumer's.
+- **No override path.** A consumer composes, passes content and data, and chooses
+  a pack and a mode. There is no merge, wrapper or copy-out. When Prism lacks
+  something, request it upstream (see `CONTRIBUTING.md`).
+- **The catalogue is the single list.** Do not keep a second one, and do not
+  hand-edit the derived shadcn registry.
+- **JSDoc on the exported component is the documentation source.** It is preserved
+  into the emitted declarations, which the corpus reads. A component with no JSDoc
+  block has no corpus entry.
+- **Update the documentation with the code.** When a public surface, token or rule
+  changes, update the item's JSDoc or MDX, its catalogue entry, and the document
+  that states the rule: `CONTEXT.md` for vocabulary, `DESIGN.md` for visual and
+  token rules, `README.md` for adoption.
+- **Add a changeset for every published change.** Follow the conventions in
+  `CONTRIBUTING.md`.
 
-## MCP servers
+## Gotchas
 
-`.mcp.json` is strict JSON and contains only real, working servers:
+- **The token dist is written in place, never wiped.** Do not add an `rm -rf`
+  before the token build. Write over the top and prune afterwards, or a running
+  dev server loses its module graph.
+- **The shadcn registry is internal.** Never serve it or document it as an install
+  lane.
+- **Root documentation is not yet inside the dash gate.** Keep it free of em and
+  en dashes anyway; the quality-gate work adds the root documents to
+  `scripts/check-dashes.mjs`.
+- **Package scope and layout.** The npm scope is `@nanisoft`; the library
+  packages are `@nanisoft/prism-tokens` in `packages/tokens` and
+  `@nanisoft/prism-ui` in `packages/ui`, and the site is `@nanisoft/site` in
+  `apps/site`. The old `@ds/*` placeholder names are gone.
 
-- `prism` — the public read-only HTTP endpoint at
-  `https://prism.nanisoft.com/mcp` (stdio clients can use `npx mcp-remote`).
-  It serves eight tools over the generated owned catalog: `list_items`,
-  `get_item_doc`, `get_item_props`, `get_item_source`, `get_theme_doc`,
-  `list_pages`, `get_page`, and `search_docs`.
-- `figma` — the remote Figma Dev Mode MCP at `https://mcp.figma.com/mcp`.
+## Agent skills
 
-HTTP entries need both `type` and `url` or Claude Code skips them. Project
-scope approval is one-time per user (`/mcp`). The Prism MCP is the source for
-Prism behavior; it never directs consumers to an upstream UI package.
+### Issue tracker
 
-## Working here
+Issues are markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
+The active map is `.scratch/prism-shadcn/map.md`.
 
-- Read the active map, `CONTEXT.md`, `PRODUCT.md`, `docs/design-conventions.md`,
-  and relevant ADRs before changing product language or visual conventions.
-- Keep the existing dirty worktree; do not reset or discard unrelated changes.
-- Prefer the checked catalog and generated projections over hand-maintained
-  duplicate lists.
-- When the UI layer changes in a way that alters the docs corpus, update the
-  docs source and run `pnpm --filter @nanisoft/prism-llms generate-content`
-  when generated stubs are affected, then run the full corpus check.
-- Add a changeset for every published package whose public behavior or docs
-  projection changes.
+### Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`,
+`wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.

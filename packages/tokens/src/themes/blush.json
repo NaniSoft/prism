@@ -1,0 +1,5 @@
+{
+  "$description": "Soft rose. The softest of the five, with a generously rounded radius.",
+  "name": "Blush",
+  "radius": { "value": 0.875, "unit": "rem" }
+}

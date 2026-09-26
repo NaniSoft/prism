@@ -1,0 +1,5 @@
+{
+  "$description": "Soft blue. The crispest of the set, with the smallest radius and the most structure.",
+  "name": "Sky",
+  "radius": { "value": 0.5, "unit": "rem" }
+}

@@ -1,95 +1,48 @@
 {
   "name": "@nanisoft/prism-ui",
-  "version": "0.4.0",
-  "description": "Prism's React design system — owned components, blocks, and pages with accessible Base UI behavior behind one import.",
-  "license": "MIT",
+  "version": "0.5.0",
   "type": "module",
-  "sideEffects": false,
-  "engines": {
-    "node": ">=22"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./provider": {
-      "types": "./dist/provider/index.d.ts",
-      "import": "./dist/provider/index.js"
-    },
-    "./components": {
-      "types": "./dist/components/index.d.ts",
-      "import": "./dist/components/index.js"
-    },
-    "./components/*": {
-      "types": "./dist/components/*/index.d.ts",
-      "import": "./dist/components/*/index.js"
-    },
-    "./blocks": {
-      "types": "./dist/blocks/index.d.ts",
-      "import": "./dist/blocks/index.js"
-    },
-    "./blocks/*": {
-      "types": "./dist/blocks/*/index.d.ts",
-      "import": "./dist/blocks/*/index.js"
-    },
-    "./pages": {
-      "types": "./dist/pages/index.d.ts",
-      "import": "./dist/pages/index.js"
-    },
-    "./pages/*": {
-      "types": "./dist/pages/*/index.d.ts",
-      "import": "./dist/pages/*/index.js"
-    },
-    "./products": {
-      "types": "./dist/products/index.d.ts",
-      "import": "./dist/products/index.js"
-    },
-    "./theming": {
-      "types": "./dist/theming/index.d.ts",
-      "import": "./dist/theming/index.js"
-    },
-    "./catalog": {
-      "types": "./dist/catalog.d.ts",
-      "import": "./dist/catalog.js"
-    },
-    "./styles.css": "./dist/styles.css",
-    "./package.json": "./package.json"
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "node scripts/clean-dist.mjs && tsc -p tsconfig.json && node scripts/copy-styles.mjs",
-    "lint": "oxlint .",
-    "test": "vitest run",
-    "prepublishOnly": "publint"
-  },
-  "peerDependencies": {
-    "react": "^19.3.0"
-  },
-  "devDependencies": {
-    "@testing-library/dom": "^10.4.1",
-    "@testing-library/react": "^16.3.3",
-    "@types/node": "^26.5.1",
-    "@types/react": "^19.3.0",
-    "jsdom": "^30.0.1",
-    "publint": "^0.3.24",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
-    "tsx": "^4.0.0",
-    "typescript": "^7.0.2",
-    "vitest": "^5.0.0"
-  },
-  "dependencies": {
-    "@base-ui/react": "^1.8.0",
-    "@nanisoft/prism-tokens": "workspace:*"
-  },
+  "description": "Component + block source of truth, published as a shadcn registry.",
+  "license": "MIT",
   "author": "NaniSoft",
   "homepage": "https://prism.nanisoft.com",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NaniSoft/prism.git",
+    "url": "https://github.com/NaniSoft/prism.git",
     "directory": "packages/ui"
+  },
+  "exports": {
+    "./components/*": "./src/components/*.tsx",
+    "./registry.json": "./registry.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "registry.json",
+    "public/r",
+    "components.json"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "sync": "node scripts/sync-registry.mjs",
+    "validate": "node scripts/validate-registry.mjs",
+    "build": "pnpm sync && pnpm validate && shadcn build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.0.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.545.0",
+    "tailwind-merge": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "shadcn": "^3.6.0",
+    "typescript": "^5.7.0"
   }
 }

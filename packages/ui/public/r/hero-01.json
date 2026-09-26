@@ -1,0 +1,44 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "hero-01",
+  "title": "Hero 01 - Centered Marketing Hero",
+  "description": "A centered hero with an optional eyebrow, headline, supporting line and one or two actions. All copy is passed in as props.",
+  "dependencies": [
+    "clsx",
+    "lucide-react",
+    "tailwind-merge"
+  ],
+  "registryDependencies": [
+    "button"
+  ],
+  "files": [
+    {
+      "path": "src/components/ds/blocks/hero-01/hero.tsx",
+      "content": "import { ArrowRight } from 'lucide-react'\n\nimport { Button } from '@/components/ui/button'\nimport { Section, SectionHeading, type HeadingLevel } from '@/components/ds/blocks/section'\n\nexport type HeroAction = {\n  label: string\n  href?: string\n  variant?: 'default' | 'outline' | 'secondary' | 'ghost'\n}\n\nexport type Hero01Props = {\n  /**\n   * Optional label above the headline. Intentionally has no default: an earlier\n   * version shipped a hardcoded \"Now in open beta\" pill, which meant every\n   * consumer who installed this block inherited a status badge making a claim\n   * about their product. Pass one if you mean it.\n   */\n  eyebrow?: string\n  title: string\n  description?: string\n  actions?: HeroAction[]\n  /**\n   * Heading level for the title. Defaults to `h2` because a block is composed,\n   * not a page: it installs into a consumer's layout via `shadcn add` and renders\n   * inside catalog previews, so the surrounding document already owns the `h1`.\n   * A page that uses this block as its top-level heading opts in with\n   * `headingLevel=\"h1\"`; a document that already names this section in its own\n   * heading passes one level deeper. See `HeadingLevel`.\n   */\n  headingLevel?: HeadingLevel\n}\n\nexport function Hero01({\n  eyebrow,\n  title,\n  description,\n  actions = [],\n  headingLevel = 'h2',\n}: Hero01Props) {\n  return (\n    <Section className=\"relative overflow-hidden\">\n      <div\n        aria-hidden\n        className=\"from-primary/5 pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b to-transparent\"\n      />\n      <div className=\"flex flex-col items-center gap-10 text-center\">\n        {eyebrow ? (\n          <span className=\"bg-muted text-muted-foreground rounded-full px-3 py-1 text-xs font-medium\">\n            {eyebrow}\n          </span>\n        ) : null}\n\n        <SectionHeading\n          as={headingLevel}\n          title={title}\n          description={description}\n        />\n\n        {actions.length ? (\n          <div className=\"flex flex-col gap-3 sm:flex-row\">\n            {actions.map((action, index) => (\n              // Positional, for the same reason as `pricing-01`'s feature list:\n              // the label is display content, and two actions may share one.\n              // Safe here because the list is static and never reordered.\n              <Button\n                key={index}\n                size=\"lg\"\n                variant={action.variant ?? (index === 0 ? 'default' : 'outline')}\n                className=\"group\"\n              >\n                {action.label}\n                {index === 0 ? (\n                  <ArrowRight className=\"motion-safe:transition-transform size-4 group-hover:translate-x-0.5\" />\n                ) : null}\n              </Button>\n            ))}\n          </div>\n        ) : null}\n      </div>\n    </Section>\n  )\n}\n\nexport default Hero01\n",
+      "type": "registry:component",
+      "target": "components/ds/blocks/hero-01/hero.tsx"
+    },
+    {
+      "path": "src/components/ds/blocks/hero-01/index.tsx",
+      "content": "export { Hero01, default } from './hero'\n",
+      "type": "registry:component",
+      "target": "components/ds/blocks/hero-01/index.tsx"
+    },
+    {
+      "path": "src/components/ds/blocks/section.tsx",
+      "content": "import type { ReactNode } from 'react'\nimport { cn } from '@/lib/utils'\n\n/**\n * Container primitive. Every block composes its own section from this so vertical\n * rhythm stays consistent across the catalog instead of being re-invented per block.\n */\nexport function Section({\n  className,\n  children,\n  ...props\n}: React.ComponentProps<'section'>) {\n  return (\n    <section\n      className={cn('py-16 sm:py-24', className)}\n      {...props}\n    >\n      <div className=\"mx-auto w-full max-w-6xl px-6 lg:px-8\">\n        {children}\n      </div>\n    </section>\n  )\n}\n\n/**\n * The six heading levels a block can be composed at.\n *\n * Every block takes a `headingLevel` prop typed with this and forwards it to the\n * one heading it renders, so the surrounding document decides where the block\n * sits in the outline rather than the block deciding for itself. `h2` is the\n * default because a block is composed, not a page.\n *\n * A block rendered where the document *already* owns a heading for the same\n * content passes one level deeper. A catalog card already names the block in its\n * own `h2`, so the copy of the block embedded inside that card passes `h3`: the\n * embedded heading then reads as a child of the card that introduces it instead\n * of as a second, competing sibling. This is a fact about where the block was\n * placed, not about the block, which is why it is a prop and not a default.\n */\nexport type HeadingLevel = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'\n\nexport function SectionHeading({\n  eyebrow,\n  title,\n  as: Heading = 'h2',\n  description,\n  align = 'center',\n  className,\n}: {\n  eyebrow?: ReactNode\n  title: ReactNode\n  description?: ReactNode\n  align?: 'center' | 'left'\n  /**\n   * Heading level. Defaults to `h2` because blocks compose under a page heading.\n   * A page that renders a block as its primary heading passes `as=\"h1\"` — a\n   * document with no `h1` gives screen-reader and search engines no top-level\n   * entry point.\n   */\n  as?: HeadingLevel\n  className?: string\n}) {\n  return (\n    <div\n      className={cn(\n        'flex flex-col gap-4',\n        align === 'center' ? 'items-center text-center' : 'items-start text-left',\n        className,\n      )}\n    >\n      {eyebrow ? (\n        <span className=\"text-muted-foreground text-sm font-medium tracking-wide uppercase\">\n          {eyebrow}\n        </span>\n      ) : null}\n      <Heading className=\"text-3xl font-semibold tracking-tight text-balance sm:text-4xl\">\n        {title}\n      </Heading>\n      {description ? (\n        <p className=\"text-muted-foreground max-w-2xl text-lg text-pretty\">\n          {description}\n        </p>\n      ) : null}\n    </div>\n  )\n}\n",
+      "type": "registry:component",
+      "target": "components/ds/blocks/section.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "categories": [
+    "marketing"
+  ],
+  "type": "registry:block"
+}

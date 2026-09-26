@@ -1,15 +1,11 @@
 # Prism
 
-**One design language, many expressions.**
-
-Prism is NaniSoft's agent-ready React design system. `@nanisoft/prism-ui`
-ships an owned catalog of accessible components, pre-composed blocks, and
-complete pages, styled by Prism's Spectral Refraction tokens. The same source
-powers the human documentation, generated `llms.txt`, Markdown mirrors, and the
-read-only Prism MCP at [prism.nanisoft.com](https://prism.nanisoft.com).
-
-Base UI is an internal accessibility dependency of `prism-ui`. Consumers do
-not install or import it.
+**One source of truth for NaniSoft products.** Prism is a design system: a DTCG
+token pipeline, a React component library that downstream products compose
+without writing or overriding a single style, and a machine-readable agent
+surface. Install `@nanisoft/prism-ui`, import one stylesheet, and build with
+Components, Blocks and Pages. Every token, style and animation is authored here
+and reaches you through the packages.
 
 ## Install
 
@@ -17,50 +13,110 @@ not install or import it.
 pnpm add @nanisoft/prism-ui react react-dom
 ```
 
-Import the stylesheet once, then wrap the app in a Prism provider:
+Import the one stylesheet in your app root and, if you want runtime switching,
+mount the provider:
 
 ```tsx
-import '@nanisoft/prism-ui/styles.css';
-import { PrismProvider, createPrismTheme } from '@nanisoft/prism-ui';
+import '@nanisoft/prism-ui/styles.css'
+import { PrismProvider, PrismThemeScript } from '@nanisoft/prism-ui/provider'
 
-const theme = createPrismTheme({ pack: 'blue', mode: 'dark' });
-
-export function App({ children }: { children: React.ReactNode }) {
-  return <PrismProvider prismTheme={theme}>{children}</PrismProvider>;
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html
+      lang="en"
+      data-pack="blush"
+      className="dark"
+      suppressHydrationWarning
+    >
+      <head>
+        <PrismThemeScript />
+      </head>
+      <body>
+        <PrismProvider defaultPack="blush" defaultMode="dark">
+          {children}
+        </PrismProvider>
+      </body>
+    </html>
+  )
 }
 ```
 
-The public catalog is organized as **components → blocks → pages**. The first
-release contains 29 components, 9 blocks, and 5 pages. Apps assemble these
-exports from npm; they do not copy Prism source or adopt another UI runtime.
+You install no Tailwind, no PostCSS and no token plugin. `styles.css` is
+self-sufficient: it carries the custom properties, the theme bindings, the
+compiled utilities every component uses, and the base layer.
 
-## Themes
+## The provider
 
-Five registered packs — **blue, green, lavender, rose, peach** — each ship in
-light and beam-dark mode. A `PrismTheme` is frozen data containing resolved
-primitives, semantic tokens, and CSS custom properties. The stylesheet and the
-blocking site bootstrap keep mode changes flash-free.
+The provider is optional. Without it, the two attributes on `<html>` apply and
+everything works with no client runtime. With it, you get programmatic switching
+and persistence:
 
 ```tsx
-import { createPrismTheme, PrismProvider } from '@nanisoft/prism-ui';
+import { PrismProvider, usePrismTheme } from '@nanisoft/prism-ui/provider'
 
-const theme = createPrismTheme({ pack: 'lavender', mode: 'light' });
-
-<PrismProvider prismTheme={theme}>
-  <App />
-</PrismProvider>;
+function ThemeControls() {
+  const { pack, mode, setPack, toggleMode } = usePrismTheme()
+  return (
+    <button onClick={toggleMode}>
+      {pack} {mode}
+    </button>
+  )
+}
 ```
 
-## Agent surface
+`PrismProvider` writes the same two attributes a declarative consumer writes and
+carries pack and mode through context. It has no `overrides`, `tokens` or
+`style` prop: there is no override path, because the system has exactly one
+source of truth. When Prism lacks a component, token or variant, request it
+upstream rather than merging one in locally.
 
-Prism treats agents as first-class consumers:
+## Theming
 
-- [`llms.txt`](https://prism.nanisoft.com/llms.txt) is the compact catalog and
-  guide index.
-- Per-component, block, page, theme, and guide Markdown is served under
-  [`/md/`](https://prism.nanisoft.com/md/).
-- The public read-only MCP is available at
-  `https://prism.nanisoft.com/mcp`; configure an HTTP MCP client with:
+Theming is two independent axes, `data-pack` and `.dark`, plus the vocabulary
+and pure helpers exported from `./theming`:
+
+```tsx
+import { PACKS, MODES, themeAttributes } from '@nanisoft/prism-ui/theming'
+
+// Declarative: put the attributes on any element, and its subtree follows.
+<div data-pack="mint" className="dark">{children}</div>
+
+// Or let a server component render them.
+themeAttributes({ pack: 'mint', mode: 'dark' })
+```
+
+The base pack is the absence of `data-pack`. A themed subtree states both axes,
+and descendant scoping is supported, so a marketing page can show every pack at
+once without writing CSS. `default` is expressed by omitting `data-pack`.
+
+## Components, Blocks and Pages
+
+The public surface is three layers, and every layer is an npm export:
+
+- **Components** are focused, accessible, product-agnostic controls.
+- **Blocks** are pre-composed sections that take their content as props and
+  fetch nothing.
+- **Pages** are complete screen models that receive application-owned navigation,
+  content and data.
+
+```tsx
+import { Button } from '@nanisoft/prism-ui/components/button'
+import { Card, CardHeader, CardTitle, CardContent } from '@nanisoft/prism-ui/components/card'
+// Blocks and Pages import the same way, from ./blocks/* and ./pages/*.
+```
+
+The v1 roster is settled separately. This README states the contract, not the
+list.
+
+## The agent surface
+
+Prism treats agents as first-class consumers, and the same checked catalogue
+feeds the human site and the agent surface:
+
+- `/llms.txt` is the compact catalogue and guide index.
+- A `.md` mirror of every item page is served from the docs origin.
+- A read-only MCP server answers catalogue, props, source, theme and search
+  queries at `https://prism.nanisoft.com/mcp`:
 
   ```json
   {
@@ -73,19 +129,32 @@ Prism treats agents as first-class consumers:
   }
   ```
 
-  Its eight tools cover catalog discovery, item docs, public props, copyable
-  source, themes, guide pages, and corpus search. Generated code always imports
-  from `@nanisoft/prism-ui`.
+Generated code always imports from `@nanisoft/prism-ui`.
 
 ## Repository map
 
-- `packages/tokens` — pure brand data, semantics, and CSS-variable themes
-- `packages/ui` — owned components, blocks, pages, provider, and CSS
-- `packages/llms` — deterministic corpus generation and drift checks
-- `packages/mcp-server` — transport-free MCP tool logic
-- `apps/site` — static docs, themes, demos, and Worker assets
+| Path | Package | Role |
+| --- | --- | --- |
+| `packages/tokens` | `@nanisoft/prism-tokens` | foundation and semantic tokens, packs, the CSS variable contract |
+| `packages/ui` | `@nanisoft/prism-ui` | Components, Blocks, Pages, provider, and the one stylesheet |
+| `packages/llms` | `@nanisoft/prism-llms` | generated corpus: `llms.txt`, Markdown mirrors, store |
+| `packages/mcp-server` | `@nanisoft/prism-mcp-server` | read-only MCP tool logic |
+| `apps/site` | `@nanisoft/site` | static docs site, landing page, themes, Worker |
+| `scripts` | - | repository gates and release scripts |
 
-Read [`AGENTS.md`](./AGENTS.md) before contributing. The active migration plan
-is [`.scratch/prism-base-ui/map.md`](./.scratch/prism-base-ui/map.md); older
-Ant Design research and ADRs remain as historical records, not current
-implementation truth.
+The constitution lives at the root: `PRODUCT.md`, `CONTEXT.md`, `DESIGN.md`,
+`AGENTS.md` and `CONTRIBUTING.md`.
+
+## Status
+
+Prism is being rebuilt from this repository. The packages, subpaths and commands
+above are the settled target; the rebuild map at `.scratch/prism-shadcn/map.md`
+is the work list, and `DESIGN.md` records the open items. The previous public
+system is archived at `github.com/NaniSoft/prism` and is not the source of this
+system.
+
+## Contributing
+
+Prism is MIT-licensed. Read `CONTRIBUTING.md` before opening a pull request; it
+states the contribution path, the acceptance criteria and the changeset
+conventions. The vocabulary is in `CONTEXT.md`.

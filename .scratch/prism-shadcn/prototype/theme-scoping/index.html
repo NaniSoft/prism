@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en" data-pack="blush">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Prism theme scoping probe</title>
+    <link rel="stylesheet" href="candidates/attribute-agnostic.css" />
+    <style>
+      /* Probe chrome only. Tokens are read through Prism's semantic custom
+         properties; no Prism value is restated here. */
+      html {
+        background: var(--background);
+        color: var(--foreground);
+        font: 14px/1.5 system-ui, sans-serif;
+      }
+      body { margin: 0; padding: 24px; }
+      h1 { font-size: 18px; margin: 0 0 4px; }
+      h2 { font-size: 14px; margin: 28px 0 8px; }
+      p.hint { color: var(--muted-foreground); margin: 0 0 16px; }
+      .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+      button {
+        font: inherit;
+        padding: 4px 10px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--secondary);
+        color: var(--secondary-foreground);
+        cursor: pointer;
+      }
+      button[aria-pressed='true'] { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+      .card {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--card);
+        color: var(--card-foreground);
+        padding: 12px;
+      }
+      .card h3 { margin: 0 0 8px; font-size: 13px; }
+      .card .swatch { height: 40px; border-radius: calc(var(--radius) * 0.8); background: var(--primary); color: var(--primary-foreground); display: flex; align-items: center; justify-content: center; font-weight: 600; }
+      .card code { display: block; margin-top: 8px; color: var(--muted-foreground); font-size: 11px; word-break: break-all; }
+      #check { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; background: var(--muted); color: var(--muted-foreground); white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 12px; }
+      .pass { color: var(--success, #15803d); }
+      .fail { color: var(--destructive, #dc2626); font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <h1>Prism theme scoping probe</h1>
+    <p class="hint">
+      Candidate selector: <code>[data-pack="&lt;id&gt;"]</code> and its dark companion
+      <code>[data-pack="&lt;id&gt;"].dark</code>, with the base pack on <code>:root</code>/<code>.dark</code>.
+    </p>
+
+    <div class="bar">
+      <strong>Root pack:</strong>
+      <button data-pack-btn="default">default</button>
+      <button data-pack-btn="blush">blush</button>
+      <button data-pack-btn="mint">mint</button>
+      <button data-pack-btn="lavender">lavender</button>
+      <button data-pack-btn="sky">sky</button>
+      <button data-pack-btn="peach">peach</button>
+      <button id="mode">toggle root mode (light)</button>
+    </div>
+    <div class="bar">
+      <strong>Subtree mode:</strong>
+      <button data-sub-mode="light">light</button>
+      <button data-sub-mode="dark">dark</button>
+      <span class="hint">— applies class="dark" to every descendant card, independently of the root mode.</span>
+    </div>
+
+    <h2>All five packs at once, in a descendant subtree</h2>
+    <p class="hint">
+      Each card carries <code>data-pack</code> on a plain <code>&lt;div&gt;</code>; the
+      page's own pack is on <code>&lt;html&gt;</code>. The subtree re-points the
+      custom properties without touching CSS.
+    </p>
+    <div class="grid" id="cards"></div>
+
+    <h2>Self-check (computed styles)</h2>
+    <div id="check">running…</div>
+
+    <script>
+      const PACKS = ['default', 'blush', 'mint', 'lavender', 'sky', 'peach']
+      const PRIMARY = {
+        default: { light: '#171717', dark: '#f5f5f5' },
+        blush: { light: '#ec88a0', dark: '#ffb2c2' },
+        mint: { light: '#73bf88', dark: '#9ddcad' },
+        lavender: { light: '#bc97e7', dark: '#d9baff' },
+        sky: { light: '#6cb2eb', dark: '#9bd1ff' },
+        peach: { light: '#e4965e', dark: '#feb98b' },
+      }
+      const root = document.documentElement
+      let rootMode = 'light'
+      let subMode = 'light'
+
+      // Build one card per pack; the card is a descendant of <html>.
+      const cards = document.getElementById('cards')
+      for (const pack of PACKS) {
+        const card = document.createElement('div')
+        card.className = 'card'
+        card.id = 'card-' + pack
+        if (pack !== 'default') card.setAttribute('data-pack', pack)
+        card.innerHTML =
+          '<h3>' + pack + (pack === 'default' ? ' (absence of data-pack)' : '') + '</h3>' +
+          '<div class="swatch">' + pack + '</div>' +
+          '<code></code>'
+        cards.appendChild(card)
+      }
+
+      function applySubMode() {
+        for (const pack of PACKS) {
+          const card = document.getElementById('card-' + pack)
+          card.classList.toggle('dark', subMode === 'dark')
+        }
+        document.querySelectorAll('[data-sub-mode]').forEach((b) =>
+          b.setAttribute('aria-pressed', String(b.dataset.subMode === subMode)),
+        )
+      }
+
+      function applyRootPack(pack) {
+        if (pack === 'default') root.removeAttribute('data-pack')
+        else root.setAttribute('data-pack', pack)
+        document.querySelectorAll('[data-pack-btn]').forEach((b) =>
+          b.setAttribute('aria-pressed', String(b.dataset.packBtn === pack)),
+        )
+      }
+
+      function applyRootMode() {
+        root.classList.toggle('dark', rootMode === 'dark')
+        document.getElementById('mode').textContent = 'toggle root mode (' + rootMode + ')'
+      }
+
+      document.querySelectorAll('[data-pack-btn]').forEach((b) =>
+        b.addEventListener('click', () => applyRootPack(b.dataset.packBtn)),
+      )
+      document.getElementById('mode').addEventListener('click', () => {
+        rootMode = rootMode === 'dark' ? 'light' : 'dark'
+        applyRootMode()
+        check()
+      })
+      document.querySelectorAll('[data-sub-mode]').forEach((b) =>
+        b.addEventListener('click', () => { subMode = b.dataset.subMode; applySubMode(); check() }),
+      )
+
+      function check() {
+        const lines = []
+        let failures = 0
+        for (const pack of PACKS) {
+          const card = document.getElementById('card-' + pack)
+          const got = getComputedStyle(card).getPropertyValue('--primary').trim().toLowerCase()
+          const want = PRIMARY[pack][subMode]
+          const panel = subMode === 'dark'
+            ? 'dark: ' + want
+            : 'light: ' + want
+          const ok = got === want
+          if (!ok) failures++
+          card.querySelector('code').textContent =
+            '--primary ' + got + '  (expected ' + panel + ')'
+          lines.push((ok ? '[pass] ' : '[FAILL] ') + pack + ' subtree --primary = ' + got + ', expected ' + want)
+        }
+        const rootGot = getComputedStyle(root).getPropertyValue('--primary').trim().toLowerCase()
+        lines.push('')
+        lines.push('root --primary = ' + rootGot + ' (root pack ' + (root.dataset.pack || 'default') + ', root mode ' + rootMode + ')')
+        lines.push('')
+        lines.push(failures === 0 ? 'ALL DESCENDANT CARDS RESOLVED THEIR OWN PACK. failures=' + failures : 'FAILURES=' + failures)
+        const el = document.getElementById('check')
+        el.textContent = lines.join('\n')
+      }
+
+      applyRootPack('blush')
+      applyRootMode()
+      applySubMode()
+      check()
+      window.__probe = { check, get state() { return { rootMode, subMode } } }
+    </script>
+  </body>
+</html>
