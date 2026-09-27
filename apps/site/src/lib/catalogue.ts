@@ -14,7 +14,21 @@ import type { MetaData, PageData, StaticSource } from 'fumadocs-core/source'
  * disk. One page per item at `<segment>/<slug>.mdx`, plus one explicit page per
  * section root so a section builds while its roster is still thin. The prose
  * body is looked up separately at render time, from the `items/` collection.
+ *
+ * Each section also carries a generated `meta.json`, and that is the order the
+ * navigation reads. It is generated from the same `buildCatalog()` call that
+ * emits the pages, from the same array, so the order cannot fall behind the
+ * Catalogue: a new Item is a line in one list and the ordering grows with it.
+ * A hand-written `pages` array would be the opposite, because a `pages` array is
+ * a whitelist rather than a reorder. An Item it omits does not move down the
+ * list, it leaves the primary tree, lands in the fallback collection and keeps
+ * its exported route, which is a page reachable by URL and invisible in the
+ * navigation with a green build. Generating the array is what removes the
+ * opportunity.
  */
+
+/** The three Kinds, in the order the Sections are built and rendered. */
+export const KINDS = ['component', 'block', 'page'] as const
 
 /** The catalogue metadata a routed page carries. */
 export type CataloguePageData = PageData & {
@@ -55,8 +69,6 @@ export const SECTIONS: Record<
   },
 }
 
-const EMPTY: never[] = []
-
 function itemPath(item: CatalogItem): string {
   return `${SECTIONS[item.kind].segment}/${item.slug}.mdx`
 }
@@ -95,11 +107,18 @@ function build(): StaticSource<CatalogueConfig> {
   const items = buildCatalog()
   const files: StaticSource<CatalogueConfig>['files'] = []
 
-  for (const kind of ['component', 'block', 'page'] as const) {
+  for (const kind of KINDS) {
+    const segment = SECTIONS[kind].segment
+    files.push({ type: 'page', path: `${segment}/index.mdx`, data: indexData(kind) })
+    // The ordering, generated from the same array the pages came from. The
+    // section's own index page is deliberately absent from it: naming it would
+    // take the folder's automatic `index.mdx` lookup away and list the landing
+    // page as a child of itself, and the lookup is what a group heading links
+    // to.
     files.push({
-      type: 'page',
-      path: `${SECTIONS[kind].segment}/index.mdx`,
-      data: indexData(kind),
+      type: 'meta',
+      path: `${segment}/meta.json`,
+      data: { pages: items.filter((item) => item.kind === kind).map((item) => item.slug) },
     })
   }
 

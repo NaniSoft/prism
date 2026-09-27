@@ -9,7 +9,7 @@ import { DocsShell } from '@/components/docs-shell'
 import { ItemHeader } from '@/components/item-header'
 import { getMDXComponents } from '@/components/mdx'
 import type { CataloguePageData } from '@/lib/catalogue'
-import { buildNav, flattenNav } from '@/lib/nav'
+import { flattenNav, projectNav } from '@/lib/nav'
 import { proseSource, source } from '@/lib/source'
 
 export function generateStaticParams() {
@@ -38,7 +38,12 @@ export default async function Page({ params }: { params: Promise<{ slug: string[
   // boundary, so an unknown slug is a real not-found rather than a soft 404.
   if (!page) notFound()
 
-  const sections = buildNav()
+  // The tree is the navigation's one source, read here because this is the one
+  // module that can: the routing tree is compiled by the bundler plugin, so it
+  // does not exist outside it. The projection refuses to return a partial
+  // navigation, which is what turns a page the ordering forgot into a failed
+  // render rather than a green build with a page missing from the sidebar.
+  const sections = projectNav(source.getPageTree())
   const flat = flattenNav(sections)
   const components = getMDXComponents()
 

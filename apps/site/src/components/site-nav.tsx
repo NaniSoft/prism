@@ -5,16 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 
-const NAV = [
-  { href: '/', label: 'Overview' },
-  { href: '/docs', label: 'Guides' },
-  { href: '/foundations', label: 'Foundations' },
-  { href: '/components', label: 'Components' },
-  { href: '/blocks', label: 'Blocks' },
-  { href: '/pages', label: 'Pages' },
-  { href: '/content', label: 'Content' },
-  { href: '/themes', label: 'Themes' },
-] as const
+import { TOP_NAV } from '@/lib/nav'
 
 /**
  * Horizontal navigation for `md` and up.
@@ -39,7 +30,7 @@ export function SiteNav() {
 
   return (
     <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
-      {NAV.map((item) => {
+      {TOP_NAV.map((item) => {
         const current = pathname === item.href
         return (
           <Link
@@ -172,7 +163,7 @@ export function MobileMenu() {
           className="border-border bg-popover absolute inset-x-0 top-full z-30 border-b p-2 shadow-lg"
         >
           <nav aria-label="Main" className="mx-auto flex w-full max-w-6xl flex-col gap-1 px-4">
-            {NAV.map((item) => {
+            {TOP_NAV.map((item) => {
               const current = pathname === item.href
               return (
                 <Link

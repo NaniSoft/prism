@@ -37,7 +37,8 @@ directions exist:
 - the Corpus and the content tree hold the same pages, and each page's mirror is
   its own route plus `.md`;
 - every internal link in the authored prose resolves to a route;
-- every href the published navigation renders resolves to a route.
+- every href the published navigation renders resolves to a route, and every
+  content route the site publishes is one the navigation links.
 
 The assertions are in `apps/site/scripts/content-joins.mjs`, which touches no
 filesystem, and the test lane runs them against a flat tree and a nested tree,
@@ -50,6 +51,20 @@ and the Catalogue is read, never inferred from a directory scan.
 The known limit: a link to a published file that is not a page, which today
 means `llms.txt`, `llms-full.txt` and `prism-skill.md`, is reported as
 unresolved, because the route set is the set of routes.
+
+**The reachability direction has a second line, and the second one comes
+first.** A `pages` array in a `meta.json` is a whitelist, not a reorder, so a
+page it omits and does not cover with an ellipsis leaves the primary page tree,
+lands in the fallback collection and keeps its exported route. The page
+template refuses to project a tree that holds one, so `pnpm build` fails and
+names the file. The gate's direction is the same rule seen from the reader's
+side, over two surfaces it already reads, which is what lets it hold at any
+depth and lets the test lane run it against a flat and a nested fixture: the
+routing tree itself cannot be built outside the bundler that compiled the macro,
+so the gate never instantiates it. Neither replaces the other. The build
+enforcement sees the fallback and nothing else, and only when a page render
+runs; the gate sees reachability and would also catch a navigation that dropped a
+page for any other reason.
 
 ## The client-JavaScript budget
 

@@ -19,6 +19,13 @@
  * re-derives what the Corpus contains: the Corpus arrives as the Store the MCP
  * server reads and is compared, not recomputed.
  *
+ * The routing tree is not read here either, because it cannot be: the site's
+ * content source is declared through the macro API, whose module throws unless
+ * the bundler plugin compiled it. The one thing the gate needs from the tree is
+ * whether an ordering claims every page, and that is stated here as the
+ * join it implies: a route the site publishes that no navigation links is a page
+ * an ordering left out.
+ *
  * @typedef {{ name: string, slug: string, kind: string }} CatalogueItem
  * @typedef {{ slug: string, file: string, demos: string[] }} ItemDoc
  * @typedef {{ route: string, file: string, index: boolean }} ContentFile
@@ -267,6 +274,45 @@ export function findContentJoins(joins) {
       fail(
         'routes',
         `the published navigation links ${href}, which the routing tree does not produce`,
+      )
+    }
+  }
+
+  /* The navigation against the routes an ordering governs, both ways. ----- */
+
+  // A `pages` array in a meta file is a whitelist, not a reorder. A page it
+  // omits and does not cover with an ellipsis leaves the primary tree, lands in
+  // the fallback collection, and keeps its exported route. The page template
+  // refuses to project a tree that has one, so the build fails before this gate
+  // runs; this is the same rule from the reader's side, over two surfaces the
+  // gate already reads, so it holds at any depth and needs the tree never to be
+  // instantiated. The one direction it cannot check is the fallback itself,
+  // which is why both exist rather than one.
+  //
+  // The population is what the content tree and the Catalogue publish. A
+  // catalogue Section landing page is not in it, because it is only reachable
+  // through its folder, and a folder that lost its place in the ordering takes
+  // every page beneath it with it, so the Item routes already carry the failure.
+  //
+  // Skipped entirely when there is no navigation to compare against, so a build
+  // that was never published reports the one finding above rather than one per
+  // page.
+  if (joins.navHrefs.length > 0) {
+    const linked = new Set(joins.navHrefs.map((href) => routeOfHref(href)))
+    for (const file of joins.contentFiles) {
+      if (linked.has(file.route)) continue
+      fail(
+        'routes',
+        `the content page ${file.route} (${file.file}) is published but no navigation links ` +
+          'it, so a page-tree ordering left it out and it is reachable only by URL',
+      )
+    }
+    for (const item of joins.corpus.items) {
+      if (linked.has(item.url)) continue
+      fail(
+        'routes',
+        `the Catalogue Item page ${item.url} (${item.kind} ${item.slug}) is published but no ` +
+          'navigation links it, so a page-tree ordering left it out and it is reachable only by URL',
       )
     }
   }
