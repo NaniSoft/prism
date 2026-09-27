@@ -6,9 +6,22 @@ import { SearchEntry } from '@/components/search-entry'
 import { MobileMenu, SiteNav } from '@/components/site-nav'
 import { inter } from '@/lib/fonts'
 
-// Order matters: the site's own Tailwind build emits `.h-9` and friends for the
-// chrome, and the Prism stylesheet must come after it so a variant rule such as
-// `pointer-coarse:h-11` wins the tie instead of losing to a later base utility.
+// Order matters, and the reason is a library utility this site's own build also
+// emits, which is the collision the import order cannot fix on its own.
+//
+// This site's Tailwind build emits `.h-9` for its own chrome and demos, and the
+// Prism stylesheet must come after it so a variant rule such as
+// `pointer-coarse:h-11` wins the tie instead of losing to a later base utility:
+// the library generates that class name at runtime from its own source, so this
+// build never sees it in a scan and never orders it against its `.h-9`.
+//
+// The same ordering is what made the library's copy of `.hidden` land after this
+// site's `.md\:flex`, `.lg\:block` and `.sm\:inline`, and the library's `.p-4` and
+// `.gap-6` land after this site's `.sm\:p-6` and `.sm\:gap-16`. A media query adds
+// no specificity, so those ties went to whichever stylesheet was second and five
+// variants stopped applying. `globals.css` moves exactly those five into a
+// cascade layer above the library's, which is a rank rather than a position, so the
+// two requirements no longer contradict each other.
 import './globals.css'
 import '@nanisoft/prism-ui/styles.css'
 

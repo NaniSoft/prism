@@ -17,7 +17,7 @@ reports and is published.
 | `prism-ui` | surface scan, registry validator (registry and published file list), the component suites, the axe suite, the JSDoc and catalogue checks, the two source grep gates | per-item client-JavaScript measurement, the demo `client` flag |
 | `prism-llms` | corpus drift, build-twice determinism, per-item mirror and store coverage, the store type round-trip, the declared output list | corpus freshness stamp |
 | `prism-mcp-server` | the protocol round-trip suite, tool registry equals the corpus, the bundled `data.json` hash | corpus freshness |
-| `@nanisoft/site` (private) | dash gate, content joins (including the redirect coverage and the Worker's first-run prefixes), search gzip budget, registry artifacts absent from `out/` | visual regression, per-item client measurement |
+| `@nanisoft/site` (private) | dash gate, content joins (including the redirect coverage and the Worker's first-run prefixes), utility cascade, search gzip budget, registry artifacts absent from `out/` | visual regression, the computed display assertions, per-item client measurement |
 
 ## The content joins
 
@@ -115,6 +115,24 @@ both routes. The gate reads the same two surfaces from the other side, so
 a nested fixture. Neither replaces the other: the build is where the route is
 produced, and the gate is where the address an agent would resolve is read.
 
+## The utility cascade
+
+The site is the one consumer here, and it is the one place two Tailwind builds meet. The site's own build scans `src`, `items` and `content`; the library's is prebuilt into `@nanisoft/prism-ui/styles.css` and imported once. Each emits its own `@layer utilities`, and the bundler concatenates them, so the reader receives one `utilities` layer holding both builds' rules in import order.
+
+Inside one layer the only thing left deciding a tie is position, and a `@media` block adds no specificity. Tailwind guarantees that a variant's rule is emitted after the bare rule it overrides; two builds concatenated into one layer do not have that guarantee and nothing else in the cascade restores it. Layer rank cannot, because both builds share the layer, and specificity cannot, because a media query adds none.
+
+It failed silently, and for a long time. The header's navigation row, both documentation sidebars, both header labels, the demo frame padding and the footer were all `display: none`, `padding: 1rem` or `gap: 1.5rem` at every width in both Modes, and the committed visual baselines recorded it as the expected look.
+
+`apps/site/scripts/check-utility-cascade.mjs` is the gate, and the first one here that reads CSS. It reads the built stylesheet under `out/`, which is the only place the two builds are together, and the site's own class lists, which is where a colliding pair is written down. It asserts three things:
+
+1. `@layer site-variants` exists in the built stylesheet, ranks above `utilities`, holds at least one rule, and holds only media-scoped rules. A layer that lost its rank, that a minifier dropped, that is empty, or that acquired a bare rule stops being the thing it is for.
+2. At each of the three widths the site is held to, on every class list the site writes down, a property that some media-scoped rule also declares is decided by a media-scoped rule. Where it is not, the finding names the width, the bare rule that took the win and the variant that lost, because that is the line the layer needs.
+3. `globals.css` still declares the layer, checked against the artifact so a stale `out/` cannot make a stylesheet the site no longer ships look correct.
+
+The layer exists because raising the whole of the site's utility layer above the library's, which is the other obvious answer, is wrong here. The library generates class names at runtime from its own source, so a Button rendered by a Demo carries `h-9` and `pointer-coarse:h-11` without either string appearing in anything this site's build scans. Handing the base the win there drops the control from 44px to 36px, under the coarse-pointer floor.
+
+**The limit, stated plainly.** The gate reads declarations, at three widths, and only over class lists written in the site's own source. An element whose classes the library composes at runtime is not in that set, because nothing in the site's source states its class list. So the computed outcome is asserted in the browser lane as well: `apps/site/e2e/display.spec.ts` reads `getComputedStyle` for the header navigation, the mobile menu, both header labels, both documentation sidebars, the demo frame and the footer, at each project's own width in both Modes, and `visual.spec.ts` keeps the 44px coarse-pointer check. The browser lane is the only place a used value exists, so it also settles what a blockified flex item computes to and whether a width between two of the three is wrong. Neither lane sees what the other cannot.
+
 ## The client-JavaScript budget
 
 `packages/ui/scripts/check-client-budget.mjs` bundles each emitted
@@ -158,6 +176,15 @@ committed baselines and `maxDiffPixelRatio: 0.01`. The job is report-only
 (`continue-on-error: true`) and uploads the report as an artifact and one pull
 request comment.
 
+`apps/site/e2e/display.spec.ts` is in the same job and is not report-only. It
+asserts computed display, padding and gap for the elements the cascade gate cannot
+reach into, at each project's own width in both Modes and at the coarse pointer.
+It is the reason a cascade regression is a red line rather than a pixel diff in a
+report nobody reads, and it runs inside a report-only job, which is a deliberate
+mismatch worth naming: until the promotion rule below is met, a display failure
+does not fail CI. `pnpm --filter @nanisoft/site run visual` fails locally, and the
+gate in `scripts/` fails the build for the half the gate can see.
+
 Promotion rule: once the baseline has been stable for two consecutive weeks with
 no unexplained diff (target: ten consecutive merges), remove
 `continue-on-error` and make the job required. Any unexplained diff resets the
@@ -177,9 +204,14 @@ free of these defects.
   gradients or overlay contexts. The recorded focus-ring episode (the gate said
   4.5:1, half-alpha composited to 1.96:1) is the proof that the gate and a
   browser can disagree.
-- It does not prove a consumer's integration. Tailwind collision, a consumer's
-  own `@source`, their bundler, SSR and hydration in their app, and prerender or
-  RSC boundaries are outside every gate here.
+- It does not prove a consumer's integration. The utility cascade is gated for
+  this site at three widths and over site-authored class lists, and nothing else:
+  a consumer's own `@source`, their bundler, SSR and hydration in their app, and
+  prerender or RSC boundaries are outside every gate here.
+- The cascade gate reasons about declarations at 390, 768 and 1440 pixels. A
+  collision that only resolves wrong between two of those is outside it and inside
+  the browser lane, and the browser lane evaluates the same three widths. Neither
+  is a proof at every width.
 - "Zero client JavaScript" means "no statically detectable client boundary".
   The analysis is lexical: it can over-approximate, and it cannot see a computed
   `import()` or a `require` assembled at runtime.
