@@ -10,7 +10,9 @@
  * tree with no entry in the redirect table is a bookmark that dead-ends. The
  * site's content-join gate now reads the same module, which is what makes the
  * comparison between "what was published", "what is published" and "what
- * redirects" a set comparison rather than a spot check.
+ * redirects" a set comparison rather than a spot check. A fifth list joined it,
+ * the live routes below, because the same silence applies to a route no
+ * navigation links.
  *
  * **This module imports nothing.** That is load-bearing in two directions. The
  * header's row is rendered by a client component, so this file must not reach
@@ -58,9 +60,8 @@ export type SiteSection = {
  *
  * The catalogue Sections nest under Components by Category, which is the one
  * asymmetry in the tree, and the Foundation Section holds the live pack reader as
- * a route inside it. Neither is visible here, and both are stated where they are
- * read: the nesting is `catalogue.ts`'s ordering and the reader is
- * `app/foundation/themes`.
+ * a route inside it. Neither is visible here: the nesting is `catalogue.ts`'s
+ * ordering, and the reader is `LIVE_ROUTES` below.
  */
 export const SECTIONS: readonly SiteSection[] = [
   { segment: 'overview', title: 'Overview', prose: true },
@@ -78,12 +79,80 @@ export function sectionFor(segment: string): SiteSection | undefined {
 }
 
 /**
+ * A route inside a Section that renders a live reader rather than a document.
+ *
+ * The pack reader is the reason this exists. It is a component that reads the
+ * token package's emitted output at build time, so there is no content file for
+ * the corpus to walk, nothing for a `meta.json` to order and no document behind
+ * it in the routing tree. It is a page of the Foundation Section all the same,
+ * and this is the one place that says so.
+ *
+ * **It is listed in its Section, not in the header row.** A live reader is a
+ * page of the Section that owns it, beside that Section's own pages, so a
+ * reader who opens Foundation finds it in the one navigation scoped to
+ * Foundation. The header row is the shape of the whole documentation, where a
+ * control is a peer of the seven Sections, and the reader is not a Section and
+ * does not claim to be one.
+ *
+ * **The routing tree is not asked to hold it, and that is deliberate.** A folder
+ * cannot list a page it has no file for, so the route is added to the navigation
+ * rather than to the tree, and `nav.ts` places it. The trade is why the site's
+ * gate reads this list: a route the navigation links and no document backs is
+ * exactly the failure this restructure exists to catch, so the gate asserts that
+ * every route here is served by a specific App Router page, is linked by the
+ * published navigation, is linked from its Section's index, and is not also a
+ * content file's route.
+ */
+export type SectionLiveRoute = {
+  /** The route segment of the Section it is listed inside. */
+  section: string
+  /** The label a reader is shown beside that Section's own pages. */
+  title: string
+  /** The route it is answered at, with a leading slash and no trailing one. */
+  href: string
+}
+
+/**
+ * The live routes, one per Section that holds one.
+ *
+ * Themes is a foundational concern made live, so it sits in Foundation beside
+ * the token pages it renders, at the route the redirect table already sends
+ * `/themes` to. The old route keeps resolving through `MOVES` below, which is
+ * generated rather than hand-kept, so this list and the redirect serving it are
+ * one decision stated twice and compared once by `test/routes.test.ts`.
+ */
+export const LIVE_ROUTES: readonly SectionLiveRoute[] = [
+  { section: 'foundation', title: 'Themes', href: '/foundation/themes' },
+] as const
+
+/**
+ * The live routes one Section lists, in the order this module declares them.
+ *
+ * Matched on the Section's own route, so a live route declared inside a Section
+ * the tree does not publish as a top-level group is simply not placed. That is
+ * not a silent omission: the gate asserts every route here is linked by the
+ * published navigation, and a route the tree has no place for is one the
+ * navigation does not link.
+ */
+export function liveRoutesFor(section: string): readonly SectionLiveRoute[] {
+  return LIVE_ROUTES.filter((entry) => entry.section === section)
+}
+
+/**
  * A route that moved, as a prefix and its replacement.
  *
- * Three entries, and every one of them is a whole Section rather than a page, so
- * the rule covers every page under it. `/themes` is a single route that joined
- * the Foundation Section, and the same prefix rule serves it: it has no children
- * today, and if it ever does they come with it.
+ * Three entries, and two of them are a whole Section rather than a page, so the
+ * rule covers every page under it. The third is `/themes`, a single route that
+ * joined the Foundation Section, and the same prefix rule serves it: it has no
+ * children today, and if it ever does they come with it.
+ *
+ * That entry's destination is the live route's own address, so the fact is stated
+ * in two lists here. A table of prefix rules cannot be derived from a list of
+ * routes, and joining the two would mean computing the table at import time, which
+ * this module deliberately does not do: it is literals and pure functions over
+ * them, because the header's row is a client bundle. So the duplication is
+ * compared instead, by `test/routes.test.ts`, which is why a reader's route
+ * cannot move without the redirect following it.
  */
 export type SectionMove = {
   /** The route, or route prefix, a reader or an agent may still be holding. */

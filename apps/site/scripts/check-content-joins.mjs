@@ -50,6 +50,15 @@
  * serving answers before the Worker runs and a prefix missing from that list is a
  * 404 on a machine-readable surface.
  *
+ * The manifest's live routes are the one exemption from "every published route is
+ * a document", because the pack reader is a component that reads generated token
+ * output and has no content file at all. An exemption is only honest if it is
+ * gated, so each live route is checked for four things: a specific App Router page
+ * file serves it rather than the catch-all, no content file is filed at the same
+ * address, the published navigation links it, and its Section's index links it. The
+ * last one is what a narrow viewport depends on, since the sidebar is hidden below
+ * `lg` and the mobile menu carries Sections only.
+ *
  * The manifest is imported from TypeScript. It is a leaf module of literals, a
  * type and pure functions, so this runs under the Node type stripping that has
  * been unflagged since 22.18, and nothing about the site's gate depends on a
@@ -65,7 +74,7 @@ import { fileURLToPath } from 'node:url'
 import { buildCatalog } from '@nanisoft/prism-ui/catalog'
 import { parsePrismDocsStore, STORE_SECTIONS } from '@nanisoft/prism-llms'
 
-import { redirectFor, RUN_WORKER_FIRST } from '../src/lib/sections.ts'
+import { LIVE_ROUTES, redirectFor, RUN_WORKER_FIRST } from '../src/lib/sections.ts'
 
 import { CONTENT_EXTENSIONS, findContentJoins, parseNav, routeForFile, routeOfHref } from './content-joins.mjs'
 import { readItemContent } from './item-content.mjs'
@@ -271,6 +280,18 @@ for (const link of links) {
    without this gate keeping a second list of them. */
 
 const routes = new Set(contentFiles.map((entry) => entry.route))
+/**
+ * The routes a specific App Router page file serves, kept apart from the whole
+ * published set.
+ *
+ * The distinction is the catch-all. A page under a `[...]` segment is served by
+ * the collection, so a route with no file of its own is published only if the
+ * content tree holds a document there, and a live reader has to be its own route
+ * precisely so that it is not. A second list would be a list to keep in step, so
+ * this is the same scan as above with the dynamic segments left out, and the live
+ * routes are compared against it.
+ */
+const staticRoutes = new Set()
 for (const file of await walkFiles(APP_ROOT)) {
   if (path.basename(file) !== 'page.tsx') continue
   const segments = path
@@ -279,6 +300,7 @@ for (const file of await walkFiles(APP_ROOT)) {
     .filter((segment) => segment && segment !== '.')
   // A dynamic segment is served by the collections above, not by a file.
   if (segments.some((segment) => segment.startsWith('['))) continue
+  staticRoutes.add(`/${segments.join('/')}`)
   routes.add(`/${segments.join('/')}`)
 }
 for (const item of store.items) {
@@ -370,6 +392,8 @@ const findings = findContentJoins({
     })),
   },
   routes: [...routes],
+  staticRoutes: [...staticRoutes],
+  liveRoutes: LIVE_ROUTES.map((entry) => ({ ...entry })),
   routesBefore,
   redirects,
   workerFirst,
@@ -387,8 +411,9 @@ if (findings.length > 0) {
 console.log(
   `content-joins: every join holds - ${catalogue.length} Items, ${contentFiles.length} content ` +
     `files, ${itemDocs.length} Item documents, ${store.pages.length} Corpus pages, ` +
-    `${changelogPackages.length} published changelogs, ${routes.size} routes, ` +
-    `${redirects.length} redirects over ${routesBefore.length} routes published before the move, ` +
+    `${changelogPackages.length} published changelogs, ${routes.size} routes ` +
+    `(${LIVE_ROUTES.length} live), ${redirects.length} redirects over ` +
+    `${routesBefore.length} routes published before the move, ` +
     `${workerFirst.length} Worker prefixes, ` +
     `${navBlocks.size} navigation blocks across ${publishedPages} published pages`,
 )

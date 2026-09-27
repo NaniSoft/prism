@@ -87,6 +87,19 @@ does.
 navigation. Themes are Foundation made live, and a specific static segment takes
 precedence over the `[...slug]` catch-all, so this needs no new route machinery.
 
+**A live reader is a page of its Section, not a control in the header row.** It is
+listed in the Foundation Section's own navigation beside the token pages, and the
+Foundation index links it, which is what a reader needs on a narrow viewport where
+the sidebar is hidden and the mobile menu carries Sections only. The header row
+shows the shape of the whole documentation, so it holds the seven Sections and
+nothing else. The routing tree cannot hold the reader, because a folder cannot list
+a page it has no file for, so the Section manifest declares it and the navigation
+projection places it. That is the one exemption from "every published route is a
+document", so the site's content-join gate asserts four things about it: a specific
+page file serves the route rather than the catch-all, no content file is filed at
+the same address, the published navigation links it, and the Section's index links
+it.
+
 **`agent-workflow` becomes `using-llms`.** It already documents the corpus, the
 skill and the MCP tools. The rename aligns it with Plasma and costs no new
 writing.

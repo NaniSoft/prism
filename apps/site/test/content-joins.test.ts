@@ -68,7 +68,14 @@ const section = (
  */
 const changelogs = () => section('Changelogs', '/changelogs', ['/changelogs/prism-ui'])
 
-/** The header row, which is a block of routes with no group of its own. */
+/**
+ * The header row, which is a block of routes with no group of its own.
+ *
+ * Seven entries and no more: the landing page has none because the wordmark is
+ * already a link home, and the pack reader has none because it is a page of the
+ * Foundation Section rather than a Section of its own, so it is listed in the
+ * sidebar beside the token pages instead.
+ */
 const header: NavBlock = {
   hrefs: [
     '/overview',
@@ -78,10 +85,19 @@ const header: NavBlock = {
     '/blocks',
     '/pages',
     '/changelogs',
-    '/foundation/themes',
   ],
   groups: [],
 }
+
+/**
+ * The live route, as the Section manifest declares it.
+ *
+ * A live reader is a component rather than a document, so a page file of its own
+ * is the only thing that publishes it. It is the one route in these fixtures with
+ * no content file behind it, which is why the gate has a block of joins about it
+ * rather than a note saying live routes are exempt.
+ */
+const live = { section: 'foundation', title: 'Themes', href: '/foundation/themes' }
 
 /**
  * The one published package the fixtures carry, in the four places it appears:
@@ -181,6 +197,7 @@ const flat: Joins = {
   ],
   links: [
     { file: 'content/overview/index.mdx', href: '/overview/quickstart' },
+    { file: 'content/foundation/index.mdx', href: '/foundation/themes' },
     { file: 'content/changelogs/index.mdx', href: '/changelogs/prism-ui' },
   ],
   itemDocs: [
@@ -233,11 +250,13 @@ const flat: Joins = {
     ],
   },
   routes: afterRoutes,
+  staticRoutes: ['/', live.href],
+  liveRoutes: [live],
   navBlocks: [
     header,
     sidebar(
       section('Overview', '/overview', ['/overview/quickstart']),
-      section('Foundation', '/foundation', ['/foundation/colors']),
+      section('Foundation', '/foundation', ['/foundation/colors', live.href]),
       section('Content', '/content', ['/content/voice']),
       section('Components', '/components', ['/components/button']),
       section('Blocks', '/blocks', ['/blocks/hero-01']),
@@ -274,6 +293,7 @@ const nested: Joins = {
   links: [
     { file: 'content/overview/index.mdx', href: '/overview/quickstart' },
     { file: 'content/foundation/index.mdx', href: '/foundation/tokens' },
+    { file: 'content/foundation/index.mdx', href: live.href },
     { file: 'content/foundation/tokens/index.mdx', href: '/foundation/tokens/colors' },
     { file: 'content/changelogs/index.mdx', href: '/changelogs/prism-ui' },
   ],
@@ -319,11 +339,13 @@ const nested: Joins = {
     ],
   },
   routes: nestedRoutes,
+  staticRoutes: ['/', live.href],
+  liveRoutes: [live],
   navBlocks: [
     header,
     sidebar(
       section('Overview', '/overview', ['/overview/quickstart']),
-      section('Foundation', '/foundation', ['/foundation/colors'], [
+      section('Foundation', '/foundation', ['/foundation/colors', live.href], [
         section('Tokens', '/foundation/tokens', ['/foundation/tokens/colors'], [
           section('Contrast', '', ['/foundation/tokens/contrast/ratios']),
         ]),
@@ -611,7 +633,7 @@ describe('the content-join gate', () => {
         header,
         sidebar(
           section('Overview', '/overview', ['/overview/quickstart']),
-          section('Foundation', '/foundation', ['/foundation/colors'], [
+          section('Foundation', '/foundation', ['/foundation/colors', live.href], [
             section('Tokens', '/foundation/tokens', ['/foundation/tokens/colors'], [
               section('Contrast', '', ['/foundation/tokens/contrast/ratios']),
             ]),
@@ -633,7 +655,7 @@ describe('the content-join gate', () => {
         header,
         sidebar(
           section('Overview', '/overview', ['/overview/quickstart']),
-          section('Foundation', '/foundation', ['/foundation/colors'], [
+          section('Foundation', '/foundation', ['/foundation/colors', live.href], [
             section('Tokens', '/foundation/tokens', ['/foundation/tokens/colors'], [
               section('Contrast', '', ['/foundation/tokens/contrast/ratios']),
             ]),
@@ -659,7 +681,7 @@ describe('the content-join gate', () => {
         header,
         sidebar(
           section('Overview', '/overview', ['/overview/quickstart']),
-          section('Foundation', '/foundation', ['/foundation/colors'], [
+          section('Foundation', '/foundation', ['/foundation/colors', live.href], [
             section('Tokens', '/foundation/tokens', ['/foundation/tokens/colors'], [
               section('Contrast', '', ['/foundation/tokens/contrast/ratios']),
             ]),
@@ -685,7 +707,7 @@ describe('the content-join gate', () => {
         header,
         sidebar(
           section('Overview', '/overview', ['/overview/quickstart']),
-          section('Foundation', '/foundation', ['/foundation/colors'], [
+          section('Foundation', '/foundation', ['/foundation/colors', live.href], [
             section('Tokens', '/foundation/tokens', ['/foundation/tokens/colors'], [
               section('Contrast', '', ['/foundation/tokens/contrast/ratios']),
             ]),
@@ -719,6 +741,94 @@ describe('the content-join gate', () => {
     const indexRoutes = flat.contentFiles.filter((file) => file.index).map((file) => file.route)
     expect(indexRoutes).toEqual(['/changelogs', '/content', '/overview', '/foundation'])
     expect(flat.corpus.pages.map((page) => page.url)).not.toContain('/overview')
+  })
+})
+
+/**
+ * The live-route joins, on both shapes.
+ *
+ * The pack reader is the only route the site publishes that no document backs,
+ * and it is the only exemption from "every published route is a document" the gate
+ * allows. So each test removes one of the four things that make the exemption
+ * safe, and asserts the finding that names it: the specific page file, the
+ * absence of a content file at the same address, the navigation link, and the
+ * link from the Section's index.
+ */
+describe('the live-route joins', () => {
+  it.each(shapes)('holds for %s', (_name, joins) => {
+    expect(findContentJoins(joins)).toEqual([])
+  })
+
+  it.each(shapes)('fails for %s when no specific page serves the route', (_name, joins) => {
+    // The catch-all serves the content tree and nothing else, so a live route
+    // with no page file of its own is a route the navigation links and nothing
+    // answers. This is the collision below wearing a different hat.
+    const findings = findContentJoins({ ...joins, staticRoutes: ['/'] })
+    expect(groups(findings)).toContain('live')
+    expect(
+      findings.some(
+        (f) => f.message.includes('lists the live route /foundation/themes') && f.message.includes('specific page file'),
+      ),
+    ).toBe(true)
+  })
+
+  it.each(shapes)('fails for %s when a content file claims the same route', (_name, joins) => {
+    // A document and a live reader at one address: the specific route wins, the
+    // document is still mirrored, and the agent surface still advertises a page a
+    // reader cannot reach.
+    const findings = findContentJoins({
+      ...joins,
+      contentFiles: [
+        ...joins.contentFiles,
+        { route: live.href, file: 'content/foundation/themes.mdx', index: false },
+      ],
+    })
+    expect(groups(findings)).toContain('live')
+    expect(
+      findings.some(
+        (f) => f.message.includes('content/foundation/themes.mdx') && f.message.includes('one address'),
+      ),
+    ).toBe(true)
+  })
+
+  it.each(shapes)('fails for %s when the navigation does not link it', (_name, joins) => {
+    const findings = findContentJoins(unlinked(joins, live.href))
+    expect(groups(findings)).toContain('live')
+    expect(
+      findings.some(
+        (f) => f.message.includes('does not link the live route /foundation/themes') && f.message.includes('reachable only by URL'),
+      ),
+    ).toBe(true)
+  })
+
+  it.each(shapes)('fails for %s when the Section index does not link it', (_name, joins) => {
+    // The sidebar is hidden below `lg` and the mobile menu carries Sections only,
+    // so the index is the whole way in on a narrow viewport.
+    const findings = findContentJoins({
+      ...joins,
+      links: joins.links.filter((link) => link.href !== live.href),
+    })
+    expect(groups(findings)).toContain('live')
+    expect(
+      findings.some(
+        (f) => f.message.includes("index of the Section 'foundation'") && f.message.includes('narrow viewport'),
+      ),
+    ).toBe(true)
+  })
+
+  it('leaves a Section with no authored index alone, and says why in the code', () => {
+    // A catalogue Section's index is generated by the Catalogue, so there is no
+    // file there to link from and the sidebar is the only place its live route
+    // could appear. The index join is skipped rather than failed, and the reason
+    // is in the gate's own comment above the block.
+    const reader = { section: 'components', title: 'Nothing', href: '/components/reader' }
+    const findings = findContentJoins({
+      ...linked(flat, reader.href),
+      liveRoutes: [reader],
+      routes: [...flat.routes, reader.href],
+      staticRoutes: ['/', live.href, reader.href],
+    })
+    expect(groups(findings)).not.toContain('live')
   })
 })
 

@@ -2,7 +2,7 @@ import type { Folder, Item, Node, Root } from 'fumadocs-core/page-tree'
 import type { PageTreeOptions } from 'fumadocs-core/source'
 import type { ReactNode } from 'react'
 
-import { SECTIONS } from './sections'
+import { liveRoutesFor, SECTIONS } from './sections'
 
 /**
  * The site's navigation, projected from the content tree.
@@ -169,7 +169,38 @@ function unordered(tree: Root): string[] {
 }
 
 /**
- * The navigation, from the one routed tree.
+ * The live routes a Section lists, added to its own pages.
+ *
+ * A live reader is a component, not a document: it reads the token package's
+ * output at build time, so the routing tree has no file for it and no `meta.json`
+ * can order it. It is added here instead, as an ordinary page entry at the end of
+ * its Section's list, which is where the specification's reading order puts it:
+ * the token pages in the order the Section's meta file declares, then the reader
+ * that renders the packs they resolve against.
+ *
+ * Appended rather than inserted, so the order a `meta.json` states is untouched
+ * and the reader cannot quietly reorder a Section's own pages. Matched on the
+ * Section's own route, and the group is returned untouched when the Section holds
+ * none, which is the case for the six Sections that hold no reader.
+ *
+ * The array is built fresh for the same reason every other array here is: the
+ * tree is memoized and this projection runs once per rendered page.
+ */
+function withLiveRoutes(group: NavSection): NavSection {
+  if (group.url === undefined) return group
+  const live = liveRoutesFor(group.url.replace(/^\//, ''))
+  if (live.length === 0) return group
+  return {
+    ...group,
+    items: [
+      ...group.items,
+      ...live.map((entry) => ({ type: 'page' as const, title: entry.title, url: entry.href })),
+    ],
+  }
+}
+
+/**
+ * The navigation, from the one routed tree, plus the live routes beside it.
  *
  * It throws rather than return a partial navigation when a page is in the
  * fallback collection, because a partial navigation is the failure this exists
@@ -186,7 +217,7 @@ export function projectNav(tree: Root): NavSection[] {
         'or delete the page.',
     )
   }
-  return tree.children.map((node, index) => projectSection(node, index))
+  return tree.children.map((node, index) => withLiveRoutes(projectSection(node, index)))
 }
 
 export type FlatNav = { title: string; url: string }
@@ -214,26 +245,25 @@ function pushEntries(out: FlatNav[], entries: NavEntry[]): void {
 }
 
 /**
- * The header's top-level row.
+ * The header's top-level row: the seven Sections and nothing else.
  *
- * It is the seven Sections in the manifest's reading order, and nothing else.
  * The list used to be written out by hand, which made the header the one
  * navigation a Section could be missing from without anything noticing, and it
  * is now derived so a Section that exists is a Section a reader can reach from
  * the header.
  *
  * **The landing page keeps no entry.** The row labelled `/` "Overview", which
- * collided with the new Overview Section, and the header already renders the
+ * collided with the Overview Section, and the header already renders the
  * wordmark as a link home, so the entry was dropped rather than relabelled: a
  * second route home is a control that duplicates one already on screen.
  *
- * **The pack reader is the one control that is not a Section,** and it stays in
- * the row because it is the reader that renders all six packs side by side and
- * nothing else on the site does. It reads as a live page of the Foundation
- * Section rather than as a Section of its own, so it sits at the end, after the
- * history, where a control that is not part of the reading order belongs.
+ * **A live reader keeps no entry either.** The pack reader was a control in this
+ * row, sitting after the last Section, and it is now a page of the Foundation
+ * Section: the Section's own navigation lists it beside the token pages, and its
+ * Section's index links it. What the row shows is the shape of the whole
+ * documentation, and a reader is not a Section, so it is not a peer of one.
  */
-export const TOP_NAV = [
-  ...SECTIONS.map((section) => ({ href: `/${section.segment}`, label: section.title })),
-  { href: '/foundation/themes', label: 'Themes' },
-] as const
+export const TOP_NAV = SECTIONS.map((section) => ({
+  href: `/${section.segment}`,
+  label: section.title,
+}))

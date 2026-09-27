@@ -1,10 +1,18 @@
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
-import { MOVES, MD_SECTIONS, redirectFor, RUN_WORKER_FIRST, SECTIONS } from '../src/lib/sections'
+import {
+  LIVE_ROUTES,
+  MOVES,
+  MD_SECTIONS,
+  redirectFor,
+  RUN_WORKER_FIRST,
+  SECTIONS,
+  sectionFor,
+} from '../src/lib/sections'
 import { handleRequest } from '../worker/index'
 import { rewriteMdPathname } from '../worker/router'
 
@@ -277,6 +285,72 @@ describe('the manifest itself', () => {
     // Sections are singular and the four that hold many Items are plural.
     for (const section of SECTIONS) {
       expect(section.segment.endsWith('s'), `${section.segment} is plural`).toBe(!section.prose)
+    }
+  })
+})
+
+/**
+ * A live route: the one published address no document backs.
+ *
+ * The pack reader is a component that reads the token package's emitted output at
+ * build time, so it has no content file, no mirror and no Corpus entry, and the
+ * Section manifest declares it as a route inside a Section. Three joins make that
+ * exemption safe rather than merely stated, and each is checked here against the
+ * files on disk rather than against a second copy of the same fact.
+ */
+describe('a live route', () => {
+  const APP = path.join(SITE, 'src', 'app')
+
+  it('is served by a page file of its own, not by the catch-all', () => {
+    for (const live of LIVE_ROUTES) {
+      const segments = live.href.replace(/^\//, '').split('/')
+      const file = path.join(APP, ...segments, 'page.tsx')
+      expect(existsSync(file), `${live.href} has no page file of its own`).toBe(true)
+      // A segment in brackets is the catch-all, which serves the content tree and
+      // knows nothing about a reader. A live route with one is a document at the
+      // same address wearing the reader's name.
+      expect(segments.some((segment) => segment.startsWith('['))).toBe(false)
+      expect(published).toContain(live.href)
+    }
+  })
+
+  it('is filed by no content file, so the two can never claim one address', () => {
+    for (const live of LIVE_ROUTES) {
+      for (const file of walk(path.join(SITE, 'content'))) {
+        if (!file.endsWith('.mdx') && !file.endsWith('.md')) continue
+        expect(routeOf(path.relative(path.join(SITE, 'content'), file).split(path.sep).join('/'))).not.toBe(
+          live.href,
+        )
+      }
+    }
+  })
+
+  it('is where the old route redirects, and the only route it redirects to', () => {
+    // Two lists state one fact: the manifest's live route and the move that serves
+    // the old address. The reader that moved from `/themes` resolves here, so a
+    // change to either list that the other does not follow is a finding rather
+    // than a 301 into nothing.
+    for (const live of LIVE_ROUTES) {
+      const moves = MOVES.filter((move) => move.to === live.href)
+      expect(moves.length, `${live.href} is not the destination of any move`).toBe(1)
+      expect(redirectFor(moves[0]?.from ?? '')).toBe(live.href)
+      expect(redirectFor(live.href)).toBeNull()
+      // And the old address has no asset behind it, so the Worker has to run first
+      // for it or asset serving answers 404 before the redirect does.
+      expect(RUN_WORKER_FIRST).toContain(moves[0]?.from ?? '')
+      expect(RUN_WORKER_FIRST).toContain(`${moves[0]?.from}/*`)
+    }
+  })
+
+  it('is named by the Section it is listed in, and labelled as a page of its own', () => {
+    for (const live of LIVE_ROUTES) {
+      expect(SECTIONS.map((section) => section.segment)).toContain(live.section)
+      expect(live.href.startsWith(`/${live.section}/`)).toBe(true)
+      // A live route listed under its Section must not carry the Section's own
+      // label, or the sidebar shows the same word twice: once as the heading and
+      // once as the last page beneath it.
+      expect(live.title).not.toBe(sectionFor(live.section)?.title)
+      expect(live.title.length).toBeGreaterThan(0)
     }
   })
 })

@@ -44,8 +44,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/*
           Skip link, first in the document on purpose.
 
-          The header is a full tab stop on every page: wordmark, four nav links,
-          theme trigger, mode toggle, menu button. It renders above the content
+          The header is a full tab stop on every page: wordmark, the row of
+          Sections, search, theme trigger, menu button. It renders above the content
           on all of them, so a keyboard user pays that cost again with every
           page, and this is the one control that lets them decline it. It has to
           precede the header rather than sit inside it, or tabbing to it would

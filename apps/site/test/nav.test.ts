@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest'
 
 import { discoverPublishedPackages, readPublishedChangelogs } from '../scripts/published-packages.mjs'
 import { flattenNav, PAGE_TREE, projectNav, TOP_NAV } from '../src/lib/nav'
-import { SECTIONS, sectionFor } from '../src/lib/sections'
+import { LIVE_ROUTES, SECTIONS, sectionFor } from '../src/lib/sections'
 
 /**
  * The navigation projection, over plain page-tree data.
@@ -578,29 +578,140 @@ describe('the Changelogs Section', () => {
     expect(linked).toEqual((await published()).map((entry) => entry.route).sort())
   })
 
-  it('appears in the top navigation once, in the reading order', () => {
+  it('appears in the top navigation as the Sections and nothing else', () => {
     // The header row is derived from the manifest rather than written out, so the
     // assertion is that the row is the manifest's Sections in the manifest's
     // order and nothing else. A Section that exists and is missing from the row
     // is a reader who cannot see the whole shape of the documentation at a
     // glance, and a row entry the manifest does not declare is a route nobody
     // chose to publish.
-    expect(TOP_NAV.map((entry) => entry.href)).toEqual([
-      ...SECTIONS.map((section) => `/${section.segment}`),
-      '/foundation/themes',
-    ])
-    expect(TOP_NAV.map((entry) => entry.label)).toEqual([
-      ...SECTIONS.map((section) => section.title),
-      'Themes',
-    ])
-    // History is read after the thing it is the history of, and the pack reader
-    // is the one control in the row that is not a Section, so it sits after the
-    // last Section rather than in the middle of the catalogue.
-    const sectionHrefs = TOP_NAV.map((entry) => entry.href).filter((href) => href !== '/foundation/themes')
-    expect(sectionHrefs[sectionHrefs.length - 1]).toBe(`/${SECTION}`)
-    // And the landing page keeps no entry: the wordmark is already a link home,
-    // and the label it used to carry now names a Section.
+    expect(TOP_NAV.map((entry) => entry.href)).toEqual(
+      SECTIONS.map((section) => `/${section.segment}`),
+    )
+    expect(TOP_NAV.map((entry) => entry.label)).toEqual(SECTIONS.map((section) => section.title))
+    // The landing page keeps no entry: the wordmark is already a link home, and
+    // the label it used to carry now names a Section.
     expect(TOP_NAV.map((entry) => entry.href)).not.toContain('/')
+    // A live reader keeps no entry either. The pack reader is a page of the
+    // Foundation Section, so it is listed beside the token pages in that Section's
+    // own navigation, and the row stays the shape of the whole documentation.
+    expect(TOP_NAV.map((entry) => entry.href)).not.toContain('/foundation/themes')
+    expect(TOP_NAV[TOP_NAV.length - 1]?.href).toBe(`/${SECTIONS[SECTIONS.length - 1]?.segment}`)
+  })
+
+  it('starts the top navigation with a Section', () => {
+    // What the reference design system does, and the reason the row begins where
+    // it does: the first entry is a Section, so a reader who has not chosen a
+    // Section is nowhere yet rather than nowhere at all.
+    expect(SECTIONS.map((section) => `/${section.segment}`)).toContain(TOP_NAV[0]?.href)
+  })
+})
+
+/**
+ * The live reader, placed in the Section that owns it.
+ *
+ * It is a component, not a document, so the routing tree cannot hold it: no
+ * content file, nothing for the `meta.json` to order, no page for the corpus to
+ * walk. The Section manifest declares it and the projection places it, which is
+ * the whole difference between a live reader inside a Section and a control
+ * bolted onto the header row.
+ */
+describe('a live route inside a Section', () => {
+  const CONTENT = path.join(SITE, 'content')
+
+  /** One authored page or meta file, in the shape the tree builder reads. */
+  function files(): StaticSource['files'] {
+    const entries: StaticSource['files'] = []
+    for (const full of walk(CONTENT)) {
+      const relative = path.relative(CONTENT, full).split(path.sep).join('/')
+      if (full.endsWith('.mdx')) {
+        const frontmatter = /^---\n([\s\S]*?)\n---/.exec(readFileSync(full, 'utf8'))?.[1] ?? ''
+        entries.push({
+          type: 'page',
+          path: relative,
+          data: { title: /^title:\s*(.+)$/m.exec(frontmatter)?.[1]?.trim() ?? '' },
+        })
+        continue
+      }
+      if (full.endsWith('.md')) {
+        const source = readFileSync(full, 'utf8')
+        entries.push({
+          type: 'page',
+          path: relative,
+          data: { title: /^#\s+(.+?)\s*$/m.exec(source)?.[1]?.trim() ?? '' },
+        })
+        continue
+      }
+      if (path.basename(relative) === 'meta.json') {
+        entries.push({
+          type: 'meta',
+          path: relative,
+          data: JSON.parse(readFileSync(full, 'utf8')) as MetaData,
+        })
+      }
+    }
+    return entries
+  }
+
+  /** The real authored tree, projected. */
+  const projected = () => projectNav(treeOf(files()).getPageTree())
+
+  it('is listed in the Section that declares it, beside that Section\'s own pages', () => {
+    for (const live of LIVE_ROUTES) {
+      const section = projected().find((entry) => entry.url === `/${live.section}`)
+      expect(section, `${live.section} is not a Section of the authored tree`).toBeDefined()
+      const pages = (section?.items ?? []).flatMap((entry) =>
+        entry.type === 'page' ? [entry.url] : [],
+      )
+      expect(pages).toContain(live.href)
+      // Last, because the specification's reading order puts the reader after the
+      // token pages it renders, and appending is what keeps a `meta.json`'s own
+      // order untouched.
+      expect(pages[pages.length - 1]).toBe(live.href)
+    }
+  })
+
+  it('is a page of the Section rather than a group of its own', () => {
+    // A group heading links to a folder's index page, and a live route has no
+    // index page and no children, so it is a page entry. Rendering it as a group
+    // would give it a heading that is a link to itself and a list holding nothing.
+    const foundation = projected().find((entry) => entry.url === '/foundation')
+    const themes = (foundation?.items ?? []).find(
+      (entry) => entry.type === 'page' && entry.url === '/foundation/themes',
+    )
+    expect(themes).toEqual({ type: 'page', title: 'Themes', url: '/foundation/themes' })
+  })
+
+  it('adds itself to one Section and leaves every other Section alone', () => {
+    // Every Section's own pages are exactly what its `meta.json` declares, in the
+    // order it declares them, and a Section holding a live route carries that one
+    // route after them. A Section that gained a page, or lost one, or reordered,
+    // is a finding here rather than a sidebar a reader cannot predict.
+    for (const section of projected()) {
+      const segment = (section.url ?? '').replace(/^\//, '')
+      const meta = JSON.parse(
+        readFileSync(path.join(CONTENT, segment, 'meta.json'), 'utf8'),
+      ) as MetaData
+      const declared = (meta.pages ?? []).map((slug) => `/${segment}/${slug}`)
+      const live = LIVE_ROUTES.filter((entry) => entry.section === segment).map(
+        (entry) => entry.href,
+      )
+      const pages = (section.items ?? []).flatMap((entry) =>
+        entry.type === 'page' ? [entry.url] : [],
+      )
+      expect(pages, `${segment} lists pages its meta file does not declare`).toEqual([
+        ...declared,
+        ...live,
+      ])
+    }
+  })
+
+  it('reaches the reader through prev and next, at the end of its Section', () => {
+    const flat = flattenNav(projected())
+    const at = flat.findIndex((entry) => entry.url === '/foundation/themes')
+    expect(at).toBeGreaterThan(0)
+    expect(flat[at - 1]?.url).toBe('/foundation/variables')
+    expect(flat[at + 1]?.url).toBe('/content')
   })
 })
 

@@ -44,6 +44,7 @@
  * @typedef {{ section: string, slug: string, url: string, mirror: string }} CorpusPage
  * @typedef {{ package: string, route: string, versions: string[] }} CorpusChangelog
  * @typedef {{ from: string, to: string }} Redirect
+ * @typedef {{ section: string, title: string, href: string }} LiveRoute
  * @typedef {{ group: string, message: string }} Finding
  *
  * @typedef {object} ChangelogPackage
@@ -83,6 +84,8 @@
  * @property {string[]} routesBefore the routes the site published before the Sections moved
  * @property {Redirect[]} redirects the redirect table, generated from the Section manifest
  * @property {NavBlock[]} navBlocks the navigation blocks the published export renders
+ * @property {string[]} staticRoutes the routes a specific App Router page file serves
+ * @property {LiveRoute[]} liveRoutes the live routes the Section manifest declares
  * @property {string[]} workerFirst the prefixes the Worker is invoked for, from `wrangler.jsonc`
  * @property {string[]} requiredWorkerFirst the prefixes it has to be invoked for, from the manifest
  */
@@ -626,6 +629,88 @@ export function findContentJoins(joins) {
         'routes',
         `the Catalogue Item page ${item.url} (${item.kind} ${item.slug}) is published but no ` +
           'navigation links it, so a page-tree ordering left it out and it is reachable only by URL',
+      )
+    }
+  }
+
+  /* The live routes a Section holds. ------------------------------------- */
+
+  // A live reader is a component that reads generated output at build time, so
+  // it has no content file, nothing for a `meta.json` to order and no document
+  // behind it in the routing tree. It is listed in the Section it belongs to
+  // anyway, from the Section manifest, and that is the one exemption from
+  // "every published route is a document" this gate allows. An exemption needs
+  // the same rigour as the rule it excepts, so the four joins below are stated
+  // rather than assumed, and all four fail by omission otherwise.
+  //
+  // *Served by a specific route.* A static segment takes precedence over the
+  // catch-all, which is what lets a live reader have an address at all. A live
+  // route with no page file of its own is published by the catch-all only if the
+  // content tree happens to hold a document there, which is the collision below
+  // wearing a different hat.
+  //
+  // *Linked by the navigation.* The reason the manifest exists: a live reader the
+  // navigation dropped is reachable by URL, which is the failure mode every other
+  // join in this file is about.
+  //
+  // *Linked from the Section's index.* The sidebar is `hidden` below `lg` and
+  // the mobile menu holds Sections only, so the index is the way in on a narrow
+  // viewport. A Section with no authored index is exempt, and that is the whole
+  // exemption: a catalogue Section's index is generated, so there is no file
+  // there to link from, and the sidebar is then the only place its live route
+  // appears.
+  //
+  // *Not a content file's route.* A document and a live reader at one address
+  // resolve to whichever the router prefers, silently, and the document that
+  // loses is still in the Corpus, still mirrored and still advertised to every
+  // agent reading `llms.txt`.
+  //
+  // The inverse is not checked, and that is the limit worth stating: a live route
+  // the manifest does not declare, reached by a hand-written link in a
+  // component, passes the navigation join above, because the App Router does
+  // produce the address. The manifest is what the navigation is projected from,
+  // so a link that bypasses it is a link in a component, and `docs/quality-gates.md`
+  // is where a green build's blind spot is recorded.
+  const staticRoutes = new Set(joins.staticRoutes)
+  const contentAt = new Map(joins.contentFiles.map((file) => [file.route, file]))
+
+  for (const live of joins.liveRoutes) {
+    if (!staticRoutes.has(live.href)) {
+      fail(
+        'live',
+        `the Section manifest lists the live route ${live.href} in '${live.section}', but no ` +
+          'specific page file serves it, so the address is answered by the catch-all or by ' +
+          'nothing, and a live reader has to be its own route to stay out of the content tree',
+      )
+    }
+    if (contentAt.has(live.href)) {
+      fail(
+        'live',
+        `${contentAt.get(live.href)?.file} is filed at ${live.href}, which the Section manifest ` +
+          'also lists as a live route, so a document and a live reader claim one address and ' +
+          'the specific route wins with nothing reported',
+      )
+    }
+    if (navHrefs.length > 0 && !navHrefs.some((href) => routeOfHref(href) === live.href)) {
+      fail(
+        'live',
+        `the published navigation does not link the live route ${live.href}, so the reader in ` +
+          "the Section's own pages is reachable only by URL",
+      )
+    }
+    const index = joins.contentFiles.find(
+      (file) => file.index && file.route === `/${live.section}`,
+    )
+    if (index === undefined) continue
+    const fromIndex = joins.links.some(
+      (link) => link.file === index.file && routeOfHref(link.href) === live.href,
+    )
+    if (!fromIndex) {
+      fail(
+        'live',
+        `the index of the Section '${live.section}' (${index.file}) does not link its live ` +
+          `route ${live.href}, and the sidebar is hidden below lg while the mobile menu holds ` +
+          'Sections only, so a narrow viewport has no way in',
       )
     }
   }
