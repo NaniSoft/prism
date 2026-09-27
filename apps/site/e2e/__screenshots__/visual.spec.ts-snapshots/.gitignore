@@ -1,0 +1,23 @@
+# No 768 baseline is committed, on purpose.
+#
+# The header row computes to 1013 pixels at a 768 pixel viewport, so a
+# full-page shot at that width is 1013 pixels wide: the document scrolls
+# sideways, the wordmark wraps onto two lines and the mode toggle sits off
+# screen. The horizontal navigation is on screen from `md` up, `md` is 768, and
+# `display.spec.ts` asserts it computes to `flex` there, so the row has to fit.
+# Before the cascade layers landed the navigation was `display: none` at every
+# width, the row was never asked to fit at 768, and every 768 shot was 768 wide.
+# The overflow is what became visible when the header started rendering.
+#
+# A committed 1013 pixel image would make the next run pass and take the
+# evidence with it. `toHaveScreenshot()` writes a baseline that does not exist,
+# and Playwright 1.63 does it in CI as well as on a local run, so the fourteen
+# files below reappear in the working tree after every visual run whether it
+# passed or failed. This line is what stops a `git add -A` from quietly
+# committing the broken render. The 768 project keeps running and keeps
+# reporting; these are the files it wants to write.
+#
+# `apps/site/e2e/README.md` carries the detail and `docs/quality-gates.md` names
+# the gap. Delete this file when the header fits at 768, and cut the baselines
+# in the same commit that fixes it.
+*-768-*.png

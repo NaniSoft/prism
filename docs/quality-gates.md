@@ -171,10 +171,22 @@ of accessibility.
 
 `apps/site/e2e/visual.spec.ts` runs Playwright's `toHaveScreenshot()` over the
 built site at 390, 768 and 1440 pixels, light and dark, on `/`, `/components`,
-one component item, one block item, `/foundation/themes` and `/foundation`, with
-committed baselines and `maxDiffPixelRatio: 0.01`. The job is report-only
-(`continue-on-error: true`) and uploads the report as an artifact and one pull
-request comment.
+one component item, one block item, `/foundation`, `/foundation/themes` and
+`/changelogs`, with committed baselines and `maxDiffPixelRatio: 0.01`. The job is
+report-only (`continue-on-error: true`) and uploads the report as an artifact
+and one pull request comment.
+
+**The 768 project is exercised and has no committed baseline.** The header row
+computes to 1013 pixels at a 768 pixel viewport, because the horizontal
+navigation is on screen from `md` up and now carries seven Section links, so
+`scrollWidth` is 1013 against a `clientWidth` of 768 and the document scrolls
+sideways with the mode toggle off screen. Before the cascade layers landed the
+navigation was `display: none` at every width and the row was never asked to fit,
+so every 768 shot was 768 pixels wide; the branch base renders all forty-two of
+them pixel-exact. The overflow is what became visible when the header started
+rendering, and it belongs with the header. A baseline there would make the next
+run pass and remove the evidence, so the shots are left uncut and the job reports
+them. `apps/site/e2e/README.md` carries the detail.
 
 `apps/site/e2e/display.spec.ts` is in the same job and is not report-only. It
 asserts computed display, padding and gap for the elements the cascade gate cannot
