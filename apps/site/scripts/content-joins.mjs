@@ -28,7 +28,7 @@
  * list of hrefs, so a group a reader can see is a group this file can check.
  *
  * @typedef {{ name: string, slug: string, kind: string, category: string | null }} CatalogueItem
- * @typedef {{ slug: string, kind: string, file: string, group: string[], demo: string | null, demos: string[] }} ItemDoc
+ * @typedef {{ slug: string, kind: string, file: string, group: string[], route: string | null, demo: string | null, demos: string[] }} ItemDoc
  * @typedef {{ route: string, file: string, index: boolean }} ContentFile
  * @typedef {{ file: string, href: string }} ContentLink
  * @typedef {{ slug: string, kind: string, url: string }} CorpusItem
@@ -457,9 +457,44 @@ export function findContentJoins(joins) {
     }
   }
 
+  /* The route an Item's document states, against the route published. ---- */
+
+  // The Corpus is where the site's segment names are readable without this gate
+  // keeping a second list of them, so the route an Item is published at is read
+  // from there rather than assembled here out of the Kind. A document states its
+  // own route, because an Item is filed under its Kind and its Category while it
+  // is published at its Section, and the two cannot both be read out of the path.
+  //
+  // A document that states another route is a published-surface change, and it is
+  // the kind this gate exists for. The build reads the stated route and publishes
+  // the page there, while the Corpus, the redirects and every cached agent
+  // instruction keep resolving the Catalogue's, and nothing downstream notices.
+  const corpusItems = new Map(joins.corpus.items.map((item) => [item.slug, item]))
+  for (const doc of joins.itemDocs) {
+    const entry = corpusItems.get(doc.slug)
+    // A document no Catalogue Item claims, and an Item the Corpus has no entry
+    // for, are both reported above and in the section below in their own words.
+    if (entry === undefined) continue
+    if (doc.route === null) {
+      fail(
+        'route',
+        `${doc.file} states no route, so its page is addressed by the folder it is filed ` +
+          `in rather than at ${entry.url}, and the Corpus advertises ${entry.url}`,
+      )
+      continue
+    }
+    if (doc.route !== entry.url) {
+      fail(
+        'route',
+        `${doc.file} states the route ${doc.route} and the Corpus advertises the ` +
+          `${entry.kind} '${doc.slug}' at ${entry.url}, so the two disagree about a published ` +
+          'address and every agent holding a cached index resolves the other one',
+      )
+    }
+  }
+
   /* The Corpus, consumed rather than re-derived. ------------------------- */
 
-  const corpusItems = new Map(joins.corpus.items.map((item) => [item.slug, item]))
   for (const item of joins.catalogue) {
     const entry = corpusItems.get(item.slug)
     if (entry === undefined) {

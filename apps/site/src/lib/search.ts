@@ -1,20 +1,22 @@
 import { createSearchAPI, type AdvancedIndex } from 'fumadocs-core/search/server'
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure'
 
-import { buildCatalog } from '@nanisoft/prism-ui/catalog'
-
-import { proseSource, source } from './source'
+import { source } from './source'
 import type { CataloguePageData } from './catalogue'
 
 /**
- * The static search index, assembled from both trees.
+ * The static search index, assembled from the one routed tree.
  *
- * The routed `source` carries the hand-written pages, each of which has a
- * compiled `structuredData` (headings and content blocks) that advanced mode
- * explodes into searchable documents. It also carries the catalogue's virtual
- * pages, which have metadata but no body; the item bodies live in the `prose`
- * tree, so those are indexed from there and their `/_prose/...` location is
- * rewritten to the public item URL.
+ * Every page the site publishes is indexed, and each carries its own compiled
+ * `structuredData` (headings and content blocks), which advanced mode explodes
+ * into searchable documents. An Item's page is its documentation, so the body a
+ * reader reads and the body an agent searches are the same bytes read from the
+ * same file: there is no second tree to walk, no location to rewrite, and no page
+ * that can be published without being indexed.
+ *
+ * The one page with nothing to index is a Section landing page. The Catalogue
+ * generates it, so it holds metadata and no body, and it is indexed by its title
+ * and its route, which is what a reader searching for a Section expects to find.
  *
  * No custom tokenizer is passed. The default `multilingual` tokenizer is used by
  * both the build (here) and the browser (the same `fumadocs-core` version), so
@@ -30,51 +32,16 @@ function structured(data: { structuredData?: unknown }): StructuredData {
 }
 
 export function buildSearchIndexes(): AdvancedIndex[] {
-  const indexed: AdvancedIndex[] = []
-  const catalogue = buildCatalog()
-  const bySlug = new Map(catalogue.map((item) => [item.slug, item]))
-
-  for (const page of source.getPages()) {
+  return source.getPages().map((page) => {
     const data = page.data as CataloguePageData
-    if (data.sectionIndex) {
-      indexed.push({
-        id: page.url,
-        title: (page.data.title as string | undefined) ?? page.url,
-        description: page.data.description as string | undefined,
-        url: page.url,
-        structuredData: EMPTY,
-      })
-      continue
-    }
-
-    // Catalogue item pages are indexed from the prose tree below, so an item
-    // appears once and carries its body rather than its catalogue one-liner.
-    if (page.type === 'catalogue') continue
-
-    indexed.push({
+    return {
       id: page.url,
       title: (page.data.title as string | undefined) ?? page.url,
       description: page.data.description as string | undefined,
       url: page.url,
-      structuredData: structured(page.data),
-    })
-  }
-
-  for (const page of proseSource.getPages()) {
-    const [kind, slug] = page.slugs
-    if (!kind || !slug) continue
-    const item = bySlug.get(slug)
-    const url = `/${kind}s/${slug}`
-    indexed.push({
-      id: url,
-      title: item?.name ?? (page.data.title as string | undefined) ?? url,
-      description: item?.description ?? (page.data.description as string | undefined),
-      url,
-      structuredData: structured(page.data),
-    })
-  }
-
-  return indexed
+      structuredData: data.sectionIndex === true ? EMPTY : structured(page.data),
+    }
+  })
 }
 
 export const searchAPI = createSearchAPI('advanced', { indexes: buildSearchIndexes() })

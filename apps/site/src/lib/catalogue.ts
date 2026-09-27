@@ -14,38 +14,41 @@ import generatedItemGroups from '@/generated/item-groups.json'
  *
  * Ticket 09 keeps one list, `packages/ui/src/catalog.ts`, and ticket 10 routes
  * it through a `StaticSource`: a plain object with virtual paths, no file on
- * disk. One page per item at `<segment>/<slug>.mdx`, plus one explicit page per
- * section root so a section builds while its roster is still thin. The prose
- * body is looked up separately at render time, from the `items/` collection.
+ * disk. What it emits is the two things a file on disk cannot say. One page per
+ * Section root, so a Section landing page exists for a group heading to link to
+ * and a Section builds while its roster is still thin, and one `meta.json` per
+ * folder, which is the order the navigation reads. The Item pages themselves are
+ * not emitted here: an Item's page is its documentation, read by the one
+ * collection beside its Demo, and `content-tree.ts` places it in this tree and
+ * gives it the Catalogue's data.
  *
- * Each section also carries a generated `meta.json`, and that is the order the
- * navigation reads. It is generated from the same `buildCatalog()` call that
- * emits the pages, from the same array, so the order cannot fall behind the
- * Catalogue: a new Item is a line in one list and the ordering grows with it.
- * A hand-written `pages` array would be the opposite, because a `pages` array is
- * a whitelist rather than a reorder. An Item it omits does not move down the
- * list, it leaves the primary tree, lands in the fallback collection and keeps
- * its exported route, which is a page reachable by URL and invisible in the
- * navigation with a green build. Generating the array is what removes the
- * opportunity.
+ * Each Section's `meta.json` carries the order the navigation reads, and it is
+ * generated from the same `buildCatalog()` call, from the same array, so the
+ * order cannot fall behind the Catalogue: a new Item is a line in one list and
+ * the ordering grows with it. A hand-written `pages` array would be the
+ * opposite, because a `pages` array is a whitelist rather than a reorder. An Item
+ * it omits does not move down the list, it leaves the primary tree, lands in the
+ * fallback collection and keeps its exported route, which is a page reachable by
+ * URL and invisible in the navigation with a green build. Generating the array is
+ * what removes the opportunity.
  *
- * **Where an Item sits in the tree is read, and its route is stated.** A
- * Component's documentation is filed under its Category, so its page is emitted
- * at `<segment>/<category>/<slug>.mdx` and the page tree nests it under a
- * folder. The folders come from `item-groups.json`, which the site's own build
- * generates from the documentation tree with the same rule the corpus and the
- * gate read, so the tree follows the content rather than a second hand-kept list
- * of where content is. A Block's and a Page's documentation is filed one folder
- * deeper and with no Category folder above it, because a Block and a Page have
- * no Category, so their pages are emitted flat and their sidebars are flat
- * lists.
+ * **Where an Item sits in the tree is read, and its route is stated by the
+ * document.** A Component's documentation is filed under its Category, so the
+ * ordering names a Category folder at the place of the first Item inside it and
+ * the page tree nests it. The folders come from `item-groups.json`, which the
+ * site's own build generates from the documentation tree with the same rule the
+ * corpus and the gate read, so the tree follows the content rather than a second
+ * hand-kept list of where content is. A Block's and a Page's documentation is
+ * filed one folder deeper and with no Category folder above it, because a Block
+ * and a Page have no Category, so their sidebars are flat lists.
  *
- * The route does not follow the folder. Every catalogue page carries an explicit
- * `slugs` array of `<segment>/<slug>`, so a Component's published address is
- * the Catalogue's word for it and not a side effect of how deeply its
- * documentation happens to be filed. Forty-two routes are unchanged by the
- * nesting, and the corpus, the redirects and every cached agent instruction that
- * names one keep resolving.
+ * The route does not follow the folder, and nothing here computes one. Each Item
+ * page states `<segment>/<slug>` in its own frontmatter and `content-tree.ts`
+ * refuses the page whose declared route is not this Catalogue's word for it, so
+ * a Component's published address is the Catalogue's and not a side effect of how
+ * deeply its documentation happens to be filed. Forty-two routes are unchanged
+ * by the nesting, and the corpus, the redirects and every cached agent
+ * instruction that names one keep resolving.
  */
 
 /** The three Kinds, in the order the Sections are built and rendered. */
@@ -142,12 +145,16 @@ function groupOf(item: CatalogItem): readonly string[] {
   return entry
 }
 
-/** The virtual path of an Item's page, which is where in the tree it sits. */
-function itemPath(item: CatalogItem, group: readonly string[]): string {
-  return [SECTIONS[item.kind].segment, ...group, `${item.slug}.mdx`].join('/')
-}
-
-function itemData(item: CatalogItem): CataloguePageData {
+/**
+ * The Catalogue's own words for an Item's page.
+ *
+ * Merged into the page's data by `content-tree.ts` rather than carried by a page
+ * emitted from here, because the page is the Item's documentation and the
+ * documentation is not where the Catalogue's words are written. Every field here
+ * is read from `buildCatalog()`, so an Item page carries the one list's account
+ * of itself and the file beside it carries the prose.
+ */
+export function itemData(item: CatalogItem): CataloguePageData {
   return {
     title: item.name,
     description: item.description,
@@ -218,17 +225,6 @@ function build(): StaticSource<CatalogueConfig> {
     })
   }
 
-  for (const item of items) {
-    files.push({
-      type: 'page',
-      path: itemPath(item, groupOfItem.get(item.slug) ?? []),
-      // The route is the Catalogue's, stated here rather than read out of the
-      // folder, so nesting an Item in the content tree cannot move its address.
-      slugs: [SECTIONS[item.kind].segment, item.slug],
-      data: itemData(item),
-    })
-  }
-
   return { files }
 }
 
@@ -279,6 +275,19 @@ function orderFor(
 
 export const catalogueSource = build()
 
+/**
+ * The one Catalogue Item a document names, read by Kind and slug.
+ *
+ * Keyed once at module scope rather than searched per call, because the routed
+ * tree asks this question for every Item page on every build and the Catalogue is
+ * the answer, not a list kept beside it. An Item the Catalogue does not claim is
+ * `undefined`, and the caller says so in its own words: that is the failure the
+ * content-join gate also reports, from the same `buildCatalog()` call.
+ */
+const byIdentity = new Map(
+  buildCatalog().map((item) => [`${item.kind}/${item.slug}`, item] as const),
+)
+
 export function itemFor(kind: CatalogKind, slug: string): CatalogItem | undefined {
-  return buildCatalog().find((item) => item.kind === kind && item.slug === slug)
+  return byIdentity.get(`${kind}/${slug}`)
 }

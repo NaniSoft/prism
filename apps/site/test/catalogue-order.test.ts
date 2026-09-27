@@ -1,21 +1,23 @@
+import { readFileSync, readdirSync, statSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import { describe, expect, it } from 'vitest'
 
-import { buildCatalog, type CatalogKind, type CatalogItem } from '@nanisoft/prism-ui/catalog'
-import type { Folder, Root } from 'fumadocs-core/page-tree'
-import { loader } from 'fumadocs-core/source'
+import { buildCatalog, type CatalogItem, type CatalogKind } from '@nanisoft/prism-ui/catalog'
 
 import { catalogueSource, categoryFolder, KINDS, SECTIONS } from '../src/lib/catalogue'
-import { PAGE_TREE, projectNav } from '../src/lib/nav'
+import { routedPath } from '../src/lib/content-tree'
 
 /**
- * The generated catalogue order, and the routing tree it orders.
+ * The generated catalogue order, and the routes the Item pages state.
  *
  * The site's routing tree cannot be built in this lane, because the macro module
  * `defineDocs` compiles through is a stub that throws unless the bundler plugin
  * compiled it. The generated source can be read, though: it is a plain
- * `StaticSource`, built by `buildCatalog()` and nothing else, and it is the
- * thing the ordering could fall behind. So the Catalogue is read here through
- * its own tooling entry point and the emitted files are compared to it.
+ * `StaticSource`, built by `buildCatalog()` and nothing else, and it is the thing
+ * the ordering could fall behind. So the Catalogue is read here through its own
+ * tooling entry point and the emitted files are compared to it.
  *
  * The comparison is equality, not containment. A hand-written `pages` array that
  * happened to list every slug would pass a containment check and still be a
@@ -36,13 +38,17 @@ import { PAGE_TREE, projectNav } from '../src/lib/nav'
  * this assertion is the old one in the case where the old one held and says
  * something the old one could not once the tree is fully nested.
  *
- * The tree itself is built here, from the real `StaticSource` and the site's own
- * `PAGE_TREE`, for the same reason `nav.test.ts` builds one: the projection is
- * pure and the files are plain data, so a real loader call over them is the
- * whole tree rather than a stand-in for it. That is what proves a Component is
- * nested under its Category in the navigation *and* keeps its route, which are
- * two different facts about the same page.
+ * An Item's page is no longer emitted here. It is the Item's documentation, read
+ * by the one collection beside its Demo, and what this file checks about it is
+ * the two things the Catalogue and the documentation have to agree on: the route
+ * the document states, and the folder the projection puts it in. Both are read
+ * from the files on disk through the site's own projection, so the assertion is
+ * about the real tree rather than about a restatement of it. `content-tree.test.ts`
+ * builds the whole tree from those files and proves what a reader gets.
  */
+
+const SITE = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
+const ITEMS = path.join(SITE, 'items')
 
 const files = catalogueSource.files
 const catalogue = buildCatalog()
@@ -64,33 +70,48 @@ function orderFor(kind: CatalogKind): string[] {
   }
 }
 
-/** A real page tree over the generated source, built the way the site builds it. */
-function tree(): Root {
-  return loader({ files }, { baseUrl: '/', pageTree: PAGE_TREE }).getPageTree()
+/** Every file below a directory, at whatever depth the tree holds. */
+function walk(root: string): string[] {
+  return readdirSync(root).flatMap((name) => {
+    const full = path.join(root, name)
+    return statSync(full).isDirectory() ? walk(full) : [full]
+  })
 }
 
-function folderAt(root: Root, at: string): Folder | undefined {
-  const walk = (nodes: Folder['children']): Folder | undefined => {
-    for (const node of nodes) {
-      if (node.type !== 'folder') continue
-      if (node.$ref?.folder === at) return node
-      const found = walk(node.children)
-      if (found) return found
+/** One Item's documentation, as the collection reads it: a path and frontmatter. */
+interface ItemDocument {
+  file: string
+  slug: string
+  title: string
+  route: string | null
+  /** Where the projection puts it in the routed tree. */
+  at: string
+  /** The folders between the Section and the page, which is its Category. */
+  group: string[]
+}
+
+const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---/
+const KEY = (name: string) => new RegExp(`^${name}:\\s*(.+)$`, 'm')
+
+/** Every Item's documentation, read from the tree rather than from a manifest. */
+const documents: ItemDocument[] = walk(ITEMS)
+  .filter((file) => file.endsWith('.mdx'))
+  .map((file) => {
+    const front = FRONTMATTER.exec(readFileSync(file, 'utf8'))?.[1] ?? ''
+    const at = routedPath(path.relative(SITE, file).split(path.sep).join('/'))
+    return {
+      file: path.relative(SITE, file).split(path.sep).join('/'),
+      slug: path.basename(file, '.mdx'),
+      title: (KEY('title').exec(front)?.[1] ?? '').trim(),
+      route: (KEY('slug').exec(front)?.[1] ?? '').trim() || null,
+      at,
+      group: at.split('/').slice(1, -1),
     }
-    return undefined
-  }
-  return walk(root.children)
-}
+  })
 
-const filed = catalogue.filter((item: CatalogItem) => item.category !== null && item.kind === 'component')
-/** The Items the content tree has filed in a folder, read from the emitted paths. */
+/** The Items the content tree files under a folder, read from those files. */
 const nestedItems = catalogue.filter((item) =>
-  files.some(
-    (file) =>
-      file.type === 'page' &&
-      file.path.split('/').length > 2 &&
-      file.path.endsWith(`/${item.slug}.mdx`),
-  ),
+  documents.some((doc) => doc.slug === item.slug && doc.group.length > 0),
 )
 
 /**
@@ -159,10 +180,15 @@ describe('the generated catalogue order', () => {
   })
 })
 
-describe('the generated routing tree', () => {
-  it('emits one page per Item plus one Section index per Kind', () => {
+describe('the generated routing source', () => {
+  it('emits one Section index per Kind and no Item page', () => {
+    // An Item's page is its documentation, so the Catalogue does not emit it. It
+    // emits what no file on disk can say: the landing page of a Section, and the
+    // order of every folder. An Item page emitted from here would be a second
+    // page for one Item, and the storage would resolve the two by write order.
     const pages = files.filter((file) => file.type === 'page')
-    expect(pages).toHaveLength(catalogue.length + KINDS.length)
+    expect(pages.map((file) => file.path)).toEqual(KINDS.map((kind) => `${SECTIONS[kind].segment}/index.mdx`))
+    expect(pages.every((file) => file.type === 'page' && file.slugs?.length === 1)).toBe(true)
   })
 
   it('claims no virtual path twice, which resolves by write order otherwise', () => {
@@ -170,19 +196,13 @@ describe('the generated routing tree', () => {
     expect(new Set(paths).size).toBe(paths.length)
   })
 
-  it('states every page route rather than reading it out of the folder', () => {
-    // A page with no explicit slugs takes its route from where it sits, which is
-    // how filing a Component under its Category would move forty-two published
-    // addresses. Every catalogue page states `<segment>/<slug>`, so the folder is
-    // free to change without a route moving.
+  it('states the Section landing route rather than reading it out of the folder', () => {
     for (const file of files) {
       if (file.type !== 'page') continue
-      const segment = file.path.split('/')[0] as CatalogKind
-      const item = catalogue.find(
-        (entry) => entry.kind === segment && file.path.endsWith(`/${entry.slug}.mdx`),
-      )
-      if (!item) continue
-      expect(file.slugs).toEqual([SECTIONS[segment].segment, item.slug])
+      const segment = file.path.split('/')[0] as string
+      const kind = KINDS.find((entry) => SECTIONS[entry].segment === segment)
+      expect(kind, `${file.path} is not a Section landing page`).toBeDefined()
+      expect(file.slugs).toEqual([SECTIONS[kind as CatalogKind].segment])
     }
   })
 
@@ -204,8 +224,8 @@ describe('the generated routing tree', () => {
         ).toBe(true)
         expect(Array.isArray(file.data.pages)).toBe(true)
       } else {
-        // A folder below a Section is a Category, and its label is the
-        // Catalogue's name for it rather than anything typed into the folder.
+        // A folder below a Section is a Category, and its label a reader reads is
+        // the Catalogue's name for it rather than anything typed into the folder.
         expect(depth).toBe(2)
         expect(typeof file.data.title).toBe('string')
         expect(Array.isArray(file.data.pages)).toBe(true)
@@ -213,28 +233,14 @@ describe('the generated routing tree', () => {
     }
   })
 
-  it('nests a filed Component under a folder named for its Category', () => {
-    expect(nestedItems.length).toBeGreaterThan(0)
-    for (const item of nestedItems) {
-      const folder = `components/${item.category === null ? '' : categoryFolder(item.category)}`
-      expect(
-        files.some((file) => file.type === 'meta' && file.path === `${folder}/meta.json`),
-        `${item.name} is filed under no folder`,
-      ).toBe(true)
-      expect(
-        files.some(
-          (file) => file.type === 'page' && file.path === `${folder}/${item.slug}.mdx`,
-        ),
-        `${item.name} is not in its Category folder`,
-      ).toBe(true)
-    }
-  })
-
   it('refuses a folder that names no Category rather than labelling it by the folder', () => {
     // A folder the Catalogue does not know is a group a reader would see under a
     // name nobody chose, so the build stops instead. Every Category in the
     // Catalogue is spelled once and has a folder slug.
-    expect(filed.length).toBe(catalogue.filter((i) => i.category !== null).length)
+    const filedItems = catalogue.filter(
+      (item: CatalogItem) => item.category !== null && item.kind === 'component',
+    )
+    expect(filedItems.length).toBe(catalogue.filter((i) => i.category !== null).length)
     const folders = new Set(
       files
         .filter((file) => file.type === 'meta')
@@ -243,72 +249,89 @@ describe('the generated routing tree', () => {
     )
     for (const folder of folders) {
       const name = folder.split('/')[1] as string
-      expect(filed.map((item) => categoryFolder(item.category as never))).toContain(name)
+      expect(filedItems.map((item) => categoryFolder(item.category as never))).toContain(name)
     }
   })
 })
 
-describe('the navigation the generated tree produces', () => {
-  const sections = projectNav(tree())
-
-  it('gives a filed Component a group, and leaves its route where it was', () => {
-    for (const item of nestedItems) {
-      const category = item.category as NonNullable<CatalogItem['category']>
-      const folder = `components/${categoryFolder(category)}`
-      const node = folderAt(tree(), folder)
-      expect(node, `no folder at ${folder}`).toBeDefined()
-      expect(node?.index, `${folder} has an index page, so its heading would be a link`).toBeUndefined()
-      expect(node?.children.map((child) => (child.type === 'page' ? child.url : null))).toContain(
-        `/components/${item.slug}`,
-      )
-    }
-  })
-
-  it('renders the group under the Section, with the Catalogue label', () => {
-    const components = sections.find((section) => section.url === '/components')
-    expect(components).toBeDefined()
-    for (const item of nestedItems) {
-      const category = item.category as NonNullable<CatalogItem['category']>
-      const group = components?.items.find(
-        (entry) => entry.type === 'group' && entry.title === category,
-      )
-      expect(group, `no '${category}' group in the sidebar`).toBeDefined()
-      if (group?.type !== 'group') throw new Error('expected a group')
-      expect(group.items).toContainEqual({ type: 'page', title: item.name, url: `/components/${item.slug}` })
-    }
-  })
-
-  it('renders the Blocks and Pages sidebars as flat lists', () => {
-    // A Block and a Page have no Category, so a group here would be a label with
-    // one child under it, which reads as a category the reader was never told
-    // exists. The sidebar is the flat list the Catalogue is, and nothing wraps
-    // it.
-    for (const url of ['/blocks', '/pages']) {
-      const section = sections.find((entry) => entry.url === url)
-      expect(section, `no ${url} Section in the navigation`).toBeDefined()
-      const kinds = catalogue.filter((item) => item.kind === (url === '/blocks' ? 'block' : 'page'))
-      expect(section?.items.every((entry) => entry.type === 'page'), `${url} nests a group`).toBe(true)
-      expect(section?.items.map((entry) => (entry.type === 'page' ? entry.url : null))).toEqual(
-        kinds.map((item) => `${url}/${item.slug}`),
-      )
-    }
-  })
-
-  it('keeps every Item route, whether or not the Item sits in a folder', () => {
-    // The tree is deliberately uneven: a Component nests under its Category and
-    // a Block and a Page do not. A route is stated rather than read out of a
-    // folder, so neither shape moves an address, and all forty-two are here.
-    const entries = ['/components', '/blocks', '/pages'].flatMap(
-      (url) => sections.find((section) => section.url === url)?.items ?? [],
-    )
-    const listed = entries.flatMap((entry) => (entry.type === 'group' ? entry.items : [entry]))
+describe("the route each Item's document states", () => {
+  it('is the Catalogue route, for every Item', () => {
+    // Forty-two addresses are published and the Corpus advertises them. The
+    // document states the route rather than deriving it from the folder it is
+    // filed in, so a Component filed under a Category and a Block filed flat are
+    // both addressed the Catalogue's way. The value is a slug path rather than a
+    // URL, and `baseUrl: '/'` is what turns one into the other.
+    expect(documents).toHaveLength(catalogue.length)
     for (const item of catalogue) {
-      const segment = item.kind === 'component' ? 'components' : item.kind === 'block' ? 'blocks' : 'pages'
-      expect(listed).toContainEqual({
-        type: 'page',
-        title: item.name,
-        url: `/${segment}/${item.slug}`,
-      })
+      const doc = documents.find((entry) => entry.slug === item.slug)
+      expect(doc, `${item.name} has no documentation file`).toBeDefined()
+      expect(doc?.route, `${doc?.file} states no route`).toBe(
+        `${SECTIONS[item.kind].segment}/${item.slug}`,
+      )
+    }
+  })
+
+  it('is stated once per document, and by no document but an Item page', () => {
+    // `slug` is the one frontmatter key a content page may not carry, because a
+    // content page is addressed by where it sits. The projection refuses it, and
+    // a key it never sees cannot have drifted here either.
+    for (const doc of documents) expect(doc.route).not.toBeNull()
+  })
+})
+
+describe('where the projection files an Item page', () => {
+  it('puts a filed Component in its Category folder and leaves a flat Section flat', () => {
+    // The tree position is the one thing the Catalogue and the documentation
+    // cannot both compute for themselves: the ordering has to name the folder
+    // this file is in, or the page lands outside every ordering, the tree moves
+    // it to the fallback collection, and the build fails with a page no sidebar
+    // links. So the two are asserted against each other here, and the whole tree
+    // is built in `content-tree.test.ts`.
+    expect(nestedItems.length).toBeGreaterThan(0)
+    for (const item of nestedItems) {
+      const folder = `components/${categoryFolder(item.category as never)}`
+      expect(documents.find((doc) => doc.slug === item.slug)?.at).toBe(`${folder}/${item.slug}.mdx`)
+      expect(
+        files.some((file) => file.type === 'meta' && file.path === `${folder}/meta.json`),
+        `${item.name} is filed under no folder`,
+      ).toBe(true)
+    }
+    for (const item of catalogue.filter((entry) => !nestedItems.includes(entry))) {
+      const segment = SECTIONS[item.kind].segment
+      expect(documents.find((doc) => doc.slug === item.slug)?.at).toBe(
+        `${segment}/${item.slug}.mdx`,
+      )
+    }
+  })
+
+  it('is the same rule at any depth, which is what lets the tree grow folders', () => {
+    // The folders between the Kind and the Item's own folder are the Item's place
+    // in the tree, at whatever number of them there is. A rule that counted a
+    // level would break the day a Section nests, which is the day it is needed.
+    const at: [string, string][] = [
+      ['items/component/button/button.mdx', 'components/button.mdx'],
+      ['items/component/data-display/card/card.mdx', 'components/data-display/card.mdx'],
+      ['items/component/a/b/c/thing/thing.mdx', 'components/a/b/c/thing.mdx'],
+      ['items/block/cta-01/cta-01.mdx', 'blocks/cta-01.mdx'],
+      ['items/block/group/thing/thing.mdx', 'blocks/group/thing.mdx'],
+      ['items/page/auth-page/auth-page.mdx', 'pages/auth-page.mdx'],
+      ['content/docs/quickstart.mdx', 'docs/quickstart.mdx'],
+      ['content/meta.json', 'meta.json'],
+      ['content/foundations/tokens/colors/colors.mdx', 'foundations/tokens/colors/colors.mdx'],
+    ]
+    for (const [file, expected] of at) expect(routedPath(file)).toBe(expected)
+  })
+
+  it('names the Catalogue name for the Item, in the document beside its prose', () => {
+    // The tree builder labels a page with `data.title`, so a document whose title
+    // disagreed with the Catalogue would put a second name in the sidebar. The
+    // projection refuses it; the pair is asserted here because a rename in the
+    // Catalogue and a rename in forty-two documents must be one change.
+    for (const doc of documents) {
+      const item = catalogue.find((entry) => entry.slug === doc.slug)
+      expect(doc.title, `${doc.file} is titled something the Catalogue does not call it`).toBe(
+        item?.name,
+      )
     }
   })
 })

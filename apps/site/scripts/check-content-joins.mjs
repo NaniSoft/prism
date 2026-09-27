@@ -26,6 +26,13 @@
  * a second directory when its documentation moved is a finding here rather than
  * a green build.
  *
+ * The route a document states in its own frontmatter is read here too, because a
+ * document and the Corpus have to agree about a published address and this is the
+ * one place both are read. An Item is filed under its Kind and its Category while
+ * it is published at its Section, so the document says which one it is, and a
+ * document that says something else is a route no agent holding a cached index can
+ * resolve.
+ *
  * The Changelogs Section adds the joins the reference design system has no gate
  * for. A published package holding a changelog and no route is a finding, and so
  * is a route whose bytes are not the package's bytes, and so is a hand-authored
@@ -62,6 +69,22 @@ const STORE_FILE = path.join(REPO, 'packages', 'llms', 'dist', 'data.json')
 const DEMO_REFERENCE = /<ComponentDemo\s+[^>]*?slug=["']([^"']+)["']/g
 /** A link to another page of this site, which is what a moved page breaks. */
 const INTERNAL_LINK = /\]\((\/[^)\s]*)\)/g
+/** The `slug` an Item's page states in its frontmatter, which is its route. */
+const DECLARED_ROUTE = /^slug:\s*(.+?)\s*$/m
+
+/**
+ * The route a document states in its frontmatter, or null when it states none.
+ *
+ * Read from the document's own bytes, and normalised, because a document is
+ * content rather than a data file and a hand-edited one arrives with whatever
+ * line endings the editor wrote. The leading slash is added here so the value is
+ * the route a reader is addressed by, which is the form the Corpus advertises and
+ * therefore the form the two are compared in.
+ */
+function declaredRoute(source) {
+  const declared = DECLARED_ROUTE.exec(source.replace(/\r\n/g, '\n'))?.[1]?.replace(/^['"]|['"]$/g, '')
+  return declared ? `/${declared.replace(/^\/+/, '')}` : null
+}
 
 function die(message) {
   console.error(`content-joins: ${message}`)
@@ -149,6 +172,7 @@ for (const item of itemContent) {
     kind: item.kind,
     file: entry,
     group: item.group,
+    route: declaredRoute(source),
     demo: item.demo === null ? null : path.basename(item.demo, '.tsx'),
     demos: [...source.matchAll(DEMO_REFERENCE)].map((match) => match[1]),
   })

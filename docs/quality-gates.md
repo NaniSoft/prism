@@ -30,6 +30,9 @@ directions exist:
 
 - every Catalogue Item has a documentation file, and every documentation file is
   a Catalogue Item's;
+- every Item's document states the route the Corpus advertises for it, because an
+  Item is filed under its Kind and its Category while it is published at its
+  Section, so the document has to say which one it is;
 - every declared Section is a directory under `content/`, and every directory
   under `content/` is a declared Section;
 - every Item's Demo is found from beside its documentation, and every Demo is
@@ -65,6 +68,16 @@ so the gate never instantiates it. Neither replaces the other. The build
 enforcement sees the fallback and nothing else, and only when a page render
 runs; the gate sees reachability and would also catch a navigation that dropped a
 page for any other reason.
+
+**The route an Item states has the same shape, and both halves are enforced.** The
+content tree is read by one collection, an Item's page is its documentation, and
+each document carries a `slug` in its frontmatter because the route cannot be read
+out of the folder. `apps/site/src/lib/content-tree.ts` refuses a document whose
+stated route is not the Catalogue's, so `pnpm build` fails and names the file and
+both routes. The gate reads the same two surfaces from the other side, so
+`pnpm check` fails on it too, and the test lane proves both refusals on a flat and
+a nested fixture. Neither replaces the other: the build is where the route is
+produced, and the gate is where the address an agent would resolve is read.
 
 ## The client-JavaScript budget
 

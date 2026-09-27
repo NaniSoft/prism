@@ -23,6 +23,14 @@ import { findContentJoins, parseNav, routeForFile } from '../scripts/content-joi
  * route is a finding there only because this gate says so, and the reference can
  * lose every one of its changelog pages with its continuous integration green.
  *
+ * The route join is the one this restructure put in front of the reader. An Item's
+ * page states the route it is published at, because it is filed under its Kind and
+ * its Category while it is addressed by its Section, and a document that states
+ * another one is a page the Corpus, the redirects and every cached agent
+ * instruction do not point at. The build refuses it too, and both are asserted:
+ * the build's refusal in `content-tree.test.ts`, the Corpus's side here, on both
+ * shapes.
+ *
  * The navigation is a tree here, not a list of hrefs, because the Category join
  * is about where an Item sits rather than whether it is linked at all. An Item
  * filed under a Category folder has to be rendered *inside* the group that
@@ -121,6 +129,7 @@ const flat: Joins = {
       kind: 'component',
       file: 'items/component/button.mdx',
       group: [],
+      route: '/components/button',
       demo: 'button-demo',
       demos: ['button-demo'],
     },
@@ -129,6 +138,7 @@ const flat: Joins = {
       kind: 'block',
       file: 'items/block/hero-01.mdx',
       group: [],
+      route: '/blocks/hero-01',
       demo: 'hero-demo',
       demos: ['hero-demo'],
     },
@@ -228,6 +238,7 @@ const nested: Joins = {
       kind: 'component',
       file: 'items/component/call-to-action/button/button.mdx',
       group: ['call-to-action'],
+      route: '/components/button',
       demo: 'button',
       demos: ['button'],
     },
@@ -236,6 +247,7 @@ const nested: Joins = {
       kind: 'block',
       file: 'items/block/hero-01.mdx',
       group: [],
+      route: '/blocks/hero-01',
       demo: 'hero-demo',
       demos: ['hero-demo'],
     },
@@ -341,6 +353,7 @@ describe('the content-join gate', () => {
           kind: 'component',
           file: 'items/component/ghost.mdx',
           group: [],
+          route: '/components/ghost',
           demo: 'ghost-demo',
           demos: ['ghost-demo'],
         },
@@ -354,9 +367,9 @@ describe('the content-join gate', () => {
   it.each(shapes)(
     "fails for %s when a document is filed under the wrong Kind",
     (_name, joins) => {
-      // The page template reads an Item's prose through the Kind and the slug, so
-      // a document filed under another Kind is a page with no prose in it and no
-      // error anywhere.
+      // An Item page is filed under its Kind and published at its Section, so the
+      // two are read from the same document. A document filed under another Kind
+      // is filed under a Section the Catalogue does not publish it in.
       const findings = findContentJoins({
         ...joins,
         itemDocs: joins.itemDocs.map((doc) =>
@@ -367,6 +380,36 @@ describe('the content-join gate', () => {
       expect(findings.some((f) => f.message.includes("sits in the 'block' folder"))).toBe(true)
     },
   )
+
+  it.each(shapes)('fails for %s when a document states no route', (_name, joins) => {
+    // Without one, the page is addressed by the folder it is filed in, which for a
+    // Component filed under its Category is not the address the Corpus advertises.
+    // The build refuses it, and this is the same join from the Corpus's side.
+    const findings = findContentJoins({
+      ...joins,
+      itemDocs: joins.itemDocs.map((doc) => (doc.slug === 'button' ? { ...doc, route: null } : doc)),
+    })
+    expect(groups(findings)).toContain('route')
+    expect(findings.some((f) => f.message.includes('states no route'))).toBe(true)
+  })
+
+  it.each(shapes)('fails for %s when a document states another route', (_name, joins) => {
+    // A published-surface change nothing downstream notices: the build publishes
+    // the page where the document says and every tool keeps resolving the
+    // Catalogue's address.
+    const findings = findContentJoins({
+      ...joins,
+      itemDocs: joins.itemDocs.map((doc) =>
+        doc.slug === 'button' ? { ...doc, route: '/components/buttons' } : doc,
+      ),
+    })
+    expect(groups(findings)).toContain('route')
+    expect(
+      findings.some(
+        (f) => f.message.includes('/components/buttons') && f.message.includes('/components/button'),
+      ),
+    ).toBe(true)
+  })
 
   it.each(shapes)('fails for %s when a declared Section is not on disk', (_name, joins) => {
     const findings = findContentJoins({
