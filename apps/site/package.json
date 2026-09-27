@@ -22,6 +22,7 @@
     "build": "next build",
     "postbuild": "node scripts/copy-agent-surface.mjs && node scripts/check-search-budget.mjs",
     "test": "vitest run",
+    "check": "node scripts/check-content-joins.mjs",
     "visual": "playwright test",
     "start": "next start",
     "deploy": "wrangler deploy",

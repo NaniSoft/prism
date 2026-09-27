@@ -17,7 +17,39 @@ reports and is published.
 | `prism-ui` | surface scan, registry validator (registry and published file list), the component suites, the axe suite, the JSDoc and catalogue checks, the two source grep gates | per-item client-JavaScript measurement, the demo `client` flag |
 | `prism-llms` | corpus drift, build-twice determinism, per-item mirror and store coverage, the store type round-trip, the declared output list | corpus freshness stamp |
 | `prism-mcp-server` | the protocol round-trip suite, tool registry equals the corpus, the bundled `data.json` hash | corpus freshness |
-| `@nanisoft/site` (private) | dash gate, search gzip budget, `run_worker_first` equals `MD_SECTIONS`, registry artifacts absent from `out/` | visual regression, per-item client measurement |
+| `@nanisoft/site` (private) | dash gate, content joins, search gzip budget, `run_worker_first` equals `MD_SECTIONS`, registry artifacts absent from `out/` | visual regression, per-item client measurement |
+
+## The content joins
+
+`apps/site/scripts/check-content-joins.mjs` is the site's `check` task, and it
+is the only gate that looks at the joins between the four things that have to
+agree about the content: the Catalogue (read through `buildCatalog()`), the
+content tree on disk, the Corpus (the `PrismDocsStore` the MCP server reads) and
+the routes the site publishes. It asserts, in both directions where both
+directions exist:
+
+- every Catalogue Item has a documentation file, and every documentation file is
+  a Catalogue Item's;
+- every declared Section is a directory under `content/`, and every directory
+  under `content/` is a declared Section;
+- every Item's Demo is found from beside its documentation, and every Demo is
+  claimed by exactly one Item;
+- the Corpus and the content tree hold the same pages, and each page's mirror is
+  its own route plus `.md`;
+- every internal link in the authored prose resolves to a route;
+- every href the published navigation renders resolves to a route.
+
+The assertions are in `apps/site/scripts/content-joins.mjs`, which touches no
+filesystem, and the test lane runs them against a flat tree and a nested tree,
+because the content tree is flat today and nested later in this effort. The
+navigation is read from the built export in `out/`, so it is the navigation a
+reader receives rather than a list the gate keeps beside it, and the same
+staleness cannot make the check pass. The Corpus is consumed, never re-derived,
+and the Catalogue is read, never inferred from a directory scan.
+
+The known limit: a link to a published file that is not a page, which today
+means `llms.txt`, `llms-full.txt` and `prism-skill.md`, is reported as
+unresolved, because the route set is the set of routes.
 
 ## The client-JavaScript budget
 
