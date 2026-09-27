@@ -6,7 +6,7 @@
  * because a stale doc is a lie:
  *
  *  1. coverage: every catalogue item has a prose page and a mirror; every
- *     guide, Foundation and Content page has a mirror
+ *     content page, at any depth in its Section, has a mirror
  *  2. the demo self-contained contract
  *  3. cross-references resolve (public runtime exports, `<ComponentDemo>` keys)
  *  4. descriptions and titles are non-empty
@@ -24,9 +24,9 @@ import { fileURLToPath } from 'node:url'
 
 import { buildCatalog } from '@nanisoft/prism-ui/catalog'
 
-import { emit } from './build.mjs'
+import { collectContentPages, emit } from './build.mjs'
 import { validateDemoSource, scanPrismImports } from '../dist/demo-graph.js'
-import { parsePrismDocsStore } from '../dist/index.js'
+import { parsePrismDocsStore, STORE_SECTIONS } from '../dist/index.js'
 
 const PKG_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const REPO_ROOT = path.resolve(PKG_ROOT, '..', '..')
@@ -39,7 +39,6 @@ const WORK = path.join(PKG_ROOT, '.turbo', 'check')
 const DIST = path.join(PKG_ROOT, 'dist')
 const README = path.join(PKG_ROOT, 'README.md')
 const KINDS = ['component', 'block', 'page']
-const PAGE_SECTIONS = ['docs', 'foundations', 'content']
 const SEGMENT = { component: 'components', block: 'blocks', page: 'pages' }
 
 async function readText(file) {
@@ -177,15 +176,9 @@ for (const item of catalogue) {
   const mirror = `md/${SEGMENT[item.kind]}/${item.slug}.md`
   if (snapshotA[mirror] === undefined) fail('coverage', `item '${item.name}' has no mirror ${mirror}`)
 }
-for (const section of PAGE_SECTIONS) {
-  const dir = path.join(CONTENT_ROOT, section)
-  if (!existsSync(dir)) continue
-  for (const file of (await readdir(dir)).filter((name) => name.endsWith('.mdx'))) {
-    if (file === 'index.mdx') continue
-    const slug = file.replace(/\.mdx$/, '')
-    if (snapshotA[`md/${section}/${slug}.md`] === undefined) {
-      fail('coverage', `page '${section}/${slug}' has no mirror md/${section}/${slug}.md`)
-    }
+for (const page of await collectContentPages(CONTENT_ROOT, STORE_SECTIONS)) {
+  if (snapshotA[page.mirrorPath] === undefined) {
+    fail('coverage', `the content page ${page.route} has no mirror ${page.mirrorPath}`)
   }
 }
 
@@ -248,7 +241,9 @@ if (llmsTxt === undefined) {
   fail('links', 'llms.txt was not emitted')
 } else {
   const base = 'https://prism.nanisoft.com'
-  const linkPattern = new RegExp(`${base.replace(/\./g, '\\.')}/(${PAGE_SECTIONS.concat(Object.values(SEGMENT)).join('|')})/[\\w.-]+\\.md`, 'g')
+  // The path segment allows `/` because a page nested in its Section is linked
+  // by its full tree path, not by its file name.
+  const linkPattern = new RegExp(`${base.replace(/\./g, '\\.')}/(${STORE_SECTIONS.concat(Object.values(SEGMENT)).join('|')})/[\\w./-]+\\.md`, 'g')
   const links = [...new Set(llmsTxt.match(linkPattern) ?? [])]
   for (const link of links) {
     const mirror = `md${link.slice(base.length)}`

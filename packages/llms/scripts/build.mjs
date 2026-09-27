@@ -14,6 +14,10 @@
  *
  * `emit(outDir)` writes only the corpus so the drift gate can emit twice and
  * byte-compare. Run `node scripts/build.mjs` to compile the library and emit.
+ *
+ * The content walk lives here and it recurses, because a page's place in the
+ * tree is the only thing that says where it is published. See
+ * `collectContentPages`.
  */
 import { execFileSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
@@ -33,7 +37,8 @@ const DEMOS_ROOT = path.join(SITE_ROOT, 'src', 'demos')
 const BASE_URL = 'https://prism.nanisoft.com'
 const KIND_SEGMENT = { component: 'components', block: 'blocks', page: 'pages' }
 const KIND_RANK = { component: 0, block: 1, page: 2 }
-const PAGE_SECTIONS = ['docs', 'foundations', 'content']
+/** The one file extension the content tree is authored in. */
+const CONTENT_EXTENSION = '.mdx'
 const PACKS = ['default', 'blush', 'mint', 'lavender', 'sky', 'peach']
 const MODES = ['light', 'dark']
 
@@ -54,6 +59,76 @@ async function readText(file) {
 async function readJson(file) {
   const text = await readText(file)
   return text === undefined ? undefined : JSON.parse(text)
+}
+
+/**
+ * Every content page under `root`, at any depth, with its route taken from
+ * where it sits in the tree.
+ *
+ * The walk recurses. Reading one directory and filtering to `.mdx` is how a
+ * page one folder deeper used to vanish from `llms.txt`, from `llms-full.txt`,
+ * from the Store and from every tool, with a green build. Nesting content is a
+ * legitimate thing to do, so the depth of a page cannot decide whether it
+ * exists.
+ *
+ * A Section that is declared and not on disk throws. Skipping it would delete a
+ * whole Section from every agent surface without a word, which is the same
+ * failure by omission one level up.
+ *
+ * `index.mdx` is a Section's landing page rather than one of its pages, so it
+ * stays out at every level, exactly as it was when only the top level was read.
+ */
+export async function collectContentPages(root, sections) {
+  const pages = []
+  for (const section of sections) {
+    const dir = path.join(root, section)
+    const found = await walkContent(dir, section)
+    if (found === undefined) {
+      throw new Error(
+        `prism-llms: the content Section '${section}' is declared but ${dir} is not a directory`,
+      )
+    }
+    for (const relative of found) {
+      const route = relative.slice(0, -CONTENT_EXTENSION.length)
+      const slug = route.slice(section.length + 1)
+      if (slug === 'index' || slug.endsWith('/index')) continue
+      pages.push({
+        file: path.join(root, ...relative.split('/')),
+        section,
+        slug,
+        route,
+        url: `/${route}`,
+        mirrorPath: `md/${route}.md`,
+      })
+    }
+  }
+  return pages
+}
+
+/**
+ * Content files under `dir`, depth first and name sorted, as paths relative to
+ * the content root. `undefined` when the directory cannot be read, so a
+ * missing Section and a missing file are told apart from an empty Section.
+ */
+async function walkContent(dir, prefix) {
+  let entries
+  try {
+    entries = await readdir(dir, { withFileTypes: true })
+  } catch {
+    return undefined
+  }
+  const found = []
+  for (const entry of [...entries].sort((a, b) => a.name.localeCompare(b.name))) {
+    const relative = `${prefix}/${entry.name}`
+    if (entry.isDirectory()) {
+      const nested = await walkContent(path.join(dir, entry.name), relative)
+      if (nested === undefined) return undefined
+      found.push(...nested)
+    } else if (entry.isFile() && entry.name.endsWith(CONTENT_EXTENSION)) {
+      found.push(relative)
+    }
+  }
+  return found
 }
 
 /** Load the compiled library modules `emit()` uses. */
@@ -310,10 +385,15 @@ Foundations and Content pages.
 /**
  * Emit the whole corpus into `outDir`. Deterministic: the same inputs produce
  * the same bytes. Returns the sorted relative file list and the store.
+ *
+ * `options.contentRoot` points the page walk at another content tree, which is
+ * how the test lane proves a nested page reaches every artifact without
+ * nesting a page in the site the reader sees.
  */
-export async function emit(outDir) {
+export async function emit(outDir, options = {}) {
   const lib = await loadLib()
   const { markdown, store: storeLib } = lib
+  const contentRoot = options.contentRoot ?? CONTENT_ROOT
 
   for (const artifact of CORPUS_ARTIFACTS) {
     await rm(path.join(outDir, artifact), { recursive: true, force: true })
@@ -400,37 +480,31 @@ export async function emit(outDir) {
   /* Pages ---------------------------------------------------------------- */
 
   const pages = []
-  for (const section of PAGE_SECTIONS) {
-    const dir = path.join(CONTENT_ROOT, section)
-    if (!existsSync(dir)) continue
-    const files = (await readdir(dir)).filter((name) => name.endsWith('.mdx')).sort()
-    for (const file of files) {
-      if (file === 'index.mdx') continue
-      const slug = file.replace(/\.mdx$/, '')
-      const raw = await readText(path.join(dir, file))
-      if (raw === undefined) continue
-      const { data, body } = markdown.parseMdx(raw)
-      const title = data.title
-      if (!title) throw new Error(`prism-llms: page '${section}/${slug}' has no title`)
-      const description = data.description ?? ''
-      const markdownBody = markdown.assembleDoc([
-        `# ${title}`,
-        description,
-        markdown.stripMdxMechanics(body),
-      ])
-      const url = `/${section}/${slug}`
-      await writeArtifact(path.join('md', section, `${slug}.md`), markdownBody)
-      pages.push({
-        id: `${section}/${slug}`,
-        slug,
-        section,
-        title,
-        description,
-        url,
-        markdown: markdownBody,
-        mirror: `${url}.md`,
-      })
+  for (const page of await collectContentPages(contentRoot, storeLib.STORE_SECTIONS)) {
+    const raw = await readText(page.file)
+    if (raw === undefined) {
+      throw new Error(`prism-llms: the page at ${page.file} was walked and then could not be read`)
     }
+    const { data, body } = markdown.parseMdx(raw)
+    const title = data.title
+    if (!title) throw new Error(`prism-llms: the page at ${page.route} has no title`)
+    const description = data.description ?? ''
+    const markdownBody = markdown.assembleDoc([
+      `# ${title}`,
+      description,
+      markdown.stripMdxMechanics(body),
+    ])
+    await writeArtifact(page.mirrorPath, markdownBody)
+    pages.push({
+      id: `${page.section}/${page.slug}`,
+      slug: page.slug,
+      section: page.section,
+      title,
+      description,
+      url: page.url,
+      markdown: markdownBody,
+      mirror: `${page.url}.md`,
+    })
   }
 
   /* Store ---------------------------------------------------------------- */

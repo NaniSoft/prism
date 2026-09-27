@@ -135,7 +135,9 @@ export interface PrismDocsStoreEntry {
 
 export interface PrismDocsPage {
   readonly id: string
+  /** The page's path below its Section, without the extension: `tokens/colors`. */
   readonly slug: string
+  /** The top-level Section directory the page sits in. */
   readonly section: StoreSection
   readonly title: string
   readonly description: string
