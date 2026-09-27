@@ -8,6 +8,12 @@ ticket holds the reasoning and the evidence, this document holds the result.
 This is a specification. It describes the target and the order of the work. It is
 not a report of work done.
 
+**The specification of record is
+[issue #17](https://github.com/NaniSoft/prism/issues/17)**, which carries the same
+decisions in an implementable form with the user stories and the testing
+decisions. This document is its design companion and holds the reasoning. Where
+the two differ, the issue wins.
+
 ## What is being changed
 
 The documentation site is reorganised to match the shape of
