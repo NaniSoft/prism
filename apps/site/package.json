@@ -21,6 +21,7 @@
     "prebuild": "pnpm --filter @nanisoft/prism-tokens build && pnpm --filter @nanisoft/prism-llms build && pnpm --filter @nanisoft/prism-mcp-server build && node scripts/generate-demos.mjs && node scripts/generate-api.mjs",
     "build": "next build",
     "postbuild": "node scripts/copy-agent-surface.mjs && node scripts/check-search-budget.mjs",
+    "pretest": "node scripts/generate-demos.mjs",
     "test": "vitest run",
     "check": "node scripts/check-content-joins.mjs",
     "visual": "playwright test",

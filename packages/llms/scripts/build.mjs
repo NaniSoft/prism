@@ -18,12 +18,21 @@
  * The content walk lives here and it recurses, because a page's place in the
  * tree is the only thing that says where it is published. See
  * `collectContentPages`.
+ *
+ * An Item's documentation and its Demo are read through the site's own rule,
+ * `apps/site/scripts/item-content.mjs`, rather than through a path restated
+ * here. An Item is filed in one folder, with its documentation and its Demo as
+ * siblings, and the folders in between are the site's business. Nothing in this
+ * file holds a path to either, which is what keeps the Corpus reading the same
+ * Items the site renders once the tree grows folders under them.
  */
 import { execFileSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+
+import { readItemContent } from '../../../apps/site/scripts/item-content.mjs'
 
 const PKG_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const REPO_ROOT = path.resolve(PKG_ROOT, '..', '..')
@@ -219,7 +228,7 @@ function composedNames(item, demo, declaration, lib, publicExports) {
 }
 
 /** Build the item's props or composition section from its declaration. */
-async function itemSections(item, declaration, lib, publicExports, byName) {
+async function itemSections(item, demo, declaration, lib, publicExports, byName) {
   const extracted = lib.extractor.extractExports(declaration, item.exports)
 
   if (item.kind === 'component') {
@@ -227,7 +236,6 @@ async function itemSections(item, declaration, lib, publicExports, byName) {
     return { props, composition: undefined }
   }
 
-  const demo = await readText(path.join(DEMOS_ROOT, `${item.slug}.tsx`))
   const dependencies = composedNames(item, demo, declaration, lib, publicExports).filter(
     (name) => byName.has(name),
   )
@@ -403,6 +411,10 @@ export async function emit(outDir, options = {}) {
   const catalogue = (await import('@nanisoft/prism-ui/catalog')).buildCatalog()
   const byName = new Map(catalogue.map((entry) => [entry.name, entry]))
   const publicExports = new Set(catalogue.flatMap((entry) => entry.exports))
+  // Read once per emit, by the rule the site, this builder and the gate share.
+  const itemContent = new Map(
+    (await readItemContent(ITEMS_ROOT, DEMOS_ROOT)).map((item) => [item.slug, item]),
+  )
   const written = new Set()
   const writeArtifact = async (relative, text) => {
     const file = path.join(outDir, relative)
@@ -419,9 +431,19 @@ export async function emit(outDir, options = {}) {
   const items = []
   for (const item of orderedItems) {
     const segment = KIND_SEGMENT[item.kind]
-    const raw = await readText(path.join(ITEMS_ROOT, item.kind, `${item.slug}.mdx`))
+    const content = itemContent.get(item.slug)
+    if (content === undefined) {
+      throw new Error(
+        `prism-llms: catalog item '${item.name}' has no documentation file anywhere under ` +
+          `${ITEMS_ROOT}, which is where an Item's documentation and its Demo live`,
+      )
+    }
+    const raw = await readText(content.doc)
     if (raw === undefined) {
-      throw new Error(`prism-llms: catalog item '${item.name}' has no prose page at apps/site/items/${item.kind}/${item.slug}.mdx`)
+      throw new Error(
+        `prism-llms: the documentation for catalog item '${item.name}' is at ` +
+          `${content.doc} and could not be read`,
+      )
     }
     if (!item.description || item.description.trim().length === 0) {
       throw new Error(`prism-llms: catalog item '${item.name}' has an empty description`)
@@ -430,7 +452,7 @@ export async function emit(outDir, options = {}) {
     const proseBody = markdown.stripSection(markdown.stripMdxMechanics(body), 'Usage')
     const importLine = `import { ${item.exports.join(', ')} } from '@nanisoft/prism-ui/${segment}/${item.slug}'`
 
-    const demo = await readText(path.join(DEMOS_ROOT, `${item.slug}.tsx`))
+    const demo = content.demo === null ? undefined : await readText(content.demo)
     let example
     if (demo !== undefined) {
       const title = markdown.demoTitle(demo, `${item.name} example`)
@@ -440,7 +462,14 @@ export async function emit(outDir, options = {}) {
     const declarationFile = dtsPath(item.source)
     const declaration = existsSync(declarationFile) ? await readDeclarations(declarationFile) : ''
 
-    const { props, composition } = await itemSections(item, declaration, lib, publicExports, byName)
+    const { props, composition } = await itemSections(
+      item,
+      demo,
+      declaration,
+      lib,
+      publicExports,
+      byName,
+    )
     const { references, section: crossRefs } = crossReferences(item, demo, declaration, lib, byName, publicExports)
     const demoSection = example ? markdown.renderDemoSection(example.title, example.code) : undefined
 

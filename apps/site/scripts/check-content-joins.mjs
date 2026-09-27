@@ -13,11 +13,18 @@
  * on disk, the Corpus (the `PrismDocsStore` the MCP server reads, consumed
  * rather than re-derived) and the routes the site publishes. The navigation is
  * read from the published export, so it is the navigation a reader gets rather
- * than a list this gate keeps beside it.
+ * than a list this gate keeps beside it, and it is read as a tree rather than as
+ * a list of hrefs, so a Category group a reader can see is a group the gate can
+ * check.
  *
  * The assertions live in `content-joins.mjs` and are about joins, not about a
  * directory depth, because the content tree is flat today and nested later in
  * this effort. The test lane proves both shapes.
+ *
+ * An Item's documentation and its Demo are located by `item-content.mjs`, the
+ * rule the demo generator and the corpus builder read, so a Demo left behind in
+ * a second directory when its documentation moved is a finding here rather than
+ * a green build.
  *
  * Run: pnpm --filter @nanisoft/site check
  */
@@ -29,7 +36,8 @@ import { fileURLToPath } from 'node:url'
 import { buildCatalog } from '@nanisoft/prism-ui/catalog'
 import { parsePrismDocsStore, STORE_SECTIONS } from '@nanisoft/prism-llms'
 
-import { CONTENT_EXTENSIONS, findContentJoins, routeForFile } from './content-joins.mjs'
+import { CONTENT_EXTENSIONS, findContentJoins, parseNav, routeForFile } from './content-joins.mjs'
+import { readItemContent } from './item-content.mjs'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const SITE = path.join(HERE, '..')
@@ -41,13 +49,10 @@ const APP_ROOT = path.join(SITE, 'src', 'app')
 const OUT = path.join(SITE, 'out')
 const STORE_FILE = path.join(REPO, 'packages', 'llms', 'dist', 'data.json')
 
-/** The demo an Item's documentation names, which is how a Demo is discovered. */
+/** The demo an Item's documentation names, which is how a Demo is claimed. */
 const DEMO_REFERENCE = /<ComponentDemo\s+[^>]*?slug=["']([^"']+)["']/g
 /** A link to another page of this site, which is what a moved page breaks. */
 const INTERNAL_LINK = /\]\((\/[^)\s]*)\)/g
-/** A navigation element, and the links inside it. */
-const NAV_BLOCK = /<nav\b[^>]*>([\s\S]*?)<\/nav>/g
-const HREF = /href="([^"]*)"/g
 
 function die(message) {
   console.error(`content-joins: ${message}`)
@@ -116,24 +121,44 @@ const contentDirectories = (
   .map((entry) => entry.name)
   .sort()
 
-/* The Item documentation, and the Demo each one names. */
+/* The Item documentation, and the Demo each one is found beside. */
 
+/**
+ * The documentation tree, read by the same rule the demo generator and the
+ * corpus builder read, so the gate cannot disagree with either of them about
+ * where an Item's documentation or its Demo is. A Demo left behind in the flat
+ * root when a document moved is exactly the failure the rule refuses to paper
+ * over, and this is where that refusal becomes a finding.
+ */
+const itemContent = await readItemContent(ITEMS_ROOT, DEMOS_ROOT)
 const itemDocs = []
-for (const file of await walkFiles(ITEMS_ROOT)) {
-  if (!isContent(file)) continue
-  const source = await readFile(file, 'utf8')
-  const entry = toSite(file)
+for (const item of itemContent) {
+  const entry = toSite(item.doc)
+  const source = await readFile(item.doc, 'utf8')
   itemDocs.push({
-    slug: path.basename(file).replace(/\.mdx?$/, ''),
+    slug: item.slug,
+    kind: item.kind,
     file: entry,
+    group: item.group,
+    demo: item.demo === null ? null : path.basename(item.demo, '.tsx'),
     demos: [...source.matchAll(DEMO_REFERENCE)].map((match) => match[1]),
+    demosInFolder: item.demosInFolder,
   })
   for (const [, href] of source.matchAll(INTERNAL_LINK)) links.push({ file: entry, href })
 }
-const demoFiles = (await walkFiles(DEMOS_ROOT))
-  .filter((file) => file.endsWith('.tsx'))
-  .map((file) => path.basename(file, '.tsx'))
-  .sort()
+/**
+ * Every Demo-shaped file in the tree, whether beside a document or in the flat
+ * root, so a Demo no document claims is still a finding rather than a file the
+ * gate stopped looking at.
+ */
+const demoFiles = new Set(
+  (await walkFiles(DEMOS_ROOT))
+    .filter((file) => file.endsWith('.tsx'))
+    .map((file) => path.basename(file, '.tsx')),
+)
+for (const item of itemContent) {
+  for (const demo of item.demosInFolder) demoFiles.add(demo)
+}
 
 /* The routes the site publishes: the content tree, the App Router, and the
    catalogue's own section landing pages. The section names are read from the
@@ -156,7 +181,7 @@ for (const item of store.items) {
   routes.add(`/${item.url.split('/')[1] ?? ''}`)
 }
 
-/* The navigation, as published. */
+/* The navigation, as published, and as the reader receives it. */
 
 if (!existsSync(OUT)) {
   die(
@@ -164,14 +189,13 @@ if (!existsSync(OUT)) {
       'published navigation, and a navigation that was never published cannot be checked.',
   )
 }
-const navHrefs = new Set()
+const navBlocks = new Map()
 let publishedPages = 0
 for (const file of await walkFiles(OUT)) {
   if (!file.endsWith('.html')) continue
   publishedPages += 1
-  const html = await readFile(file, 'utf8')
-  for (const [, body] of html.matchAll(NAV_BLOCK)) {
-    for (const [, href] of body.matchAll(HREF)) navHrefs.add(href)
+  for (const block of parseNav(await readFile(file, 'utf8'))) {
+    navBlocks.set(JSON.stringify(block), block)
   }
 }
 
@@ -184,7 +208,7 @@ const findings = findContentJoins({
   contentFiles,
   links,
   itemDocs,
-  demoFiles,
+  demoFiles: [...demoFiles],
   corpus: {
     items: store.items.map((item) => ({ slug: item.slug, kind: item.kind, url: item.url })),
     pages: store.pages.map((page) => ({
@@ -195,7 +219,7 @@ const findings = findContentJoins({
     })),
   },
   routes: [...routes],
-  navHrefs: [...navHrefs],
+  navBlocks: [...navBlocks.values()],
 })
 
 if (findings.length > 0) {
@@ -207,6 +231,7 @@ if (findings.length > 0) {
 
 console.log(
   `content-joins: every join holds - ${catalogue.length} Items, ${contentFiles.length} content ` +
-    `files, ${store.pages.length} Corpus pages, ${routes.size} routes, ${navHrefs.size} ` +
-    `navigation links across ${publishedPages} published pages`,
+    `files, ${itemDocs.length} Item documents, ${store.pages.length} Corpus pages, ` +
+    `${routes.size} routes, ${navBlocks.size} navigation blocks across ${publishedPages} ` +
+    'published pages',
 )

@@ -69,8 +69,25 @@ export const source = loader(
 /**
  * The prose tree, internal only. `/_prose/component/button` is never routed; the
  * item page reads the body it holds.
+ *
+ * `itemSlugs` is what keeps that lookup working while the tree grows folders. A
+ * document is addressed by the Item that names it: the top folder is its Kind
+ * and its own file name is its slug, and every folder between them is the
+ * content tree's business rather than the lookup's. Without it, filing a
+ * Component under its Category would move its prose route to
+ * `/_prose/component/data-display/card/card` and the Item page would quietly
+ * render "no prose has been authored for this item yet", with a green build and
+ * a page that looks complete. The file name is the Item's slug because the
+ * content-join gate fails the build when it is not, so this rule and the gate
+ * read the same identity from the same place.
  */
 export const proseSource = loader(
   { prose: prose.toFumadocsSource() },
-  { baseUrl: '/_prose' },
+  {
+    baseUrl: '/_prose',
+    slugs: (file) => {
+      const segments = file.path.split('/')
+      return [segments[0] ?? '', (segments[segments.length - 1] ?? '').replace(/\.mdx$/, '')]
+    },
+  },
 )

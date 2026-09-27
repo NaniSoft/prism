@@ -24,6 +24,7 @@ import { fileURLToPath } from 'node:url'
 
 import { buildCatalog } from '@nanisoft/prism-ui/catalog'
 
+import { readItemContent } from '../../../apps/site/scripts/item-content.mjs'
 import { collectContentPages, emit } from './build.mjs'
 import { validateDemoSource, scanPrismImports } from '../dist/demo-graph.js'
 import { parsePrismDocsStore, STORE_SECTIONS } from '../dist/index.js'
@@ -59,18 +60,31 @@ async function walkFiles(dir, prefix = '') {
   return files
 }
 
+/**
+ * Where every Item's documentation and its Demo are, read by the site's own rule
+ * rather than by a path restated here. Every Demo is covered, wherever it sits:
+ * beside the documentation it documents, or in the flat demo root for the Items
+ * that have not moved yet.
+ */
+const itemContent = await readItemContent(ITEMS_ROOT, DEMOS_ROOT)
+const contentBySlug = new Map(itemContent.map((item) => [item.slug, item]))
+
+/** Every Demo in the tree, for the self-contained contract and the imports. */
 async function collectDemos() {
-  if (!existsSync(DEMOS_ROOT)) return []
   const demos = []
-  for (const file of (await readdir(DEMOS_ROOT)).filter((name) => name.endsWith('.tsx')).sort()) {
-    const code = await readText(path.join(DEMOS_ROOT, file))
-    if (code !== undefined) demos.push({ file: `src/demos/${file}`, code })
+  for (const item of itemContent) {
+    if (item.demo === null) continue
+    const code = await readText(item.demo)
+    if (code !== undefined) {
+      demos.push({ file: path.relative(SITE_ROOT, item.demo).split(path.sep).join('/'), code })
+    }
   }
   return demos
 }
 
 async function itemMdx(item) {
-  return readText(path.join(ITEMS_ROOT, item.kind, `${item.slug}.mdx`))
+  const found = contentBySlug.get(item.slug)
+  return found ? readText(found.doc) : undefined
 }
 
 /** The throwaway tsc project (invariant 5): the guard plus the type assignment. */
@@ -172,7 +186,9 @@ if (drift.length > 0) fail('determinism', `two builds differ: ${drift.join(', ')
 
 for (const item of catalogue) {
   const mdx = await itemMdx(item)
-  if (mdx === undefined) fail('coverage', `item '${item.name}' has no apps/site/items/${item.kind}/${item.slug}.mdx`)
+  if (mdx === undefined) {
+    fail('coverage', `item '${item.name}' has no documentation file in apps/site/items`)
+  }
   const mirror = `md/${SEGMENT[item.kind]}/${item.slug}.md`
   if (snapshotA[mirror] === undefined) fail('coverage', `item '${item.name}' has no mirror ${mirror}`)
 }
@@ -205,8 +221,21 @@ for (const item of catalogue) {
   if (mdx === undefined) continue
   for (const match of mdx.matchAll(/<ComponentDemo\s+([^>]*?)\/>/g)) {
     const slug = /\bslug=["']([^"']+)["']/.exec(match[1] ?? '')?.[1]
-    if (!slug || !existsSync(path.join(DEMOS_ROOT, `${slug}.tsx`))) {
-      fail('cross-refs', `${item.kind}/${item.slug}.mdx references <ComponentDemo slug="${slug}">, which has no demo file`)
+    // The Demo a document names must be the Demo beside it, which is the join
+    // this gate now reads rather than a lookup in the flat demo root: a Demo
+    // left behind when its documentation moved would satisfy the old check and
+    // render the Item from a second directory.
+    const found = contentBySlug.get(item.slug)
+    if (!slug || found === undefined || found.demo === null) {
+      fail(
+        'cross-refs',
+        `${item.kind}/${item.slug}.mdx references <ComponentDemo slug="${slug}">, which has no demo beside its documentation`,
+      )
+    } else if (slug !== item.slug) {
+      fail(
+        'cross-refs',
+        `${item.kind}/${item.slug}.mdx references <ComponentDemo slug="${slug}">, which is the Demo of another Item`,
+      )
     }
   }
 }
