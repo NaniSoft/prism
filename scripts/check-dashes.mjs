@@ -17,11 +17,12 @@
  * Coverage (ticket 15 section 7). ROOTS is every directory or root document the
  * gate reads. GATED is the subset whose strings render or ship:
  *
- *   ROOTS: apps/site/src, apps/site/content, apps/site/items, packages/ui/src,
- *          packages/tokens/src, packages/tokens/build, packages/tokens/scripts,
- *          packages/ui/scripts, packages/llms/src, packages/mcp-server/src,
- *          scripts, README.md, DESIGN.md, PRODUCT.md, CONTEXT.md, AGENTS.md,
- *          CONTRIBUTING.md, docs/**
+ *   ROOTS: apps/site/src, apps/site/content, apps/site/items, apps/site/scripts,
+ *          apps/site/test, packages/ui/src, packages/tokens/src,
+ *          packages/tokens/build, packages/tokens/scripts, packages/ui/scripts,
+ *          packages/llms/src, packages/mcp-server/src, scripts, README.md,
+ *          DESIGN.md, PRODUCT.md, CONTEXT.md, AGENTS.md, CONTRIBUTING.md,
+ *          docs/**
  *   GATED: all of apps/site/src and apps/site/{content,items};
  *          packages/ui/src/** (component JSDoc reaches the corpus, block source
  *          ships verbatim); packages/tokens/src/{themes,semantic,foundation}
@@ -29,6 +30,13 @@
  *          packages/llms/src/** (it emits reader-facing Markdown);
  *          packages/mcp-server/src/** (tool descriptions are read by agents);
  *          every root/doc `*.md`/`*.mdx`.
+ *
+ * `apps/site/scripts` and `apps/site/test` are read and not gated. They are
+ * build tooling and assertions: their strings are gate output and failure
+ * messages, which a maintainer reads and no reader sees, so they belong in the
+ * reported column with the rest of the comment prose rather than in the failing
+ * one. They were outside every root until the site's own gate and test lanes
+ * grew five hundred lines that nothing scanned.
  *
  * The honest limit: the gate sees characters, not meaning. It proves no em/en
  * dash and no `???` sequence in the listed files, nothing more.
@@ -40,6 +48,8 @@ const ROOTS = [
   'apps/site/src',
   'apps/site/content',
   'apps/site/items',
+  'apps/site/scripts',
+  'apps/site/test',
   'packages/ui/src',
   'packages/tokens/src',
   'packages/tokens/build',
