@@ -14,9 +14,14 @@ import { collectContentPages, emit } from '../scripts/build.mjs'
  * A walk that reads one directory answers with fewer pages every time, which is
  * exactly the omission that took a nested page out of `llms.txt`,
  * `llms-full.txt`, the Store and every tool while the build stayed green.
+ *
+ * The two extensions are the same class of omission one step along: a walk that
+ * read only `.mdx` would leave every generated changelog route out of the same
+ * four artefacts, and the Changelogs Section would exist for a reader and not for
+ * an agent.
  */
 
-const SECTIONS = ['docs', 'foundations', 'content']
+const SECTIONS = ['docs', 'foundations', 'content', 'changelogs']
 
 /** A temporary content root, so the site's real tree is never touched. */
 async function contentTree(files: Record<string, string>): Promise<string> {
@@ -121,6 +126,108 @@ describe('collectContentPages', () => {
       /the content Section 'foundations' is declared/,
     )
   })
+
+  it('reads a copied changelog as readily as an authored page', async () => {
+    // The Changelogs Section's per-package files are byte-for-byte copies of a
+    // published package's `CHANGELOG.md`, so they arrive as plain Markdown. A
+    // walk that filtered to `.mdx` would drop every one of them, and the whole
+    // Section would exist for a reader and not for an agent.
+    const root = await tree({
+      'changelogs/index.mdx': '---\ntitle: Changelogs\n---\n',
+      'changelogs/prism-ui.md': '# @nanisoft/prism-ui\n\n## 0.5.0\n\nA clean break.\n',
+    })
+    const pages = await collectContentPages(root, SECTIONS)
+
+    expect(pages.map((page) => page.url)).toEqual(['/changelogs/prism-ui'])
+    expect(pages[0]).toMatchObject({
+      section: 'changelogs',
+      slug: 'prism-ui',
+      extension: '.md',
+      mirrorPath: 'md/changelogs/prism-ui.md',
+    })
+  })
+})
+
+/**
+ * The published packages and their routes.
+ *
+ * A package that ships a changelog and has no route throws here rather than being
+ * skipped, which is the build-time half of the gate the reference design system
+ * has no equivalent of. It ships reader-facing changelog pages and nothing in its
+ * build can notice when one is deleted, so all of its pages can go and its
+ * continuous integration stays green. This builder runs in the site's
+ * `prebuild`, so the throw is a failed `pnpm build` and not only a failed check.
+ */
+describe('a published package with a changelog and no route', () => {
+  const text = '# @nanisoft/prism-ui\n\n## 0.5.0\n\nA clean break.\n'
+  const pkg = {
+    name: '@nanisoft/prism-ui',
+    directory: 'packages/ui',
+    version: '0.5.0',
+    changelog: 'packages/ui/CHANGELOG.md',
+    slug: 'prism-ui',
+    route: '/changelogs/prism-ui',
+    text,
+  }
+
+  let root = ''
+
+  beforeAll(async () => {
+    root = await mkdtemp(path.join(tmpdir(), 'prism-llms-changelog-'))
+    // Every declared Section is a directory, because a declared Section that is
+    // not on disk is its own throw and these tests are about the changelog one.
+    for (const section of SECTIONS) await mkdir(path.join(root, section), { recursive: true })
+  })
+
+  afterAll(async () => {
+    await rm(root, { recursive: true, force: true })
+  })
+
+  async function contentTree(files: Record<string, string>) {
+    for (const relative of Object.keys(files)) {
+      const file = path.join(root, ...relative.split('/'))
+      await mkdir(path.dirname(file), { recursive: true })
+      await writeFile(file, files[relative] as string, 'utf8')
+    }
+  }
+
+  it('throws rather than dropping the package from the Corpus', async () => {
+    await contentTree({ 'docs/index.mdx': '---\ntitle: Guides\n---\n' })
+    await expect(emit(path.join(root, 'corpus-missing'), { contentRoot: root, packages: [pkg] }))
+      .rejects.toThrow(/publishes no route for it at \/changelogs\/prism-ui/)
+  })
+
+  it('carries the package bytes once the route is there', async () => {
+    await contentTree({
+      'docs/index.mdx': '---\ntitle: Guides\n---\n',
+      'changelogs/prism-ui.md': text,
+    })
+    const out = path.join(root, 'corpus-present')
+    const { store } = await emit(out, { contentRoot: root, packages: [pkg] })
+
+    expect(store.changelogs).toHaveLength(1)
+    expect(store.changelogs[0]).toMatchObject({
+      package: '@nanisoft/prism-ui',
+      slug: 'prism-ui',
+      route: '/changelogs/prism-ui',
+      title: '@nanisoft/prism-ui',
+      versions: ['0.5.0'],
+    })
+    // The bytes, not a re-serialisation of them: the text the tool returns and
+    // the mirror an agent fetches are the file the site rendered.
+    expect(store.changelogs[0]?.text).toBe(text)
+    expect(store.pages.find((page) => page.url === '/changelogs/prism-ui')?.markdown).toBe(text)
+    expect(await readFile(path.join(out, 'md', 'changelogs', 'prism-ui.md'), 'utf8')).toBe(text)
+  })
+
+  it('refuses a changelog whose own heading names a different package', async () => {
+    await contentTree({
+      'docs/index.mdx': '---\ntitle: Guides\n---\n',
+      'changelogs/prism-ui.md': '# @nanisoft/prism-tokens\n\n## 0.5.0\n\nA clean break.\n',
+    })
+    await expect(emit(path.join(root, 'corpus-mislabelled'), { contentRoot: root, packages: [pkg] }))
+      .rejects.toThrow(/leads with '@nanisoft\/prism-tokens'/)
+  })
 })
 
 describe('emit, with the content walk reading a nested tree', () => {
@@ -137,7 +244,11 @@ describe('emit, with the content walk reading a nested tree', () => {
     })
     contentRoot = root
     out = path.join(root, 'corpus')
-    const emitted = await emit(out, { contentRoot })
+    // The fixture tree declares no published packages, so the changelog
+    // projection is empty rather than the workspace's four. The throw that a
+    // real package with no route causes is proved in the block below, with a
+    // package list this test states.
+    const emitted = await emit(out, { contentRoot, packages: [] })
     store = emitted.store as typeof store
   })
 

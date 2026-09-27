@@ -98,6 +98,8 @@ export default async function Page({ params }: { params: Promise<{ slug: string[
   const data = page.data as unknown as {
     title?: string
     description?: string
+    /** The file opens with its own heading, so the frame adds none. */
+    selfTitled?: boolean
     body?: ProseBody
     toc?: TOCItemType[]
   }
@@ -105,12 +107,22 @@ export default async function Page({ params }: { params: Promise<{ slug: string[
 
   return (
     <DocsShell sections={sections} currentUrl={page.url} flat={flat} toc={data.toc}>
-      <header className="flex flex-col gap-3">
-        <h1 className="text-3xl font-semibold tracking-tight">{data.title}</h1>
-        {data.description ? (
-          <p className="text-muted-foreground max-w-2xl text-lg text-pretty">{data.description}</p>
-        ) : null}
-      </header>
+      {/*
+        A page that declares its title in frontmatter has no heading of its own,
+        so the frame prints one. A generated page is a published package's own
+        `CHANGELOG.md`, byte for byte, and that file begins with the package's
+        name: the heading is already in the body, and printing a second one
+        above it is the same heading twice. Nothing is dropped from the file
+        either way, which is the property the Section is for.
+      */}
+      {data.selfTitled ? null : (
+        <header className="flex flex-col gap-3">
+          <h1 className="text-3xl font-semibold tracking-tight">{data.title}</h1>
+          {data.description ? (
+            <p className="text-muted-foreground max-w-2xl text-lg text-pretty">{data.description}</p>
+          ) : null}
+        </header>
+      )}
 
       {Body ? (
         <div className="prose">

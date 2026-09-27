@@ -1,5 +1,5 @@
 /**
- * The pure renderers behind the eight tools.
+ * The pure renderers behind the tools.
  *
  * Every tool returns markdown and never touches I/O: the store is the whole
  * input. A lookup miss is an `isError` result with did-you-mean suggestions and
@@ -7,7 +7,14 @@
  * transport.
  */
 import type { CallToolResult } from '@modelcontextprotocol/server'
-import type { PrismDocsPage, PrismDocsStore, PrismDocsStoreEntry } from '@nanisoft/prism-llms'
+import {
+  STORE_SECTION_TITLES,
+  STORE_SECTIONS,
+  type PrismChangelog,
+  type PrismDocsPage,
+  type PrismDocsStore,
+  type PrismDocsStoreEntry,
+} from '@nanisoft/prism-llms'
 
 import { IMPORT_RULE, NO_INVENTION_RULE, SURFACE_RULE } from './rules.js'
 import type { ComponentCategory, ItemKind, SearchKind, TokenGroup } from './vocab.js'
@@ -301,17 +308,18 @@ export function renderThemeDoc(store: PrismDocsStore, args: ThemeDocArgs): CallT
 /* -------------------------------------------------------------------------- */
 
 export function renderListPages(store: PrismDocsStore): CallToolResult {
-  const groups = [
-    { section: 'docs' as const, heading: 'Guides' },
-    { section: 'foundations' as const, heading: 'Foundations' },
-    { section: 'content' as const, heading: 'Content' },
-  ]
-  const counts = groups
-    .map((group) => ({ ...group, pages: store.pages.filter((page) => page.section === group.section) }))
-  const header = `# Prism pages - ${store.pages.length} pages (${counts
-    .map((group) => `${group.pages.length} ${group.heading.toLowerCase()}`)
-    .join(', ')})`
-  const sections = counts
+  // The Sections and the label each is read under are both the Store's own, so a
+  // Section added to the content tree appears here from the same edit that added
+  // it there. A hand-kept list of the three prose Sections is what would leave
+  // the Changelogs out of the one tool that exists to list pages.
+  const groups = STORE_SECTIONS.map((section) => ({
+    section,
+    heading: STORE_SECTION_TITLES[section],
+    pages: store.pages.filter((page) => page.section === section),
+  }))
+  const counted = groups.map((group) => `${group.pages.length} ${group.heading.toLowerCase()}`)
+  const header = `# Prism pages - ${store.pages.length} pages (${counted.join(', ')})`
+  const sections = groups
     .filter((group) => group.pages.length > 0)
     .map(
       (group) =>
@@ -319,7 +327,7 @@ export function renderListPages(store: PrismDocsStore): CallToolResult {
           .map((page) => `- **${page.title}** - ${page.description} (\`${page.url}\`)`)
           .join('\n')}`,
     )
-  const footer = `Use \`get_page({ url })\` to read one.\n\nImport rule: ${IMPORT_RULE}`
+  const footer = `Use \`get_page({ url })\` to read one, or \`get_changelog\` for a published package's changes.\n\nImport rule: ${IMPORT_RULE}`
   return text([header, ...sections, footer].join('\n\n'))
 }
 
@@ -482,4 +490,95 @@ export function searchDocs(store: PrismDocsStore, args: SearchArgs): CallToolRes
   )
   const footer = `Read the body with the follow-up call, or repeat a narrower search.\n\nImport rule: ${IMPORT_RULE}`
   return text([header, lines.join('\n'), footer].join('\n\n'))
+}
+
+/* -------------------------------------------------------------------------- */
+/* get_changelog                                                               */
+/* -------------------------------------------------------------------------- */
+
+export interface ChangelogArgs {
+  package: string
+  version?: string
+}
+
+/**
+ * Every published package that ships a changelog, named and routed, for a miss.
+ *
+ * The miss carries the whole set rather than a "did you mean", because the
+ * argument is a free string rather than a closed enum: an agent that guessed a
+ * package name gets the real names in one round trip instead of guessing again.
+ */
+function changelogMiss(store: PrismDocsStore, wanted: string): CallToolResult {
+  const available =
+    store.changelogs.length === 0
+      ? 'This build carries no package changelogs.'
+      : `Prism publishes a changelog for: ${store.changelogs
+          .map((entry) => `\`${entry.package}\` (\`${entry.route}\`)`)
+          .join(', ')}.`
+  return error(
+    `No Prism changelog for \`${wanted}\`. ${available} Read one with \`get_changelog({ package })\`.`,
+  )
+}
+
+/** The entry a package name, unscoped name or route segment resolves to. */
+function changelogFor(store: PrismDocsStore, wanted: string): PrismChangelog | undefined {
+  const needle = wanted.trim().toLowerCase()
+  return store.changelogs.find(
+    (entry) => entry.package.toLowerCase() === needle || entry.slug.toLowerCase() === needle,
+  )
+}
+
+/**
+ * One published package's changelog, or one version entry of it.
+ *
+ * The text is the package's own file, byte for byte, because the Store carries
+ * the bytes rather than a summary of them. A generated summary would drift the
+ * moment a release was published, which is the one thing a changelog cannot do:
+ * a breaking change in a published package has to be discoverable by an agent
+ * that never saw the release notes anywhere else. The reference design system
+ * shipped a breaking module-system change that no agent using it could find, and
+ * the reason is precisely that its corpus had no changelog and no tool to return
+ * one.
+ *
+ * The footers state where the text is published, so an agent holding an older
+ * corpus can still fetch the same bytes over HTTP, and which versions exist, so
+ * one call can pick the next `version` to ask for.
+ */
+export function renderChangelog(store: PrismDocsStore, args: ChangelogArgs): CallToolResult {
+  const changelog = changelogFor(store, args.package)
+  if (changelog === undefined) return changelogMiss(store, args.package)
+
+  const versions = changelog.versions.join(', ')
+  const published = `Published at \`${changelog.route}\` and its mirror \`${changelog.route}.md\`, byte for byte from the package.`
+
+  if (args.version === undefined) {
+    return text(
+      [
+        `# ${changelog.package} - changelog`,
+        `Versions, newest first as the file records them: ${versions}.`,
+        changelog.text.trimEnd(),
+        '---',
+        `${published} Ask for one entry with \`get_changelog({ package: "${changelog.package}", version: "<version>" })\`.`,
+        `Import rule: ${IMPORT_RULE}`,
+      ].join('\n\n'),
+    )
+  }
+
+  const wanted = args.version.trim()
+  const release = changelog.releases.find((entry) => entry.version === wanted)
+  if (release === undefined) {
+    return error(
+      `\`${wanted}\` is not a version \`${changelog.package}\` records. It records: ${versions}. ` +
+        `Read the whole changelog with \`get_changelog({ package: "${changelog.package}" })\`.`,
+    )
+  }
+  return text(
+    [
+      `# ${changelog.package} - ${release.version}`,
+      release.body,
+      '---',
+      `${published} Every version: ${versions}. Read the whole changelog with \`get_changelog({ package: "${changelog.package}" })\`.`,
+      `Import rule: ${IMPORT_RULE}`,
+    ].join('\n\n'),
+  )
 }

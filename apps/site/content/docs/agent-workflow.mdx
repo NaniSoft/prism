@@ -15,6 +15,7 @@ source, so an agent and a human cannot be told different things.
 4. Use `get_item_props` for the public TypeScript surface.
 5. Use `get_item_source` for the verbatim demo and the public import line.
 6. Use `get_theme_doc` before choosing a pack or reading a token scale.
+7. Use `get_changelog` before upgrading a dependency on Prism.
 
 ## The MCP endpoint
 
@@ -32,7 +33,7 @@ consumer project.
 }
 ```
 
-## The eight tools
+## The nine tools
 
 | Tool | Use |
 | --- | --- |
@@ -41,13 +42,21 @@ consumer project.
 | `get_item_props` | Read the `## Props` subset of an item |
 | `get_item_source` | Copy the verbatim demo plus the import line |
 | `get_theme_doc` | Read the token contract and the bound scales |
-| `list_pages` | Browse the non-item pages: guides, foundations, content |
+| `list_pages` | Browse the non-item pages: guides, foundations, content, changelogs |
 | `get_page` | Read one non-item page as Markdown |
 | `search_docs` | Search the complete corpus and return references |
+| `get_changelog` | Read a published package's changelog, optionally one version |
 
 `list_items` is the one tool that exists because a kind exists; the other seven
-exist because a retrieval pattern exists. Search returns references, not page
-bodies, so an agent follows a hit with `get_item_doc` or `get_page`.
+exist because a retrieval pattern exists, and `get_changelog` exists because a
+published breaking change has to be findable by an agent. Search returns
+references, not page bodies, so an agent follows a hit with `get_item_doc` or
+`get_page`.
+
+`get_changelog` takes a package and an optional version, and returns that
+package's own `CHANGELOG.md` as it shipped rather than a summary of it. The
+Changelogs section of this site renders the same bytes, so an agent and a reader
+cannot be told different things about what changed.
 
 ## Import contract for generated code
 

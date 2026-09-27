@@ -14,11 +14,14 @@ export {
   STORE_PACKS,
   STORE_SCALE_GROUPS,
   STORE_SECTIONS,
+  STORE_SECTION_TITLES,
   STORE_STATUSES,
 } from './store.js'
 export type {
   Mode,
   PackId,
+  PrismChangelog,
+  PrismChangelogRelease,
   PrismDocsExample,
   PrismDocsPage,
   PrismDocsStore,

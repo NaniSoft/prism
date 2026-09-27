@@ -168,9 +168,17 @@ no per-item prose that was carried across.
 `/<section>/<slug>.md`, and the MCP endpoint at `/mcp` are ported. The eight MCP
 tools keep their names (`list_items`, `get_item_doc`, `get_item_props`,
 `get_item_source`, `get_theme_doc`, `list_pages`, `get_page`, `search_docs`), but
-their answers describe the new system. Two changes to be aware of:
+their answers describe the new system, and a ninth has joined them beside rather
+than in place of any: `get_changelog(package, version?)` returns a published
+package's own changelog, which is what an agent upgrading a dependency needs and
+what this line previously had no way to discover. Two changes to be aware of:
 `get_item_source` no longer takes an `example` argument, and `search_docs`
 returns ranked references with matched fields rather than whole documents.
+
+The Changelogs section of the site renders the same bytes `get_changelog`
+returns, one route per published package. There is no entry here for the
+versions before this line: they were a different system, so their history is not
+this history, and the table above is the reference for them.
 
 ## What is not preserved
 

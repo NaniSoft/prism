@@ -3,21 +3,34 @@
  *
  * One build-fresh `dist/` serves three lanes:
  * - `data.json`   the PrismDocsStore projection, bundled by the MCP server
- * - `llms.txt` + `llms-full.txt`   the agent reference, six sections
+ * - `llms.txt` + `llms-full.txt`   the agent reference, one group per Section
  * - `prism-skill.md`   the one-screen agent fast path
  * - `md/`   the per-item Markdown mirror the Worker serves at `/<page>.md`
  *
  * File-is-truth per artifact: the catalogue entry, the hand-written MDX page,
  * `@nanisoft/prism-ui`'s emitted declarations, the verbatim demo source and the
- * emitted token cascade. Emit is deterministic and byte-stable; `dist/` is never
- * committed and the build starts from scratch.
+ * emitted token cascade. A published package's changelog is the fourth kind of
+ * file-is-truth: the generated page in the content tree is a byte-for-byte copy
+ * of the package's own `CHANGELOG.md`, and this builder carries those bytes
+ * rather than a reading of the package taken down a second path. Emit is
+ * deterministic and byte-stable; `dist/` is never committed and the build starts
+ * from scratch.
  *
  * `emit(outDir)` writes only the corpus so the drift gate can emit twice and
  * byte-compare. Run `node scripts/build.mjs` to compile the library and emit.
  *
  * The content walk lives here and it recurses, because a page's place in the
  * tree is the only thing that says where it is published. See
- * `collectContentPages`.
+ * `collectContentPages`. It reads two extensions, for the same reason: the
+ * Changelogs Section holds files that are copied rather than authored.
+ *
+ * The published packages, and the route each one's changelog belongs at, are
+ * read through the site's own rule,
+ * `apps/site/scripts/published-packages.mjs`, which is the same module the copy
+ * step and the content-join gate read. Three consumers have to agree about what
+ * a published package is and what its route is, so the rule is stated once. A
+ * published package with a changelog and no route throws below, which is the
+ * gate the reference design system does not have.
  *
  * An Item's documentation and its Demo are read through the site's own rule,
  * `apps/site/scripts/item-content.mjs`, rather than through a path restated
@@ -32,6 +45,10 @@ import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
+import {
+  readPublishedChangelogs,
+  splitChangelog,
+} from '../../../apps/site/scripts/published-packages.mjs'
 import { readItemContent } from '../../../apps/site/scripts/item-content.mjs'
 
 const PKG_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -46,10 +63,30 @@ const DEMOS_ROOT = path.join(SITE_ROOT, 'src', 'demos')
 const BASE_URL = 'https://prism.nanisoft.com'
 const KIND_SEGMENT = { component: 'components', block: 'blocks', page: 'pages' }
 const KIND_RANK = { component: 0, block: 1, page: 2 }
-/** The one file extension the content tree is authored in. */
-const CONTENT_EXTENSION = '.mdx'
+/**
+ * The extensions the content tree is read in: the one it is authored in, and
+ * the one it is copied in.
+ *
+ * The Changelogs Section is the reason there are two. A published package's
+ * `CHANGELOG.md` is copied into the content tree byte for byte so the site's
+ * text and the package's text are the same bytes, which means it arrives as
+ * plain Markdown. Reading only `.mdx` would leave every changelog out of
+ * `llms.txt`, out of `llms-full.txt`, out of the Store and out of the tool that
+ * answers for a breaking change, with a green build: the same omission, one
+ * extension down.
+ */
+const CONTENT_EXTENSIONS = ['.mdx', '.md']
 const PACKS = ['default', 'blush', 'mint', 'lavender', 'sky', 'peach']
 const MODES = ['light', 'dark']
+/**
+ * The content Section read after the catalogue rather than before it.
+ *
+ * One named exception rather than a second list of Sections: the Changelogs
+ * Section is history, and history is read after the thing it is the history of.
+ * A Section with no exception joins the prose group, which is the default a
+ * reader expects, and `STORE_SECTIONS` remains the only list of Sections.
+ */
+const TRAILING_SECTION = 'changelogs'
 
 /**
  * The corpus artifacts `emit()` owns. Removing only these keeps tsc's compiled
@@ -98,11 +135,12 @@ export async function collectContentPages(root, sections) {
       )
     }
     for (const relative of found) {
-      const route = relative.slice(0, -CONTENT_EXTENSION.length)
+      const { route, extension } = splitContentPath(relative)
+      if (route.endsWith('/index') || route === 'index') continue
       const slug = route.slice(section.length + 1)
-      if (slug === 'index' || slug.endsWith('/index')) continue
       pages.push({
         file: path.join(root, ...relative.split('/')),
+        extension,
         section,
         slug,
         route,
@@ -112,6 +150,21 @@ export async function collectContentPages(root, sections) {
     }
   }
   return pages
+}
+
+/**
+ * A content file's route and the extension it was read at.
+ *
+ * The route is the path without its extension, and the extension is returned
+ * rather than assumed because there are two of them: the walk must not slice a
+ * fixed number of characters off a filename whose length it guessed.
+ */
+function splitContentPath(relative) {
+  const extension = CONTENT_EXTENSIONS.find((candidate) => relative.endsWith(candidate))
+  if (extension === undefined) {
+    throw new Error(`prism-llms: ${relative} has none of the content extensions`)
+  }
+  return { route: relative.slice(0, -extension.length), extension }
 }
 
 /**
@@ -133,7 +186,10 @@ async function walkContent(dir, prefix) {
       const nested = await walkContent(path.join(dir, entry.name), relative)
       if (nested === undefined) return undefined
       found.push(...nested)
-    } else if (entry.isFile() && entry.name.endsWith(CONTENT_EXTENSION)) {
+    } else if (
+      entry.isFile() &&
+      CONTENT_EXTENSIONS.some((extension) => entry.name.endsWith(extension))
+    ) {
       found.push(relative)
     }
   }
@@ -370,9 +426,10 @@ never a consumer import.
 
 ## MCP
 
-The read-only MCP endpoint is \`${BASE_URL}/mcp\`. It exposes eight tools:
+The read-only MCP endpoint is \`${BASE_URL}/mcp\`. It exposes nine tools:
 \`list_items\`, \`get_item_doc\`, \`get_item_props\`, \`get_item_source\`,
-\`get_theme_doc\`, \`list_pages\`, \`get_page\` and \`search_docs\`.
+\`get_theme_doc\`, \`list_pages\`, \`get_page\`, \`search_docs\` and
+\`get_changelog\`.
 
 ## Truth rules
 
@@ -386,7 +443,9 @@ The read-only MCP endpoint is \`${BASE_URL}/mcp\`. It exposes eight tools:
 
 Generated from the catalogue and the authored pages: ${counts.component}
 Components, ${counts.block} Blocks and ${counts.page} Pages, plus the guides,
-Foundations and Content pages.
+Foundations, Content and Changelogs pages. The Changelogs pages are each
+published package's own changelog, byte for byte; \`get_changelog\` returns one
+package's, optionally one version of it.
 `
 }
 
@@ -396,12 +455,15 @@ Foundations and Content pages.
  *
  * `options.contentRoot` points the page walk at another content tree, which is
  * how the test lane proves a nested page reaches every artifact without
- * nesting a page in the site the reader sees.
+ * nesting a page in the site the reader sees. `options.packages` is the same
+ * idea for the published packages: a fixture tree declares which packages owe it
+ * a route, so the throw below is provable without publishing a package.
  */
 export async function emit(outDir, options = {}) {
   const lib = await loadLib()
   const { markdown, store: storeLib } = lib
   const contentRoot = options.contentRoot ?? CONTENT_ROOT
+  const packages = options.packages ?? (await readPublishedChangelogs(REPO_ROOT))
 
   for (const artifact of CORPUS_ARTIFACTS) {
     await rm(path.join(outDir, artifact), { recursive: true, force: true })
@@ -506,13 +568,94 @@ export async function emit(outDir, options = {}) {
     })
   }
 
+  /* Changelogs ------------------------------------------------------------ */
+
+  /*
+   * One Store entry per published package that ships a changelog, read from the
+   * generated file the site renders rather than from the package.
+   *
+   * Reading the generated file is the point. The site's text and the package's
+   * text are the same bytes because the file is a byte-for-byte copy, and the
+   * Corpus carries those bytes rather than a reading of the package taken down a
+   * second path that could disagree with the first. The package list supplies
+   * the identity and the route; the file supplies everything else.
+   *
+   * A package that ships a changelog and has no route throws here rather than
+   * being skipped. This is the build-time half of the gate the reference design
+   * system has no equivalent of: it publishes reader-facing changelog pages and
+   * can lose all of them with its continuous integration green, because nothing
+   * in it knows a package owes a route. This builder runs in the site's
+   * `prebuild`, so a missing route fails `pnpm build` and not only `pnpm check`.
+   */
+  const walkedPages = await collectContentPages(contentRoot, storeLib.STORE_SECTIONS)
+  const changelogs = []
+  for (const entry of packages) {
+    const page = walkedPages.find((candidate) => candidate.url === entry.route)
+    if (page === undefined) {
+      throw new Error(
+        `prism-llms: the published package ${entry.name} ships a changelog at ${entry.changelog} and ` +
+          `the content tree publishes no route for it at ${entry.route}, so no reader and no agent can ` +
+          'reach it. Run the site copy step, or the file it owns has been deleted.',
+      )
+    }
+    const text = await readText(page.file)
+    if (text === undefined || text.trim().length === 0) {
+      throw new Error(
+        `prism-llms: the changelog route ${entry.route} is at ${page.file} and holds no text, so ` +
+          `${entry.name} is recorded as having published nothing`,
+      )
+    }
+    const { title, releases } = splitChangelog(text)
+    if (title !== entry.name) {
+      throw new Error(
+        `prism-llms: the changelog generated for ${entry.name} at ${page.file} leads with ` +
+          `'${title}', so a reader and an agent are shown a route named for a different package. The ` +
+          'file is the package\'s own bytes, so the package\'s changelog is what to fix.',
+      )
+    }
+    changelogs.push({
+      package: entry.name,
+      slug: entry.slug,
+      route: entry.route,
+      title,
+      versions: releases.map((release) => release.version),
+      releases,
+      text,
+    })
+  }
+  const changelogByRoute = new Map(changelogs.map((entry) => [entry.route, entry]))
+
   /* Pages ---------------------------------------------------------------- */
 
   const pages = []
-  for (const page of await collectContentPages(contentRoot, storeLib.STORE_SECTIONS)) {
+  for (const page of walkedPages) {
     const raw = await readText(page.file)
     if (raw === undefined) {
       throw new Error(`prism-llms: the page at ${page.file} was walked and then could not be read`)
+    }
+    const changelog = changelogByRoute.get(page.url)
+    if (changelog !== undefined) {
+      /*
+       * A generated page is published whole. Its bytes are the package's bytes,
+       * so nothing is prepended, stripped or re-levelled: the mirror file, the
+       * Store's `markdown` and the tool's text are the same string the site
+       * rendered. A changelog assembled from its own parts would be a fourth
+       * copy of the same prose, and a copy is what drifts.
+       */
+      await writeArtifact(page.mirrorPath, changelog.text)
+      pages.push({
+        id: `${page.section}/${page.slug}`,
+        slug: page.slug,
+        section: page.section,
+        title: changelog.title,
+        // The versions the file records, which is its own content rather than a
+        // sentence about it, and is what an agent scanning `llms.txt` needs.
+        description: changelog.versions.join(', '),
+        url: page.url,
+        markdown: changelog.text,
+        mirror: `${page.url}.md`,
+      })
+      continue
     }
     const { data, body } = markdown.parseMdx(raw)
     const title = data.title
@@ -543,6 +686,7 @@ export async function emit(outDir, options = {}) {
     version: String(uiPackage.version ?? '0.0.0'),
     items,
     pages,
+    changelogs,
     tokens,
   }
   // Validate our own output through the one guard before writing it.
@@ -553,30 +697,57 @@ export async function emit(outDir, options = {}) {
 
   const bullet = (title, mirror, description) => `- [${title}](${BASE_URL}${mirror}): ${description}`
   const llmsSections = []
-  const pageSections = [
-    { heading: 'Guides', section: 'docs' },
-    { heading: 'Foundations', section: 'foundations' },
-    { heading: 'Content', section: 'content' },
-  ]
-  for (const { heading, section } of pageSections) {
-    const group = pages.filter((page) => page.section === section).sort((a, b) => a.slug.localeCompare(b.slug))
-    if (group.length === 0) continue
-    llmsSections.push(
-      `## ${heading}\n\n${group.map((page) => bullet(page.title, page.mirror, page.description)).join('\n')}`,
-    )
+
+  /**
+   * One Section's group, under the Store's own label for it, or nothing when the
+   * Section holds no page. A Section with no label throws rather than being
+   * grouped under a name this file would have to invent, because an invented
+   * name is a heading no agent will look for.
+   */
+  const sectionGroup = (section) => {
+    const group = pages
+      .filter((page) => page.section === section)
+      .sort((a, b) => a.slug.localeCompare(b.slug))
+    if (group.length === 0) return undefined
+    const heading = storeLib.STORE_SECTION_TITLES[section]
+    if (heading === undefined) {
+      throw new Error(
+        `prism-llms: the content Section '${section}' has no label in STORE_SECTION_TITLES, so it ` +
+          'would be grouped under a name this file would have to invent',
+      )
+    }
+    return `## ${heading}\n\n${group.map((page) => bullet(page.title, page.mirror, page.description)).join('\n')}`
   }
+
   const itemGroups = [
     { heading: 'Components', kind: 'component' },
     { heading: 'Blocks', kind: 'block' },
     { heading: 'Pages', kind: 'page' },
   ]
-  for (const { heading, kind } of itemGroups) {
+  const itemGroup = (heading, kind) => {
     const group = items.filter((item) => item.kind === kind)
-    if (group.length === 0) continue
-    llmsSections.push(
-      `## ${heading}\n\n${group.map((item) => bullet(item.name, item.mirror, item.description)).join('\n')}`,
-    )
+    if (group.length === 0) return undefined
+    return `## ${heading}\n\n${group.map((item) => bullet(item.name, item.mirror, item.description)).join('\n')}`
   }
+
+  // The reading order is the order the site's content tree declares: the prose
+  // Sections, the catalogue, then the history. The Section list is the Store's
+  // own and the label each is read under is the Store's own map, so a Section
+  // cannot be in the content tree and missing from `llms.txt` without one of the
+  // two refusing to agree. The Changelogs Section is the one read after the
+  // catalogue, because history is read after the thing it is the history of;
+  // a new Section joins the first loop, which is the default a reader expects.
+  for (const section of storeLib.STORE_SECTIONS) {
+    if (section === TRAILING_SECTION) continue
+    const group = sectionGroup(section)
+    if (group !== undefined) llmsSections.push(group)
+  }
+  for (const { heading, kind } of itemGroups) {
+    const group = itemGroup(heading, kind)
+    if (group !== undefined) llmsSections.push(group)
+  }
+  const trailing = sectionGroup(TRAILING_SECTION)
+  if (trailing !== undefined) llmsSections.push(trailing)
 
   const tagline =
     "Prism is NaniSoft's design system: a token pipeline, a React component library, a documentation site and an agent surface. Import from '@nanisoft/prism-ui'; internal dependencies are never consumer imports."

@@ -33,7 +33,19 @@
  * @typedef {{ file: string, href: string }} ContentLink
  * @typedef {{ slug: string, kind: string, url: string }} CorpusItem
  * @typedef {{ section: string, slug: string, url: string, mirror: string }} CorpusPage
+ * @typedef {{ package: string, route: string, versions: string[] }} CorpusChangelog
  * @typedef {{ group: string, message: string }} Finding
+ *
+ * @typedef {object} ChangelogPackage
+ * @property {string} package the published npm name
+ * @property {string} route the route its changelog is published at
+ * @property {string} file the package's own CHANGELOG.md
+ * @property {string} text that file's bytes, '' when the package ships none
+ *
+ * @typedef {object} ChangelogFile
+ * @property {string} route the route the file on the content tree is addressed by
+ * @property {string} file the site-relative path of the generated file
+ * @property {string} text that file's bytes
  *
  * @typedef {object} NavGroup
  * @property {string | null} label the heading a reader sees, null when there is none
@@ -53,13 +65,24 @@
  * @property {ContentLink[]} links the internal links in the authored prose
  * @property {ItemDoc[]} itemDocs the documentation files in the item content tree
  * @property {string[]} demoFiles the demo files on disk, by slug
- * @property {{ items: CorpusItem[], pages: CorpusPage[] }} corpus the Corpus, as the Store
+ * @property {ChangelogPackage[]} changelogPackages the published packages holding a changelog
+ * @property {ChangelogFile[]} changelogFiles the generated changelog files on the content tree
+ * @property {string[]} changelogIndex the changelog routes the authored index links
+ * @property {{ items: CorpusItem[], pages: CorpusPage[], changelogs: CorpusChangelog[] }} corpus the Corpus, as the Store
  * @property {string[]} routes the routes the site publishes
  * @property {NavBlock[]} navBlocks the navigation blocks the published export renders
  */
 
-/** The one authored extension, kept as a list so a later file type is one edit. */
-const CONTENT_EXTENSIONS = ['.mdx']
+/**
+ * The one authored extension, kept as a list so a later file type is one edit.
+ *
+ * The Changelogs Section is the reason there are two: its per-package files are
+ * byte-for-byte copies of a published package's `CHANGELOG.md`, so they arrive
+ * as plain Markdown. Reading only `.mdx` would leave every changelog route out of
+ * the content tree, out of the Corpus and out of every tool, with a green build,
+ * which is the omission this whole gate was written to catch.
+ */
+const CONTENT_EXTENSIONS = ['.mdx', '.md']
 
 const INDEX = 'index'
 
@@ -80,8 +103,14 @@ export function routeForFile(relative) {
   return `/${withoutExtension}`
 }
 
-/** A link may carry a query or a fragment; the route it names is what is left. */
-function routeOfHref(href) {
+/**
+ * A link may carry a query or a fragment; the route it names is what is left.
+ *
+ * Exported because the reader of this file is not the only consumer of the
+ * rule: the Changelogs index is judged by the routes it links, and a second
+ * implementation of "the route a link names" is a second thing to get right.
+ */
+export function routeOfHref(href) {
   const [withoutQuery = ''] = href.split('?')
   const [withoutHash = ''] = withoutQuery.split('#')
   if (withoutHash.length > 1 && withoutHash.endsWith('/')) return withoutHash.slice(0, -1)
@@ -616,6 +645,123 @@ export function findContentJoins(joins) {
         )
       }
     }
+  }
+
+  /* The Changelogs Section, and the published packages it owes routes. ----- */
+
+  // The gate the reference design system does not have. It publishes a
+  // reader-facing changelog page per package and nothing in its build can notice
+  // when one is deleted, which is how every one of its changelog pages can go
+  // with its continuous integration green. Here the packages are discovered from
+  // the workspace rather than listed, so publishing a package is the only thing
+  // that adds a route, and every direction of the join is checked.
+  const published = joins.changelogPackages.filter((entry) => entry.text.trim().length > 0)
+  const files = new Map(joins.changelogFiles.map((entry) => [entry.route, entry]))
+
+  if (!joins.contentFiles.some((file) => file.route === '/changelogs' && file.index)) {
+    fail(
+      'changelog',
+      'content/changelogs holds generated package routes and no index.mdx, so the Section has no ' +
+        'landing page and the authored upgrade notes have nowhere to sit',
+    )
+  }
+
+  for (const entry of published) {
+    const generated = files.get(entry.route)
+    if (generated === undefined) {
+      fail(
+        'changelog',
+        `the published package ${entry.package} ships a changelog at ${entry.file} and the site ` +
+          `publishes no route for it at ${entry.route}, so no reader and no agent can reach it`,
+      )
+      continue
+    }
+    // A hand-authored page is the outcome this Section is built to reject: a
+    // changelog kept in prose becomes a third place to remember alongside the
+    // changeset and the JSDoc, with no gate over it and nothing tying it to what
+    // was published.
+    if (!generated.file.endsWith('.md')) {
+      fail(
+        'changelog',
+        `${generated.file} is a hand-authored page rather than a generated copy of ${entry.file}, so ` +
+          'the changelog is written twice and the two can disagree',
+      )
+    }
+    if (generated.text !== entry.text) {
+      fail(
+        'changelog',
+        `${generated.file} is not byte for byte ${entry.file}, so the site's text and the package's ` +
+          'text have come apart. Run the site copy step; a changelog is never edited on this site.',
+      )
+    }
+    const heading = /^#\s+(.+?)\s*$/m.exec(generated.text)?.[1]
+    if (heading !== entry.package) {
+      fail(
+        'changelog',
+        `${generated.file} leads with '${heading ?? 'no heading'}' and the route was derived from ` +
+          `${entry.package}, so a reader and an agent are shown a route named for a different package`,
+      )
+    }
+  }
+
+  for (const generated of joins.changelogFiles) {
+    if (published.some((entry) => entry.route === generated.route)) continue
+    fail(
+      'changelog',
+      `${generated.file} is published at ${generated.route} and no package in the workspace claims ` +
+        'that route, so a reader is shown a changelog for a package that is not published',
+    )
+  }
+
+  // The authored index is the one hand-written half of the Section, so the list
+  // of packages it links is a second list of the published packages and has to be
+  // checked against the workspace. An index that omits one hides it from the page
+  // a reader lands on; one that names a package nothing publishes sends them
+  // nowhere.
+  const linkedChangelogs = new Set(joins.changelogIndex)
+  for (const entry of published) {
+    if (linkedChangelogs.has(entry.route)) continue
+    fail(
+      'changelog',
+      `the Changelogs index does not link ${entry.route}, so a reader landing on the Section cannot ` +
+        `find the published package ${entry.package} without the sidebar`,
+    )
+  }
+  for (const route of linkedChangelogs) {
+    if (published.some((entry) => entry.route === route)) continue
+    fail(
+      'changelog',
+      `the Changelogs index links ${route}, which no published package claims, so a reader follows a ` +
+        'route to nothing',
+    )
+  }
+
+  const corpusChangelogs = new Map(joins.corpus.changelogs.map((entry) => [entry.route, entry]))
+  for (const entry of published) {
+    const projected = corpusChangelogs.get(entry.route)
+    if (projected === undefined) {
+      fail(
+        'changelog',
+        `the Corpus carries no changelog entry for ${entry.package} (${entry.route}), so no tool can ` +
+          'return what the package changed',
+      )
+      continue
+    }
+    if (projected.package !== entry.package) {
+      fail(
+        'changelog',
+        `the Corpus calls ${entry.route} the changelog of ${projected.package} and the workspace ` +
+          `publishes it as ${entry.package}`,
+      )
+    }
+  }
+  for (const projected of joins.corpus.changelogs) {
+    if (published.some((entry) => entry.route === projected.route)) continue
+    fail(
+      'changelog',
+      `the Corpus carries a changelog at ${projected.route} that no published package claims, so an ` +
+        'agent can be told about a package that is not published',
+    )
   }
 
   return findings

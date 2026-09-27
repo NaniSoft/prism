@@ -11,15 +11,20 @@ import { findContentJoins, parseNav, routeForFile } from '../scripts/content-joi
  * pass vacuously now and break at the moment the tree moves. Each failure the
  * gate exists to catch is then proved to fail, on both shapes where it can.
  *
- * The ordering join is the newest of them and the reason a page cannot quietly
- * leave the navigation. A `pages` array in a meta file is a whitelist: a page
- * it omits keeps its route and disappears from the sidebar, with a green build.
- * The tree that would show it cannot be built outside the bundler that compiled
- * the macro, so the rule is stated over the two surfaces the gate already
- * reads, and the build's own refusal is proved in `nav.test.ts` instead.
+ * The ordering join is one of them and the reason a page cannot quietly leave the
+ * navigation. A `pages` array in a meta file is a whitelist: a page it omits
+ * keeps its route and disappears from the sidebar, with a green build. The tree
+ * that would show it cannot be built outside the bundler that compiled the
+ * macro, so the rule is stated over the two surfaces the gate already reads, and
+ * the build's own refusal is proved in `nav.test.ts` instead.
  *
- * The navigation is a tree here, not a list of hrefs, because the newest join is
- * about where an Item sits rather than whether it is linked at all. An Item
+ * The changelog joins are the newest, and they are the ones the reference design
+ * system has no equivalent of: a published package holding a changelog and no
+ * route is a finding there only because this gate says so, and the reference can
+ * lose every one of its changelog pages with its continuous integration green.
+ *
+ * The navigation is a tree here, not a list of hrefs, because the Category join
+ * is about where an Item sits rather than whether it is linked at all. An Item
  * filed under a Category folder has to be rendered *inside* the group that
  * folder is for, and the label on that group has to be the Catalogue's word for
  * the Category. A flat list of hrefs cannot tell a reader in a group from a
@@ -33,7 +38,7 @@ type NavGroup = NavBlock['groups'][number]
 const groups = (findings: ReturnType<typeof findContentJoins>) => findings.map((f) => f.group)
 
 /** One navigation block, holding the groups the sidebar renders. */
-const sidebar = (...groups: NavGroup[]): NavBlock => ({ hrefs: [], groups })
+const sidebar = (...groups: NavGroup[]): NavBlock => ({ hrefs: [], groups: [...groups, changelogs()] })
 
 /** One Section in the sidebar: a heading with a route, and what it lists. */
 const section = (
@@ -43,10 +48,50 @@ const section = (
   groups: NavGroup[] = [],
 ): NavGroup => ({ label, url, hrefs, groups })
 
+/**
+ * The Changelogs Section, appended to every fixture's sidebar.
+ *
+ * It is a function because the failing-case tests below each rebuild the whole
+ * navigation to change one thing about it. A Section that had to be re-stated in
+ * each of them is a Section one of them would eventually forget, which is the
+ * omission the gate exists to catch rather than a mistake in a fixture.
+ */
+const changelogs = () => section('Changelogs', '/changelogs', ['/changelogs/prism-ui'])
+
 /** The header row, which is a block of routes with no group of its own. */
 const header: NavBlock = {
-  hrefs: ['/', '/docs', '/foundations', '/components', '/blocks', '/pages', '/content', '/themes'],
+  hrefs: [
+    '/',
+    '/docs',
+    '/foundations',
+    '/components',
+    '/blocks',
+    '/pages',
+    '/content',
+    '/changelogs',
+    '/themes',
+  ],
   groups: [],
+}
+
+/**
+ * The one published package the fixtures carry, in the four places it appears:
+ * the workspace, the generated file on the content tree, the authored index and
+ * the Corpus. Each of the four is a list that can be wrong on its own, and every
+ * changelog join is a join between two of them, so a fixture carrying only one of
+ * them would prove nothing.
+ */
+const CHANGELOG_TEXT = '# @nanisoft/prism-ui\n\n## 0.5.0\n\nThe first published line.\n'
+const changelogPackage = {
+  package: '@nanisoft/prism-ui',
+  route: '/changelogs/prism-ui',
+  file: 'packages/ui/CHANGELOG.md',
+  text: CHANGELOG_TEXT,
+}
+const changelogFile = {
+  route: '/changelogs/prism-ui',
+  file: 'content/changelogs/prism-ui.md',
+  text: CHANGELOG_TEXT,
 }
 
 const flat: Joins = {
@@ -54,9 +99,11 @@ const flat: Joins = {
     { name: 'Button', slug: 'button', kind: 'component', category: 'Call to action' },
     { name: 'Hero01', slug: 'hero-01', kind: 'block', category: null },
   ],
-  sections: ['docs', 'foundations', 'content'],
-  contentDirectories: ['content', 'docs', 'foundations'],
+  sections: ['docs', 'foundations', 'content', 'changelogs'],
+  contentDirectories: ['changelogs', 'content', 'docs', 'foundations'],
   contentFiles: [
+    { route: '/changelogs', file: 'content/changelogs/index.mdx', index: true },
+    { route: '/changelogs/prism-ui', file: 'content/changelogs/prism-ui.md', index: false },
     { route: '/content', file: 'content/content/index.mdx', index: true },
     { route: '/content/voice', file: 'content/content/voice.mdx', index: false },
     { route: '/docs', file: 'content/docs/index.mdx', index: true },
@@ -64,7 +111,10 @@ const flat: Joins = {
     { route: '/foundations', file: 'content/foundations/index.mdx', index: true },
     { route: '/foundations/colors', file: 'content/foundations/colors.mdx', index: false },
   ],
-  links: [{ file: 'content/docs/index.mdx', href: '/docs/quickstart' }],
+  links: [
+    { file: 'content/docs/index.mdx', href: '/docs/quickstart' },
+    { file: 'content/changelogs/index.mdx', href: '/changelogs/prism-ui' },
+  ],
   itemDocs: [
     {
       slug: 'button',
@@ -84,6 +134,9 @@ const flat: Joins = {
     },
   ],
   demoFiles: ['button-demo', 'hero-demo'],
+  changelogPackages: [changelogPackage],
+  changelogFiles: [changelogFile],
+  changelogIndex: ['/changelogs/prism-ui'],
   corpus: {
     items: [
       { slug: 'button', kind: 'component', url: '/components/button' },
@@ -98,12 +151,23 @@ const flat: Joins = {
         url: '/foundations/colors',
         mirror: '/foundations/colors.md',
       },
+      {
+        section: 'changelogs',
+        slug: 'prism-ui',
+        url: '/changelogs/prism-ui',
+        mirror: '/changelogs/prism-ui.md',
+      },
+    ],
+    changelogs: [
+      { package: '@nanisoft/prism-ui', route: '/changelogs/prism-ui', versions: ['0.5.0'] },
     ],
   },
   routes: [
     '/',
     '/blocks',
     '/blocks/hero-01',
+    '/changelogs',
+    '/changelogs/prism-ui',
     '/components',
     '/components/button',
     '/content',
@@ -131,6 +195,8 @@ const flat: Joins = {
 const nested: Joins = {
   ...flat,
   contentFiles: [
+    { route: '/changelogs', file: 'content/changelogs/index.mdx', index: true },
+    { route: '/changelogs/prism-ui', file: 'content/changelogs/prism-ui.md', index: false },
     { route: '/content', file: 'content/content/index.mdx', index: true },
     { route: '/content/voice', file: 'content/content/voice.mdx', index: false },
     { route: '/docs', file: 'content/docs/index.mdx', index: true },
@@ -152,6 +218,7 @@ const nested: Joins = {
     { file: 'content/docs/index.mdx', href: '/docs/quickstart' },
     { file: 'content/foundations/index.mdx', href: '/foundations/tokens' },
     { file: 'content/foundations/tokens/index.mdx', href: '/foundations/tokens/colors' },
+    { file: 'content/changelogs/index.mdx', href: '/changelogs/prism-ui' },
   ],
   // A Component filed in its own folder, under its Category, which is the shape
   // the tree is moving to and the one the Category join exists for.
@@ -415,7 +482,10 @@ describe('the content-join gate', () => {
   })
 
   it.each(shapes)('fails for %s when the navigation links a route nothing produces', (_name, joins) => {
-    const findings = findContentJoins(linked(joins, '/changelogs?category=Call%20to%20action'))
+    // A link carrying a query the tree does not produce. It is not a changelog
+    // route: the Changelogs Section is a real route now, so a query pointed at it
+    // would resolve and prove nothing.
+    const findings = findContentJoins(linked(joins, '/docs/architecture?tab=usage'))
     expect(groups(findings)).toContain('routes')
     expect(findings.some((f) => f.message.includes('routing tree does not produce'))).toBe(true)
   })
@@ -561,9 +631,184 @@ describe('the content-join gate', () => {
     // The three Section landing pages are routed and are not in the Corpus, so
     // the index files are the one authored file the join must leave alone.
     const indexRoutes = flat.contentFiles.filter((file) => file.index).map((file) => file.route)
-    expect(indexRoutes).toEqual(['/content', '/docs', '/foundations'])
+    expect(indexRoutes).toEqual(['/changelogs', '/content', '/docs', '/foundations'])
     expect(flat.corpus.pages.map((page) => page.url)).not.toContain('/docs')
   })
+})
+
+/**
+ * The Changelogs joins, on both shapes.
+ *
+ * Each failure here is one the reference design system cannot detect, because it
+ * publishes reader-facing changelog pages with nothing in its build that knows a
+ * package owes a route. The joins are between four surfaces that can each be
+ * wrong alone: the workspace, the generated file, the authored index and the
+ * Corpus.
+ */
+describe('the Changelogs joins', () => {
+  it.each(shapes)(
+    'fails for %s when a published package holds a changelog and no route',
+    (_name, joins) => {
+      const findings = findContentJoins({ ...joins, changelogFiles: [] })
+      expect(groups(findings)).toContain('changelog')
+      expect(
+        findings.some(
+          (f) =>
+            f.message.includes('the published package @nanisoft/prism-ui ships a changelog') &&
+            f.message.includes('publishes no route for it at /changelogs/prism-ui'),
+        ),
+      ).toBe(true)
+    },
+  )
+
+  it.each(shapes)(
+    'fails for %s when the generated route is not the package bytes',
+    (_name, joins) => {
+      // A hand-edited copy, or a copy step that did not run. The page renders,
+      // the route exists, the Corpus carries it, and every one of those is true
+      // of text that is not what was published.
+      const findings = findContentJoins({
+        ...joins,
+        changelogFiles: joins.changelogFiles.map((entry) => ({
+          ...entry,
+          text: entry.text.replace('The first published line.', 'Something else entirely.'),
+        })),
+      })
+      expect(groups(findings)).toContain('changelog')
+      expect(findings.some((f) => f.message.includes('is not byte for byte'))).toBe(true)
+    },
+  )
+
+  it.each(shapes)('fails for %s when the route is a hand-authored page', (_name, joins) => {
+    const findings = findContentJoins({
+      ...joins,
+      changelogFiles: joins.changelogFiles.map((entry) => ({
+        ...entry,
+        file: entry.file.replace(/\.md$/, '.mdx'),
+      })),
+    })
+    expect(groups(findings)).toContain('changelog')
+    expect(findings.some((f) => f.message.includes('hand-authored page'))).toBe(true)
+  })
+
+  it.each(shapes)(
+    'fails for %s when the file names a different package than the route',
+    (_name, joins) => {
+      const findings = findContentJoins({
+        ...joins,
+        changelogFiles: joins.changelogFiles.map((entry) => ({
+          ...entry,
+          text: entry.text.replace('@nanisoft/prism-ui', '@nanisoft/prism-tokens'),
+        })),
+      })
+      expect(groups(findings)).toContain('changelog')
+      expect(findings.some((f) => f.message.includes('named for a different package'))).toBe(true)
+    },
+  )
+
+  it.each(shapes)(
+    'fails for %s when a route is published that no package claims',
+    (_name, joins) => {
+      const findings = findContentJoins({
+        ...joins,
+        changelogFiles: [
+          ...joins.changelogFiles,
+          { route: '/changelogs/ghost', file: 'content/changelogs/ghost.md', text: '# ghost\n' },
+        ],
+      })
+      expect(groups(findings)).toContain('changelog')
+      expect(findings.some((f) => f.message.includes('no package in the workspace claims'))).toBe(
+        true,
+      )
+    },
+  )
+
+  it.each(shapes)(
+    'fails for %s when the index does not link a published package',
+    (_name, joins) => {
+      const findings = findContentJoins({ ...joins, changelogIndex: [] })
+      expect(groups(findings)).toContain('changelog')
+      expect(findings.some((f) => f.message.includes('the Changelogs index does not link'))).toBe(
+        true,
+      )
+    },
+  )
+
+  it.each(shapes)(
+    'fails for %s when the index links a route no package publishes',
+    (_name, joins) => {
+      const findings = findContentJoins({
+        ...joins,
+        changelogIndex: [...joins.changelogIndex, '/changelogs/prism-tokens'],
+      })
+      expect(groups(findings)).toContain('changelog')
+      expect(findings.some((f) => f.message.includes('which no published package claims'))).toBe(
+        true,
+      )
+    },
+  )
+
+  it.each(shapes)(
+    'fails for %s when the Corpus carries no changelog for a published package',
+    (_name, joins) => {
+      const findings = findContentJoins({
+        ...joins,
+        corpus: { ...joins.corpus, changelogs: [] },
+      })
+      expect(groups(findings)).toContain('changelog')
+      expect(findings.some((f) => f.message.includes('carries no changelog entry'))).toBe(true)
+    },
+  )
+
+  it.each(shapes)(
+    'fails for %s when the Corpus names a different package than the workspace',
+    (_name, joins) => {
+      const findings = findContentJoins({
+        ...joins,
+        corpus: {
+          ...joins.corpus,
+          changelogs: joins.corpus.changelogs.map((entry) => ({
+            ...entry,
+            package: '@nanisoft/prism-tokens',
+          })),
+        },
+      })
+      expect(groups(findings)).toContain('changelog')
+      expect(findings.some((f) => f.message.includes('the workspace publishes it as'))).toBe(true)
+    },
+  )
+
+  it.each(shapes)(
+    'fails for %s when the Corpus carries a changelog no package publishes',
+    (_name, joins) => {
+      const findings = findContentJoins({
+        ...joins,
+        corpus: {
+          ...joins.corpus,
+          changelogs: [
+            ...joins.corpus.changelogs,
+            { package: '@nanisoft/prism-ghost', route: '/changelogs/ghost', versions: ['1.0.0'] },
+          ],
+        },
+      })
+      expect(groups(findings)).toContain('changelog')
+      expect(findings.some((f) => f.message.includes('an agent can be told about a package'))).toBe(
+        true,
+      )
+    },
+  )
+
+  it.each(shapes)(
+    'fails for %s when the Section has no authored index for the upgrade notes',
+    (_name, joins) => {
+      const findings = findContentJoins({
+        ...joins,
+        contentFiles: joins.contentFiles.filter((file) => file.route !== '/changelogs'),
+      })
+      expect(groups(findings)).toContain('changelog')
+      expect(findings.some((f) => f.message.includes('no index.mdx'))).toBe(true)
+    },
+  )
 })
 
 describe('parseNav', () => {

@@ -88,3 +88,31 @@ export const searchDocsSchema = z.object({
     .optional()
     .describe('Maximum hits to return. Defaults to 5, maximum 10.'),
 })
+
+/**
+ * `get_changelog` takes a package and an optional version, and nothing else.
+ *
+ * The package is a plain string rather than a closed enum because the set of
+ * published packages is the workspace's, discovered at build time, and an enum
+ * frozen at compile time would be a second list of them that a newly published
+ * package would not be in. The argument accepts the scoped name, the unscoped
+ * name and the route segment, because an agent arrives holding whichever it has.
+ *
+ * `version` is optional rather than defaulted, so one call can return a whole
+ * changelog and one call can return a single entry: an agent asking "what broke"
+ * for a package it is already on does not need the rest of the history, and an
+ * agent asking what a package has done needs all of it.
+ */
+export const getChangelogSchema = z.object({
+  package: z
+    .string()
+    .min(1)
+    .describe(
+      'A published Prism package, for example `@nanisoft/prism-ui`. The unscoped name and the route segment are accepted too.',
+    ),
+  version: z
+    .string()
+    .min(1)
+    .optional()
+    .describe('One version entry, for example `0.5.0`. Omit to read the whole changelog.'),
+})

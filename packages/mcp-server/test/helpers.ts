@@ -4,6 +4,7 @@ import { Client } from '@modelcontextprotocol/client'
 import { InMemoryTransport, type CallToolResult, type McpServer } from '@modelcontextprotocol/server'
 import {
   parsePrismDocsStore,
+  type PrismChangelog,
   type PrismDocsStore,
   type PrismDocsStoreEntry,
 } from '@nanisoft/prism-llms'
@@ -68,7 +69,34 @@ export function emptyTokens(): PrismDocsStore['tokens'] {
 }
 
 export function emptyStore(version = '9.9.9'): PrismDocsStore {
-  return { version, items: [], pages: [], tokens: emptyTokens() }
+  return { version, items: [], pages: [], changelogs: [], tokens: emptyTokens() }
+}
+
+/**
+ * One changelog entry, the shape the corpus emits.
+ *
+ * `versions` and `releases` are stated together because the store's guard
+ * refuses a store where the two disagree, so a fixture that set only one of them
+ * would fail the guard rather than the assertion under test.
+ */
+export function makeChangelog(
+  name: string,
+  overrides: Partial<PrismChangelog> = {},
+): PrismChangelog {
+  const slug = name.startsWith('@') ? (name.split('/')[1] ?? name) : name
+  const releases = overrides.releases ?? [
+    { version: '1.0.0', body: `The first published line of ${name}.` },
+  ]
+  return {
+    package: name,
+    slug,
+    route: `/changelogs/${slug}`,
+    title: name,
+    versions: releases.map((release) => release.version),
+    releases,
+    text: `# ${name}\n\n## 1.0.0\n\nThe first published line of ${name}.\n`,
+    ...overrides,
+  }
 }
 
 export function makeItem(

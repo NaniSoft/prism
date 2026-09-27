@@ -37,6 +37,13 @@ apps/site/src/generated/
 # dist so build-twice determinism never sees it.
 packages/mcp-server/src/generated/
 
+# Each published package's CHANGELOG.md, copied byte for byte into the content
+# tree on every predev/prebuild/pretest/pretypecheck, so the site's text and the
+# package's text are the same bytes. Never committed: a committed copy is a
+# hand-maintained changelog that drifts from the tarball, which is the thing the
+# generated route exists to prevent. See apps/site/scripts/copy-changelogs.mjs
+apps/site/content/changelogs/*.md
+
 # Staged into each package by scripts/stage-package-files.mjs at pack time so a
 # published tarball carries LICENSE and THIRD-PARTY-NOTICES.md.
 packages/*/LICENSE

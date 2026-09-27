@@ -26,6 +26,14 @@
  * a second directory when its documentation moved is a finding here rather than
  * a green build.
  *
+ * The Changelogs Section adds the joins the reference design system has no gate
+ * for. A published package holding a changelog and no route is a finding, and so
+ * is a route whose bytes are not the package's bytes, and so is a hand-authored
+ * page in the Section, an index that does not link a published package, and a
+ * Corpus carrying a changelog no package claims. The packages are discovered from
+ * the workspace through the same rule the copy step reads, so this gate cannot
+ * end up agreeing with a list nobody checks against the workspace.
+ *
  * Run: pnpm --filter @nanisoft/site check
  */
 import { existsSync } from 'node:fs'
@@ -36,13 +44,15 @@ import { fileURLToPath } from 'node:url'
 import { buildCatalog } from '@nanisoft/prism-ui/catalog'
 import { parsePrismDocsStore, STORE_SECTIONS } from '@nanisoft/prism-llms'
 
-import { CONTENT_EXTENSIONS, findContentJoins, parseNav, routeForFile } from './content-joins.mjs'
+import { CONTENT_EXTENSIONS, findContentJoins, parseNav, routeForFile, routeOfHref } from './content-joins.mjs'
 import { readItemContent } from './item-content.mjs'
+import { CHANGELOG_SECTION, readPublishedChangelogs, splitChangelog } from './published-packages.mjs'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const SITE = path.join(HERE, '..')
 const REPO = path.join(SITE, '..', '..')
 const CONTENT_ROOT = path.join(SITE, 'content')
+const CHANGELOG_ROOT = path.join(CONTENT_ROOT, CHANGELOG_SECTION)
 const ITEMS_ROOT = path.join(SITE, 'items')
 const DEMOS_ROOT = path.join(SITE, 'src', 'demos')
 const APP_ROOT = path.join(SITE, 'src', 'app')
@@ -160,6 +170,51 @@ for (const item of itemContent) {
   for (const demo of item.demosInFolder) demoFiles.add(demo)
 }
 
+/* The Changelogs Section: the published packages, the generated routes, and
+   the authored index that links them. ---------------------------------------- */
+
+/**
+ * The published packages that owe the site a route, discovered from the
+ * workspace by the rule the copy step reads rather than listed here. Listing them
+ * in this gate would make the gate agree with a list nobody checks against the
+ * workspace, which is the same second list the discovery exists to remove.
+ */
+const changelogPackages = (await readPublishedChangelogs(REPO)).map((entry) => ({
+  package: entry.name,
+  route: entry.route,
+  file: entry.changelog,
+  text: entry.text,
+}))
+
+/**
+ * Every generated changelog file on the content tree, and its bytes.
+ *
+ * The whole Section is read rather than the routes the packages claim, so a
+ * route no package claims is a finding in the other direction. The authored
+ * `index.mdx` is excluded because it is the one hand-written page here and is
+ * judged by its links instead.
+ */
+const changelogFiles = []
+for (const file of await walkFiles(CHANGELOG_ROOT)) {
+  const entry = toSite(file)
+  if (entry === `content/${CHANGELOG_SECTION}/index.mdx`) continue
+  if (!CONTENT_EXTENSIONS.some((extension) => file.endsWith(extension))) continue
+  const withoutExtension = below(CHANGELOG_ROOT, file).replace(/\.mdx?$/, '')
+  changelogFiles.push({
+    route: routeForFile(`${CHANGELOG_SECTION}/${withoutExtension}`),
+    file: entry,
+    text: (await readFile(file, 'utf8')).replace(/\r\n/g, '\n'),
+  })
+}
+
+/** The changelog routes the authored index links, which is the reader's way in. */
+const changelogIndex = []
+for (const link of links) {
+  if (link.file !== `content/${CHANGELOG_SECTION}/index.mdx`) continue
+  const route = routeOfHref(link.href)
+  if (route.startsWith(`/${CHANGELOG_SECTION}/`)) changelogIndex.push(route)
+}
+
 /* The routes the site publishes: the content tree, the App Router, and the
    catalogue's own section landing pages. The section names are read from the
    Corpus, because the Corpus is where the site's segment names are readable
@@ -209,6 +264,9 @@ const findings = findContentJoins({
   links,
   itemDocs,
   demoFiles: [...demoFiles],
+  changelogPackages,
+  changelogFiles,
+  changelogIndex,
   corpus: {
     items: store.items.map((item) => ({ slug: item.slug, kind: item.kind, url: item.url })),
     pages: store.pages.map((page) => ({
@@ -216,6 +274,11 @@ const findings = findContentJoins({
       slug: page.slug,
       url: page.url,
       mirror: page.mirror,
+    })),
+    changelogs: store.changelogs.map((entry) => ({
+      package: entry.package,
+      route: entry.route,
+      versions: [...entry.versions],
     })),
   },
   routes: [...routes],
@@ -232,6 +295,6 @@ if (findings.length > 0) {
 console.log(
   `content-joins: every join holds - ${catalogue.length} Items, ${contentFiles.length} content ` +
     `files, ${itemDocs.length} Item documents, ${store.pages.length} Corpus pages, ` +
-    `${routes.size} routes, ${navBlocks.size} navigation blocks across ${publishedPages} ` +
-    'published pages',
+    `${changelogPackages.length} published changelogs, ${routes.size} routes, ` +
+    `${navBlocks.size} navigation blocks across ${publishedPages} published pages`,
 )

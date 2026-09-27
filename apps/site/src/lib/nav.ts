@@ -219,6 +219,14 @@ function pushEntries(out: FlatNav[], entries: NavEntry[]): void {
  * read out of the tree, so neither is invented here: this row is stated once,
  * consumed by the one component that renders it, and the Section routes it
  * shares with the sidebar are the same routes the tree holds.
+ *
+ * `/changelogs` sits after the parts and after the Content section, which is
+ * the reading order the specification of record states: start here, then the raw
+ * materials, then the rules for writing, then the parts, then the history. It is
+ * placed before `/themes` rather than last because the theme reader is the one
+ * control that is not a Section, and a Section that is a collection of many
+ * entries reads as the tail of the row rather than as a detour in the middle of
+ * it. Nothing already in the row moves.
  */
 export const TOP_NAV = [
   { href: '/', label: 'Overview' },
@@ -228,5 +236,6 @@ export const TOP_NAV = [
   { href: '/blocks', label: 'Blocks' },
   { href: '/pages', label: 'Pages' },
   { href: '/content', label: 'Content' },
+  { href: '/changelogs', label: 'Changelogs' },
   { href: '/themes', label: 'Themes' },
 ] as const

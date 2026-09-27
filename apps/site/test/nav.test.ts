@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -7,7 +7,8 @@ import { loader, type MetaData, type PageData, type StaticSource } from 'fumadoc
 import { metaSchema } from 'fumadocs-core/source/schema'
 import { describe, expect, it } from 'vitest'
 
-import { flattenNav, PAGE_TREE, projectNav } from '../src/lib/nav'
+import { discoverPublishedPackages, readPublishedChangelogs } from '../scripts/published-packages.mjs'
+import { flattenNav, PAGE_TREE, projectNav, TOP_NAV } from '../src/lib/nav'
 
 /**
  * The navigation projection, over plain page-tree data.
@@ -32,6 +33,18 @@ import { flattenNav, PAGE_TREE, projectNav } from '../src/lib/nav'
  */
 
 const SITE = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
+const REPO = path.join(SITE, '..', '..')
+
+/**
+ * A file the content tree holds as a page, in either extension.
+ *
+ * `.md` is here because the Changelogs Section holds generated routes that are
+ * byte-for-byte copies of a published package's `CHANGELOG.md`. A rule that
+ * counted only `.mdx` would say the Changelogs folder holds no page, and would
+ * then not require it to have an ordering, which is the one thing that keeps a
+ * generated route out of the fallback collection.
+ */
+const CONTENT_PAGE = /\.(mdx|md)$/
 
 /** One authored page, the shape the tree builder reads. */
 function page(file: string, title: string): { type: 'page'; path: string; data: PageData } {
@@ -277,9 +290,11 @@ describe('the authored content tree', () => {
   it('gives every folder that holds a page an ordering', () => {
     // The authored side of the same rule the projection enforces: a folder with
     // no `pages` array is not a failure, but a folder that holds a page and
-    // orders nothing is how a page ends up in the fallback collection.
+    // orders nothing is how a page ends up in the fallback collection. Both
+    // content extensions count, because a folder holding only generated routes
+    // holds pages too.
     for (const folder of folders()) {
-      const holds = walk(path.join(SITE, folder)).some((file) => file.endsWith('.mdx'))
+      const holds = walk(path.join(SITE, folder)).some((file) => CONTENT_PAGE.test(file))
       if (!holds) continue
       const entry = authored().find((meta) => meta.file === `${folder}/meta.json`)
       expect(entry, `${folder} holds a page and no meta.json`).toBeDefined()
@@ -334,6 +349,17 @@ describe('the authored prose Sections', () => {
       if (full.endsWith('.mdx')) {
         const frontmatter = /^---\n([\s\S]*?)\n---/.exec(readFileSync(full, 'utf8'))?.[1] ?? ''
         const title = /^title:\s*(.+)$/m.exec(frontmatter)?.[1]?.trim() ?? ''
+        files.push({ type: 'page', path: relative, data: { title } })
+        continue
+      }
+      if (full.endsWith('.md')) {
+        // A generated changelog has no frontmatter: its title is its own first
+        // heading, which is the rule the site's collection schema applies. The
+        // tree builder reads `data.title` for the sidebar label, so the label is
+        // derived here the same way, or the fixture would be testing a page the
+        // build never produces.
+        const source = readFileSync(full, 'utf8')
+        const title = /^#\s+(.+?)\s*$/m.exec(source)?.[1]?.trim() ?? ''
         files.push({ type: 'page', path: relative, data: { title } })
         continue
       }
@@ -416,6 +442,146 @@ describe('the authored prose Sections', () => {
       const at = routes.indexOf(expected[0] as string)
       expect(routes.slice(at, at + expected.length)).toEqual(expected)
     }
+  })
+})
+
+/**
+ * The Changelogs Section, over the real tree and the real workspace.
+ *
+ * The routing tree cannot be compiled here, so this reads the same seam the block
+ * above does: a real `loader()` call over the files the site actually holds,
+ * carrying the site's own `PAGE_TREE`. What is asserted is the join between two
+ * independent sources, the generated routes the copy step produced from the
+ * workspace and the ordering the meta file declares, because those are the two
+ * that can disagree.
+ *
+ * The disagreement is the failure the reference design system cannot see. It
+ * hand-writes a page per package, so a package it adds has no page and its
+ * continuous integration is green; here a package is discovered, the copy step
+ * writes its route, and this test says the ordering claims it or the route is
+ * reachable only by URL.
+ */
+describe('the Changelogs Section', () => {
+  const CONTENT = path.join(SITE, 'content')
+  const SECTION = 'changelogs'
+
+  /** One authored page or meta file, in the shape the tree builder reads. */
+  function files(): StaticSource['files'] {
+    const entries: StaticSource['files'] = []
+    for (const full of walk(CONTENT)) {
+      const relative = path.relative(CONTENT, full).split(path.sep).join('/')
+      if (full.endsWith('.mdx')) {
+        const frontmatter = /^---\n([\s\S]*?)\n---/.exec(readFileSync(full, 'utf8'))?.[1] ?? ''
+        entries.push({
+          type: 'page',
+          path: relative,
+          data: { title: /^title:\s*(.+)$/m.exec(frontmatter)?.[1]?.trim() ?? '' },
+        })
+        continue
+      }
+      if (full.endsWith('.md')) {
+        const source = readFileSync(full, 'utf8')
+        entries.push({
+          type: 'page',
+          path: relative,
+          data: { title: /^#\s+(.+?)\s*$/m.exec(source)?.[1]?.trim() ?? '' },
+        })
+        continue
+      }
+      if (path.basename(relative) === 'meta.json') {
+        entries.push({
+          type: 'meta',
+          path: relative,
+          data: JSON.parse(readFileSync(full, 'utf8')) as MetaData,
+        })
+      }
+    }
+    return entries
+  }
+
+  /**
+   * The published packages that owe the Section a route, read from the
+   * workspace. Read inside each test rather than once at module scope, because
+   * the module scope of a test file is evaluated before any hook has run and a
+   * promise there is a promise nobody awaited.
+   */
+  const published = () => readPublishedChangelogs(REPO)
+
+  it('publishes a route for every published package that ships a changelog', async () => {
+    // The workspace, not a list. A package that ships a changelog and has no
+    // generated file is the omission the whole Section is built to prevent, so
+    // this is asserted against the discovery rather than against a name.
+    const packages = await published()
+    expect(packages.length).toBeGreaterThan(0)
+    for (const entry of packages) {
+      const generated = path.join(CONTENT, SECTION, `${entry.slug}.md`)
+      expect(existsSync(generated), `${entry.name} ships a changelog and has no route`).toBe(true)
+    }
+  })
+
+  it('leaves the private packages out of the Section', async () => {
+    // The site is private, so it is not on npm and has no tarball whose bytes a
+    // reader could be shown instead. Discovery says so from each package's own
+    // manifest rather than from a list of which ones count.
+    const all = await discoverPublishedPackages(REPO)
+    expect(all.map((entry) => entry.name)).not.toContain('@nanisoft/site')
+    expect((await published()).map((entry) => entry.name)).not.toContain('@nanisoft/site')
+  })
+
+  it('publishes the generated file byte for byte, as a buffer comparison', async () => {
+    // The evidence for the whole Section: the site renders these bytes, and
+    // these bytes are the package's. Compared as buffers rather than as strings
+    // so a difference in line endings is a difference, not a normalisation.
+    for (const entry of await published()) {
+      const source = readFileSync(path.join(REPO, ...entry.changelog.split('/')))
+      const generated = readFileSync(path.join(CONTENT, SECTION, `${entry.slug}.md`))
+      expect(generated.equals(source), `${entry.slug}.md is not ${entry.changelog}`).toBe(true)
+    }
+  })
+
+  it('claims every generated route in its meta file, and nothing else', () => {
+    const meta = JSON.parse(
+      readFileSync(path.join(CONTENT, SECTION, 'meta.json'), 'utf8'),
+    ) as MetaData
+    const generated = readdirSync(path.join(CONTENT, SECTION))
+      .filter((name) => name.endsWith('.md'))
+      .map((name) => path.basename(name, '.md'))
+      .sort()
+    // Both directions. A `pages` array is a whitelist, so a route it omits leaves
+    // the primary tree and keeps its exported route, and a page it invents is a
+    // routing target nothing can serve.
+    expect([...(meta.pages ?? [])].sort()).toEqual(generated)
+  })
+
+  it('leaves no generated route in the fallback collection', () => {
+    const source = treeOf(files())
+    // The silent mode: the route exists, the page builds, and a reader reaches it
+    // only by URL. `projectNav` throws on a tree in this state, so this is also
+    // the assertion that the build would refuse.
+    expect(source.getPageTree().fallback).toBeUndefined()
+    expect(() => projectNav(source.getPageTree())).not.toThrow()
+  })
+
+  it('labels the Section from its meta file and links every route from it', async () => {
+    const source = treeOf(files())
+    const projected = projectNav(source.getPageTree())
+    const changelogs = projected.find((entry) => entry.url === `/${SECTION}`)
+    expect(changelogs?.title).toBe('Changelogs')
+    const linked = (changelogs?.items ?? [])
+      .map((entry) => (entry.type === 'page' ? entry.url : undefined))
+      .filter((url): url is string => url !== undefined)
+    expect(linked).toEqual((await published()).map((entry) => entry.route).sort())
+  })
+
+  it('appears in the top navigation once, after the parts', () => {
+    // The header row is the one navigation list left by hand, so its position is
+    // a decision rather than a projection. It goes after the catalogue Sections
+    // because history is read after the thing it is the history of, and nothing
+    // already in the row moves.
+    const at = TOP_NAV.findIndex((entry) => entry.href === `/${SECTION}`)
+    expect(at).toBeGreaterThan(-1)
+    expect(TOP_NAV[at - 1]?.href).toBe('/content')
+    expect(TOP_NAV.filter((entry) => entry.href === `/${SECTION}`)).toHaveLength(1)
   })
 })
 
