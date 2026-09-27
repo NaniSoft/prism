@@ -35,7 +35,6 @@ const UI_ROOT = path.join(REPO_ROOT, 'packages', 'ui')
 const SITE_ROOT = path.join(REPO_ROOT, 'apps', 'site')
 const ITEMS_ROOT = path.join(SITE_ROOT, 'items')
 const CONTENT_ROOT = path.join(SITE_ROOT, 'content')
-const DEMOS_ROOT = path.join(SITE_ROOT, 'src', 'demos')
 const WORK = path.join(PKG_ROOT, '.turbo', 'check')
 const DIST = path.join(PKG_ROOT, 'dist')
 const README = path.join(PKG_ROOT, 'README.md')
@@ -62,11 +61,10 @@ async function walkFiles(dir, prefix = '') {
 
 /**
  * Where every Item's documentation and its Demo are, read by the site's own rule
- * rather than by a path restated here. Every Demo is covered, wherever it sits:
- * beside the documentation it documents, or in the flat demo root for the Items
- * that have not moved yet.
+ * rather than by a path restated here. There is one place either can sit, so
+ * every Demo is covered: the one beside the documentation it documents.
  */
-const itemContent = await readItemContent(ITEMS_ROOT, DEMOS_ROOT)
+const itemContent = await readItemContent(ITEMS_ROOT)
 const contentBySlug = new Map(itemContent.map((item) => [item.slug, item]))
 
 /** Every Demo in the tree, for the self-contained contract and the imports. */

@@ -19,8 +19,8 @@
  * client import. It is reported by the page rather than guessed.
  *
  * The import specifiers are relative to the generated file, not aliased, because
- * a Demo now lives outside `src`: one rule that covers the flat demo root and
- * an Item's own folder, and no second list to keep in step.
+ * a Demo lives outside `src`: one rule that covers an Item's own folder, and no
+ * second list to keep in step.
  *
  * Run: node scripts/generate-demos.mjs
  */
@@ -33,7 +33,6 @@ import { readItemContent } from './item-content.mjs'
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const SITE = path.join(HERE, '..')
 const ITEMS = path.join(SITE, 'items')
-const DEMOS = path.join(SITE, 'src', 'demos')
 const OUT_DIR = path.join(SITE, 'src', 'generated')
 const OUT = path.join(OUT_DIR, 'demos.ts')
 const OUT_GROUPS = path.join(OUT_DIR, 'item-groups.json')
@@ -61,13 +60,13 @@ function specifierFor(demo) {
   return relative.startsWith('.') ? relative : `./${relative}`
 }
 
-const items = await readItemContent(ITEMS, DEMOS)
+const items = await readItemContent(ITEMS)
 
 const entries = []
 for (const item of items) {
   if (item.demo === null) {
     console.error(
-      `demos: ${item.slug} has no Demo: ${item.beside ? 'no file beside its documentation' : 'no file in the demo root'}`,
+      `demos: ${item.slug} has no Demo: no ${item.slug}.tsx beside ${path.relative(SITE, item.doc)}`,
     )
     process.exit(1)
   }

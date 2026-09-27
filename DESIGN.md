@@ -440,6 +440,17 @@ the contract; the catalogue is the one list of the items that ship.
   screen composed of Blocks and Components, and it receives application-owned
   navigation, content and data through documented slots and props. Like a Block
   it never fetches and never imports a router or a data client.
+- **The documentation tree is uneven, and the unevenness is this taxonomy read
+  as folders.** A Component's documentation is filed in a folder named for its
+  Category, and a Block's and a Page's is filed in a folder of its own with
+  nothing above it, because the Categories section below gives them none to
+  name. So a Component sits one level deeper than a Block or a Page, its
+  documentation and its demo travel together in that folder, and a reader meets
+  it inside a Category group where a Block or a Page is met in a flat list. The
+  depth is a consequence, not a stage: a Block or a Page is not waiting for a
+  Category, and giving it one to level the tree would invent the role group the
+  Categories section holds closed. An uneven tree here is the taxonomy showing
+  through, and it is not an oversight to be tidied later.
 
 ### Categories
 

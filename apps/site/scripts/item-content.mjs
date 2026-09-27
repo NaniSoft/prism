@@ -18,18 +18,18 @@
  *     Item's prose and the verbatim Demo source for the Corpus.
  *
  * The corpus package reaches across for this rather than keeping its own walk
- * of the site's tree, and the two paths it needs to be deleted with are the
- * ones this module deletes when the last Item moves: the flat demo root and the
- * `items/<kind>/<slug>.mdx` shape.
+ * of the site's tree, and the one path it needs is the one this module reads.
  *
- * **The flat fallback is half a rule, and it is deliberate.** An Item whose
- * documentation is not in a folder named for it has not moved yet, and its Demo
- * is in the flat demo root. A documentation file that *is* in a folder named for
- * it has no fallback: its Demo is the file beside it or it has none, because a
- * fallback in that direction would quietly satisfy a Demo that a maintainer
- * left behind when they moved the documentation, and the Demo would render from
- * a second directory with every gate green. The gate reports it; the build
- * refuses it.
+ * **There is one place an Item lives, and there is no fallback.** All forty-two
+ * Items are in a folder named for them, with their Demo beside them, and the
+ * transitional flat demo root that the last few tickets carried is gone. A
+ * document that is not in a folder named for it therefore has no Demo at all,
+ * which is a refusal rather than a lookup: the demo generator exits on it, the
+ * corpus builder and the gate each report it in their own words, and no consumer
+ * can be handed a Demo from a directory nobody declared. A fallback in that
+ * direction would quietly satisfy a Demo a maintainer left behind when they
+ * filed the documentation, and the Demo would render from a second directory
+ * with every gate green.
  *
  * Nothing here reads a route, a kind from the Catalogue or a Category. The Kind
  * is the top folder of the documentation tree, and it is the Catalogue's word
@@ -82,18 +82,16 @@ async function isFile(file) {
  * @property {string} doc absolute path of the documentation file
  * @property {string | null} demo absolute path of the Demo, or null when there is none
  * @property {string[]} group the folders between the Kind and the Item's own folder
- * @property {boolean} beside whether the Demo is a sibling of the documentation
- * @property {string[]} demosInFolder every Demo-shaped file in the documentation's own folder
+ * @property {boolean} beside whether the documentation is in a folder named for the Item
  */
 
 /**
  * Every Item's documentation, its Demo and where the two sit, read from disk.
  *
  * @param {string} itemsRoot the documentation tree, e.g. `apps/site/items`
- * @param {string} demoRoot the flat demo root, e.g. `apps/site/src/demos`
  * @returns {Promise<ItemContent[]>} one entry per documentation file, name sorted
  */
-export async function readItemContent(itemsRoot, demoRoot) {
+export async function readItemContent(itemsRoot) {
   const items = []
   for (const file of await walk(itemsRoot)) {
     if (!file.relative.endsWith(CONTENT_EXTENSION)) continue
@@ -102,24 +100,21 @@ export async function readItemContent(itemsRoot, demoRoot) {
     const kind = segments[0] ?? ''
     const folders = segments.slice(1, -1)
     const beside = folders.length > 0 && folders[folders.length - 1] === slug
-    const folder = path.dirname(file.full)
-    const demosInFolder = (await walk(folder))
-      .filter((entry) => entry.relative.endsWith(DEMO_EXTENSION))
-      .map((entry) => path.basename(entry.relative, DEMO_EXTENSION))
-      .sort()
 
-    const demo = beside
-      ? path.join(folder, `${slug}${DEMO_EXTENSION}`)
-      : path.join(demoRoot, `${slug}${DEMO_EXTENSION}`)
+    // The Demo is the file beside the documentation, or it is nothing. There is
+    // no second directory to look in, so an Item whose documentation is filed
+    // outside a folder named for it has no Demo and every consumer says so.
+    const candidate = beside
+      ? path.join(path.dirname(file.full), `${slug}${DEMO_EXTENSION}`)
+      : null
 
     items.push({
       slug,
       kind,
       doc: file.full,
-      demo: (await isFile(demo)) ? demo : null,
+      demo: candidate !== null && (await isFile(candidate)) ? candidate : null,
       group: beside ? folders.slice(0, -1) : [],
       beside,
-      demosInFolder,
     })
   }
   return items

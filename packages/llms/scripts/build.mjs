@@ -58,7 +58,6 @@ const TOKENS_ROOT = path.join(REPO_ROOT, 'packages', 'tokens')
 const SITE_ROOT = path.join(REPO_ROOT, 'apps', 'site')
 const ITEMS_ROOT = path.join(SITE_ROOT, 'items')
 const CONTENT_ROOT = path.join(SITE_ROOT, 'content')
-const DEMOS_ROOT = path.join(SITE_ROOT, 'src', 'demos')
 
 const BASE_URL = 'https://prism.nanisoft.com'
 const KIND_SEGMENT = { component: 'components', block: 'blocks', page: 'pages' }
@@ -475,7 +474,7 @@ export async function emit(outDir, options = {}) {
   const publicExports = new Set(catalogue.flatMap((entry) => entry.exports))
   // Read once per emit, by the rule the site, this builder and the gate share.
   const itemContent = new Map(
-    (await readItemContent(ITEMS_ROOT, DEMOS_ROOT)).map((item) => [item.slug, item]),
+    (await readItemContent(ITEMS_ROOT)).map((item) => [item.slug, item]),
   )
   const written = new Set()
   const writeArtifact = async (relative, text) => {

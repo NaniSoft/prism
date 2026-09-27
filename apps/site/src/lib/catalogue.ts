@@ -35,8 +35,10 @@ import generatedItemGroups from '@/generated/item-groups.json'
  * folder. The folders come from `item-groups.json`, which the site's own build
  * generates from the documentation tree with the same rule the corpus and the
  * gate read, so the tree follows the content rather than a second hand-kept list
- * of where content is. An Item whose documentation has not moved is emitted
- * flat, which is what a not-yet-moved Item looks like.
+ * of where content is. A Block's and a Page's documentation is filed one folder
+ * deeper and with no Category folder above it, because a Block and a Page have
+ * no Category, so their pages are emitted flat and their sidebars are flat
+ * lists.
  *
  * The route does not follow the folder. Every catalogue page carries an explicit
  * `slugs` array of `<segment>/<slug>`, so a Component's published address is

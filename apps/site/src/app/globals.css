@@ -18,16 +18,16 @@
 @source '../components';
 @source '../lib';
 /*
- * The content tree, because a Demo is moving into it. An Item's Demo sits beside
- * its documentation, and the documentation is not under `src`, so without this
- * line nothing in this stylesheet says the Demo's class names are to be read: the
- * utility generator finds them today only because its automatic root is the
- * working directory of the build, which happens to be the site root. That is a
- * property of how the build is invoked rather than a statement about this file,
- * and it is the reason `src/demos` was never named either. Point the automatic
- * root anywhere else and the class names stop being scanned, at which point a
- * Component page renders a wall of unstyled buttons with every gate green,
- * because a class name is only a string in a file nobody reads.
+ * The content tree, because a Demo lives in it. Every Item's Demo sits beside
+ * its own documentation, and the documentation is not under `src`, so without
+ * this line nothing in this stylesheet says the Demo's class names are to be
+ * read: the utility generator would find them only because its automatic root
+ * is the working directory of the build, which happens to be the site root.
+ * That is a property of how the build is invoked rather than a statement about
+ * this file. Point the automatic root anywhere else and the class names stop
+ * being scanned, at which point a Component page renders a wall of unstyled
+ * buttons with every gate green, because a class name is only a string in a file
+ * nobody reads.
  *
  * So the one directory this restructure moves content into is named here, and
  * the Demos it holds are scanned because the stylesheet says so.

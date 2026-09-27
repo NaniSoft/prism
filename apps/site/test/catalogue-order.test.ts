@@ -26,10 +26,15 @@ import { PAGE_TREE, projectNav } from '../src/lib/nav'
  * The comparison is depth first, because the ordering is a tree. An Item filed
  * under a Category is claimed by its folder rather than by the Section's own
  * array, and the Section's array names the folder at the place of the first Item
- * inside it. Read the way a reader reads the sidebar, the order is still the
- * Catalogue's own: a reader meets the Items in Catalogue order whether they sit
- * in a folder or beside it, and that is the property worth asserting, because it
- * is the one a hand-written array would break the moment one Item was filed.
+ * inside it. Read the way a reader reads the sidebar, the order is the
+ * Catalogue's own with its Items gathered into their Categories: nothing is
+ * reordered inside a folder, the folders take the place of the first Item in
+ * each, and every Item appears once. That is the property worth asserting,
+ * because it is the one a hand-written array would break the moment one Item was
+ * filed, and the one a `sort` over slugs would break the moment two Items shared
+ * a name. A flat Section is the special case where every run holds one Item, so
+ * this assertion is the old one in the case where the old one held and says
+ * something the old one could not once the tree is fully nested.
  *
  * The tree itself is built here, from the real `StaticSource` and the site's own
  * `PAGE_TREE`, for the same reason `nav.test.ts` builds one: the projection is
@@ -88,8 +93,41 @@ const nestedItems = catalogue.filter((item) =>
   ),
 )
 
+/**
+ * The Catalogue's own order for one kind, gathered into the folders the Items
+ * sit in and with nothing reordered inside a folder.
+ *
+ * The Catalogue interleaves Categories, so a sidebar that groups by Category
+ * cannot also read as the Catalogue verbatim: a reader meets all seven Layout
+ * Components before the first Feedback one, which is the point of a group. What
+ * has to hold is that the grouping is the *only* transformation, so it is
+ * asserted as the transformation rather than as a list typed out again: every
+ * Item of a folder gathers at the place that folder is first met, and inside a
+ * folder the Catalogue's own order is untouched. A flat Section is the case
+ * where every Item is in its own group, so this is the old assertion in the case
+ * where the old one held, and it says something the old one could not once the
+ * tree is fully nested.
+ */
+function groupedOrder(kind: CatalogKind): string[] {
+  const folders = new Map<string, string[]>()
+  for (const item of catalogue.filter((entry) => entry.kind === kind)) {
+    const folder = nestedItems.includes(item) ? categoryFolder(item.category as never) : ''
+    const slugs = folders.get(folder) ?? []
+    slugs.push(item.slug)
+    folders.set(folder, slugs)
+  }
+  return [...folders.values()].flat()
+}
+
 describe('the generated catalogue order', () => {
-  it.each(KINDS)('is the %s section of the Catalogue, in the Catalogue order', (kind) => {
+  it.each(KINDS)('is the %s section of the Catalogue, gathered into its folders', (kind) => {
+    expect(orderFor(kind)).toEqual(groupedOrder(kind))
+  })
+
+  it.each(['block', 'page'] as const)('leaves the %s section in the Catalogue order', (kind) => {
+    // No folder, so no run to gather, and the flat list is the Catalogue read
+    // straight through. A Block and a Page have no Category, so this is the
+    // whole of what "flat" means.
     expect(orderFor(kind)).toEqual(
       catalogue.filter((item) => item.kind === kind).map((item) => item.slug),
     )
@@ -240,11 +278,37 @@ describe('the navigation the generated tree produces', () => {
     }
   })
 
-  it('keeps the route of an Item that has not moved, and of one that has', () => {
-    const flat = sections.find((section) => section.url === '/components')?.items ?? []
-    const urls = flat.flatMap((entry) => (entry.type === 'group' ? entry.items : [entry]))
-    for (const item of catalogue.filter((entry) => entry.kind === 'component')) {
-      expect(urls).toContainEqual({ type: 'page', title: item.name, url: `/components/${item.slug}` })
+  it('renders the Blocks and Pages sidebars as flat lists', () => {
+    // A Block and a Page have no Category, so a group here would be a label with
+    // one child under it, which reads as a category the reader was never told
+    // exists. The sidebar is the flat list the Catalogue is, and nothing wraps
+    // it.
+    for (const url of ['/blocks', '/pages']) {
+      const section = sections.find((entry) => entry.url === url)
+      expect(section, `no ${url} Section in the navigation`).toBeDefined()
+      const kinds = catalogue.filter((item) => item.kind === (url === '/blocks' ? 'block' : 'page'))
+      expect(section?.items.every((entry) => entry.type === 'page'), `${url} nests a group`).toBe(true)
+      expect(section?.items.map((entry) => (entry.type === 'page' ? entry.url : null))).toEqual(
+        kinds.map((item) => `${url}/${item.slug}`),
+      )
+    }
+  })
+
+  it('keeps every Item route, whether or not the Item sits in a folder', () => {
+    // The tree is deliberately uneven: a Component nests under its Category and
+    // a Block and a Page do not. A route is stated rather than read out of a
+    // folder, so neither shape moves an address, and all forty-two are here.
+    const entries = ['/components', '/blocks', '/pages'].flatMap(
+      (url) => sections.find((section) => section.url === url)?.items ?? [],
+    )
+    const listed = entries.flatMap((entry) => (entry.type === 'group' ? entry.items : [entry]))
+    for (const item of catalogue) {
+      const segment = item.kind === 'component' ? 'components' : item.kind === 'block' ? 'blocks' : 'pages'
+      expect(listed).toContainEqual({
+        type: 'page',
+        title: item.name,
+        url: `/${segment}/${item.slug}`,
+      })
     }
   })
 })

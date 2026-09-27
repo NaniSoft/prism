@@ -54,7 +54,6 @@ const REPO = path.join(SITE, '..', '..')
 const CONTENT_ROOT = path.join(SITE, 'content')
 const CHANGELOG_ROOT = path.join(CONTENT_ROOT, CHANGELOG_SECTION)
 const ITEMS_ROOT = path.join(SITE, 'items')
-const DEMOS_ROOT = path.join(SITE, 'src', 'demos')
 const APP_ROOT = path.join(SITE, 'src', 'app')
 const OUT = path.join(SITE, 'out')
 const STORE_FILE = path.join(REPO, 'packages', 'llms', 'dist', 'data.json')
@@ -136,11 +135,11 @@ const contentDirectories = (
 /**
  * The documentation tree, read by the same rule the demo generator and the
  * corpus builder read, so the gate cannot disagree with either of them about
- * where an Item's documentation or its Demo is. A Demo left behind in the flat
- * root when a document moved is exactly the failure the rule refuses to paper
- * over, and this is where that refusal becomes a finding.
+ * where an Item's documentation or its Demo is. A Demo left behind in a second
+ * directory when a document moved is exactly the failure the rule refuses to
+ * paper over, and this is where that refusal becomes a finding.
  */
-const itemContent = await readItemContent(ITEMS_ROOT, DEMOS_ROOT)
+const itemContent = await readItemContent(ITEMS_ROOT)
 const itemDocs = []
 for (const item of itemContent) {
   const entry = toSite(item.doc)
@@ -152,23 +151,20 @@ for (const item of itemContent) {
     group: item.group,
     demo: item.demo === null ? null : path.basename(item.demo, '.tsx'),
     demos: [...source.matchAll(DEMO_REFERENCE)].map((match) => match[1]),
-    demosInFolder: item.demosInFolder,
   })
   for (const [, href] of source.matchAll(INTERNAL_LINK)) links.push({ file: entry, href })
 }
 /**
- * Every Demo-shaped file in the tree, whether beside a document or in the flat
- * root, so a Demo no document claims is still a finding rather than a file the
- * gate stopped looking at.
+ * Every Demo in the tree, read from the documentation tree itself rather than
+ * from the folders that happen to hold a document, so a Demo filed anywhere the
+ * rule does not expect one is a finding rather than a file the gate stopped
+ * looking for. There is one place a Demo can sit, so this is the whole set.
  */
 const demoFiles = new Set(
-  (await walkFiles(DEMOS_ROOT))
+  (await walkFiles(ITEMS_ROOT))
     .filter((file) => file.endsWith('.tsx'))
     .map((file) => path.basename(file, '.tsx')),
 )
-for (const item of itemContent) {
-  for (const demo of item.demosInFolder) demoFiles.add(demo)
-}
 
 /* The Changelogs Section: the published packages, the generated routes, and
    the authored index that links them. ---------------------------------------- */
