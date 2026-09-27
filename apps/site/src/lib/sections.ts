@@ -12,7 +12,9 @@
  * comparison between "what was published", "what is published" and "what
  * redirects" a set comparison rather than a spot check. A fifth list joined it,
  * the live routes below, because the same silence applies to a route no
- * navigation links.
+ * navigation links. The search index reads it too, for `searched` below, because
+ * which pages a reader can find is a fact about the Sections rather than a
+ * detail of the search module.
  *
  * **This module imports nothing.** That is load-bearing in two directions. The
  * header's row is rendered by a client component, so this file must not reach
@@ -52,6 +54,22 @@ export type SiteSection = {
   title: string
   /** True for a Section that is one body of knowledge rather than a collection. */
   prose: boolean
+  /**
+   * False for a Section that is a dated record of what changed rather than
+   * reference material, so the client's search index does not carry its pages.
+   *
+   * This is the only field here that is about discovery rather than routing, and
+   * it is here because it is a fact about the Section rather than about the
+   * search module: a Section a reader searches for and a Section a reader walks
+   * to are different claims, and only the manifest knows which is which. A
+   * Section added tomorrow states its answer here rather than inheriting one.
+   *
+   * Out of the index is not out of the site. The routes, the navigation, the
+   * Corpus, the Markdown mirror and the MCP tools are separate surfaces and none
+   * of them reads this field, which is the point: a page a reader is given by
+   * link, by URL or by an agent is a page the site still publishes.
+   */
+  searched: boolean
 }
 
 /**
@@ -62,20 +80,56 @@ export type SiteSection = {
  * asymmetry in the tree, and the Foundation Section holds the live pack reader as
  * a route inside it. Neither is visible here: the nesting is `catalogue.ts`'s
  * ordering, and the reader is `LIVE_ROUTES` below.
+ *
+ * The last Section is the one a reader does not search. `searched` is what says
+ * so, and it is the only entry here that answers false.
  */
 export const SECTIONS: readonly SiteSection[] = [
-  { segment: 'overview', title: 'Overview', prose: true },
-  { segment: 'foundation', title: 'Foundation', prose: true },
-  { segment: 'content', title: 'Content', prose: true },
-  { segment: 'components', title: 'Components', prose: false },
-  { segment: 'blocks', title: 'Blocks', prose: false },
-  { segment: 'pages', title: 'Pages', prose: false },
-  { segment: 'changelogs', title: 'Changelogs', prose: false },
+  { segment: 'overview', title: 'Overview', prose: true, searched: true },
+  { segment: 'foundation', title: 'Foundation', prose: true, searched: true },
+  { segment: 'content', title: 'Content', prose: true, searched: true },
+  { segment: 'components', title: 'Components', prose: false, searched: true },
+  { segment: 'blocks', title: 'Blocks', prose: false, searched: true },
+  { segment: 'pages', title: 'Pages', prose: false, searched: true },
+  { segment: 'changelogs', title: 'Changelogs', prose: false, searched: false },
 ] as const
 
 /** The one Section by its route segment, or undefined when no Section claims it. */
 export function sectionFor(segment: string): SiteSection | undefined {
   return SECTIONS.find((section) => section.segment === segment)
+}
+
+/**
+ * The Section segments the client's search index does not carry, read off the
+ * manifest rather than listed.
+ *
+ * A set rather than a filter over `SECTIONS` on every call, because this module
+ * is in the header's client bundle and the answer is asked once per page on
+ * every build. The values are the manifest's own segments, so the exclusion
+ * cannot name a Section the manifest does not declare.
+ */
+const UNSEARCHED = new Set(SECTIONS.filter((section) => !section.searched).map((section) => section.segment))
+
+/**
+ * Whether the client's search index carries the page at a route.
+ *
+ * True by default, and the exclusion has to be asked for, because every route
+ * the site publishes is a page a reader may be looking for until a Section says
+ * otherwise. Two things follow from that default and both matter:
+ *
+ * A Section that is out of the index keeps its landing page, because the landing
+ * page is authored prose that says what the Section is and links what is inside
+ * it, so a reader who searches for a changelog still lands somewhere that
+ * answers. Only the pages inside it go.
+ *
+ * A route no Section claims is in the index, which covers a live reader and
+ * anything published outside a Section. The predicate is a pure function over
+ * the manifest's own literals, so it costs the header's bundle one Set and no
+ * module graph.
+ */
+export function isSearchedRoute(route: string): boolean {
+  const segment = route.split('/')[1] ?? ''
+  return !UNSEARCHED.has(segment) || route === `/${segment}`
 }
 
 /**

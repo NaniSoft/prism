@@ -146,6 +146,55 @@ measured widths rather than the computed values, because a rule can compute to
 exactly the value it should and still render 245 pixels wider than the viewport;
 see the visual regression section for what that cost.
 
+## The search index
+
+`apps/site/scripts/check-search-budget.mjs` runs in the site's `postbuild` and
+fails the build when the static index a reader's browser downloads on the first
+keystroke is over **300 KiB gzipped**. The threshold is the number the reader
+pays, not a number that tracks the content: a ceiling that moved with the pages
+would be a report of history.
+
+**It does not carry every page the site publishes, and the second assertion is
+what says so.** The Section manifest marks the Changelogs Section as not
+searched, `buildSearchIndexes()` asks `isSearchedRoute()` for every page, and the
+gate then compares the set of routes the built index holds against the set the
+content tree, the Item documentation and the Section manifest say it should hold,
+in both directions. Three failures are therefore impossible to ship: a published
+page the index does not hold, a route the manifest excludes that the index holds
+anyway, and a Section widened to not searched without a failing build. The
+expected set is read from disk rather than from the module that built the index,
+because a gate that agrees with the code it checks cannot fail. The gate prints
+both counts on every build, so a reader of the log can see the page count and the
+ceiling together.
+
+**Why the Changelogs Section is the exclusion, and why the ceiling did not
+move instead.** The index exists to answer one question, which is how do I use
+this, and a changelog cannot answer it: it is a dated record of what changed, so
+its value is in its dates and its wording is the package maintainer's rather than
+a reader's. A reader who searches a changelog wants the version a change landed
+in, which the routes, the navigation, the Corpus and the tools answer better and
+already did. It is also the one page class here that grows without bound, because
+the text arrives from the changesets generator on every release and is never
+shortened, so any budget an index containing it is held to is a budget the next
+routine release breaks. That is a fault in what is indexed rather than bad luck,
+and trimming the threshold to fit what a release happened to produce would turn
+a ceiling into a description of history. The exclusion removes the unbounded
+class; it does not make the number smaller to look tidy.
+
+**The exclusion is about the client's index and nothing else.** The Section
+landing page stays in the index, because it is authored prose that says what the
+Section is and links every package in it, so a reader who searches for a
+changelog still lands somewhere that answers. The four per-package routes keep
+their pages, their navigation entries, the authored index that links them, the
+Corpus entry, the Markdown mirror and the `get_changelog` tool. The content-join
+gate already asserted most of that; what it could not see is the index, and that
+is the half this gate owns.
+
+At the time of writing the measured index is **1344.2 KiB raw, 286.8 KiB
+gzipped** over **69 pages**, against 1424.9 KiB and 302.6 KiB over 73 pages
+before the exclusion. The four pages that left are the four published packages'
+changelogs, which is the whole difference.
+
 ## The client-JavaScript budget
 
 `packages/ui/scripts/check-client-budget.mjs` bundles each emitted
@@ -266,6 +315,12 @@ free of these defects.
   listed files.
 - The registry validator proves internal consistency, not installability. The
   tarball verifier proves contents, not runtime compatibility.
+- The search budget gate bounds the bytes and asserts the page set, and the page
+  set it asserts is "every published content page except the Sections the
+  manifest marks as not searched". It does not judge whether that exclusion is
+  the right one; a Section marked as not searched for a good reason and one marked
+  for a bad reason look identical to it, and the argument for the exclusion lives
+  in the manifest and in this document rather than in a threshold.
 - No byte budget is enforced for `styles.css`. The client analyzer measures
   source, not the compiled bytes a consumer downloads; a `styles.css` gzip
   budget is the strongest candidate for a future fail gate and is not adopted.
