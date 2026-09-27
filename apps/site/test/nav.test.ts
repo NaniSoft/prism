@@ -309,6 +309,116 @@ describe('the authored content tree', () => {
   })
 })
 
+/**
+ * The three prose Sections, over the files the site actually authors.
+ *
+ * The content source is compiled through the macro, so the routed tree cannot be
+ * built here. The files it would read can: every authored `.mdx` and every
+ * authored `meta.json` is plain data on disk, so a real `loader()` call over them
+ * with the site's own `PAGE_TREE` builds the same tree the build builds, minus
+ * the catalogue's pages. That is what lets the prose Sections' order and their
+ * labels be asserted here at all, and it is the same seam the fixtures above use,
+ * pointed at the real tree instead of a stand-in.
+ */
+describe('the authored prose Sections', () => {
+  /** The prose Sections: the authored folders under `content/`, by name. */
+  const PROSE = ['docs', 'foundations', 'content'] as const
+
+  const CONTENT = path.join(SITE, 'content')
+
+  /** One authored page or meta file, in the shape the tree builder reads. */
+  function authoredFiles(): StaticSource['files'] {
+    const files: StaticSource['files'] = []
+    for (const full of walk(CONTENT)) {
+      const relative = path.relative(CONTENT, full).split(path.sep).join('/')
+      if (full.endsWith('.mdx')) {
+        const frontmatter = /^---\n([\s\S]*?)\n---/.exec(readFileSync(full, 'utf8'))?.[1] ?? ''
+        const title = /^title:\s*(.+)$/m.exec(frontmatter)?.[1]?.trim() ?? ''
+        files.push({ type: 'page', path: relative, data: { title } })
+        continue
+      }
+      if (path.basename(relative) === 'meta.json') {
+        files.push({
+          type: 'meta',
+          path: relative,
+          data: JSON.parse(readFileSync(full, 'utf8')) as MetaData,
+        })
+      }
+    }
+    return files
+  }
+
+  /** A real tree over the authored files, and the navigation it projects. */
+  function authoredNav() {
+    const source = treeOf(authoredFiles())
+    return { tree: source.getPageTree(), sections: projectNav(source.getPageTree()) }
+  }
+
+  /** Every page the prose Sections hold, by the route it is addressed by. */
+  const authoredRoutes = () =>
+    walk(CONTENT)
+      .filter((file) => file.endsWith('.mdx'))
+      .map((file) => {
+        const relative = path.relative(CONTENT, file).split(path.sep).join('/').replace(/\.mdx$/, '')
+        return relative.endsWith('/index') ? `/${relative.slice(0, -'/index'.length)}` : `/${relative}`
+      })
+      .sort()
+
+  /** Every route the projected navigation links, in reading order. */
+  const linked = (entries: { type: string; items?: unknown[] }[]): string[] =>
+    flattenNav(entries as never).map((entry) => entry.url)
+
+  it.each(PROSE)('orders %s from a meta file beside its pages', (section) => {
+    const meta = JSON.parse(
+      readFileSync(path.join(CONTENT, section, 'meta.json'), 'utf8'),
+    ) as MetaData
+    const pages = walk(path.join(CONTENT, section))
+      .filter((file) => file.endsWith('.mdx') && !file.endsWith(`${path.sep}index.mdx`))
+      .map((file) => path.basename(file, '.mdx'))
+      .sort()
+
+    // Both directions. A `pages` array is a whitelist, so a page it omits leaves
+    // the primary tree while keeping its route, and a page it invents is a
+    // routing target nothing can serve.
+    expect([...(meta.pages ?? [])].sort()).toEqual(pages)
+  })
+
+  it.each(PROSE)('names %s in its meta file, not in its directory name', (section) => {
+    const meta = JSON.parse(
+      readFileSync(path.join(CONTENT, section, 'meta.json'), 'utf8'),
+    ) as MetaData
+    expect(typeof meta.title, `content/${section}/meta.json declares no title`).toBe('string')
+    // The label the sidebar shows is the meta file's, and the directory name is
+    // not what a reader sees: `docs` is "Guides" and `content` is "Content".
+    const shown = authoredNav().sections.find((entry) => entry.url === `/${section}`)
+    expect(shown?.title).toBe(meta.title)
+  })
+
+  it('publishes every authored page in the navigation, with nothing left over', () => {
+    const { tree } = authoredNav()
+    // Nothing in the fallback collection: that is the silent mode where a page
+    // keeps its route and vanishes from the sidebar.
+    expect(tree.fallback).toBeUndefined()
+
+    const routes = linked(authoredNav().sections)
+    for (const route of authoredRoutes()) {
+      expect(routes, `${route} is authored and no navigation links it`).toContain(route)
+    }
+  })
+
+  it('leaves the reader with the same order the meta files declare', () => {
+    for (const section of PROSE) {
+      const meta = JSON.parse(
+        readFileSync(path.join(CONTENT, section, 'meta.json'), 'utf8'),
+      ) as MetaData
+      const expected = [`/${section}`, ...(meta.pages ?? []).map((slug) => `/${section}/${slug}`)]
+      const routes = linked(authoredNav().sections)
+      const at = routes.indexOf(expected[0] as string)
+      expect(routes.slice(at, at + expected.length)).toEqual(expected)
+    }
+  })
+})
+
 /** Every file below a directory, at whatever depth the tree holds. */
 function walk(root: string): string[] {
   return readdirSync(root).flatMap((name) => {
