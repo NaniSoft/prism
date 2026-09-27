@@ -148,14 +148,21 @@ pull request.
 
 ## URLs
 
-Preserved, because the path already matches the new shape: `/docs`,
-`/components`, `/blocks`, `/pages`, `/themes`. These serve the new section index
-at the same path.
+Moved, with a permanent redirect from the old path at the site Worker:
+`/docs` to `/overview`, `/foundations` to `/foundation`, `/themes` to
+`/foundation/themes`. `/docs/agent-workflow` moves to `/overview/using-llms`
+rather than to the Section it is in, so an old link lands on the page and not on
+a section index that does not mention it.
+
+Preserved, because the path is unchanged: `/components`, `/blocks`, `/pages` and
+every per-item route under them. These serve the section index and the item pages
+at the same paths as before, and the Corpus advertises the same forty-two
+addresses.
 
 Removed with no redirect:
 
 - every old per-item URL (`/components/<old-slug>`, `/blocks/<old-slug>`,
-  `/pages/<old-slug>`, `/docs/<old-guide-slug>`);
+  `/pages/<old-slug>`);
 - every old per-theme deep link;
 - `/blog` and `/rss.xml` (the blog never had a post).
 

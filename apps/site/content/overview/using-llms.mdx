@@ -1,6 +1,6 @@
 ---
-title: Agent workflow
-description: "Give an AI agent the same owned catalogue, props, demos and tokens that power the human documentation."
+title: Using LLMs
+description: "Using LLMs against Prism: the corpus, the Markdown mirror and the read-only MCP endpoint, so an agent reads the same source the human documentation does."
 ---
 
 Prism treats agents as first-class consumers. The site, the package declarations,
@@ -9,7 +9,7 @@ source, so an agent and a human cannot be told different things.
 
 ## Fast path
 
-1. Read `llms.txt` for the catalogue and the guide index.
+1. Read `llms.txt` for the catalogue and the page index.
 2. Use `search_docs` when the item name is unknown.
 3. Use `get_item_doc` for the assembled item documentation and its rules.
 4. Use `get_item_props` for the public TypeScript surface.
@@ -42,7 +42,7 @@ consumer project.
 | `get_item_props` | Read the `## Props` subset of an item |
 | `get_item_source` | Copy the verbatim demo plus the import line |
 | `get_theme_doc` | Read the token contract and the bound scales |
-| `list_pages` | Browse the non-item pages: guides, foundations, content, changelogs |
+| `list_pages` | Browse the non-item pages: Overview, Foundation, Content, Changelogs |
 | `get_page` | Read one non-item page as Markdown |
 | `search_docs` | Search the complete corpus and return references |
 | `get_changelog` | Read a published package's changelog, optionally one version |

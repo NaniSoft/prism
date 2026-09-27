@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import { redirectFor, RUN_WORKER_FIRST } from '../src/lib/sections'
+
 import { findContentJoins, parseNav, routeForFile } from '../scripts/content-joins.mjs'
 
 /**
@@ -69,15 +71,14 @@ const changelogs = () => section('Changelogs', '/changelogs', ['/changelogs/pris
 /** The header row, which is a block of routes with no group of its own. */
 const header: NavBlock = {
   hrefs: [
-    '/',
-    '/docs',
-    '/foundations',
+    '/overview',
+    '/foundation',
+    '/content',
     '/components',
     '/blocks',
     '/pages',
-    '/content',
     '/changelogs',
-    '/themes',
+    '/foundation/themes',
   ],
   groups: [],
 }
@@ -102,25 +103,84 @@ const changelogFile = {
   text: CHANGELOG_TEXT,
 }
 
+/** Every route the flat fixture publishes, which is also what the move is relative to. */
+const afterRoutes = [
+  '/',
+  '/blocks',
+  '/blocks/hero-01',
+  '/changelogs',
+  '/changelogs/prism-ui',
+  '/components',
+  '/components/button',
+  '/content',
+  '/content/voice',
+  '/overview',
+  '/overview/quickstart',
+  '/foundation',
+  '/foundation/colors',
+  '/foundation/themes',
+  '/pages',
+]
+
+/** The same set with a Foundation folder two levels deeper, which is the other shape. */
+const nestedRoutes = [
+  ...afterRoutes,
+  '/foundation/tokens',
+  '/foundation/tokens/colors',
+  '/foundation/tokens/contrast/ratios',
+]
+
+/**
+ * The routes the site published before the Sections moved, and the redirect table
+ * the manifest generates for them, for one published route set.
+ *
+ * The fixture is a miniature of the real one and is built the same way. The
+ * snapshot is a record rather than a derived list, because "a route that moved"
+ * has no other definition: every other surface says what exists now, and a route
+ * that quietly stopped being published is absent from all of them. The table is
+ * `redirectFor()` applied to the routes in it rather than a list of pairs written
+ * out beside it, and the moved routes are the two Section prefixes and the reader
+ * that joined one, which is the smallest set that exercises a prefix rule at
+ * depth zero and at depth one plus a route with no children. The page that was
+ * also renamed is asserted against the real tree in `routes.test.ts`, where its
+ * destination is a route that exists.
+ */
+function theMove(published: string[]) {
+  const before = [
+    ...published.filter((route) => route !== '/foundation/themes'),
+    '/docs',
+    '/docs/quickstart',
+    '/foundations',
+    '/foundations/colors',
+    '/themes',
+  ]
+  return {
+    routesBefore: before,
+    redirects: before
+      .map((from) => ({ from, to: redirectFor(from) }))
+      .filter((entry): entry is { from: string; to: string } => entry.to !== null),
+  }
+}
+
 const flat: Joins = {
   catalogue: [
     { name: 'Button', slug: 'button', kind: 'component', category: 'Call to action' },
     { name: 'Hero01', slug: 'hero-01', kind: 'block', category: null },
   ],
-  sections: ['docs', 'foundations', 'content', 'changelogs'],
-  contentDirectories: ['changelogs', 'content', 'docs', 'foundations'],
+  sections: ['overview', 'foundation', 'content', 'changelogs'],
+  contentDirectories: ['changelogs', 'content', 'overview', 'foundation'],
   contentFiles: [
     { route: '/changelogs', file: 'content/changelogs/index.mdx', index: true },
     { route: '/changelogs/prism-ui', file: 'content/changelogs/prism-ui.md', index: false },
     { route: '/content', file: 'content/content/index.mdx', index: true },
     { route: '/content/voice', file: 'content/content/voice.mdx', index: false },
-    { route: '/docs', file: 'content/docs/index.mdx', index: true },
-    { route: '/docs/quickstart', file: 'content/docs/quickstart.mdx', index: false },
-    { route: '/foundations', file: 'content/foundations/index.mdx', index: true },
-    { route: '/foundations/colors', file: 'content/foundations/colors.mdx', index: false },
+    { route: '/overview', file: 'content/overview/index.mdx', index: true },
+    { route: '/overview/quickstart', file: 'content/overview/quickstart.mdx', index: false },
+    { route: '/foundation', file: 'content/foundation/index.mdx', index: true },
+    { route: '/foundation/colors', file: 'content/foundation/colors.mdx', index: false },
   ],
   links: [
-    { file: 'content/docs/index.mdx', href: '/docs/quickstart' },
+    { file: 'content/overview/index.mdx', href: '/overview/quickstart' },
     { file: 'content/changelogs/index.mdx', href: '/changelogs/prism-ui' },
   ],
   itemDocs: [
@@ -154,12 +214,12 @@ const flat: Joins = {
     ],
     pages: [
       { section: 'content', slug: 'voice', url: '/content/voice', mirror: '/content/voice.md' },
-      { section: 'docs', slug: 'quickstart', url: '/docs/quickstart', mirror: '/docs/quickstart.md' },
+      { section: 'overview', slug: 'quickstart', url: '/overview/quickstart', mirror: '/overview/quickstart.md' },
       {
-        section: 'foundations',
+        section: 'foundation',
         slug: 'colors',
-        url: '/foundations/colors',
-        mirror: '/foundations/colors.md',
+        url: '/foundation/colors',
+        mirror: '/foundation/colors.md',
       },
       {
         section: 'changelogs',
@@ -172,36 +232,23 @@ const flat: Joins = {
       { package: '@nanisoft/prism-ui', route: '/changelogs/prism-ui', versions: ['0.5.0'] },
     ],
   },
-  routes: [
-    '/',
-    '/blocks',
-    '/blocks/hero-01',
-    '/changelogs',
-    '/changelogs/prism-ui',
-    '/components',
-    '/components/button',
-    '/content',
-    '/content/voice',
-    '/docs',
-    '/docs/quickstart',
-    '/foundations',
-    '/foundations/colors',
-    '/pages',
-    '/themes',
-  ],
+  routes: afterRoutes,
   navBlocks: [
     header,
     sidebar(
-      section('Guides', '/docs', ['/docs/quickstart']),
-      section('Foundations', '/foundations', ['/foundations/colors']),
+      section('Overview', '/overview', ['/overview/quickstart']),
+      section('Foundation', '/foundation', ['/foundation/colors']),
       section('Content', '/content', ['/content/voice']),
       section('Components', '/components', ['/components/button']),
       section('Blocks', '/blocks', ['/blocks/hero-01']),
     ),
   ],
+  ...theMove(afterRoutes),
+  workerFirst: [...RUN_WORKER_FIRST],
+  requiredWorkerFirst: [...RUN_WORKER_FIRST],
 }
 
-/** The same content with a Foundations page one and two folders deeper. */
+/** The same content with a Foundation page one and two folders deeper. */
 const nested: Joins = {
   ...flat,
   contentFiles: [
@@ -209,25 +256,25 @@ const nested: Joins = {
     { route: '/changelogs/prism-ui', file: 'content/changelogs/prism-ui.md', index: false },
     { route: '/content', file: 'content/content/index.mdx', index: true },
     { route: '/content/voice', file: 'content/content/voice.mdx', index: false },
-    { route: '/docs', file: 'content/docs/index.mdx', index: true },
-    { route: '/docs/quickstart', file: 'content/docs/quickstart.mdx', index: false },
-    { route: '/foundations', file: 'content/foundations/index.mdx', index: true },
-    { route: '/foundations/tokens', file: 'content/foundations/tokens/index.mdx', index: true },
+    { route: '/overview', file: 'content/overview/index.mdx', index: true },
+    { route: '/overview/quickstart', file: 'content/overview/quickstart.mdx', index: false },
+    { route: '/foundation', file: 'content/foundation/index.mdx', index: true },
+    { route: '/foundation/tokens', file: 'content/foundation/tokens/index.mdx', index: true },
     {
-      route: '/foundations/tokens/colors',
-      file: 'content/foundations/tokens/colors.mdx',
+      route: '/foundation/tokens/colors',
+      file: 'content/foundation/tokens/colors.mdx',
       index: false,
     },
     {
-      route: '/foundations/tokens/contrast/ratios',
-      file: 'content/foundations/tokens/contrast/ratios.mdx',
+      route: '/foundation/tokens/contrast/ratios',
+      file: 'content/foundation/tokens/contrast/ratios.mdx',
       index: false,
     },
   ],
   links: [
-    { file: 'content/docs/index.mdx', href: '/docs/quickstart' },
-    { file: 'content/foundations/index.mdx', href: '/foundations/tokens' },
-    { file: 'content/foundations/tokens/index.mdx', href: '/foundations/tokens/colors' },
+    { file: 'content/overview/index.mdx', href: '/overview/quickstart' },
+    { file: 'content/foundation/index.mdx', href: '/foundation/tokens' },
+    { file: 'content/foundation/tokens/index.mdx', href: '/foundation/tokens/colors' },
     { file: 'content/changelogs/index.mdx', href: '/changelogs/prism-ui' },
   ],
   // A Component filed in its own folder, under its Category, which is the shape
@@ -256,34 +303,29 @@ const nested: Joins = {
   corpus: {
     ...flat.corpus,
     pages: [
-      ...flat.corpus.pages.filter((page) => page.section !== 'foundations'),
+      ...flat.corpus.pages.filter((page) => page.section !== 'foundation'),
       {
-        section: 'foundations',
+        section: 'foundation',
         slug: 'tokens/colors',
-        url: '/foundations/tokens/colors',
-        mirror: '/foundations/tokens/colors.md',
+        url: '/foundation/tokens/colors',
+        mirror: '/foundation/tokens/colors.md',
       },
       {
-        section: 'foundations',
+        section: 'foundation',
         slug: 'tokens/contrast/ratios',
-        url: '/foundations/tokens/contrast/ratios',
-        mirror: '/foundations/tokens/contrast/ratios.md',
+        url: '/foundation/tokens/contrast/ratios',
+        mirror: '/foundation/tokens/contrast/ratios.md',
       },
     ],
   },
-  routes: [
-    ...flat.routes,
-    '/foundations/tokens',
-    '/foundations/tokens/colors',
-    '/foundations/tokens/contrast/ratios',
-  ],
+  routes: nestedRoutes,
   navBlocks: [
     header,
     sidebar(
-      section('Guides', '/docs', ['/docs/quickstart']),
-      section('Foundations', '/foundations', ['/foundations/colors'], [
-        section('Tokens', '/foundations/tokens', ['/foundations/tokens/colors'], [
-          section('Contrast', '', ['/foundations/tokens/contrast/ratios']),
+      section('Overview', '/overview', ['/overview/quickstart']),
+      section('Foundation', '/foundation', ['/foundation/colors'], [
+        section('Tokens', '/foundation/tokens', ['/foundation/tokens/colors'], [
+          section('Contrast', '', ['/foundation/tokens/contrast/ratios']),
         ]),
       ]),
       section('Content', '/content', ['/content/voice']),
@@ -293,6 +335,7 @@ const nested: Joins = {
       section('Blocks', '/blocks', ['/blocks/hero-01']),
     ),
   ],
+  ...theMove(nestedRoutes),
 }
 
 const shapes: [string, Joins][] = [
@@ -414,10 +457,10 @@ describe('the content-join gate', () => {
   it.each(shapes)('fails for %s when a declared Section is not on disk', (_name, joins) => {
     const findings = findContentJoins({
       ...joins,
-      contentDirectories: joins.contentDirectories.filter((name) => name !== 'foundations'),
+      contentDirectories: joins.contentDirectories.filter((name) => name !== 'foundation'),
     })
     expect(groups(findings)).toContain('section')
-    expect(findings.some((f) => f.message.includes("Section 'foundations' is declared"))).toBe(true)
+    expect(findings.some((f) => f.message.includes("Section 'foundation' is declared"))).toBe(true)
   })
 
   it.each(shapes)('fails for %s when a content directory is no declared Section', (_name, joins) => {
@@ -503,10 +546,10 @@ describe('the content-join gate', () => {
         pages: [
           ...joins.corpus.pages,
           {
-            section: 'docs',
+            section: 'overview',
             slug: 'deleted',
-            url: '/docs/deleted',
-            mirror: '/docs/deleted.md',
+            url: '/overview/deleted',
+            mirror: '/overview/deleted.md',
           },
         ],
       },
@@ -518,17 +561,17 @@ describe('the content-join gate', () => {
   it.each(shapes)('fails for %s when a link resolves to no route', (_name, joins) => {
     const findings = findContentJoins({
       ...joins,
-      links: [...joins.links, { file: 'content/docs/index.mdx', href: '/docs/colours' }],
+      links: [...joins.links, { file: 'content/overview/index.mdx', href: '/overview/colours' }],
     })
     expect(groups(findings)).toContain('links')
-    expect(findings.some((f) => f.message.includes('links /docs/colours'))).toBe(true)
+    expect(findings.some((f) => f.message.includes('links /overview/colours'))).toBe(true)
   })
 
   it.each(shapes)('fails for %s when the navigation links a route nothing produces', (_name, joins) => {
     // A link carrying a query the tree does not produce. It is not a changelog
     // route: the Changelogs Section is a real route now, so a query pointed at it
     // would resolve and prove nothing.
-    const findings = findContentJoins(linked(joins, '/docs/architecture?tab=usage'))
+    const findings = findContentJoins(linked(joins, '/overview/architecture?tab=usage'))
     expect(groups(findings)).toContain('routes')
     expect(findings.some((f) => f.message.includes('routing tree does not produce'))).toBe(true)
   })
@@ -542,9 +585,9 @@ describe('the content-join gate', () => {
   it.each(shapes)(
     'fails for %s when a content page is published but no ordering claims it',
     (_name, joins) => {
-      const findings = findContentJoins(unlinked(joins, '/docs/quickstart'))
+      const findings = findContentJoins(unlinked(joins, '/overview/quickstart'))
       expect(groups(findings)).toContain('routes')
-      expect(findings.some((f) => f.message.includes('/docs/quickstart'))).toBe(true)
+      expect(findings.some((f) => f.message.includes('/overview/quickstart'))).toBe(true)
       expect(findings.some((f) => f.message.includes('reachable only by URL'))).toBe(true)
     },
   )
@@ -567,10 +610,10 @@ describe('the content-join gate', () => {
       navBlocks: [
         header,
         sidebar(
-          section('Guides', '/docs', ['/docs/quickstart']),
-          section('Foundations', '/foundations', ['/foundations/colors'], [
-            section('Tokens', '/foundations/tokens', ['/foundations/tokens/colors'], [
-              section('Contrast', '', ['/foundations/tokens/contrast/ratios']),
+          section('Overview', '/overview', ['/overview/quickstart']),
+          section('Foundation', '/foundation', ['/foundation/colors'], [
+            section('Tokens', '/foundation/tokens', ['/foundation/tokens/colors'], [
+              section('Contrast', '', ['/foundation/tokens/contrast/ratios']),
             ]),
           ]),
           section('Content', '/content', ['/content/voice']),
@@ -589,10 +632,10 @@ describe('the content-join gate', () => {
       navBlocks: [
         header,
         sidebar(
-          section('Guides', '/docs', ['/docs/quickstart']),
-          section('Foundations', '/foundations', ['/foundations/colors'], [
-            section('Tokens', '/foundations/tokens', ['/foundations/tokens/colors'], [
-              section('Contrast', '', ['/foundations/tokens/contrast/ratios']),
+          section('Overview', '/overview', ['/overview/quickstart']),
+          section('Foundation', '/foundation', ['/foundation/colors'], [
+            section('Tokens', '/foundation/tokens', ['/foundation/tokens/colors'], [
+              section('Contrast', '', ['/foundation/tokens/contrast/ratios']),
             ]),
           ]),
           section('Content', '/content', ['/content/voice']),
@@ -615,15 +658,15 @@ describe('the content-join gate', () => {
       navBlocks: [
         header,
         sidebar(
-          section('Guides', '/docs', ['/docs/quickstart']),
-          section('Foundations', '/foundations', ['/foundations/colors'], [
-            section('Tokens', '/foundations/tokens', ['/foundations/tokens/colors'], [
-              section('Contrast', '', ['/foundations/tokens/contrast/ratios']),
+          section('Overview', '/overview', ['/overview/quickstart']),
+          section('Foundation', '/foundation', ['/foundation/colors'], [
+            section('Tokens', '/foundation/tokens', ['/foundation/tokens/colors'], [
+              section('Contrast', '', ['/foundation/tokens/contrast/ratios']),
             ]),
           ]),
           section('Content', '/content', ['/content/voice']),
           section('Components', '/components', [], [
-            section('Call to action', '', ['/components/button', '/docs/quickstart']),
+            section('Call to action', '', ['/components/button', '/overview/quickstart']),
           ]),
           section('Blocks', '/blocks', ['/blocks/hero-01']),
         ),
@@ -641,10 +684,10 @@ describe('the content-join gate', () => {
       navBlocks: [
         header,
         sidebar(
-          section('Guides', '/docs', ['/docs/quickstart']),
-          section('Foundations', '/foundations', ['/foundations/colors'], [
-            section('Tokens', '/foundations/tokens', ['/foundations/tokens/colors'], [
-              section('Contrast', '', ['/foundations/tokens/contrast/ratios']),
+          section('Overview', '/overview', ['/overview/quickstart']),
+          section('Foundation', '/foundation', ['/foundation/colors'], [
+            section('Tokens', '/foundation/tokens', ['/foundation/tokens/colors'], [
+              section('Contrast', '', ['/foundation/tokens/contrast/ratios']),
             ]),
           ]),
           section('Content', '/content', ['/content/voice']),
@@ -674,8 +717,109 @@ describe('the content-join gate', () => {
     // The three Section landing pages are routed and are not in the Corpus, so
     // the index files are the one authored file the join must leave alone.
     const indexRoutes = flat.contentFiles.filter((file) => file.index).map((file) => file.route)
-    expect(indexRoutes).toEqual(['/changelogs', '/content', '/docs', '/foundations'])
-    expect(flat.corpus.pages.map((page) => page.url)).not.toContain('/docs')
+    expect(indexRoutes).toEqual(['/changelogs', '/content', '/overview', '/foundation'])
+    expect(flat.corpus.pages.map((page) => page.url)).not.toContain('/overview')
+  })
+})
+
+/**
+ * The route-move joins, on both shapes.
+ *
+ * The one failure here that a reader or an agent actually meets is a cached URL
+ * that dead-ends, so each test drops one route from the table, points one at a
+ * route nothing produces, or takes a prefix out of the first-run list, and
+ * asserts the finding that names it. A spot check of a few known moves would pass
+ * all of these.
+ */
+describe('the route-move joins', () => {
+  it.each(shapes)('fails for %s when a moved route has no redirect', (_name, joins) => {
+    const findings = findContentJoins({
+      ...joins,
+      redirects: joins.redirects.filter((entry) => entry.from !== '/docs/quickstart'),
+    })
+    expect(groups(findings)).toContain('redirect')
+    expect(
+      findings.some(
+        (f) => f.message.includes('/docs/quickstart') && f.message.includes('dead-ends'),
+      ),
+    ).toBe(true)
+  })
+
+  it.each(shapes)('fails for %s when a redirect points at no route', (_name, joins) => {
+    const findings = findContentJoins({
+      ...joins,
+      redirects: joins.redirects.map((entry) =>
+        entry.from === '/docs' ? { ...entry, to: '/overview/nothing-here' } : entry,
+      ),
+    })
+    expect(groups(findings)).toContain('redirect')
+    expect(
+      findings.some(
+        (f) => f.message.includes('/overview/nothing-here') && f.message.includes('404'),
+      ),
+    ).toBe(true)
+  })
+
+  it.each(shapes)('fails for %s when a redirect is for a route that did not move', (_name, joins) => {
+    // A stale entry in the table is the other direction: it moves a reader who
+    // asked for a page that is still published.
+    const findings = findContentJoins({
+      ...joins,
+      redirects: [...joins.redirects, { from: '/components/button', to: '/components/badge' }],
+    })
+    expect(groups(findings)).toContain('redirect')
+    expect(
+      findings.some((f) => f.message.includes('redirects a reader who did not ask to be moved')),
+    ).toBe(true)
+  })
+
+  it.each(shapes)('fails for %s when a redirect takes two hops', (_name, joins) => {
+    const findings = findContentJoins({
+      ...joins,
+      redirects: [...joins.redirects, { from: '/overview/quickstart', to: '/overview/brand' }],
+    })
+    expect(groups(findings)).toContain('redirect')
+    expect(findings.some((f) => f.message.includes('two hops'))).toBe(true)
+  })
+
+  it.each(shapes)('fails for %s when a required prefix is not invoked first', (_name, joins) => {
+    // The stale mirrored-document prefix, in the direction that costs a 404. An
+    // agent asking for `/changelogs/prism-ui.md` is answered by asset serving
+    // before the Worker can rewrite it.
+    const findings = findContentJoins({
+      ...joins,
+      workerFirst: joins.workerFirst.filter((prefix) => prefix !== '/changelogs/*.md'),
+    })
+    expect(groups(findings)).toContain('worker')
+    expect(
+      findings.some(
+        (f) =>
+          f.message.includes('run_worker_first does not list /changelogs/*.md') &&
+          f.message.includes('asset serving answers before'),
+      ),
+    ).toBe(true)
+  })
+
+  it.each(shapes)('fails for %s when a moved prefix is not invoked first', (_name, joins) => {
+    // A moved route with no asset behind it is answered with the 404 page unless
+    // the Worker runs first, so this is the redirect join from the config side.
+    const findings = findContentJoins({
+      ...joins,
+      workerFirst: joins.workerFirst.filter((prefix) => prefix !== '/docs/*'),
+    })
+    expect(groups(findings)).toContain('worker')
+    expect(findings.some((f) => f.message.includes("run_worker_first does not list /docs/*"))).toBe(
+      true,
+    )
+  })
+
+  it.each(shapes)('fails for %s when a prefix is invoked first for nothing', (_name, joins) => {
+    const findings = findContentJoins({
+      ...joins,
+      workerFirst: [...joins.workerFirst, '/old-section/*.md'],
+    })
+    expect(groups(findings)).toContain('worker')
+    expect(findings.some((f) => f.message.includes('/old-section/*.md'))).toBe(true)
   })
 })
 
@@ -923,13 +1067,13 @@ describe('parseNav', () => {
 describe('routeForFile', () => {
   it('gives an index file its folder and every other file its own path', () => {
     expect(routeForFile('index')).toBe('/')
-    expect(routeForFile('docs/index')).toBe('/docs')
-    expect(routeForFile('docs/quickstart')).toBe('/docs/quickstart')
+    expect(routeForFile('overview/index')).toBe('/overview')
+    expect(routeForFile('overview/quickstart')).toBe('/overview/quickstart')
   })
 
   it('applies the same rule at any depth', () => {
-    expect(routeForFile('foundations/tokens/index')).toBe('/foundations/tokens')
-    expect(routeForFile('foundations/tokens/colors')).toBe('/foundations/tokens/colors')
+    expect(routeForFile('foundation/tokens/index')).toBe('/foundation/tokens')
+    expect(routeForFile('foundation/tokens/colors')).toBe('/foundation/tokens/colors')
     expect(routeForFile('components/call-to-action/button/button')).toBe(
       '/components/call-to-action/button/button',
     )

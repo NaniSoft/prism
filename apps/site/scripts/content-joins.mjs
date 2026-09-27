@@ -27,6 +27,15 @@
  * ordering left out. The published navigation is read as a tree rather than as a
  * list of hrefs, so a group a reader can see is a group this file can check.
  *
+ * Two surfaces arrive as data rather than as something re-derived here. The
+ * redirect table is `redirectFor()` from the Section manifest applied to the
+ * record of what was published before the Sections moved, so this file compares
+ * three independent surfaces (the snapshot, the table and the routes the tree
+ * publishes) without being the one that computed any of them. And the Worker's
+ * first-run prefixes arrive as two sets, the ones `wrangler.jsonc` lists and the
+ * ones the manifest requires, so the comparison is a set equality rather than a
+ * reading of a config file whose comments would have to stay true.
+ *
  * @typedef {{ name: string, slug: string, kind: string, category: string | null }} CatalogueItem
  * @typedef {{ slug: string, kind: string, file: string, group: string[], route: string | null, demo: string | null, demos: string[] }} ItemDoc
  * @typedef {{ route: string, file: string, index: boolean }} ContentFile
@@ -34,6 +43,7 @@
  * @typedef {{ slug: string, kind: string, url: string }} CorpusItem
  * @typedef {{ section: string, slug: string, url: string, mirror: string }} CorpusPage
  * @typedef {{ package: string, route: string, versions: string[] }} CorpusChangelog
+ * @typedef {{ from: string, to: string }} Redirect
  * @typedef {{ group: string, message: string }} Finding
  *
  * @typedef {object} ChangelogPackage
@@ -70,7 +80,11 @@
  * @property {string[]} changelogIndex the changelog routes the authored index links
  * @property {{ items: CorpusItem[], pages: CorpusPage[], changelogs: CorpusChangelog[] }} corpus the Corpus, as the Store
  * @property {string[]} routes the routes the site publishes
+ * @property {string[]} routesBefore the routes the site published before the Sections moved
+ * @property {Redirect[]} redirects the redirect table, generated from the Section manifest
  * @property {NavBlock[]} navBlocks the navigation blocks the published export renders
+ * @property {string[]} workerFirst the prefixes the Worker is invoked for, from `wrangler.jsonc`
+ * @property {string[]} requiredWorkerFirst the prefixes it has to be invoked for, from the manifest
  */
 
 /**
@@ -614,6 +628,93 @@ export function findContentJoins(joins) {
           'navigation links it, so a page-tree ordering left it out and it is reachable only by URL',
       )
     }
+  }
+
+  /* The routes that moved, and the redirects that serve them. ------------- */
+
+  // A spot check passes while a moved route dead-ends, and a dead end is what a
+  // cached agent instruction actually hits, so this is a set comparison in both
+  // directions rather than a sample of the moves. The population is the record
+  // of what was published before the Sections moved, which is a snapshot rather
+  // than a list somebody maintains: a route that has quietly stopped being
+  // published is invisible to every other assertion here, because it is absent
+  // rather than wrong.
+  //
+  // The table itself is not read out of the snapshot. It is the manifest's
+  // `redirectFor()` applied to the snapshot, so a redirect that covers a route
+  // which never moved is a finding and so is one that covers nothing, and neither
+  // can hide behind the other being right.
+  const before = new Set(joins.routesBefore)
+  const live = new Set(joins.routes)
+  const moved = [...before].filter((route) => !live.has(route)).sort()
+  const sources = new Set(joins.redirects.map((entry) => entry.from))
+  const unserved = moved.filter((route) => !sources.has(route))
+  const unexpected = joins.redirects.filter((entry) => !moved.includes(entry.from))
+
+  for (const route of unserved) {
+    fail(
+      'redirect',
+      `${route} was published before the Sections moved and is not published now, and the redirect ` +
+        'table does not serve it, so a bookmark or a cached agent index that still names it dead-ends',
+    )
+  }
+  for (const entry of unexpected) {
+    fail(
+      'redirect',
+      `the redirect table serves ${entry.from}, which is either still published at ` +
+        `${live.has(entry.from) ? 'the same route' : 'no route this site has ever published'}, so it ` +
+        'redirects a reader who did not ask to be moved',
+    )
+  }
+  for (const entry of joins.redirects) {
+    if (live.has(entry.to)) continue
+    fail(
+      'redirect',
+      `the redirect table sends ${entry.from} to ${entry.to}, which the routing tree does not ` +
+        'produce, so the redirect a cached index resolves is a 404 at the end of it',
+    )
+  }
+  // A chain is a redirect whose target is itself redirected, which resolves in
+  // two round trips and stops working the moment the second one is dropped.
+  for (const entry of joins.redirects) {
+    if (!sources.has(entry.to)) continue
+    fail(
+      'redirect',
+      `the redirect table sends ${entry.from} to ${entry.to}, which is itself redirected, so the ` +
+        'old URL takes two hops to reach a page',
+    )
+  }
+  for (const entry of joins.redirects) {
+    if (entry.from !== entry.to) continue
+    fail('redirect', `the redirect table maps ${entry.from} to itself`)
+  }
+
+  /* The prefixes the Worker is invoked for. -------------------------------- */
+
+  // Two lists that have to be the same set and were kept in step by eye. A
+  // prefix missing from the config means the Worker never runs for that path, and
+  // both families fail the same way: a mirrored document answers 404, and a moved
+  // route answers the 404 page, because asset serving answers first. The
+  // manifest states what is required and the config says what is there, so a
+  // Section that exists without its prefix is a finding rather than a 404 an
+  // agent discovers.
+  const configured = new Set(joins.workerFirst)
+  const required = new Set(joins.requiredWorkerFirst)
+  for (const prefix of required) {
+    if (configured.has(prefix)) continue
+    fail(
+      'worker',
+      `wrangler.jsonc's run_worker_first does not list ${prefix}, so the Worker is not invoked for ` +
+        'it and asset serving answers before the redirect or the mirror rewrite can',
+    )
+  }
+  for (const prefix of joins.workerFirst) {
+    if (required.has(prefix)) continue
+    fail(
+      'worker',
+      `wrangler.jsonc's run_worker_first lists ${prefix}, which the Section manifest does not ` +
+        'require, so it is a prefix that only costs a Worker invocation',
+    )
   }
 
   /* The Category groups, from the Catalogue and the published sidebar. ---- */

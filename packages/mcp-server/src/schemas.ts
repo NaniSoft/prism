@@ -71,7 +71,7 @@ export const getPageSchema = z.object({
   url: z
     .string()
     .min(1)
-    .describe('A non-item page URL or mirror, for example `/docs/quickstart` or `/docs/quickstart.md`.'),
+    .describe('A non-item page URL or mirror, for example `/overview/quickstart` or `/overview/quickstart.md`.'),
 })
 
 export const searchDocsSchema = z.object({

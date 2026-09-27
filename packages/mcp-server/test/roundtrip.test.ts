@@ -159,7 +159,7 @@ describe('protocol round-trips over InMemoryTransport', () => {
     const second = await connect(raw)
     try {
       const one = await first.client.callTool({ name: 'list_pages', arguments: {} })
-      const two = await second.client.callTool({ name: 'get_page', arguments: { url: '/docs/quickstart' } })
+      const two = await second.client.callTool({ name: 'get_page', arguments: { url: '/overview/quickstart' } })
       expect(readText(one)).toContain('# Prism pages')
       expect(readText(two)).toContain('# Quickstart')
     } finally {

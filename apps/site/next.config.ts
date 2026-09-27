@@ -5,8 +5,8 @@ import type { NextConfig } from 'next'
  * The site is a static export.
  *
  * `trailingSlash: false` pairs with the Worker's `html_handling:
- * "auto-trailing-slash"`, so a route is emitted as `out/docs/quickstart.html`
- * and served at `/docs/quickstart`. `images.unoptimized` is required because
+ * "auto-trailing-slash"`, so a route is emitted as `out/overview/quickstart.html`
+ * and served at `/overview/quickstart`. `images.unoptimized` is required because
  * Next's default image loader cannot run without a server.
  *
  * `createMDX` compiles the one content collection declared in

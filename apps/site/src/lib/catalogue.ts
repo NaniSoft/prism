@@ -7,7 +7,7 @@ import {
 } from '@nanisoft/prism-ui/catalog'
 import type { MetaData, PageData, StaticSource } from 'fumadocs-core/source'
 
-import generatedItemGroups from '@/generated/item-groups.json'
+import { sectionFor } from './sections'
 
 /**
  * Builds the routed page tree from the checked catalogue.
@@ -35,12 +35,14 @@ import generatedItemGroups from '@/generated/item-groups.json'
  * **Where an Item sits in the tree is read, and its route is stated by the
  * document.** A Component's documentation is filed under its Category, so the
  * ordering names a Category folder at the place of the first Item inside it and
- * the page tree nests it. The folders come from `item-groups.json`, which the
- * site's own build generates from the documentation tree with the same rule the
- * corpus and the gate read, so the tree follows the content rather than a second
- * hand-kept list of where content is. A Block's and a Page's documentation is
- * filed one folder deeper and with no Category folder above it, because a Block
- * and a Page have no Category, so their sidebars are flat lists.
+ * the page tree nests it. The folder comes from the Catalogue, as the slug of the
+ * Item's own Category, which is what removed the item manifest this module used
+ * to import: there is no longer a generated file saying which folder an Item
+ * lives in, because the one fact it recorded is in the Catalogue and the file
+ * path is read by the projection. A Component filed under a folder that is not
+ * its Category still publishes its route and still leaves the sidebar, and
+ * `projectNav()` refuses to render that tree, so the disagreement fails the
+ * build rather than shipping a page nothing links.
  *
  * The route does not follow the folder, and nothing here computes one. Each Item
  * page states `<segment>/<slug>` in its own frontmatter and `content-tree.ts`
@@ -53,15 +55,6 @@ import generatedItemGroups from '@/generated/item-groups.json'
 
 /** The three Kinds, in the order the Sections are built and rendered. */
 export const KINDS = ['component', 'block', 'page'] as const
-
-/**
- * The item manifest, read: which folder each Item's documentation is filed
- * under, keyed by slug, generated from the documentation tree by the same rule
- * the corpus builder and the content-join gate read. A JSON import is inferred
- * as a literal object, so it is widened here to the shape it is used as rather
- * than indexed through a literal type.
- */
-const itemGroups: Readonly<Record<string, readonly string[]>> = generatedItemGroups
 
 /** The catalogue metadata a routed page carries. */
 export type CataloguePageData = PageData & {
@@ -78,28 +71,46 @@ export type CataloguePageData = PageData & {
 
 type CatalogueConfig = { pageData: CataloguePageData; metaData: MetaData }
 
-export const SECTIONS: Record<
-  CatalogKind,
-  { segment: string; title: string; description: string }
-> = {
-  component: {
-    segment: 'components',
-    title: 'Components',
-    description:
-      'Focused, accessible, product-agnostic exports. A Component has one job and consumes semantic tokens only.',
-  },
-  block: {
-    segment: 'blocks',
-    title: 'Blocks',
-    description:
-      'Pre-composed, product-agnostic sections assembled from Components. A Block takes its content as props and fetches nothing.',
-  },
-  page: {
-    segment: 'pages',
-    title: 'Pages',
-    description:
-      'Complete structural compositions of Blocks and Components that model a whole screen and receive application-owned data.',
-  },
+/**
+ * The one Section a Kind is published at, with the words a reader is shown.
+ *
+ * The segment and the title are read from the manifest rather than written here,
+ * because this was the fourth place the Section list was stated and the one a
+ * rename had to be repeated in. A Kind whose Section the manifest does not
+ * declare throws rather than publishing at an invented route, which is the
+ * failure a segment written beside a list is always one edit away from. Only the
+ * description is authored here: the prose Sections take theirs from their own
+ * index page's frontmatter, and a catalogue Section's is the one piece of copy
+ * that exists to describe a roster of Items.
+ */
+function catalogueSection(
+  kind: CatalogKind,
+  description: string,
+): { segment: string; title: string; description: string } {
+  const segment = `${kind}s`
+  const section = sectionFor(segment)
+  if (section === undefined) {
+    throw new Error(
+      `the Catalogue publishes the ${kind} Section at /${segment} and the manifest declares no ` +
+        'Section there, so there is no route to publish it at. The segment is the manifest word.',
+    )
+  }
+  return { segment: section.segment, title: section.title, description }
+}
+
+export const SECTIONS: Record<CatalogKind, { segment: string; title: string; description: string }> = {
+  component: catalogueSection(
+    'component',
+    'Focused, accessible, product-agnostic exports. A Component has one job and consumes semantic tokens only.',
+  ),
+  block: catalogueSection(
+    'block',
+    'Pre-composed, product-agnostic sections assembled from Components. A Block takes its content as props and fetches nothing.',
+  ),
+  page: catalogueSection(
+    'page',
+    'Complete structural compositions of Blocks and Components that model a whole screen and receive application-owned data.',
+  ),
 }
 
 /**
@@ -127,22 +138,42 @@ function categoryOf(folder: string): ComponentCategory {
   return found
 }
 
-/** The folders an Item's documentation is filed under, checked against the manifest. */
+/**
+ * The folders an Item's page is nested under in the tree, read from the
+ * Catalogue rather than from a generated file.
+ *
+ * A Component's folder is the slug of its own Category, so the folder, the label
+ * the sidebar shows and the Catalogue entry are one fact read three ways and
+ * cannot disagree about which role a Component is for. A Block and a Page have
+ * no Category, and the constitution says so in two places, so their folder list
+ * is empty and their sidebars are flat lists. A Component the Catalogue gives no
+ * Category would nest nowhere, and `categoryFolder()` throws on it rather than
+ * filing it under a folder a reader would be told nothing about.
+ *
+ * The other side of the join is the documentation tree: `content-tree.ts` reads
+ * the same folder out of the file path. The two are asserted against each other
+ * in the test lane, and a disagreement is a build failure rather than a silent
+ * split, because the ordering below would name one folder and the page would be
+ * placed in the other, which is a page that keeps its route and leaves the
+ * sidebar.
+ */
 function groupOf(item: CatalogItem): readonly string[] {
-  const entry = Object.hasOwn(itemGroups, item.slug) ? itemGroups[item.slug] : undefined
-  if (entry === undefined) {
+  if (item.kind !== 'component') {
+    if (item.category !== null) {
+      throw new Error(
+        `the Catalogue files the ${item.kind} ${item.name} under the Category '${item.category}'. A ` +
+          'Block and a Page have no Category, and the constitution says so in two places.',
+      )
+    }
+    return []
+  }
+  if (item.category === null) {
     throw new Error(
-      `the item manifest has no entry for the Catalogue Item ${item.name} (${item.kind}). Run ` +
-        'node scripts/generate-demos.mjs: the manifest is generated from the documentation tree.',
+      `the Catalogue Item ${item.name} is a Component with no Category, so it has no folder to nest ` +
+        'under and would be filed in no group at all. Every Component belongs to one of the seven.',
     )
   }
-  if (item.kind !== 'component' && entry.length > 0) {
-    throw new Error(
-      `the content tree files the ${item.kind} ${item.name} under '${entry.join('/')}'. A Block ` +
-        'and a Page have no Category, and the constitution says so in two places.',
-    )
-  }
-  return entry
+  return [categoryFolder(item.category)]
 }
 
 /**

@@ -43,13 +43,16 @@ import { itemData, itemFor, KINDS, SECTIONS } from './catalogue'
  * become a second list of them: the merge is the only writer, and what it writes
  * it read from the Catalogue.
  *
- * **The group comes from the file, the ordering comes from the manifest, and the
- * two are the same rule read twice.** `items/` is the truth and the grouping is
- * read out of the path, which is what `item-content.mjs` reads and what
- * `item-groups.json` is generated from. If the two ever disagreed, the Item's page
- * would land outside every ordering, the tree would put it in the fallback
- * collection, and `projectNav()` would refuse to render, so the disagreement
- * fails the build rather than publishing a page no sidebar links.
+ * **The group comes from the file, the ordering comes from the Catalogue, and the
+ * two are the same rule read from two sides.** `items/` is the truth and the
+ * grouping is read out of the path here, while `catalogue.ts` reads the same
+ * folder out of the Item's Category and names it in the ordering. If the two ever
+ * disagreed, the Item's page would land outside every ordering, the tree would
+ * put it in the fallback collection, and `projectNav()` would refuse to render,
+ * so the disagreement fails the build rather than publishing a page no sidebar
+ * links. That comparison is the reason there is no generated manifest of folders
+ * any more: it would have been a third record of one fact, and the build would
+ * have had to be trusted to keep it in step.
  *
  * **A file this module cannot place stops the build.** A path under neither
  * `content/` nor `items/`, a Kind that is not one of the three, a document that is

@@ -10,8 +10,7 @@
  * Three consumers read it, and that is the whole reason it is one module:
  *
  *   - `apps/site/scripts/generate-demos.mjs`, for the registry the live preview
- *     and the copy control render from, and for the item manifest the routing
- *     tree is built from;
+ *     and the copy control render from;
  *   - `apps/site/scripts/check-content-joins.mjs`, for the document and Demo
  *     join the gate asserts in both directions;
  *   - `packages/llms/scripts/build.mjs` and its drift gate, which read an

@@ -17,7 +17,7 @@ clock. This is an operational step, not a new decision ticket.
   coarse-pointer project (`hasTouch`) that is the only real browser check of the
   44px target floor.
 - Routes: `/`, `/components`, `/components/button`, `/blocks/hero-01`,
-  `/themes` and `/foundations`.
+  `/foundation/themes` and `/foundation`.
 - Baselines are committed under `__screenshots__/`, compared with
   `maxDiffPixelRatio: 0.01`, `reducedMotion: 'reduce'` and animations disabled.
 

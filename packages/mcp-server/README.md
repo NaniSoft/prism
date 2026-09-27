@@ -34,7 +34,7 @@ surface rule.
 | `get_item_props` | `{ name, kind? }` | The `## Props` section, or `## Composition` for a Block or Page. |
 | `get_item_source` | `{ name, kind? }` | The public import line plus the verbatim demo. |
 | `get_theme_doc` | `{ pack?, mode?, group? }` | A pack's resolved values, or one bound scale. |
-| `list_pages` | `{}` | The guides, Foundations and Content page index. |
+| `list_pages` | `{}` | The Overview, Foundation, Content and Changelogs page index. |
 | `get_page` | `{ url }` | One non-item page as Markdown; a catalogue URL points at `get_item_doc`. |
 | `search_docs` | `{ query, kind?, limit? }` | Substring search over names, descriptions and page bodies. |
 

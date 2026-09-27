@@ -5,6 +5,7 @@ import path from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { collectContentPages, emit } from '../scripts/build.mjs'
+import { STORE_SECTIONS } from '../src/store.js'
 
 /**
  * The content walk, which is the fix.
@@ -21,7 +22,13 @@ import { collectContentPages, emit } from '../scripts/build.mjs'
  * an agent.
  */
 
-const SECTIONS = ['docs', 'foundations', 'content', 'changelogs']
+/**
+ * The Section names the fixtures are built from, which are the ones the site
+ * publishes. The walk takes the list as an argument, so a fixture may name
+ * whatever it likes; naming the real ones keeps a failure here about the walk
+ * rather than about a Section that does not exist.
+ */
+const SECTIONS = [...STORE_SECTIONS]
 
 /** A temporary content root, so the site's real tree is never touched. */
 async function contentTree(files: Record<string, string>): Promise<string> {
@@ -51,66 +58,66 @@ afterAll(async () => {
 describe('collectContentPages', () => {
   it('reads a flat Section and leaves its index out', async () => {
     const root = await tree({
-      'docs/index.mdx': '---\ntitle: Guides\n---\n',
-      'docs/quickstart.mdx': '---\ntitle: Quickstart\n---\n',
-      'docs/architecture.mdx': '---\ntitle: Architecture\n---\n',
-      'foundations/index.mdx': '---\ntitle: Foundations\n---\n',
-      'foundations/colors.mdx': '---\ntitle: Colors\n---\n',
+      'overview/index.mdx': '---\ntitle: Overview\n---\n',
+      'overview/quickstart.mdx': '---\ntitle: Quickstart\n---\n',
+      'overview/architecture.mdx': '---\ntitle: Architecture\n---\n',
+      'foundation/index.mdx': '---\ntitle: Foundation\n---\n',
+      'foundation/colors.mdx': '---\ntitle: Colors\n---\n',
     })
     const pages = await collectContentPages(root, SECTIONS)
 
     expect(pages.map((page) => page.url)).toEqual([
-      '/docs/architecture',
-      '/docs/quickstart',
-      '/foundations/colors',
+      '/overview/architecture',
+      '/overview/quickstart',
+      '/foundation/colors',
     ])
   })
 
   it('reaches a page nested below its Section and routes it from where it sits', async () => {
     const root = await tree({
-      'docs/quickstart.mdx': '---\ntitle: Quickstart\n---\n',
-      'docs/guides/using-llms.mdx': '---\ntitle: Using llms\n---\n',
-      'docs/guides/agent/mcp.mdx': '---\ntitle: MCP\n---\n',
-      'docs/guides/agent/tools.mdx': '---\ntitle: Tools\n---\n',
+      'overview/quickstart.mdx': '---\ntitle: Quickstart\n---\n',
+      'overview/guides/using-llms.mdx': '---\ntitle: Using llms\n---\n',
+      'overview/guides/agent/mcp.mdx': '---\ntitle: MCP\n---\n',
+      'overview/guides/agent/tools.mdx': '---\ntitle: Tools\n---\n',
     })
     const pages = await collectContentPages(root, SECTIONS)
 
     expect(pages.map((page) => page.url)).toEqual([
-      '/docs/guides/agent/mcp',
-      '/docs/guides/agent/tools',
-      '/docs/guides/using-llms',
-      '/docs/quickstart',
+      '/overview/guides/agent/mcp',
+      '/overview/guides/agent/tools',
+      '/overview/guides/using-llms',
+      '/overview/quickstart',
     ])
 
-    const deep = pages.find((page) => page.url === '/docs/guides/agent/mcp')
+    const deep = pages.find((page) => page.url === '/overview/guides/agent/mcp')
     expect(deep).toMatchObject({
-      section: 'docs',
+      section: 'overview',
       // The slug carries the folders below the Section, so the store's
       // section and slug still join to the page's public path.
       slug: 'guides/agent/mcp',
-      route: 'docs/guides/agent/mcp',
-      mirrorPath: 'md/docs/guides/agent/mcp.md',
+      route: 'overview/guides/agent/mcp',
+      mirrorPath: 'md/overview/guides/agent/mcp.md',
     })
     expect(path.basename(deep?.file ?? '')).toBe('mcp.mdx')
   })
 
   it('leaves a nested index out at every level, not only at the top', async () => {
     const root = await tree({
-      'docs/guides/index.mdx': '---\ntitle: Guides\n---\n',
-      'docs/guides/agent/index.mdx': '---\ntitle: Agent\n---\n',
-      'docs/guides/agent/mcp.mdx': '---\ntitle: MCP\n---\n',
+      'overview/guides/index.mdx': '---\ntitle: Guides\n---\n',
+      'overview/guides/agent/index.mdx': '---\ntitle: Agent\n---\n',
+      'overview/guides/agent/mcp.mdx': '---\ntitle: MCP\n---\n',
     })
     const pages = await collectContentPages(root, SECTIONS)
 
-    expect(pages.map((page) => page.url)).toEqual(['/docs/guides/agent/mcp'])
+    expect(pages.map((page) => page.url)).toEqual(['/overview/guides/agent/mcp'])
   })
 
   it('walks in a stable order, so the emitted corpus is byte-stable', async () => {
     const root = await tree({
-      'docs/b.mdx': '---\ntitle: B\n---\n',
-      'docs/a.mdx': '---\ntitle: A\n---\n',
-      'docs/z/y.mdx': '---\ntitle: Y\n---\n',
-      'docs/z/x.mdx': '---\ntitle: X\n---\n',
+      'overview/b.mdx': '---\ntitle: B\n---\n',
+      'overview/a.mdx': '---\ntitle: A\n---\n',
+      'overview/z/y.mdx': '---\ntitle: Y\n---\n',
+      'overview/z/x.mdx': '---\ntitle: X\n---\n',
     })
     const once = await collectContentPages(root, SECTIONS)
     const twice = await collectContentPages(root, SECTIONS)
@@ -119,11 +126,11 @@ describe('collectContentPages', () => {
   })
 
   it('fails on a declared Section that is not on disk instead of skipping it', async () => {
-    const root = await tree({ 'docs/quickstart.mdx': '---\ntitle: Quickstart\n---\n' })
-    await rm(path.join(root, 'foundations'), { recursive: true, force: true })
+    const root = await tree({ 'overview/quickstart.mdx': '---\ntitle: Quickstart\n---\n' })
+    await rm(path.join(root, 'foundation'), { recursive: true, force: true })
 
     await expect(collectContentPages(root, SECTIONS)).rejects.toThrow(
-      /the content Section 'foundations' is declared/,
+      /the content Section 'foundation' is declared/,
     )
   })
 
@@ -192,14 +199,14 @@ describe('a published package with a changelog and no route', () => {
   }
 
   it('throws rather than dropping the package from the Corpus', async () => {
-    await contentTree({ 'docs/index.mdx': '---\ntitle: Guides\n---\n' })
+    await contentTree({ 'overview/index.mdx': '---\ntitle: Overview\n---\n' })
     await expect(emit(path.join(root, 'corpus-missing'), { contentRoot: root, packages: [pkg] }))
       .rejects.toThrow(/publishes no route for it at \/changelogs\/prism-ui/)
   })
 
   it('carries the package bytes once the route is there', async () => {
     await contentTree({
-      'docs/index.mdx': '---\ntitle: Guides\n---\n',
+      'overview/index.mdx': '---\ntitle: Overview\n---\n',
       'changelogs/prism-ui.md': text,
     })
     const out = path.join(root, 'corpus-present')
@@ -222,7 +229,7 @@ describe('a published package with a changelog and no route', () => {
 
   it('refuses a changelog whose own heading names a different package', async () => {
     await contentTree({
-      'docs/index.mdx': '---\ntitle: Guides\n---\n',
+      'overview/index.mdx': '---\ntitle: Overview\n---\n',
       'changelogs/prism-ui.md': '# @nanisoft/prism-tokens\n\n## 0.5.0\n\nA clean break.\n',
     })
     await expect(emit(path.join(root, 'corpus-mislabelled'), { contentRoot: root, packages: [pkg] }))
@@ -237,9 +244,9 @@ describe('emit, with the content walk reading a nested tree', () => {
 
   beforeAll(async () => {
     const root = await tree({
-      'docs/index.mdx': '---\ntitle: Guides\n---\n\nThe index.\n',
-      'docs/quickstart.mdx': '---\ntitle: Quickstart\ndescription: The first page.\n---\n\nStart here.\n',
-      'docs/guides/agent/mcp.mdx':
+      'overview/index.mdx': '---\ntitle: Overview\n---\n\nThe index.\n',
+      'overview/quickstart.mdx': '---\ntitle: Quickstart\ndescription: The first page.\n---\n\nStart here.\n',
+      'overview/guides/agent/mcp.mdx':
         '---\ntitle: MCP\ndescription: The read-only tools.\n---\n\nTools an agent calls.\n',
     })
     contentRoot = root
@@ -255,7 +262,7 @@ describe('emit, with the content walk reading a nested tree', () => {
   it('links the nested page in llms.txt', async () => {
     const llmsTxt = await readFile(path.join(out, 'llms.txt'), 'utf8')
     expect(llmsTxt).toContain(
-      '- [MCP](https://prism.nanisoft.com/docs/guides/agent/mcp.md): The read-only tools.',
+      '- [MCP](https://prism.nanisoft.com/overview/guides/agent/mcp.md): The read-only tools.',
     )
   })
 
@@ -265,25 +272,25 @@ describe('emit, with the content walk reading a nested tree', () => {
   })
 
   it('writes the nested mirror at the path its position in the tree implies', async () => {
-    const mirror = await readFile(path.join(out, 'md', 'docs', 'guides', 'agent', 'mcp.md'), 'utf8')
+    const mirror = await readFile(path.join(out, 'md', 'overview', 'guides', 'agent', 'mcp.md'), 'utf8')
     expect(mirror).toContain('# MCP')
   })
 
   it('puts the nested page in the store under the fields the tools match on', () => {
-    const page = store?.pages.find((entry) => entry.url === '/docs/guides/agent/mcp')
+    const page = store?.pages.find((entry) => entry.url === '/overview/guides/agent/mcp')
     expect(page).toMatchObject({
-      id: 'docs/guides/agent/mcp',
+      id: 'overview/guides/agent/mcp',
       slug: 'guides/agent/mcp',
-      section: 'docs',
+      section: 'overview',
       // `get_page` resolves on `url` and `mirror`, so both carry the tree path.
-      url: '/docs/guides/agent/mcp',
-      mirror: '/docs/guides/agent/mcp.md',
+      url: '/overview/guides/agent/mcp',
+      mirror: '/overview/guides/agent/mcp.md',
     })
   })
 
   it('keeps the flat pages it reached before, and the index pages it always left out', () => {
     const urls = store?.pages.map((entry) => entry.url)
-    expect(urls).toContain('/docs/quickstart')
-    expect(urls).not.toContain('/docs')
+    expect(urls).toContain('/overview/quickstart')
+    expect(urls).not.toContain('/overview')
   })
 })

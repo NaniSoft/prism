@@ -21,13 +21,13 @@ export default function NotFound() {
           as="h1"
           eyebrow="404"
           title="That page does not exist"
-          description="The address may be old, or the item may not have shipped yet. The catalogue and the guides are one link away."
+          description="The address may be old, or the item may not have shipped yet. The catalogue and the Overview are one link away."
         />
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link href="/components">
             <Button>Browse components</Button>
           </Link>
-          <Link href="/docs/quickstart">
+          <Link href="/overview/quickstart">
             <Button variant="outline">Read the quickstart</Button>
           </Link>
         </div>

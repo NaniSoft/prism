@@ -16,8 +16,8 @@ const ROUTES = [
   { path: '/components', slug: 'components' },
   { path: '/components/button', slug: 'component-button' },
   { path: '/blocks/hero-01', slug: 'block-hero-01' },
-  { path: '/themes', slug: 'themes' },
-  { path: '/foundations', slug: 'foundations' },
+  { path: '/foundation/themes', slug: 'themes' },
+  { path: '/foundation', slug: 'foundation' },
 ]
 
 test.beforeEach(async ({ page }, testInfo) => {

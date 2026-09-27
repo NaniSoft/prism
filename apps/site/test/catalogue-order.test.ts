@@ -315,9 +315,9 @@ describe('where the projection files an Item page', () => {
       ['items/block/cta-01/cta-01.mdx', 'blocks/cta-01.mdx'],
       ['items/block/group/thing/thing.mdx', 'blocks/group/thing.mdx'],
       ['items/page/auth-page/auth-page.mdx', 'pages/auth-page.mdx'],
-      ['content/docs/quickstart.mdx', 'docs/quickstart.mdx'],
+      ['content/overview/quickstart.mdx', 'overview/quickstart.mdx'],
       ['content/meta.json', 'meta.json'],
-      ['content/foundations/tokens/colors/colors.mdx', 'foundations/tokens/colors/colors.mdx'],
+      ['content/foundation/tokens/colors/colors.mdx', 'foundation/tokens/colors/colors.mdx'],
     ]
     for (const [file, expected] of at) expect(routedPath(file)).toBe(expected)
   })

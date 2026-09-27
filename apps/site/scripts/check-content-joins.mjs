@@ -41,6 +41,20 @@
  * the workspace through the same rule the copy step reads, so this gate cannot
  * end up agreeing with a list nobody checks against the workspace.
  *
+ * Two more joins come with the Sections moving, and both are the same omission
+ * class as everything above. Every route the site published before the move is
+ * compared as a set against the redirect table the Section manifest generates, in
+ * both directions, so a moved route that dead-ends and a redirect for a route that
+ * did not move are the same finding. And `wrangler.jsonc`'s `run_worker_first` is
+ * compared as a set against the prefixes the manifest requires, because asset
+ * serving answers before the Worker runs and a prefix missing from that list is a
+ * 404 on a machine-readable surface.
+ *
+ * The manifest is imported from TypeScript. It is a leaf module of literals, a
+ * type and pure functions, so this runs under the Node type stripping that has
+ * been unflagged since 22.18, and nothing about the site's gate depends on a
+ * compile step that has to run first.
+ *
  * Run: pnpm --filter @nanisoft/site check
  */
 import { existsSync } from 'node:fs'
@@ -50,6 +64,8 @@ import { fileURLToPath } from 'node:url'
 
 import { buildCatalog } from '@nanisoft/prism-ui/catalog'
 import { parsePrismDocsStore, STORE_SECTIONS } from '@nanisoft/prism-llms'
+
+import { redirectFor, RUN_WORKER_FIRST } from '../src/lib/sections.ts'
 
 import { CONTENT_EXTENSIONS, findContentJoins, parseNav, routeForFile, routeOfHref } from './content-joins.mjs'
 import { readItemContent } from './item-content.mjs'
@@ -63,6 +79,20 @@ const CHANGELOG_ROOT = path.join(CONTENT_ROOT, CHANGELOG_SECTION)
 const ITEMS_ROOT = path.join(SITE, 'items')
 const APP_ROOT = path.join(SITE, 'src', 'app')
 const OUT = path.join(SITE, 'out')
+const WRANGLER = path.join(SITE, 'wrangler.jsonc')
+/**
+ * The routes the site published before the Sections moved.
+ *
+ * A snapshot, not a list anybody keeps: it is the record of the published URL
+ * set at the moment the Plasma restructure landed, and nothing reads it to produce
+ * anything. It is read here for one purpose, which is that "a route that moved"
+ * has no other definition. Every other surface this gate compares says what
+ * exists now, so a route that quietly stopped being published is absent from all
+ * of them and only this file can see it. It is not regenerated: a later Section
+ * move adds its own file rather than editing this one, because what each file
+ * records is the URL set at one moment in time.
+ */
+const ROUTES_BEFORE = path.join(HERE, 'published-routes-before.json')
 const STORE_FILE = path.join(REPO, 'packages', 'llms', 'dist', 'data.json')
 
 /** The demo an Item's documentation names, which is how a Demo is claimed. */
@@ -274,6 +304,44 @@ for (const file of await walkFiles(OUT)) {
   }
 }
 
+/* The routes the site published before the Sections moved, and the redirect table
+   the manifest generates for them. ----------------------------------------- */
+
+/**
+ * The redirect table, generated rather than read.
+ *
+ * The table is `redirectFor()` applied to every route the site published before
+ * the move, which is the only way to enumerate it: the manifest states a prefix
+ * rule and a rename, and the routes that existed under those prefixes are the
+ * ones a reader or an agent could still be holding. The assertions compare that
+ * table against the routes the site publishes now as sets, in both directions, so
+ * neither a moved route with no redirect nor a redirect for a route that did not
+ * move can pass.
+ */
+if (!existsSync(ROUTES_BEFORE)) {
+  die(
+    `${toSite(ROUTES_BEFORE)} is missing, so there is no record of the routes this site published ` +
+      'before the Sections moved and "a route that moved" has no definition. It is a snapshot, not a ' +
+      'generated file: restore it from version control rather than regenerating it.',
+  )
+}
+const routesBefore = JSON.parse(await readFile(ROUTES_BEFORE, 'utf8'))
+if (!Array.isArray(routesBefore) || routesBefore.some((route) => typeof route !== 'string')) {
+  die(`${toSite(ROUTES_BEFORE)} is not a list of route strings.`)
+}
+const redirects = routesBefore
+  .map((route) => ({ from: route, to: redirectFor(route) }))
+  .filter((entry) => entry.to !== null)
+  .sort((a, b) => a.from.localeCompare(b.from))
+
+/* The prefixes the Worker has to be invoked for, and the ones it is. -------- */
+
+const wrangler = JSON.parse((await readFile(WRANGLER, 'utf8')).replace(/^\s*\/\/.*$/gm, ''))
+const workerFirst = wrangler?.assets?.run_worker_first
+if (!Array.isArray(workerFirst)) {
+  die(`${toSite(WRANGLER)} declares no assets.run_worker_first list, so the Worker's prefixes cannot be checked.`)
+}
+
 /* The joins. */
 
 const findings = findContentJoins({
@@ -302,6 +370,10 @@ const findings = findContentJoins({
     })),
   },
   routes: [...routes],
+  routesBefore,
+  redirects,
+  workerFirst,
+  requiredWorkerFirst: [...RUN_WORKER_FIRST],
   navBlocks: [...navBlocks.values()],
 })
 
@@ -316,5 +388,7 @@ console.log(
   `content-joins: every join holds - ${catalogue.length} Items, ${contentFiles.length} content ` +
     `files, ${itemDocs.length} Item documents, ${store.pages.length} Corpus pages, ` +
     `${changelogPackages.length} published changelogs, ${routes.size} routes, ` +
+    `${redirects.length} redirects over ${routesBefore.length} routes published before the move, ` +
+    `${workerFirst.length} Worker prefixes, ` +
     `${navBlocks.size} navigation blocks across ${publishedPages} published pages`,
 )

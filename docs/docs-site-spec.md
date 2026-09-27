@@ -271,10 +271,12 @@ content surface that fails by omission rather than by error.
    `../components` and `../lib`. Demos move out of `src/demos`, so `@source` gains
    `../../content`, or the demos render unstyled because Tailwind never scanned
    their classes.
-4. **The Worker redirect map is generated**, not hand-kept, and
+4. **The Worker's redirect map is generated**, not hand-kept, and
    `wrangler.jsonc`'s `run_worker_first` list loses the old `/docs/*.md` and
-   `/foundations/*.md` entries. A stale entry is a 404 on a machine-readable
-   surface.
+   `/foundations/*.md` entries and gains a prefix for every Section, the
+   Changelogs included. A stale entry is a 404 on a machine-readable surface, and
+   so is a missing one, which is why the site gate compares that list against the
+   manifest as a set.
 5. **A page in `root.fallback` fails the build.**
 6. **A catalogue item with no folder, and a folder with no catalogue item, both
    fail the build.** That is the gate that keeps the tree from becoming the second
@@ -285,18 +287,34 @@ content surface that fails by omission rather than by error.
 
 ## The route migration
 
-Sixteen prose routes move and one section is added. Forty-two catalogue routes
-do not move. Nineteen redirects, all `301`, all served by the Cloudflare Worker:
+Sixteen prose routes move and one live reader joins a Section. Forty-two
+catalogue routes do not move. Seventeen permanent redirects, all `301`, all served
+by the Cloudflare Worker:
 
 | From | To | Count |
 | --- | --- | --- |
 | `/docs` | `/overview` | 1 |
-| `/docs/<page>` | `/overview/<page>` | 7 |
+| `/docs/<page>` | `/overview/<page>` | 6 |
 | `/foundations` | `/foundation` | 1 |
-| `/foundations/<page>` | `/foundation/<page>` | 9 |
+| `/foundations/<page>` | `/foundation/<page>` | 8 |
 | `/themes` | `/foundation/themes` | 1 |
 
-Within the `/docs` group, `agent-workflow` redirects to `/overview/using-llms`.
+Within the `/docs` group, `agent-workflow` redirects to `/overview/using-llms`
+rather than to `/overview/agent-workflow`, so the old link lands on the page
+rather than on a 404 at the end of a correct-looking prefix rule.
+
+**The count is seventeen, not the nineteen an earlier draft of this table gave.**
+The two Section index pages were counted twice, once as the directory and once as
+a page inside it: `/docs` is `content/docs/index.mdx` and is therefore the same
+route as one of the seven pages that Section held, and the same for
+`/foundations`. The table above counts each route once, and the site's
+content-join gate asserts the same set the table states, by comparing the
+redirect table against a record of the routes the site published before the move.
+
+The table is generated from the Section manifest rather than written out, and the
+gate compares it to that record in both directions: every route that moved is
+redirected, every redirect is for a route that moved, and every redirect lands on
+a route the routing tree produces.
 
 No pointer pages and no 404s. The corpus is regenerated at build and points at
 the new URLs, and every old URL redirects, so an agent holding a cached

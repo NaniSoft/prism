@@ -17,7 +17,7 @@ reports and is published.
 | `prism-ui` | surface scan, registry validator (registry and published file list), the component suites, the axe suite, the JSDoc and catalogue checks, the two source grep gates | per-item client-JavaScript measurement, the demo `client` flag |
 | `prism-llms` | corpus drift, build-twice determinism, per-item mirror and store coverage, the store type round-trip, the declared output list | corpus freshness stamp |
 | `prism-mcp-server` | the protocol round-trip suite, tool registry equals the corpus, the bundled `data.json` hash | corpus freshness |
-| `@nanisoft/site` (private) | dash gate, content joins, search gzip budget, `run_worker_first` equals `MD_SECTIONS`, registry artifacts absent from `out/` | visual regression, per-item client measurement |
+| `@nanisoft/site` (private) | dash gate, content joins (including the redirect coverage and the Worker's first-run prefixes), search gzip budget, registry artifacts absent from `out/` | visual regression, per-item client measurement |
 
 ## The content joins
 
@@ -41,7 +41,12 @@ directions exist:
   its own route plus `.md`;
 - every internal link in the authored prose resolves to a route;
 - every href the published navigation renders resolves to a route, and every
-  content route the site publishes is one the navigation links.
+  content route the site publishes is one the navigation links;
+- every route the site published before the Sections moved is redirected, every
+  redirect is for a route that moved and lands on a route that exists, and no
+  redirect takes two hops;
+- `wrangler.jsonc`'s `run_worker_first` is exactly the set of prefixes the Section
+  manifest requires, in both directions.
 
 The assertions are in `apps/site/scripts/content-joins.mjs`, which touches no
 filesystem, and the test lane runs them against a flat tree and a nested tree,
@@ -50,6 +55,19 @@ navigation is read from the built export in `out/`, so it is the navigation a
 reader receives rather than a list the gate keeps beside it, and the same
 staleness cannot make the check pass. The Corpus is consumed, never re-derived,
 and the Catalogue is read, never inferred from a directory scan.
+
+**The route-move comparison is a set comparison over a record, not a spot check.**
+`apps/site/scripts/published-routes-before.json` holds the routes the site
+published before the Sections moved. It is a snapshot of one moment rather than a
+list anybody maintains, and it exists because "a route that moved" has no other
+definition: every other surface the gate reads says what exists now, so a route
+that quietly stopped being published is absent from all of them rather than wrong
+in any. The redirect table is then `redirectFor()` from the Section manifest
+applied to that record, and the gate compares the two against the routes the tree
+publishes in both directions. `apps/site/test/routes.test.ts` runs the same
+comparison in the test lane and additionally drives every entry through the
+Worker's real entry point, so a table that is correct and never wired into the
+fetch handler cannot pass either.
 
 The known limit: a link to a published file that is not a page, which today
 means `llms.txt`, `llms-full.txt` and `prism-skill.md`, is reported as
@@ -117,8 +135,8 @@ of accessibility.
 
 `apps/site/e2e/visual.spec.ts` runs Playwright's `toHaveScreenshot()` over the
 built site at 390, 768 and 1440 pixels, light and dark, on `/`, `/components`,
-one component item, one block item, `/themes` and `/foundations`, with committed
-baselines and `maxDiffPixelRatio: 0.01`. The job is report-only
+one component item, one block item, `/foundation/themes` and `/foundation`, with
+committed baselines and `maxDiffPixelRatio: 0.01`. The job is report-only
 (`continue-on-error: true`) and uploads the report as an artifact and one pull
 request comment.
 

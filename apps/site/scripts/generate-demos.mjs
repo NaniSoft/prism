@@ -1,18 +1,24 @@
 /**
- * Builds the item manifest: the demo registry and the tree the routing tree is
- * built from.
+ * Builds the demo registry the live preview and the copy control render from.
  *
- * Two artefacts, one walk, one rule. The walk is `item-content.mjs`, which says
- * where an Item's documentation and its Demo are, so this script holds no path
- * of its own and cannot disagree with the corpus builder or the gate about what
+ * One artefact, one walk, one rule. The walk is `item-content.mjs`, which says
+ * where an Item's documentation and its Demo are, so this script holds no path of
+ * its own and cannot disagree with the corpus builder or the gate about what
  * exists.
  *
  *   `src/generated/demos.ts`   the live preview, the copy control and the
  *                              corpus, keyed by slug, carrying each Demo's
- *                              verbatim source and a measured client flag;
- *   `src/generated/item-groups.json`  which folder each Item's documentation
- *                              is filed under, which is the only thing the
- *                              routing tree reads to know where an Item sits.
+ *                              verbatim source and a measured client flag.
+ *
+ * **The manifest that used to be written here is gone.** `item-groups.json` said
+ * which folder each Item's documentation was filed under, and the routing tree
+ * read it to know where to nest an Item's page. It was a second record of a fact
+ * the Catalogue already holds, generated into `src/generated` and stale-checked
+ * by the build and the gate so that it would agree with the tree for one build
+ * and then drift from the reason it existed. The folder a Component is filed
+ * under is the slug of its Category, which is in the Catalogue, and the file path
+ * is read by the projection, so the two are now compared where they are both
+ * used and a disagreement fails the build rather than a manifest going stale.
  *
  * The client flag is measured the same way `analyze-blocks.mjs` measures a
  * block: a `'use client'` directive, one of the client hooks, or a `next/*`
@@ -35,7 +41,6 @@ const SITE = path.join(HERE, '..')
 const ITEMS = path.join(SITE, 'items')
 const OUT_DIR = path.join(SITE, 'src', 'generated')
 const OUT = path.join(OUT_DIR, 'demos.ts')
-const OUT_GROUPS = path.join(OUT_DIR, 'item-groups.json')
 
 const USE_CLIENT = /^[ \t]*['"]use client['"]/m
 const CLIENT_HOOKS = /\buse(State|Effect|Memo|Ref|Reducer|Callback|Context|LayoutEffect)\s*\(/
@@ -113,22 +118,12 @@ export const demoSlugs = ${JSON.stringify(entries.map((entry) => entry.slug))} a
 export type DemoSlug = (typeof demoSlugs)[number]
 `
 
-/**
- * The manifest, one entry per Item, in the same order as the registry.
- *
- * Every Item appears, including the ones with an empty group, so a missing entry
- * is a stale manifest rather than an Item that quietly reads as unfiled. The
- * routing tree checks both directions and refuses to build on a disagreement.
- */
-const groups = Object.fromEntries(items.map((item) => [item.slug, item.group]))
-
 await mkdir(OUT_DIR, { recursive: true })
 await writeFile(OUT, output, 'utf8')
-await writeFile(OUT_GROUPS, `${JSON.stringify(groups, null, 2)}\n`, 'utf8')
 
 const clientCount = entries.filter((entry) => entry.client).length
 const nested = items.filter((item) => item.group.length > 0)
 console.log(
   `demos: ${entries.length} registered, ${entries.length - clientCount} server / ${clientCount} ` +
-    `client, ${nested.length} filed under a folder -> ${path.relative(SITE, OUT)}`,
+    `client, ${nested.length} filed under a Category folder -> ${path.relative(SITE, OUT)}`,
 )

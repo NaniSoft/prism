@@ -295,7 +295,7 @@ describe('what the projection refuses', () => {
 
   it('a content page that states a route', () => {
     expect(() =>
-      treeOf([page('content/docs/quickstart.mdx', { title: 'Quickstart', slug: 'start-here' })]),
+      treeOf([page('content/overview/quickstart.mdx', { title: 'Quickstart', slug: 'start-here' })]),
     ).toThrow(/addressed by where it is filed/)
   })
 

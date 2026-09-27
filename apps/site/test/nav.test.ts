@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest'
 
 import { discoverPublishedPackages, readPublishedChangelogs } from '../scripts/published-packages.mjs'
 import { flattenNav, PAGE_TREE, projectNav, TOP_NAV } from '../src/lib/nav'
+import { SECTIONS, sectionFor } from '../src/lib/sections'
 
 /**
  * The navigation projection, over plain page-tree data.
@@ -337,7 +338,7 @@ describe('the authored content tree', () => {
  */
 describe('the authored prose Sections', () => {
   /** The prose Sections: the authored folders under `content/`, by name. */
-  const PROSE = ['docs', 'foundations', 'content'] as const
+  const PROSE = SECTIONS.filter((section) => section.prose).map((section) => section.segment)
 
   const CONTENT = path.join(SITE, 'content')
 
@@ -415,9 +416,13 @@ describe('the authored prose Sections', () => {
     ) as MetaData
     expect(typeof meta.title, `content/${section}/meta.json declares no title`).toBe('string')
     // The label the sidebar shows is the meta file's, and the directory name is
-    // not what a reader sees: `docs` is "Guides" and `content` is "Content".
+    // not what a reader sees: `foundation` is "Foundation" and `content` is
+    // "Content". The two agree here because a Section's name and its route are
+    // one decision, and this is where a rename that touched only one of them
+    // would be caught.
     const shown = authoredNav().sections.find((entry) => entry.url === `/${section}`)
     expect(shown?.title).toBe(meta.title)
+    expect(meta.title).toBe(sectionFor(section)?.title)
   })
 
   it('publishes every authored page in the navigation, with nothing left over', () => {
@@ -573,15 +578,29 @@ describe('the Changelogs Section', () => {
     expect(linked).toEqual((await published()).map((entry) => entry.route).sort())
   })
 
-  it('appears in the top navigation once, after the parts', () => {
-    // The header row is the one navigation list left by hand, so its position is
-    // a decision rather than a projection. It goes after the catalogue Sections
-    // because history is read after the thing it is the history of, and nothing
-    // already in the row moves.
-    const at = TOP_NAV.findIndex((entry) => entry.href === `/${SECTION}`)
-    expect(at).toBeGreaterThan(-1)
-    expect(TOP_NAV[at - 1]?.href).toBe('/content')
-    expect(TOP_NAV.filter((entry) => entry.href === `/${SECTION}`)).toHaveLength(1)
+  it('appears in the top navigation once, in the reading order', () => {
+    // The header row is derived from the manifest rather than written out, so the
+    // assertion is that the row is the manifest's Sections in the manifest's
+    // order and nothing else. A Section that exists and is missing from the row
+    // is a reader who cannot see the whole shape of the documentation at a
+    // glance, and a row entry the manifest does not declare is a route nobody
+    // chose to publish.
+    expect(TOP_NAV.map((entry) => entry.href)).toEqual([
+      ...SECTIONS.map((section) => `/${section.segment}`),
+      '/foundation/themes',
+    ])
+    expect(TOP_NAV.map((entry) => entry.label)).toEqual([
+      ...SECTIONS.map((section) => section.title),
+      'Themes',
+    ])
+    // History is read after the thing it is the history of, and the pack reader
+    // is the one control in the row that is not a Section, so it sits after the
+    // last Section rather than in the middle of the catalogue.
+    const sectionHrefs = TOP_NAV.map((entry) => entry.href).filter((href) => href !== '/foundation/themes')
+    expect(sectionHrefs[sectionHrefs.length - 1]).toBe(`/${SECTION}`)
+    // And the landing page keeps no entry: the wordmark is already a link home,
+    // and the label it used to carry now names a Section.
+    expect(TOP_NAV.map((entry) => entry.href)).not.toContain('/')
   })
 })
 

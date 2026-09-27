@@ -127,7 +127,7 @@ export const site = defineDocs({
 /**
  * The one routed tree: the hand-written `site` pages and the catalogue's
  * generated Section landing pages and orderings, both under `baseUrl: '/'` so a
- * page's `url` is its public path (`/components/button`, `/docs/quickstart`).
+ * page's `url` is its public path (`/components/button`, `/overview/quickstart`).
  *
  * `site` is listed first, so it writes first, and two sources claiming the same
  * virtual path would resolve by write order with no warning. `contentTree('site')`

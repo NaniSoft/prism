@@ -441,8 +441,8 @@ The read-only MCP endpoint is \`${BASE_URL}/mcp\`. It exposes nine tools:
 ## This corpus
 
 Generated from the catalogue and the authored pages: ${counts.component}
-Components, ${counts.block} Blocks and ${counts.page} Pages, plus the guides,
-Foundations, Content and Changelogs pages. The Changelogs pages are each
+Components, ${counts.block} Blocks and ${counts.page} Pages, plus the Overview,
+Foundation, Content and Changelogs pages. The Changelogs pages are each
 published package's own changelog, byte for byte; \`get_changelog\` returns one
 package's, optionally one version of it.
 `
@@ -733,9 +733,11 @@ export async function emit(outDir, options = {}) {
   // Sections, the catalogue, then the history. The Section list is the Store's
   // own and the label each is read under is the Store's own map, so a Section
   // cannot be in the content tree and missing from `llms.txt` without one of the
-  // two refusing to agree. The Changelogs Section is the one read after the
-  // catalogue, because history is read after the thing it is the history of;
-  // a new Section joins the first loop, which is the default a reader expects.
+  // two refusing to agree. The order inside the prose group is the Store's
+  // order, which is the reading order the site publishes: Overview, then
+  // Foundation, then Content. The Changelogs Section is the one read after the
+  // catalogue, because history is read after the thing it is the history of; a
+  // new Section joins the first loop, which is the default a reader expects.
   for (const section of storeLib.STORE_SECTIONS) {
     if (section === TRAILING_SECTION) continue
     const group = sectionGroup(section)

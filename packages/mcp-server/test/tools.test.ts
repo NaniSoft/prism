@@ -119,18 +119,21 @@ describe('list_pages and get_page', () => {
   it('lists the non-item page lanes, including the Changelogs', () => {
     const body = readText(renderListPages(store))
     // The Section count moved from twenty to twenty-four, four of them the
-    // generated changelog routes, and the Changelogs group is read from the
-    // Store's own Sections rather than from a list of the three prose Sections.
+    // generated changelog routes, and every group is read from the Store's own
+    // Sections rather than from a list of the three prose Sections. The Sections
+    // are the seven the site publishes, in the order it publishes them, so the
+    // first group an agent reads is the Overview and the last is the Changelogs.
     expect(body).toContain('# Prism pages - 24 pages')
-    expect(body).toContain('## Guides')
+    expect(body).toContain('## Overview')
+    expect(body).toContain('## Foundation')
     expect(body).toContain('**Quickstart**')
     expect(body).toContain('## Changelogs')
     expect(body).toContain('`/changelogs/prism-ui`')
   })
 
   it('reads a page by canonical URL and by its mirror', () => {
-    expect(readText(renderPage(store, { url: '/docs/quickstart' }))).toContain('# Quickstart')
-    expect(readText(renderPage(store, { url: '/docs/quickstart.md' }))).toContain('# Quickstart')
+    expect(readText(renderPage(store, { url: '/overview/quickstart' }))).toContain('# Quickstart')
+    expect(readText(renderPage(store, { url: '/overview/quickstart.md' }))).toContain('# Quickstart')
   })
 
   it('reads a changelog route as the package bytes, through get_page too', () => {
@@ -151,7 +154,7 @@ describe('list_pages and get_page', () => {
   })
 
   it('misses an unknown page with a browse pointer', () => {
-    const result = renderPage(store, { url: '/docs/nope' })
+    const result = renderPage(store, { url: '/overview/nope' })
     expect(result.isError).toBe(true)
     expect(readText(result)).toContain('list_pages')
   })

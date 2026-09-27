@@ -47,12 +47,12 @@ store.d.ts
 store.js
 ```
 
-`md/<section>/<slug>.md` is the per-item Markdown mirror for
-`section` in `docs`, `foundations`, `content`, `components`, `blocks`, `pages`.
-A content page's mirror keeps the shape of the content tree it was read from, at
-any depth: a page at `content/foundations/tokens/spacing-scale.mdx` is emitted at
-`md/foundations/tokens/spacing-scale.md` and is linked as
-`/foundations/tokens/spacing-scale.md`. A page's route comes from where it sits
+`md/<section>/<slug>.md` is the per-item Markdown mirror for `section` in
+`overview`, `foundation`, `content`, `components`, `blocks`, `pages`,
+`changelogs`. A content page's mirror keeps the shape of the content tree it was
+read from, at any depth: a page at `content/foundation/tokens/spacing-scale.mdx`
+is emitted at `md/foundation/tokens/spacing-scale.md` and is linked as
+`/foundation/tokens/spacing-scale.md`. A page's route comes from where it sits
 in that tree, not from a Section-and-file-name join, so nesting a page publishes
 it rather than losing it. `data.json` is the `PrismDocsStore`; it is never copied
 into the site export and is bundled into the Worker instead.

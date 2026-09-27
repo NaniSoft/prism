@@ -2,6 +2,8 @@ import type { Folder, Item, Node, Root } from 'fumadocs-core/page-tree'
 import type { PageTreeOptions } from 'fumadocs-core/source'
 import type { ReactNode } from 'react'
 
+import { SECTIONS } from './sections'
+
 /**
  * The site's navigation, projected from the content tree.
  *
@@ -11,12 +13,14 @@ import type { ReactNode } from 'react'
  * written out. Nothing here restates either, so a section cannot disagree with
  * the order its own folder declares.
  *
- * This module holds no runtime import. That is deliberate and load-bearing in two
- * places: the page tree cannot be built outside the bundler that compiled the
- * macro, so everything that reads it lives in a module that can be loaded
- * without it and therefore be tested; and the header's row is rendered by a
- * client component, so importing `TOP_NAV` from here must not drag a server
- * module, or `fumadocs-core` itself, into the client bundle.
+ * This module holds no runtime import except the Section manifest, and that
+ * exception is deliberate in two places. The page tree cannot be built outside
+ * the bundler that compiled the macro, so everything that reads it lives in a
+ * module that can be loaded without it and therefore be tested; and the header's
+ * row is rendered by a client component, so importing `TOP_NAV` from here must
+ * not drag a server module, or `fumadocs-core` itself, into the client bundle.
+ * The manifest is a leaf: literals, a type and pure functions over them, with no
+ * import of its own, which `test/routes.test.ts` asserts rather than assumes.
  */
 
 /** A page in the navigation: a title and the route it is addressed by. */
@@ -212,30 +216,24 @@ function pushEntries(out: FlatNav[], entries: NavEntry[]): void {
 /**
  * The header's top-level row.
  *
- * This is the one navigation list left by hand, and it is not the sidebar. It is
- * a reading order of its own that puts the catalogue together in the middle
- * rather than after the prose, and it carries the two routes that are not
- * Sections at all: the landing page and the live theme reader. Neither can be
- * read out of the tree, so neither is invented here: this row is stated once,
- * consumed by the one component that renders it, and the Section routes it
- * shares with the sidebar are the same routes the tree holds.
+ * It is the seven Sections in the manifest's reading order, and nothing else.
+ * The list used to be written out by hand, which made the header the one
+ * navigation a Section could be missing from without anything noticing, and it
+ * is now derived so a Section that exists is a Section a reader can reach from
+ * the header.
  *
- * `/changelogs` sits after the parts and after the Content section, which is
- * the reading order the specification of record states: start here, then the raw
- * materials, then the rules for writing, then the parts, then the history. It is
- * placed before `/themes` rather than last because the theme reader is the one
- * control that is not a Section, and a Section that is a collection of many
- * entries reads as the tail of the row rather than as a detour in the middle of
- * it. Nothing already in the row moves.
+ * **The landing page keeps no entry.** The row labelled `/` "Overview", which
+ * collided with the new Overview Section, and the header already renders the
+ * wordmark as a link home, so the entry was dropped rather than relabelled: a
+ * second route home is a control that duplicates one already on screen.
+ *
+ * **The pack reader is the one control that is not a Section,** and it stays in
+ * the row because it is the reader that renders all six packs side by side and
+ * nothing else on the site does. It reads as a live page of the Foundation
+ * Section rather than as a Section of its own, so it sits at the end, after the
+ * history, where a control that is not part of the reading order belongs.
  */
 export const TOP_NAV = [
-  { href: '/', label: 'Overview' },
-  { href: '/docs', label: 'Guides' },
-  { href: '/foundations', label: 'Foundations' },
-  { href: '/components', label: 'Components' },
-  { href: '/blocks', label: 'Blocks' },
-  { href: '/pages', label: 'Pages' },
-  { href: '/content', label: 'Content' },
-  { href: '/changelogs', label: 'Changelogs' },
-  { href: '/themes', label: 'Themes' },
+  ...SECTIONS.map((section) => ({ href: `/${section.segment}`, label: section.title })),
+  { href: '/foundation/themes', label: 'Themes' },
 ] as const

@@ -18,10 +18,10 @@ export const DESCRIPTIONS = {
     'Read the Prism token contract: a pack\u2019s resolved semantic values for a mode, or one bound scale (motion, typography, spacing, shadow, breakpoint, container). Read the contract here instead of inventing a duration, a curve or a spacing step.',
   ),
   list_pages: describe(
-    'List the non-item Prism documentation pages: the guides, the Foundations pages, the Content pages and the Changelogs. Use `get_page` to read one.',
+    'List the non-item Prism documentation pages: the Overview, the Foundation, the Content and the Changelogs. Use `get_page` to read one.',
   ),
   get_page: describe(
-    'Read one non-item Prism documentation page as Markdown by its URL. Only serves the guides, Foundations, Content and Changelogs lanes; a catalogue item URL is a miss with a pointer to `get_item_doc`.',
+    'Read one non-item Prism documentation page as Markdown by its URL. Only serves the Overview, Foundation, Content and Changelogs lanes; a catalogue item URL is a miss with a pointer to `get_item_doc`.',
   ),
   search_docs: describe(
     'Substring match over item names, descriptions and page bodies. Returns ranked references, each with its kind, the field that matched, and the follow-up call to make. It does not return page or item contents; use `get_item_doc` or `get_page` for the body.',

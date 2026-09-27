@@ -49,7 +49,32 @@ const _categoriesAssert: _CategoriesMatch = true
 void _categoriesAssert
 
 export const STORE_STATUSES = ['stable', 'deprecated'] as const
-export const STORE_SECTIONS = ['docs', 'foundations', 'content', 'changelogs'] as const
+
+/**
+ * The content Sections, in the reading order the site publishes them, and the
+ * same order `llms.txt` groups them in.
+ *
+ * These are the Section *directories*, so the list is the walk the corpus builder
+ * takes and the set of directories the site's gate checks. The three catalogue
+ * Sections are not here: an Item is a catalogue entry with a `kind`, and its page
+ * is emitted from the Catalogue rather than walked out of the content tree, so
+ * adding `components` to this list would make the walk look for a directory that
+ * is not one.
+ *
+ * **A Section's route is its directory, and the two were renames.** `docs` is
+ * `overview` and `foundations` is `foundation`, which is the rule that a prose
+ * Section is one body of knowledge and takes a singular route while a catalogue
+ * Section is a collection of many Items and takes a plural one. An agent holding
+ * a cached `llms.txt` from before the move still resolves every URL it names,
+ * because the site Worker redirects each of these routes permanently, and the
+ * corpus is rebuilt per release and points at the new ones. Nothing here is
+ * aliased: a page's `section` is the directory it is filed in, which is what
+ * `get_page` matches on, and a `Record<StoreSection, string>` over a list that
+ * had to be edited in the same commit as the rename is a second list that can be
+ * half done.
+ */
+export const STORE_SECTIONS = ['overview', 'foundation', 'content', 'changelogs'] as const
+
 /**
  * The label each content Section is read under, in every artifact that groups
  * pages by Section.
@@ -60,15 +85,15 @@ export const STORE_SECTIONS = ['docs', 'foundations', 'content', 'changelogs'] a
  * The keys are the Section directories themselves, so the label cannot be filed
  * under a Section that does not exist.
  *
- * `docs` is labelled "Guides" because the Section is the guides; the directory
- * name is what the tree is called, not what a reader is told. The Corpus builder
- * and the MCP tool both read this map rather than keeping a list of their own,
- * which is what puts the Changelogs Section in `llms.txt` and in `list_pages`
- * from the same edit that puts it in the content tree.
+ * The label is the Section's name rather than its directory, which is the whole
+ * point of the pair: the directory is what the tree is called, and the name is
+ * what a reader and an agent are told. `llms.txt` groups under these headings and
+ * `list_pages` counts them, so a Section renamed without its label renamed here
+ * would be advertised under two names in two artifacts.
  */
 export const STORE_SECTION_TITLES: Record<StoreSection, string> = {
-  docs: 'Guides',
-  foundations: 'Foundations',
+  overview: 'Overview',
+  foundation: 'Foundation',
   content: 'Content',
   changelogs: 'Changelogs',
 }
@@ -163,7 +188,7 @@ export interface PrismDocsPage {
   readonly section: StoreSection
   readonly title: string
   readonly description: string
-  /** The page's canonical site path, for example `/docs/quickstart`. */
+  /** The page's canonical site path, for example `/overview/quickstart`. */
   readonly url: string
   readonly markdown: string
   readonly mirror: string
