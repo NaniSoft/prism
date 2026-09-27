@@ -14,6 +14,23 @@ import { emptyStore, emptyTokens, makeItem, readStore, readText } from './helper
 
 const store = readStore()
 
+/**
+ * The versions a published package's changelog records, newest first.
+ *
+ * Read from the Store rather than written into a test: the corpus carries the
+ * package's own changelog, so the set of versions it records is a fact about the
+ * build and not a constant a release has to be taught about. The Store's own
+ * guard already refuses a document whose `versions` and `releases` disagree, so
+ * this list and the entries under it are one reading.
+ */
+function recordedVersions(name: string): readonly string[] {
+  const changelog = store.changelogs.find((entry) => entry.package === name)
+  if (changelog === undefined) {
+    throw new Error(`the corpus carries no changelog for ${name}, so nothing can read its versions`)
+  }
+  return changelog.versions
+}
+
 describe('get_item_props', () => {
   it('renders the native seam line for a native-backed component', () => {
     const result = renderItemProps(store, { name: 'Input' })
@@ -217,8 +234,13 @@ describe('get_changelog', () => {
   })
 
   it('names the versions it records when none is asked for', () => {
+    // The Store's own version list, newest first as the generator writes it, so
+    // the assertion is the presentation rather than today's number. A release
+    // that adds an entry to a changelog is picked up here without an edit.
+    const recorded = recordedVersions('@nanisoft/prism-llms')
     const body = readText(renderChangelog(store, { package: '@nanisoft/prism-llms' }))
-    expect(body).toContain('Versions, newest first as the file records them: 0.1.0.')
+    expect(recorded.length).toBeGreaterThan(0)
+    expect(body).toContain(`Versions, newest first as the file records them: ${recorded.join(', ')}.`)
   })
 
   it('misses an unknown package with the whole published set, not a guess', () => {
@@ -231,11 +253,17 @@ describe('get_changelog', () => {
   })
 
   it('misses an unknown version with the versions the file does record', () => {
-    const result = renderChangelog(store, { package: '@nanisoft/prism-ui', version: '0.4.0' })
-    expect(result.isError).toBe(true)
     // The predecessor line is not in this system's changelog, so a request for
-    // it is a miss that says what is there rather than a fabricated history.
-    expect(readText(result)).toContain('It records: 0.5.0')
+    // it is a miss that says what is there rather than a fabricated history. The
+    // version asked for is still a literal, because the property under test is
+    // that a version the file does not carry misses; the versions it answers
+    // with are read from the Store rather than written here.
+    const recorded = recordedVersions('@nanisoft/prism-ui')
+    const absent = '0.4.0'
+    expect(recorded).not.toContain(absent)
+    const result = renderChangelog(store, { package: '@nanisoft/prism-ui', version: absent })
+    expect(result.isError).toBe(true)
+    expect(readText(result)).toContain(`It records: ${recorded.join(', ')}.`)
   })
 
   it('answers for every published package the corpus carries', () => {
