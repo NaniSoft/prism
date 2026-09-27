@@ -16,7 +16,7 @@ import { inter } from '@/lib/fonts'
 // build never sees it in a scan and never orders it against its `.h-9`.
 //
 // The same ordering is what made the library's copy of `.hidden` land after this
-// site's `.md\:flex`, `.lg\:block` and `.sm\:inline`, and the library's `.p-4` and
+// site's `.lg\:flex`, `.lg\:block` and `.sm\:inline`, and the library's `.p-4` and
 // `.gap-6` land after this site's `.sm\:p-6` and `.sm\:gap-16`. A media query adds
 // no specificity, so those ties went to whichever stylesheet was second and five
 // variants stopped applying. `globals.css` moves exactly those five into a
@@ -123,8 +123,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <SiteNav />
             {/*
               `ml-auto` keeps the controls hard right while the nav sits beside the
-              wordmark. Below `md` the nav is display:none, so the controls still land
-              against the edge without the header needing a second breakpoint.
+              wordmark. Below `lg` the nav is display:none and the mobile menu
+              carries the Sections instead, so the controls still land against the
+              edge without the header needing a second breakpoint of its own. `lg`
+              is the same threshold the row and the documentation sidebar switch
+              at, and the reasoning for it, with the measurement behind it, is in
+              `SiteNav`.
             */}
             <div className="ml-auto flex items-center gap-2">
               <SearchEntry />

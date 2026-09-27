@@ -27,6 +27,11 @@ import { expect, test, type TestInfo } from '@playwright/test'
  * The header's navigation row and the documentation sidebars are the headline:
  * both are `hidden` plus a breakpoint variant, and both were invisible at every
  * width in both Modes for as long as the site has existed.
+ *
+ * The row follows `lg` and not `md`, and `header-fit.spec.ts` is where that is
+ * measured rather than asserted: this spec states which affordance is on screen at
+ * a project's width, and the other one proves the row fits at the width it claims
+ * and that a reader below it can still reach every Section.
  */
 
 /** The width and Mode this project runs at, from the config's own metadata. */
@@ -50,13 +55,13 @@ test.beforeEach(async ({ page }, testInfo) => {
   }, mode)
 })
 
-test('the header navigation row follows md', async ({ page }, testInfo) => {
+test('the header navigation row follows lg', async ({ page }, testInfo) => {
   const { width } = project(testInfo)
   await page.goto('/', { waitUntil: 'networkidle' })
   const display = await page
     .locator('nav[aria-label="Main"]')
     .evaluate((element) => getComputedStyle(element).display)
-  expect(display, `nav[aria-label="Main"] at ${width}px`).toBe(width >= AT.md ? 'flex' : 'none')
+  expect(display, `nav[aria-label="Main"] at ${width}px`).toBe(width >= AT.lg ? 'flex' : 'none')
 })
 
 test('the mobile menu is the mirror of it, and never both', async ({ page }, testInfo) => {
@@ -64,13 +69,13 @@ test('the mobile menu is the mirror of it, and never both', async ({ page }, tes
   await page.goto('/', { waitUntil: 'networkidle' })
   const [nav, menu] = await page.evaluate(() => {
     const navElement = document.querySelector('nav[aria-label="Main"]')
-    const menuElement = document.querySelector('header div[class~="md:hidden"]')
+    const menuElement = document.querySelector('header div[class~="lg:hidden"]')
     return [
       navElement ? getComputedStyle(navElement).display : '(absent)',
       menuElement ? getComputedStyle(menuElement).display : '(absent)',
     ]
   })
-  expect(menu, `the mobile menu at ${width}px`).toBe(width >= AT.md ? 'none' : 'block')
+  expect(menu, `the mobile menu at ${width}px`).toBe(width >= AT.lg ? 'none' : 'block')
   // The two are one decision read twice, so they cannot both be on screen.
   expect(nav === 'none').toBe(menu !== 'none')
 })

@@ -19,6 +19,11 @@ import { expect, test } from '@playwright/test'
  * The axe scan runs in the real browser, which is the only place the
  * `color-contrast` rule can evaluate; it runs in one project so the job stays
  * quick. The 44px check runs only in the coarse-pointer project.
+ *
+ * The three widths are all committed now, 768 included. `display.spec.ts` holds
+ * the computed values at each project's own width and `header-fit.spec.ts` holds
+ * the measured widths, because a rule can compute to exactly the value it should
+ * and still render wider than the viewport, which is what the row did at 768.
  */
 const ROUTES = [
   { path: '/', slug: 'home' },

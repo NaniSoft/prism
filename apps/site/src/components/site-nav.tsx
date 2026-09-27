@@ -8,7 +8,36 @@ import { Menu, X } from 'lucide-react'
 import { TOP_NAV } from '@/lib/nav'
 
 /**
- * Horizontal navigation for `md` and up.
+ * Horizontal navigation for `lg` and up.
+ *
+ * **`lg` is where the row fits, and that is measured rather than assumed.** The
+ * row is one rigid line and nothing in it can yield: the wordmark is 97 pixels,
+ * the seven Section links are 635 because a Section name is a defined term and
+ * cannot be abbreviated to fit, and the three controls are 273. That is 1005 of
+ * content plus two 16 pixel gaps and the 48 pixel container gutter, so the row
+ * needs 1085 pixels of viewport to sit on one line at its designed size. `md` is
+ * 768, and the row has never fitted there: it measured 1013 against a 768 pixel
+ * viewport, the document scrolled 245 pixels sideways and the mode toggle sat off
+ * screen. `lg` is 1024, it is the widest threshold the design system authors
+ * (`xl` and `2xl` are closed in the emitted theme, so a larger one cannot be
+ * written without inventing a token), and it is the threshold the documentation
+ * sidebar already switches at, so the row and the sidebar now arrive together
+ * rather than the row appearing 256 pixels before the navigation a reader at that
+ * width most wants.
+ *
+ * The mobile menu below is therefore not the small-width fallback any more, it
+ * is the primary way to reach a Section from 640 to 1023, which is why it carries
+ * all seven and why its links are the 44 pixel targets the coarse-pointer floor
+ * asks for.
+ *
+ * **The known limit, at the bottom of the band.** From 1024 to 1085 the row is up
+ * to 61 pixels short of its natural width, and the wordmark is the only elastic
+ * element in it, so it takes two lines there rather than pushing the document
+ * sideways. Those widths rendered that way before the row moved and render that
+ * way now, because the row was already on screen at `md`. Closing the band would
+ * take either a threshold this repository does not author or a re-spacing of the
+ * row, and the second is a design change wearing a responsive fix's clothes. The
+ * measurements are in `e2e/README.md` rather than only here.
  *
  * The active item is marked with `aria-current` rather than colour alone, so the
  * current page is not communicated by hue that a theme switch can change out from
@@ -29,7 +58,7 @@ export function SiteNav() {
     'focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px] focus-visible:outline-none'
 
   return (
-    <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
+    <nav aria-label="Main" className="hidden items-center gap-1 lg:flex">
       {TOP_NAV.map((item) => {
         const current = pathname === item.href
         return (
@@ -52,7 +81,13 @@ export function SiteNav() {
 }
 
 /**
- * Navigation for viewports below `md`, where the horizontal row has no room.
+ * Navigation for viewports below `lg`, where the horizontal row has no room.
+ *
+ * It stopped being the fallback for a phone the day the row moved to `lg`. From
+ * 640 to 1023 this is how a reader reaches a Section, which is the whole of the
+ * range a tablet in landscape and a small laptop sit in, so the panel carries all
+ * seven Sections rather than the handful that would fit, and nothing a reader
+ * could reach at 1023 is out of reach at 640.
  *
  * The panel is a disclosure rather than a route change: it closes on navigation,
  * on Escape and on a pointer-down outside itself, and every close hands focus back
@@ -143,7 +178,7 @@ export function MobileMenu() {
   }, [open, close])
 
   return (
-    <div ref={rootRef} className="md:hidden">
+    <div ref={rootRef} className="lg:hidden">
       <button
         type="button"
         ref={triggerRef}

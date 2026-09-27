@@ -131,7 +131,20 @@ It failed silently, and for a long time. The header's navigation row, both docum
 
 The layer exists because raising the whole of the site's utility layer above the library's, which is the other obvious answer, is wrong here. The library generates class names at runtime from its own source, so a Button rendered by a Demo carries `h-9` and `pointer-coarse:h-11` without either string appearing in anything this site's build scans. Handing the base the win there drops the control from 44px to 36px, under the coarse-pointer floor.
 
-**The limit, stated plainly.** The gate reads declarations, at three widths, and only over class lists written in the site's own source. An element whose classes the library composes at runtime is not in that set, because nothing in the site's source states its class list. So the computed outcome is asserted in the browser lane as well: `apps/site/e2e/display.spec.ts` reads `getComputedStyle` for the header navigation, the mobile menu, both header labels, both documentation sidebars, the demo frame and the footer, at each project's own width in both Modes, and `visual.spec.ts` keeps the 44px coarse-pointer check. The browser lane is the only place a used value exists, so it also settles what a blockified flex item computes to and whether a width between two of the three is wrong. Neither lane sees what the other cannot.
+**The limit, stated plainly.** The gate reads declarations, at three widths, and
+only over class lists written in the site's own source. An element whose classes
+the library composes at runtime is not in that set, because nothing in the site's
+source states its class list. So the computed outcome is asserted in the browser
+lane as well: `apps/site/e2e/display.spec.ts` reads `getComputedStyle` for the
+header navigation, the mobile menu, both header labels, both documentation
+sidebars, the demo frame and the footer, at each project's own width in both
+Modes, and `visual.spec.ts` keeps the 44px coarse-pointer check. The browser lane
+is the only place a used value exists, so it also settles what a blockified flex
+item computes to and whether a width between two of the three is wrong. Neither
+lane sees what the other cannot. A third lane, `header-fit.spec.ts`, reads the
+measured widths rather than the computed values, because a rule can compute to
+exactly the value it should and still render 245 pixels wider than the viewport;
+see the visual regression section for what that cost.
 
 ## The client-JavaScript budget
 
@@ -176,17 +189,17 @@ one component item, one block item, `/foundation`, `/foundation/themes` and
 report-only (`continue-on-error: true`) and uploads the report as an artifact
 and one pull request comment.
 
-**The 768 project is exercised and has no committed baseline.** The header row
-computes to 1013 pixels at a 768 pixel viewport, because the horizontal
-navigation is on screen from `md` up and now carries seven Section links, so
-`scrollWidth` is 1013 against a `clientWidth` of 768 and the document scrolls
-sideways with the mode toggle off screen. Before the cascade layers landed the
-navigation was `display: none` at every width and the row was never asked to fit,
-so every 768 shot was 768 pixels wide; the branch base renders all forty-two of
-them pixel-exact. The overflow is what became visible when the header started
-rendering, and it belongs with the header. A baseline there would make the next
-run pass and remove the evidence, so the shots are left uncut and the job reports
-them. `apps/site/e2e/README.md` carries the detail.
+**The 768 project is exercised and committed.** The header row used to compute to
+1013 pixels at a 768 pixel viewport, because the horizontal navigation was on
+screen from `md` up and carries seven Section links, so `scrollWidth` was 1013
+against a `clientWidth` of 768, the document scrolled sideways and the mode toggle
+sat off screen. The row now switches at `lg` with the documentation sidebar, and
+the mobile menu carries the Sections below it, so the 768 baselines are cut and
+committed with the rest. The residual is stated rather than hidden: from 1024 to
+1085 the row is up to 61 pixels short of its natural width and the wordmark, the
+only elastic element in it, takes two lines. Those widths rendered that way before
+the fix and render that way now, because the row was already on screen at `md`
+there. `apps/site/e2e/README.md` carries the detail.
 
 `apps/site/e2e/display.spec.ts` is in the same job and is not report-only. It
 asserts computed display, padding and gap for the elements the cascade gate cannot
@@ -196,6 +209,19 @@ report nobody reads, and it runs inside a report-only job, which is a deliberate
 mismatch worth naming: until the promotion rule below is met, a display failure
 does not fail CI. `pnpm --filter @nanisoft/site run visual` fails locally, and the
 gate in `scripts/` fails the build for the half the gate can see.
+
+**And it is not sufficient on its own, which the 768 episode proved.** A computed
+`display` is what the cascade decides, not what the element measures, so
+`display.spec.ts` asserted `flex` at 768 for as long as the row was 1013 pixels
+wide and passing. `apps/site/e2e/header-fit.spec.ts` is the lane that reads the
+measurements: it sweeps 390, 640, 768, 1024 and 1440 in both Modes on the landing
+page and on a documentation route, and asserts that the document does not scroll
+sideways, that every control in the header is inside the viewport, and that the
+affordance on screen is the one that width is designed for. It also opens the
+disclosure at 640 and 768 and asserts it carries all seven Sections, so a
+navigation that moved cannot quietly cost a route. The widths are the union of the
+authored thresholds and the visual viewports rather than the gate's three, because
+the defect lived in a width between two of them.
 
 Promotion rule: once the baseline has been stable for two consecutive weeks with
 no unexplained diff (target: ten consecutive merges), remove
@@ -222,8 +248,15 @@ free of these defects.
   prerender or RSC boundaries are outside every gate here.
 - The cascade gate reasons about declarations at 390, 768 and 1440 pixels. A
   collision that only resolves wrong between two of those is outside it and inside
-  the browser lane, and the browser lane evaluates the same three widths. Neither
-  is a proof at every width.
+  the browser lane. `header-fit.spec.ts` sweeps 390, 640, 768, 1024 and 1440, so
+  the widths it covers are the union rather than the gate's three, and neither is
+  a proof at every width.
+- A passing fit lane proves the header did not overflow at the widths it swept and
+  that one of two affordances was on screen. It does not prove the row looks
+  right at a width it does not sweep, and it cannot: from 1024 to 1085 the row is
+  up to 61 pixels short of its natural width and the wordmark takes two lines,
+  which the lane has no assertion against because the row is on screen and nothing
+  overflows there.
 - "Zero client JavaScript" means "no statically detectable client boundary".
   The analysis is lexical: it can over-approximate, and it cannot see a computed
   `import()` or a `require` assembled at runtime.

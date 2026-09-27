@@ -211,7 +211,7 @@ describe("the site's own stylesheet", () => {
     // rather than a silent gap: `check-utility-cascade.mjs` is what finds the new
     // one, and this is what it will find.
     const colliding = [
-      { className: 'hidden items-center gap-1 md:flex', restated: 'md\\:flex' },
+      { className: 'hidden items-center gap-1 lg:flex', restated: 'lg\\:flex' },
       { className: 'hidden w-60 shrink-0 lg:block', restated: 'lg\\:block' },
       { className: 'hidden sm:inline', restated: 'sm\\:inline' },
       { className: 'bg-background p-4 sm:p-6', restated: 'sm\\:p-6' },
