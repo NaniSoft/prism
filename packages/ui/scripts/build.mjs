@@ -19,6 +19,7 @@
 import { execFileSync } from 'node:child_process'
 import { createRequire } from 'node:module'
 import {
+  cpSync,
   existsSync,
   mkdirSync,
   readdirSync,
@@ -72,6 +73,38 @@ const result = await postcss([tailwindcss()]).process(readFileSync(STYLES_IN, 'u
   to: STYLES_OUT,
 })
 writeFileSync(STYLES_OUT, result.css)
+
+/* ── 3. The face, next to the stylesheet that names it ────────────────────── */
+
+// The `@font-face` sources in the emitted stylesheet are relative to it, and a
+// consumer imports `dist/styles.css` from its own root, so the binaries have to
+// sit beside the sheet rather than in a `public/` directory only the development
+// server serves. The old line emitted the face at an absolute path and it silently
+// failed in all four consumer repositories, so this is copied rather than assumed.
+const FONTS_IN = path.join(PKG, 'public', 'fonts')
+const FONTS_OUT = path.join(DIST, 'fonts')
+if (existsSync(FONTS_IN)) {
+  cpSync(FONTS_IN, FONTS_OUT, { recursive: true })
+  const shipped = readdirSync(FONTS_OUT).filter((f) => !/OFL|LICENSE|LICENCE/i.test(f))
+  const total = shipped.reduce((sum, f) => sum + statSync(path.join(FONTS_OUT, f)).size, 0)
+  console.log(
+    `  fonts: ${shipped.length} face(s) copied to dist/fonts, ${(total / 1024).toFixed(1)} KB, ` +
+      'and the licence beside them',
+  )
+  // Every face the sheet names has to arrive with it. A `@font-face` pointing at
+  // a file this build did not copy is a page that renders in the fallback with no
+  // error anywhere, which is the failure this package exists to end.
+  const faces = [...result.css.matchAll(/url\(['"]?([^'")]+\.woff2?)/g)].map((m) => m[1])
+  for (const src of new Set(faces)) {
+    const resolved = path.join(DIST, src)
+    if (!existsSync(resolved)) {
+      throw new Error(
+        `the emitted stylesheet names ${src} and the build did not copy it; a face the sheet ` +
+          `references but does not ship resolves to nothing in every consumer`,
+      )
+    }
+  }
+}
 
 /* ── Report ──────────────────────────────────────────────────────────────── */
 

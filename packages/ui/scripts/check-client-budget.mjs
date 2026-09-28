@@ -173,6 +173,16 @@ const EXCLUSIONS = [
     match: (rel) => rel.endsWith('.tsbuildinfo'),
     reason: "TypeScript's own incremental-build cache: it is an input to a later build, not an output of this one",
   },
+  {
+    // The face is not JavaScript and it is not a module: it is 70.7 KB of font
+    // binary that a browser fetches over the network, once, and that no bundler
+    // inlines. It is a real cost to a consumer and it is priced in its own budget
+    // (check-typeface.mjs reads the licence and the @font-face sources), so
+    // excluding it here is not a way of losing it. Counting it as a module would
+    // be a worse lie, because gzipping a woff2 measures nothing a reader pays.
+    match: (rel) => /^fonts\//.test(rel),
+    reason: 'the face and its licence: 70.7 KB of binary fetched over the network, priced by check-typeface.mjs and not by this gate',
+  },
 ]
 
 /**

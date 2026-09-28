@@ -7,6 +7,7 @@
  * Structure:
  *   tailwindcss        the framework and its preflight
  *   @source            Prism's own component and block source
+ *   the face           `@font-face` for the three weights the scale renders
  *   token CSS          the emitted `:root`/`.dark`/`[data-pack=...]` variables
  *   token theme        the `@theme` bindings that produce the semantic utilities
  *   base layer         Prism's own defaults, not a consumer's globals
@@ -15,6 +16,56 @@
 
 /* Prism's component and block source is the only thing that must be scanned. */
 @source './';
+
+/*
+ * The face, and the licence beside it.
+ *
+ * `--font-sans` names Inter as its first family, and naming a family is not
+ * shipping it: without these rules the first entry resolves to nothing and every
+ * page falls through to the platform's UI face, which is the one face a design
+ * system never means by its first choice. It was not theoretical, because a
+ * consumer that deleted its own copy and loaded nothing got exactly that.
+ *
+ * The source is relative to the EMITTED stylesheet, not to this file, because a
+ * consumer imports `dist/styles.css` from its own root and an absolute path or a
+ * web-root path resolves against the consumer's origin rather than against the
+ * package. The old line emitted the face at an absolute path and it silently
+ * failed in all four consumer repositories.
+ *
+ * Three weights, and 700 is deliberately absent. The authored scale emits four
+ * (`--font-weight-bold: 700`) and the shipped source renders three: 400 three
+ * times, 500 ninety-nine, 600 forty-six, and 700 nothing. A 23.8 KB file that no
+ * page renders is 23.8 KB every consumer downloads on every install, forever, for
+ * a token nothing uses. The weight axis is also the file's only axis: the design
+ * system retired the width axis, and optical sizing, which it approximated, is
+ * the browser's initial behaviour. A file carrying a width range is not the file
+ * this design asked for.
+ *
+ * The licence ships beside the binaries rather than in a repository document,
+ * because the obligation is discharged once here and the consumer who installs
+ * the file is the one who needs it.
+ */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./fonts/inter-latin-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./fonts/inter-latin-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./fonts/inter-latin-600.woff2') format('woff2');
+}
 
 /* Semantic variables: the shadcn-compatible neutral default and the five packs. */
 @import '@nanisoft/prism-tokens/dist/light.css';
