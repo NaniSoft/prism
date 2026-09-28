@@ -105,9 +105,11 @@ import { Card, CardHeader, CardTitle, CardContent } from '@nanisoft/prism-ui/com
 // Blocks and Pages import the same way, from ./blocks/* and ./pages/*.
 ```
 
-The v1 roster is 28 Components, 10 Blocks and 4 Pages, 42 catalogue items. The
-checked catalogue is the one list; this README states the contract, not the
-list.
+The roster is whatever the catalogue holds, and this README deliberately does not
+state a number: a count in prose goes stale silently, and a gate on prose punishes
+editing a comment. Run `pnpm --filter @nanisoft/prism-ui check:catalogue` to read
+the current roster, and the gate reports a roster error and a version bump as two
+separate claims so neither is mistaken for the other.
 
 ## The agent surface
 
@@ -154,8 +156,8 @@ The constitution lives at the root: `PRODUCT.md`, `CONTEXT.md`, `DESIGN.md`,
 ## Status
 
 The system is built. The four packages exist under their final names, the
-component library ships the 42-item v1 catalogue, the docs site builds and
-exports statically, and the quality-gate set runs in CI. `DESIGN.md` records the
+component library ships the catalogue, the docs site builds and exports
+statically, and the quality-gate set runs in CI. `DESIGN.md` records the
 open items, which are the cutover steps and the v1.1 roster tail rather than
 missing work. The previous public system is archived at `github.com/NaniSoft/prism`
 and is not the source of this system.
