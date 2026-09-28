@@ -1,7 +1,7 @@
 /**
  * `createPrismMcpServer`: the transport-free factory ticket 05 fixed as the one
- * seam. It registers the eight read-only tools over a validated
- * `PrismDocsStore` and returns an `McpServer` that any transport can connect.
+ * seam. It registers the read-only tools over a validated `PrismDocsStore` and
+ * returns an `McpServer` that any transport can connect.
  *
  * The store guard runs at this door, so a raw `data.json` is validated once and
  * every transport inherits the same rejection. The factory holds no I/O: the
@@ -12,6 +12,7 @@ import { parsePrismDocsStore, type PrismDocsStore } from '@nanisoft/prism-llms'
 
 import { DESCRIPTIONS } from './descriptions.js'
 import {
+  getChangelogSchema,
   getItemDocSchema,
   getItemPropsSchema,
   getItemSourceSchema,
@@ -22,6 +23,7 @@ import {
   searchDocsSchema,
 } from './schemas.js'
 import {
+  renderChangelog,
   renderItemDoc,
   renderItemProps,
   renderItemSource,
@@ -131,6 +133,21 @@ export function createPrismMcpServer(
       inputSchema: searchDocsSchema,
     },
     (args) => searchDocs(store, args),
+  )
+
+  // Registered last and named `get_changelog` beside the eight rather than
+  // replacing one of them. The Changelogs Section reaching the Corpus is a
+  // parameter on `list_pages` and `get_page`, which already read the Sections
+  // from the Store, plus one tool for the thing the eight cannot express: what
+  // a published package changed in a version.
+  server.registerTool(
+    'get_changelog',
+    {
+      title: 'Get a package changelog',
+      description: DESCRIPTIONS.get_changelog,
+      inputSchema: getChangelogSchema,
+    },
+    (args) => renderChangelog(store, args),
   )
 
   return server

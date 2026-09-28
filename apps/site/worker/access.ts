@@ -20,8 +20,8 @@
  *      and the application audience in the block below, then set
  *      `MCP_ACCESS_ENABLED` to `true`.
  *
- * The factory and all eight tools are pure and do not change; only this wrapper
- * does. `@cloudflare/workers-oauth-provider` is deliberately not adopted.
+ * The factory and every read-only tool are pure and do not change; only this
+ * wrapper does. `@cloudflare/workers-oauth-provider` is deliberately not adopted.
  */
 import type { StatelessMcpHandler } from 'agents/mcp/server'
 

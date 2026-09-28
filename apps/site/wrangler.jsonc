@@ -13,12 +13,19 @@
     "run_worker_first": [
       "/mcp",
       "/mcp/*",
-      "/docs/*.md",
+      "/docs",
+      "/docs/*",
+      "/foundations",
+      "/foundations/*",
+      "/themes",
+      "/themes/*",
+      "/overview/*.md",
+      "/foundation/*.md",
+      "/content/*.md",
       "/components/*.md",
       "/blocks/*.md",
       "/pages/*.md",
-      "/foundations/*.md",
-      "/content/*.md"
+      "/changelogs/*.md"
     ]
   },
   "routes": [{ "pattern": "prism.nanisoft.com", "custom_domain": true }]

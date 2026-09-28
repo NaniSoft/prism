@@ -61,7 +61,12 @@ export default defineConfig({
     ...VIEWPORTS.flatMap((viewport) =>
       MODES.map((mode) => ({
         name: `${viewport.name}-${mode}`,
-        metadata: { mode },
+        // The width is metadata as well as a viewport, so a spec can state what it
+        // expects at that width without setting one. `display.spec.ts` is that
+        // spec: it asserts the responsive outcome per project rather than looping
+        // three viewports inside every project, which would run each width seven
+        // times and make the coarse-pointer project meaningless.
+        metadata: { mode, width: viewport.width },
         use: {
           ...devices['Desktop Chrome'],
           viewport: { width: viewport.width, height: viewport.height },
@@ -70,7 +75,7 @@ export default defineConfig({
     ),
     {
       name: 'coarse-390',
-      metadata: { mode: 'light', coarse: true },
+      metadata: { mode: 'light', coarse: true, width: 390 },
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 390, height: 844 },

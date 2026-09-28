@@ -47,10 +47,20 @@ store.d.ts
 store.js
 ```
 
-`md/<section>/<slug>.md` is the per-item Markdown mirror for
-`section` in `docs`, `foundations`, `content`, `components`, `blocks`, `pages`.
-`data.json` is the `PrismDocsStore`; it is never copied into the site export and
-is bundled into the Worker instead.
+`md/<section>/<slug>.md` is the per-item Markdown mirror for `section` in
+`overview`, `foundation`, `content`, `components`, `blocks`, `pages`,
+`changelogs`. A content page's mirror keeps the shape of the content tree it was
+read from, at any depth: a page at `content/foundation/tokens/spacing-scale.mdx`
+is emitted at `md/foundation/tokens/spacing-scale.md` and is linked as
+`/foundation/tokens/spacing-scale.md`. A page's route comes from where it sits
+in that tree, not from a Section-and-file-name join, so nesting a page publishes
+it rather than losing it. `data.json` is the `PrismDocsStore`; it is never copied
+into the site export and is bundled into the Worker instead.
+
+The content walk is `collectContentPages` in `scripts/build.mjs`, and it is the
+only thing that decides which content pages exist. A Section that is declared and
+not on disk throws rather than being skipped, because a skipped Section is a
+whole Section deleted from every agent surface with a green build.
 
 ## The store
 
@@ -71,7 +81,8 @@ on the literal `## Props` heading.
 
 ## The drift gate
 
-`scripts/check.mjs` fails the build on any of eight invariants: coverage, the
-demo contract, cross-references, descriptions, the store type round-trip, link
-and mirror completeness, byte-for-byte determinism, and the README's declared
-output list equalling the emitted set.
+`scripts/check.mjs` fails the build on any of eight invariants: coverage (every
+catalogue item, and every content page at any depth, has a mirror), the demo
+contract, cross-references, descriptions, the store type round-trip, link and
+mirror completeness, byte-for-byte determinism, and the README's declared output
+list equalling the emitted set.

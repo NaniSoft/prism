@@ -5,14 +5,15 @@ import type { NextConfig } from 'next'
  * The site is a static export.
  *
  * `trailingSlash: false` pairs with the Worker's `html_handling:
- * "auto-trailing-slash"`, so a route is emitted as `out/docs/quickstart.html`
- * and served at `/docs/quickstart`. `images.unoptimized` is required because
+ * "auto-trailing-slash"`, so a route is emitted as `out/overview/quickstart.html`
+ * and served at `/overview/quickstart`. `images.unoptimized` is required because
  * Next's default image loader cannot run without a server.
  *
- * `createMDX` compiles the hand-written MDX collections declared in
- * `src/lib/source.ts` through the macro API and the item prose under `items/`.
- * `macro.include` names the module that may call `defineCollections`, per the
- * macro contract.
+ * `createMDX` compiles the one content collection declared in
+ * `src/lib/source.ts` through the macro API: the hand-written pages under
+ * `content/` and an Item's documentation beside its Demo under `items/`, which is
+ * the whole content tree. `macro.include` names the module that may call
+ * `defineCollections`, per the macro contract.
  */
 const nextConfig: NextConfig = {
   output: 'export',

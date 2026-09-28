@@ -93,7 +93,7 @@ export default function HomePage() {
               <ArrowRight className="size-3.5" />
             </Link>
             <Link
-              href="/docs/quickstart"
+              href="/overview/quickstart"
               className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
             >
               Read the quickstart

@@ -22,10 +22,25 @@ async function withServer(run: (harness: Harness) => Promise<void>): Promise<voi
 }
 
 describe('the tool registry', () => {
-  it('registers exactly the eight unprefixed tools in order', async () => {
+  it('registers the nine unprefixed tools in order, the first eight unchanged', async () => {
     await withServer(async ({ client }) => {
       const { tools } = await client.listTools()
       expect(tools.map((tool) => tool.name)).toEqual([...TOOL_ORDER])
+      // The eight the earlier tickets pinned keep their names and their
+      // positions. `get_changelog` is appended rather than inserted, so an agent
+      // holding a tool list from before it finds every tool it knew where it
+      // knew it.
+      expect(tools.slice(0, 8).map((tool) => tool.name)).toEqual([
+        'list_items',
+        'get_item_doc',
+        'get_item_props',
+        'get_item_source',
+        'get_theme_doc',
+        'list_pages',
+        'get_page',
+        'search_docs',
+      ])
+      expect(tools).toHaveLength(9)
     })
   })
 

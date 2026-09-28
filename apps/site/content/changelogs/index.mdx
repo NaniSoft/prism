@@ -1,0 +1,41 @@
+---
+title: Changelogs
+description: "What changed in each published Prism package, read from that package's own changelog."
+---
+
+Prism publishes four packages, and each entry below is that package's own
+`CHANGELOG.md`, copied into this site by the build and rendered whole. No
+changelog here is written twice: the text a reader sees and the bytes in the npm
+tarball are the same bytes, because a hand-maintained copy of a changelog drifts
+from what was published while continuing to look correct.
+
+## The packages
+
+- [`@nanisoft/prism-llms`](/changelogs/prism-llms)
+- [`@nanisoft/prism-mcp-server`](/changelogs/prism-mcp-server)
+- [`@nanisoft/prism-tokens`](/changelogs/prism-tokens)
+- [`@nanisoft/prism-ui`](/changelogs/prism-ui)
+
+The list is the workspace's own published set, discovered from it rather than
+written here, and a published package that ships a changelog with no route on
+this site fails the build. That gate is the point: the reference design system
+this is modelled on has reader-facing changelog pages and no such check, which
+is how its pages can be deleted and leave its continuous integration green.
+
+This page is the only authored part of the Section. Everything it links to is
+generated, is overwritten on every build, and is never edited here.
+
+## Before you upgrade
+
+The current line is a clean break rather than an incremental release, so there
+is no upgrade path to walk version by version. What changed across the break,
+what was removed rather than renamed, and what to do instead of each removed
+thing are all in the migration note, `MIGRATION.md` at the repository root. It
+is still a draft, and the parts it marks provisional are provisional: confirm
+them at the version that publishes.
+
+There is deliberately no history here for the line before this one. That line is
+not an earlier version of this system, it is a different system that happened to
+share a name, and reconstructing its releases here would be fiction. The
+migration note is the reference for it, and the only version numbers that appear
+on this site are the ones the current packages have actually published.

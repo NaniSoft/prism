@@ -1,7 +1,7 @@
 /**
  * @nanisoft/prism-mcp-server public surface.
  *
- * One factory, eight tools, no transport: the Worker connects it to
+ * One factory, the read-only tools, no transport: the Worker connects it to
  * `createMcpHandler`, and the protocol tests connect it to an in-memory
  * transport. The build stamp ships beside the factory so `list_items` can echo
  * how fresh the bundled corpus is.

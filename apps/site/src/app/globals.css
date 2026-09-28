@@ -1,4 +1,26 @@
 /*
+ * The cascade, declared in one place, because this site is two Tailwind builds.
+ *
+ * The site's own build (this file) and the library's (`@nanisoft/prism-ui/styles.css`,
+ * imported in `app/layout.tsx`) each emit their own `@layer utilities`, and the two
+ * land in the reader's document as ONE `utilities` layer whose contents are
+ * concatenated in import order. So the site builds first and the library second,
+ * and inside that single layer source order is the only thing left deciding a tie.
+ *
+ * The first layer statement in the document fixes the order of every layer in it,
+ * which is the only rank a stylesheet can claim over another. `site-variants` is
+ * declared last so the rules at the bottom of this file outrank the library's
+ * utility layer whatever the import order is. The five layers ahead of it are the
+ * ones Tailwind emits, in the order it emits them, and they are listed rather than
+ * left to first appearance so a future Tailwind that reorders them is a diff here
+ * rather than a diff in the reader's cascade.
+ *
+ * `@import` is legal after a layer statement, which is the only reason this file
+ * opens with one.
+ */
+@layer properties, theme, base, components, utilities, site-variants;
+
+/*
  * The site's own Tailwind build.
  *
  * Prism's compiled stylesheet, `@nanisoft/prism-ui/styles.css`, is imported once
@@ -17,6 +39,22 @@
 @source '../app';
 @source '../components';
 @source '../lib';
+/*
+ * The content tree, because a Demo lives in it. Every Item's Demo sits beside
+ * its own documentation, and the documentation is not under `src`, so without
+ * this line nothing in this stylesheet says the Demo's class names are to be
+ * read: the utility generator would find them only because its automatic root
+ * is the working directory of the build, which happens to be the site root.
+ * That is a property of how the build is invoked rather than a statement about
+ * this file. Point the automatic root anywhere else and the class names stop
+ * being scanned, at which point a Component page renders a wall of unstyled
+ * buttons with every gate green, because a class name is only a string in a file
+ * nobody reads.
+ *
+ * So the one directory this restructure moves content into is named here, and
+ * the Demos it holds are scanned because the stylesheet says so.
+ */
+@source '../../items';
 
 @import '@nanisoft/prism-tokens/dist/theme.css';
 
@@ -149,5 +187,80 @@
     border-left: 2px solid var(--primary);
     padding-left: var(--spacing-4);
     color: var(--muted-foreground);
+  }
+}
+
+/*
+ * The site's responsive variants, restated above the library's utility layer.
+ *
+ * WHAT IS WRONG WITHOUT THIS LAYER
+ *
+ * `hidden` is the site's most-used display utility and it is also one the library
+ * emits, for its own `hidden ... lg:flex` aside in `app-shell-01` and its
+ * `hidden sm:block` page numbers in `pagination`. Two builds, one `utilities`
+ * layer, so `.hidden` appears in it twice: at byte 11531 from this build and at
+ * byte 38759 from the library's, in the shipped stylesheet. The site's
+ * `@media (min-width:64rem){.lg\:flex{display:flex}}` is at 25661, between them.
+ *
+ * A media query adds no specificity, so `.lg\:flex` and `.hidden` are both (0,1,0)
+ * and the later one wins: the header's navigation row, both documentation
+ * sidebars and both `sm:inline` labels computed `display: none` at 390, 768 and
+ * 1440 pixels, in both Modes, and had done since before the Sections moved. The
+ * same shape broke `sm:p-6` and `sm:gap-16` against the library's `p-4` and
+ * `gap-6`. Five variants, seven elements. `node scripts/check-utility-cascade.mjs`
+ * re-derives that list from the built stylesheet, so this layer cannot fall behind
+ * it silently.
+ *
+ * WHY A LAYER AND NOT A BIGGER SELECTOR
+ *
+ * `site-variants` is declared above `utilities`, so these five rules outrank the
+ * library's whole utility layer regardless of which of the two stylesheets the
+ * bundler emits first. That is the one rank a stylesheet can claim over another
+ * that is not `!important`, and it is why the layer is declared in the statement at
+ * the top of this file rather than left to appear after `utilities` by accident.
+ *
+ * The alternative, raising the whole of this build's `utilities` above the
+ * library's, is the obvious one and it is wrong here. The library generates class
+ * names at runtime from its own source, so a Button rendered by this site's demos
+ * carries `h-9` and `pointer-coarse:h-11` without either string appearing in
+ * anything this build scans. Its variant would drop to the lower layer and the
+ * base would keep the element at 36px, under the 44px coarse-pointer floor the
+ * Button's own gate holds. So the library's utility layer stays on top, and only
+ * the rules that lose to it move.
+ *
+ * The library's own variant beats the library's own base, and still does:
+ * `app-shell-01`'s `lg:flex` and `pagination`'s `sm:block` are ordered by the
+ * library's single build and nothing here touches them.
+ *
+ * WHY EACH DECLARATION IS WRITTEN OUT
+ *
+ * Because there is no shared build to order them, the value is repeated rather
+ * than referenced. Each is the value this build already emits for the same
+ * utility, so no element's rendering changes except the seven the collision
+ * broke, and the gate compares the two so a divergence is a finding.
+ */
+@layer site-variants {
+  @media (width >= theme(--breakpoint-sm)) {
+    .sm\:gap-16 {
+      gap: var(--spacing-16);
+    }
+
+    .sm\:inline {
+      display: inline;
+    }
+
+    .sm\:p-6 {
+      padding: var(--spacing-6);
+    }
+  }
+
+  @media (width >= theme(--breakpoint-lg)) {
+    .lg\:block {
+      display: block;
+    }
+
+    .lg\:flex {
+      display: flex;
+    }
   }
 }

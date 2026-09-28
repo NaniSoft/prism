@@ -65,13 +65,49 @@ describe('the site Worker MCP lane', () => {
       await client.connect(transport)
       expect(client.getServerVersion()).toMatchObject({ name: 'prism-mcp-server' })
       const { tools } = await client.listTools()
-      expect(tools).toHaveLength(8)
+      expect(tools).toHaveLength(9)
       const result = await client.callTool({ name: 'list_items', arguments: {} })
       const block = result.content[0]
       expect(block?.type).toBe('text')
       if (block?.type === 'text') {
         expect(block.text).toContain('28 components, 10 blocks, 4 pages')
       }
+    } finally {
+      await client.close()
+    }
+  })
+
+  it('answers a changelog request over the Worker from the bundled corpus', async () => {
+    // The ninth tool, proved over the same transport a real agent uses rather
+    // than against the renderer. A published breaking change has to be
+    // discoverable here, which is the one thing the reference design system this
+    // is modelled on cannot do: its corpus has no changelog and no tool that
+    // could return one.
+    const fetchFn: FetchLike = async (input, init) => {
+      const url = typeof input === 'string' ? input : input.toString()
+      return handleMcp(request(url, init ?? {}), guardedEnv, ctx)
+    }
+    const transport = new StreamableHTTPClientTransport(new URL(`${ORIGIN}/mcp`), {
+      fetch: fetchFn,
+    })
+    const client = new Client({ name: 'site-test', version: '0.0.0' })
+    try {
+      await client.connect(transport)
+      const result = await client.callTool({
+        name: 'get_changelog',
+        arguments: { package: '@nanisoft/prism-ui', version: '0.5.0' },
+      })
+      const block = result.content[0]
+      expect(block?.type).toBe('text')
+      if (block?.type === 'text') {
+        expect(block.text).toContain('# @nanisoft/prism-ui - 0.5.0')
+        expect(block.text).toContain('clean break')
+      }
+      const miss = await client.callTool({
+        name: 'get_changelog',
+        arguments: { package: '@nanisoft/prism-ui', version: '0.4.0' },
+      })
+      expect(miss.isError).toBe(true)
     } finally {
       await client.close()
     }

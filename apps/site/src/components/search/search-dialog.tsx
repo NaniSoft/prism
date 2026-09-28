@@ -35,7 +35,7 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
   const results = Array.isArray(query.data) ? query.data : []
   const status =
     search.trim().length === 0
-      ? 'Type to search the guides, foundations, content and every catalogue item.'
+      ? 'Type to search the overview, foundation, content and every catalogue item.'
       : query.isLoading
         ? 'Searching...'
         : results.length === 0

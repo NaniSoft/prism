@@ -18,11 +18,15 @@ async function withServer(
 
 describe('protocol round-trips over InMemoryTransport', () => {
   it('list_items reports the header, counts and groups', async () => {
+    // The header names the version the Store itself carries. Written as a
+    // literal it was one more place a release had to be edited by hand, and the
+    // corpus version moves on every release of the component library.
+    const store = readStore()
     await withServer(async ({ client }) => {
       const result = await client.callTool({ name: 'list_items', arguments: {} })
       const body = readText(result)
       expect(result.isError).toBeFalsy()
-      expect(body).toContain('# Prism 0.5.0 - 28 components, 10 blocks, 4 pages')
+      expect(body).toContain(`# Prism ${store.version} - 28 components, 10 blocks, 4 pages`)
       expect(body).toContain('## Components')
       expect(body).toContain('## Blocks')
       expect(body).toContain('## Pages')
@@ -159,7 +163,7 @@ describe('protocol round-trips over InMemoryTransport', () => {
     const second = await connect(raw)
     try {
       const one = await first.client.callTool({ name: 'list_pages', arguments: {} })
-      const two = await second.client.callTool({ name: 'get_page', arguments: { url: '/docs/quickstart' } })
+      const two = await second.client.callTool({ name: 'get_page', arguments: { url: '/overview/quickstart' } })
       expect(readText(one)).toContain('# Prism pages')
       expect(readText(two)).toContain('# Quickstart')
     } finally {

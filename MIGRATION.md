@@ -148,14 +148,21 @@ pull request.
 
 ## URLs
 
-Preserved, because the path already matches the new shape: `/docs`,
-`/components`, `/blocks`, `/pages`, `/themes`. These serve the new section index
-at the same path.
+Moved, with a permanent redirect from the old path at the site Worker:
+`/docs` to `/overview`, `/foundations` to `/foundation`, `/themes` to
+`/foundation/themes`. `/docs/agent-workflow` moves to `/overview/using-llms`
+rather than to the Section it is in, so an old link lands on the page and not on
+a section index that does not mention it.
+
+Preserved, because the path is unchanged: `/components`, `/blocks`, `/pages` and
+every per-item route under them. These serve the section index and the item pages
+at the same paths as before, and the Corpus advertises the same forty-two
+addresses.
 
 Removed with no redirect:
 
 - every old per-item URL (`/components/<old-slug>`, `/blocks/<old-slug>`,
-  `/pages/<old-slug>`, `/docs/<old-guide-slug>`);
+  `/pages/<old-slug>`);
 - every old per-theme deep link;
 - `/blog` and `/rss.xml` (the blog never had a post).
 
@@ -168,9 +175,17 @@ no per-item prose that was carried across.
 `/<section>/<slug>.md`, and the MCP endpoint at `/mcp` are ported. The eight MCP
 tools keep their names (`list_items`, `get_item_doc`, `get_item_props`,
 `get_item_source`, `get_theme_doc`, `list_pages`, `get_page`, `search_docs`), but
-their answers describe the new system. Two changes to be aware of:
+their answers describe the new system, and a ninth has joined them beside rather
+than in place of any: `get_changelog(package, version?)` returns a published
+package's own changelog, which is what an agent upgrading a dependency needs and
+what this line previously had no way to discover. Two changes to be aware of:
 `get_item_source` no longer takes an `example` argument, and `search_docs`
 returns ranked references with matched fields rather than whole documents.
+
+The Changelogs section of the site renders the same bytes `get_changelog`
+returns, one route per published package. There is no entry here for the
+versions before this line: they were a different system, so their history is not
+this history, and the table above is the reference for them.
 
 ## What is not preserved
 

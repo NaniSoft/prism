@@ -4,8 +4,8 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 import { BUILT, BUILT_CORPUS } from '../src/generated/built.js'
-import { renderItemDoc, renderPage } from '../src/render.js'
-import { BUNDLED_PATH, CORPUS_PATH, readCorpusRaw, readStore } from './helpers.js'
+import { renderChangelog, renderItemDoc, renderPage } from '../src/render.js'
+import { BUNDLED_PATH, CORPUS_PATH, readCorpusRaw, readStore, readText } from './helpers.js'
 
 const store = readStore()
 
@@ -20,7 +20,18 @@ describe('the bundled corpus', () => {
 
   it('parses through the inherited guard', () => {
     expect(store.items).toHaveLength(42)
-    expect(store.pages).toHaveLength(20)
+    // Twenty prose pages and the four generated changelog routes, which is the
+    // shape the Changelogs Section adds to the Corpus.
+    expect(store.pages).toHaveLength(24)
+    expect(store.changelogs.length).toBeGreaterThan(0)
+  })
+
+  it('reaches every published package changelog through get_changelog', () => {
+    for (const changelog of store.changelogs) {
+      const result = renderChangelog(store, { package: changelog.package })
+      expect(result.isError, `${changelog.package} is unreachable`).toBeFalsy()
+      expect(readText(result)).toContain(changelog.text.trimEnd())
+    }
   })
 
   it('stamps the corpus version the store carries', () => {

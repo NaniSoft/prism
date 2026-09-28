@@ -49,7 +49,54 @@ const _categoriesAssert: _CategoriesMatch = true
 void _categoriesAssert
 
 export const STORE_STATUSES = ['stable', 'deprecated'] as const
-export const STORE_SECTIONS = ['docs', 'foundations', 'content'] as const
+
+/**
+ * The content Sections, in the reading order the site publishes them, and the
+ * same order `llms.txt` groups them in.
+ *
+ * These are the Section *directories*, so the list is the walk the corpus builder
+ * takes and the set of directories the site's gate checks. The three catalogue
+ * Sections are not here: an Item is a catalogue entry with a `kind`, and its page
+ * is emitted from the Catalogue rather than walked out of the content tree, so
+ * adding `components` to this list would make the walk look for a directory that
+ * is not one.
+ *
+ * **A Section's route is its directory, and the two were renames.** `docs` is
+ * `overview` and `foundations` is `foundation`, which is the rule that a prose
+ * Section is one body of knowledge and takes a singular route while a catalogue
+ * Section is a collection of many Items and takes a plural one. An agent holding
+ * a cached `llms.txt` from before the move still resolves every URL it names,
+ * because the site Worker redirects each of these routes permanently, and the
+ * corpus is rebuilt per release and points at the new ones. Nothing here is
+ * aliased: a page's `section` is the directory it is filed in, which is what
+ * `get_page` matches on, and a `Record<StoreSection, string>` over a list that
+ * had to be edited in the same commit as the rename is a second list that can be
+ * half done.
+ */
+export const STORE_SECTIONS = ['overview', 'foundation', 'content', 'changelogs'] as const
+
+/**
+ * The label each content Section is read under, in every artifact that groups
+ * pages by Section.
+ *
+ * `Record<StoreSection, string>` rather than a separate list, because a Section
+ * added to `STORE_SECTIONS` with no label is a compile error here rather than a
+ * Section that `llms.txt`, `list_pages` and the Corpus each spell their own way.
+ * The keys are the Section directories themselves, so the label cannot be filed
+ * under a Section that does not exist.
+ *
+ * The label is the Section's name rather than its directory, which is the whole
+ * point of the pair: the directory is what the tree is called, and the name is
+ * what a reader and an agent are told. `llms.txt` groups under these headings and
+ * `list_pages` counts them, so a Section renamed without its label renamed here
+ * would be advertised under two names in two artifacts.
+ */
+export const STORE_SECTION_TITLES: Record<StoreSection, string> = {
+  overview: 'Overview',
+  foundation: 'Foundation',
+  content: 'Content',
+  changelogs: 'Changelogs',
+}
 export const STORE_PACKS = ['default', 'blush', 'mint', 'lavender', 'sky', 'peach'] as const
 export const STORE_MODES = ['light', 'dark'] as const
 export const STORE_SCALE_GROUPS = [
@@ -135,21 +182,66 @@ export interface PrismDocsStoreEntry {
 
 export interface PrismDocsPage {
   readonly id: string
+  /** The page's path below its Section, without the extension: `tokens/colors`. */
   readonly slug: string
+  /** The top-level Section directory the page sits in. */
   readonly section: StoreSection
   readonly title: string
   readonly description: string
-  /** The page's canonical site path, for example `/docs/quickstart`. */
+  /** The page's canonical site path, for example `/overview/quickstart`. */
   readonly url: string
   readonly markdown: string
   readonly mirror: string
+}
+
+/**
+ * One version entry of a published package's changelog.
+ *
+ * `body` is the text under the version's own `## <version>` heading, sliced by
+ * the shared changelog rule and never re-levelled: the file is published whole
+ * and re-levelling a heading would be another transformation between the
+ * package's bytes and the agent's.
+ */
+export interface PrismChangelogRelease {
+  readonly version: string
+  readonly body: string
+}
+
+/**
+ * One published package's changelog, projected from the generated file the site
+ * renders.
+ *
+ * This is the field the ninth read-only tool answers from, and it exists so that
+ * a breaking change in a published package is discoverable by an agent. The
+ * reference design system shipped a breaking module-system change that no agent
+ * using it could find, because its corpus had no changelog field and no tool
+ * could return one.
+ *
+ * `text` is the generated file verbatim, which is a byte-for-byte copy of the
+ * package's own `CHANGELOG.md`. `releases` is the shared rule's reading of those
+ * same bytes, and the two cannot disagree because the rule is the only thing
+ * that produces either.
+ */
+export interface PrismChangelog {
+  /** The published npm name, which is what an agent asks for. */
+  readonly package: string
+  /** The route segment the changelog is published at: the unscoped name. */
+  readonly slug: string
+  /** The site's route for it, and the mirror an agent can fetch instead. */
+  readonly route: string
+  /** The file's own first heading, which names the package. */
+  readonly title: string
+  /** Every version the file records, newest first as the generator writes it. */
+  readonly versions: readonly string[]
+  readonly releases: readonly PrismChangelogRelease[]
+  /** The generated file, byte for byte. */
+  readonly text: string
 }
 
 export interface PrismSemanticToken {
   readonly token: string
   readonly value: string
 }
-
 export interface PrismScaleToken {
   readonly token: string
   readonly value: string
@@ -174,6 +266,13 @@ export interface PrismDocsStore {
   readonly version: string
   readonly items: readonly PrismDocsStoreEntry[]
   readonly pages: readonly PrismDocsPage[]
+  /**
+   * One entry per published package that ships a changelog. Required rather than
+   * optional: the field is what makes a published breaking change discoverable
+   * by an agent, and a store that quietly omitted it would leave the tool that
+   * reads it answering for nothing while every other gate stayed green.
+   */
+  readonly changelogs: readonly PrismChangelog[]
   readonly tokens: PrismTokensProjection
 }
 
@@ -299,6 +398,43 @@ function parsePage(value: unknown, path: string): PrismDocsPage {
   }
 }
 
+function parseChangelogRelease(value: unknown, path: string): PrismChangelogRelease {
+  const record = asRecord(value, path)
+  return {
+    version: asString(record['version'], `${path}.version`),
+    body: asString(record['body'], `${path}.body`),
+  }
+}
+
+function parseChangelog(value: unknown, path: string): PrismChangelog {
+  const record = asRecord(value, path)
+  const releases = asList(record['releases'], `${path}.releases`).map((entry, index) =>
+    parseChangelogRelease(entry, `${path}.releases[${index}]`),
+  )
+  const versions = asStringList(record['versions'], `${path}.versions`)
+  // The version list and the entries are two views of one reading, so a store
+  // that carried them out of step would answer `get_changelog` with a version
+  // the tool cannot hand back. It is checked here rather than at the call site,
+  // because the call site is the only place that would not notice.
+  const fromReleases = releases.map((release) => release.version)
+  if (versions.join('\n') !== fromReleases.join('\n')) {
+    fail(
+      `${path}.versions`,
+      `= ${JSON.stringify(versions)} is not the version list its own entries record, ` +
+        `which is ${JSON.stringify(fromReleases)}`,
+    )
+  }
+  return {
+    package: asString(record['package'], `${path}.package`),
+    slug: asString(record['slug'], `${path}.slug`),
+    route: asString(record['route'], `${path}.route`),
+    title: asString(record['title'], `${path}.title`),
+    versions,
+    releases,
+    text: asString(record['text'], `${path}.text`),
+  }
+}
+
 function parseSemantic(value: unknown, path: string): PrismSemanticToken {
   const record = asRecord(value, path)
   return {
@@ -377,6 +513,10 @@ function parseTokens(value: unknown, path: string): PrismTokensProjection {
  * Narrow an `unknown` JSON payload to a `PrismDocsStore`, or throw with the
  * offending path. This is the only place a `PrismDocsStore` is produced from
  * JSON: nothing is assigned with `as`, and `kind` is never widened to `string`.
+ *
+ * The order of the fields is the order of the layers that have to have carried
+ * the change. `items` before `changelogs`, so a document with a widened `kind`
+ * reports the path a reader is more likely to be looking at.
  */
 export function parsePrismDocsStore(raw: unknown): PrismDocsStore {
   const root = asRecord(raw, 'root')
@@ -387,6 +527,9 @@ export function parsePrismDocsStore(raw: unknown): PrismDocsStore {
     ),
     pages: asList(root['pages'], 'pages').map((entry, index) =>
       parsePage(entry, `pages[${index}]`),
+    ),
+    changelogs: asList(root['changelogs'], 'changelogs').map((entry, index) =>
+      parseChangelog(entry, `changelogs[${index}]`),
     ),
     tokens: parseTokens(root['tokens'], 'tokens'),
   }

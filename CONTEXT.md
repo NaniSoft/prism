@@ -119,6 +119,21 @@ The optional client module that carries pack and mode through context and writes
 the two document-element attributes. It has no override path.
 _Avoid_: theme factory, override surface, theme object.
 
+### Documentation site
+
+**Section**:
+A top-level division of the documentation site, each with its own root route:
+Overview, Foundation, Content, Components, Blocks, Pages, Changelogs. A Section
+holds prose, catalogue items, or both. A Section is a division of the site, not a
+division of the design system, and it is neither a Kind nor a Category.
+_Avoid_: category, kind, group, tier, tab.
+
+**Demo**:
+The live example that sits in the same folder as an Item's documentation. A Demo
+renders the real export from the component package, so it cannot drift from the
+thing it documents. It is never a screenshot and never a mock.
+_Avoid_: story, example, sample, preview, screenshot, snippet.
+
 ### Source and agents
 
 **Corpus**:

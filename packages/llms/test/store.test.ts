@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 
 import { describe, expect, it } from 'vitest'
 
-import { parsePrismDocsStore } from '../src/store.js'
+import { parsePrismDocsStore, STORE_SECTIONS, STORE_SECTION_TITLES } from '../src/store.js'
 
 /**
  * The emitted store, validated through the same runtime guard the check gate
@@ -12,12 +12,32 @@ const raw: unknown = JSON.parse(readFileSync(new URL('../dist/data.json', import
 const store = parsePrismDocsStore(raw)
 
 describe('the emitted PrismDocsStore', () => {
-  it('carries the version and the six-section corpus', () => {
+  it('carries the version, the seven-section corpus and the package changelogs', () => {
     expect(store.version).toMatch(/^\d+\.\d+\.\d+/)
     expect(store.items).toHaveLength(42)
     expect(store.pages.length).toBeGreaterThan(0)
     expect(store.tokens.packs).toHaveLength(6)
     expect(store.tokens.themes).toHaveLength(12)
+    // One entry per published package that ships a changelog, discovered from
+    // the workspace rather than listed, so the field cannot be quietly empty
+    // while the packages exist.
+    expect(store.changelogs.length).toBeGreaterThan(0)
+    for (const changelog of store.changelogs) {
+      expect(changelog.route).toBe(`/changelogs/${changelog.slug}`)
+      expect(changelog.title).toBe(changelog.package)
+      expect(changelog.versions).toEqual(changelog.releases.map((release) => release.version))
+      expect(changelog.text).toContain(`# ${changelog.package}`)
+    }
+  })
+
+  it('names every content Section it walks', () => {
+    // The Section list and the label map are two declarations that have to agree,
+    // and a Section with no label would be grouped under an invented name in
+    // `llms.txt` and omitted from `list_pages`. The map is typed as
+    // `Record<StoreSection, string>`, so the compiler catches the other
+    // direction; this catches a map that grew a key nothing walks.
+    expect(Object.keys(STORE_SECTION_TITLES).sort()).toEqual([...STORE_SECTIONS].sort())
+    expect(store.pages.some((page) => page.section === 'changelogs')).toBe(true)
   })
 
   it('projects the closed kind union', () => {
@@ -50,6 +70,21 @@ describe('parsePrismDocsStore', () => {
     const document = JSON.parse(readFileSync(new URL('../dist/data.json', import.meta.url), 'utf8'))
     delete document.items[0].kind
     expect(() => parsePrismDocsStore(document)).toThrow(/items\[0\]\.kind/)
+  })
+
+  it('rejects a changelog whose version list disagrees with its own entries', () => {
+    // Two views of one reading of the file. A store that carried them out of step
+    // would answer `get_changelog` for a version it cannot hand back, and the
+    // only place that would not notice is the call site.
+    const document = JSON.parse(readFileSync(new URL('../dist/data.json', import.meta.url), 'utf8'))
+    document.changelogs[0].versions = ['9.9.9']
+    expect(() => parsePrismDocsStore(document)).toThrow(/changelogs\[0\]\.versions/)
+  })
+
+  it('rejects a missing changelogs field, because the tool reads it', () => {
+    const document = JSON.parse(readFileSync(new URL('../dist/data.json', import.meta.url), 'utf8'))
+    delete document.changelogs
+    expect(() => parsePrismDocsStore(document)).toThrow(/changelogs/)
   })
 
   it('rejects a structurally valid document whose kind is widened to string', () => {
