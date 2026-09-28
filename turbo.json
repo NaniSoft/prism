@@ -6,6 +6,28 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "@nanisoft/site#copy-changelogs": {
+      "cache": false
+    },
+    "@nanisoft/prism-llms#build": {
+      "dependsOn": ["^build", "@nanisoft/site#copy-changelogs"],
+      "inputs": [
+        "src/**",
+        "scripts/**",
+        "package.json",
+        "tsconfig.json",
+        "tsconfig.build.json",
+        "$TURBO_ROOT$/tsconfig.base.json",
+        "$TURBO_ROOT$/pnpm-workspace.yaml",
+        "$TURBO_ROOT$/apps/site/content/**",
+        "$TURBO_ROOT$/apps/site/items/**",
+        "$TURBO_ROOT$/apps/site/scripts/item-content.mjs",
+        "$TURBO_ROOT$/apps/site/scripts/published-packages.mjs",
+        "$TURBO_ROOT$/packages/*/CHANGELOG.md",
+        "$TURBO_ROOT$/packages/*/package.json"
+      ],
+      "outputs": ["dist/**"]
+    },
     "check": {
       "dependsOn": ["build"]
     },

@@ -219,10 +219,11 @@ Plasma does not hand-write its changelog prose. Each of its pages is a thin
 wrapper that inlines the package's changesets-generated `CHANGELOG.md` and
 renders it whole. The transferable part is the pattern, not the wrapper.
 
-- `prebuild` copies each published package's `CHANGELOG.md` into
-  `content/changelogs/<package>.md`, beside the `generate-demos.mjs` and
-  `generate-api.mjs` steps the site already runs. One route per published
-  package.
+- A task of its own, `@nanisoft/site#copy-changelogs`, copies each published
+  package's `CHANGELOG.md` into `content/changelogs/<package>.md`. The corpus
+  build depends on that task in the task graph, because the corpus reads what it
+  writes and the corpus package is built by the task runner on its own rather
+  than only through the site's lifecycle. One route per published package.
 - The published packages are **discovered from the workspace, not hand-listed**,
   and a published package with a non-empty `CHANGELOG.md` and no route **fails
   the build**. This is the gate Plasma lacks: deleting all five of its pages

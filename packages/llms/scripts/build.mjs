@@ -32,6 +32,19 @@
  * published package with a changelog and no route throws below, which is the
  * gate the reference design system does not have.
  *
+ * **The reads cross a package boundary, so the build declares them.** The content
+ * tree, the Item documentation tree and the two site modules above belong to the
+ * site; the workspace globs, the manifests and the changelogs belong to the
+ * published packages. A task runner hashes the files inside the package it is
+ * building, so a build that reads another package's tree without declaring it is
+ * hashed over inputs it never looks at: a warm cache replays a corpus built
+ * before the tree changed, and nothing notices. The Changelogs Section is where
+ * that cost a red build on `main`, because the tree's generated half is written
+ * by a step in another package. `turbo.json` therefore names the site's copy
+ * step as a task this build depends on, so the files are written before they are
+ * read on a cold machine, and declares every one of the reads above as an input
+ * of this build, so a change to any of them invalidates it.
+ *
  * An Item's documentation and its Demo are read through the site's own rule,
  * `apps/site/scripts/item-content.mjs`, rather than through a path restated
  * here. An Item is filed in one folder, with its documentation and its Demo as
@@ -46,6 +59,8 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import {
+  CHANGELOG_SECTION,
+  changelogFile,
   readPublishedChangelogs,
   splitChangelog,
 } from '../../../apps/site/scripts/published-packages.mjs'
@@ -193,6 +208,69 @@ async function walkContent(dir, prefix) {
     }
   }
   return found
+}
+
+/**
+ * The generated routes the Changelogs Section currently holds, name sorted.
+ *
+ * The generated half of the Section is the plain Markdown the copy step writes,
+ * and this is the copy step's own rule rather than a second one: one level of
+ * the Section, files only, the `.md` extension it prunes by. Reading it with the
+ * rule that produced the files is what makes the answer a fact about this tree
+ * rather than a guess. The authored `index.mdx` is not generated and is not
+ * counted, so a Section holding nothing but its authored index reads as a
+ * Section nothing has been copied into.
+ */
+async function generatedChangelogRoutes(contentRoot) {
+  const entries = await readdir(path.join(contentRoot, CHANGELOG_SECTION), {
+    withFileTypes: true,
+  }).catch(() => [])
+  return entries
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
+    .map((entry) => entry.name)
+    .sort()
+}
+
+/**
+ * Why a published package's changelog route is absent, as a line that says which
+ * of the two causes it is.
+ *
+ * From here the two are the same fact: a published package that owes a route and
+ * has none. But they are not the same problem, and the error has to say which,
+ * because the first is answered by running a step and the second is a file that
+ * is gone or a package that arrived after the last run. A Section holding no
+ * generated route at all has never been copied into, or every route the copy
+ * wrote has since been removed, which is a fact about the tree rather than about
+ * any one package. A Section holding other packages' routes and not this one has
+ * been copied, so this one was removed after the copy, or the package gained a
+ * changelog, or a package was published, since it ran. Reading the Section is
+ * what tells the two apart, and it is the only place the difference is written
+ * down.
+ *
+ * @param {string} contentRoot the content tree the walk read
+ * @param {{ name: string }} entry the published package whose route is absent
+ * @returns {Promise<string>}
+ */
+async function missingChangelogRouteCause(contentRoot, entry) {
+  const step = 'node apps/site/scripts/copy-changelogs.mjs'
+  const expected = changelogFile(entry.name)
+  const generated = await generatedChangelogRoutes(contentRoot)
+  if (generated.length === 0) {
+    return (
+      `  Cause: the copy step has not run. The Section at content/${CHANGELOG_SECTION} holds no ` +
+      `generated .md file at all, so the tree has never been copied into: no run of the step left a ` +
+      `route here, or something removed every route it wrote. Run \`${step}\` and build again. The task ` +
+      'runner runs it ahead of this build, so reaching here means the edge was skipped or the file was ' +
+      'lost after the copy.'
+    )
+  }
+  return (
+    `  Cause: the copy step ran and did not write ${expected}. The Section holds ` +
+    `${generated.length} generated route(s) (${generated.join(', ')}), so it was copied and this one ` +
+    `is not among them. Either ${expected} was deleted after the copy, or ${entry.name} gained a ` +
+    `changelog, or a package was published, after the last run. Run \`${step}\`, which rewrites ` +
+    "every published package's route and removes the ones it no longer owns."
+  )
 }
 
 /** Load the compiled library modules `emit()` uses. */
@@ -583,8 +661,15 @@ export async function emit(outDir, options = {}) {
    * being skipped. This is the build-time half of the gate the reference design
    * system has no equivalent of: it publishes reader-facing changelog pages and
    * can lose all of them with its continuous integration green, because nothing
-   * in it knows a package owes a route. This builder runs in the site's
-   * `prebuild`, so a missing route fails `pnpm build` and not only `pnpm check`.
+   * in it knows a package owes a route. This builder is a task the task runner
+   * builds on its own and the site's `prebuild` builds ahead of the site, so a
+   * missing route fails `pnpm build` and not only `pnpm check`.
+   *
+   * The throw stays, and it also says which of the two causes it is, because
+   * from this side a copy step that never ran and a file somebody deleted are
+   * the same absence. `missingChangelogRouteCause` reads the Section to tell
+   * them apart, so the next occurrence names its own remedy rather than asking a
+   * reader to guess which of the two happened.
    */
   const walkedPages = await collectContentPages(contentRoot, storeLib.STORE_SECTIONS)
   const changelogs = []
@@ -594,7 +679,7 @@ export async function emit(outDir, options = {}) {
       throw new Error(
         `prism-llms: the published package ${entry.name} ships a changelog at ${entry.changelog} and ` +
           `the content tree publishes no route for it at ${entry.route}, so no reader and no agent can ` +
-          'reach it. Run the site copy step, or the file it owns has been deleted.',
+          `reach it.\n${await missingChangelogRouteCause(contentRoot, entry)}`,
       )
     }
     const text = await readText(page.file)

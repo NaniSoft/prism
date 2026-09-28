@@ -237,6 +237,55 @@ describe('a published package with a changelog and no route', () => {
   })
 })
 
+/**
+ * The same absence, two causes, and which of them the message names.
+ *
+ * From the corpus builder a copy step that never ran and a file a person deleted
+ * are one fact: a published package that owes a route and has none. Only one of
+ * them is answered by running the copy step, so the message reads the Section to
+ * tell them apart. A Section holding no generated file at all has never been
+ * copied here; a Section holding another package's route has been copied, and
+ * this one is missing from it.
+ *
+ * Both are proved against a fixture rather than asserted in prose, because the
+ * whole point is that the two sentences are chosen by the state of the tree.
+ */
+describe('which cause a missing changelog route names', () => {
+  const pkg = {
+    name: '@nanisoft/prism-ui',
+    directory: 'packages/ui',
+    version: '0.5.0',
+    changelog: 'packages/ui/CHANGELOG.md',
+    slug: 'prism-ui',
+    route: '/changelogs/prism-ui',
+    text: '# @nanisoft/prism-ui\n\n## 0.5.0\n\nA clean break.\n',
+  }
+
+  it('names a copy step that has not run when the Section holds no generated route', async () => {
+    const contentRoot = await tree({ 'overview/index.mdx': '---\ntitle: Overview\n---\n' })
+    await expect(emit(path.join(contentRoot, 'corpus-never-copied'), { contentRoot, packages: [pkg] }))
+      .rejects.toThrow(/Cause: the copy step has not run/)
+  })
+
+  it('names the deleted file and the routes that are there when the Section was copied', async () => {
+    const contentRoot = await tree({
+      'overview/index.mdx': '---\ntitle: Overview\n---\n',
+      'changelogs/prism-tokens.md': '# @nanisoft/prism-tokens\n\n## 1.0.0\n\nThe first token.\n',
+    })
+    // One failure, two facts about the same message: the route the copy step
+    // would have written, named as the one that is missing, and the routes that
+    // are there, named as the evidence the Section was copied at all. A message
+    // carrying only the cause would not say which file to look at.
+    const failure = await emit(path.join(contentRoot, 'corpus-deleted'), { contentRoot, packages: [pkg] }).catch(
+      (error: Error) => error,
+    )
+    expect(failure).toBeInstanceOf(Error)
+    const message = (failure as Error).message
+    expect(message).toMatch(/Cause: the copy step ran and did not write changelogs\/prism-ui\.md/)
+    expect(message).toMatch(/prism-tokens\.md/)
+  })
+})
+
 describe('emit, with the content walk reading a nested tree', () => {
   let out = ''
   let contentRoot = ''

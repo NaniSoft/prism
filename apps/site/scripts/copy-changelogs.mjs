@@ -8,10 +8,16 @@
  * alongside the changeset and the JSDoc, and a hand-maintained copy of a
  * changelog drifts from the bytes in the npm tarball while looking correct.
  *
- * The step runs inside the build the site already runs, beside
- * `generate-demos.mjs` and `generate-api.mjs`, so the changelog pages are
- * ordinary content pages on the existing pipeline rather than a second
- * publication path with its own step to forget.
+ * The step is a task of its own in the site's `package.json`, and the corpus
+ * build declares a task-graph edge onto it, so the copy runs before the corpus
+ * is built on a cold machine with no warm cache. It reads checked-in files and
+ * needs no package build, which is what lets it sit upstream of everything the
+ * corpus reads. The order used to be the order of two steps in the shell line
+ * `prebuild` runs, and the corpus package is also built on its own by the task
+ * runner, so that line governed nothing: the corpus was built before the files
+ * it asserts existed, and on a warm cache the failure never arrived. The
+ * changelog pages are ordinary content pages on the existing pipeline rather
+ * than a second publication path with its own step to forget.
  *
  * **The bytes are written as bytes.** The file is read as a buffer and written
  * back as a buffer, with no re-serialisation and no frontmatter, which is what
@@ -34,7 +40,8 @@
  * is why the gate can compare the tree against the workspace in both
  * directions.
  *
- * Run: node scripts/copy-changelogs.mjs
+ * Run: pnpm copy-changelogs, or node scripts/copy-changelogs.mjs. The task
+ * runner reaches the same script as the task `@nanisoft/site#copy-changelogs`.
  */
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'

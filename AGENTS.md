@@ -69,6 +69,17 @@ the source of truth for what a script does today.
 - **The token dist is written in place, never wiped.** Do not add an `rm -rf`
   before the token build. Write over the top and prune afterwards, or a running
   dev server loses its module graph.
+- **The corpus build reads the site's tree, so `turbo.json` declares it.** It
+  names `@nanisoft/site#copy-changelogs` as a task `@nanisoft/prism-llms#build`
+  depends on, because the corpus reads the files that copy writes and the corpus
+  package is built on its own by the task runner, not only through the site's
+  lifecycle. The same task lists the site's content tree, the Item
+  documentation tree, the two site script modules the builder imports, the
+  workspace globs, the published manifests and the changelogs as that build's
+  inputs. A build that reads another package's tree without declaring it is
+  hashed over inputs it never looks at, so a warm cache replays it and only a
+  cold machine shows the omission. Add a read to the builder, add it to the
+  inputs.
 - **The shadcn registry is internal.** Never serve it or document it as an install
   lane.
 - **Root documentation is inside the dash gate.** `scripts/check-dashes.mjs`

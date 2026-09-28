@@ -115,6 +115,30 @@ both routes. The gate reads the same two surfaces from the other side, so
 a nested fixture. Neither replaces the other: the build is where the route is
 produced, and the gate is where the address an agent would resolve is read.
 
+**The changelog join has three doors, and its order is declared rather than
+remembered.** A published package that ships a changelog owes the site a route.
+The copy step refuses a route it cannot write, the corpus builder throws a
+missing one when it is built, and this gate compares the workspace against the
+tree in both directions and the tree against the Corpus. None of the three is
+the order, and the order is what failed on `main`: the copy ran after the corpus
+had been built, so the corpus asserted the existence of files that did not exist
+yet. It is now the task `@nanisoft/site#copy-changelogs`, and
+`@nanisoft/prism-llms#build` depends on it in the task graph, because the corpus
+package is also built on its own rather than only through the site's lifecycle
+scripts. The copy reads checked-in files and needs no package build, which is
+what lets it sit upstream of everything the corpus reads. The same task declares
+the corpus build's inputs: the site's content tree, the Item documentation tree,
+the two site script modules the builder imports, the workspace globs, the
+published manifests and the changelogs. Without that list a build reading another
+package's tree was hashed over one package's sources, so a warm cache replayed a
+corpus emitted before the tree changed and reported nothing, and only a cold
+machine saw the build fail. The assertion itself is unchanged and is still what
+catches a changelog the site does not publish, which is how a path the Corpus
+advertised while the site returned 404 for it was found. Its message now says
+which of the two causes it is, because from the builder a step that never ran and
+a file somebody deleted are the same absence, and only one of them is answered by
+running the step again.
+
 ## The utility cascade
 
 The site is the one consumer here, and it is the one place two Tailwind builds meet. The site's own build scans `src`, `items` and `content`; the library's is prebuilt into `@nanisoft/prism-ui/styles.css` and imported once. Each emits its own `@layer utilities`, and the bundler concatenates them, so the reader receives one `utilities` layer holding both builds' rules in import order.
