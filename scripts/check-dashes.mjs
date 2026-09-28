@@ -75,6 +75,7 @@ const ROOTS = [
   'apps/site/scripts',
   'apps/site/test',
   'packages/ui/src',
+  'packages/ui/gates',
   'packages/tokens/src',
   'packages/tokens/build',
   'packages/tokens/scripts',
@@ -101,6 +102,10 @@ const GATED = [
   'apps/site/content',
   'apps/site/items',
   'packages/ui/src',
+  // The gate kit's own failure messages are reader-facing copy for a maintainer in
+  // another repository: they are the laws, and a law that prints an em dash is the
+  // one piece of this programme's prose that reaches a terminal rather than a page.
+  'packages/ui/gates',
   'packages/tokens/src/themes',
   'packages/tokens/src/semantic',
   'packages/tokens/src/foundation',

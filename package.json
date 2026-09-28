@@ -12,7 +12,7 @@
     "build": "turbo run build",
     "check": "node scripts/check-dashes.mjs && node scripts/check-elevation-layout.mjs && node scripts/check-no-legacy-line.mjs && turbo run check",
     "test": "turbo run test && pnpm test:scripts",
-    "test:scripts": "node --test \"scripts/__tests__/*.test.mjs\"",
+    "test:scripts": "node --test \"scripts/__tests__/*.test.mjs\" \"packages/*/gates/__tests__/*.test.mjs\"",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "clean": "node scripts/clean.mjs",

@@ -13,7 +13,7 @@ and avoid the words it retires.
 | Path | Package | Role |
 | --- | --- | --- |
 | `packages/tokens` | `@nanisoft/prism-tokens` | foundation and semantic tokens, pack descriptors, the CSS variable contract |
-| `packages/ui` | `@nanisoft/prism-ui` | Components, Blocks, Pages, the provider, and the one stylesheet |
+| `packages/ui` | `@nanisoft/prism-ui` | Components, Blocks, Pages, the provider, the one stylesheet, and the consumer gate kit |
 | `packages/llms` | `@nanisoft/prism-llms` | generated `llms.txt`, the Markdown mirror, and the store |
 | `packages/mcp-server` | `@nanisoft/prism-mcp-server` | read-only MCP tool logic, served from the site Worker |
 | `apps/site` | `@nanisoft/site` | static docs site, landing page, themes, and the Worker |
@@ -64,6 +64,26 @@ the source of truth for what a script does today.
 - **Add a changeset for every published change.** Follow the conventions in
   `CONTRIBUTING.md`.
 
+## Cross-repository laws
+
+The four consumer repositories are coordinated by the gates in
+`@nanisoft/prism-ui/gates`, not by a document. A law is the failure message of a
+gate, so a change to one lands here once and reaches every consumer in one release
+and cannot be declined there. Read `docs/consumer-gates.md` for where the line is
+drawn between a law and a site's own data.
+
+Two rules follow from that, and both are about what may be written where:
+
+- **Never restate a law in a consumer's repository, in a document or in a test.** A
+  consumer holds data: its roots, its sheet, its pack map, its coverage floors. A
+  law restated in four repositories is four laws that will disagree, and the
+  disagreement is invisible until a reader sees it.
+- **A comment that names a fact is a record; a comment that instructs is an
+  instruction.** The retired-line gate treats the two differently, and so should a
+  hand: recording what the old sheet declared is history, while telling a later
+  implementer which package to import is the failure this programme spent a
+  migration losing readers to.
+
 ## Gotchas
 
 - **The token dist is written in place, never wiped.** Do not add an `rm -rf`
@@ -88,6 +108,18 @@ the source of truth for what a script does today.
   order.
 - **The shadcn registry is internal.** Never serve it or document it as an install
   lane.
+- **`packages/ui/gates/` is published and `packages/ui/src` is the library.** The
+  kit is a build-time program for a consumer's repository, so it lives outside
+  `src/`, outside `dist/`, and outside the token build. Adding a gate to `src/`
+  would put a Node-only program in a consumer's module graph and its bundle. The
+  kit's own gate is `packages/ui/scripts/check-gate-kit.mjs` and it is the only
+  part of the kit this repository runs.
+- **A consumer resolves the token package through the component package.** The kit
+  seeds a `require` from `@nanisoft/prism-ui/package.json`, which is a published
+  export, so `@nanisoft/prism-tokens` is prism-ui's dependency and not a consumer's.
+  That is why no consumer declares it, and the pin gate fails on a consumer that
+  does: the token version is one repository's decision and five declarations of it
+  are five facts to keep in step with a release.
 - **Root documentation is inside the dash gate.** `scripts/check-dashes.mjs`
   scans `README.md`, `DESIGN.md`, `PRODUCT.md`, `CONTEXT.md`, `AGENTS.md`,
   `CONTRIBUTING.md` and `docs/**` alongside the package sources, and fails on an

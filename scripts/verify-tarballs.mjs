@@ -62,7 +62,13 @@ function publishablePackages() {
 }
 
 const ARTIFACTS = {
-  '@nanisoft/prism-ui': ['dist/styles.css'],
+  // `gates/` is named alongside `dist/styles.css` because it is the surface four
+  // consumer repositories coordinate through, and a release that dropped it would
+  // leave every one of them with a gate that cannot resolve the subpath it runs.
+  // That is the failure this lane exists to catch before a publish rather than
+  // after: the consumers fail on the next `pnpm install`, and the version is
+  // already spent.
+  '@nanisoft/prism-ui': ['dist/styles.css', 'gates/cli.mjs', 'gates/index.mjs', 'gates/laws.mjs'],
   '@nanisoft/prism-llms': ['dist/data.json'],
 }
 
@@ -71,6 +77,11 @@ const LEAK_PATTERNS = [
   { pattern: /\.test\./, message: 'test file leaked' },
   { pattern: /\.spec\./, message: 'spec file leaked' },
   { pattern: /(^|\/)__tests__\//, message: 'test directory leaked' },
+  // The gate kit's tests are the only files under `gates/` that a consumer must
+  // not receive: they build fixtures, they spawn the CLI, and they read four
+  // sibling repositories by relative path. A consumer installing them would get a
+  // tree it cannot run and a `pnpm test` that fails on paths it does not have.
+  { pattern: /(^|\/)gates\/__tests__\//, message: 'gate kit test directory leaked' },
   { pattern: /(^|\/)tsconfig[^/]*\.json$/, message: 'tsconfig leaked' },
   { pattern: /(^|\/)registry\.json$/, message: 'internal registry leaked' },
   { pattern: /(^|\/)components\.json$/, message: 'internal registry config leaked' },

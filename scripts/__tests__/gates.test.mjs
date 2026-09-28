@@ -26,7 +26,7 @@
  */
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, writeFileSync } from 'node:fs'
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -53,6 +53,20 @@ function stageGate(name, dir) {
 const run = (gate, cwd) =>
   spawnSync(process.execPath, [gate], { cwd, encoding: 'utf8', env: { ...process.env } })
 
+/**
+ * How many roots `check-dashes` declares, read out of the gate rather than typed
+ * here. A hard-coded count in a test about coverage is a second list that drifts:
+ * adding the consumer gate kit's root moved that number once, and a test printing
+ * the old figure would have failed for a reason that had nothing to do with the
+ * claim it was making. Counted from the ROOTS array's own entries, so the GATED
+ * list beside it does not inflate the number.
+ */
+const dashRootCount = () => {
+  const source = readFileSync(DASHES, 'utf8')
+  const block = source.slice(source.indexOf('const ROOTS = ['), source.indexOf('const EXT ='))
+  return block.split('\n').filter((line) => /^ {2}'[a-zA-Z]/.test(line)).length
+}
+
 /** Both causes, so a test cannot pass on a message that names only one. */
 const BOTH_CAUSES = /wrong working directory[\s\S]*does not exist in the repository at all/
 
@@ -62,7 +76,7 @@ test('check-dashes reads the same coverage from a working directory that is not 
 
   assert.equal(fromPackage.status, 0)
   assert.equal(fromRoot.status, 0)
-  assert.match(fromPackage.stdout, /in 20 root\(s\) \(0 unresolved\)/)
+  assert.match(fromPackage.stdout, new RegExp(`in ${dashRootCount()} root\\(s\\) \\(0 unresolved\\)`))
 
   const files = fromRoot.stdout.match(/across \d+ file\(s\)/)[0]
   assert.ok(
@@ -81,7 +95,8 @@ test('check-dashes pointed at a directory that is not the repository fails loudl
   assert.match(result.stderr, BOTH_CAUSES)
   // The staged `scripts` root does resolve, which is the point: a partial read is
   // reported rather than passing as a smaller run.
-  assert.match(result.stderr, /19 of 20 configured roots do not resolve/)
+  const roots = dashRootCount()
+  assert.match(result.stderr, new RegExp(`${roots - 1} of ${roots} configured roots do not resolve`))
   assert.doesNotMatch(result.stdout, /dashes: 0 in reader-facing copy/)
 })
 

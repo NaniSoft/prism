@@ -19,7 +19,7 @@ it is green, it is believed, and it is not checking anything.
 | Package | Script | Fails the build | Reports only |
 | --- | --- | --- | --- |
 | `prism-tokens` | `scripts/check-contrast.mjs`, `scripts/check-emitted-contract.mjs`, `scripts/check-determinism.mjs` | the contrast gate's role walk, its exemption list, the mode rule and the chart-series distinctness assertion, the emitted contract (completeness, value equality, spacing arithmetic, no extras, and the mode-independent groups including the closed duration, easing, shadow, breakpoint and container sets), build-twice determinism | the three advisory contrast pairs (`border`, `input` and `sidebar-border`) |
-| `prism-ui` | `scripts/validate-registry.mjs`, `scripts/check-catalogue.mjs`, `scripts/check-surface.mjs`, `scripts/check-focus-indicators.mjs`, `scripts/check-pack-boundary.mjs`, `scripts/check-vector-ink.mjs`, `scripts/check-client-budget.mjs`, `scripts/check-theme-resolution.mjs`, `scripts/check-boot-budget.mjs` | surface scan, registry validator (registry and published file list), the three-way catalogue comparison, the focus-indicator table, the pack-boundary law, the vector-ink contract, the theme-resolution equivalence table, the boot-path byte ceiling, the component and axe suites | per-item client-JavaScript measurement |
+| `prism-ui` | `scripts/validate-registry.mjs`, `scripts/check-catalogue.mjs`, `scripts/check-surface.mjs`, `scripts/check-focus-indicators.mjs`, `scripts/check-pack-boundary.mjs`, `scripts/check-vector-ink.mjs`, `scripts/check-client-budget.mjs`, `scripts/check-theme-resolution.mjs`, `scripts/check-boot-budget.mjs`, `scripts/check-gate-kit.mjs` | surface scan, registry validator (registry and published file list), the three-way catalogue comparison, the focus-indicator table, the pack-boundary law, the vector-ink contract, the theme-resolution equivalence table, the boot-path byte ceiling, the consumer gate kit's registry and published surface, the component and axe suites | per-item client-JavaScript measurement |
 | `prism-llms` | `scripts/check.mjs` | corpus drift, per-item mirror and store coverage, the store type round-trip, the declared output list | none |
 | `prism-mcp-server` | `src/registration.test.ts` and the bundled-data hash | the protocol round-trip suite, the registered tool list equals the package's declared `TOOL_ORDER` with every tool served from the bundled corpus, the bundled `data.json` hash | corpus freshness stamp (`scripts/stamp-built.mjs`) |
 | repository root | `scripts/check-dashes.mjs`, `scripts/check-elevation-layout.mjs`, `scripts/validate-changesets.mjs` | the dash gate, the elevation and layout gate, the changeset validator | none |
@@ -41,6 +41,21 @@ Two entries this list used to make, and what they really are:
 - **No gate asserts that the shadcn registry artifacts are absent from `out/`.**
   `AGENTS.md` states the rule and nothing checks it, so it is recorded here as an
   unenforced instruction rather than as a gate.
+- **A consumer's gates are not run by this repository's CI.** The kit is tested
+  here against fixtures and driven by hand against all four consumers, but
+  `pnpm check` in this workspace cannot tell whether a consumer's own half of the
+  contract is true, because a consumer is a different repository with a different
+  tree. What this repository can assert, and `check-gate-kit.mjs` does, is that
+  the kit's own registry, its files and its published surface are one list.
+- **The kit is not published.** The trusted publisher is not configured on npm for
+  these packages and the release lane cannot publish; every version since 0.6.0
+  shipped from a maintainer's machine, which `CONTRIBUTING.md` records in full. So
+  the four consumers pin a version that predates `gates/`, their `prism-gates`
+  run fails to resolve the subpath, and the remedy is a release and a `pnpm install`
+  in each of them. That is a real residual and it is stated rather than worked
+  around: a gate that could not read what it needed must fail rather than report
+  clean, and a fallback that ran a consumer's own copy of a law would be the defect
+  this work exists to remove.
 
 ## Coverage is asserted, not assumed
 
@@ -342,6 +357,40 @@ Promotion rule: once the baseline has been stable for two consecutive weeks with
 no unexplained diff (target: ten consecutive merges), remove
 `continue-on-error` and make the job required. Any unexplained diff resets the
 clock.
+
+## The consumer gate kit, and what it is not in this table
+
+`packages/ui/gates/` is a gate set that runs in a *consumer's* repository rather
+than in this one, so it has no row above: it is the row every other repository's
+row now points at. `scripts/check-gate-kit.mjs` is in the table because it is the
+only part of the kit that runs here.
+
+The distinction is worth stating, because a list of gates that quietly omits the
+one that coordinates four other repositories is the same defect class as a
+catalogue whose registry and list disagree. So:
+
+- **The laws live there, once.** `packages/ui/gates/laws.mjs` is the single
+  definition of every cross-repository law's title, its failure message, and the
+  failure each one prevents. `check-gate-kit.mjs` asserts that every law has a
+  gate and every gate names only laws that exist, in both directions and by name.
+- **The programs are there too**, so a consumer's repository holds only data: its
+  roots, its stylesheets, its pack map, its region resolver, its coverage floors,
+  the destinations its own corpus gets wrong, and the custom properties its own
+  build supplies. A consumer that keeps its own copy of a gate keeps a second law.
+- **It is not in the tarball's `dist/`, and must not be.** It is a build-time
+  program for another repository; putting it in `dist/` would put it in a
+  consumer's module graph and its bundle.
+- **Its own tests drive every gate to red on a fixture**, because a gate that has
+  never been red is not evidence of anything. That is `packages/ui/gates/__tests__/`,
+  run by `pnpm test:scripts`.
+- **Its limits are the ones this document already keeps making.** It reads text
+  rather than resolving a cascade, it reads the emitted export rather than a
+  browser, and it cannot see an attribute a runtime sets after paint. Each gate
+  prints its own limit on every run, because a gate that appeared to resolve
+  cascades and did not would be worse than no gate: it would retire the question.
+
+`docs/consumer-gates.md` records where the line was drawn between a law and a
+site's data, and what was deliberately not moved.
 
 ## What a green build does not prove
 
