@@ -1,0 +1,10 @@
+{
+  "name": "@nanisoft/prism-ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@nanisoft/prism-tokens": "workspace:*",
+    "antd": "^6.6.4"
+  }
+}

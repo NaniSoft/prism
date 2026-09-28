@@ -1,0 +1,11 @@
+{
+  "name": "@nanisoft/prism-ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@nanisoft/prism-tokens": "workspace:*",
+    "plantd-theme": "^3.0.0",
+    "@ant-design-system/tokens": "^1.0.0"
+  }
+}

@@ -1,0 +1,11 @@
+/*
+ * The old line's ruleset class. A pack and a mode are selected today with
+ * `[data-pack="blush"]` and `.dark`, never with a `prism-<pack>-<mode>` class.
+ */
+.prism-blush-dark {
+  color: #1b1718;
+}
+
+.prism-mint-light {
+  color: #10231a;
+}

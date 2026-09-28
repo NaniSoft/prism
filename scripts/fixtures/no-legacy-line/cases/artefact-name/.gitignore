@@ -1,0 +1,7 @@
+node_modules/
+dist/
+
+# The old line's baked stylesheet. A line that names it is the artefact still
+# being wired in, which is why the text rule and the existence rule are both
+# needed: this line survives the file being deleted.
+apps/site/src/app/antd-vars.css

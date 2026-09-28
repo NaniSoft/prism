@@ -1,0 +1,8 @@
+/*
+ * The old line's custom-property namespace, which the current contract does
+ * not use: today a token property is `--background`, not a `--prism-` one.
+ */
+:root {
+  --prism-color-bg-layout: #f5f5f5;
+  --prism-color-text: #1f1f1f;
+}

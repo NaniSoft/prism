@@ -1,0 +1,46 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    devDependencies:
+      turbo:
+        specifier: ^2.11.4
+        version: 2.11.4
+
+  packages/ui:
+    dependencies:
+      '@nanisoft/prism-tokens':
+        specifier: workspace:*
+        version: link:../tokens
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+
+packages:
+
+  picocolors@1.1.1:
+    resolution: {integrity: sha512-KysrKysrantdKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKw==}
+
+  clsx@2.1.1:
+    resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
+
+  turbo@2.11.4:
+    resolution: {integrity: sha512-6tqBnQaoMBuxOJfdBDMaGaK5tYxEU6OYqOfDYLvvNqCsZzPXFh0MhoaUyzR1GT4Pvz3XH+JPqvv1q+HGqbYYTqgcQ==}
+
+snapshots:
+
+  picocolors@1.1.1: {}
+
+  clsx@2.1.1:
+    dependencies:
+      picocolors: 1.1.1
+
+  turbo@2.11.4:
+    dependencies:
+      picocolors: 1.1.1
+
