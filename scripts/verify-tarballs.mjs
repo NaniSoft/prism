@@ -211,8 +211,30 @@ for (const pkg of publishablePackages()) {
 
     const tag = `${pkg.name}@${pkg.version}`
     if (MODE === 'prepublish') {
-      if (git(['tag', '--list', tag])) {
-        problems.push(`tag ${tag} already exists; publishing would be a no-op`)
+      // A version the registry already has is one this release is not publishing.
+      // The publisher only sends what it bumped, so an unchanged package arrives
+      // here carrying the version it is already live at, and failing it would fail
+      // every release for a package that has nothing to release. So this is
+      // reported and stepped over rather than treated as a fault.
+      //
+      // It is not the check that catches a version collision, and it is worth
+      // saying why it never was. A spent version was published by some earlier
+      // line, so `latest` has since been at least that version, which means a
+      // spent version is always at or below the tag and the regression check
+      // below catches it on its own. The two checks are not the same assertion
+      // and the second subsumes the first; the first used to be the only one, and
+      // it was the only one that could not see a package legitimately standing
+      // still.
+      const latest = await registryLatest(pkg.name)
+      // The skip is only about the version assertions. A package that is already
+      // live still has to pass every content check, because those describe the
+      // tarball rather than the release, and a tarball with a leaked source file
+      // is a fault whether or not this run publishes it.
+      const notBeingPublished = latest !== null && latest === pkg.version
+      if (notBeingPublished) {
+        console.log(`  skip ${pkg.name}@${pkg.version} (already the published latest; this release does not bump it)`)
+      } else if (git(['tag', '--list', tag])) {
+        console.log(`  note ${tag} already exists; the regression check below decides whether that is a fault`)
       }
       // The no-op and the regression look identical in a package.json and are
       // opposite outcomes, and only the first is a no-op. A version below the
@@ -221,8 +243,9 @@ for (const pkg of publishablePackages()) {
       // that takes `latest` gets an older release than the one it already had.
       // That is the release lane's worst failure mode and the one its own
       // precondition used to be blind to.
-      const latest = await registryLatest(pkg.name)
-      if (latest === UNREACHABLE) {
+      if (notBeingPublished) {
+        // nothing to assert about a version that is not moving
+      } else if (latest === UNREACHABLE) {
         problems.push(
           `the registry would not report the current latest for ${pkg.name}, so a regression cannot be ruled out`,
         )

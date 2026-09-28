@@ -151,9 +151,24 @@ publishes on its own.
 3. Publish: run the same workflow with `dry_run: false`. The `npm-publish`
    environment puts a required reviewer in front of the job.
 
-`@nanisoft/prism-tokens` and `@nanisoft/prism-ui` are a linked pair and share a
-version. `@nanisoft/prism-llms` and `@nanisoft/prism-mcp-server` version
-independently. `@nanisoft/site` is private and is never versioned or tagged.
+`@nanisoft/prism-tokens` and `@nanisoft/prism-ui` are a linked group, and
+`@nanisoft/prism-llms` and `@nanisoft/prism-mcp-server` version independently.
+`@nanisoft/site` is private and is never versioned or tagged.
+
+**The linked group does not make the two versions equal, and 0.7.0 is the proof.**
+The 0.7.0 release changed `prism-ui` and nothing in `prism-tokens`, and changesets
+left `prism-tokens` at 0.6.0. So the live line is `prism-ui` 0.7.0 against
+`prism-tokens` 0.6.0, and a release that changes only the token package will leave
+the component package behind. Linking aligns versions when a linked package is
+released; it does not release one that has no change, because a version bump with
+no change in it is a lie about what shipped.
+
+Nothing breaks, and the reason is worth keeping: `prism-ui` declares
+`@nanisoft/prism-tokens` as `workspace:*`, which resolves at publish time to the
+exact version rather than a range, so `prism-ui@0.7.0` requires
+`prism-tokens@0.6.0` precisely and a consumer cannot be handed a mismatched pair.
+Treat the two numbers as independent and check both when you are reasoning about a
+release.
 
 **The rebuilt line sits above the retired one, and the gap is permanent.** The
 DTCG rebuild restarted the corpus and the MCP server from 0.2.0 while the
