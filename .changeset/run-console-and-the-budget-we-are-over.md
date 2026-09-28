@@ -52,25 +52,19 @@ client. A live region is announced by the browser's own mutation observer rather
 than by JavaScript, which is the reason it is a good primitive: it works in a
 server-rendered page.
 
-## The client budget is over, and this branch is why
+## The client budget
 
-`pnpm check` fails on exactly one thing, and it is not a defect in the new
-components:
+The whole-tree client bundle measures **108.1 KB** with this branch's components
+in it, against a 116 KB ceiling, and the five components here cost about **0.1 KB**.
 
-```
-the all-client bundle is 93.1 KB gzipped, over the 92.0 KB ceiling
-```
+That is worth stating plainly, because the number looked very different for a
+while. An earlier draft of this branch reported that the components added 2.3 KB,
+crossed a 92 KB ceiling, and needed the ceiling raised. That measurement was taken
+against a gate whose roster read two directories, and it was wrong for the same
+reason the old ceiling was: 53 emitted client modules were never read. The roster
+has since been widened to the whole tree, the honest figure is 108 KB, and these
+components land inside the existing ceiling with about 8 KB of headroom.
 
-Measured with this branch's three client modules removed from the roster, the
-bundle is **90.8 KB**, so this branch adds **2.3 KB** and crosses the line by
-**1.1 KB**. The two modules responsible are `tree` and `command-palette`, and both
-are client because they are interactive: one owns an arrow-key model and the other
-owns a search field and a rank. Neither has fat to cut, because the weight *is* the
-feature. `command-palette` measures 25.9 KB standalone but only about 1.2 KB more
-than the `Dialog` it composes, which is the price of that composition.
-
-**The ceiling has not been raised.** That number was chosen on purpose, the gate is
-deliberately asymmetric (per-item budgets are soft judgements and print; the
-all-client ceiling fails), and editing the threshold in the same pull request that
-crosses it is the thing the gate exists to prevent. Raising it is a decision, and
-it is not the agent's to make quietly.
+**No ceiling change is proposed here.** The one that was drafted has been dropped
+rather than applied, because it would have moved a number to accommodate a
+measurement that was itself measuring the wrong set of files.

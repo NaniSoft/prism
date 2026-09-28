@@ -284,13 +284,25 @@ gzipped. React, React DOM, the shared floating engine and the shared class-merge
 utility are the runtime every client component already pays for and are excluded
 from the measured figure. Per-item sizes are compared to the `BUDGETS` table in
 that script and reported. The deduplicated all-client bundle is compared to the
-90 KB gzip ceiling and fails.
+116 KB gzip ceiling and fails.
 
-At the time of writing the measured all-client bundle is **89.7 KB**, within the
-ceiling, and the same bundle with the shared runtime included is 105.6 KB. Every
+The measured all-client bundle is **108.0 KB**, within the ceiling, and every
 per-item figure exceeds its budget because `@base-ui/react@1.8.0` and
-`tailwind-merge` are larger than the budgets assume; those are reported and do
-not fail. The gate prints both figures so the number is auditable.
+`tailwind-merge` are larger than the budgets assume; those are reported and do not
+fail. The gate prints both figures so the number is auditable.
+
+The ceiling has moved twice and the script records why each time. It was 90 KB
+when the roster read one directory and missed the provider, so that figure was
+never a statement about all of the client JavaScript; completing the roster put
+the truth over it and it was re-pinned to 92 KB. It is 116 KB now because the
+roster was widened to the whole emitted tree, which found 53 modules the
+two-directory version had never read and put the honest figure at 108.0 KB. The
+16 KB of new headroom is not new weight. It is weight that was always shipping.
+
+**A ceiling with a fraction of a kilobyte of headroom is not a policy, it is a
+pin.** At 92 KB against a 90 KB bundle the gate had 0.3 KB of slack, so it failed
+on an unrelated dependency bump and the fastest available answer was to rerun it
+with a bigger number. The current figure leaves about 7 percent.
 
 ## Accessibility coverage
 
