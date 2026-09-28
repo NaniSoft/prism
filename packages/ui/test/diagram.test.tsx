@@ -251,13 +251,21 @@ describe('a Diagram is accessible without a hook, a mode or a provider', () => {
   })
 
   it('ships no client code, so a consumer renders it from a server file', () => {
-    const emitted = readFileSync(
-      path.join(UI, 'dist', 'components', 'ui', 'diagram.js'),
-      'utf8',
-    )
+    // Read from the SOURCE, not from `dist/`. A `'use client'` line is written in
+    // the source and the build does not add one, so the emitted module proves
+    // nothing extra - and `dist/` is this package's own build output, which turbo
+    // does not build before its own `test` task (`test` depends on `^build`, the
+    // dependencies' builds). An earlier version of this assertion read `dist/`
+    // and failed in CI on a clean runner for the want of a file, having passed
+    // everywhere it ran after a local build. A test that only passes once
+    // something else has run is a test of the order things ran in.
+    const source = readFileSync(path.join(UI, 'src', 'components', 'ui', 'diagram.tsx'), 'utf8')
     // The same classification `check-client-budget.mjs` uses, so a directive
     // added here would put the drawing on the client roster.
-    expect(/^['"]use client['"]/m.test(emitted)).toBe(false)
+    expect(/^['"]use client['"]/m.test(source)).toBe(false)
+    expect(/from ['"]react['"].*\buse(State|Effect|Memo|Callback|Ref|Reducer|Context)\b/.test(source)).toBe(
+      false,
+    )
   })
 
   it('spreads no other prop, so a caller cannot hand the drawing a stroke of its own', () => {

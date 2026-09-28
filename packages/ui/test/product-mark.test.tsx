@@ -226,11 +226,16 @@ describe('a product mark is accessible without a hook, a mode or a provider', ()
   })
 
   it('ships no client code, so a consumer renders it from a server file', () => {
-    const emitted = readFileSync(
-      path.join(UI, 'dist', 'components', 'ui', 'product-mark.js'),
-      'utf8',
+    // Read from the SOURCE. A `'use client'` line is authored in the source and
+    // the build does not add one, so `dist/` proves nothing extra - and `dist/`
+    // is this package's own build output, which turbo does not build before its
+    // own `test` task. This assertion failed in CI on a clean runner for the want
+    // of a file, having passed everywhere it ran after a local build.
+    const source = readFileSync(path.join(UI, 'src', 'components', 'ui', 'product-mark.tsx'), 'utf8')
+    expect(/^['"]use client['"]/m.test(source)).toBe(false)
+    expect(/from ['"]react['"].*\buse(State|Effect|Memo|Callback|Ref|Reducer|Context)\b/.test(source)).toBe(
+      false,
     )
-    expect(/^['"]use client['"]/m.test(emitted)).toBe(false)
   })
 
   it('draws all three sizes, and a size changes the mark and the name together', () => {

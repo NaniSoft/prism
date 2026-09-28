@@ -79,7 +79,13 @@ the source of truth for what a script does today.
   inputs. A build that reads another package's tree without declaring it is
   hashed over inputs it never looks at, so a warm cache replays it and only a
   cold machine shows the omission. Add a read to the builder, add it to the
-  inputs.
+  inputs. The same applies to a test that reads its own package's build output:
+  `@nanisoft/prism-ui#test` declares `dependsOn: ["build"]` because the surface
+  gate reads `dist/` and the gate's own test spawns it. Without that entry the
+  `test` task depends on `^build`, which is the DEPENDENCIES' builds, so a clean
+  runner has no `dist/` and a test that passed locally after a manual build
+  fails. A test that quietly depends on the order things ran in is a test of the
+  order.
 - **The shadcn registry is internal.** Never serve it or document it as an install
   lane.
 - **Root documentation is inside the dash gate.** `scripts/check-dashes.mjs`

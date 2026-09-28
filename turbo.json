@@ -34,6 +34,9 @@
     "test": {
       "dependsOn": ["^build", "^test"]
     },
+    "@nanisoft/prism-ui#test": {
+      "dependsOn": ["build"]
+    },
     "typecheck": {
       "dependsOn": ["^build"]
     },
