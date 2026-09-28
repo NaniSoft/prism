@@ -23,7 +23,7 @@ themselves, in their own CSS, against a design system that has no override path
 to help them.
 
 Both shortages are the same problem from two directions. Prism's own research
-(`docs/research/taxonomy-survey.md`, 108 product categories surveyed) measured
+(`docs/history/taxonomy-survey.md`, 108 product categories surveyed) measured
 what the standard application surfaces need and found **10 covered, 51 partial,
 41 gaps**. The three absent primitives between them block the largest number of
 those gaps of anything on the roadmap.
@@ -333,7 +333,7 @@ a file nobody places looks like a green build.
 
 ## Further Notes
 
-**The research this rests on, and its limits.** `docs/research/taxonomy-survey.md`
+**The research this rests on, and its limits.** `docs/history/taxonomy-survey.md`
 surveyed 108 product categories and measured 10 covered, 51 partial, 41 gaps.
 Its own limitations are recorded in the file and should be read before the gap
 list is used as anything but a starting point: category purpose is inferred from
@@ -349,7 +349,7 @@ free reference blocks. The taxonomy survey read category listings and public
 product documentation and no implementation at all. The originality and
 similarity record is a self-assessment against a stated method: a gate can prove
 a claim was made, not that it is true.
-`docs/research/licensing-review-shadcnblocks.md` is the evidence for the method,
+`docs/history/licensing-review-shadcnblocks.md` is the evidence for the method,
 not a substitute for review by someone who did not write the code.
 
 **One question no artifact in this repository can answer.** Whether anyone on

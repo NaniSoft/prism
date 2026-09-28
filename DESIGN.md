@@ -986,7 +986,7 @@ Recorded as facts. None of these is fixed in this document.
   read-mostly records that change as a run completes or as a person decides, which
   makes them Workflows rather than a Kind. They are named here because leaving
   them unnamed is how the fourth Kind quietly becomes the answer to every agent
-  problem, and it is not. See `docs/research/taxonomy-survey.md`, which found them
+  problem, and it is not. See `docs/history/taxonomy-survey.md`, which found them
   by reading agent documentation rather than a component catalogue: none of the
   108 commercial categories names a run, a tool call, an approval, a trace or a
   cost, and none names an audit trail, a permission matrix, or a retention
