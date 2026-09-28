@@ -68,7 +68,12 @@ function Slider({
         <SliderPrimitive.Thumb
           aria-label={ariaLabel}
           className={cn(
-            'border-primary bg-background shadow-xs ring-ring/50 block size-4 shrink-0 rounded-full border outline-none',
+            // `ring-ring` at full strength, not shadcn's stock `ring-ring/50`. The alpha
+            // is applied here rather than in the token, so the contrast gate measures a
+            // compliant ring and never sees that half strength fails 3:1. This thumb is
+            // the element the JSDoc above says stays focusable, so it is the one
+            // indicator a keyboard user has. See the comment on the Button's base class.
+            'border-primary bg-background shadow-xs ring-ring block size-4 shrink-0 rounded-full border outline-none',
             'transition-[color,box-shadow] duration-fast ease-out',
             'hover:ring-4 focus-visible:ring-4',
             'data-[disabled]:pointer-events-none',

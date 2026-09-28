@@ -1,0 +1,172 @@
+import { spawnSync } from 'node:child_process'
+import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { afterEach, describe, expect, it } from 'vitest'
+
+/**
+ * The surface gate, run as a process against a staged `dist` and `exports` map.
+ *
+ * The gate's job is the seam a consumer sees, so its tests are written against a
+ * tree a test can make wrong: a wildcard subpath that resolves to nothing, a new
+ * file under the internal directory, and a declared internal file that stopped
+ * being emitted. Each of those passed before the reverse direction existed, and
+ * a passing run of a gate that read nothing is the failure this suite exists to
+ * prevent. The shipped script is copied rather than reimplemented, so what runs
+ * is the file the package runs.
+ */
+const PKG = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
+const GATE = path.join(PKG, 'scripts', 'check-surface.mjs')
+const REPO = path.join(PKG, '..', '..')
+
+const DECLARATIONS: Record<string, string> = {
+  'dist/index.d.ts': 'export declare function Button(): void\n',
+  'dist/components/ui/button.d.ts': 'export declare function Button(): void\n',
+  'dist/lib/utils.d.ts': 'export declare function cn(...classes: string[]): string\n',
+}
+
+const manifest = (exports: Record<string, unknown>) =>
+  `${JSON.stringify({ name: 'fixture', version: '0.0.0', type: 'module', exports }, null, 2)}\n`
+
+const BASE_EXPORTS = {
+  '.': { types: './dist/index.d.ts', default: './dist/index.js' },
+  './components/*': { types: './dist/components/ui/*.d.ts', default: './dist/components/ui/*.js' },
+}
+
+const staged: string[] = []
+
+/** Stage a package with the given `exports` map and declarations, and run the gate. */
+function run(exports: Record<string, unknown>, declarations: Record<string, string>) {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'prism-surface-gate-'))
+  staged.push(dir)
+
+  mkdirSync(path.join(dir, 'scripts'), { recursive: true })
+  copyFileSync(GATE, path.join(dir, 'scripts', 'check-surface.mjs'))
+  writeFileSync(path.join(dir, 'package.json'), manifest(exports))
+  for (const [name, source] of Object.entries(declarations)) {
+    mkdirSync(path.join(dir, path.dirname(name)), { recursive: true })
+    writeFileSync(path.join(dir, name), source)
+  }
+
+  return spawnSync(process.execPath, [path.join(dir, 'scripts', 'check-surface.mjs')], {
+    cwd: REPO,
+    encoding: 'utf8',
+  })
+}
+
+afterEach(() => {
+  for (const dir of staged.splice(0)) rmSync(dir, { recursive: true, force: true })
+})
+
+describe('the surface gate', () => {
+  it('passes a surface whose wildcard targets all resolve', () => {
+    const result = run(BASE_EXPORTS, DECLARATIONS)
+
+    expect(result.stderr).toBe('')
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('3 emitted declaration(s), 2 public, 1 internal')
+    expect(result.stdout).toContain(
+      'exports["./components/*"] -> ./dist/components/ui/*.js matched 1 declaration(s)',
+    )
+    expect(result.stdout).toContain('internal boundary asserted in both directions: dist/lib/utils.d.ts')
+  })
+
+  it('fails a wildcard target that resolves to nothing, naming the target', () => {
+    const result = run(
+      {
+        ...BASE_EXPORTS,
+        './blocks/*': { types: './dist/blocks/*/index.d.ts', default: './dist/blocks/*/index.js' },
+      },
+      DECLARATIONS,
+    )
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain(
+      'exports["./blocks/*"] -> ./dist/blocks/*/index.js matches 0 emitted declaration(s)',
+    )
+    expect(result.stderr).toContain('read nothing through this entry')
+  })
+
+  it('fails a new file under the internal directory, naming the file', () => {
+    const result = run(BASE_EXPORTS, {
+      ...DECLARATIONS,
+      'dist/lib/merge.d.ts': 'export declare function merge(): string\n',
+    })
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('dist/lib/merge.d.ts: is internal (under dist/lib) but is not declared')
+    expect(result.stderr).toContain('Declare it with a reason')
+  })
+
+  it('fails a declared internal file that is no longer emitted, naming the file', () => {
+    const { 'dist/lib/utils.d.ts': _dropped, ...withoutUtils } = DECLARATIONS
+    const result = run(BASE_EXPORTS, withoutUtils)
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain(
+      'dist/lib/utils.d.ts: is declared internal in INTERNAL but no declaration is emitted for it',
+    )
+  })
+
+  it('still fails an upstream type on an internal declaration, so item 1 stays bidirectional', () => {
+    const result = run(BASE_EXPORTS, {
+      ...DECLARATIONS,
+      'dist/lib/utils.d.ts': "import type { Slot } from '@base-ui/react/utils'\nexport declare const x: Slot\n",
+    })
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('dist/lib/utils.d.ts: references a @base-ui module or type')
+  })
+
+  it('still fails a variant recipe on a public entry', () => {
+    const result = run(BASE_EXPORTS, {
+      ...DECLARATIONS,
+      'dist/index.d.ts': 'export declare const buttonVariants: Record<string, string>\n',
+    })
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('dist/index.d.ts: exports the internal variant recipe "buttonVariants"')
+  })
+
+  it('still fails an upstream props re-export on a public entry', () => {
+    const result = run(BASE_EXPORTS, {
+      ...DECLARATIONS,
+      'dist/index.d.ts': "export type { ButtonProps } from '@base-ui/react/button'\n",
+    })
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('dist/index.d.ts: re-exports the upstream props object (ButtonProps)')
+  })
+
+  it('fails a non-wildcard entry with no emitted declaration, naming the entry', () => {
+    const result = run(
+      { ...BASE_EXPORTS, './theming': { types: './dist/theming/index.d.ts', default: './dist/theming/index.js' } },
+      DECLARATIONS,
+    )
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain(
+      'exports["./theming"] -> ./dist/theming/index.js has no emitted declaration at ./dist/theming/index.d.ts',
+    )
+  })
+
+  it('fails a build that emitted no declaration at all', () => {
+    const result = run(BASE_EXPORTS, {})
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('dist has no emitted declarations; run the build before this gate')
+  })
+
+  it('states its coverage on the real package', () => {
+    const result = spawnSync(process.execPath, [GATE], { cwd: REPO, encoding: 'utf8' })
+
+    expect(result.stderr).toBe('')
+    expect(result.status).toBe(0)
+    expect(result.stdout).toMatch(/\d+ emitted declaration\(s\), \d+ public, 1 internal/)
+    expect(result.stdout).toContain('internal boundary asserted in both directions: dist/lib/utils.d.ts')
+    expect(result.stdout).toMatch(
+      /exports\["\.\/components\/\*"\] -> \.\/dist\/components\/ui\/\*\.js matched [1-9]\d* declaration\(s\)/,
+    )
+  })
+})

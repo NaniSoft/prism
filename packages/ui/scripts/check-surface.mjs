@@ -14,6 +14,24 @@
  * `dist/lib/utils` and no subpath exposes it; the toolchain still emits its
  * declaration, and that is not a surface.
  *
+ * The reverse direction is asserted rather than skipped, in two places.
+ *
+ *   - A wildcard target that matches zero declarations is a finding naming the
+ *     target. A `./components/*` that resolved to nothing used to leave items 2
+ *     and 3 reading no file at all through that entry, and the run still
+ *     printed its success line: the hole through which a published surface
+ *     drifts from its source without a consumer failing first.
+ *   - The internal side is a declared boundary, `INTERNAL`, compared in both
+ *     directions. A new file under `dist/lib` is a finding naming it, and a
+ *     declared internal declaration that is no longer emitted is a finding
+ *     naming it as well. So "we chose not to check the reverse" is now "the
+ *     reverse is checked, against this list, and the list is printed".
+ *
+ * Coverage is stated on every run: how many declarations were emitted, how many
+ * the `exports` map reaches, how many are internal, and what the declared
+ * internal boundary resolved to. The roots are this file's own location, never
+ * `process.cwd()`.
+ *
  * Run: node scripts/check-surface.mjs
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs'
@@ -67,8 +85,20 @@ function wildcardRegex(target) {
   return new RegExp(`^${escaped}$`)
 }
 
+/**
+ * The declarations this design calls internal, which is the boundary rules 2 and
+ * 3 are deliberately not applied across. Checked in both directions, so the set
+ * is a stated decision a reader can argue with rather than a directory name the
+ * walk happened to produce. `dist/lib/utils` is here because `cn` is the shared
+ * class-merge helper no subpath exposes; adding a file under `dist/lib` means
+ * either a new internal helper, which belongs in this list with a reason, or a
+ * surface that is being kept off the map by accident.
+ */
+const INTERNAL = ['dist/lib/utils.d.ts']
+
 const publicFiles = new Set()
 const errors = []
+const wildcards = []
 
 for (const [key, value] of Object.entries(exportsField)) {
   const target = resolveTarget(value)
@@ -76,8 +106,19 @@ for (const [key, value] of Object.entries(exportsField)) {
 
   if (target.includes('*')) {
     const pattern = wildcardRegex(toPosix(target))
+    let matched = 0
     for (const file of allDts) {
-      if (pattern.test(rel(file))) publicFiles.add(rel(file))
+      if (pattern.test(rel(file))) {
+        publicFiles.add(rel(file))
+        matched += 1
+      }
+    }
+    wildcards.push({ key, target, matched })
+    if (matched === 0) {
+      errors.push(
+        `exports["${key}"] -> ${target} matches 0 emitted declaration(s), so items 2 and 3 ` +
+          'read nothing through this entry and this run would otherwise report a clean surface',
+      )
     }
     continue
   }
@@ -142,16 +183,60 @@ for (const file of [...publicFiles].sort()) {
   }
 }
 
+/* 4. The internal side, in both directions, against a boundary that is printed. */
+const internalFiles = allDts.map(rel).filter((file) => file.startsWith('dist/lib/')).sort()
+
+for (const file of internalFiles) {
+  if (!INTERNAL.includes(file)) {
+    errors.push(
+      `${file}: is internal (under dist/lib) but is not declared in INTERNAL. Declare it with a ` +
+        'reason, or move it out of dist/lib so items 2 and 3 read it',
+    )
+  }
+}
+
+for (const file of INTERNAL) {
+  if (!internalFiles.includes(file)) {
+    errors.push(
+      `${file}: is declared internal in INTERNAL but no declaration is emitted for it. The ` +
+        'internal boundary changed; update INTERNAL in this gate rather than leaving it stale',
+    )
+  }
+}
+
 if (allDts.length === 0) {
   errors.push('dist has no emitted declarations; run the build before this gate')
 }
 
+const report = errors.length ? console.error : console.log
+
 if (errors.length) {
   for (const error of errors) console.error(`error ${error}`)
-  console.error(`\nsurface: ${errors.length} violation(s) across ${publicFiles.size} public declaration(s)`)
-  process.exit(1)
+  report('')
 }
 
-console.log(
-  `surface: ${allDts.length} emitted declaration(s), ${publicFiles.size} public, no Base UI, no variant recipes`,
+report(
+  `surface: ${allDts.length} emitted declaration(s), ${publicFiles.size} public, ` +
+    `${internalFiles.length} internal, no Base UI, no variant recipes`,
 )
+for (const entry of wildcards) {
+  report(`surface: exports["${entry.key}"] -> ${entry.target} matched ${entry.matched} declaration(s)`)
+}
+report(
+  `surface: internal boundary asserted in both directions: ${INTERNAL.join(', ') || '(none declared)'}` +
+    `${internalFiles.length === 0 ? ' (no internal declaration was emitted)' : ''}`,
+)
+const unclassified = allDts
+  .map(rel)
+  .filter((file) => !publicFiles.has(file) && !internalFiles.includes(file))
+report(
+  `surface: ${unclassified.length} further declaration(s) the exports map does not reach and the ` +
+    'internal boundary does not name, so item 1 reads them and items 2 and 3 do not; every emitted ' +
+    'declaration is in one of the three columns',
+)
+
+if (errors.length) {
+  report('')
+  report(`surface: ${errors.length} violation(s) across ${publicFiles.size} public declaration(s)`)
+  process.exit(1)
+}
