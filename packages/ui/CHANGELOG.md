@@ -1,5 +1,183 @@
 # @nanisoft/prism-ui
 
+## 0.8.0
+
+### Minor Changes
+
+- 86cbc20: The accessible name a control announces is now a prop, so a consumer can localise it
+  
+  `Pagination`, `Dialog` and `Breadcrumb` each shipped an `aria-label` that a
+  consumer could not change, and `ProductSwitcher` shipped a `label` default that
+  put the word "Products" into every consumer's navigation. A consumer could
+  localise the visible text of a pagination step and not the name a screen reader
+  announced for it, which left a control that looked localised and was half of it.
+  
+  What changed:
+  
+  - `Pagination` takes `label` for the region name, and each of `PaginationPrevious`
+    and `PaginationNext` takes `label` beside its existing `text`, so the visible
+    word and the announced name move together.
+  - `Dialog` takes `closeLabel` for the built-in close control, so a localised
+    dialog no longer announces "Close" in a product that never uses that word.
+  - `Breadcrumb` takes `label` for its region name.
+  - `ProductSwitcher` no longer defaults `label`. A switcher with no `label`
+    renders a navigation with no accessible name, which is a real state the caller
+    resolves, rather than one that is quietly wrong.
+  
+  Every new prop keeps the word Prism would have used as its default, so nothing
+  changes for a consumer that never set one. The one behaviour that does change is
+  `ProductSwitcher`'s, and it is the point: the default was a claim about a
+  consumer's product that the prop existed so they would not have to make.
+- b31e444: Ship the consumer gate kit, so a cross-repository law reaches a consumer in one release
+  
+  The four repositories that consume this package coordinated through a prose
+  contract mirrored in four files. It could not be enforced, because prose cannot
+  fail, and it had already drifted: two sites that mattered held three
+  implementations of one rule and one of the three rules was false.
+  
+  The laws are now the failure messages of gates in this package, and a consumer's
+  repository holds only its own data.
+  
+  ```sh
+  pnpm exec prism-gates                 # every gate prism-gates.json names
+  pnpm exec prism-gates --gate=links    # one gate
+  pnpm exec prism-gates --json          # machine-readable, for a test
+  ```
+  
+  Configure it with a `prism-gates.json` at your repository root. A consumer holds
+  its stylesheets, its pack map, its coverage floors, the destinations its own
+  corpus gets wrong, and the custom properties its own build supplies. It does not
+  hold the wording of a rule, because a wording held in four places is four rules
+  that will disagree.
+  
+  The gates are `pin` (the design system is an exact version, and the token package
+  is this package's dependency rather than yours), `retired-line`, `stylesheet-ownership`
+  with `token-read`, `links`, `pack-boundary`, `hidden-state` and `runtime-token-read`.
+  
+  **This release adds the `gates` export subtree and a `prism-gates` binary, and
+  adds `gates` to `files`.** It also means a consumer no longer needs to declare
+  `@nanisoft/prism-tokens`: resolve it through this package, which requires it at an
+  exact version, and the pair cannot be mismatched. Removing the token package from
+  a consumer's `package.json` and from its `pnpm-workspace.yaml` is part of the
+  adoption; the `pin` gate fails on either.
+  
+  The kit is outside `dist/` on purpose. It is a build-time program for another
+  repository and must never enter a consumer's module graph or its bundle.
+- 86cbc20: Add `LiveRegion`, a region that announces what just changed in it
+  
+  Prism had no live region at all, so a result list that filtered as you type, a
+  search whose count updated, and any stream that appended to the page all changed
+  silently for anyone using a screen reader. The fourth Kind the design rules
+  already decide, `live`, is specified to own an event log surface, and an event
+  log surface is a live region, so this is the prerequisite rather than a
+  convenience.
+  
+  ```tsx
+  <LiveRegion busy={streaming} label="Run output">
+    {lines.map((line) => (
+      <p key={line.id}>{line.text}</p>
+    ))}
+  </LiveRegion>
+  ```
+  
+  Three decisions are in the Component rather than left to each consumer to make
+  the same way:
+  
+  - **It renders nothing when it has nothing to say.** A live region that is
+    always present announces every unrelated state change of its ancestors, so an
+    empty region is not rendered at all rather than rendered as an empty element.
+    The test is "renders nothing" rather than a list of the nothing values, because
+    an empty string, a null state and a false condition are three routes to it and a
+    list of three is a list a fourth route would miss.
+  - **The politeness default is the least interruptive value still announced.** A
+    run log that announces assertively interrupts a screen reader mid-sentence, and a
+    consumer with a genuinely urgent event passes `politeness="assertive"`.
+  - **`aria-busy` is about the caller's knowledge, not about an animation.** A busy
+    region is still readable, and a caller that sets it permanently has told
+    assistive technology the stream never ends.
+  
+  The component owns the region and not the transport. A consumer owns the socket,
+  the retry, the persistence and the order events arrive in, which is the same split
+  the documentation Page makes with its navigation, and it is why Prism stays
+  transport-agnostic and no consumer inherits a connection it did not ask for.
+- 86cbc20: Add `Mark`, so a search result can show which characters matched
+  
+  A command palette and a search result list both need to show why a result
+  matched, and until this existed the only way to do that inside Prism was to drop a
+  span with hand-written styling into a consumer's own markup, which the authoring
+  contract does not permit.
+  
+  ```tsx
+  <Mark text="component library" ranges={[{ start: 0, end: 9 }]} />
+  ```
+  
+  It takes the string and the ranges rather than pre-split nodes, because a caller
+  that assembled the nodes had to compute the ranges and this Component has the
+  string. The ranges are handled rather than refused: they are sorted, overlapping
+  runs are merged, and a range that runs past the end of the string is clamped. Each
+  is a thing a search backend does as a matter of course, and a Component that threw
+  on any of them would be one a consumer has to wrap in a try, which is a worse
+  failure than a highlight that stops at the last character.
+  
+  **It adds no semantics, and that is the decision rather than an omission.** A
+  consumer marking a hit wants a visual difference, not a screen reader announcing
+  "highlighted" between every character of a result. So it styles a `mark` and puts
+  nothing else on it, and a consumer who wants the announcement writes it.
+  
+  The treatment is the existing warning token pair rather than a new role. A mark
+  sits behind the text it marks, so it needs a ground and a foreground, and that
+  pair is already measured against every surface in every pack and both modes by the
+  token contrast gate. A search hit is emphasis and not a caution, and the two are
+  kept apart by spending the existing token rather than by adding a role that means
+  "highlighted" and will be re-pointed at something else within a year.
+- 86cbc20: Add `Tree`, so a file browser, a category tree and an outline have something to build from
+  
+  Prism had a working tree and could not reach it. The implementation existed as
+  two private renderers inside the documentation Page, with its depth rule, its
+  current-item marking and its rule that a group with no index renders a label.
+  What was missing was that it was unreachable, and that its data type was bound to
+  documentation navigation rather than being a tree's own vocabulary, so a file
+  tree, a category tree, an outline and a knowledge base all had nothing to build
+  from.
+  
+  ```tsx
+  <Tree
+    label="Documentation"
+    currentHref="/foundation/colors"
+    nodes={[
+      { type: 'group', title: 'Foundation', items: [
+        { type: 'page', title: 'Colors', href: '/foundation/colors' },
+      ] },
+      { type: 'divider', title: '' },
+      { type: 'page', title: 'Overview', href: '/overview' },
+    ]}
+  />
+  ```
+  
+  **It is navigable by the arrow keys**, which is the part a consumer cannot
+  assemble for themselves. A tree is one Tab stop and the arrows move inside it.
+  Composing the markup gives the Tab order of the document instead, which is every
+  node in the tree and none of the arrows. The flat order is collected from the DOM
+  rather than computed from the node data, so there is no second list to fall behind
+  the first, and a label is skipped rather than focused and doing nothing.
+  
+  **A flat list renders a flat tree.** An outline is a tree of depth one, so a caller
+  passes leaves and gets leaves. A Component that required nesting to express a flat
+  structure would make the common case the awkward one.
+  
+  **A group with no index is a label, not a link.** This is the rule the
+  documentation Page already reasoned at length and it is carried across rather than
+  reinvented: a group with an index is a destination and renders an anchor, a group
+  without one renders a span that carries no `href`, is not focusable, and cannot be
+  reached by Tab. Inventing a route for it would publish an address that resolves to
+  nothing. The empty case is authored too, because a tree that renders nothing is a
+  control with nothing in it.
+  
+  The documentation Page keeps its own renderers and does not change. Its two rules
+  are specific to a documentation rail, which is one shape a tree takes rather than
+  the shape. Whether the Page later composes this Component is a separate decision
+  this does not make.
+
 ## 0.7.0
 
 ### Minor Changes
