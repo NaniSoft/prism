@@ -247,15 +247,50 @@ The verified facts behind it:
   repository is public, so that secret never reaches the job. A secret scoped to
   private repositories cannot be seen from a public repository, which is why the
   list above looks empty and the org list does not.
+- **pnpm is not the blocker.** pnpm 11.18.0's shipped bundle contains both
+  `ACTIONS_ID_TOKEN_REQUEST_URL` and the `oidc/token/exchange` endpoint, so the
+  client performs the exchange itself and the lane does not need to switch to
+  `npm publish`. Configuring the trusted publisher is sufficient.
 
-Until the trusted publisher is configured on npmjs.com, the release lane cannot
-publish and a maintainer must publish from a machine whose `~/.npmrc` carries a
-token for the owning account. That is how 0.6.0 shipped: `pnpm -r --filter
-"./packages/*" publish --no-git-checks` from such a machine, followed by
-`git push origin --tags` for the four version tags, because the lane's own
-"Push the tags" step never ran. A publish done this way carries no provenance
-attestation, which is a real cost and the reason the trusted publisher is worth
-the five minutes to configure.
+**This step cannot be automated, and the reason is a security boundary rather
+than a missing permission.** npm exposes the configuration as an API:
+
+```
+POST /-/package/{escapedPackageName}/trust
+Authorization: Bearer <token>
+npm-otp: <one-time password>
+[{"type":"github","claims":{"repository":"NaniSoft/prism",
+  "workflow_ref":{"file":"publish.yml"},"environment":"npm-publish"},
+  "permissions":["createPackage"]}]
+```
+
+and refuses it for the token in a maintainer's `~/.npmrc`:
+
+```
+Granular access tokens that bypass two-factor authentication may not perform
+this action.
+```
+
+Two conditions are needed and neither alone suffices, which was established by
+running the request **with** a one-time password present and still being refused:
+a token that does not bypass 2FA, so a session token from `npm login` rather than
+a granular automation token, and the `npm-otp` code from the same authenticator.
+npm rejects the token first, so a correct code changes nothing on its own and the
+error is identical either way.
+
+`scripts/configure-trusted-publishers.mjs` does all four packages in one command
+and reads the code from `NPM_OTP`, never printing or storing it. It refuses to run
+without one. With a bypass token it will fail, and its failure message says why
+rather than leaving the next reader to rediscover it from a status code.
+
+Until the trusted publisher is configured on npmjs.com, a maintainer must publish
+from a machine whose `~/.npmrc` carries a token for the owning account. That is how
+0.6.0, 0.7.0 and everything after it shipped: `pnpm -r --filter "./packages/*"
+publish --no-git-checks` from such a machine, followed by `git push origin --tags`
+for the version tags, because the lane's own "Push the tags" step never ran. A
+publish done this way carries no provenance attestation, which is a real cost and
+the reason the trusted publisher is worth the five minutes to configure.
+
 
 The rehearsal cannot catch this. It verifies the tarballs and runs a dry-run
 publish; neither asks the registry whether this workflow may write. That is the
