@@ -189,6 +189,28 @@
       ]
     },
     {
+      "name": "command-palette",
+      "title": "Command-palette",
+      "description": "Shared command-palette primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/command-palette.tsx",
+          "type": "registry:component",
+          "target": "components/ui/command-palette.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "cta-link",
       "title": "Cta-link",
       "description": "Shared cta-link primitive. Installed automatically as a dependency of any block that uses it.",

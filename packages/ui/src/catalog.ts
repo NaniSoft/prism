@@ -393,6 +393,16 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'CommandPalette',
+    slug: 'command-palette',
+    kind: 'component',
+    category: 'Forms and inputs',
+    description: 'A searchable list of commands, ranked by where the match falls.',
+    source: 'src/components/ui/command-palette.tsx',
+    exports: ['CommandPalette'],
+    status: 'stable',
+  },
+  {
     name: 'Meter',
     slug: 'meter',
     kind: 'component',

@@ -1,0 +1,122 @@
+---
+slug: components/command-palette
+title: CommandPalette
+---
+
+## Overview
+
+A CommandPalette is a searchable list of commands. It ranks what it finds rather
+than only filtering it, so a command whose name starts with what you typed comes
+above one that merely mentions it three rows down, and it is composed on the Dialog
+this system already has rather than beside it.
+
+## Usage
+
+```tsx
+import { CommandPalette, type CommandGroup } from '@nanisoft/prism-ui/components/command-palette'
+
+const groups: CommandGroup[] = [
+  {
+    id: 'appearance',
+    label: 'Appearance',
+    items: [
+      {
+        id: 'theme',
+        label: 'Toggle theme',
+        hint: 'Cmd K T',
+        keywords: ['dark', 'light', 'colour'],
+        onSelect: () => setTheme('system'),
+      },
+    ],
+  },
+]
+
+<CommandPalette
+  open={open}
+  onOpenChange={setOpen}
+  label="Commands"
+  inputLabel="Search commands"
+  groups={groups}
+  empty={{ message: (query) => `Nothing matches ${query}` }}
+/>
+```
+
+<ComponentDemo slug="command-palette" />
+
+## Guidelines
+
+### When to use
+
+Use a CommandPalette for the actions of a whole product, reached by typing. It is
+the fastest route to a command that lives behind three levels of menu, and it is
+the only place a reader can find an action whose name they do not know.
+
+Use `keywords` on anything a reader might look for by what it does rather than what
+it is called. A command called "Toggle theme" is unfindable by "dark" or "colour"
+without them, and a reader who has to name a command exactly already knows it
+exists, which defeats the surface.
+
+Use `suggest` for what a reader is likely to want first. A palette that opens onto
+a bare list makes someone type before they know what is available, which inverts
+the point of a surface whose whole purpose is to be faster than the menu it
+replaces.
+
+### When not to use
+
+Do not use a palette for the actions of one object. The menu on a row belongs on
+the row, and a palette full of one document's actions is a palette scoped to
+something a popover already covers.
+
+Do not use it for navigation between pages. A palette runs commands; a link is a
+link, and a palette that navigates is a menu that has been made slower.
+
+Do not add a second way to the same place. A palette beside a full sidebar is two
+searchable routes to every page, and the reader has to guess which one the rest of
+the product expects.
+
+### Best practices
+
+- Keep the group count small. Four or five headings is a structure a reader can
+  hold; twelve is a list they have to scan, which is what the palette was for.
+- Put the shortcut in `hint`, not in the label. The label is what gets matched
+  against what someone types, and a label with "Cmd K T" in it is a label nobody
+  types correctly.
+- Order groups by their best match, which this Component does for you. Ranking
+  only within a group would leave an exact match in a late group below a poor match
+  in an early one.
+- Author the empty state with a sentence that takes the query. "No results" is the
+  one thing a palette must never show, because it reads as a broken surface rather
+  than as a search that found nothing.
+
+### Accessibility
+
+The search field is a combobox: it keeps focus for the whole interaction and the
+arrows move a highlight through the list rather than moving focus into it. That is
+why a reader can keep typing while they choose, and why the highlighted row carries
+`aria-selected` and the field carries `aria-activedescendant`.
+
+Nothing else in the surface is focusable, which is what makes it a combobox rather
+than a list of buttons.
+
+The matched run is emphasised by **weight, not by a background**, and that is a
+deliberate difference from `Mark`. A Mark is right in a list of search results,
+where the match is the reason the row is there and a full background is the point.
+In a palette the match is a hint while the row's label is what the reader is
+reading, and a saturated background on every matched character fights the text it
+sits inside. Two surfaces, two treatments, one reason.
+
+The dialog carries a visually hidden title so it is announced by name. The visible
+surface has no heading, because a heading above a search field is a label for
+something the reader is already in.
+
+### Behaviour worth knowing
+
+- **Enter never runs a command the reader did not point at.** With nothing
+  highlighted it does nothing at all.
+- **The arrows wrap.** A palette is a transient surface where overshoot is common,
+  and a reader who overshot should not have to press Up to come back.
+- **The highlight is clamped, not reset, as the list changes.** A reader who
+  arrows down three rows and types one more character is choosing from a list that
+  moved under them, and yanking the highlight to the top discards where they were.
+- **The query resets on close**, so the palette does not reopen showing the last
+  search.
