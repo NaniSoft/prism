@@ -422,37 +422,64 @@ test('a CRLF lockfile is the same graph, not an empty one', () => {
   )
 })
 
-test('the real lockfile has no vendor package reachable from any importer', () => {
+test('the real lockfile resolves into a graph that can find a vendor', () => {
   // The real tree passes. That pass is only evidence if the real lockfile was
-  // actually resolved into a graph, so the CRLF case above is proved against
-  // THIS file rather than only against a fixture: a gate whose graph came back
-  // empty would also pass here, which is exactly the failure being replaced.
+  // actually resolved into a graph, so the CRLF case is proved against THIS file
+  // rather than only against a fixture: a gate whose graph came back empty would
+  // also pass on the real tree, which is exactly the failure being replaced.
+  //
+  // This asserts a property of the PARSER, not of the file. Asserting that the
+  // checked-in lockfile happens to be CRLF is a claim about one machine's
+  // checkout, and it is false on the Linux runner: git writes LF there and
+  // LF here only because this working tree has `core.autocrlf` set. A test that
+  // passes on the author's checkout and fails on the runner is a test of the
+  // environment. The invariant is that both spellings resolve, which is pinned
+  // by running this against each.
   const real = readFileSync(path.join(REPO, 'pnpm-lock.yaml'), 'utf8')
-  assert.ok(real.includes('\r\n'), 'the checked-in lockfile is CRLF, which is why it is normalised')
+  const lf = real.replace(/\r\n/g, '\n')
 
-  // A copy of the REAL lockfile, with one vendor package added to one importer,
-  // must produce a finding. If the real lockfile resolved to an empty graph,
-  // this would be green.
+  for (const [label, text] of [
+    ['as checked out', real],
+    ['normalised to LF', lf],
+  ]) {
+    // A copy of the REAL lockfile, with one vendor package added to one importer,
+    // must produce a finding. If the real lockfile resolved to an empty graph,
+    // this would be green. The line ending is taken from the text being patched,
+    // not from the checked-out file, so the LF variant is patched as LF.
+    const eol = text.includes('\r\n') ? '\r\n' : '\n'
+    const dir = stageTemplate()
+    const patched = text.replace(
+      `  packages/ui:${eol}    dependencies:${eol}`,
+      `  packages/ui:${eol}    dependencies:${eol}      antd:${eol}        specifier: ^6.6.4${eol}        version: 6.6.4${eol}`,
+    )
+    // Not `assert.notEqual`: on a mismatch it would print both 400 KB strings,
+    // which buries the one line a reader needs.
+    if (patched === text) throw new Error(`the real lockfile must be patchable to prove anything (${label})`)
+    writeFileSync(path.join(dir, 'pnpm-lock.yaml'), patched)
+
+    const result = overRepo(dir)
+    assert.equal(result.status, 1, `a vendor added to the real lockfile must be found (${label})`)
+    assert.match(
+      result.stderr + result.stdout,
+      /antd.*reachable from importer `packages\/ui`/s,
+      `the finding must name the vendor and the importer (${label})`,
+    )
+  }
+})
+
+test('the real lockfile has no vendor package reachable from any importer', () => {
+  // And unmodified, the real lockfile finds nothing. Both halves matter: the
+  // previous test says the graph is read, this one says what it read is clean.
   const dir = stageTemplate()
-  const eol = real.includes('\r\n') ? '\r\n' : '\n'
-  const patched = real.replace(
-    `  packages/ui:${eol}    dependencies:${eol}`,
-    `  packages/ui:${eol}    dependencies:${eol}      antd:${eol}        specifier: ^6.6.4${eol}        version: 6.6.4${eol}`,
-  )
-  assert.notEqual(patched, real, 'the real lockfile must be patchable for this to prove anything')
-  writeFileSync(path.join(dir, 'pnpm-lock.yaml'), patched)
+  writeFileSync(path.join(dir, 'pnpm-lock.yaml'), readFileSync(path.join(REPO, 'pnpm-lock.yaml')))
+  const result = overRepo(dir)
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`)
+  assert.doesNotMatch(result.stderr, /lockfile-reachability/)
+  assert.match(result.stdout, /read as a graph, never grepped: pnpm-lock\.yaml/)
 
-  const injected = overRepo(dir)
-  assert.equal(injected.status, 1, 'the real lockfile must resolve into a graph that can find the vendor')
+  // The transitive case still names its importer, so the clean result above is a
+  // read graph and not a silently empty one.
+  const injected = overRepo(stage('lockfile-transitive'))
+  assert.equal(injected.status, 1)
   assert.match(injected.stderr, /reachable from importer `packages\/ui`/)
-
-  // And unmodified, it finds nothing. Both halves matter: the first says the
-  // graph is read, the second says what it read is clean.
-  const clean = run(REPO)
-  assert.equal(clean.status, 0)
-  assert.match(clean.stdout, /0 finding\(s\)/)
-
-  // Pinned to the one importer the transitive case shows the gate naming.
-  const result = overRepo(stage('lockfile-transitive'))
-  assert.match(result.stderr, /reachable from importer `packages\/ui`/)
 })
