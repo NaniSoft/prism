@@ -1,5 +1,12 @@
 # @nanisoft/prism-mcp-server
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [5c43520]
+  - @nanisoft/prism-llms@0.5.1
+
 ## 0.4.0
 
 ### Patch Changes
