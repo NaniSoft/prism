@@ -62,6 +62,8 @@ export {
   TableCell,
   TableCaption,
 } from './ui/table'
+export { Timeline } from './ui/timeline'
+export type { TimelineProps, TimelineEntry, TimelineState } from './ui/timeline'
 export { Heading, Text } from './ui/typography'
 export type { HeadingElement } from './ui/typography'
 export { Kbd } from './ui/kbd'

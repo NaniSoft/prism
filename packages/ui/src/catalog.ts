@@ -190,6 +190,16 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'Timeline',
+    slug: 'timeline',
+    kind: 'component',
+    category: 'Data display',
+    description: 'A run of events in order, with the time each one took drawn to scale.',
+    source: 'src/components/ui/timeline.tsx',
+    exports: ['Timeline'],
+    status: 'stable',
+  },
+  {
     name: 'Table',
     slug: 'table',
     kind: 'component',

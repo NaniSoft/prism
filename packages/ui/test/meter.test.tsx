@@ -28,7 +28,7 @@ describe('the Meter', () => {
   const fill = (container: HTMLElement) =>
     container.querySelector('[data-slot="meter-fill"]') as HTMLElement
   const notches = (container: HTMLElement) => [
-    ...container.querySelectorAll('[data-slot="meter-threshold"]'),
+    ...container.querySelectorAll<HTMLElement>('[data-slot="meter-threshold"]'),
   ]
 
   it('is a meter and not a progress bar, because the two are different measurements', () => {

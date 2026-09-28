@@ -1,0 +1,88 @@
+---
+slug: components/timeline
+title: Timeline
+---
+
+## Overview
+
+A Timeline is a run's events in order, with the time each one took drawn to scale.
+It is an ordered list, so the sequence and the count are in the accessibility tree,
+and each step that reports a duration gets a bar whose length is its share of the
+longest step in the run.
+
+## Usage
+
+```tsx
+import { Timeline, type TimelineEntry } from '@nanisoft/prism-ui/components/timeline'
+
+const steps: TimelineEntry[] = [
+  { id: 'plan', title: 'Plan', duration: 900 },
+  { id: 'read', title: 'Read feed', duration: 4200 },
+  { id: 'edit', title: 'Edit source', duration: 1200 },
+  { id: 'done', title: 'Ready' },
+]
+
+<Timeline entries={steps} label="Run steps" />
+```
+
+<ComponentDemo slug="timeline" />
+
+## Guidelines
+
+### When to use
+
+Use a Timeline for a sequence of events that happened inside a bounded window: an
+agent run, a deploy, an import, a build, a session. The signal is that a reader
+will ask "what happened, in what order" and then "where did the time go".
+
+Use it over a table when the events are few enough to read without scanning
+horizontally. Past about a dozen entries a table with sortable columns wins,
+because a reader who wants the slowest step should not have to read every row to
+find it.
+
+### When not to use
+
+Do not use a Timeline for a history a reader searches. An audit log, an order
+history and a transaction list are looked up, not read through, and they belong in
+a table.
+
+Do not use one for a sequence with no timing. A four-step onboarding flow is a set
+of steps, not a run, and a bar beside each step would be comparing durations
+nobody is measuring.
+
+Do not use one to show progress. A task advancing toward an end is a Progress, and
+a Timeline beside a Progress is the same information twice.
+
+### Best practices
+
+- Give every entry a stable `id`. A run's entries arrive and are inserted as it
+  goes, and a list keyed by index moves a reader's focus to a different step when
+  an earlier one is inserted.
+- Omit `duration` where it is meaningless rather than passing zero. A run's opening
+  event has no length, and a bar drawn for it reads as "this was instant", which is
+  a different claim and usually not the true one.
+- Wrap it in a LiveRegion when the run is still arriving. The list is the thing
+  worth reading afterwards; announcing the list itself would re-announce the whole
+  run on every append.
+- Put the payload under the step through `children` rather than in the title. A
+  title is what a reader scans; the detail is what they open.
+
+### Accessibility
+
+The order is the accessibility tree. It is an ordered list, so a reader hears the
+sequence and the count without reading the visual arrangement.
+
+The marks and the spine are `aria-hidden` on the rail that holds both, and the
+entry's own words carry the state. A `failed` step is titled with what failed, so
+nothing depends on a reader being able to distinguish the marks.
+
+Durations use tabular numerals, because a column of them is read as a column and
+proportional digits make the decimal points drift sideways between rows.
+
+### What the bars do not tell you
+
+The scale is relative to the longest step in the run, not to wall-clock time, so
+the bars answer **which step was slow** and deliberately do not answer **how long
+did the run take**. Only the caller knows whether its steps ran sequentially or
+overlapped, and a shared zero baseline would imply an ordering the data may not
+have. A consumer that wants elapsed time puts it in the entry title or the detail.
