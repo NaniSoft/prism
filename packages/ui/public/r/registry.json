@@ -258,6 +258,28 @@
       ]
     },
     {
+      "name": "diff",
+      "title": "Diff",
+      "description": "Shared diff primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/diff.tsx",
+          "type": "registry:component",
+          "target": "components/ui/diff.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "dropdown-menu",
       "title": "Dropdown-menu",
       "description": "Shared dropdown-menu primitive. Installed automatically as a dependency of any block that uses it.",

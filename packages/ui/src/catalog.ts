@@ -190,6 +190,16 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'Diff',
+    slug: 'diff',
+    kind: 'component',
+    category: 'Data display',
+    description: 'A change as lines, where the bar measures how much of each line changed.',
+    source: 'src/components/ui/diff.tsx',
+    exports: ['Diff'],
+    status: 'stable',
+  },
+  {
     name: 'Timeline',
     slug: 'timeline',
     kind: 'component',

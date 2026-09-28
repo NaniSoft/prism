@@ -64,6 +64,8 @@ export {
 } from './ui/table'
 export { Timeline } from './ui/timeline'
 export type { TimelineProps, TimelineEntry, TimelineState } from './ui/timeline'
+export { Diff } from './ui/diff'
+export type { DiffProps, DiffLine, DiffLineKind, DiffLabels } from './ui/diff'
 export { Heading, Text } from './ui/typography'
 export type { HeadingElement } from './ui/typography'
 export { Kbd } from './ui/kbd'
