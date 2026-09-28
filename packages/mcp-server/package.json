@@ -1,6 +1,6 @@
 {
   "name": "@nanisoft/prism-mcp-server",
-  "version": "0.2.1",
+  "version": "0.4.0",
   "type": "module",
   "description": "Prism's read-only MCP tool surface: eight retrieval tools over the bundled PrismDocsStore corpus. Transport-free: one factory serves the site Worker at /mcp.",
   "license": "MIT",

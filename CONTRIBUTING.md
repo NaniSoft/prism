@@ -155,6 +155,23 @@ publishes on its own.
 version. `@nanisoft/prism-llms` and `@nanisoft/prism-mcp-server` version
 independently. `@nanisoft/site` is private and is never versioned or tagged.
 
+**The rebuilt line sits above the retired one, and the gap is permanent.** The
+DTCG rebuild restarted the corpus and the MCP server from 0.2.0 while the
+pre-rebuild line had already published `prism-llms` 0.2.0, 0.3.0 and 0.4.0 and
+`prism-mcp-server` 0.2.0 and 0.3.0. Those numbers are spent. `prism-llms` is at
+0.5.0 and `prism-mcp-server` at 0.4.0 because that is the next free number above
+the retired line, not because the work was that large, and the two packages skip
+versions as a result. Do not read a skipped number as a missing release.
+
+Two failures follow from this, and `verify-tarballs.mjs --mode=prepublish` now
+catches both before the publish step rather than after it. A version the retired
+line already took is a no-op: the tag exists and the publish would do nothing.
+A version below what the registry currently serves as `latest` is the worse one,
+because it succeeds, and every install that resolves `latest` silently receives
+an older release than the one it already had. When a release fails on either,
+the fix is to raise the version past the published `latest`, not to delete the
+tag or to publish under a different tag.
+
 The publish job uses npm trusted publishing over OIDC and enables provenance, so
 it carries no long-lived token. If OIDC is ever unavailable, the fallback is a
 granular access token with `Packages: Read and write`, scoped to `@nanisoft`,

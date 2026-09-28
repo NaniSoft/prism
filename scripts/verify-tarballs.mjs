@@ -10,8 +10,11 @@
  * Modes:
  *   --mode=verify      pack and assert contents only. CI runs this on every pull
  *                      request and push.
- *   --mode=prepublish  additionally assert no tag exists for the version, so
- *                      publishing will create one.
+ *   --mode=prepublish  additionally assert the registry agrees the publish moves
+ *                      forward: no tag exists for the version, so publishing will
+ *                      create one, and the version is above whatever the registry
+ *                      currently serves as `latest`, so publishing it under
+ *                      `latest` moves the tag rather than dragging it back.
  *   --mode=postpublish additionally assert the tag now exists on the remote, so a
  *                      silent no-op publish fails the job.
  *
@@ -27,6 +30,10 @@ const MODE = (process.argv.find((arg) => arg.startsWith('--mode=')) ?? '--mode=v
   '--mode='.length,
 )
 const REPOSITORY_URL = 'git+https://github.com/NaniSoft/prism.git'
+// A registry that hangs must fail the lane rather than hang it, so every lookup
+// is bounded. The release already depends on the registry being up; this is
+// about how long that gets to take, not about whether it is up.
+const REGISTRY_TIMEOUT_MS = 20_000
 
 if (!['verify', 'prepublish', 'postpublish'].includes(MODE)) {
   console.error(`verify-tarballs: unknown mode "${MODE}"`)
@@ -104,6 +111,64 @@ function git(command) {
   }
 }
 
+/**
+ * The version the registry currently serves as `latest`, or null when the
+ * package has never been published.
+ *
+ * A registry that cannot be asked is a different answer from a package nobody
+ * has claimed, and the caller must not read the second as the first: one means
+ * there is nothing to regress and the other means the invariant could not be
+ * established. Failing on the second is the point.
+ */
+const UNREACHABLE = Symbol('registry unreachable')
+
+/**
+ * The version the registry currently serves as `latest`, or null when the
+ * package has never been published.
+ *
+ * This asks the registry over HTTP rather than shelling out to `npm view`. The
+ * npm entry point is a `.cmd` shim on Windows, a shim is not something a child
+ * process can spawn without a shell, and a shell would buy that at the price of
+ * a check that behaves differently on the machine it was written on than in the
+ * lane that actually runs it. The registry's own endpoint answers the same
+ * question identically in both places, and answers it in one request.
+ */
+async function registryLatest(name) {
+  try {
+    const response = await fetch(`https://registry.npmjs.org/${name.replace('/', '%2F')}`, {
+      signal: AbortSignal.timeout(REGISTRY_TIMEOUT_MS),
+    })
+    // 404 is the registry saying nobody has claimed this name, which is a fact
+    // about the package rather than a failure to learn it.
+    if (response.status === 404) return null
+    if (!response.ok) return UNREACHABLE
+    const body = await response.json()
+    return body?.['dist-tags']?.latest ?? null
+  } catch {
+    return UNREACHABLE
+  }
+}
+
+/**
+ * Is `a` above `b`, as the dist-tag question needs? Build metadata is ignored,
+ * which semver requires.
+ *
+ * Returns null rather than a guess when either side is not a plain release, so
+ * the caller can report a version it could not read instead of ordering two
+ * prereleases by string comparison and calling that semver. Nothing in this
+ * repository publishes a prerelease, so the honest answer is the rare one.
+ */
+function ordersAfter(a, b) {
+  const parse = (value) => /^(\d+)\.(\d+)\.(\d+)$/.exec(String(value).trim())
+  if (!parse) return null
+  const left = parse(a).slice(1).map(Number)
+  const right = parse(b).slice(1).map(Number)
+  for (let index = 0; index < 3; index += 1) {
+    if (left[index] !== right[index]) return left[index] > right[index]
+  }
+  return null
+}
+
 const failures = []
 
 for (const pkg of publishablePackages()) {
@@ -145,8 +210,34 @@ for (const pkg of publishablePackages()) {
     }
 
     const tag = `${pkg.name}@${pkg.version}`
-    if (MODE === 'prepublish' && git(['tag', '--list', tag])) {
-      problems.push(`tag ${tag} already exists; publishing would be a no-op`)
+    if (MODE === 'prepublish') {
+      if (git(['tag', '--list', tag])) {
+        problems.push(`tag ${tag} already exists; publishing would be a no-op`)
+      }
+      // The no-op and the regression look identical in a package.json and are
+      // opposite outcomes, and only the first is a no-op. A version below the
+      // one the registry serves as `latest` publishes successfully, succeeds in
+      // the step that checks it, and moves the tag backwards, so every install
+      // that takes `latest` gets an older release than the one it already had.
+      // That is the release lane's worst failure mode and the one its own
+      // precondition used to be blind to.
+      const latest = await registryLatest(pkg.name)
+      if (latest === UNREACHABLE) {
+        problems.push(
+          `the registry would not report the current latest for ${pkg.name}, so a regression cannot be ruled out`,
+        )
+      } else if (latest !== null) {
+        const ahead = ordersAfter(pkg.version, latest)
+        if (ahead === null) {
+          problems.push(
+            `could not order ${pkg.version} against the published latest ${latest}; a version that is not a plain release is not something to guess about`,
+          )
+        } else if (!ahead) {
+          problems.push(
+            `the registry serves ${latest} as latest, so publishing ${pkg.version} under that tag would move it backwards`,
+          )
+        }
+      }
     }
     if (MODE === 'postpublish') {
       const remote = git(['ls-remote', '--tags', 'origin', tag])
