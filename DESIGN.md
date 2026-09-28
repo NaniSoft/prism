@@ -469,6 +469,20 @@ the contract; the catalogue is the one list of the items that ship.
   screen composed of Blocks and Components, and it receives application-owned
   navigation, content and data through documented slots and props. Like a Block
   it never fetches and never imports a router or a data client.
+- **A Page renders a consumer's shape and never imposes one.** When a Page takes
+  a structure, that structure is data, and the Page holds no opinion about how many
+  of it there are, how deep it nests, or what its parts are called. It renders a
+  tree of one entry and a tree of a hundred and twenty-seven the same way, and the
+  frame is sized by what the consumer passed rather than by a fixed arrangement. A
+  Page that imposed a count would make itself a component for the tree its author
+  happened to have, which is the one thing a Page exists to stop being.
+- **A structural affordance is a claim about the reader's freedom, and a Page
+  makes no claim it cannot keep.** A label that collapses, counts, sorts or
+  carries a status tells a reader that the things it names are independent topics
+  they may reach in any order. Where a consumer's own information architecture says
+  otherwise, that affordance is a misreading, so the Page carries none of them and
+  the structure is read from the data. A status written into a title stays in the
+  title as words: a Page does not parse a consumer's copy.
 - **The documentation tree is uneven, and the unevenness is this taxonomy read
   as folders.** A Component's documentation is filed in a folder named for its
   Category, and a Block's and a Page's is filed in a folder of its own with
@@ -879,12 +893,41 @@ Recorded as facts. None of these is fixed in this document.
   `logo-strip-01`; that name keeps the `-01` suffix its entry was given and no
   consumer imports it yet.
 
+  **The old "the docs shell never ships" line is withdrawn, and the reason it
+  was written no longer holds.** It said the documentation frame is site chrome
+  rather than catalogue surface, and that was a reading of the retired line's
+  `DocsShell`, which was an empty `div` carrying a class name that every site then
+  had to style from its own stylesheet. A frame with no styles is not a surface,
+  and publishing it as one would have handed four repositories an unstyled box.
+  What shipped is not that: a documentation screen that takes the tree as data,
+  so the frame is the same on all three sites and the styling is Prism's. The
+  name is unchanged at `docs-shell` and the kind is now `page` rather than a
+  Block, because the screen is a whole one: it owns the document's `h1`, it is
+  what a route renders for a documentation page, and the rail alone is not
+  separable from it. The three consumer sites already import that exact name,
+  `import { DocsShell, type DocsNavEntry } from '@nanisoft/prism-ui/pages'`, which
+  is the same evidence that named `site-footer` and the same reason a published
+  name cannot be cheaply changed.
+
+  Two rules the Page states, because each is a misreading a structural affordance
+  would otherwise cause. **A section is a label and not a control**: it carries no
+  status, no badge, no count, no collapse and no sort, because one consumer site
+  files its documentation as a pipeline where a section is a stage of the work
+  rather than a topic a reader may visit in any order, and every one of those
+  affordances says the opposite. **A group with no index is a label and not a
+  route**: the group route is optional in the type, so its absence renders a
+  `span` rather than an anchor with no `href`, and the two stylesheet rules that
+  restyled that anchor back into a label become deletable. The pager is derived
+  from the navigation and the current address rather than passed, which removes
+  one derivation from each of the three sites and makes a neighbour that is not in
+  the tree impossible to express.
+
   Three more items are settled rather than deferred, so v1.1 does not
   re-express them blindly. The old `stat-card` Block folds into `stats-01` and is
-  not a separate item. The old `icon` item, `blog-layout` and `docs-shell` never
+  not a separate item. The old `icon` item and `blog-layout` never
   ship: a custom icon package is out of scope because Lucide is the icon lane,
-  the blog does not exist, and the docs shell is site chrome rather than
-  catalogue surface. The old `empty` Component returns as `empty-state-01`, a
+  and the blog does not exist. The old `empty` Component returns as
+  `empty-state-01`, a
   Block, because the old item was already a composition of icon, title, body
   and action, which is a Block's shape.
 - **Visual regression is report-only.** The Playwright job is committed with a

@@ -1,0 +1,141 @@
+---
+slug: pages/docs-shell
+title: DocsShell
+---
+
+## Overview
+
+DocsShell is a documentation screen: a navigation rail, the document, a contents
+rail, and the pager to the neighbouring pages.
+
+**It is the Page the other three NaniSoft sites import, and the name is theirs.**
+All three already read `import { DocsShell, type DocsNavEntry } from
+'@nanisoft/prism-ui/pages'` in their own document template, and all three map
+their page tree into that shape in their own `lib/to-prism-tree`. A published
+name cannot be cheaply changed and there is no redirect lane for item routes, so
+the name follows those three import lines rather than this file's shape. It was
+`docs-shell` in the retired line too, where it was an empty `div` and a class
+name each site then had to style from scratch.
+
+**The shape arrives as data.** The three sites publish full documentation sets
+and none of them agrees on the shape:
+
+- Nexus files six sections of five pages, each named for a documentation genre,
+  each with an index.
+- Atlas files four sections, one of which holds nine pages under a single
+  heading, and not one of them has an index.
+- AlphaLens files six sections separated by rules, named for subject matter
+  rather than for a genre, with a status inside three of the titles.
+
+The tree is a prop and the Page renders it, so none of the three had to be told
+which of the others it looks like.
+
+## Usage
+
+```tsx
+import { DocsShell, type DocsNavEntry } from '@nanisoft/prism-ui/pages/docs-shell'
+
+const NAV: DocsNavEntry[] = [
+  { type: 'page', title: 'Introduction', href: '/docs/introduction' },
+  { type: 'divider', title: 'Data platform (live)' },
+  {
+    type: 'group',
+    title: 'Data platform (live)',
+    href: '/docs/data-platform',
+    items: [
+      { type: 'page', title: 'Capture', href: '/docs/data-platform/capture' },
+      { type: 'page', title: 'Storage', href: '/docs/data-platform/storage' },
+    ],
+  },
+  {
+    // No href: a group with no index is a label, not a route.
+    type: 'group',
+    title: 'Research pipeline (designed)',
+    items: [{ type: 'page', title: 'Anatomy', href: '/docs/research-pipeline/anatomy' }],
+  },
+]
+
+<DocsShell
+  title="Storage"
+  description="Where a full chain of bars lands, and how it is partitioned."
+  nav={NAV}
+  toc={TOC}
+  currentHref="/docs/data-platform/storage"
+  navLabel="AlphaLens documentation"
+  tocLabel="On this page"
+  pagerLabel="AlphaLens pages"
+  pagerLabels={{ previous: 'Previous', next: 'Next' }}
+>
+  <p>The body, authored by your own pipeline.</p>
+</DocsShell>
+```
+
+<ComponentDemo slug="docs-shell" />
+
+## Guidelines
+
+### When to use
+
+Use DocsShell as the body of the route that renders one documentation page,
+handed the page tree, the document's own outline, and the address being rendered.
+
+Use it for every page of a documentation set. A documentation site whose pages
+each carry their own rail is a site whose rail drifts.
+
+### When not to use
+
+Do not use it for a single-page site. It is a whole screen around a tree, and a
+site with one page has no tree.
+
+Do not use it for a blog. A post is a dated argument about one thing, and
+`BlogPostPage` is that screen.
+
+Do not hand it a `nav` you built by parsing a folder tree at render time. Map
+the tree once, in your own adapter, and pass the result: a Page that walked a
+filesystem would be a Page that fetches, and a Page imports no router and no data
+client.
+
+### Best practices
+
+- **A section is a label, not a control.** It carries no status, no badge, no
+  count, no collapse and no sort, and that is the whole of its interface. AlphaLens
+  files its documentation as a pipeline, where "Unified data contract (approved)"
+  is a stage of the work and not a topic a reader may visit in any order, and
+  every structural affordance says the opposite. A status in the title is part of
+  the title and stays there as words: the Page reads no parentheses, matches no
+  vocabulary, and renders no pill beside a heading that has one.
+- **Omit `href` on a group that has no index.** That absence is what makes the
+  heading a label rather than a route, and it is the same thing all three sites
+  already spell as `url: node.index?.url ?? ''`, which two of them then restyle
+  back into a label in their own stylesheets. Naming the case in the type makes
+  those rules dead rather than load-bearing, and the type is the only thing that
+  had to change.
+- **Do not pass a previous and a next.** The pager is derived from `nav` and
+  `currentHref`, which removes one derivation from every consumer. It is derived
+  rather than passed for a second reason: a caller who passes neighbours can pass
+  a neighbour that is not in the tree, and this is the one arrangement where a
+  reader would notice.
+- **Give the rail and the contents their own orders, and let both stand.** `nav`
+  is in the order the rail shows and `toc` is in the order the contents rail
+  shows. Nothing is sorted, deduplicated or alphabetised. A site that files its
+  rail as a pipeline and its contents as a reference has both in one render.
+- Pass `toc` whole or not at all. A partial outline is a contents list that lies
+  about the page.
+- Omit `title` when your document owns its own heading. The Page renders no empty
+  `h1` to fill the gap, so a document with no title keeps exactly the outline its
+  own content declares.
+- Name the three regions. `navLabel`, `tocLabel` and `pagerLabel` are required
+  because they are words a reader hears, and a Page that ships no copy ships no
+  reader-facing copy either. A site that files its pages as a pipeline and its
+  contents as a reference names the three regions three different ways.
+
+### Content guidelines
+
+- Put a section's stage in its title, as AlphaLens does, and let it stay a
+  sentence. The Page will not pull it out into a badge for you, and a badge is a
+  state the reader can act on, which a stage of a pipeline is not.
+- Keep a rule's title short or leave it empty. A rule with words is a label a
+  reader reads twice: once in the rule and once on the section beneath it.
+- Keep a section index page's title the same as its section's title, so a reader
+  who arrives at the index and a reader who is already inside the section are
+  reading the same words.

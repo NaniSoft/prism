@@ -304,6 +304,25 @@ function dtsPath(source) {
  * only other consumer of the result: `findFunctionParams` requires
  * `declare function`, and no `.js` has one; `findTypeBodies` looks for a `type` or
  * `interface` keyword, and no `.js` has one either.
+ *
+ * **Each sibling is read once, and that is load-bearing rather than tidy.** The
+ * loop below ran once per `from '...'` occurrence, and an `index.tsx` with a value
+ * re-export and a type re-export names the same sibling twice. The sibling's
+ * declaration was therefore appended to the text twice, and the extractor's
+ * `findTypeBodies` walks from the FIRST `type` declaration it matches to the
+ * first terminator that closes nothing it opened, so a second copy of the same
+ * declaration lies inside the first copy's scan. The result published every prop
+ * twice and then swept the two named types that sit between them into the
+ * Page's own row set: `DocsShell` was documented as taking `type`, `items`,
+ * `previous` and `next`, which are members of its navigation union and its pager
+ * labels and not props of the Page. A type-level truth the extractor duplicates
+ * becomes a documentation-level lie, and nothing else in this run could see it,
+ * because every other Page keeps its declaration in one file.
+ *
+ * The fix is the set, which was already there for the `.js` and was not applied
+ * to the `.d.ts`. Reading a module once is also the only way the composition
+ * section can be right: it names the Prism exports a Page composes, and a
+ * sibling counted twice names them twice.
  */
 async function readDeclarations(file) {
   const text = await readFile(file, 'utf8')
@@ -315,13 +334,16 @@ async function readDeclarations(file) {
   // `index.tsx` is one re-export line and every value import lives in the sibling
   // beside it, so reading only the index's own `.js` finds nothing.
   const modules = new Set([file])
+  const read = new Set([file])
   for (const match of text.matchAll(/from\s+['"](\.[^'"]+)['"]/g)) {
     const base = path.resolve(dir, match[1])
     for (const candidate of [`${base}.d.ts`, `${base}.d.mts`, path.join(base, 'index.d.ts')]) {
+      if (read.has(candidate)) continue
       const part = await readText(candidate)
       if (part !== undefined) {
         parts.push(part)
         modules.add(candidate)
+        read.add(candidate)
         break
       }
     }

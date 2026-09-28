@@ -699,6 +699,17 @@ export const catalog: readonly CatalogItem[] = [
     exports: ['BlogPostPage'],
     status: 'stable',
   },
+  {
+    name: 'DocsShell',
+    slug: 'docs-shell',
+    kind: 'page',
+    category: null,
+    description:
+      'A documentation screen: a navigation rail whose shape arrives as data, the document at the measure, a contents rail, and a pager derived from the navigation rather than passed.',
+    source: 'src/pages/docs-shell/index.tsx',
+    exports: ['DocsShell'],
+    status: 'stable',
+  },
 ]
 
 /** Returns the catalogue ordered for display and keyed for lookup. */

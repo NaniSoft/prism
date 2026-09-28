@@ -146,4 +146,92 @@ describe('extractProps', () => {
     expect(first?.props.map((prop) => prop.name)).toEqual(['a'])
     expect(second?.props.map((prop) => prop.name)).toEqual(['b'])
   })
+
+  it('stops at the declaration and not at whatever the caller appended after it', () => {
+    // The corpus builder concatenates a module's declaration with the emitted
+    // JavaScript of the same module, so the composition section can name what the
+    // item is composed of. The scan used to walk each body TWICE, once to read it
+    // and again with a depth counter of its own, and the two counts disagreed:
+    // the re-walk counted every `{` the balanced read had already consumed, so
+    // `depth` never came back to 0 at the closing brace and the scan never found
+    // its terminator. It ran on into the JavaScript, and every object literal in
+    // the implementation was published as another arm of the props type. A
+    // documentation Page came to take the class strings of its own links.
+    //
+    // The shape below is the one that fails: a body whose braces are NOT
+    // neutral once re-walked, which is every body, because the opening brace is
+    // counted by the balanced read and again by the walk.
+    const declaration = [
+      'export type DocsProps = {',
+      '    /** The words of the heading. */',
+      '    heading: string;',
+      '    status: string;',
+      '};',
+      'declare function Docs(props: DocsProps): unknown;',
+    ].join('\n')
+    const emittedJs = [
+      'export function Pager({ previous, next }) {',
+      '  return { href: previous.href, className: "pager" };',
+      '}',
+    ].join('\n')
+
+    const [docs] = extractExports(`${declaration}\n${emittedJs}`, ['Docs'])
+    expect(docs?.props.map((prop) => [prop.name, prop.typeText])).toEqual([
+      ['heading', 'string'],
+      ['status', 'string'],
+    ])
+  })
+
+  it('reads a body once, so a JSDoc comment cannot unbalance the scan', () => {
+    // `readBalancedBody` skips comments, so a quoted brace in a JSDoc leaves the
+    // body balanced. A second walk whose counter did not skip comments would
+    // count the quoted brace and never terminate, so this is the same defect
+    // reached by a different route and the fix is the same one.
+    const source = [
+      'export type Quoted = {',
+      '    /**',
+      '     * Renders a brace: `{` on the way in and `}` on the way out.',
+      '     */',
+      '    branch: string;',
+      '};',
+      'declare function Quoted(props: Quoted): unknown;',
+      'export function Implementation() {',
+      '  return { leaked: true };',
+      '}',
+    ].join('\n')
+
+    const [quoted] = extractExports(source, ['Quoted'])
+    expect(quoted?.props.map((prop) => prop.name)).toEqual(['branch'])
+  })
+
+  it('publishes a union whole however many arms it has', () => {
+    // Three arms, so a reader that published the first and stopped would pass on
+    // a two-arm fixture and fail here. The Page's navigation union has three.
+    const source = [
+      'export type NavEntry = {',
+      "    type: 'page';",
+      '    href: string;',
+      '} | {',
+      "    type: 'group';",
+      '    items: readonly NavEntry[];',
+      '} | {',
+      "    type: 'divider';",
+      '    title: string;',
+      '};',
+      'export type NavProps = {',
+      '    nav: readonly NavEntry[];',
+      '};',
+      'declare function Nav(props: NavEntry): unknown;',
+    ].join('\n')
+
+    const [nav] = extractExports(source, ['Nav'])
+    expect(nav?.props.map((prop) => [prop.name, prop.typeText])).toEqual([
+      ['type', "'page'"],
+      ['href', 'string'],
+      ['type', "'group'"],
+      ['items', 'readonly NavEntry[]'],
+      ['type', "'divider'"],
+      ['title', 'string'],
+    ])
+  })
 })

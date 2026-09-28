@@ -64,12 +64,12 @@ export function extractProps(source: string): ExtractedInterface[] {
   while ((match = pattern.exec(source)) !== null) {
     if (!(match[1] ?? '').endsWith('Props')) continue
     const openBrace = pattern.lastIndex - 1
-    const body = readBalancedBody(source, openBrace)
-    if (body === undefined) continue
+    const found = readBalancedBody(source, openBrace)
+    if (found === undefined) continue
     results.push({
       typeName: match[1] ?? '',
       ...(match[2] ? { extendsType: match[2].trim() } : {}),
-      props: parseMembers(body).map(toProp),
+      props: parseMembers(found.body).map(toProp),
     })
   }
   return results
@@ -95,8 +95,19 @@ export function extractExports(
   })
 }
 
-/** The `{...}` body of the declaration whose brace sits at `openBrace`. */
-function readBalancedBody(source: string, openBrace: number): string | undefined {
+/**
+ * The `{...}` body of the declaration whose brace sits at `openBrace`, and the
+ * index of the brace that closed it.
+ *
+ * The index is returned as well as the text because `findTypeBodies` has to
+ * resume scanning after the body, and re-walking it with a second depth counter
+ * is how the two came to disagree. `undefined` for the text means the body never
+ * closed, and the caller stops rather than guessing where it ended.
+ */
+function readBalancedBody(
+  source: string,
+  openBrace: number,
+): { body: string; end: number } | undefined {
   let depth = 0
   let i = openBrace
   while (i < source.length) {
@@ -120,7 +131,7 @@ function readBalancedBody(source: string, openBrace: number): string | undefined
     if (ch === '{') depth += 1
     if (ch === '}') {
       depth -= 1
-      if (depth === 0) return source.slice(openBrace + 1, i)
+      if (depth === 0) return { body: source.slice(openBrace + 1, i), end: i }
     }
     i += 1
   }
@@ -158,6 +169,24 @@ function skipString(source: string, start: number, quote: string): number {
  * the declaration at `variant?: 'icon';` and never reach the second arm, which
  * is the defect this function exists to remove. Angle brackets are tracked
  * because a generic argument can carry its own braces.
+ *
+ * **A body is consumed once and skipped, not re-walked.** `readBalancedBody`
+ * returns a body's text, and the scan used to leave `i` on the opening brace and
+ * walk the body a second time with its own depth counter. The second walk counts
+ * every `{` the balanced read had already accounted for, so the two disagreed and
+ * `depth` could not be trusted to reach 0 at the brace that closed the body. The
+ * scan therefore depended on finding a terminator it was no longer counting
+ * correctly, and the caller concatenates the emitted JavaScript of the same
+ * module beside the declaration, so a scan that ran long published every object
+ * literal in that implementation as another arm of the type. Advancing `i` to the
+ * brace `readBalancedBody` reported removes the second walk rather than trying to
+ * correct for it, and one walk cannot disagree with itself.
+ *
+ * The honest limit on that claim: a declaration whose body closes and is followed
+ * immediately by a terminator terminated the scan correctly even before this
+ * change, which is why every Page in the package was published correctly and only
+ * the first Page with a two-line barrel was not. The defect was a miscount, not a
+ * missing terminator, and a miscount is only visible where a miscount is.
  */
 function findTypeBodies(source: string, name: string): string[] {
   const pattern = new RegExp(`(?:export\\s+)?(?:type|interface)\\s+${name}\\b`)
@@ -182,14 +211,16 @@ function findTypeBodies(source: string, name: string): string[] {
       continue
     }
     if (ch === '{') {
-      const body = readBalancedBody(source, i)
-      if (body === undefined) return bodies
-      bodies.push(body)
-      depth += 1
+      const found = readBalancedBody(source, i)
+      if (found === undefined) return bodies
+      bodies.push(found.body)
+      // Resume AFTER the brace that closed the body. The re-walk this replaces
+      // counted every `{` in the body a second time and only the closing `}`
+      // once, so `depth` never returned to 0 and the scan never terminated.
+      i = found.end
       continue
     }
-    if (ch === '}') depth -= 1
-    else if (ch === '(') depth += 1
+    if (ch === '(') depth += 1
     else if (ch === ')') depth -= 1
     else if (ch === '<') angle += 1
     else if (ch === '>') angle = Math.max(0, angle - 1)
@@ -267,8 +298,8 @@ function resolveAnnotation(
   }
 
   if (annotation.startsWith('{')) {
-    const body = readBalancedBody(annotation, 0)
-    if (body !== undefined) return { props: parseMembers(body).map(toProp), inherited: [] }
+    const found = readBalancedBody(annotation, 0)
+    if (found !== undefined) return { props: parseMembers(found.body).map(toProp), inherited: [] }
   }
 
   const props: ExtractedProp[] = []

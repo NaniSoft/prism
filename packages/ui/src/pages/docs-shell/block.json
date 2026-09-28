@@ -1,0 +1,7 @@
+{
+  "name": "docs-shell",
+  "title": "Docs Shell - Rail, Document, Contents And Derived Pager",
+  "description": "A documentation screen: a navigation rail whose shape arrives as data, the document at the measure, a contents rail, and a pager derived from the navigation. A section is a label, never a control.",
+  "categories": ["chrome"],
+  "dependencies": []
+}
