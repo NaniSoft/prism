@@ -206,6 +206,45 @@ repository:
 - The rehearsal passes: dispatch the publish workflow with `dry_run: true` and
   confirm `node scripts/verify-tarballs.mjs` passes.
 
+#### The trusted publisher is not configured, and the first publish fails
+
+Recorded on 2026-09-28, from a real attempt. The rehearsal passes and the
+publish then fails at the `Publish` step with:
+
+```
+E404: 404 Not Found - PUT https://registry.npmjs.org/@nanisoft%2fprism-llms
+```
+
+npm returns 404 rather than 403 when the identity making the request may not
+publish that package, so this is a permission answer and not a missing package.
+The verified facts behind it:
+
+- The four packages are owned by the individual account `durgaprasad.vennapusa`.
+  There is no `nanisoft` organization on npm: `/-/org/nanisoft` returns 404. A
+  trusted publisher is configured per package against the owning account, so the
+  **Organization or user** field on npmjs.com must be whichever account owns the
+  package, and a name that does not exist on npm will not authenticate.
+- The existing versions carry no provenance attestation, so they were published
+  by something other than this OIDC lane. The first publish from this repository
+  has therefore never exercised the trusted-publisher path.
+- `NPM_TOKEN` is not set as a repository secret, so the documented fallback
+  token path is not available either.
+
+Fixing this needs a human on npmjs.com: sign in as the owning account, open each
+package, and add the trusted publisher with **Organization or user** set to that
+account, **Repository** `prism`, **Workflow filename** `publish.yml`,
+**Environment name** `npm-publish`. The alternative is to create a granular
+access token as described above and store it as `NPM_TOKEN`. Until one of those
+is done, the rehearsal will keep passing and the publish will keep failing,
+which is the shape of a precondition that is checked in the wrong place.
+
+The `npm-publish` environment exists and carries no protection rules, so the
+required reviewer this section promises is not in front of the job. A merge
+still cannot publish on its own, because the lane is a manual dispatch, so the
+gap is narrower than it looks. It is a gap, and it is a separate decision from
+the npm permission above.
+
+
 ### Prereleases
 
 The `next` branch is the prerelease lane.
