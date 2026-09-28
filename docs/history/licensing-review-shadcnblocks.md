@@ -18,6 +18,14 @@ file, any configuration, any commit message, or any published artefact. Where
 the repository's own history mentions shadcnblocks, it does so to state a
 deliberate non-derivation.
 
+**NaniSoft holds no shadcnblocks licence** (confirmed 2026-09-28). That is the
+favourable position and not merely the low-exposure one: a paid licence would
+have prohibited building a UI library using Components, and Prism is a public MIT
+UI library. Holding one and deriving would have been the bad state. Holding none
+and not deriving is the state that is actually true. See Part 4, which also
+separates the three products whose names are easily conflated, and records the
+one of them that no purchase protects against.
+
 **Three real gaps do exist**, none of them shadcnblocks-related:
 
 1. Four already-published npm tarballs ship an MIT `LICENSE` with **no
@@ -469,21 +477,65 @@ says than if it had been quietly rewritten.
 
 ---
 
-## Part 4: What would change this verdict
+## Part 4: The licence position, confirmed
 
-Two things, and only two:
+**Confirmed by NaniSoft on 2026-09-28: NaniSoft holds no shadcnblocks licence.**
+Neither Standard nor Team, and no purchase by any contributor. This closes the one
+question Part 1 of this review left open, because a purchase would not have shown
+up in the code.
 
-1. **Evidence that a Block's source was taken or adapted from a shadcnblocks
-   payload.** The vendor's terms would then prohibit the public repository and
-   the UI-library distribution, and the MIT grant over the affected code would
-   be void. Today the shared-token diff is zero, the shapes differ, and the
-   Block JSDoc records the removal of exactly the copy a template ships.
-2. **A shadcnblocks purchase by NaniSoft or by any contributor.** If the team
-   bought a Standard or Team licence and used it as a reference, the terms'
-   "building a UI library using Components" example becomes a live question
-   rather than a hypothetical. Nothing in the repository indicates a purchase,
-   and no shadcnblocks string appears anywhere. This is the one thing to
-   confirm out of band, because it would not show up in the code.
+The answer is more favourable than "less exposure", and the reason is worth stating
+plainly, because it inverts the intuition:
+
+- **A licence would have been the worse position.** The License Agreement's own
+  examples of what is prohibited include building a UI library using Components.
+  Prism is a public MIT UI library. So the bad state was always *hold a licence and
+  derive from it*, and the good state is the one that is actually true: no licence,
+  no derivation.
+- **No licence means no grant at all.** Standard and Team are the only sources of
+  permission under the License Agreement, and neither is held, so there is no
+  permission to use their Components in the first place. Independent authorship is
+  therefore required rather than merely prudent. It is not a belt-and-braces
+  posture chosen for comfort; it is the only lawful position available.
+- **Access confirms it independently.** Their delivery is a private authenticated
+  registry. Without a Bearer key the registry answers 401, so the Components are
+  not obtainable. Independent authorship is not only permitted, it is the only
+  available path. (One block, `/r/hero1`, answered 200 without a key at the time of
+  review. Availability of a single payload is not permission to use it.)
+
+### Three products, and the distinction matters
+
+The phrase "a shadcn licence" is ambiguous across three separate things, and
+conflating them is how a clean position gets lost:
+
+| Product | Terms | Does a purchase help? |
+| --- | --- | --- |
+| shadcn/ui | MIT, "This is not a component library. It is how you build your component library." | No purchase exists or is needed. |
+| shadcnblocks paid Components | Proprietary, Australian law, Standard or Team | Yes, and it would be the wrong thing to hold. |
+| shadcnblocks free-blocks repo | MIT **plus Commons Clause** | No purchase is involved, so **no licence protects against this one.** |
+
+The third row is the one that is easy to miss. The free-blocks repository is
+publicly downloadable with no account and no purchase, and its Commons Clause
+restricts use on terms that "do not sell, sublicense, or redistribute the
+components themselves, whether alone, in a bundle, or as a ported version." That
+clause attaches to the free download, not to a paid tier. Declining to buy a
+licence does not exempt anyone from it.
+
+What keeps Prism clear of the Commons Clause is the no-derivation finding in Part 2,
+and only that. The shared-token diff against the five free blocks is zero, the
+component layer is Base UI rather than theirs, no vendor string appears in any
+source file, and the Block JSDoc records the removal of exactly the copy a template
+ships.
+
+### What still would change this verdict
+
+One thing only: **evidence that a Block's source was taken or adapted from a
+shadcnblocks payload**, whether from a paid registry or from the free repository.
+The vendor's terms would then prohibit the public repository and the
+UI-library distribution, the MIT grant over the affected code would be void, and
+the Commons Clause would independently bar redistribution of the components
+themselves. Today the shared-token diff is zero, the shapes differ, and no
+shadcnblocks string appears anywhere in the repository.
 
 ---
 
