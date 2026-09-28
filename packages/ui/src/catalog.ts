@@ -219,6 +219,28 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'Diagram',
+    slug: 'diagram',
+    kind: 'component',
+    category: 'Data display',
+    description:
+      'Named things and the labelled relations between them, drawn as inline vector markup whose every stroke and fill is a token.',
+    source: 'src/components/ui/diagram.tsx',
+    exports: ['Diagram'],
+    status: 'stable',
+  },
+  {
+    name: 'ProductMark',
+    slug: 'product-mark',
+    kind: 'component',
+    category: 'Data display',
+    description:
+      "A product's two-part colour mark: a brand-ink ring around the pack's own fill, beside the product's name in the brand ink.",
+    source: 'src/components/ui/product-mark.tsx',
+    exports: ['ProductMark'],
+    status: 'stable',
+  },
+  {
     name: 'Select',
     slug: 'select',
     kind: 'component',

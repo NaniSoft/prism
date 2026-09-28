@@ -1,0 +1,103 @@
+---
+slug: components/diagram
+title: Diagram
+---
+
+## Overview
+
+A Diagram draws named things and the labelled relations between them, as inline
+vector markup. It takes its geometry as data and returns an `<svg>`, so a
+consumer needs no hook, no mode, no provider and no client code to render one.
+
+Every stroke and fill it draws is a semantic utility on the emitted token
+contract, and never a resolved value. That is the whole reason it exists: a
+drawing that reads a colour out of computed style at runtime takes its value from
+one element, while a pack is an attribute on an ancestor, so a scoped boundary
+hands it the pack's light values on a dark page. Inline markup inherits the pack
+the way every other element does, and a subtree carrying a second pack restyles
+in place.
+
+`x` and `y` are in your coordinate space and are normalised into the canvas, so
+fractions, pixels or any other monotonic scale draw the same shape and keep their
+aspect ratio. A fixed canvas is deliberate: a viewBox derived from your numbers
+would make the label size a function of how large a number you happened to use,
+so the same drawing would come out with unreadable labels from `0..1` fractions
+and enormous ones from `0..4000` pixels.
+
+## Usage
+
+```tsx
+import { Diagram } from '@nanisoft/prism-ui/components/diagram'
+
+<Diagram
+  label="How a finding is produced and published"
+  nodes={[
+    { id: 'capture', name: 'Capture', x: 0.1, y: 0.5 },
+    { id: 'read', name: 'Read', x: 0.5, y: 0.5, emphasis: true },
+    { id: 'publish', name: 'Publish', x: 0.9, y: 0.5 },
+  ]}
+  relations={[
+    { from: 'capture', to: 'read', label: 'feeds' },
+    { from: 'read', to: 'publish', label: 'confirms' },
+  ]}
+/>
+```
+
+<ComponentDemo slug="diagram" />
+
+## Guidelines
+
+### When to use
+
+Use a Diagram when the thing you are showing is a set of named things and the
+relations between them: a pipeline, a data flow, a set of moving parts. It is the
+right replacement for a canvas that drew the same thing, because it inherits the
+pack, ships no client code, and is legible to a screen reader.
+
+Mark at most one node with `emphasis`. It is the node the drawing is about, and
+it takes the brand ink. Two emphasised nodes is a caller's mistake, not a second
+level.
+
+Use `indirect` on a relation that happens rather than causes, for example a
+review that follows a merge. It draws the line dashed, chosen over fading the
+line because a dashed line keeps its contrast and a faded one does not.
+
+### When not to use
+
+Do not use a Diagram for a series of values, a time axis or anything quantitative.
+A drawing of a shape with no name on it is not a diagram, and a fabricated series
+presented under a live label is a lie the surface is not able to make.
+
+Do not use a Diagram where the relationships are a linear sequence. A numbered
+list is a linear sequence, and it is more honest and more accessible than a
+drawing of one.
+
+Do not pass `decorative` to a drawing that carries meaning. `label` is required
+unless the drawing is decorative, and the union is what makes the compiler hold
+that: a single optional prop could only be required everywhere or optional
+everywhere, and both halves of that are wrong.
+
+### Best practices
+
+- Give the Diagram a `label` that says what the drawing is, not what it is called.
+  The name is read aloud; "How a finding is produced" beats "architecture".
+- Keep the node count readable. A drawing that needs a legend to be understood is
+  a table.
+- Two nodes at the same position collapse onto one another, so spread a column
+  rather than repeating a number.
+- Put the emphasised node near the middle. The eye goes there first and the
+  relations read outward from it.
+- Do not nest a pack boundary inside a drawing. A boundary moves the pack's
+  corner radius, and a drawing's marks are circles and paths with no radius
+  concept, so a boundary on one changes its colour and nothing else. That is the
+  property that makes a drawing safe under a boundary.
+
+### Content guidelines
+
+- Node names are labels: one or two words, sentence case, no period.
+- Relation labels are the verb or preposition that says what the line is: "feeds",
+  "confirms", "blocks on".
+- A relation label is placed beside its line rather than on it. A label drawn over
+  a line has to be knocked out with a halo, and the halo has to be filled with
+  the colour of the surface the drawing happens to sit on, which the component is
+  not told.

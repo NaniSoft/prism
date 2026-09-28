@@ -83,12 +83,18 @@ const kib = (bytes) => `${(bytes / 1024).toFixed(1)} KiB`
 /* The routes the built index holds, read out of the artefact itself. */
 
 /**
- * The routes a serialised advanced index holds, one per page it carries.
+ * The routes a serialised index holds, read from whichever shape it has.
  *
- * Read from `page_id` rather than from the page-shaped documents, because every
- * document names the page it came from and only the page-shaped document is
- * addressed by its own id. That makes the answer the union of the two rather
- * than a guess about which ids are pages and which are their headings.
+ * Advanced mode serialises one document per heading and per content block, each
+ * naming the page it came from, so the routes are the union of `page_id` over the
+ * documents. Simple mode serialises one document per page, addressed by its own
+ * id and with no `page_id` at all, so the routes are the document ids.
+ *
+ * Both shapes are read because the mode is a decision and not a constant: a gate
+ * that understood one of them would read zero routes out of the other and pass
+ * the size half while proving nothing about coverage, which is the whole reason
+ * the coverage half exists. A shape this reader does not recognise is an error,
+ * never an empty set.
  *
  * @param {Buffer} bytes the built index
  * @returns {string[]}
@@ -102,9 +108,24 @@ function indexedRoutes(bytes) {
         'coverage half of this gate has nothing to compare. Refusing to pass a check it could not run.',
     )
   }
-  const routes = new Set()
-  for (const document of Object.values(documents)) {
-    if (typeof document?.page_id === 'string') routes.add(document.page_id)
+
+  const byPageId = new Set()
+  const byDocumentId = new Set()
+  for (const [id, document] of Object.entries(documents)) {
+    if (typeof document?.page_id === 'string') byPageId.add(document.page_id)
+    // Only a document that carries no page reference is itself a page, so a
+    // simple index and the page-shaped document of an advanced one both land
+    // here and an advanced heading never does.
+    if (document?.page_id === undefined && typeof document?.url === 'string') byDocumentId.add(document.url)
+  }
+
+  const routes = byPageId.size > 0 ? byPageId : byDocumentId
+  if (routes.size === 0) {
+    throw new Error(
+      'the built index carries documents but none of them names a page, by `page_id` or by `url`, so the ' +
+        'routes it holds cannot be read. The two shapes this gate knows are an advanced index, whose documents ' +
+        'name their page, and a simple index, whose documents are pages. Refusing to report zero pages held.',
+    )
   }
   return [...routes].sort()
 }

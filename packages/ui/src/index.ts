@@ -113,6 +113,10 @@ export {
 export { Popover, PopoverTrigger, PopoverContent } from './components/ui/popover'
 export { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs'
 export { Avatar, AvatarImage, AvatarFallback } from './components/ui/avatar'
+export { Diagram } from './components/ui/diagram'
+export type { DiagramProps, DiagramNode, DiagramRelation } from './components/ui/diagram'
+export { ProductMark } from './components/ui/product-mark'
+export type { ProductMarkProps, ProductMarkSize } from './components/ui/product-mark'
 
 export { Hero01 } from './blocks/hero-01'
 export { FeatureGrid01 } from './blocks/feature-grid-01'

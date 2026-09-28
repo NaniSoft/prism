@@ -63,6 +63,10 @@ export {
 export { Heading, Text } from './ui/typography'
 export type { HeadingElement } from './ui/typography'
 export { Kbd } from './ui/kbd'
+export { Diagram } from './ui/diagram'
+export type { DiagramProps, DiagramNode, DiagramRelation } from './ui/diagram'
+export { ProductMark } from './ui/product-mark'
+export type { ProductMarkProps, ProductMarkSize } from './ui/product-mark'
 
 export {
   Select,

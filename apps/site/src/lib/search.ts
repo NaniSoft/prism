@@ -1,4 +1,4 @@
-import { createSearchAPI, type AdvancedIndex } from 'fumadocs-core/search/server'
+import { createSearchAPI, type AdvancedIndex, type Index } from 'fumadocs-core/search/server'
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure'
 
 import { isSearchedRoute } from './sections'
@@ -74,4 +74,59 @@ export function buildSearchIndexes(): AdvancedIndex[] {
     })
 }
 
-export const searchAPI = createSearchAPI('advanced', { indexes: buildSearchIndexes() })
+/**
+ * One document per page, for simple mode.
+ *
+ * **The index is in simple mode, and the budget is why.** Advanced mode explodes
+ * each page into one searchable document per heading and per content block, so
+ * the inverted index grows with the number of blocks rather than the number of
+ * pages. The Item documentation is where that bites: two new Components took the
+ * index from 286.9 KiB to 307.4 KiB against a 300 KiB ceiling, and the catalogue
+ * has sixteen more Items to come, so advanced mode is not going to come back
+ * under the ceiling without the prose being shortened, and reference prose is not
+ * a defect to be trimmed to fit a number.
+ *
+ * The ceiling has not moved, deliberately. It is the number a reader's browser
+ * downloads, and a threshold that moves with the content stops being a ceiling.
+ * What changed is how much index the same content needs, which is the half of the
+ * decision that is ours to make.
+ *
+ * The cost is real and worth stating: a result is the page, not the heading
+ * inside it, so a reader searching for a prop name is taken to the Item's page
+ * rather than to the section that documents the prop. For a catalogue of forty
+ * five items that is a shorter scroll than it sounds, because the page is the
+ * thing being looked for. The gate still asserts both halves: the index stays
+ * inside its ceiling, and it holds every published page the manifest does not
+ * exclude.
+ */
+export function buildSimpleIndexes(): Index[] {
+  return source
+    .getPages()
+    .filter((page) => isSearchedRoute(page.url))
+    .map((page) => {
+      const data = page.data as CataloguePageData
+      return {
+        id: page.url,
+        title: (page.data.title as string | undefined) ?? page.url,
+        description: page.data.description as string | undefined,
+        url: page.url,
+        // The compiled page body, which is the same bytes a reader reads and the
+        // same bytes the advanced mode read. Only the granularity of the index
+        // changes; what is in it does not.
+        content: data.sectionIndex === true ? '' : pageContent(page),
+      }
+    })
+}
+
+/** A page's prose, flattened. The compiled body, with no markup left in it. */
+function pageContent(page: { data: unknown }): string {
+  const data = page.data as { content?: string; structuredData?: StructuredData }
+  if (typeof data.content === 'string' && data.content.length > 0) return data.content
+  const value = structured(data)
+  return [
+    ...value.headings.map((heading) => heading.content),
+    ...value.contents.map((block) => block.content),
+  ].join('\n')
+}
+
+export const searchAPI = createSearchAPI('simple', { indexes: buildSimpleIndexes() })

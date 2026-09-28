@@ -1,0 +1,89 @@
+---
+slug: components/product-mark
+title: ProductMark
+---
+
+## Overview
+
+A ProductMark is a product's two-part colour mark: a ring in the brand ink around
+a core in the product's own pack fill, beside the product's name in the same
+brand ink. It is a server component and ships no client code.
+
+The mark is promoted to a component because a product row and a product switcher
+both need it, and two hand-written copies is the arrangement this design system
+exists to remove. One implementation also means one place where the two colour
+laws are applied, and those laws are not obvious:
+
+**The ring and the name are ink; the core is a fill.** A pastel brand value is a
+fill and never text, so the core takes `primary`. The ring and the name take
+`brand-ink`, which is the role for something that must read *as the brand*:
+gated at 4.5:1 against the page, a card and the accent surface, in both modes of
+all six packs, worst measured 5.57:1. Plain `foreground` is not a brand ink, and
+neither is a foreground paired with a fill, so a mark drawn in `primary` text is
+the wrong answer twice over.
+
+**A product with no pack wears the spectrum, not a colourless mark.** A mark with
+no `pack` is drawn as a conic sweep of all five chart steps. A colourless mark
+would take the reading page's accent and change per site, so a product with no
+single colour would be a different colour on every site that listed it. The one
+entry with no pack is the company root, and the spectrum says so once rather
+than five times.
+
+## Usage
+
+```tsx
+import { ProductMark } from '@nanisoft/prism-ui/components/product-mark'
+
+<ProductMark id="nexus" name="Nexus" pack="lavender" />
+<ProductMark id="atlas" name="Atlas" pack="mint" />
+<ProductMark id="www" name="NaniSoft" size="sm" />
+```
+
+<ComponentDemo slug="product-mark" />
+
+## Guidelines
+
+### When to use
+
+Use a ProductMark wherever a reader is being shown which product they are in, or
+which of a set of products a link goes to: a product row, a product switcher, a
+site header's brand lockup, a footer grid. Wherever a site draws the same mark
+twice, it should be drawing this.
+
+Pass the product's `id` as the key within the set it is distinguished in. It is
+carried on the DOM as `data-product`, and it is what makes two marks in the same
+view traceable to their product.
+
+### When not to use
+
+Do not use a ProductMark to colour a section, a surface or a heading. The mark
+identifies a member of a set, and the design system keeps mark and ground on
+separate axes for exactly that reason: a pack is a signal, never a ground.
+
+Do not put a boundary on a ProductMark's disc. A pack boundary moves the pack's
+corner radius as well as its colour, and the mark is a fully-rounded element, so
+a boundary on it changes nothing a reader can see. Carry the pack through `pack`
+instead, which is the axis the mark actually reads.
+
+Do not hand-write a second mark. If a surface needs a mark this component does
+not cover, extend this one.
+
+### Best practices
+
+- Give every product in a set a distinct pack, or let one wear the spectrum. A
+  set where two members share a pack has two marks that say the same thing.
+- Use one size across a row. `sm` beside a hairline row, `md` in body content,
+  `lg` only in a page header; a row of mixed sizes reads as a hierarchy that is
+  not there.
+- The mark is `aria-hidden` and the name beside it is the accessible content. Do
+  not put meaning in the ring's colour that is not also in the name.
+- Prefer `md`. It is the size that reads at body text, and a mark is a
+  co-occurrence with a name rather than a thing to look at.
+
+### Content guidelines
+
+- The name is the product's own name, in the case it uses everywhere else.
+- Keep the name to one or two words. The mark carries the identity; the name
+  carries the label.
+- Never abbreviate a product's name to fit beside its mark. Drop the mark, or
+  shorten the row, or let the name wrap.
