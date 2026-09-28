@@ -19,8 +19,21 @@ const buttonVariants = cva(
         default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
         destructive:
           'bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90',
+        // `outline` sets its own fill and must therefore set its own ink. It
+        // carried `bg-background` with no `text-` for its whole life, and the
+        // omission was invisible everywhere the ink was inherited from the page
+        // ground or a card, because `--foreground` and `--card-foreground` are
+        // equal in all twelve pack and mode combinations. On any other surface
+        // it silently inherited that surface's ink instead, and the variant was
+        // no longer the same button. `Cta01` is the case that shipped: a filled
+        // `bg-primary` panel with `--primary-foreground` inherited, in lavender
+        // dark, measured 1.01:1 and was unreadable while staying focusable and
+        // announced. The reason lives in `cta-link.tsx`, which is the surface
+        // that was drawn; this is the same string kept in step by hand, which is
+        // the arrangement this repository's JSDoc already records as the reason
+        // the two files are separate.
         outline:
-          'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground',
+          'border bg-background text-foreground shadow-xs hover:bg-accent hover:text-accent-foreground',
         secondary:
           'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
         ghost: 'hover:bg-accent hover:text-accent-foreground',

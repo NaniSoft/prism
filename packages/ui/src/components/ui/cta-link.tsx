@@ -41,8 +41,23 @@ const ctaLinkVariants = cva(
     variants: {
       variant: {
         default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+        // `outline` sets its own fill and must therefore set its own ink. It
+        // carried `bg-background` with no `text-` for its whole life, which made
+        // it placement-dependent: on the page ground and on a card the inherited
+        // ink is already `--foreground` (verified equal to `--card-foreground` in
+        // all twelve pack and mode combinations), so the omission was invisible.
+        // On a filled surface it is not. `Cta01` draws a `bg-primary` panel with
+        // `--primary-foreground` as the inherited ink and defaulted its second
+        // action to this variant, so in the lavender pack's dark mode the button
+        // was `--background` behind `--primary-foreground` and measured 1.01:1.
+        // The button was in the document, focusable, announced, and unreadable.
+        //
+        // The contract's own row already covers the pair this now states:
+        // `foreground` on `background`, 4.5:1, required, in every pack and mode.
+        // What was missing was the component asking for it, and a token pair
+        // cannot notice that a variant declined to use one.
         outline:
-          'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground',
+          'border bg-background text-foreground shadow-xs hover:bg-accent hover:text-accent-foreground',
         secondary:
           'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
         ghost: 'hover:bg-accent hover:text-accent-foreground',

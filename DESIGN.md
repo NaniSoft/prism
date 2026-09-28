@@ -267,6 +267,21 @@ foreground paired with a fill. Both are the two answers a tired implementer
 reaches for, and both are arithmetically defensible, so they are named here with
 the measurement that rules them out rather than left to judgement.
 
+**The Stated Ink Rule.** A variant that sets its own fill sets its own ink. An
+ink left to be inherited is not the page's, it is whatever surface the element
+happens to sit on, and a variant whose colour depends on where it is placed is
+the same control in one arrangement and a different control in another. The token
+gate cannot see this: it measures token pairs, and `foreground` on `background`
+is a pair it already holds at 4.5:1 in every pack and mode, so the defect was
+never in a value. It was `outline` carrying `bg-background` and no `text-`, which
+was invisible on the page ground and on a card because the ink there already is
+`foreground`, and unreadable inside any Block that draws a filled surface. In
+`Cta01` it shipped a `--background` button behind `--primary-foreground` in seven
+of twelve pack and mode combinations, worst case 1.00:1 in the base pack's light
+mode where the two are the same white. `packages/ui/scripts/check-variant-ink.mjs`
+is the gate, and it reads the source rather than the emitted sheet because
+Tailwind only emits a variant that something uses.
+
 `foreground` is the tinted-neutral step and the tint is deliberately tiny: across
 the five pastels its OKLCH chroma measures 0.0051 to 0.0089, between 9.8 and 15.6
 times less than the `brand-ink` published beside it, and in the base pack it is

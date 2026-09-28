@@ -25,6 +25,27 @@ export type Cta01Action = {
    * reason to open a tab.
    */
   newTab?: boolean
+  /**
+   * Which weight this action draws at, when the caller does not say.
+   *
+   * **A panel wants `default` or `secondary`, never `outline`.** This Block draws
+   * its band as a filled `bg-primary` surface and sets the band's ink to
+   * `--primary-foreground`, so every ink inside it is inherited from that panel
+   * rather than from the page. An `outline` action sets its own fill
+   * (`bg-background`) and, before this was settled, left its ink inherited, which
+   * put `--background` behind `--primary-foreground`. In the lavender pack's dark
+   * mode that is `#19171b` behind `#210c33`, or 1.01:1: a focusable, announced,
+   * unreadable button.
+   *
+   * Both defaults below are self-contained, which is the property that matters:
+   * `default` pairs `--primary` with `--primary-foreground` and `secondary`
+   * pairs `--secondary` with `--secondary-foreground`, and a pair the Block
+   * chooses cannot be changed by whatever surface the Block is placed on. The
+   * `outline` variant is fixed too, in `cta-link.tsx`, because a variant that
+   * sets a fill should set the matching ink rather than inherit whatever it lands
+   * on. It is kept in the type because a caller may want it once the ink is
+   * explicit, and dropping it would be a smaller answer than the defect.
+   */
   variant?: 'default' | 'secondary' | 'outline'
 }
 
@@ -54,6 +75,13 @@ export type Cta01Props = {
    * Three of the four NaniSoft sites render two actions in their closing band
    * and all four do, and all four wrote the pair by hand, so each one re-decided
    * the gap, the order and the weight between them.
+   *
+   * Its default weight is `outline`, which is the settled answer for the pair:
+   * the primary action is filled and this one is not, so the two read as one
+   * decision and one alternative rather than as two competing asks. What `outline`
+   * may not do is inherit its ink from the filled band behind it, and that is
+   * now a property of the variant rather than of where a caller puts it. See
+   * `Cta01Action`'s `variant` for the measurement.
    */
   secondaryAction?: Cta01Action
   /**
