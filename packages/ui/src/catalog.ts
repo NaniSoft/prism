@@ -617,6 +617,17 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'RunConsole01',
+    slug: 'run-console-01',
+    kind: 'block',
+    category: null,
+    description:
+      'A run as a heading, a budget and the steps that got there, with a still-arriving run announced from one prop.',
+    source: 'src/blocks/run-console-01/index.tsx',
+    exports: ['RunConsole01'],
+    status: 'stable',
+  },
+  {
     name: 'StatusLedger01',
     slug: 'status-ledger-01',
     kind: 'block',
