@@ -257,6 +257,35 @@ with brand 950. The one exception is `link`, which uses `foreground`, because a
 pastel `primary` fails 4.5:1 against the page background as text; the underline
 carries the affordance instead.
 
+**The Brand Ink Rule.** `foreground` is not a brand ink, and neither is a
+foreground paired with a fill. Both are the two answers a tired implementer
+reaches for, and both are arithmetically defensible, so they are named here with
+the measurement that rules them out rather than left to judgement.
+
+`foreground` is the tinted-neutral step and the tint is deliberately tiny: across
+the five pastels its OKLCH chroma measures 0.0051 to 0.0089, between 9.8 and 15.6
+times less than the `brand-ink` published beside it, and in the base pack it is
+`#171717` with no chroma at all. A wordmark, a brand-coloured heading, or a link
+that must read as the brand reads `brand-ink`, which is gated at 4.5:1 against the
+page, a card and the accent surface in both modes of all six sources, worst
+measured 5.57:1.
+
+`primary-foreground` is the pack's brand-950 step. It clears the one ground it is
+gated against by 7.39:1 to 11.06:1, then measures 1.00:1 to 1.82:1 on the dark
+page, the dark card and the dark accent surface. In light mode the same value
+reads 15.05:1 to 18.05:1 on the page, so it looks right in half the modes and
+vanishes in the other half, and no row could see the difference because every row
+that named it also named `primary`. `ring` is the other wrong answer: it measures
+2.66:1 (Mint light, on its own accent) to 4.35:1 (base light) on the accent
+surface in all six light-mode sources, while clearing its own 3:1 row on the page
+in all twelve.
+
+`brand-ink` is not a rename of either. It differs from `primary` in all twelve
+pack and mode combinations. The near miss is on the record because it is the
+constraint: had dark been brand 300, `brand-ink` would have been byte-identical to
+`primary` in all five dark modes, and that step is the only one the accent ground
+allows above 400. That is why dark is brand 200.
+
 **The Semantic-Utility Rule.** A component references semantic utilities only
 (`bg-background`, `text-muted-foreground`, `border-primary`), never a ramp step
 and never a raw value, so theming is automatic, including at runtime. This is
@@ -578,8 +607,12 @@ them.
 
 **Semantic names are the contract.** Every semantic token is emitted as
 `--<path-joined-by-hyphen>`, computed by the build rather than through a name
-transform, so no dependency upgrade can alter it. The colour contract is 36
-custom properties plus `--radius`.
+transform, so no dependency upgrade can alter it. The colour contract is every
+role in `src/semantic/{light,dark}.tokens.json` plus `--radius`; the size of that
+contract is not restated here, because a count in prose goes stale silently and a
+stale count is worse than no count. `check-contrast.mjs` prints the number on
+every run, with the roles it measured, the rows that measured them and the
+exemptions that did not.
 
 **The authored groups reach CSS.** The previous system authored typography,
 spacing and motion and emitted none of it. Now each authored group is bound to a
@@ -646,15 +679,31 @@ under `dist/dtcg/` for a future Figma Variables sync. The site never imports it.
 Two-way Figma sync is out of scope. A one-way sync and its plugin ownership are
 not built in this effort.
 
-**The contrast gate.** The gate evaluates a fixed pair table per theme: 15
-required pairs at 4.5:1 or 3:1, and 2 advisory pairs (`border` and `input` on the
-background, reported and never failed). That is 30 required assertions per theme
-across the two modes. Motion, typography and spacing are not colour pairs and are
-not contrast-checkable. Two rules tighten the gate: a new root-level colour token
-whose name ends in `-foreground` must be the first element of a pair, so a new
-semantic colour cannot ship unchecked; and `muted-foreground` is checked on
-`muted` as well as on `background`, because the pill, avatar fallback, kbd and
-tab-list pattern sits on the tinted surface rather than the page ground.
+**The contrast gate.** The gate walks the semantic colour roles, not the pair
+table, so a new role cannot be silent by default. Every role read from the token
+source must be named by a row, in either position, or carry a stated reason in
+the exemption list; an exemption buys a role freedom from a *ground*, never from
+a *mode*, so a role that resolves in light and not in dark fails. The gate
+refuses four shapes of its own drift: a row naming a role the source does not
+author, an exemption for a role a row already measures, an exemption for a role
+the source does not author, and an exemption with no reason. Every exemption
+reason is printed on every run, because a rule that fires on nothing is
+indistinguishable from a rule that found nothing to say.
+
+Today: 37 colour roles, 22 rows, 19 required and 3 advisory, measured across
+6 packs and 2 modes for 228 required assertions. The advisory set is `border` and
+`input` on the page ground, plus `sidebar-border` on `sidebar`; those three are
+aesthetics, and WCAG 1.4.11 only binds where a boundary is the sole means of
+identifying a control. `chart-1` through `chart-5` are exempted because a series
+is a graphic object rather than text, and what binds a five-way set is
+distinctness, which the gate asserts instead by requiring no two series to resolve
+to the same value in any pack or mode, and by printing the tightest pair it found.
+
+Motion, typography and spacing are not colour pairs and are not
+contrast-checkable. One more pair earns its row on its own evidence:
+`muted-foreground` is checked on `muted` as well as on `background`, because the
+pill, avatar fallback, kbd and tab-list pattern sits on the tinted surface rather
+than the page ground.
 
 **The grep gates.** A motion gate fails on a `cubic-bezier(...)` literal, an
 arbitrary duration or easing utility, or a bare millisecond value in component
@@ -707,15 +756,65 @@ a boundary that inherits its mode omits both.
 **The provider is optional.** A programmatic consumer mounts the provider and
 uses the theme hook to read and write the same two attributes and persist the
 choice. The provider is the only programmatic path and carries no override
-parameter, no token object and no merge. On mount it resolves a stored value,
-then the server-rendered attribute, then its defaults, so a server-rendered pack
-survives hydration instead of flashing.
+parameter, no token object and no merge.
+
+**A stored theme is written only on a decision.** The provider resolves a stored
+value, then the server-rendered attributes, then its own defaults, and it writes
+to storage only when a caller changes the pack, the mode or the toggle. Resolving
+to a default is not a decision and is never stored, which is the whole point: a
+site that changes its default reaches every reader who has not chosen, instead of
+being outranked forever by a value written on their first visit. A visitor who
+has chosen keeps that choice across a reload, because the value they chose is
+still the one in the key.
+
+**One resolution rule, held together by a gate.** The boot script and the
+provider read the same stored value and must agree on every one of them,
+including the half-right ones. They do not share a function, and cannot: the build
+minifies, a renamed identifier would throw inside the script's own guard, and the
+`catch` would swallow it, so the theme would silently stop applying on every page.
+The honest arrangement is one implementation, `resolveTheme`, plus
+`check-theme-resolution.mjs`, which runs the EMITTED script and the shared rule
+over one table of twenty-seven cases across three consumer configurations and
+fails if they disagree, if any fall-through is half-applied, or if a branch of the
+rule never ran. A stored value that names a retired pack falls through whole to
+the default rather than applying its mode alone, and is never cleared: a
+present-but-unparseable value is the only record that the reader ever chose
+anything.
+
+**Where the theme came from is a contract.** The root element carries
+`data-theme-origin`, written by the boot script as the only writer, because two
+writers would make the origin a race rather than a record. Its closed set is
+`stored`, `legacy`, `document`, `default` and `unparsed`, and the fifth member is
+the load-bearing one: a three-value set cannot tell "never chose" from "chose,
+and the value no longer parses", and that is exactly the distinction a storage
+migration has to be retired against.
 
 **First paint.** Under static export there is no server and no middleware, so the
 blocking inline script in `<head>` is the only mechanism that honours a per-user
 preference before first paint. It applies a valid stored value and otherwise
 leaves the document exactly as rendered, so the no-JS baseline and the provider's
 resolution order agree. The root element carries `suppressHydrationWarning`.
+
+**The boot path is priced in its own unit.** The inline string runs before paint
+on every page and is not a bundle, so it is measured in raw bytes by
+`check-boot-budget.mjs` rather than in the client table, where it would corrupt
+the unit that table exists to measure. The ceiling is derived by addition: the
+measured emission's non-migration part, pinned, plus one migration generation
+priced at the live clause. The non-migration term is pinned rather than recomputed
+because `measured + one generation` recomputed every run cannot fail for any
+input, which is a gate reporting success because it ran. The gate prints the drift
+against the pin rather than asserting the pin is current, because a run with
+drift is still a correct run.
+
+**A retired key is recovered, and the clause expires by its own effect.** The old
+line wrote a bare mode into `prism-theme-mode`, and only inside its mode setter.
+The script reads that key, and if it holds a usable mode it writes the recovered
+pair into the key this line owns and removes the key it read. So the clause fires
+at most once per reader, because its own write is what makes the next load find
+nothing, and its reachable population shrinks to nothing when the last entry of
+`LEGACY_MODE_STORAGE_KEYS` is deleted. There is no date and no version constant,
+and the gate prints how many clauses are still live on every run, so the number
+that retires it is visible rather than remembered.
 
 **Adding a pack.** Add a pack descriptor (name, description, radius and ramp
 parameters) and rebuild. The descriptor is the single source for pack identity;

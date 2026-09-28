@@ -23,6 +23,7 @@
   "border": { "$value": "{color.neutral.800}" },
   "input": { "$value": "{color.neutral.800}" },
   "ring": { "$value": "{color.neutral.500}" },
+  "brand-ink": { "$value": "{color.brand.200}" },
   "chart-1": { "$value": "{color.brand.400}" },
   "chart-2": { "$value": "{color.teal.400}" },
   "chart-3": { "$value": "{color.amber.400}" },
@@ -35,5 +36,5 @@
   "sidebar-accent": { "$value": "{color.neutral.800}" },
   "sidebar-accent-foreground": { "$value": "{color.neutral.100}" },
   "sidebar-border": { "$value": "{color.neutral.800}" },
-  "sidebar-ring": { "$value": "{color.neutral.700}" }
+  "sidebar-ring": { "$value": "{color.neutral.500}" }
 }

@@ -103,6 +103,12 @@ export function expandTheme(id) {
       border: { $value: `{${N}.200}` },
       input: { $value: `{${N}.200}` },
       ring: { $value: `{${B}.500}` },
+      // The one brand hue in the contract that is read as text rather than used
+      // as a fill. The accent ground decides the step, and it is brand 700 here:
+      // brand 600 measures 3.82:1 to 4.21:1 on the five packs' own accent surface
+      // and brand 700 is the first step that clears 4.5:1 in all five. Going
+      // deeper would only trade chroma for contrast the text does not need.
+      'brand-ink': { $value: `{${B}.700}` },
       'chart-1': { $value: `{${B}.500}` },
       'chart-2': { $value: '{color.teal.500}' },
       'chart-3': { $value: '{color.amber.500}' },
@@ -115,7 +121,13 @@ export function expandTheme(id) {
       'sidebar-accent': { $value: `{${B}.100}` },
       'sidebar-accent-foreground': { $value: `{${B}.950}` },
       'sidebar-border': { $value: `{${N}.200}` },
-      'sidebar-ring': { $value: `{${B}.500}` },
+      // The sidebar is a step off the page ground in every mode: in light it is
+      // neutral 50 rather than neutral 0, so a ring on it has slightly less room,
+      // and brand 500 measured 2.86:1 in Mint and 2.97:1 in Sky. Brand 600 is the
+      // first step that clears 3:1 on all five. In dark the sidebar is neutral
+      // 900, lighter than the page ground, and brand 300 already holds 8.06:1 or
+      // better, so the dark arm keeps its step.
+      'sidebar-ring': { $value: `{${B}.600}` },
     },
 
     dark: {
@@ -142,6 +154,12 @@ export function expandTheme(id) {
       border: { $value: `{${N}.800}` },
       input: { $value: `{${N}.800}` },
       ring: { $value: `{${B}.300}` },
+      // The dark accent surface is brand 800, so the ink has to be a light brand
+      // step: brand 400 measures 4.34:1 to 4.37:1 on that surface and misses, and
+      // brand 300 is the first step that clears. Brand 200 rather than brand 300
+      // because brand 300 is `primary` in this mode, and a brand ink that is the
+      // brand fill is the confusion this role exists to end.
+      'brand-ink': { $value: `{${B}.200}` },
       'chart-1': { $value: `{${B}.400}` },
       'chart-2': { $value: '{color.teal.400}' },
       'chart-3': { $value: '{color.amber.400}' },

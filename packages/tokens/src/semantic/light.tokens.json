@@ -23,6 +23,7 @@
   "border": { "$value": "{color.neutral.200}", "$description": "Borders and separators." },
   "input": { "$value": "{color.neutral.200}", "$description": "Form control borders." },
   "ring": { "$value": "{color.neutral.500}", "$description": "Focus rings. Pinned to a step that clears 3:1 against the surface." },
+  "brand-ink": { "$value": "{color.brand.700}", "$description": "Brand-coloured text read on a surface: a wordmark, a brand-coloured heading, a link that must read as the brand. `primary` cannot serve this, because `primary` is a fill and a pastel brand 400 measures 1.90:1 to 2.05:1 on the pack's own accent surface, far below the 4.5:1 text needs. Brand 700 is the deepest brand step that clears 4.5:1 on the page, on a card and on the accent surface, in every pack." },
   "chart-1": { "$value": "{color.brand.500}" },
   "chart-2": { "$value": "{color.teal.500}" },
   "chart-3": { "$value": "{color.amber.500}" },
@@ -35,5 +36,5 @@
   "sidebar-accent": { "$value": "{color.neutral.100}", "$description": "Sidebar hover and selected state." },
   "sidebar-accent-foreground": { "$value": "{color.neutral.900}", "$description": "Text on a sidebar accent surface." },
   "sidebar-border": { "$value": "{color.neutral.200}", "$description": "Sidebar borders." },
-  "sidebar-ring": { "$value": "{color.neutral.400}", "$description": "Sidebar focus rings." }
+  "sidebar-ring": { "$value": "{color.neutral.500}", "$description": "Sidebar focus rings. Pinned to a step that clears 3:1 against the sidebar surface, which is one step off the page ground in either mode, so it is not the page ring's step." }
 }

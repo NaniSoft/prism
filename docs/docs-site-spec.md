@@ -34,7 +34,7 @@ Four things change.
 
 ## What is deliberately not changing
 
-- **The design system.** shadcn, the 36-name token contract, the five pastel
+- **The design system.** shadcn, the unprefixed token contract, the five pastel
   packs, Inter, the one stylesheet, the type scale, the radius scale, the
   component library, the token pipeline.
 - **The shell's construction.** fumadocs stays headless. `fumadocs-ui` is not
