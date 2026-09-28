@@ -1,0 +1,81 @@
+---
+slug: blocks/site-footer
+title: SiteFooter
+---
+
+## Overview
+
+SiteFooter is the block at the foot of a product site: a brand lockup, grouped
+destinations, the links that leave the site, and an optional slot for the legal
+line.
+
+All four NaniSoft sites compose this exact footer in their root layout, and each
+one wrote its own column model, its own mark and its own current-page treatment.
+
+Every string is a prop and the block ships none. There is no site name, no
+copyright, no year, no "built with" line and no default column: a footer that
+hardcoded any of them would hand every consumer a claim about a product that is
+not theirs and a year that was not this one.
+
+## Usage
+
+```tsx
+import { SiteFooter } from '@nanisoft/prism-ui/blocks/site-footer'
+
+<SiteFooter
+  product={{ id: 'nexus', name: 'Nexus', pack: 'lavender' }}
+  columns={[
+    { title: 'Site', links: [{ label: 'Docs', href: '/docs' }] },
+    {
+      title: 'Elsewhere',
+      links: [{ label: 'GitHub', href: 'https://github.com/NaniSoft/nexus' }],
+    },
+  ]}
+  social={[{ label: 'GitHub', href: 'https://github.com/NaniSoft/nexus', icon: <GitHubIcon /> }]}
+  legal={<span>(c) 2026 NaniSoft</span>}
+/>
+```
+
+<ComponentDemo slug="site-footer" />
+
+## Guidelines
+
+### When to use
+
+Use SiteFooter as the chrome at the foot of a whole product site, in the root
+layout, below the main region.
+
+Use it wherever there are destinations a reader might otherwise not find: the
+documentation, the blog, the repository, the company site.
+
+### When not to use
+
+Do not use it inside an application screen. `AppShell01` owns a signed-in shell
+and its own foot.
+
+Do not use it for a single link. A footer with one destination is a link with a
+large margin around it.
+
+### Best practices
+
+- Group by what the links are, and name each group. Each column is its own
+  navigation region named by its title, so a reader navigating by landmark reaches
+  "Documentation" rather than one anonymous list of links.
+- The columns collapse to one column on a narrow viewport, and a footer read as
+  three unreadable columns on a phone is three columns nobody reads. Group what
+  belongs together before you split it into columns.
+- **Links that leave the site open in a new tab by default**, because a link that
+  leaves and comes back is a reader who has lost the page they were on. Pass
+  `newTab={false}` on one link to override it: Prism does not decide which
+  destinations are external, so the per-link prop wins.
+- Put a social icon in `icon`. It is `aria-hidden`, so the label is announced once
+  rather than twice.
+- Use `legal` for the copyright, the licence or the version. It is a slot because
+  every one of those is a fact about a specific product and about the year it was
+  published, and a block that held a year would be a block that went stale.
+
+### Content guidelines
+
+- Keep a link label to one or two words. A footer is scanned.
+- Name a column after what the links in it are, not after where they live.
+- Keep the social labels the same words a reader would use for the destination.

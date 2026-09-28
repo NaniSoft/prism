@@ -1,0 +1,82 @@
+---
+slug: blocks/product-grid-01
+title: ProductGrid01
+---
+
+## Overview
+
+ProductGrid01 is a set of products as a stack of hairline rows: a two-part mark, a
+name, one tagline and a destination per row.
+
+All four NaniSoft sites publish this section, and each one drew it by hand with
+the same three parts in the same order: a colour mark for the product, the
+product's name, and one line about what it is, on a hairline row with the whole
+row a link. Each site also resolved the mark's ink in JavaScript from the live
+mode, which is the part that is a second source of truth.
+
+**The mark is two parts, and it is `ProductMark`.** The ring is `brand-ink` and
+the core is the product's own `primary`, with the name in the brand ink beside it.
+That split is settled by a measurement rather than by taste: a pastel brand value
+is a fill and never text, so the core may be `primary` and the name may not, and a
+*filled* mark on a light card measures under the threshold a mark has to clear, so
+the mark is a hairline ring around the fill rather than a disc of it.
+
+## Usage
+
+```tsx
+import { ProductGrid01 } from '@nanisoft/prism-ui/blocks/product-grid-01'
+
+<ProductGrid01
+  title="Built on Nexus"
+  products={[
+    {
+      id: 'nexus',
+      name: 'Nexus',
+      pack: 'lavender',
+      tagline: 'The agent factory.',
+      href: 'https://nexus.nanisoft.com',
+    },
+    { id: 'www', name: 'NaniSoft', tagline: 'The company.', href: 'https://nanisoft.com' },
+  ]}
+/>
+```
+
+<ComponentDemo slug="product-grid-01" />
+
+## Guidelines
+
+### When to use
+
+Use ProductGrid01 where the reader's question is "which of these should I open".
+That is a family of products, a set of integrations, a set of sibling sites.
+
+Use it when each member is one line long. A member that needs a paragraph is a
+`FeatureGrid01` card, and a paragraph in a row makes the row a column of
+paragraphs.
+
+### When not to use
+
+Do not use it for a set of things that are not navigable. A grid of capabilities
+is a `FeatureGrid01`; there is nothing to click, and a row that pretends to be a
+link teaches a reader that everything on a page is.
+
+Do not use it for two members. Two products side by side is a hero with two
+things in it, and a hairline list of two is a list.
+
+### Best practices
+
+- Order the rows by how likely a reader is to want each one. Order is a claim and
+  it is yours.
+- Pass `newTab` per row rather than globally. Prism does not decide what counts as
+  external, and a same-site link that opens a tab is a reader who has lost the
+  page.
+- Leave `pack` off the one member that has no pack of its own. That member wears
+  the spectrum.
+- Use one mark size across the grid. The grid passes one size to every mark, so a
+  mixed set is not reachable from here.
+
+### Content guidelines
+
+- Keep a tagline to one line. It is what a reader scans.
+- Write the tagline as what the product is, not as what it does for the reader.
+- Use the product's own name, in the case it uses everywhere else.

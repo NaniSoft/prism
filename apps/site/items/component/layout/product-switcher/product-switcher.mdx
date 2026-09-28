@@ -1,0 +1,73 @@
+---
+slug: components/product-switcher
+title: ProductSwitcher
+---
+
+## Overview
+
+A ProductSwitcher is a switch between the members of a set of products. Each
+member is drawn with its own `ProductMark`, so the two parts of a product's
+identity - the ring in the brand ink and the core in its own pack fill - are the
+same two colours in a switcher, in a row and on a page header.
+
+All four NaniSoft sites need it and each one wrote it: the company's own site
+moves between its products from a row of coloured marks, and each product site
+names its siblings in its header.
+
+## Usage
+
+```tsx
+import { ProductSwitcher } from '@nanisoft/prism-ui/components/product-switcher'
+
+<ProductSwitcher
+  currentId="nexus"
+  products={[
+    { id: 'nexus', name: 'Nexus', pack: 'lavender', href: 'https://nexus.nanisoft.com' },
+    { id: 'atlas', name: 'Atlas', pack: 'mint', href: 'https://atlas.nanisoft.com' },
+  ]}
+/>
+```
+
+<ComponentDemo slug="product-switcher" />
+
+## Guidelines
+
+### When to use
+
+Use a ProductSwitcher where a reader can move between whole products rather than
+between pages of one: a site header, a footer, a page that lists the family.
+
+Use one size across the whole switcher. A set where one mark is larger than the
+rest reads as a hierarchy that is not there.
+
+### When not to use
+
+Do not use a ProductSwitcher to switch between pages of one product. That is
+`Pagination` or `Tabs`, and a set of product marks is a claim about where the
+reader is, not a position in a sequence.
+
+Do not use it for a set of one. Pass nothing rather than a switcher with a single
+member; a switcher with nothing to switch to is a heading.
+
+Do not use it as a menu. It renders every member at once. If you want a control
+that opens a list, compose `DropdownMenu` with the marks.
+
+### Best practices
+
+- Pass `currentId` on the page a member is showing, and omit it on a page that is
+  not one of the members.
+- The current member is marked with `aria-current="page"`, never with a colour
+  alone. There is no prop that overrides that marking, which is the reason this
+  is a component rather than a list of anchors you write yourself.
+- Leave `pack` off the one member that has no pack of its own. That member wears
+  the full spectrum, which says "no single colour" once rather than five times.
+- Pass `label` when the set is not a set of products. The default name is
+  `Products`, and a consumer whose set is not products should pass its own word.
+
+### Content guidelines
+
+- Use each product's own name, in the case it uses everywhere else.
+- Keep a name to one or two words. The mark carries the identity; the name carries
+  the label.
+- Never abbreviate a name to fit beside its mark. Drop the mark, shorten the row,
+  or let the name wrap.

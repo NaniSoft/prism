@@ -1,0 +1,8 @@
+{
+  "name": "process-rail-01",
+  "title": "Process Rail 01 - Steps On One Line",
+  "description": "A process drawn as a rail: two, three or four steps on one line, each with an ordinal, a name and one caption, with an optional label on the last step. The type refuses a fifth step. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section"],
+  "dependencies": []
+}

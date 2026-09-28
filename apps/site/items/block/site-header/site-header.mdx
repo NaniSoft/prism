@@ -1,0 +1,90 @@
+---
+slug: blocks/site-header
+title: SiteHeader
+---
+
+## Overview
+
+SiteHeader is the bar at the top of a product site: a brand lockup, an optional
+product switcher, the site's own navigation, and a slot for the controls your
+product owns.
+
+All four NaniSoft sites compose this exact bar in their root layout, and each one
+wrote its own: the mark in one place, the switcher in a popover in another, the
+navigation in a third, and each wrote the focus and current-page wiring separately.
+
+It is a Block and not a Component because it is a region of a page rather than a
+control: it composes a `ProductMark`, a `ProductSwitcher` and a set of links, and
+it owns the bar they sit in.
+
+**There is no product directory in this package.** The product is passed as the
+three facts its mark is drawn from rather than as an id this package would have to
+resolve. That is the same answer `ProductMark` gives, and for the same reason: a
+consumer that composes a set of its own products composes the header too.
+
+## Usage
+
+```tsx
+import { SiteHeader } from '@nanisoft/prism-ui/blocks/site-header'
+
+<SiteHeader
+  product={{ id: 'nexus', name: 'Nexus', pack: 'lavender' }}
+  navLabel="Site"
+  productsLabel="Products"
+  products={[
+    { id: 'nexus', name: 'Nexus', pack: 'lavender', href: 'https://nexus.nanisoft.com' },
+    { id: 'atlas', name: 'Atlas', pack: 'mint', href: 'https://atlas.nanisoft.com' },
+  ]}
+  nav={[
+    { label: 'Docs', href: '/docs' },
+    { label: 'About', href: '/about', current: true },
+  ]}
+  actions={<ModeToggle />}
+/>
+```
+
+<ComponentDemo slug="site-header" />
+
+## Guidelines
+
+### When to use
+
+Use SiteHeader as the chrome around a whole product site. One header per site, in
+the root layout, above the main region.
+
+Use it on the landing page and on every documentation and blog page alike. A
+header that changes between sections of one site is two sites' worth of chrome.
+
+### When not to use
+
+Do not use it inside an application screen. `AppShell01` is that: a rail, a top
+bar and a mobile sheet, for signed-in state rather than for a public site.
+
+Do not use it for a product site's in-page navigation. That is a `Tabs` or a
+`Breadcrumb`.
+
+### Best practices
+
+- Pass `product`, and pass `products` only when the site is one of several. A set
+  of one renders one mark, so pass nothing rather than a switcher with a single
+  member.
+- Mark the current page with `current` on the one link whose destination is the
+  current route. The header marks it with `aria-current="page"`; it does not colour
+  it, because a colour is not a state a screen reader can read.
+- `navLabel` and `productsLabel` are required, because they are words a reader
+  hears. A Block that ships no copy ships no reader-facing copy either, so the name
+  of your own landmarks is yours to pass.
+- Put interactive controls in `actions`. It is a slot rather than a prop, because
+  an account menu, a sign-in link and a mode toggle are all application state and
+  none of them is a fact a header can be told.
+- Use `sticky` only where the page scrolls. A sticky header on a page with no
+  scroll costs the reader a strip of viewport for nothing.
+- The bar is one flex row that wraps. The switcher and the navigation wrap onto a
+  second line rather than overflowing, so a narrow viewport gets a taller header
+  and never a clipped one.
+
+### Content guidelines
+
+- Keep a nav label to one word. It is a bar.
+- Use each product's own name in the lockup, in the case it uses everywhere else.
+- Order the nav by how often a reader goes there, not alphabetically.

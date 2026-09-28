@@ -1,0 +1,92 @@
+---
+slug: pages/blog-post-page
+title: BlogPostPage
+---
+
+## Overview
+
+BlogPostPage is a complete blog post screen: the title, the standfirst, the
+byline, the body at the reading measure, and the trail to the neighbouring posts.
+
+All four NaniSoft sites publish a blog, each with four posts and the same
+frontmatter: a title, a description, a date and a list of tags. Each one then
+rendered that frontmatter in its own component, with its own wrapper, its own
+measure and its own treatment of the date, and each of them wrote the trail to the
+neighbouring posts separately or not at all.
+
+**The date is two props.** `date` is the words a reader sees and `dateTime` is the
+machine value on the `time` element, and they are kept apart because parsing a
+formatted date back into an ISO one is a guess about a locale. A wrong date in a
+`datetime` attribute is a wrong date in a feed reader and in a search result, and
+neither reader can see the string that was wrong.
+
+## Usage
+
+```tsx
+import { BlogPostPage } from '@nanisoft/prism-ui/pages/blog-post-page'
+
+<BlogPostPage
+  title="Every minute, the whole chain"
+  description="What live full-chain capture at index scale actually takes."
+  date="21 September 2026"
+  dateTime="2026-09-21"
+  author="NaniSoft"
+  tags={[{ label: 'market-data' }, { label: 'kubernetes' }]}
+  trailLabels={{ previous: 'Previous', next: 'Next' }}
+  trailLabel="More posts"
+  previous={{ title: 'One feed to research', href: '/blog/one-feed' }}
+  next={{ title: 'Multi-agent research', href: '/blog/multi-agent' }}
+  indexLink={{ title: 'All posts', href: '/blog' }}
+>
+  <p>The body, authored by your own pipeline.</p>
+</BlogPostPage>
+```
+
+<ComponentDemo slug="blog-post-page" />
+
+## Guidelines
+
+### When to use
+
+Use BlogPostPage as the body of the route that renders one post, handed the
+frontmatter your content pipeline produced.
+
+Use it for every post. A blog whose posts each have their own wrapper is a blog
+whose posts drift apart within a year.
+
+### When not to use
+
+Do not use it for a documentation page. Documentation is a set of short pages
+about one thing; a post is a dated argument about one thing, and a trail to the
+post before it is not a trail through a manual.
+
+Do not use it for a landing page. `MarketingPage` is that composition.
+
+### Best practices
+
+- Pass `dateTime` in `YYYY-MM-DD`. It is the value a feed reader and a search
+  engine order by, and it is the one that is wrong silently.
+- The body is `children`, held by `Prose`. Your pipeline owns the document; this
+  owns the measure and the rhythm. Do not parse it into an array of paragraphs to
+  hand over - that is a second representation of something your pipeline already
+  has.
+- Render only the halves of the trail you have. A previous link on the oldest post
+  is a link to the first post a reader has already read, and a next link on the
+  newest is a promise the site cannot keep.
+- `trailLabel` and `trailLabels` are required alongside a neighbour. They are words
+  a reader reads and hears, and a Page that ships no copy ships no reader-facing
+  copy either: a site that files posts newest-last says the opposite pair.
+- Use `footer` for what comes after the trail: related posts, a newsletter form, a
+  closing call to action. It is a slot because every one of those is a Block, and a
+  Page that took a Block per prop would be a Page whose interface lists the whole
+  catalogue.
+- Pass `indexLink` with the words and the route your archive lives at. The page
+  ships neither.
+
+### Content guidelines
+
+- Write the standfirst as one or two sentences a reader can stop at. It is what an
+  index, a feed and a search result show.
+- Keep tags to nouns. A tag is a category a reader browses, not a sentence.
+- Keep the title to one line at the largest viewport unless the post is the only
+  thing on the page.

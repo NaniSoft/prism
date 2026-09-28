@@ -1,0 +1,8 @@
+{
+  "name": "instrument-panel-01",
+  "title": "Instrument Panel 01 - Titled Bar Around A Slot",
+  "description": "A bordered panel with a titled bar, a state dot with the caller's own words beside it, a slot for the instrument, an optional control and an optional footnote. The frame is the Block; the instrument is the consumer's. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": [],
+  "dependencies": []
+}

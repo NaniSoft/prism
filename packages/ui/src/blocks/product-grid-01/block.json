@@ -1,0 +1,8 @@
+{
+  "name": "product-grid-01",
+  "title": "Product Grid 01 - Products As Hairline Rows",
+  "description": "A set of products as a stack of hairline rows: a two-part ProductMark, a name, one tagline and a destination per row. Every string, every pack and every destination is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["product-mark", "section"],
+  "dependencies": []
+}

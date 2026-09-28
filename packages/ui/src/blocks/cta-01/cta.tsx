@@ -44,6 +44,29 @@ export type Cta01Props = {
    * work.
    */
   actionSlot?: ReactNode
+  /**
+   * The second action, rendered beside the first at outline weight. It is a prop
+   * rather than a second `action` array because `action` is the one this Block
+   * styles as the closing ask and a second action in the same weight is two
+   * closing asks; a reader who has to choose between two equally-weighted
+   * buttons has been given a menu where a page wanted a decision.
+   *
+   * Three of the four NaniSoft sites render two actions in their closing band
+   * and all four do, and all four wrote the pair by hand, so each one re-decided
+   * the gap, the order and the weight between them.
+   */
+  secondaryAction?: Cta01Action
+  /**
+   * The line under the actions: the footnote, the caveat, the sentence that
+   * qualifies the ask. Three of the four sites render one, and each wrote it by
+   * hand.
+   *
+   * A `ReactNode` rather than a string because the honest line is sometimes not
+   * one sentence: three of the four carry a link inside it, and a string prop
+   * would force a caller to compose a paragraph to say "this is in development,
+   * here is where to watch it".
+   */
+  note?: ReactNode
   /** Heading level for the headline. See `HeadingLevel`. */
   headingLevel?: HeadingLevel
 }
@@ -66,6 +89,8 @@ export function Cta01({
   description,
   action,
   actionSlot,
+  secondaryAction,
+  note,
   headingLevel = 'h2',
 }: Cta01Props) {
   /*
@@ -92,18 +117,33 @@ export function Cta01({
             <p className="max-w-xl text-lg text-pretty opacity-90">{description}</p>
           ) : null}
           {action ? (
-            <CtaLink
-              size="lg"
-              variant={action.variant ?? 'secondary'}
-              href={action.href}
-              newTab={action.newTab}
-              className="group"
-            >
-              {action.label}
-              <ArrowRight className="motion-safe:transition-transform size-4 group-hover:translate-x-0.5" />
-            </CtaLink>
+            <div className="flex flex-col items-center gap-3 sm:flex-row">
+              <CtaLink
+                size="lg"
+                variant={action.variant ?? 'secondary'}
+                href={action.href}
+                newTab={action.newTab}
+                className="group"
+              >
+                {action.label}
+                <ArrowRight className="motion-safe:transition-transform size-4 group-hover:translate-x-0.5" />
+              </CtaLink>
+              {secondaryAction ? (
+                <CtaLink
+                  size="lg"
+                  variant={secondaryAction.variant ?? 'outline'}
+                  href={secondaryAction.href}
+                  newTab={secondaryAction.newTab}
+                >
+                  {secondaryAction.label}
+                </CtaLink>
+              ) : null}
+            </div>
           ) : actionSlot ? (
             actionSlot
+          ) : null}
+          {note ? (
+            <p className="max-w-2xl text-pretty text-sm opacity-80">{note}</p>
           ) : null}
         </div>
       </div>

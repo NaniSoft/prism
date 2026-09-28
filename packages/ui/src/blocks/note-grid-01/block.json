@@ -1,0 +1,8 @@
+{
+  "name": "note-grid-01",
+  "title": "Note Grid 01 - Titled Points In Columns",
+  "description": "A grid of short points: a title and a sentence or two each, on a hairline above every point, with no tile and no icon. Rendered as a definition list so each title is announced with its own body. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section"],
+  "dependencies": []
+}

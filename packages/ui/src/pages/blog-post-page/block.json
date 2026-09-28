@@ -1,0 +1,7 @@
+{
+  "name": "blog-post-page",
+  "title": "Blog Post Page - Title, Byline, Body And Trail",
+  "description": "A complete blog post screen: the title as the page's own h1, a standfirst, a byline with both the display date and the machine date, tags, the body held at the reading measure, the trail to the neighbouring posts and a way back to the archive. Every fact about the post is passed in as a prop.",
+  "categories": ["application"],
+  "dependencies": []
+}

@@ -1,0 +1,8 @@
+{
+  "name": "stack-grid-01",
+  "title": "Stack Grid 01 - Composed Parts And In-House Work",
+  "description": "A survey of what a product is assembled from, and a second grid of what it built itself. Both groups carry a name and one line; the second carries the caller's own words for the claim it makes. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["card", "section"],
+  "dependencies": []
+}

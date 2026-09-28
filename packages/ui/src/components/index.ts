@@ -67,6 +67,12 @@ export { Diagram } from './ui/diagram'
 export type { DiagramProps, DiagramNode, DiagramRelation } from './ui/diagram'
 export { ProductMark } from './ui/product-mark'
 export type { ProductMarkProps, ProductMarkSize } from './ui/product-mark'
+export { Prose } from './ui/prose'
+export type { ProseProps, ProseSize } from './ui/prose'
+export { FactList } from './ui/fact-list'
+export type { FactListProps, Fact } from './ui/fact-list'
+export { ProductSwitcher } from './ui/product-switcher'
+export type { ProductSwitcherProps, SwitcherProduct } from './ui/product-switcher'
 
 export {
   Select,

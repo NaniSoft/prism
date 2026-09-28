@@ -1,0 +1,8 @@
+{
+  "name": "logo-strip-01",
+  "title": "Logo Strip 01 - One Line Of Short Items",
+  "description": "A single line of three to eight short phrases: the transition band between a hero and the section that follows it. Rendered as a list so a reader is told how many items there are. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section"],
+  "dependencies": []
+}

@@ -1,0 +1,8 @@
+{
+  "name": "site-footer",
+  "title": "Site Footer - Brand, Grouped Destinations and Legal Slot",
+  "description": "The block at the foot of a product site: a brand lockup, grouped destinations, the links that leave the site and a slot for the legal line. All copy is passed in as props.",
+  "categories": ["chrome"],
+  "registryDependencies": ["product-mark"],
+  "dependencies": []
+}

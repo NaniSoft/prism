@@ -1,0 +1,75 @@
+---
+slug: blocks/logo-strip-01
+title: LogoStrip01
+---
+
+## Overview
+
+LogoStrip01 is a single line of short items: the transition band between a hero
+and the section that follows it.
+
+All four NaniSoft sites compose this band, immediately after the hero and before
+the first numbered section, and each one wrote it as the same thing: a row of
+three to six short phrases in muted text, with no heading at all. Four
+hand-written strips, four sets of site CSS, and one question each of them
+answered differently - whether the strip is a list, a paragraph with separators,
+or a decorative row of spans.
+
+It is a `ul`, so a screen reader hears how many items there are before it hears
+the first one. That is the whole answer to the question: a strip whose items are
+spans in a `div` is announced as one run of text with no count, and a reader
+deciding whether to keep listening has nothing to weigh.
+
+## Usage
+
+```tsx
+import { LogoStrip01 } from '@nanisoft/prism-ui/blocks/logo-strip-01'
+
+<LogoStrip01
+  label="Data sources"
+  items={['Fyers v3', 'yfinance', 'nselib / nse-xbrl', 'NSE filings']}
+/>
+```
+
+<ComponentDemo slug="logo-strip-01" />
+
+## Guidelines
+
+### When to use
+
+Use LogoStrip01 immediately after a hero, to say in one quiet line what the hero
+did not have room for.
+
+Use it for three to eight short phrases. Fewer is a sentence, and more is a
+paragraph.
+
+### When not to use
+
+Do not use it for logos. This block takes strings and renders them as text, at the
+same size as the body. A row of marks is a `ProductGrid01` and a row of images is
+neither of these.
+
+Do not use it as a marquee. **The strip does not move.** A band of items that
+slides is an entrance animation, and this system has none: motion is state
+feedback only. What the four sites wanted from their strips was a second, quieter
+statement of what the product is, and repeating the type does that without
+anything moving.
+
+Do not use it with more than about eight items. It wraps onto three lines on a
+phone and stops being a band; a longer set belongs in a `StackGrid01`.
+
+### Best practices
+
+- Give it a `label`, which is required. It is the accessible name and no visible
+  text, so a reader navigating by list knows what they have landed on, and the
+  word is yours because a Block that ships no copy ships no reader-facing copy.
+- Keep every item to one or two words. The strip is scanned, not read.
+- Place it once per page, between the hero and the first section.
+
+### Content guidelines
+
+- Write items as names, not as claims. A strip of adjectives is a slogan.
+- Keep the register even across the items. One long item among four short ones
+  makes the long one the only one read.
+- Do not repeat the hero's own words. The strip is the second statement, not the
+  first one again.

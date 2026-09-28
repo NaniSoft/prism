@@ -1,0 +1,8 @@
+{
+  "name": "status-ledger-01",
+  "title": "Status Ledger 01 - Things And The State Each Is In",
+  "description": "A ledger of rows: a name, one of four status tiers, the caller's own words for that tier, and an optional detail line or bullet list. The tier is a colour and the words are the information. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section"],
+  "dependencies": []
+}

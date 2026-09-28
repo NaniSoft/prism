@@ -73,7 +73,7 @@ export function Pricing01({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>{plan.name}</CardTitle>
-                {plan.featured ? <Badge>{plan.badge ?? 'Popular'}</Badge> : null}
+                {plan.featured && plan.badge ? <Badge>{plan.badge}</Badge> : null}
               </div>
               {plan.body ? <CardDescription>{plan.body}</CardDescription> : null}
               <p className="mt-2 text-3xl font-semibold tracking-tight">

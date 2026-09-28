@@ -207,6 +207,18 @@ export function renderItemProps(store: PrismDocsStore, args: ItemArgs): CallTool
   const resolved = resolveItem(store, args.name, args.kind)
   if (!resolved.ok) return resolved.result
   const item = resolved.item
+  // Both sections, when both are recorded. A Block and a Page publish an
+  // interface section AND a composition section, and reading one while calling
+  // the other "no own props" is the type-level lie the published surface exists
+  // to prevent: the store carried both and the tool reported one and denied the
+  // other.
+  if (item.props && item.composition) {
+    return text(
+      `# ${item.name} - props and composition\n\n## Props\n\n${item.props}\n\n## Composition\n\n${item.composition}\n\n` +
+        `This is the complete public Prism API for \`${item.name}\`; internal primitive props are not a consumer contract.\n\n` +
+        `Import rule: ${IMPORT_RULE}`,
+    )
+  }
   if (item.props) {
     return text(
       `# ${item.name} - props\n\n${item.props}\n\nThis is the complete public Prism API for \`${item.name}\`; internal primitive props are not a consumer contract.\n\nImport rule: ${IMPORT_RULE}`,
@@ -214,7 +226,7 @@ export function renderItemProps(store: PrismDocsStore, args: ItemArgs): CallTool
   }
   if (item.composition) {
     return text(
-      `# ${item.name} - composition\n\nA ${kindLabel(item.kind)} has no own props; its public surface is the composition below.\n\n${item.composition}\n\nImport rule: ${IMPORT_RULE}`,
+      `# ${item.name} - composition\n\nThe public surface of this ${kindLabel(item.kind)} is the composition below.\n\n${item.composition}\n\nImport rule: ${IMPORT_RULE}`,
     )
   }
   return error(

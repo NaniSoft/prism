@@ -1,0 +1,75 @@
+---
+slug: blocks/stack-grid-01
+title: StackGrid01
+---
+
+## Overview
+
+StackGrid01 is a survey of what a product is assembled from, and what it built
+itself. The composed parts sit in one grid, each a name and a role; the in-house
+work sits in a second grid, each a name and a line about it.
+
+Three of the four NaniSoft sites publish this section, and each one drew it by
+hand with the same two groups. Three of them also drew the second group
+differently from the first - a dashed border, a different tile, a mark above the
+name - because the visual difference is the claim: *this part is ours*.
+
+That is what the `own` group is here. It is a separate prop and a separate grid
+rather than a flag on the part, because the difference is a claim about provenance
+and a claim is not a property of a row: a part that is assembled and a part that is
+built are the same kind of thing with a different answer to "who wrote it".
+
+## Usage
+
+```tsx
+import { StackGrid01 } from '@nanisoft/prism-ui/blocks/stack-grid-01'
+
+<StackGrid01
+  title="How it is built"
+  parts={[
+    { name: 'Postgres', role: 'Storage' },
+    { name: 'NATS', role: 'Queue' },
+  ]}
+  own={[{ name: 'The orchestrator', blurb: 'Decides what runs next.' }]}
+  ownLabel="built in-house"
+/>
+```
+
+<ComponentDemo slug="stack-grid-01" />
+
+## Guidelines
+
+### When to use
+
+Use StackGrid01 where a reader's question is "what is this made of" and the honest
+answer is mostly other people's work with a few exceptions.
+
+Use it when the exceptions are the point. If everything in the grid is composed,
+drop `own` and use `NoteGrid01` instead: a second group with nothing in it is a
+claim you have not made.
+
+### When not to use
+
+Do not use it for integrations the reader connects themselves. That is a
+`ProductGrid01` of destinations, and a survey of parts is not a survey of things
+you can turn on.
+
+Do not use it where you cannot substantiate the in-house group. The block requires
+`ownLabel` precisely because the group is a claim, and a claim nobody can check
+is marketing.
+
+### Best practices
+
+- Pass the words you mean for the claim. Three of the four sites write three
+  different ones - "built in-house", "built by Nanisoft", "our own" - and the
+  block does not choose between them.
+- Keep a role to a phrase. The grid is a survey of what a product stands on, not a
+  feature list, and a role that runs to a sentence turns a survey into prose.
+- Order the composed parts by how much of the product they carry.
+
+### Content guidelines
+
+- Use each part's own name, as its authors spell it.
+- Write a role as what the part does *here*, not as what the part is generally
+  capable of.
+- Write a blurb as why it is not assembled. That is the question the group raises.

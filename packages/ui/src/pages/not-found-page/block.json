@@ -1,0 +1,7 @@
+{
+  "name": "not-found-page",
+  "title": "Not Found Page - Code, Sentence And Ways Out",
+  "description": "A complete not-found screen: the status code as the page's own h1, one sentence about what happened, and the ways out as native links. Every string and every destination is passed in as a prop.",
+  "categories": ["application"],
+  "dependencies": []
+}

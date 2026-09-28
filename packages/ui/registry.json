@@ -282,6 +282,28 @@
       ]
     },
     {
+      "name": "fact-list",
+      "title": "Fact-list",
+      "description": "Shared fact-list primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/fact-list.tsx",
+          "type": "registry:component",
+          "target": "components/ui/fact-list.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "field",
       "title": "Field",
       "description": "Shared field primitive. Installed automatically as a dependency of any block that uses it.",
@@ -416,6 +438,28 @@
       ]
     },
     {
+      "name": "product-switcher",
+      "title": "Product-switcher",
+      "description": "Shared product-switcher primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/product-switcher.tsx",
+          "type": "registry:component",
+          "target": "components/ui/product-switcher.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "progress",
       "title": "Progress",
       "description": "Shared progress primitive. Installed automatically as a dependency of any block that uses it.",
@@ -430,6 +474,28 @@
           "path": "src/components/ui/progress.tsx",
           "type": "registry:component",
           "target": "components/ui/progress.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "prose",
+      "title": "Prose",
+      "description": "Shared prose primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/prose.tsx",
+          "type": "registry:component",
+          "target": "components/ui/prose.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -960,6 +1026,117 @@
       ]
     },
     {
+      "name": "instrument-panel-01",
+      "title": "Instrument Panel 01 - Titled Bar Around A Slot",
+      "description": "A bordered panel with a titled bar, a state dot with the caller's own words beside it, a slot for the instrument, an optional control and an optional footnote. The frame is the Block; the instrument is the consumer's. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/instrument-panel-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/instrument-panel-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/instrument-panel-01/instrument-panel.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/instrument-panel-01/instrument-panel.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "logo-strip-01",
+      "title": "Logo Strip 01 - One Line Of Short Items",
+      "description": "A single line of three to eight short phrases: the transition band between a hero and the section that follows it. Rendered as a list so a reader is told how many items there are. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/logo-strip-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/logo-strip-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/logo-strip-01/logo-strip.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/logo-strip-01/logo-strip.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "note-grid-01",
+      "title": "Note Grid 01 - Titled Points In Columns",
+      "description": "A grid of short points: a title and a sentence or two each, on a hairline above every point, with no tile and no icon. Rendered as a definition list so each title is announced with its own body. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/note-grid-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/note-grid-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/note-grid-01/note-grid.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/note-grid-01/note-grid.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "page-header-01",
       "title": "Page Header 01 - Title Band",
       "description": "A page title band with a breadcrumb trail, a supporting line and a row of actions. Every step, string and action is passed in as a prop.",
@@ -1042,6 +1219,83 @@
       ]
     },
     {
+      "name": "process-rail-01",
+      "title": "Process Rail 01 - Steps On One Line",
+      "description": "A process drawn as a rail: two, three or four steps on one line, each with an ordinal, a name and one caption, with an optional label on the last step. The type refuses a fifth step. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/process-rail-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/process-rail-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/process-rail-01/process-rail.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/process-rail-01/process-rail.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "product-grid-01",
+      "title": "Product Grid 01 - Products As Hairline Rows",
+      "description": "A set of products as a stack of hairline rows: a two-part ProductMark, a name, one tagline and a destination per row. Every string, every pack and every destination is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "product-mark",
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/product-grid-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/product-grid-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/product-grid-01/product-grid.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/product-grid-01/product-grid.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "settings-panel-01",
       "title": "Settings Panel 01 - Grouped Form",
       "description": "A settings form grouped into sections of text, select and switch fields. Labels, options and value handlers are all passed in as props.",
@@ -1073,6 +1327,122 @@
           "path": "src/blocks/settings-panel-01/settings-panel.tsx",
           "type": "registry:component",
           "target": "components/blocks/settings-panel-01/settings-panel.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "site-footer",
+      "title": "Site Footer - Brand, Grouped Destinations and Legal Slot",
+      "description": "The block at the foot of a product site: a brand lockup, grouped destinations, the links that leave the site and a slot for the legal line. All copy is passed in as props.",
+      "type": "registry:block",
+      "categories": [
+        "chrome"
+      ],
+      "registryDependencies": [
+        "product-mark"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/site-footer/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/site-footer/index.tsx"
+        },
+        {
+          "path": "src/blocks/site-footer/site-footer.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/site-footer/site-footer.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "site-header",
+      "title": "Site Header - Brand, Product Switcher and Site Navigation",
+      "description": "The bar at the top of a product site: a brand lockup, an optional product switcher, the site's own navigation and a slot for application controls. All copy is passed in as props.",
+      "type": "registry:block",
+      "categories": [
+        "chrome"
+      ],
+      "registryDependencies": [
+        "product-mark",
+        "product-switcher"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/site-header/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/site-header/index.tsx"
+        },
+        {
+          "path": "src/blocks/site-header/site-header.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/site-header/site-header.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "stack-grid-01",
+      "title": "Stack Grid 01 - Composed Parts And In-House Work",
+      "description": "A survey of what a product is assembled from, and a second grid of what it built itself. Both groups carry a name and one line; the second carries the caller's own words for the claim it makes. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "card",
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/stack-grid-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/stack-grid-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/stack-grid-01/stack-grid.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/stack-grid-01/stack-grid.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",
@@ -1126,6 +1496,44 @@
       ]
     },
     {
+      "name": "status-ledger-01",
+      "title": "Status Ledger 01 - Things And The State Each Is In",
+      "description": "A ledger of rows: a name, one of four status tiers, the caller's own words for that tier, and an optional detail line or bullet list. The tier is a colour and the words are the information. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/status-ledger-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/status-ledger-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/status-ledger-01/status-ledger.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/status-ledger-01/status-ledger.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "auth-page",
       "title": "Auth Page - Centered Sign-In Screen",
       "description": "A complete authentication screen composing a sign-in form with an optional supporting card. Fields, labels, handlers, the error and the supporting content are all passed in as props.",
@@ -1139,6 +1547,28 @@
           "path": "src/pages/auth-page/index.tsx",
           "type": "registry:page",
           "target": "components/pages/auth-page/index.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "blog-post-page",
+      "title": "Blog Post Page - Title, Byline, Body And Trail",
+      "description": "A complete blog post screen: the title as the page's own h1, a standfirst, a byline with both the display date and the machine date, tags, the body held at the reading measure, the trail to the neighbouring posts and a way back to the archive. Every fact about the post is passed in as a prop.",
+      "type": "registry:page",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/blog-post-page/index.tsx",
+          "type": "registry:page",
+          "target": "components/pages/blog-post-page/index.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -1183,6 +1613,28 @@
           "path": "src/pages/marketing-page/index.tsx",
           "type": "registry:page",
           "target": "components/pages/marketing-page/index.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "not-found-page",
+      "title": "Not Found Page - Code, Sentence And Ways Out",
+      "description": "A complete not-found screen: the status code as the page's own h1, one sentence about what happened, and the ways out as native links. Every string and every destination is passed in as a prop.",
+      "type": "registry:page",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/not-found-page/index.tsx",
+          "type": "registry:page",
+          "target": "components/pages/not-found-page/index.tsx"
         },
         {
           "path": "src/lib/utils.ts",

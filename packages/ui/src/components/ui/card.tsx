@@ -22,6 +22,13 @@ function Card({ className, ...props }: ComponentProps<'div'>) {
   )
 }
 
+/**
+ * The head of a card: the row above the card's content.
+ *
+ * A part rather than an Item, and it stays inside this module: `CardHeader` is not
+ * a second catalogue entry, and DESIGN.md's authoring contract says compound parts
+ * ship from their parent module and do not form a second vocabulary.
+ */
 function CardHeader({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
@@ -35,6 +42,15 @@ function CardHeader({ className, ...props }: ComponentProps<'div'>) {
   )
 }
 
+/**
+ * The card's title: the one line that names the group of related content.
+ *
+ * Renders a `div` rather than a heading, because a card's title is not always the
+ * heading of the region it sits in: four cards in a grid are four titles under one
+ * section heading, and four `h3`s under one `h2` is right while four `h2`s is
+ * four sections. Pass Prism's `Heading` inside it when the card is the only thing
+ * in its region and the outline should say so.
+ */
 function CardTitle({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
@@ -45,6 +61,10 @@ function CardTitle({ className, ...props }: ComponentProps<'div'>) {
   )
 }
 
+/**
+ * The supporting line under a card's title: one sentence about what the card
+ * holds.
+ */
 function CardDescription({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
@@ -55,10 +75,15 @@ function CardDescription({ className, ...props }: ComponentProps<'div'>) {
   )
 }
 
+/** The card's body: the content the title and description introduce. */
 function CardContent({ className, ...props }: ComponentProps<'div'>) {
   return <div data-slot="card-content" className={cn('px-6', className)} {...props} />
 }
 
+/**
+ * The foot of a card: the actions that belong to the card rather than to the
+ * page.
+ */
 function CardFooter({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div

@@ -39,6 +39,20 @@ type FeatureGrid01CommonProps = {
   eyebrow?: string
   title?: string
   description?: string
+  /**
+   * Puts the feature's position in the grid on the card, zero-padded to two
+   * digits, above the title.
+   *
+   * The ordinal is rendered from the card's position rather than taken from the
+   * feature, because a list that carries its own numbers is a list whose numbers
+   * can disagree with its order after a sort, a filter or an insertion. All four
+   * NaniSoft sites render one: three of them as `01` in the mono face on every
+   * card, and the fourth on a set of pillars as well as on the grid.
+   *
+   * It is off by default. A number on a card is a claim that the set is a
+   * sequence, and a grid of features is usually a set.
+   */
+  numbered?: boolean
   /** Heading level for the section title. See `HeadingLevel`. */
   headingLevel?: HeadingLevel
 }
@@ -66,7 +80,7 @@ export type FeatureGrid01Props = FeatureGrid01CommonProps &
  * rather than the renderer finding out.
  */
 export function FeatureGrid01(props: FeatureGrid01Props) {
-  const { eyebrow, title, description, headingLevel = 'h2' } = props
+  const { eyebrow, title, description, numbered = false, headingLevel = 'h2' } = props
   // Read off `props` rather than destructured, so the two stay one value: taking
   // `variant` and `features` apart is what would let the arm the type checked
   // and the arm the renderer followed come to be two different ones.
@@ -86,9 +100,14 @@ export function FeatureGrid01(props: FeatureGrid01Props) {
       ) : null}
 
       <div className="grid gap-6 sm:grid-cols-2">
-        {features.map((feature) => (
+        {features.map((feature, index) => (
           <Card key={feature.title} className="gap-4 py-6">
             <CardHeader>
+              {numbered ? (
+                <span className="text-muted-foreground font-mono text-xs">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+              ) : null}
               {variant === 'icon' && 'icon' in feature ? (
                 <span className="bg-accent text-accent-foreground mb-2 flex size-10 items-center justify-center rounded-lg">
                   <feature.icon className="size-5" />

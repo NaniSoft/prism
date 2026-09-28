@@ -1,0 +1,83 @@
+---
+slug: pages/not-found-page
+title: NotFoundPage
+---
+
+## Overview
+
+NotFoundPage is a complete not-found screen: the code, what happened, and the ways
+out.
+
+All four NaniSoft sites compose one, each in its own not-found route, and three of
+them are the same six lines with a different product name on it: a display title
+carrying the code, one muted sentence, and two or three links. The fourth wrote
+the same thing in its own markup. Four hand-written screens for one shape.
+
+It is a Page rather than a Block because it is a whole screen: it owns the
+document's `h1`, it is what a router renders when a route does not resolve, and
+the band's job is not separable from the screen's. There is one correct page here
+and it is short.
+
+## Usage
+
+```tsx
+import { NotFoundPage } from '@nanisoft/prism-ui/pages/not-found-page'
+
+<NotFoundPage
+  code="404"
+  title="No node here."
+  description="The estate is fully mapped. This URL is not in the graph."
+  linksLabel="Ways out"
+  links={[
+    { label: 'Read the docs', href: '/docs' },
+    { label: 'Back to the landing', href: '/' },
+  ]}
+/>
+```
+
+<ComponentDemo slug="not-found-page" />
+
+## Guidelines
+
+### When to use
+
+Use NotFoundPage as the body of whatever route your framework names for a
+not-found response: Next's `not-found.tsx`, a Nuxt error page, a route your own
+router falls through to.
+
+Use it for every status that means "this address is not a page here", not only
+404. A 410 and a 404 are the same screen with a different code, and the code is a
+prop.
+
+### When not to use
+
+Do not use it for a request that failed. That is an error page with a retry, and a
+reader who sees "this page does not exist" when the page exists and did not load
+will not believe you next time.
+
+Do not use it for a permission failure the reader might be granted later. That is
+a 403, and it needs a sign-in link rather than a way back to the landing.
+
+### Best practices
+
+- **The code is the `h1` and the sentence is not.** A not-found page whose `h1` is
+  "Page not found" gives a search engine and a screen reader nothing distinct to
+  index, and the code is the one string on the page that is the same for every
+  broken URL. The code takes the display step and the sentence takes the muted one,
+  which is the reverse of what a reader sees first and the right way round for
+  anything that reads the outline.
+- Put the most useful destination first, and weight it as the primary action. A
+  not-found page that offers the homepage link before the documentation sends a
+  reader further from what they wanted.
+- Leave `newTab` off every link. A reader who followed a broken link and is sent
+  to a new tab has to find their way back.
+- Use the `children` slot for a search box or a list of recent posts, which is
+  what turns a dead end into a page.
+
+### Content guidelines
+
+- Write the sentence as a fact about the address, not as an apology. "No node
+  here" beats "Sorry, we could not find that page".
+- Say whether the page might exist later if it does. "This page does not exist
+  (yet)" is one clause longer and saves a support ticket.
+- Keep each link label to one or two words.

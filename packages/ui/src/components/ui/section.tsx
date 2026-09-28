@@ -39,7 +39,17 @@ export function Section({
  */
 export type HeadingLevel = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
 
+/**
+ * The heading a section opens with: an optional eyebrow, the title, an optional
+ * supporting line, and the level of the one heading it renders.
+ *
+ * `align` is the block's own decision about where the heading sits in the
+ * container. `center` is right for a band that is only a heading, and `left` is
+ * right for a section with content under it, where a centred title above a
+ * left-aligned list reads as two unrelated pieces.
+ */
 export function SectionHeading({
+  index,
   eyebrow,
   title,
   as: Heading = 'h2',
@@ -47,6 +57,20 @@ export function SectionHeading({
   align = 'center',
   className,
 }: {
+  /**
+   * A short ordinal for the section: "01", "02", "7". It is rendered in the mono
+   * face above the title, because a section's position in a sequence is machine
+   * notation rather than a word, and the mono stack is what this repository
+   * annotates machine-readable values with.
+   *
+   * It is a separate prop from `eyebrow` and not a default value of it, because
+   * the two say different things: an eyebrow is a word a reader reads, and an
+   * index is a number that is only meaningful beside the section it counts. All
+   * four NaniSoft sites render one of these above every section heading, and
+   * three of them render it beside a label rather than above a title, which is
+   * the same fact in a different arrangement.
+   */
+  index?: string
   eyebrow?: ReactNode
   title: ReactNode
   description?: ReactNode
@@ -68,6 +92,11 @@ export function SectionHeading({
         className,
       )}
     >
+      {index ? (
+        <span className="text-muted-foreground font-mono text-xs font-normal tracking-normal">
+          {index}
+        </span>
+      ) : null}
       {eyebrow ? (
         <span className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
           {eyebrow}

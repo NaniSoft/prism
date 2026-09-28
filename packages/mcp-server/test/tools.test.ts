@@ -54,10 +54,32 @@ describe('get_item_props', () => {
     expect(body).toContain(seam)
   })
 
-  it('renders the composition section for a block', () => {
+  it('renders both sections for a block, and no longer denies the props it publishes', () => {
+    // A Block and a Page publish an interface section AND a composition section.
+    // The tool used to read the first and report the second as "has no own
+    // props", which is the same lie the published surface existed to remove: the
+    // store carried both and the tool described one and denied the other. The
+    // assertion on the absence is the load-bearing half: a refactor that
+    // restores the sentence fails here even if the composition is still printed.
     const body = readText(renderItemProps(store, { name: 'Hero01' }))
+    expect(body).toContain('## Props')
     expect(body).toContain('## Composition')
-    expect(body).toContain('has no own props')
+    expect(body).toContain('props and composition')
+    expect(body).not.toContain('has no own props')
+  })
+
+  it('renders the composition alone when no interface section is recorded', () => {
+    // The both-present branch must not swallow the one-present case, or a future
+    // block that records no props would report nothing at all.
+    const compositionOnly = {
+      ...store,
+      items: store.items.map((item) =>
+        item.name === 'Hero01' ? { ...item, props: undefined } : item,
+      ),
+    }
+    const body = readText(renderItemProps(compositionOnly, { name: 'Hero01' }))
+    expect(body).toContain('## Composition')
+    expect(body).not.toContain('## Props')
   })
 })
 

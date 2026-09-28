@@ -1,0 +1,71 @@
+---
+slug: components/fact-list
+title: FactList
+---
+
+## Overview
+
+A FactList is a short list of named facts: a term beside its value, in a column a
+reader can scan. It renders a real `<dl>`, so a screen reader announces the term
+before the value instead of reading a list of labels and then a list of answers.
+
+Every NaniSoft site states facts beside prose: what a plan costs, what a feed
+carries, which version a document describes, when a collector went live. Each one
+re-derived a `<dl>`, and each one got the alignment and the term-before-value
+wiring subtly wrong.
+
+## Usage
+
+```tsx
+import { FactList } from '@nanisoft/prism-ui/components/fact-list'
+
+<FactList
+  label="Release"
+  facts={[
+    { label: 'Version', value: '0.5.1' },
+    { label: 'Changelog', value: 'Read it', href: '/changelogs/prism-ui' },
+  ]}
+/>
+```
+
+<ComponentDemo slug="fact-list" />
+
+## Guidelines
+
+### When to use
+
+Use a FactList for two to six facts that belong to one thing and are worth reading
+together: a release, a feed source, a plan, a deployment.
+
+Use it beside prose rather than inside it. A fact in the middle of a paragraph is
+a sentence, and a sentence is not a fact list.
+
+### When not to use
+
+Do not use a FactList for a table of records. That is `Table`, and a fact list of
+twenty rows is a table with its column headers removed.
+
+Do not use it for a set of links. That is a footer's column or a plain list, and a
+column of destinations is not a column of terms.
+
+Do not use it to compare products. A comparison has a row per product and a column
+per fact, and this is the other way round.
+
+### Best practices
+
+- Keep the label column short. The column is a fixed fraction so a list of facts
+  lines up down its whole length, and a label that wraps costs every other row its
+  alignment.
+- Give a fact an `href` only when the fact is kept somewhere else. A link to a fact
+  already on the page is a click that changes nothing.
+- Omit `label` when the list is already inside something that names it.
+- An empty list renders nothing, so a caller with nothing to state does not get a
+  bordered box with a title above it.
+
+### Content guidelines
+
+- Write a label as a name, not a question: "Last capture", not "When did it last
+  capture".
+- Keep a value to a word or a short phrase. A value that needs a sentence belongs
+  in a `NoteGrid01` row.
+- Write values as they would be read aloud, because that is how they are scanned.

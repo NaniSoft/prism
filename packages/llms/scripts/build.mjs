@@ -290,22 +290,45 @@ function dtsPath(source) {
 }
 
 /**
- * Read a declaration file plus the relative files it re-exports from. A Block's
- * `index.tsx` re-exports from its sibling, so one hop reaches the declaration.
+ * Read a declaration file, the relative files it re-exports from, and the emitted
+ * JavaScript beside it.
+ *
+ * A Block's `index.tsx` re-exports from its sibling, so one hop reaches the
+ * declaration. The `.js` is read for a different reason and it is the reason the
+ * composition section is accurate rather than empty: `tsc` erases a value import
+ * that only appears inside a JSX body, so `hero.d.ts` imports no Component at all
+ * and a composition section built from it lists nothing. The emitted `.js` keeps
+ * those imports, so the section names what the Block is actually composed of.
+ *
+ * Reading the `.js` into the same text is safe for the extractor, which is the
+ * only other consumer of the result: `findFunctionParams` requires
+ * `declare function`, and no `.js` has one; `findTypeBodies` looks for a `type` or
+ * `interface` keyword, and no `.js` has one either.
  */
 async function readDeclarations(file) {
   const text = await readFile(file, 'utf8')
   const dir = path.dirname(file)
   const parts = [text.replace(/\r\n/g, '\n')]
+
+  // Every module this one reaches by a relative re-export, so the emitted
+  // JavaScript of a sibling is read as well as the declaration of it. A Block's
+  // `index.tsx` is one re-export line and every value import lives in the sibling
+  // beside it, so reading only the index's own `.js` finds nothing.
+  const modules = new Set([file])
   for (const match of text.matchAll(/from\s+['"](\.[^'"]+)['"]/g)) {
     const base = path.resolve(dir, match[1])
     for (const candidate of [`${base}.d.ts`, `${base}.d.mts`, path.join(base, 'index.d.ts')]) {
       const part = await readText(candidate)
       if (part !== undefined) {
         parts.push(part)
+        modules.add(candidate)
         break
       }
     }
+  }
+  for (const module of modules) {
+    const emitted = await readText(module.replace(/\.d\.mts$/, '.mjs').replace(/\.d\.ts$/, '.js'))
+    if (emitted !== undefined) parts.push(emitted)
   }
   return parts.join('\n')
 }
@@ -360,7 +383,7 @@ function composedNames(item, demo, declaration, lib, publicExports) {
     .sort()
 }
 
-/** Build the item's props or composition section from its declaration. */
+/** Build the item's props and composition sections from its declaration. */
 async function itemSections(item, demo, declaration, lib, publicExports, byName) {
   const extracted = lib.extractor.extractExports(declaration, item.exports)
 
@@ -368,6 +391,33 @@ async function itemSections(item, demo, declaration, lib, publicExports, byName)
     const props = lib.markdown.renderPropsSection(extracted, seamLine(item, declaration))
     return { props, composition: undefined }
   }
+
+  /*
+   * A Block and a Page publish BOTH sections, and this is the change.
+   *
+   * It used to be one or the other: a Component got an interface section and a
+   * Block or a Page got a composition section, so the tool told an agent that a
+   * Block had no own props. That was true of the extractor at the time and is not
+   * true of it now - the extractor reads a named props type off an emitted
+   * declaration whether that declaration belongs to a Component or to a Block - so
+   * publishing only the composition section published half of what the declaration
+   * already said.
+   *
+   * The two sections answer different questions and neither answers the other. The
+   * interface section is what a consumer passes: the strings, the numbers, the
+   * slots. The composition section is what the Block is made of. An agent choosing
+   * between two Blocks cannot decide from either alone, and the seam line a
+   * Component with no own props gets is actively wrong for a Block, which usually
+   * has six.
+   *
+   * The Store carries BOTH fields for every kind, and `get_item_props` prints
+   * both when it has both. The field is not restricted to a Component: the one
+   * consumer that branched on it read `props` first and fell back to the
+   * composition section, so a Block was answered with its composition and a
+   * sentence denying it had props, which is the lie this change removes. The
+   * mirror file, `llms-full.txt` and the Store's `doc` all carry both sections.
+   */
+  const props = lib.markdown.renderPropsSection(extracted, seamLine(item, declaration))
 
   const dependencies = composedNames(item, demo, declaration, lib, publicExports).filter(
     (name) => byName.has(name),
@@ -377,7 +427,7 @@ async function itemSections(item, demo, declaration, lib, publicExports, byName)
     { key: 'source', value: `packages/ui/${item.source}`, description: `the file this ${kindLabel(item.kind)} is defined in` },
     { key: 'dependencies', value: dependencies.join(', ') || '\u2014', description: 'the public Prism exports this item composes' },
   ])
-  return { props: undefined, composition }
+  return { props, composition }
 }
 
 /**
@@ -618,7 +668,12 @@ export async function emit(outDir, options = {}) {
       markdown.fence(importLine, 'tsx'),
       proseBody,
       demoSection,
-      props ?? composition,
+      // Both sections for a Block and a Page, in that order: what a consumer
+      // passes first, then what the item is made of. `??` rather than a spread
+      // because `assembleDoc` drops an empty section and a Component has no
+      // composition section at all.
+      props,
+      composition,
       crossRefs,
     ])
 
@@ -638,6 +693,14 @@ export async function emit(outDir, options = {}) {
       exports: item.exports,
       importLine,
       doc,
+      // Both sections, for every kind. The store's field is not restricted to a
+      // Component any more, because the one consumer that branched on it has been
+      // changed to render both: `get_item_props` used to read `props` first and
+      // fall back to the composition section, so a Block was answered with the
+      // composition and a sentence denying it had props. The store carried both
+      // sections in its `doc` and only one in a field, and the field is the one an
+      // agent reads. Two fields, no exclusivity, and the tool prints whichever it
+      // has.
       ...(props !== undefined ? { props } : {}),
       ...(composition !== undefined ? { composition } : {}),
       ...(example !== undefined ? { example } : {}),

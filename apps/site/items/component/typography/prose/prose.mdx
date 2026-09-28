@@ -1,0 +1,72 @@
+---
+slug: components/prose
+title: Prose
+---
+
+## Overview
+
+A Prose is a run of body copy you wrote, held to the reading measure and to the
+block rhythm so a document does not have to restate either. You pass the content
+as `children`; Prism owns the width, the spacing between blocks and the
+treatments.
+
+Every NaniSoft site publishes long-form pages, and each one re-derived the same
+answer: a column that stops growing, paragraphs that are too far apart or too
+close, and a link that is either an unstyled word or an over-decorated one. This
+is that answer once.
+
+## Usage
+
+```tsx
+import { Prose } from '@nanisoft/prism-ui/components/prose'
+
+<Prose>
+  <h2>A heading</h2>
+  <p>A paragraph.</p>
+  <ul>
+    <li>A bullet.</li>
+  </ul>
+</Prose>
+```
+
+<ComponentDemo slug="prose" />
+
+## Guidelines
+
+### When to use
+
+Use a Prose wherever the content is authored somewhere else and Prism should own
+its presentation: a blog post body, a documentation page, a description that
+turned out to be three paragraphs.
+
+The treatments are child selectors, so your own elements are the ones styled.
+Writing a plain `<p>` and a plain `<h2>` gets the system treatment, and writing
+Prism's own `Heading` and `Text` gets the same result, because the two spellings
+converge on the same element.
+
+### When not to use
+
+Do not use a Prose for a supporting line under a heading. That is `Text`, and a
+measure around one sentence is a measure around one sentence.
+
+Do not use it to fix a width. The measure is the component's whole job, and a run
+set wider than the measure is the defect it exists to remove. `fullWidth` exists
+for the case where the prose genuinely is not a reading column, and it is opt-in
+on purpose.
+
+### Best practices
+
+- Pass plain semantic elements. Do not add class names of your own to size or
+  colour text; that is the override path this system does not have.
+- Keep heading levels consistent with the document. A Prose does not know what
+  surrounds it.
+- Use `size="lg"` for a marketing page's supporting copy and the default for a
+  document body. Do not mix the two on one page.
+
+### Content guidelines
+
+- Aim for a sentence or two per paragraph. A paragraph a reader scrolls past is a
+  paragraph that needed to be two.
+- Link the first mention of a term, not every mention.
+- Use a list when the items are peers. A list of sentences is a paragraph with
+  punctuation.

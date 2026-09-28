@@ -1,0 +1,83 @@
+---
+slug: blocks/instrument-panel-01
+title: InstrumentPanel01
+---
+
+## Overview
+
+InstrumentPanel01 is a bordered panel with a titled bar: the frame a live view of
+something is shown in, beside the copy that explains it.
+
+Three of the four NaniSoft sites compose this as the right half of their hero,
+and each one wrote the same four things by hand: a bordered panel, a bar across
+the top with a small state dot on the left, the name of the view in the middle and
+something on the right, the instrument below, and a footnote under it. Each also
+gave the panel a definite height, because an instrument whose height is whatever
+its content is makes the hero beside it jump while it loads.
+
+**The panel owns the frame, never the instrument.** What goes inside is whatever
+you composed, and that is not a limitation: an instrument is the one thing in this
+system Prism cannot draw, because it is a view of your data and every product's
+data is a different drawing.
+
+## Usage
+
+```tsx
+import { InstrumentPanel01 } from '@nanisoft/prism-ui/blocks/instrument-panel-01'
+
+<InstrumentPanel01
+  label="The estate, as one graph"
+  state="live"
+  stateLabel="live view"
+  caption="The access graph"
+  footnote="Edges are the paths a person can actually take."
+>
+  <MyGraph />
+</InstrumentPanel01>
+```
+
+<ComponentDemo slug="instrument-panel-01" />
+
+## Guidelines
+
+### When to use
+
+Use InstrumentPanel01 where a reader needs to see a view of something and the
+words beside it, and the two are one unit: a hero, a documentation sidebar, a
+dashboard panel.
+
+Use `state` when the content updates on its own, or when a reader would otherwise
+think it does. A panel showing a static snapshot and one showing a live view look
+identical otherwise, and the difference is the whole reason to publish the panel.
+
+### When not to use
+
+Do not use it for a static illustration. A picture with a caption is a `Card` with
+`CardContent`, and a panel bar saying "live" above a still image is a lie.
+
+Do not use it as a modal or a drawer. That is `Dialog`.
+
+Do not use `state="paused"` to mean "loading". A state is a claim about the
+content, and a spinner is a claim about the fetch.
+
+### Best practices
+
+- **The state dot is `aria-hidden` and the words beside it are not.** All three
+  sites that draw a dot write the state in words, and that is the rule: a dot is a
+  shape, and a reader who cannot see `success` has learned nothing from it. The
+  block throws if you pass a state with no `stateLabel`.
+- Use the `actions` slot for a control the panel does not own: a range selector, a
+  pause button, a link to the full view.
+- Give the panel a definite height from your side. The frame does not set one,
+  because the instrument's height is the instrument's business.
+- Use `caption` when the panel stands alone on a page. It is the figure's
+  accessible name and no visible text.
+
+### Content guidelines
+
+- Keep `label` to one line. It is a bar, and a label that wraps is a bar with two
+  lines in it.
+- Write `stateLabel` in the product's own vocabulary: "live view", "snapshot",
+  "paused". Prism does not decide what a system is doing.
+- Use `footnote` for what a reader needs to know before trusting the view: where
+  the data came from, how fresh it is, what is not shown.

@@ -1,0 +1,8 @@
+{
+  "name": "site-header",
+  "title": "Site Header - Brand, Product Switcher and Site Navigation",
+  "description": "The bar at the top of a product site: a brand lockup, an optional product switcher, the site's own navigation and a slot for application controls. All copy is passed in as props.",
+  "categories": ["chrome"],
+  "registryDependencies": ["product-mark", "product-switcher"],
+  "dependencies": []
+}

@@ -8,7 +8,7 @@ export default function Pricing01Demo() {
       title="Section heading"
       plans={[
         { name: 'First plan', price: '$0', period: ' / month', body: 'One line on who it is for.', features: ['First included line', 'Second included line', 'Third included line'], cta: 'Choose' },
-        { name: 'Second plan', price: '$24', period: ' / month', body: 'One line on who it is for.', features: ['Everything in the first plan', 'One extra line', 'Another extra line'], cta: 'Choose', featured: true },
+        { name: 'Second plan', price: '$24', period: ' / month', body: 'One line on who it is for.', features: ['Everything in the first plan', 'One extra line', 'Another extra line'], cta: 'Choose', featured: true, badge: 'Most chosen' },
         { name: 'Third plan', price: '$68', period: ' / month', body: 'One line on who it is for.', features: ['Everything in the second plan', 'One extra line', 'Another extra line'], cta: 'Choose' },
       ]}
     />

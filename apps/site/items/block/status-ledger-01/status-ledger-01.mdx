@@ -1,0 +1,85 @@
+---
+slug: blocks/status-ledger-01
+title: StatusLedger01
+---
+
+## Overview
+
+StatusLedger01 is a ledger of things and the state each is in: a hairline row per
+entry, a mark for the tier, and the words for the state beside the name.
+
+All four NaniSoft sites publish this section, and three of them publish it as a
+ledger of rows while the fourth publishes the same shape as a list of products;
+the ledger appears twice in the fourth site as well, once for use cases and once
+for research directions. Five ledgers across four sites, each one written by hand,
+each one re-deciding the same four things: which tier words to use, how the tier
+is drawn, whether the tier is announced, and whether the row carries a detail
+line or a bullet list.
+
+**The tier is four and the words are the caller's.** The `status` prop takes one
+of four tiers and the `statusLabel` prop takes the words. That split is the whole
+design: the tier is a colour, and colour is not information a reader can act on;
+the words are the information, and the words belong to the product.
+
+The four tiers are `live`, `designed`, `planned` and `direction`. Between them the
+four sites use eight different words for those four states - `live`, `available`
+and `complete` all mean the first; `approved`, `specified` and `designed` all mean
+the second - and that vocabulary is what `statusLabel` is for.
+
+## Usage
+
+```tsx
+import { StatusLedger01 } from '@nanisoft/prism-ui/blocks/status-ledger-01'
+
+<StatusLedger01
+  title="Use cases"
+  rows={[
+    { name: 'Access traversal', status: 'live', statusLabel: 'Flagship - available today' },
+    { name: 'Containment rehearsal', status: 'designed', statusLabel: 'Specified, not built' },
+    { name: 'Privilege hygiene', status: 'planned', statusLabel: 'Planned' },
+  ]}
+/>
+```
+
+<ComponentDemo slug="status-ledger-01" />
+
+## Guidelines
+
+### When to use
+
+Use StatusLedger01 when a reader needs to know how far along each of several
+things is, and the difference between the states is the point.
+
+Use it when the states are not all the same. A ledger of four rows that are all
+`live` is a list with a column in it, and a plain list says that more plainly.
+
+### When not to use
+
+Do not use it for a list of things that are all available. `NoteGrid01` is for
+that, and a ledger of green dots is a decoration.
+
+Do not use it for a plan with dates. A tier says where a thing stands, not when it
+will move, and a ledger cannot say when.
+
+Do not use it to compare products. A comparison has a row per product and a column
+per fact, and this is the other way round.
+
+### Best practices
+
+- Order the rows by state, most available first, when the reader's question is
+  "what can I use". Order them by importance when it is not.
+- Write `statusLabel` as the sentence you would say out loud. It is the state a
+  screen reader hears, so "Planned" is better than a bare dot and "Available in
+  Q3" is better than "Planned" if that is the truth.
+- The dot is `aria-hidden` on purpose. Nothing in a row depends on a reader being
+  able to see it, and that is the rule to keep if you fork the design.
+- Prefer a `detail` line to a bullet list unless the row really lists things. A
+  row with four bullets and a row with one sentence beside it are hard to scan
+  together.
+
+### Content guidelines
+
+- Keep a name to one or two words. It is the anchor of the row.
+- Do not put the state in the name as well as in the label. "Live capture" beside
+  "Available" says the same thing twice.
+- A row with no detail and no bullets is a valid row, and most rows should be.

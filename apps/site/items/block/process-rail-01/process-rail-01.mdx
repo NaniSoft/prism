@@ -1,0 +1,82 @@
+---
+slug: blocks/process-rail-01
+title: ProcessRail01
+---
+
+## Overview
+
+ProcessRail01 draws a process as a rail: the steps of a pipeline, in order, on
+one line, each with an ordinal, a name and one caption.
+
+All four NaniSoft sites compose this section, and each one drew it by hand with
+the same three parts: an ordinal per step, a name, and one caption per step,
+separated by hairlines with a label on the last one. This is that section once,
+with the ordinal and the separation owned here rather than by four sets of site
+CSS.
+
+**The rail admits four steps and refuses five, in the type.** `steps` is a tuple
+union rather than an array, so a fifth element is a compile error and not a fifth
+column. The reason is that a rail is a claim about a sequence, and a rail that
+quietly dropped a step to fit a width would be a diagram of a process that is not
+the process. Four is the number every one of the four sites actually states; a
+longer process is a different shape and earns its own Block.
+
+## Usage
+
+```tsx
+import { ProcessRail01 } from '@nanisoft/prism-ui/blocks/process-rail-01'
+
+<ProcessRail01
+  title="The data path"
+  finalLabel="serving"
+  steps={[
+    { name: 'Collect', description: 'The whole surface, every minute.' },
+    { name: 'Conform', description: 'One canonical timestamp, one symbol form.' },
+    { name: 'Verify', description: 'The column list held by test.' },
+    { name: 'Serve', description: 'One queryable view.' },
+  ]}
+/>
+```
+
+<ComponentDemo slug="process-rail-01" />
+
+## Guidelines
+
+### When to use
+
+Use ProcessRail01 for a process with two to four steps where each step is one
+name and one line: a data path, a build pipeline, a review loop.
+
+Use it when the order is the point. A set of independent features is a
+`FeatureGrid01`, and a set of stages that do not run in sequence is a set.
+
+### When not to use
+
+Do not use it for a process of five or more steps. It will not compile. That is
+the design: a rail this wide stops reading as a line, and a longer process wants a
+numbered list, which is a `Prose` and not a rail.
+
+Do not use it for two steps that are really a before and an after. A rail with
+two columns is two columns, and `NoteGrid01` says the same thing with less
+ceremony.
+
+### Best practices
+
+- Keep each caption to about twelve words. A caption that wraps under its step and
+  the row stops reading as a line; the detail belongs above the rail in
+  `description`.
+- Pass `finalLabel` only when the rail genuinely ends in a state worth naming.
+  "serving", "merged" and "verified" are claims; a rail that has not finished
+  should say nothing.
+- Leave `title` out when the rail is composed under a heading the page already
+  owns.
+
+### Content guidelines
+
+- Name a step the way you would name it in conversation: a verb or a short noun
+  phrase, not a sentence.
+- Write the caption as what happens, not as why it matters. The why belongs in
+  `description`.
+- Do not number the steps yourself. The ordinal is rendered from the position, so
+  a list that carries its own numbers can disagree with its own order after a
+  sort.
