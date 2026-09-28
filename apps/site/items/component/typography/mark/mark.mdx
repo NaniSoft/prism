@@ -1,0 +1,75 @@
+---
+slug: components/mark
+title: Mark
+---
+
+## Overview
+
+A Mark is a run of text with its matches visibly marked. It takes the string and
+the ranges that matched rather than pre-split nodes, because a caller that
+assembled the nodes had to compute the ranges and this Component has the string.
+
+The ranges are handled rather than refused. They are sorted, overlapping runs are
+merged, and a range that runs past the end of the string is clamped, because each
+is a thing a search backend does as a matter of course.
+
+It adds no semantics. A Mark is a `mark` and carries no role, no accessible name
+and no live region, so a consumer marking a hit gets a visual difference and not a
+screen reader announcing "highlighted" between every character of a result.
+
+## Usage
+
+```tsx
+import { Mark } from '@nanisoft/prism-ui/components/mark'
+
+<Mark text="component library" ranges={[{ start: 0, end: 9 }]} />
+```
+
+<ComponentDemo slug="mark" />
+
+## Guidelines
+
+### When to use
+
+Use a Mark wherever a reader is choosing between results and needs to see why one
+matched: a command palette, a search result list, a file filter, a table column
+sorted by relevance. The marked characters are the answer to "why is this one
+here", and without them every result reads the same.
+
+Use it for the matched substring only. A Mark around the whole result is a
+highlighted row, which is a different thing and belongs on the row.
+
+### When not to use
+
+Do not use a Mark for emphasis that is not a match. A term a document is defining
+is not a hit, and marking it says the reader arrived here by searching when they
+did not.
+
+Do not use one to carry a meaning a reader must not miss. A Mark is a visual
+treatment, and a visual treatment is not available to every reader. A result that
+is materially more relevant than the others should be marked in the row, not in
+the text.
+
+Do not wrap a Mark around a consumer's own markup and expect the treatment to
+compose. It takes a string and ranges because it is a match treatment, not a
+container.
+
+### Best practices
+
+- Pass ranges from the backend rather than computing them in the view. A search
+  that reports a normalised index and a view that slices the original string will
+  disagree at exactly the characters a reader is looking at.
+- Overlapping ranges are expected and are merged. Do not pre-merge them to be
+  tidy; a caller that tries usually drops one of the two matches.
+- Keep the treatment on the marked characters and let the caller pass
+  `className` for layout only. Changing a Prism-owned visual property is
+  prohibited, and the treatment is Prism-owned.
+- Pair it with a `LiveRegion` or a result count when the set changes, because a
+  Mark tells a reader why a result matched and not that the set changed.
+
+### Accessibility
+
+The treatment is a visual difference and nothing else, which is the decision
+rather than an omission. A consumer who needs the match announced writes it, and
+a consumer who announces every match by default has made a result list less
+readable, not more.
