@@ -170,6 +170,16 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'LiveRegion',
+    slug: 'live-region',
+    kind: 'component',
+    category: 'Feedback',
+    description: 'A region that announces what just changed in it, and renders nothing when it has nothing to say.',
+    source: 'src/components/ui/live-region.tsx',
+    exports: ['LiveRegion'],
+    status: 'stable',
+  },
+  {
     name: 'Separator',
     slug: 'separator',
     kind: 'component',

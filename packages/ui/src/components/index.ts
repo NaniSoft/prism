@@ -49,6 +49,8 @@ export { Input } from './ui/input'
 export { Textarea } from './ui/textarea'
 export { Alert, AlertTitle, AlertDescription } from './ui/alert'
 export { Skeleton } from './ui/skeleton'
+export { LiveRegion } from './ui/live-region'
+export type { LiveRegionProps, LivePoliteness } from './ui/live-region'
 export { Separator } from './ui/separator'
 export {
   Table,
