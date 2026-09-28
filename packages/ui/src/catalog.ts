@@ -45,6 +45,16 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'CtaLink',
+    slug: 'cta-link',
+    kind: 'component',
+    category: 'Call to action',
+    description: 'The call to action that goes somewhere: a native link carrying the weight of a button.',
+    source: 'src/components/ui/cta-link.tsx',
+    exports: ['CtaLink'],
+    status: 'stable',
+  },
+  {
     name: 'Badge',
     slug: 'badge',
     kind: 'component',

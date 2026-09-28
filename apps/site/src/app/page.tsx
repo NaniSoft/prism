@@ -71,7 +71,7 @@ export default function HomePage() {
       <Cta01
         title="Start with one component, keep the tokens"
         description="Install the package, import one stylesheet, and choose a pack. Nothing about Prism holds your product back."
-        action={{ label: 'Browse the catalogue' }}
+        action={{ label: 'Browse the catalogue', href: '/components' }}
       />
 
       <section className="border-t">

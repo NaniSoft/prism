@@ -7,6 +7,8 @@
  * item import its own subpath instead.
  */
 export { Button } from './components/ui/button'
+export { CtaLink } from './components/ui/cta-link'
+export type { CtaLinkProps } from './components/ui/cta-link'
 export { Badge } from './components/ui/badge'
 export {
   Card,

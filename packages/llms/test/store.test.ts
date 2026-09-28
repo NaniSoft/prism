@@ -14,8 +14,24 @@ const store = parsePrismDocsStore(raw)
 describe('the emitted PrismDocsStore', () => {
   it('carries the version, the seven-section corpus and the package changelogs', () => {
     expect(store.version).toMatch(/^\d+\.\d+\.\d+/)
-    expect(store.items).toHaveLength(42)
+    // The item roster is NOT pinned to a number here. It tracks the catalogue,
+    // and a literal would fail on every new item, so the response would be to
+    // edit this test, which is how a count in a test stops meaning anything.
+    // `check-catalogue.mjs` owns the roster: it compares the source tree, the
+    // catalogue and the registry in both directions and names any item that
+    // differs. What this lane asserts is the property the store itself owes,
+    // which is that its items are whole and distinct.
+    expect(store.items.length).toBeGreaterThan(0)
+    expect(new Set(store.items.map((item) => item.slug)).size).toBe(store.items.length)
+    for (const item of store.items) {
+      expect(item.slug, JSON.stringify(item)).not.toBe('')
+      expect(item.kind, item.slug).not.toBe('')
+      expect(item.url, item.slug).toMatch(/^\//)
+    }
     expect(store.pages.length).toBeGreaterThan(0)
+    // The two token vocabularies ARE closed sets the token package owns, so a
+    // literal is the right assertion for them: five packs plus the base, and a
+    // pack per mode.
     expect(store.tokens.packs).toHaveLength(6)
     expect(store.tokens.themes).toHaveLength(12)
     // One entry per published package that ships a changelog, discovered from

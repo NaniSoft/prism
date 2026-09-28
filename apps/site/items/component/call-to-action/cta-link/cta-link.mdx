@@ -1,0 +1,72 @@
+---
+slug: components/cta-link
+title: CtaLink
+---
+
+## Overview
+
+The CtaLink is the call to action that goes somewhere. It renders a native
+`<a>` and carries the visual weight of a Button, so a marketing page can have a
+primary action that is genuinely a link: right-clickable, openable in a new tab,
+and announced as a link rather than as a button.
+
+`href` is required. There is no form of this component without a destination,
+because an action with no handler navigates nothing, and a control that
+announces itself as a button and does not move the reader anywhere is worse than
+a control that is plainly a button.
+
+The rendered control is a second component rather than a `Button` that changes
+element by prop. The design system had already answered this twice, in
+`Breadcrumb` and in `Pagination`, where the link is a second export beside the
+item rather than an `as` on the item. Following the existing answer costs no
+client JavaScript: the CtaLink is a server component.
+
+## Usage
+
+```tsx
+import { CtaLink } from '@nanisoft/prism-ui/components/cta-link'
+
+<CtaLink href="/guides">Read the guides</CtaLink>
+<CtaLink href="/docs" variant="outline">Read the docs</CtaLink>
+<CtaLink href="https://example.com" newTab>Open the playground</CtaLink>
+```
+
+<ComponentDemo slug="cta-link" />
+
+## Guidelines
+
+### When to use
+
+Use a CtaLink wherever the reader's intent is to go somewhere: the primary
+action on a landing section, the closing action on a page, a cross-reference
+between two pages.
+
+Set `newTab` when opening a new browsing context is what the reader wants, such
+as an external playground or a reference. The link relationship then defaults to
+`noopener noreferrer`, so the opened page cannot reach back through `window.opener`.
+
+### When not to use
+
+Do not use a CtaLink for an action that changes the page's state rather than its
+address: submitting a form, saving a change, deleting a record. That is a Button,
+and the Button's own guidance says so.
+
+Do not reach for `newTab` because a URL looks external. Prism does not parse the
+destination and makes no guess about what counts as external, because a
+cross-origin URL is not by itself a reason to take the reader out of the page
+they are reading. Decide per link.
+
+### Best practices
+
+- One CtaLink per section carries `default` weight. Two primaries make neither
+  of them primary.
+- Keep the label in the imperative and state the outcome, the same as a Button.
+- Prefer a same-tab link unless the destination is genuinely somewhere else.
+- If the destination is the current route, use a different control: a link to
+  where the reader already is is a dead link.
+
+### Content guidelines
+
+- Start with a verb: "Read the guides", "Compare variants", "Open the playground".
+- Sentence case, no period, three words where possible.
+- Never "Click here". The label should state the outcome, not the mechanism.

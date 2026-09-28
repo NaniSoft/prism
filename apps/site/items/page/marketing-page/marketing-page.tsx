@@ -93,7 +93,7 @@ export default function MarketingPageDemo() {
       cta={{
         title: 'A closing line, two lines at most',
         description: 'A sentence that says what happens next, then one action.',
-        action: { label: 'Do the thing' },
+        action: { label: 'Do the thing', href: '/components/button' },
       }}
     />
   )

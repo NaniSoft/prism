@@ -18,6 +18,7 @@ import {
 import { Button } from '../src/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../src/components/ui/card'
 import { Checkbox } from '../src/components/ui/checkbox'
+import { CtaLink } from '../src/components/ui/cta-link'
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '../src/components/ui/dialog'
 import {
   DropdownMenu,
@@ -72,6 +73,7 @@ async function expectNoViolations(ui: ReactElement) {
 
 const cases: Array<[string, ReactElement]> = [
   ['Button', <Button>Save changes</Button>],
+  ['CtaLink', <CtaLink href="/overview/quickstart">Read the guides</CtaLink>],
   ['Badge', <Badge>New</Badge>],
   [
     'Card',

@@ -26,7 +26,16 @@ describe('protocol round-trips over InMemoryTransport', () => {
       const result = await client.callTool({ name: 'list_items', arguments: {} })
       const body = readText(result)
       expect(result.isError).toBeFalsy()
-      expect(body).toContain(`# Prism ${store.version} - 28 components, 10 blocks, 4 pages`)
+      // The header's per-kind counts are derived from the corpus the tool was
+      // handed, not restated as literals. A literal here is a count in a test:
+      // it fails on every new item, so the response is to edit the test, and then
+      // it asserts only that someone remembered. The version stays pinned
+      // because it is the one claim the header makes about the build.
+      const byKind = (kind: string) => store.items.filter((item) => item.kind === kind).length
+      expect(body).toContain(
+        `# Prism ${store.version} - ${byKind('component')} components, ` +
+          `${byKind('block')} blocks, ${byKind('page')} pages`,
+      )
       expect(body).toContain('## Components')
       expect(body).toContain('## Blocks')
       expect(body).toContain('## Pages')

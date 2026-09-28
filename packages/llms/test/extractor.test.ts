@@ -95,4 +95,55 @@ describe('extractProps', () => {
     expect(card?.props).toEqual([])
     expect(card?.extendsType).toBe("React.ComponentProps<'div'>")
   })
+
+  it('publishes every arm of a union, not the first', () => {
+    // A union published as one arm is a type-level truth rendered as a
+    // documentation-level lie. This table showed `variant?: 'icon'` and no
+    // `bare` arm at all, because the scan took the first balanced body and the
+    // first body of this shape is the SHARED part, so both arms were dropped. A
+    // consumer reading the published surface could not see the exception the
+    // compiler enforces.
+    const source = [
+      'type CommonProps = {',
+      '    /** Optional label. */',
+      '    eyebrow?: string;',
+      '};',
+      'export type GridProps = CommonProps & ({',
+      "    variant?: 'icon';",
+      '    features: IconFeature[];',
+      '} | {',
+      "    variant: 'bare';",
+      '    features: BareFeature[];',
+      '});',
+      'declare function Grid(props: GridProps): unknown;',
+    ].join('\n')
+
+    const [grid] = extractExports(source, ['Grid'])
+    expect(grid?.props.map((prop) => [prop.name, prop.typeText])).toEqual([
+      ['variant', "'icon'"],
+      ['features', 'IconFeature[]'],
+      ['variant', "'bare'"],
+      ['features', 'BareFeature[]'],
+    ])
+  })
+
+  it('stops a union scan at the declaration boundary, not at the next one', () => {
+    // The scan has to end when a terminator closes nothing it opened. A scan
+    // that ended on the first member semicolon would stop at `variant?: 'icon';`
+    // and never reach the second arm, which is the defect the union fix removes.
+    const source = [
+      'export type First = {',
+      '    a?: string;',
+      '}',
+      'export type Second = {',
+      '    b?: number;',
+      '}',
+      'declare function First(props: First): unknown;',
+      'declare function Second(props: Second): unknown;',
+    ].join('\n')
+
+    const [first, second] = extractExports(source, ['First', 'Second'])
+    expect(first?.props.map((prop) => prop.name)).toEqual(['a'])
+    expect(second?.props.map((prop) => prop.name)).toEqual(['b'])
+  })
 })

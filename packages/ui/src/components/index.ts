@@ -8,6 +8,7 @@
  * `components/card-header` subpath.
  */
 export { Button } from './ui/button'
+export { CtaLink } from './ui/cta-link'
 export { Badge } from './ui/badge'
 export {
   Card,

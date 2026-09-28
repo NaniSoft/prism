@@ -1,8 +1,8 @@
 {
   "name": "cta-01",
   "title": "CTA 01 - Filled Banner",
-  "description": "A closing call to action on a filled primary surface. Headline, supporting line and the action are passed in as props.",
+  "description": "A closing call to action on a filled primary surface. Headline, supporting line and the action are passed in as props, and the action carries a required destination and renders a native link.",
   "categories": ["marketing"],
-  "registryDependencies": ["button"],
+  "registryDependencies": ["cta-link"],
   "dependencies": ["lucide-react"]
 }

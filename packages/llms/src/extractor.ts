@@ -141,12 +141,64 @@ function skipString(source: string, start: number, quote: string): number {
   return -1
 }
 
-function findTypeBody(source: string, name: string): string | null {
-  const pattern = new RegExp(`(?:export\\s+)?(?:type|interface)\\s+${name}\\b[^{;]*\\{`)
+/**
+ * Every object body a named type's declaration holds, in source order.
+ *
+ * A union is published whole or not at all. The single-body form this replaces
+ * took the FIRST match and the first balanced body, so it published one body and
+ * dropped every other by declaration order. For an emitted declaration shaped
+ * `Common & ({ A } | { B })` it published neither arm at all, only the shared
+ * part, so the API table described a type the declaration does not describe: the
+ * `bare` arm of a union was invisible to every reader and every agent. A
+ * type-level truth the extractor drops becomes a documentation-level lie, so the
+ * scan walks every balanced body inside the declaration's own extent instead.
+ *
+ * The depth and angle tracking is load-bearing rather than defensive. A member
+ * semicolon sits at depth 1, so a scan that stopped on the first `;` would end
+ * the declaration at `variant?: 'icon';` and never reach the second arm, which
+ * is the defect this function exists to remove. Angle brackets are tracked
+ * because a generic argument can carry its own braces.
+ */
+function findTypeBodies(source: string, name: string): string[] {
+  const pattern = new RegExp(`(?:export\\s+)?(?:type|interface)\\s+${name}\\b`)
   const match = pattern.exec(source)
-  if (!match) return null
-  const open = match.index + match[0].length - 1
-  return readBalancedBody(source, open) ?? null
+  if (!match) return []
+
+  const bodies: string[] = []
+  let depth = 0
+  let angle = 0
+  let quote: string | null = null
+  let i = match.index + match[0].length
+
+  for (; i < source.length; i += 1) {
+    const ch = source[i]
+
+    if (quote !== null) {
+      if (ch === quote && source[i - 1] !== '\\') quote = null
+      continue
+    }
+    if (ch === '"' || ch === "'" || ch === '`') {
+      quote = ch
+      continue
+    }
+    if (ch === '{') {
+      const body = readBalancedBody(source, i)
+      if (body === undefined) return bodies
+      bodies.push(body)
+      depth += 1
+      continue
+    }
+    if (ch === '}') depth -= 1
+    else if (ch === '(') depth += 1
+    else if (ch === ')') depth -= 1
+    else if (ch === '<') angle += 1
+    else if (ch === '>') angle = Math.max(0, angle - 1)
+    // The declaration ends at the first terminator that closes nothing it
+    // opened, so the next declaration's braces cannot be collected as arms.
+    else if ((ch === ';' || ch === '\n') && depth <= 0 && angle === 0) return bodies
+  }
+
+  return bodies
 }
 
 function findFunctionParams(source: string, name: string): string | null {
@@ -207,8 +259,12 @@ function resolveAnnotation(
 ): { props: ExtractedProp[]; inherited: string[] } {
   if (!annotation) return { props: [], inherited: [] }
 
-  const named = /^[A-Za-z_$][\w$]*$/.test(annotation) ? findTypeBody(source, annotation) : null
-  if (named !== null) return { props: parseMembers(named).map(toProp), inherited: [] }
+  const named = /^[A-Za-z_$][\w$]*$/.test(annotation) ? findTypeBodies(source, annotation) : []
+  if (named.length > 0) {
+    // Every arm, in declaration order, so a union reaches the table whole
+    // rather than as whichever arm happened to be written first.
+    return { props: named.flatMap((body) => parseMembers(body)).map(toProp), inherited: [] }
+  }
 
   if (annotation.startsWith('{')) {
     const body = readBalancedBody(annotation, 0)

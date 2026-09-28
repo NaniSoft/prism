@@ -1,4 +1,6 @@
 import { Client, StreamableHTTPClientTransport, type FetchLike } from '@modelcontextprotocol/client'
+import { parsePrismDocsStore } from '@nanisoft/prism-llms'
+import docsData from '@nanisoft/prism-llms/data.json'
 import { describe, expect, it } from 'vitest'
 
 import { handleRequest } from '../worker/index'
@@ -70,7 +72,18 @@ describe('the site Worker MCP lane', () => {
       const block = result.content[0]
       expect(block?.type).toBe('text')
       if (block?.type === 'text') {
-        expect(block.text).toContain('28 components, 10 blocks, 4 pages')
+        // Derived from the corpus the Worker bundles rather than restated as a
+        // literal. A literal is a count in a test: it fails on every new
+        // catalogue item, so the response is to edit the test, and then it
+        // asserts only that someone remembered. The tool count is fixed at nine
+        // because that is a closed surface this test does own; the roster is not.
+        // The same corpus the Worker bundles, imported the same way the Worker
+        // imports it, so the expectation and the thing under test read one file.
+        const store = parsePrismDocsStore(docsData as unknown)
+        const byKind = (kind: string) => store.items.filter((item) => item.kind === kind).length
+        expect(block.text).toContain(
+          `${byKind('component')} components, ${byKind('block')} blocks, ${byKind('page')} pages`,
+        )
       }
     } finally {
       await client.close()

@@ -631,9 +631,20 @@ describe('roots resolve from the script, not from the working directory', () => 
     const result = run(PKG, { real: true, cwd: os.tmpdir() })
     expect(result.code, result.output).toBe(0)
     expect(result.errors).toEqual([])
-    expect(result.output).toMatch(
-      /^catalogue: roster 42 module\(s\) on disk, 42 catalogue item\(s\), 42 registry item\(s\)$/m,
+    // The three sets must AGREE. The assertion is deliberately not a literal
+    // count: pinning the number would make every new catalogue item fail this
+    // test, and the response to that is to edit the test, which is exactly how a
+    // count in a test stops meaning anything. The gate reports the number; this
+    // asserts the property the gate exists to protect.
+    const roster = /^catalogue: roster (\d+) module\(s\) on disk, (\d+) catalogue item\(s\), (\d+) registry item\(s\)$/m.exec(
+      result.output,
     )
+    expect(roster, result.output).not.toBeNull()
+    const [, onDisk, catalogue, registry] = roster as RegExpExecArray
+    expect(catalogue).toBe(onDisk)
+    expect(registry).toBe(onDisk)
+    expect(Number(onDisk)).toBeGreaterThan(0)
+    expect(result.output).toMatch(/16\/16 comparisons passed/)
     expect(result.output).toMatch(/^catalogue: version @nanisoft\/prism-ui /m)
     expect(result.output).toMatch(/^catalogue: coverage 6 root\(s\) resolved, 0 unresolved; /m)
   })

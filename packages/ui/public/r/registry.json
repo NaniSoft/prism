@@ -189,6 +189,29 @@
       ]
     },
     {
+      "name": "cta-link",
+      "title": "Cta-link",
+      "description": "Shared cta-link primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/cta-link.tsx",
+          "type": "registry:component",
+          "target": "components/ui/cta-link.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "dialog",
       "title": "Dialog",
       "description": "Shared dialog primitive. Installed automatically as a dependency of any block that uses it.",
@@ -733,13 +756,13 @@
     {
       "name": "cta-01",
       "title": "CTA 01 - Filled Banner",
-      "description": "A closing call to action on a filled primary surface. Headline, supporting line and the action are passed in as props.",
+      "description": "A closing call to action on a filled primary surface. Headline, supporting line and the action are passed in as props, and the action carries a required destination and renders a native link.",
       "type": "registry:block",
       "categories": [
         "marketing"
       ],
       "registryDependencies": [
-        "button"
+        "cta-link"
       ],
       "dependencies": [
         "clsx",
