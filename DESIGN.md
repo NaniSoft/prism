@@ -843,11 +843,15 @@ the ramp file and the manifest are generated from it, never authored by hand.
 
 Recorded as facts. None of these is fixed in this document.
 
-- **The cutover is not executed.** The implementation is complete in this
-  repository, but publishing the four packages, deprecating the old `0.3.0` and
-  `0.4.0` lines, and moving `prism.nanisoft.com` to the new site are staged,
-  human-executed steps rather than done work. `MIGRATION.md` is the draft that
-  goes live at cutover.
+- **The cutover is partly executed.** `@nanisoft/prism-tokens` and
+  `@nanisoft/prism-ui` are published at 0.6.0, `@nanisoft/prism-llms` at 0.5.0 and
+  `@nanisoft/prism-mcp-server` at 0.4.0, and the four consumer sites can install
+  them. The publish came from a maintainer machine rather than the release lane,
+  because the npm trusted publisher is not configured; see `CONTRIBUTING.md` for
+  that and for what it costs, which is a missing provenance attestation. Still
+  open: deprecating the retired pre-rebuild line, and moving
+  `prism.nanisoft.com` to the new site. `MIGRATION.md` is the draft that goes
+  live at cutover.
 - **`CODEOWNERS` carries a placeholder owner line.** The project has one
   maintainer and no confirmed team handle yet; the cutover confirms it.
 - **The v1.1 roster tail is deferred, not dropped.** (Roster composition as

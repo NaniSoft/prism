@@ -192,9 +192,11 @@ repository:
 - The npm account that owns the four packages has two-factor authentication on.
 - Each of `@nanisoft/prism-tokens`, `@nanisoft/prism-ui`,
   `@nanisoft/prism-llms` and `@nanisoft/prism-mcp-server` has a trusted publisher
-  on npmjs.com: **Organization or user** `NaniSoft`, **Repository** `prism`,
-  **Workflow filename** `publish.yml`, **Environment name** `npm-publish`, and
-  allowed action direct `npm publish`.
+  on npmjs.com: **Organization or user** set to the account that owns the
+  package, **Repository** `prism`, **Workflow filename** `publish.yml`,
+  **Environment name** `npm-publish`, and allowed action direct `npm publish`.
+  See the note below: this is not configured, and the lane cannot publish
+  without it.
 - Each package sets `repository.url` to
   `git+https://github.com/NaniSoft/prism.git` exactly (case-sensitive, or
   provenance fails silently) and the matching `repository.directory`.
@@ -206,10 +208,10 @@ repository:
 - The rehearsal passes: dispatch the publish workflow with `dry_run: true` and
   confirm `node scripts/verify-tarballs.mjs` passes.
 
-#### The trusted publisher is not configured, and the first publish fails
+#### The trusted publisher is not configured, and the lane cannot publish
 
 Recorded on 2026-09-28, from a real attempt. The rehearsal passes and the
-publish then fails at the `Publish` step with:
+`Publish` step then fails with:
 
 ```
 E404: 404 Not Found - PUT https://registry.npmjs.org/@nanisoft%2fprism-llms
@@ -224,19 +226,26 @@ The verified facts behind it:
   trusted publisher is configured per package against the owning account, so the
   **Organization or user** field on npmjs.com must be whichever account owns the
   package, and a name that does not exist on npm will not authenticate.
-- The existing versions carry no provenance attestation, so they were published
-  by something other than this OIDC lane. The first publish from this repository
-  has therefore never exercised the trusted-publisher path.
-- `NPM_TOKEN` is not set as a repository secret, so the documented fallback
-  token path is not available either.
+- The published versions carry no provenance attestation, so the OIDC lane has
+  never published here.
+- `NPM_TOKEN` is set as an **org** secret scoped to `PRIVATE` repositories. This
+  repository is public, so that secret never reaches the job. A secret scoped to
+  private repositories cannot be seen from a public repository, which is why the
+  list above looks empty and the org list does not.
 
-Fixing this needs a human on npmjs.com: sign in as the owning account, open each
-package, and add the trusted publisher with **Organization or user** set to that
-account, **Repository** `prism`, **Workflow filename** `publish.yml`,
-**Environment name** `npm-publish`. The alternative is to create a granular
-access token as described above and store it as `NPM_TOKEN`. Until one of those
-is done, the rehearsal will keep passing and the publish will keep failing,
-which is the shape of a precondition that is checked in the wrong place.
+Until the trusted publisher is configured on npmjs.com, the release lane cannot
+publish and a maintainer must publish from a machine whose `~/.npmrc` carries a
+token for the owning account. That is how 0.6.0 shipped: `pnpm -r --filter
+"./packages/*" publish --no-git-checks` from such a machine, followed by
+`git push origin --tags` for the four version tags, because the lane's own
+"Push the tags" step never ran. A publish done this way carries no provenance
+attestation, which is a real cost and the reason the trusted publisher is worth
+the five minutes to configure.
+
+The rehearsal cannot catch this. It verifies the tarballs and runs a dry-run
+publish; neither asks the registry whether this workflow may write. That is the
+shape of a precondition checked in the wrong place, and it is the one thing a
+rehearsal exists to catch.
 
 The `npm-publish` environment exists and carries no protection rules, so the
 required reviewer this section promises is not in front of the job. A merge
