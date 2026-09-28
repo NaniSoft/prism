@@ -17,7 +17,7 @@
  */
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -30,7 +30,19 @@ const CASES = path.join(FIXTURES, 'cases')
 const NOT_THE_ROOT = path.join(REPO, 'packages', 'ui')
 
 /** Every root the gate declares, which is also the fixture template's shape. */
-const ROOTS = 55
+const ROOTS = 51
+
+/**
+ * The roots the gate reads when present and does not require. They are
+ * gitignored build outputs written at `prepack`, so the template has none of
+ * them: a staged tree is already the case where every one is absent.
+ */
+const OPTIONAL_ROOTS = [
+  'packages/tokens/THIRD-PARTY-NOTICES.md',
+  'packages/ui/THIRD-PARTY-NOTICES.md',
+  'packages/llms/THIRD-PARTY-NOTICES.md',
+  'packages/mcp-server/THIRD-PARTY-NOTICES.md',
+]
 
 const tempTree = () => mkdtempSync(path.join(os.tmpdir(), 'prism-legacy-'))
 
@@ -345,6 +357,46 @@ test('the real repository passes, and prints its one historical-record discharge
   assert.match(result.stdout, /MIGRATION\.md:194\s+\[vendor-name\]\s+DISCHARGED by convention `migration-note`/)
   assert.match(result.stdout, /1 file\(s\) skipped as historical record\(s\)/)
   assert.match(result.stdout, /read as a graph, never grepped: pnpm-lock\.yaml/)
+})
+
+test('an absent optional root is reported absent, not read', () => {
+  // A status line that cannot report absence is not a coverage claim. The
+  // comparison is keyed on the walker's repository-relative field rather than
+  // its absolute `root`, because the absolute path is platform-separated and the
+  // declared list is not: comparing the two matched nothing, and every optional
+  // root reported itself read whether or not the file existed. That shipped
+  // because the developer's tree has the files (a publish rehearsal wrote them)
+  // and only a clean checkout does not. This drives the tree where they are
+  // genuinely missing, which is what a clean clone and CI both look like.
+  const dir = stageTemplate()
+  for (const root of OPTIONAL_ROOTS) {
+    assert.equal(existsSync(path.join(dir, root)), false, `${root} must be absent from the template`)
+  }
+
+  const result = overRepo(dir)
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`)
+  for (const root of OPTIONAL_ROOTS) {
+    assert.match(
+      result.stdout,
+      new RegExp(`${root.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} \\(absent\\)`),
+      `the run must report ${root} as absent, not read`,
+    )
+  }
+  assert.doesNotMatch(result.stdout, /\(read\)/, 'nothing optional resolved, so nothing may claim it did')
+})
+
+test('an optional root that exists is read and scanned, not skipped', () => {
+  // The absence must not be the only behaviour: a notices file is generated from
+  // what is actually installed, so a vendor named in one is a finding and not a
+  // record. This pins that a present optional root is really scanned.
+  const dir = stageTemplate()
+  const notices = path.join(dir, 'packages', 'ui', 'THIRD-PARTY-NOTICES.md')
+  writeFileSync(notices, '# Third party notices\n\nThis product bundles antd 6.6.4\n')
+
+  const result = overRepo(dir)
+  assert.equal(result.status, 1, 'a vendor in a present notices file is a finding')
+  assert.match(result.stdout, /packages\/ui\/THIRD-PARTY-NOTICES\.md/)
+  assert.match(result.stdout, /packages\/ui\/THIRD-PARTY-NOTICES\.md \(read\)/)
 })
 
 test('a CRLF lockfile is the same graph, not an empty one', () => {

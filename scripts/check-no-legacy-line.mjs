@@ -108,16 +108,12 @@ const ROOTS = [
   // the published package documents
   'packages/tokens/CHANGELOG.md',
   'packages/tokens/README.md',
-  'packages/tokens/THIRD-PARTY-NOTICES.md',
   'packages/ui/CHANGELOG.md',
   'packages/ui/README.md',
-  'packages/ui/THIRD-PARTY-NOTICES.md',
   'packages/llms/CHANGELOG.md',
   'packages/llms/README.md',
-  'packages/llms/THIRD-PARTY-NOTICES.md',
   'packages/mcp-server/CHANGELOG.md',
   'packages/mcp-server/README.md',
-  'packages/mcp-server/THIRD-PARTY-NOTICES.md',
   // the site
   'apps/site/src',
   'apps/site/content',
@@ -146,6 +142,32 @@ const ROOTS = [
   'docs',
   '.github',
   '.changeset',
+]
+
+/**
+ * Roots that are read when they exist and are not a failure when they do not.
+ *
+ * A required root that is absent fails the run, which is right for a source tree
+ * and wrong for a build output. The per-package `THIRD-PARTY-NOTICES.md` files
+ * are gitignored and written by `stage-package-files.mjs` at `prepack`, so they
+ * exist in a developer's tree after a publish rehearsal and do not exist in a
+ * clean checkout or in CI. Listing them as required made the gate pass locally
+ * and fail in CI, which is the coverage-is-assumed failure in its purest form: the
+ * run had read a file the reader could not reproduce.
+ *
+ * They stay listed because they are a surface worth reading when present. A
+ * notices file is generated from what is actually installed, so a vendor named
+ * there means a dependency really is present, and a finding in a file that
+ * happens to be absent must not be the reason a run is trusted less.
+ *
+ * Every optional root and whether it resolved prints on every run, because a root
+ * that silently reads nothing is a root whose coverage nobody can state.
+ */
+const OPTIONAL_ROOTS = [
+  'packages/tokens/THIRD-PARTY-NOTICES.md',
+  'packages/ui/THIRD-PARTY-NOTICES.md',
+  'packages/llms/THIRD-PARTY-NOTICES.md',
+  'packages/mcp-server/THIRD-PARTY-NOTICES.md',
 ]
 
 /**
@@ -510,7 +532,27 @@ try {
   process.exit(1)
 }
 
-for (const result of results) {
+/*
+ * Optional roots are walked after the required ones have already proved the run
+ * read something, so an optional root that is absent cannot be the reason a run
+ * passed over nothing. A manifest dependency and a lockfile edge are checked
+ * separately and do not depend on any of these roots resolving. A root that
+ * resolved is scanned exactly like a required one.
+ */
+const optionalResults = walkRoots(REPO_ROOT, OPTIONAL_ROOTS, { extensions: EXT })
+const optionalResolved = optionalResults.filter((result) => result.exists)
+/*
+ * Keyed on the walker's `relative`, not its `root`. `root` is absolute and
+ * platform-separated while the declared list is repository-relative and
+ * forward-slashed, so comparing them matched nothing and every optional root
+ * reported itself read whether or not it existed. A status line that cannot
+ * report absence is the coverage claim this gate exists to make, so the test
+ * below drives a tree where the files are genuinely missing.
+ */
+const optionalUnresolved = optionalResults.filter((r) => !r.exists).map((r) => r.relative)
+const scanned = [...results, ...optionalResolved]
+
+for (const result of scanned) {
   for (const full of result.files) {
     if (isSelf(full)) continue
 
@@ -668,6 +710,13 @@ console.log(
 console.log(`${NAME}: read as a graph, never grepped: ${LOCKFILE}`)
 console.log(
   `${NAME}: excluded from the text rules: ${SELF_EXCLUDED.map((file) => relativePosix(REPO_ROOT, file)).join(', ')}`,
+)
+console.log(
+  `${NAME}: optional root(s), read when present and not a failure when absent: ` +
+    OPTIONAL_ROOTS.map((root) => {
+      const resolved = optionalUnresolved.includes(root) ? 'absent' : 'read'
+      return `${root} (${resolved})`
+    }).join(', '),
 )
 
 if (findings.length > 0) {
