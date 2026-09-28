@@ -213,6 +213,12 @@ const EXCLUSIONS = [
     reason:
       'the default of a destructured prop, which is not the same as a shipped literal. `label = \'Pagination\'` renders the word only when a caller passed nothing, so it is a default every consumer may override and removing it would be a breaking change to a published Component. `aria-label="Pagination"` renders the word whatever the caller did, which is the Component choosing an accessible name and is the defect this gate reports. The position is read from the destructuring braces rather than from the shape, so a copy string passed to a call is not exempted by sitting near a default.',
   },
+  {
+    name: 'a key name',
+    match: /^(?:Arrow(?:Up|Down|Left|Right)|Enter|Escape|Tab|Home|End|PageUp|PageDown|Backspace|Delete|Shift|Control|Alt|Meta|Space|F1|F12)$/,
+    reason:
+      "the name of a key, read from its shape against the closed set the DOM defines rather than from its position, because a key name is compared against `event.key` in a Component that owns a keyboard model and the comparison reads as a sentence to the shape rule. The set is enumerated rather than pattern-matched, and that is the point: an earlier version of this rule matched any `Arrow` followed by capitals, so the literal `\"Press enter to continue\"` was exempted because it *contains* `Enter`. A sentence containing a key name is a sentence, and a set is what tells the two apart.",
+  },
 ]
 
 /**
@@ -667,6 +673,11 @@ for (const result of results) {
 
       if (isPropDefault(source, match.index)) {
         resolved.get(EXCLUSIONS[8]).push(`prop default '${value}' (${shown})`)
+        continue
+      }
+
+      if (EXCLUSIONS[9].match.test(value)) {
+        resolved.get(EXCLUSIONS[9]).push(`key name '${value}' (${shown})`)
         continue
       }
 

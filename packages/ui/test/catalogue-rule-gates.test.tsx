@@ -229,6 +229,7 @@ const cleanComponent = [
   ' * A control that owns a default name and a caller may replace it.',
   ' */',
   "export function Thing({ label = 'Thing' }: Omit<ComponentProps<'div'>, 'onValueChange'>) {",
+  "  if (label === 'ArrowDown') return null",
   "  return <div aria-label={label} data-slot='thing'><line x1='4 4' /></div>",
   '}',
   '',
@@ -340,6 +341,38 @@ describe('the no-copy gate', () => {
     expect(result.stderr).toContain(
       'the declared exclusion "a thrown diagnostic" resolved to nothing',
     )
+  })
+
+  it('fails a word-shaped literal that is not a key name, so the key exclusion is a set and not a position', () => {
+    // The key-name exclusion is a set from the DOM rather than a rule about the
+    // position, so a sentence in the position a key name occupies is still a
+    // finding. Without this the exclusion would be a hole shaped exactly like a
+    // keyboard model, which is where a copy string would be easiest to hide.
+    const result = run('check-block-copy.mjs', {
+      'src/components/ui/thing.tsx': [
+        "import type { ComponentProps } from 'react'",
+        '',
+        '/**',
+        ' * A control with a keyboard model and a sentence where a key name belongs.',
+        ' */',
+        "export function Thing({ label = 'Thing' }: Omit<ComponentProps<'div'>, 'onValueChange'>) {",
+        "  if (label === 'Press enter to continue') return null",
+        "  if (label === 'Go back') return null",
+        "  if (label === 'ArrowDown') return null",
+        "  return <div aria-label={label} data-slot='thing'><line x1='4 4' /></div>",
+        '}',
+        '',
+      ].join('\n'),
+      'src/blocks/thing-01/index.tsx': cleanBlock,
+      'src/pages/thing-page/index.tsx': cleanBlock,
+    })
+
+    expect(result.status).toBe(1)
+    // The two sentences are findings, and the key name beside them is not, which
+    // is the whole claim: the exclusion is a set and not a shape of position.
+    expect(result.stderr).toMatch(/\[hardcoded-copy\] +"Press enter to continue"/)
+    expect(result.stderr).toMatch(/\[hardcoded-copy\] +"Go back"/)
+    expect(result.stderr).not.toMatch(/\[hardcoded-copy\] +"ArrowDown"/)
   })
 
   it('fails a root that resolves to nothing rather than reporting a clean tree', () => {

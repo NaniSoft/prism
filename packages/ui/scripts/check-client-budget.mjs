@@ -75,6 +75,7 @@ const BUDGETS = {
   popover: 6,
   progress: 3,
   'live-region': 1,
+  tree: 2,
   provider: 2,
   'radio-group': 4,
   select: 12,

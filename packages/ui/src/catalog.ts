@@ -239,6 +239,16 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'Tree',
+    slug: 'tree',
+    kind: 'component',
+    category: 'Layout',
+    description: 'A tree of nodes given as data, navigable by the arrow keys.',
+    source: 'src/components/ui/tree.tsx',
+    exports: ['Tree'],
+    status: 'stable',
+  },
+  {
     name: 'Diagram',
     slug: 'diagram',
     kind: 'component',

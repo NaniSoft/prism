@@ -799,6 +799,28 @@
       ]
     },
     {
+      "name": "tree",
+      "title": "Tree",
+      "description": "Shared tree primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/tree.tsx",
+          "type": "registry:component",
+          "target": "components/ui/tree.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "typography",
       "title": "Typography",
       "description": "Shared typography primitive. Installed automatically as a dependency of any block that uses it.",
