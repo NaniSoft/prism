@@ -212,8 +212,37 @@ const cleanBlock = [
   '',
 ].join('\n')
 
+/**
+ * A Component that exercises the three exclusions the Component layer added.
+ *
+ * A type argument, because a Component narrows a type it forwards rather than
+ * writing its own; a prop default, because every accessible name a control owns
+ * is a default a caller may override; and a vector coordinate, because a drawing
+ * is written in numbers that happen to carry a space. The fixture has to carry
+ * all three or the gate reports them as exclusions that resolve to nothing, which
+ * is the gate's own rule and is the reason this comment exists.
+ */
+const cleanComponent = [
+  "import type { ComponentProps } from 'react'",
+  '',
+  '/**',
+  ' * A control that owns a default name and a caller may replace it.',
+  ' */',
+  "export function Thing({ label = 'Thing' }: Omit<ComponentProps<'div'>, 'onValueChange'>) {",
+  "  return <div aria-label={label} data-slot='thing'><line x1='4 4' /></div>",
+  '}',
+  '',
+].join('\n')
+
 describe('the no-copy gate', () => {
+  // Every configured root has to exist in a staged fixture, or the gate's own
+  // root-resolution assertion fires before it can report anything. The Component
+  // root is a third one as of the gate reading the Component layer, and a fixture
+  // that omitted it would fail for a reason that has nothing to do with the rule
+  // under test, which is the stale-exclusion hazard the fixture comments already
+  // describe for the exclusions.
   const CLEAN = {
+    'src/components/ui/thing.tsx': cleanComponent,
     'src/blocks/thing-01/index.tsx': cleanBlock,
     'src/pages/thing-page/index.tsx': cleanBlock,
   }
@@ -286,9 +315,13 @@ describe('the no-copy gate', () => {
   })
 
   it('fails a declared exclusion that resolves to nothing', () => {
-    // The fixture drops the client directive and the template literal, so two of
-    // the five declared exclusions have nothing to resolve and are reported.
+    // The fixture drops the client directive and the template literal, so the
+    // declared exclusions that cover them have nothing to resolve and are
+    // reported. The Component file is staged so the gate gets past its own
+    // root-resolution assertion, which fires first and would otherwise be the
+    // only thing this test could observe.
     const result = run('check-block-copy.mjs', {
+      'src/components/ui/thing.tsx': cleanComponent,
       'src/blocks/thing-01/index.tsx': cleanBlock
         .replace("'use client'\n\n", '')
         .replace("  if (title === '') throw new Error('Thing01: title is required')\n", '')
@@ -310,7 +343,10 @@ describe('the no-copy gate', () => {
   })
 
   it('fails a root that resolves to nothing rather than reporting a clean tree', () => {
-    const result = run('check-block-copy.mjs', { 'src/blocks/thing-01/index.tsx': cleanBlock })
+    const result = run('check-block-copy.mjs', {
+      'src/components/ui/thing.tsx': cleanComponent,
+      'src/blocks/thing-01/index.tsx': cleanBlock,
+    })
 
     expect(result.status).toBe(1)
     expect(result.stderr).toContain('"src/pages"')

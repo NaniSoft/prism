@@ -64,6 +64,13 @@ export type ProductSwitcherProps = Omit<ComponentProps<'nav'>, 'children'> & {
    * A heading for the set, for a switcher that is not inside a landmark the
    * reader can already name. Rendered as the navigation's accessible name and as
    * no visible text, because the marks beside it are the labels.
+   *
+   * It defaults to nothing rather than to a word. A switcher in a product that
+   * calls its products something else announces the wrong name, and a default of
+   * "Products" is a claim about a consumer's product that the prop exists so they
+   * do not have to make. A switcher with no `label` renders a navigation with no
+   * accessible name, which is a real state and the caller's to resolve, rather than
+   * one that is quietly wrong.
    */
   label?: string
   /**
@@ -112,7 +119,7 @@ function ProductSwitcher({
   products,
   currentId,
   size = 'sm',
-  label = 'Products',
+  label,
   className,
   ...props
 }: ProductSwitcherProps) {
@@ -121,7 +128,7 @@ function ProductSwitcher({
   return (
     <nav
       data-slot="product-switcher"
-      aria-label={label}
+      {...(label === undefined ? null : { 'aria-label': label })}
       className={cn('flex flex-wrap items-center gap-x-4 gap-y-2', className)}
       {...props}
     >

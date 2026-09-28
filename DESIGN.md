@@ -187,7 +187,12 @@ interface face.
 - Motion is state feedback only, and its tokens reach CSS. There are no
   decorative keyframes and no entrance or scroll animation.
 - Blocks ship no copy and no sample data; every string and every number is a
-  prop.
+  prop. A Component owns some words and not others: a variant name, a state
+  name and a landmark name are machine values, and the **accessible name a
+  control ships is the consumer's word**, so it is a prop whose default is the
+  word Prism would have used. A caller that localises the visible text of a
+  control localises the announced name with it, because a control that looks
+  localised and announces English is the state this rule exists to end.
 - The site is built with the system it documents.
 
 **Register of this document.** It states the design system's rules, not the v1

@@ -14,7 +14,7 @@
   "files": [
     {
       "path": "src/blocks/stats-01/index.tsx",
-      "content": "export { Stats01, default } from './stats'\r\n",
+      "content": "export { Stats01, default } from './stats'\n",
       "type": "registry:component",
       "target": "components/blocks/stats-01/index.tsx"
     },

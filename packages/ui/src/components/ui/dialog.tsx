@@ -45,6 +45,17 @@ export interface DialogContentProps extends ComponentProps<'div'> {
   side?: 'center' | 'top' | 'bottom' | 'left' | 'right'
   /** Whether the built-in close control is rendered. @defaultValue true */
   showCloseButton?: boolean
+  /**
+   * The accessible name of the built-in close control, when it is rendered.
+   *
+   * A prop and not a fixed word, because a consumer that localises its dialog
+   * cannot otherwise localise the one control that dismisses it, and a dialog
+   * that announces "Close" in a product that never uses that word is a control
+   * the consumer cannot fix.
+   *
+   * @defaultValue 'Close'
+   */
+  closeLabel?: string
 }
 
 /** The props DialogHeader forwards to a plain container. */
@@ -116,6 +127,7 @@ function DialogContent({
   className,
   side = 'center',
   showCloseButton = true,
+  closeLabel = 'Close',
   children,
   ...props
 }: DialogContentProps) {
@@ -140,7 +152,7 @@ function DialogContent({
           {showCloseButton ? (
             <DialogPrimitive.Close
               data-slot="dialog-close"
-              aria-label="Close"
+              aria-label={closeLabel}
               className="ring-offset-background focus-visible:ring-ring absolute top-4 right-4 rounded-sm opacity-70 outline-none transition-opacity duration-fast ease-out hover:opacity-100 focus-visible:ring-[3px] disabled:pointer-events-none"
             >
               <XIcon className="size-4" />

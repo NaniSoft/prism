@@ -9,12 +9,19 @@ type PaginationSize = 'default' | 'sm' | 'lg' | 'icon'
  * The control that moves between pages of a paged collection.
  *
  * The root is a `<nav>` with an accessible name, so the page links are grouped
- * as one navigation region.
+ * as one navigation region. The name is a prop and the default is the word Prism
+ * would have used: a product that calls its paging something else announces the
+ * wrong region to a screen reader, and the default is a convenience rather than
+ * the right answer for a consumer whose product is not a generic library.
  */
-function Pagination({ className, ...props }: ComponentProps<'nav'>) {
+function Pagination({
+  className,
+  label = 'Pagination',
+  ...props
+}: ComponentProps<'nav'> & { label?: string }) {
   return (
     <nav
-      aria-label="Pagination"
+      aria-label={label}
       data-slot="pagination"
       className={cn('mx-auto flex w-full justify-center', className)}
       {...props}
@@ -71,15 +78,23 @@ function PaginationLink({
   )
 }
 
-/** The step back to the previous page, with a hidden label on narrow layouts. */
+/**
+ * The step back to the previous page, with a hidden label on narrow layouts.
+ *
+ * `text` and `label` are separate props and they move together or not at all: a
+ * caller that localises the visible word and not the announced one gets a control
+ * that looks localised and is half of it, which is the state this shape was
+ * written to end. Both default to the word Prism would have used.
+ */
 function PaginationPrevious({
   className,
   text = 'Previous',
+  label = 'Go to the previous page',
   ...props
-}: ComponentProps<typeof PaginationLink> & { text?: string }) {
+}: ComponentProps<typeof PaginationLink> & { text?: string; label?: string }) {
   return (
     <PaginationLink
-      aria-label="Go to the previous page"
+      aria-label={label}
       size="default"
       className={cn('gap-1 px-2.5 sm:pl-2.5', className)}
       {...props}
@@ -90,15 +105,20 @@ function PaginationPrevious({
   )
 }
 
-/** The step forward to the next page, with a hidden label on narrow layouts. */
+/**
+ * The step forward to the next page, with a hidden label on narrow layouts.
+ *
+ * `text` and `label` move together for the reason `PaginationPrevious` states.
+ */
 function PaginationNext({
   className,
   text = 'Next',
+  label = 'Go to the next page',
   ...props
-}: ComponentProps<typeof PaginationLink> & { text?: string }) {
+}: ComponentProps<typeof PaginationLink> & { text?: string; label?: string }) {
   return (
     <PaginationLink
-      aria-label="Go to the next page"
+      aria-label={label}
       size="default"
       className={cn('gap-1 px-2.5 sm:pr-2.5', className)}
       {...props}

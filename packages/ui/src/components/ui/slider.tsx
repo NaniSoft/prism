@@ -11,7 +11,7 @@ import { cn } from '../../lib/utils'
  * Declared here rather than re-exported from Base UI so no upstream type
  * crosses the package seam (ticket 07 section 6).
  */
-export interface SliderProps extends Omit<ComponentProps<'div'>, 'onChange' | 'defaultValue'> {
+export interface SliderProps extends Omit<ComponentProps<'div'>, 'onChange'> {
   /** The current value, when the slider is controlled. */
   value?: number
   /** The value the slider starts at, for an uncontrolled slider. */
