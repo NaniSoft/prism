@@ -71,12 +71,15 @@ named props type off an emitted declaration whether that declaration belongs to 
 Component or to a Block, so both sections are now built and both are assembled into
 the mirror file, `llms-full.txt` and the Store's `doc`.
 
-The Store's `props` field stays the Component-only field its type declares, so
-`get_item_props` still answers a Block with the composition section and still
-carries the sentence this release removes from the published document. That is the
-one half of the change that needs `packages/mcp-server`, which is not in this
-package; `render.ts` reads `item.props` first and falls back to `item.composition`,
-so the fix there is to render both when both are present.
+The Store now carries both fields for every kind, and `get_item_props` prints
+both when it has both. The sentence "a Block has no own props" is gone from the
+tool as well as from the published document. It was the one place the two
+sections were still exclusive, because that tool branched on `item.props` and
+fell back to the composition section, so a Block was answered with its
+composition and a denial of the interface it publishes. The test asserts the
+sentence's absence, so a refactor that restores it fails even if the composition
+is still printed, and a second test covers the one-present case so the
+both-present branch cannot swallow it.
 
 **Four accessible names became required props** on `SiteHeader`, `LogoStrip01`,
 `NotFoundPage` and `BlogPostPage`, and a Block that ships no copy ships no
