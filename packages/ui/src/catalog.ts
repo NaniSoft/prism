@@ -229,6 +229,16 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'Mark',
+    slug: 'mark',
+    kind: 'component',
+    category: 'Typography',
+    description: 'A run of text with its matches visibly marked, and nothing announced.',
+    source: 'src/components/ui/mark.tsx',
+    exports: ['Mark'],
+    status: 'stable',
+  },
+  {
     name: 'Diagram',
     slug: 'diagram',
     kind: 'component',
