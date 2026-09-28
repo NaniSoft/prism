@@ -1,6 +1,6 @@
 {
   "name": "@nanisoft/prism-llms",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "description": "Prism's agent-facing corpus: llms.txt, the Markdown mirror, prism-skill.md and the PrismDocsStore projection. One build-fresh dist/ serves npm, the site and the MCP server.",
   "license": "MIT",
