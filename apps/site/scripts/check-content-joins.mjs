@@ -252,6 +252,15 @@ const changelogPackages = (await readPublishedChangelogs(REPO)).map((entry) => (
  * route no package claims is a finding in the other direction. The authored
  * `index.mdx` is excluded because it is the one hand-written page here and is
  * judged by its links instead.
+ *
+ * The text is read raw, with no line-ending normalisation, because the comparison
+ * is against `readPublishedChangelogs()`, which is also raw, and because the copy
+ * step writes the buffer it read rather than a re-serialisation of it. Normalising
+ * one side and not the other made this join unfalsifiable on a Windows checkout:
+ * the two files were byte identical and the gate still reported them apart, and
+ * the message told the reader to run a copy step they had already run. Two sides
+ * read the same way is what makes a difference in the comparison mean a difference
+ * in the files.
  */
 const changelogFiles = []
 for (const file of await walkFiles(CHANGELOG_ROOT)) {
@@ -262,7 +271,7 @@ for (const file of await walkFiles(CHANGELOG_ROOT)) {
   changelogFiles.push({
     route: routeForFile(`${CHANGELOG_SECTION}/${withoutExtension}`),
     file: entry,
-    text: (await readFile(file, 'utf8')).replace(/\r\n/g, '\n'),
+    text: await readFile(file, 'utf8'),
   })
 }
 

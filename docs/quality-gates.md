@@ -11,13 +11,55 @@ consumer-facing claim be false or a consumer's install break. A number whose
 threshold is a judgement, or a measurement that informs a human decision,
 reports and is published.
 
-| Package | Fails the build | Reports only |
-| --- | --- | --- |
-| `prism-tokens` | contrast gate, emitted-contract, the `: undefined` read-back, the per-theme key-set guard, motion, elevation and layout, build-twice determinism | the two advisory contrast pairs (border and input) |
-| `prism-ui` | surface scan, registry validator (registry and published file list), the component suites, the axe suite, the JSDoc and catalogue checks, the two source grep gates | per-item client-JavaScript measurement, the demo `client` flag |
-| `prism-llms` | corpus drift, build-twice determinism, per-item mirror and store coverage, the store type round-trip, the declared output list | corpus freshness stamp |
-| `prism-mcp-server` | the protocol round-trip suite, tool registry equals the corpus, the bundled `data.json` hash | corpus freshness |
-| `@nanisoft/site` (private) | dash gate, content joins (including the redirect coverage and the Worker's first-run prefixes), utility cascade, search gzip budget, registry artifacts absent from `out/` | visual regression, the computed display assertions, per-item client measurement |
+The script column is the gate. A row that named an aspiration rather than a
+script has been corrected, because a gate list that names a gate which does not
+exist is the same defect class as a catalogue whose registry and list disagree:
+it is green, it is believed, and it is not checking anything.
+
+| Package | Script | Fails the build | Reports only |
+| --- | --- | --- | --- |
+| `prism-tokens` | `scripts/check-contrast.mjs`, `scripts/check-emitted-contract.mjs`, `scripts/check-determinism.mjs` | contrast gate, the emitted contract (completeness, value equality, spacing arithmetic, no extras, and the mode-independent groups including the closed duration, easing, shadow, breakpoint and container sets), build-twice determinism | the two advisory contrast pairs (border and input) |
+| `prism-ui` | `scripts/validate-registry.mjs`, `scripts/check-surface.mjs`, `scripts/check-client-budget.mjs` | surface scan, registry validator (registry and published file list), the component and axe suites | per-item client-JavaScript measurement |
+| `prism-llms` | `scripts/check.mjs` | corpus drift, per-item mirror and store coverage, the store type round-trip, the declared output list | none |
+| `prism-mcp-server` | `src/registration.test.ts` and the bundled-data hash | the protocol round-trip suite, the registered tool list equals the package's declared `TOOL_ORDER` with every tool served from the bundled corpus, the bundled `data.json` hash | corpus freshness stamp (`scripts/stamp-built.mjs`) |
+| repository root | `scripts/check-dashes.mjs`, `scripts/check-elevation-layout.mjs`, `scripts/validate-changesets.mjs` | the dash gate, the elevation and layout gate, the changeset validator | none |
+| `@nanisoft/site` (private) | `scripts/check-utility-cascade.mjs`, `scripts/check-content-joins.mjs`, `scripts/check-search-budget.mjs` | content joins (including the redirect coverage and the Worker's first-run prefixes), utility cascade, search gzip budget | visual regression and the computed display assertions, both inside the report-only `visual` job |
+
+Two entries this list used to make, and what they really are:
+
+- **JSDoc and catalogue coverage is not a `prism-ui` gate.** It is asserted by
+  `packages/llms/scripts/check.mjs` against the emitted declarations, so it is
+  attributed to `prism-llms`.
+- **The dash and elevation gates are repository-root scripts, not `prism-ui`
+  tasks.** The dash gate lists the site's and the packages' trees among its
+  roots, which is not the same as the site's `check` running it. They run first
+  in the root `check` chain.
+- **The demo `client` flag and the per-item site client measurement are not in
+  any gate lane.** The flag is produced by the manual `catalog:analyze` task and
+  CI never runs it; the per-item measurement is `prism-ui`'s
+  `check-client-budget.mjs` and is listed above.
+- **No gate asserts that the shadcn registry artifacts are absent from `out/`.**
+  `AGENTS.md` states the rule and nothing checks it, so it is recorded here as an
+  unenforced instruction rather than as a gate.
+
+## Coverage is asserted, not assumed
+
+A gate that can read nothing must fail. Every gate above resolves its roots from
+its own location via `import.meta.url`, so running it from any working directory
+reads the same files; a root that does not resolve fails the run and the message
+names both causes a reader cannot tell apart, a wrong working directory and a root
+that is genuinely gone; and a run that reads zero files fails rather than
+reporting zero violations. Each gate's final line states how many files it read,
+across how many roots, and how many roots were unresolved, and every excluded path
+is printed on every run, because a rule that fires on nothing is indistinguishable
+from a rule that found nothing to say.
+
+The shared implementation is `scripts/lib/walk.mjs`, and its unit and integration
+tests are `scripts/__tests__/`, run by `pnpm test:scripts`. Those tests spawn the
+real gate files from a working directory that is not the repository root, which is
+the only way to keep the property honest: a test that imports the helper proves the
+helper, not the gate.
+
 
 ## The content joins
 

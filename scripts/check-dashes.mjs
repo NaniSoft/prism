@@ -40,9 +40,33 @@
  *
  * The honest limit: the gate sees characters, not meaning. It proves no em/en
  * dash and no `???` sequence in the listed files, nothing more.
+ *
+ * Coverage is asserted, not assumed. ROOTS is resolved against `REPO_ROOT`,
+ * which is derived from this file's own location rather than `process.cwd()`,
+ * so the working directory cannot change what the gate reads. A root that
+ * resolves to nothing fails the run, and a run that reads no file at all fails
+ * the run, because "0 in reader-facing copy" over zero files is the claim this
+ * gate used to make from the wrong directory. The final line states the coverage
+ * the run achieved, and the roots that are read but not gated are printed every
+ * run rather than described only in the comment above.
  */
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import {
+  assertFilesRead,
+  assertRootsResolve,
+  coverageOf,
+  relativePosix,
+  walkRoots,
+} from './lib/walk.mjs'
+
+const NAME = 'check-dashes'
+const HERE = path.dirname(fileURLToPath(import.meta.url))
+
+/** The repository root, from this file's own location. Never `process.cwd()`. */
+const REPO_ROOT = path.resolve(HERE, '..')
 
 const ROOTS = [
   'apps/site/src',
@@ -93,22 +117,23 @@ const GATED = [
 
 const gated = (file) => GATED.some((prefix) => file === prefix || file.startsWith(`${prefix}/`))
 
-/** Forward-slashed paths so the gate behaves the same on Windows and Linux. */
-const toPosix = (file) => file.split(path.sep).join('/')
-
-function walk(root) {
-  let entries
-  try {
-    entries = statSync(root)
-  } catch {
-    return []
-  }
-  if (entries.isFile()) return [root]
-  return readdirSync(root).flatMap((name) => {
-    const full = path.join(root, name)
-    return statSync(full).isDirectory() ? walk(full) : [full]
-  })
+/** A root whose every file is gated, a root that is partly gated, or neither. */
+const gatedState = (root) => {
+  const covered = GATED.some((prefix) => prefix === root || prefix.startsWith(`${root}/`))
+  if (covered) return 'gated'
+  return GATED.some((prefix) => root === prefix || root.startsWith(`${prefix}/`))
+    ? 'partly gated'
+    : 'read, not gated'
 }
+
+/**
+ * Every root the gate reads without failing on, computed rather than kept as a
+ * second hand-maintained list, so a root added to ROOTS shows up here the day it
+ * is added.
+ */
+const EXCLUSIONS = ROOTS.filter((root) => gatedState(root) !== 'gated').map(
+  (root) => `${root} (${gatedState(root)})`,
+)
 
 /**
  * Per line, whether the whole line is comment prose. Tracks both `/* ... *\/`
@@ -140,10 +165,19 @@ function commentMask(lines) {
 let violations = 0
 let reported = 0
 
-for (const root of ROOTS) {
-  for (const full of walk(root)) {
-    if (!EXT.test(full)) continue
-    const file = toPosix(full)
+const results = walkRoots(REPO_ROOT, ROOTS, { extensions: EXT })
+
+try {
+  assertRootsResolve(results, { scriptName: NAME })
+  assertFilesRead(results, { scriptName: NAME, extensions: EXT })
+} catch (failure) {
+  console.error(`\n${failure.message}`)
+  process.exit(1)
+}
+
+for (const result of results) {
+  for (const full of result.files) {
+    const file = relativePosix(REPO_ROOT, full)
     const lines = readFileSync(full, 'utf8').split('\n')
     const mask = commentMask(lines)
 
@@ -171,9 +205,14 @@ for (const root of ROOTS) {
   }
 }
 
+const coverage = coverageOf(results)
+
 console.log(
-  `\ndashes: ${violations} in reader-facing copy, ${reported} in comments or ungated files`,
+  `\ndashes: ${violations} in reader-facing copy, ${reported} in comments or ungated files, ` +
+    `across ${coverage.files} file(s) in ${coverage.roots} root(s) ` +
+    `(${coverage.unresolved} unresolved)`,
 )
+console.log(`dashes: read but not gated: ${EXCLUSIONS.join(', ')}`)
 
 if (violations > 0) {
   console.error(

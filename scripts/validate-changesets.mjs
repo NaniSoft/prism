@@ -9,13 +9,67 @@
  * ordinary careful writing and get worked around.
  *
  * Run: pnpm changeset:validate
+ *
+ * Where the empty result used to hide, decided from the code rather than from
+ * the ticket's description of it. This gate prints the neutral
+ * `no changesets found` and exits 0 when `.changeset/` holds no changesets, so
+ * the positive false claim was not in that line. The claim that was false was
+ * the run itself, and it was made in two places:
+ *
+ *   1. `ROOT` was `process.cwd()`, so the validator run from any directory
+ *      other than the repository root read no changesets and no workspace
+ *      manifest and printed the same line a clean run prints;
+ *   2. `existsSync(CHANGESET_DIR) ? readdirSync(...) : []` made a MISSING
+ *      `.changeset/` directory indistinguishable from an empty one, so a
+ *      validator pointed at a tree that is not this repository reported
+ *      "nothing to do" on the release path.
+ *
+ * Both are gone: the roots are resolved from this file's own location, a root
+ * that does not resolve fails with both causes named, and the final line states
+ * what was read. This gate guards the release path (the Gates composite action
+ * runs it in `ci.yml` and in `publish.yml`), which is why a run that read
+ * nothing was worth this much.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const ROOT = process.cwd()
-const CHANGESET_DIR = path.join(ROOT, '.changeset')
+import { assertRootsResolve, resolveRoot } from './lib/walk.mjs'
+
+const NAME = 'changesets'
+const HERE = path.dirname(fileURLToPath(import.meta.url))
+
+/** The repository root, from this file's own location. Never `process.cwd()`. */
+const ROOT = path.resolve(HERE, '..')
+const CHANGESET_DIR = resolveRoot(ROOT, '.changeset')
 const BUMPS = new Set(['major', 'minor', 'patch'])
+
+/** The workspace groups whose members this validator holds names for. */
+const GROUPS = ['packages', 'apps']
+
+/**
+ * Every configured root, resolved once. A root that does not resolve is a
+ * failure rather than an empty result, so a missing `.changeset/` cannot be
+ * reported as a repository with nothing to release.
+ */
+const ROOT_RESULTS = ['.changeset', ...GROUPS].map((relative) => {
+  const absolute = resolveRoot(ROOT, relative)
+  return { relative, absolute, files: [], exists: existsSync(absolute) }
+})
+
+// Coverage first: a root that does not resolve stops the run before it reads
+// anything, so the failure cannot be reported as a clean empty result.
+try {
+  assertRootsResolve(ROOT_RESULTS, {
+    scriptName: NAME,
+    hint: "run this repository's validator, from the repository root or via `pnpm changeset:validate`",
+  })
+} catch (failure) {
+  console.error(`\n${failure.message}`)
+  process.exit(1)
+}
+
+let manifests = 0
 
 /** Every workspace package name, so a changeset cannot name a package that does not exist. */
 function workspacePackageNames() {
@@ -24,13 +78,15 @@ function workspacePackageNames() {
     const file = path.join(dir, 'package.json')
     if (!existsSync(file)) return
     const pkg = JSON.parse(readFileSync(file, 'utf8'))
-    if (pkg.name) names.add(pkg.name)
+    if (pkg.name) {
+      names.add(pkg.name)
+      manifests += 1
+    }
   }
 
   read(ROOT)
-  for (const group of ['packages', 'apps']) {
-    const base = path.join(ROOT, group)
-    if (!existsSync(base)) continue
+  for (const group of GROUPS) {
+    const base = resolveRoot(ROOT, group)
     for (const entry of readdirSync(base, { withFileTypes: true })) {
       if (entry.isDirectory()) read(path.join(base, entry.name))
     }
@@ -69,9 +125,9 @@ function splitSummary(rest) {
   return { title, body }
 }
 
-const files = existsSync(CHANGESET_DIR)
-  ? readdirSync(CHANGESET_DIR).filter((name) => name.endsWith('.md') && name !== 'README.md')
-  : []
+const files = readdirSync(CHANGESET_DIR).filter(
+  (name) => name.endsWith('.md') && name !== 'README.md',
+)
 
 const names = workspacePackageNames()
 const errors = []
@@ -126,12 +182,21 @@ if (errors.length > 0) {
   for (const error of errors) {
     console.error(`  ${error.relative}: ${error.message}`)
   }
-  console.error(`\nchangesets: ${errors.length} violation(s)`)
+  console.error(`\nchangesets: ${errors.length} violation(s) in ${files.length} changeset(s)`)
   process.exit(1)
 }
 
+/**
+ * Zero changesets is a legitimate state, so it does not fail. What must not
+ * happen is a run that validated nothing printing a line a reader takes for a
+ * validated result, so the empty case says what it did and did not read, and
+ * the covered case says the same.
+ */
+const coverage = `${files.length} changeset(s) and ${manifests} workspace manifest(s) from ` +
+  `${ROOT_RESULTS.length} resolved root(s), 0 unresolved`
+
 console.log(
   files.length === 0
-    ? 'changesets: no changesets found'
-    : `changesets: ${files.length} valid (${files.join(', ')})`,
+    ? `changesets: none found, so nothing was validated; read ${coverage}`
+    : `changesets: ${files.length} valid (${files.join(', ')}); read ${coverage}`,
 )
