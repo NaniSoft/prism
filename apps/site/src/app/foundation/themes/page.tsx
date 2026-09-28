@@ -92,7 +92,14 @@ export default function ThemesPage() {
               <section
                 key={theme.id}
                 data-pack={theme.id}
-                className="bg-card flex flex-col gap-4 rounded-xl border p-5"
+                // A literal radius, not `rounded-xl`. The pack boundary on this
+                // element re-points `--radius`, and every scale step is computed
+                // from it, so a step-derived utility would make this card's
+                // corner radius follow the pack: five cards on one row, five
+                // corner radii, and a reader comparing packs is comparing shape
+                // as well as colour. The pack's radius is shown in the row's own
+                // label below, where it is information rather than an accident.
+                className="bg-card flex flex-col gap-4 rounded-[0.875rem] border p-5"
               >
                 <div className="flex flex-col gap-1">
                   <div className="flex items-baseline justify-between gap-2">

@@ -275,7 +275,16 @@ export function renderThemeDoc(store: PrismDocsStore, args: ThemeDocArgs): CallT
     `Packs: ${store.tokens.packs.join(', ')}.`,
     `Modes: ${store.tokens.modes.join(', ')}.`,
     `Queryable groups: ${TOKEN_GROUPS.join(', ')}.`,
-    'Selection: `data-pack="<id>"` on `<html>`, plus the `.dark` class for mode.',
+    // The attribute is not root-only, and the correction is in this string
+    // because this string is the agent-facing surface: a tool that prints the
+    // pack's radius below and tells the reader the attribute belongs on `<html>`
+    // is worse than a tool that says nothing, because the reader then places a
+    // boundary where a boundary is not needed and believes a subtree cannot carry
+    // one. A boundary moves BOTH axes beneath it, and radius is the axis people
+    // forget.
+    'Selection: `data-pack="<id>"` on any element makes that element and its subtree a theme boundary. ' +
+      'It wears the mode of the nearest ancestor carrying `.dark`, and carries that class itself only to hold a fixed mode. ' +
+      'A boundary also moves the pack corner radius, which is why a boundary belongs on a fully-rounded element, on one carrying no radius utility, or on a shape with no radius concept.',
   ].join('\n\n')
   const footer = `Import rule: ${IMPORT_RULE}\n\n${NO_INVENTION_RULE}`
 

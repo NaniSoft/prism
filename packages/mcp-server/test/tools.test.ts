@@ -91,7 +91,18 @@ describe('get_theme_doc', () => {
     expect(body).toContain('# Prism theme: default / light')
     expect(body).toContain('--background: #ffffff')
     expect(body).toContain('default, blush, mint, lavender, sky, peach')
-    expect(body).toContain('`data-pack="<id>"` on `<html>`')
+    // The selection guidance is a contract, and it was wrong: it told an agent
+    // the attribute belongs on `<html>` while the token block printed below it
+    // listed the pack's radius, which a subtree also picks up. A reader acting
+    // on that string would place a boundary where none is needed and conclude a
+    // subtree cannot carry one. The preamble now says the attribute works on any
+    // element, says the boundary wears its ancestor's mode, and says it moves the
+    // radius too.
+    expect(body).toContain('`data-pack="<id>"` on any element makes that element and its subtree a theme boundary')
+    expect(body).toContain('It wears the mode of the nearest ancestor carrying `.dark`')
+    expect(body).toContain('A boundary also moves the pack corner radius')
+    // The wrong form must not survive a refactor that re-adds it.
+    expect(body).not.toContain('`data-pack="<id>"` on `<html>`')
     expect(body).toContain(NO_INVENTION_RULE)
   })
 

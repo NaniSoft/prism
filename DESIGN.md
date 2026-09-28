@@ -739,6 +739,25 @@ document's mode. This is the only form a server can render, because a server
 cannot know the reader's mode: a boundary forced to name a mode would have to
 guess one and would be wrong for half of them.
 
+**A boundary moves the corner radius beneath it.** Radius is the only non-colour
+member of a pack block, and the token build emits it the same way it emits
+colour, so the consequence is the same: `--radius` resolves from the nearest
+ancestor carrying `data-pack`, and the whole scale from `--radius-sm` through
+`--radius-4xl` is derived from it by multiplication. The five packs range from
+0.5rem to 1rem, so a row of elements each carrying its own pack shows a spread of
+corner radii, and a small pill becomes a different pill five times over. The law
+used to state the colour half and be silent on the shape half, so an implementer
+following it exactly produced mismatched corners and called it correct.
+
+**Where a boundary may sit, in one sentence.** A boundary belongs on a
+fully-rounded element, on an element carrying no radius utility, or on a shape with
+no radius concept, and on nothing else.
+
+One previously stated reason for the shape restriction was wrong and is corrected
+rather than inherited: a scalable vector rectangle's corner attribute is a CSS
+property and does follow the boundary. What blocks it is that no utility exists
+for it.
+
 **A boundary carries the mode class only when it must hold a fixed mode.**
 `[data-pack="<id>"].dark` is the compound form and it is published, not
 deprecated: it is what a dark surface on a light page is, and what a client that
