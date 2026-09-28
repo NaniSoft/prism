@@ -2,7 +2,7 @@
 '@nanisoft/prism-ui': minor
 ---
 
-The face ships from the component package, so a site writes one custom property for its typeface and nothing else
+The face ships with the package, so a site writes one property for its typeface
 
 `@nanisoft/prism-ui` declared `--font-sans: Inter, ui-sans-serif, system-ui, ...` and shipped no font file. Naming a family is not shipping it: the first entry resolved to nothing and every page fell through to the platform's UI face, which is the one face a design system never means by its first choice. All four consumer sites were compensating with their own custom property and a build-time network fetch, and the company site had already shipped that way by accident.
 
