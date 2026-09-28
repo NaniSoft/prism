@@ -373,6 +373,16 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'Meter',
+    slug: 'meter',
+    kind: 'component',
+    category: 'Feedback',
+    description: 'A bounded measure drawn as a scale, with the limits the caller cares about marked on it.',
+    source: 'src/components/ui/meter.tsx',
+    exports: ['Meter'],
+    status: 'stable',
+  },
+  {
     name: 'Tooltip',
     slug: 'tooltip',
     kind: 'component',

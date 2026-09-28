@@ -101,6 +101,8 @@ export { Slider } from './ui/slider'
 export type { SliderProps } from './ui/slider'
 export { Progress } from './ui/progress'
 export type { ProgressProps } from './ui/progress'
+export { Meter } from './ui/meter'
+export type { MeterProps, MeterTone, MeterThreshold } from './ui/meter'
 export { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip'
 export type { TooltipProps, TooltipTriggerProps, TooltipContentProps } from './ui/tooltip'
 export {
