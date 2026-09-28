@@ -861,8 +861,19 @@ Recorded as facts. None of these is fixed in this document.
   | Kind | Deferred to v1.1 |
   | --- | --- |
   | Components | the shadcn baseline tail: `empty`, `collapsible`, `spinner`, `toast`, `alert-dialog`, `sheet`, `command`, `combobox`, `calendar`, `date-picker`, `scroll-area`, `aspect-ratio`, `hover-card`, `context-menu`, `menubar`, `navigation-menu`, `toggle`, `toggle-group`, `input-otp`, `item`, `button-group`, `input-group`, `carousel`, `chart`, `sidebar`, `form` (the react-hook-form binding), `number-field`, `meter`, `resizable`, `native-select`, and a standalone `label` |
-  | Blocks | `faq-01`, `logo-cloud-01`, `testimonial-01`, `footer-01`, `newsletter-01` |
+  | Blocks | `faq-01`, `logo-cloud-01`, `testimonial-01`, `newsletter-01` |
   | Pages | `onboarding-page`, `pricing-page`, `error-page` |
+
+  `footer-01` is not on this list because it is no longer deferred: the footer
+  shipped as `site-footer` in the fourteen-item release, as a Block, because all
+  four consumer sites already import `SiteHeader` and `SiteFooter` from
+  `@nanisoft/prism-ui/blocks` and a header or a footer composes a mark, a switcher
+  and a navigation rather than holding one job. The name follows the four import
+  lines rather than the shape of this table, because a published name cannot be
+  cheaply changed and there is no redirect lane for item routes. `logo-cloud-01`
+  above is the deferred spelling of the logo strip, which also shipped as
+  `logo-strip-01`; that name keeps the `-01` suffix its entry was given and no
+  consumer imports it yet.
 
   Three more items are settled rather than deferred, so v1.1 does not
   re-express them blindly. The old `stat-card` Block folds into `stats-01` and is
