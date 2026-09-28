@@ -27,7 +27,38 @@ import { pathToFileURL } from 'node:url'
 const KIT = path.resolve(import.meta.dirname, '..')
 const CLI = path.join(KIT, 'cli.mjs')
 const REPO = path.resolve(KIT, '..', '..', '..')
-const CONSUMER = path.join(REPO, '..', 'landing-page')
+
+/**
+ * The design system these fixtures are measured against: this repository's own
+ * packages, and nothing outside it.
+ *
+ * It used to be a sibling checkout at `../landing-page`, reached through that
+ * consumer's `node_modules`. That had two faults and one of them was invisible.
+ *
+ * **It failed in CI, every run, for as long as it was there.** The sibling does
+ * not exist on a runner, so the junction dangled, `require('@nanisoft/prism-ui/
+ * package.json')` could not resolve, and eight tests in this file went red. The
+ * suite was green locally and red in CI, which is the shape of a check that only
+ * works on the machine that wrote it, and it is the third time this programme has
+ * found one. The local green was not luck either: it was the sibling's presence.
+ *
+ * **And where it did resolve, it resolved the wrong version.** The sibling had
+ * `@nanisoft/prism-ui` 0.8.0 installed from npm while this repository was
+ * building 0.9.0, so every fixture asserting against "the real emitted
+ * stylesheet" was reading 0.8.0's and calling it real. A fixture that wants the
+ * design system under test must be handed the design system under test, and the
+ * only one of those is the tree this test runs from.
+ *
+ * There is a third reason the workspace is the right answer, which is that
+ * `packages/ui` is itself `@nanisoft/prism-ui`, so a symlink to it satisfies the
+ * package-name lookup the gate performs without any workspace declaration at all.
+ * pnpm's isolated layout does not link workspace packages into a root
+ * `node_modules`, so there is no shorter path that works.
+ */
+const SYSTEM = {
+  'prism-ui': path.join(REPO, 'packages', 'ui'),
+  'prism-tokens': path.join(REPO, 'packages', 'tokens'),
+}
 
 /**
  * A consumer tree with a manifest that pins the design system exactly, and no
@@ -68,17 +99,22 @@ function run(root, config, args = []) {
 /** The design system a fixture resolves against, so a fixture can be honest about it. */
 function pinToRealSystem(root) {
   // A temporary tree cannot resolve `@nanisoft/prism-ui`, so a fixture that needs
-  // the real emitted stylesheet is given junctions to the package a sibling
-  // consumer installed. That is the same junction pnpm makes, and it is the only
-  // way a fixture can hold a real token contract rather than a mock of one: a
-  // fixture with a hand-written stylesheet would assert that the gate agrees with
-  // the fixture.
+  // the real emitted stylesheet is given junctions to this repository's packages.
+  // That is the only way a fixture can hold a real token contract rather than a
+  // mock of one: a fixture with a hand-written stylesheet would assert that the
+  // gate agrees with the fixture.
+  //
+  // The junction target is the workspace package rather than an installed copy,
+  // so the stylesheet the fixture reads is the one this build produced. Reading an
+  // installed copy instead means the suite tests whatever npm last served, which
+  // is a different question from the one the gate answers, and it is a question
+  // whose answer changes on a schedule nobody reading the suite is told about.
   const modules = path.join(root, 'node_modules', '@nanisoft')
   mkdirSync(modules, { recursive: true })
-  for (const name of ['prism-ui', 'prism-tokens']) {
+  for (const [name, target] of Object.entries(SYSTEM)) {
     const link = path.join(modules, name)
     if (existsSync(link)) continue
-    symlinkSync(path.join(CONSUMER, 'node_modules', '@nanisoft', name), link, 'junction')
+    symlinkSync(target, link, 'junction')
   }
   return root
 }
@@ -529,11 +565,43 @@ const KIT_NOT_PUBLISHED =
   `the gate kit is not on the registry yet, so a consumer cannot run a gate from it and so ` +
   `cannot delete its own copy; publish a version that carries \`gates/\` and these three run`
 
+/**
+ * The three tests below make claims about all four consumer repositories, and they
+ * can only be true if all four are on disk beside this one. Reaching npm is the
+ * other precondition they check, and it is the wrong one to check alone: a runner
+ * has a reachable registry and no siblings, so `PUBLISHED_KIT` is true there, the
+ * skip guard passes, and the test then fails with ENOENT on a consumer's
+ * `package.json` it was always going to need.
+ *
+ * **A test that cannot run in the environment it runs in should skip and say why,
+ * not fail.** Failing is what made this repository's CI red on every run since at
+ * least `0bb5ae5`, through seven commits by two authors, because a red pipeline and
+ * an obviously-environmental failure get read as "not my change". The skip below
+ * is loud about what it is skipping and why, so the signal survives.
+ *
+ * `law-reaches-every-consumer.test.mjs` already does exactly this, with the same
+ * four names and the same reason. Two files doing one thing two ways is why the
+ * suite looked green locally and red on a runner: locally all four siblings exist,
+ * so the question never arose.
+ *
+ * Anyone with the four sites beside this repository, which is anyone doing the
+ * cross-repository work, still gets all three assertions.
+ */
+const CONSUMER_SITES = ['landing-page', 'atlas', 'nexus', 'alphalens']
+const CONSUMERS_PRESENT = CONSUMER_SITES.every((site) =>
+  existsSync(path.join(REPO, '..', site, 'package.json')),
+)
+const CONSUMERS_ABSENT = () =>
+  `${CONSUMER_SITES.filter((site) => !existsSync(path.join(REPO, '..', site, 'package.json'))).length} ` +
+  `consumer checkout(s) are not beside this repository, so a claim about all four cannot be made ` +
+  `here; clone them next to this one to run these three`
+
 test('no consumer repository carries a cross-repository contract file any more', (t) => {
   // The prose mirror is what this ticket removed, and the assertion that it stays
   // removed is that the file is not there. A law in four files is four laws.
   if (!PUBLISHED_KIT) return t.skip(KIT_NOT_PUBLISHED)
-  for (const site of ['landing-page', 'atlas', 'nexus', 'alphalens']) {
+  if (!CONSUMERS_PRESENT) return t.skip(CONSUMERS_ABSENT())
+  for (const site of CONSUMER_SITES) {
     assert.equal(
       existsSync(path.join(REPO, '..', site, 'CONSISTENCY.md')),
       false,
@@ -557,7 +625,7 @@ test('no consumer gate program restates a law, because the kit ships the only co
     'check-pin.mjs',
     'check-token-read.mjs',
   ]
-  for (const site of ['landing-page', 'atlas', 'nexus', 'alphalens']) {
+  for (const site of CONSUMER_SITES) {
     for (const file of owned) {
       assert.equal(
         existsSync(path.join(REPO, '..', site, 'scripts', file)),
@@ -570,7 +638,8 @@ test('no consumer gate program restates a law, because the kit ships the only co
 
 test('no consumer declares the token package, and none names it in its workspace configuration', (t) => {
   if (!PUBLISHED_KIT) return t.skip(KIT_NOT_PUBLISHED)
-  for (const site of ['landing-page', 'atlas', 'nexus', 'alphalens']) {
+  if (!CONSUMERS_PRESENT) return t.skip(CONSUMERS_ABSENT())
+  for (const site of CONSUMER_SITES) {
     const manifest = JSON.parse(readFileSync(path.join(REPO, '..', site, 'package.json'), 'utf8'))
     const blocks = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies', 'pnpm.overrides', 'resolutions']
     for (const block of blocks) {
