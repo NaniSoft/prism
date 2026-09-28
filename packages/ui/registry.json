@@ -370,6 +370,50 @@
       ]
     },
     {
+      "name": "live-region",
+      "title": "Live-region",
+      "description": "Shared live-region primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/live-region.tsx",
+          "type": "registry:component",
+          "target": "components/ui/live-region.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "mark",
+      "title": "Mark",
+      "description": "Shared mark primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/mark.tsx",
+          "type": "registry:component",
+          "target": "components/ui/mark.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "pagination",
       "title": "Pagination",
       "description": "Shared pagination primitive. Installed automatically as a dependency of any block that uses it.",
@@ -746,6 +790,28 @@
           "path": "src/components/ui/tooltip.tsx",
           "type": "registry:component",
           "target": "components/ui/tooltip.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "tree",
+      "title": "Tree",
+      "description": "Shared tree primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/tree.tsx",
+          "type": "registry:component",
+          "target": "components/ui/tree.tsx"
         },
         {
           "path": "src/lib/utils.ts",

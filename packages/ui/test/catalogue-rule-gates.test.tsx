@@ -212,8 +212,38 @@ const cleanBlock = [
   '',
 ].join('\n')
 
+/**
+ * A Component that exercises the three exclusions the Component layer added.
+ *
+ * A type argument, because a Component narrows a type it forwards rather than
+ * writing its own; a prop default, because every accessible name a control owns
+ * is a default a caller may override; and a vector coordinate, because a drawing
+ * is written in numbers that happen to carry a space. The fixture has to carry
+ * all three or the gate reports them as exclusions that resolve to nothing, which
+ * is the gate's own rule and is the reason this comment exists.
+ */
+const cleanComponent = [
+  "import type { ComponentProps } from 'react'",
+  '',
+  '/**',
+  ' * A control that owns a default name and a caller may replace it.',
+  ' */',
+  "export function Thing({ label = 'Thing' }: Omit<ComponentProps<'div'>, 'onValueChange'>) {",
+  "  if (label === 'ArrowDown') return null",
+  "  return <div aria-label={label} data-slot='thing'><line x1='4 4' /></div>",
+  '}',
+  '',
+].join('\n')
+
 describe('the no-copy gate', () => {
+  // Every configured root has to exist in a staged fixture, or the gate's own
+  // root-resolution assertion fires before it can report anything. The Component
+  // root is a third one as of the gate reading the Component layer, and a fixture
+  // that omitted it would fail for a reason that has nothing to do with the rule
+  // under test, which is the stale-exclusion hazard the fixture comments already
+  // describe for the exclusions.
   const CLEAN = {
+    'src/components/ui/thing.tsx': cleanComponent,
     'src/blocks/thing-01/index.tsx': cleanBlock,
     'src/pages/thing-page/index.tsx': cleanBlock,
   }
@@ -286,9 +316,13 @@ describe('the no-copy gate', () => {
   })
 
   it('fails a declared exclusion that resolves to nothing', () => {
-    // The fixture drops the client directive and the template literal, so two of
-    // the five declared exclusions have nothing to resolve and are reported.
+    // The fixture drops the client directive and the template literal, so the
+    // declared exclusions that cover them have nothing to resolve and are
+    // reported. The Component file is staged so the gate gets past its own
+    // root-resolution assertion, which fires first and would otherwise be the
+    // only thing this test could observe.
     const result = run('check-block-copy.mjs', {
+      'src/components/ui/thing.tsx': cleanComponent,
       'src/blocks/thing-01/index.tsx': cleanBlock
         .replace("'use client'\n\n", '')
         .replace("  if (title === '') throw new Error('Thing01: title is required')\n", '')
@@ -309,8 +343,43 @@ describe('the no-copy gate', () => {
     )
   })
 
+  it('fails a word-shaped literal that is not a key name, so the key exclusion is a set and not a position', () => {
+    // The key-name exclusion is a set from the DOM rather than a rule about the
+    // position, so a sentence in the position a key name occupies is still a
+    // finding. Without this the exclusion would be a hole shaped exactly like a
+    // keyboard model, which is where a copy string would be easiest to hide.
+    const result = run('check-block-copy.mjs', {
+      'src/components/ui/thing.tsx': [
+        "import type { ComponentProps } from 'react'",
+        '',
+        '/**',
+        ' * A control with a keyboard model and a sentence where a key name belongs.',
+        ' */',
+        "export function Thing({ label = 'Thing' }: Omit<ComponentProps<'div'>, 'onValueChange'>) {",
+        "  if (label === 'Press enter to continue') return null",
+        "  if (label === 'Go back') return null",
+        "  if (label === 'ArrowDown') return null",
+        "  return <div aria-label={label} data-slot='thing'><line x1='4 4' /></div>",
+        '}',
+        '',
+      ].join('\n'),
+      'src/blocks/thing-01/index.tsx': cleanBlock,
+      'src/pages/thing-page/index.tsx': cleanBlock,
+    })
+
+    expect(result.status).toBe(1)
+    // The two sentences are findings, and the key name beside them is not, which
+    // is the whole claim: the exclusion is a set and not a shape of position.
+    expect(result.stderr).toMatch(/\[hardcoded-copy\] +"Press enter to continue"/)
+    expect(result.stderr).toMatch(/\[hardcoded-copy\] +"Go back"/)
+    expect(result.stderr).not.toMatch(/\[hardcoded-copy\] +"ArrowDown"/)
+  })
+
   it('fails a root that resolves to nothing rather than reporting a clean tree', () => {
-    const result = run('check-block-copy.mjs', { 'src/blocks/thing-01/index.tsx': cleanBlock })
+    const result = run('check-block-copy.mjs', {
+      'src/components/ui/thing.tsx': cleanComponent,
+      'src/blocks/thing-01/index.tsx': cleanBlock,
+    })
 
     expect(result.status).toBe(1)
     expect(result.stderr).toContain('"src/pages"')

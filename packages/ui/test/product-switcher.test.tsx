@@ -33,9 +33,16 @@ describe('a switch between products', () => {
     expect(new Set(classes).size).toBe(1)
   })
 
-  it('is a navigation region with a name the caller can replace', () => {
-    const { rerender } = render(<ProductSwitcher products={SET} />)
-    expect(screen.getByRole('navigation', { name: 'Products' })).toBeTruthy()
+  it('is a navigation region whose name is the caller\'s, and has no default', () => {
+    // The name is not defaulted. A switcher in a product that calls its products
+    // something else would otherwise announce a name Prism chose, and the prop
+    // exists precisely so the caller does not inherit one. So there is no default
+    // to assert: the absence is the behaviour, and a switcher with no `label`
+    // renders a navigation the caller has to name.
+    const { rerender, container } = render(<ProductSwitcher products={SET} />)
+    const unnamed = screen.getByRole('navigation')
+    expect(unnamed.getAttribute('aria-label')).toBeNull()
+    expect(container.querySelector('[aria-label="undefined"]')).toBeNull()
 
     rerender(<ProductSwitcher products={SET} label="Data tools" />)
     expect(screen.getByRole('navigation', { name: 'Data tools' })).toBeTruthy()

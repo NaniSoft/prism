@@ -346,16 +346,21 @@ test('the gate states what it read, and names every path it excluded', () => {
   assert.match(result.stdout, /fixtures\/no-legacy-line/)
 })
 
-test('the real repository passes, and prints its one historical-record discharge', () => {
+test('the real repository passes, and prints every historical-record discharge', () => {
   const result = run(REPO)
 
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`)
   assert.equal(result.stderr, '', 'a clean tree reports nothing on stderr')
   assert.match(result.stdout, new RegExp(`0 finding\\(s\\) in \\d+ file\\(s\\) read across ${ROOTS} root\\(s\\) \\(0 unresolved\\)`))
-  // The single vendor mention in the whole repository is the migration note,
-  // and it is printed rather than only counted.
+  // The vendor mentions that remain are discharged by convention and printed
+  // rather than only counted, so an exemption is auditable from the run's output.
   assert.match(result.stdout, /MIGRATION\.md:194\s+\[vendor-name\]\s+DISCHARGED by convention `migration-note`/)
-  assert.match(result.stdout, /1 file\(s\) skipped as historical record\(s\)/)
+  // Two files are skipped as historical records. The migration note is one. The
+  // licensing review under `docs/history` is the other, and it names the retired
+  // line because a review of the terms governing a third-party component product
+  // is about that product rather than about Prism. The count is asserted rather
+  // than derived so that a file added here has to be a decision.
+  assert.match(result.stdout, /2 file\(s\) skipped as historical record\(s\)/)
   assert.match(result.stdout, /read as a graph, never grepped: pnpm-lock\.yaml/)
 })
 

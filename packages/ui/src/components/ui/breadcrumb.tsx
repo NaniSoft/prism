@@ -7,12 +7,14 @@ import { cn } from '../../lib/utils'
  * The trail of ancestor links that shows where the current page sits.
  *
  * The root is a `<nav>` with an accessible name so the trail is announced as
- * one region rather than as an unexplained list of links.
+ * one region rather than as an unexplained list of links. The name is a prop and
+ * the default is the word Prism would have used, so a product that calls its
+ * trail something else is not made to ship a landmark named "Breadcrumb".
  */
-function Breadcrumb({ className, ...props }: ComponentProps<'nav'>) {
+function Breadcrumb({ className, label = 'Breadcrumb', ...props }: ComponentProps<'nav'> & { label?: string }) {
   return (
     <nav
-      aria-label="Breadcrumb"
+      aria-label={label}
       data-slot="breadcrumb"
       className={cn(className)}
       {...props}

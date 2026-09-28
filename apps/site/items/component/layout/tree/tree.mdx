@@ -1,0 +1,88 @@
+---
+slug: components/tree
+title: Tree
+---
+
+## Overview
+
+A Tree is a tree of nodes given as data. The nodes arrive as a union of three
+kinds, a destination, a label over a list and a rule, because a reader meets three
+different things in a tree and a single shape with optional fields would make all
+three look alike.
+
+It is navigable by the arrow keys, which is the part a consumer cannot assemble
+for themselves. A tree is one Tab stop and the arrows move inside it, whereas
+composing the markup gives the Tab order of the document, which is every node in
+the tree and none of the arrows.
+
+A flat list renders a flat tree. An outline is a tree of depth one, so a caller
+passes leaves and gets leaves.
+
+## Usage
+
+```tsx
+import { Tree, type TreeNode } from '@nanisoft/prism-ui/components/tree'
+
+const nodes: TreeNode[] = [
+  { type: 'group', title: 'Foundation', items: [
+    { type: 'page', title: 'Colors', href: '/foundation/colors' },
+  ] },
+  { type: 'divider', title: '' },
+  { type: 'page', title: 'Overview', href: '/overview' },
+]
+
+<Tree nodes={nodes} label="Documentation" currentHref="/foundation/colors" />
+```
+
+<ComponentDemo slug="tree" />
+
+## Guidelines
+
+### When to use
+
+Use a Tree when a reader navigates a hierarchy rather than a list: a file
+browser, a category tree, a settings section, a knowledge base, an outline of a
+document. The signal is that the reader needs to know where a thing sits, not only
+what it is called.
+
+Use it where the hierarchy is real. A list of six things with a heading above it
+is a list, and a Tree would make a reader hunt with arrows for something they
+could have scanned.
+
+### When not to use
+
+Do not use a Tree for a flat set. Pass a flat array of nodes and the Tree renders
+a tree of depth one, which is the honest shape for an outline, but a navigation
+whose items have no relationship is a list of links.
+
+Do not use one to select. A Tree navigates; a control that changes what the page
+shows is a Select, a Menu or a set of Tabs, and a Tree that both navigates and
+selects is two controls wearing one.
+
+Do not use one where the reader arrives by search rather than by position. A
+command palette reaches a node faster than an arrow key does, and a Tree beside a
+palette is a second way to the same place.
+
+### Best practices
+
+- Set `label` to the name a reader would use for the tree, not to the section it
+  sits in. "Documentation" names a tree with a reader's own trees in it;
+  "Sidebar" names a place on the page.
+- Set `currentHref` to the address the reader is at. The current node is marked
+  with an attribute rather than a colour, so a reader who cannot distinguish the
+  colours still knows where they are.
+- Omit `href` on a group that is a heading rather than a destination. The group
+  then renders a label that is not focusable, which is the honest state.
+- Author the empty case with `empty`. A tree that renders nothing is a control
+  with nothing in it.
+- Derive the nodes from the content the consumer already has, as a documentation
+  site derives its rail from its pages. A hand-maintained tree is a second list
+  that falls behind the first.
+
+### Accessibility
+
+Every node carries its level, so a reader is told where they are rather than only
+being able to see the indent. Only nodes with a destination take part in the
+arrow keys, so a label is skipped rather than focused and doing nothing. A group
+with no index is a label and not a link, because inventing a route for it would
+publish an address that resolves to nothing.

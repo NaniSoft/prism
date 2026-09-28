@@ -1,0 +1,39 @@
+# Line endings are a fact in this repository, not a preference.
+#
+# `.editorconfig` already declares `end_of_line = lf`, and an editor that reads it
+# will write LF. Git does not read `.editorconfig`, so on a machine with the
+# Windows default of `core.autocrlf=true` a checkout rewrites every text file to
+# CRLF on disk while the blob in the repository stays LF. The two agree in the
+# commit history and disagree on disk, which is the worst place to disagree.
+#
+# It is not cosmetic. A gate that reads a source file and matches a string with a
+# newline in it — the consumer gate kit's own test matches the published wording of
+# a law — sees a different file on a Windows checkout than on the machine that
+# wrote it, and fails on a tree that is correct. That is how the kit's
+# `law-reaches-every-consumer` test came to fail on a clean checkout of a commit
+# whose own test suite was green on Linux.
+#
+# `text=auto eol=lf` is the pair that fixes both halves: git decides from content
+# which files are text, and writes LF on checkout on every platform, including
+# Windows. The blobs in the repository are already LF, so this changes how a
+# working tree is written and not what is stored — the commit that adds this file
+# touches no other file.
+#
+# The lockfile and the fixtures are named explicitly because they are read by the
+# retired-line gate, which splits the lockfile into a graph, and a gate test that
+# writes CRLF over a fixture must start from one that is not already CRLF.
+/pnpm-lock.yaml text eol=lf
+/scripts/fixtures/** text eol=lf
+
+# Anything git cannot classify as text stays byte-for-byte, which is what
+# `text=auto` means by itself and is why the rule above is safe to apply to the
+# whole tree.
+* text=auto eol=lf
+
+# Generated and vendored trees are not ours to normalise.
+apps/site/public/** -text
+**/*.png binary
+**/*.jpg binary
+**/*.webp binary
+**/*.woff binary
+**/*.woff2 binary

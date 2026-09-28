@@ -187,7 +187,12 @@ interface face.
 - Motion is state feedback only, and its tokens reach CSS. There are no
   decorative keyframes and no entrance or scroll animation.
 - Blocks ship no copy and no sample data; every string and every number is a
-  prop.
+  prop. A Component owns some words and not others: a variant name, a state
+  name and a landmark name are machine values, and the **accessible name a
+  control ships is the consumer's word**, so it is a prop whose default is the
+  word Prism would have used. A caller that localises the visible text of a
+  control localises the announced name with it, because a control that looks
+  localised and announces English is the state this rule exists to end.
 - The site is built with the system it documents.
 
 **Register of this document.** It states the design system's rules, not the v1
@@ -878,7 +883,7 @@ Recorded as facts. None of these is fixed in this document.
 
   | Kind | Deferred to v1.1 |
   | --- | --- |
-  | Components | the shadcn baseline tail: `empty`, `collapsible`, `spinner`, `toast`, `alert-dialog`, `sheet`, `command`, `combobox`, `calendar`, `date-picker`, `scroll-area`, `aspect-ratio`, `hover-card`, `context-menu`, `menubar`, `navigation-menu`, `toggle`, `toggle-group`, `input-otp`, `item`, `button-group`, `input-group`, `carousel`, `chart`, `sidebar`, `form` (the react-hook-form binding), `number-field`, `meter`, `resizable`, `native-select`, and a standalone `label` |
+  | Components | the shadcn baseline tail: `collapsible`, `spinner`, `toast`, `alert-dialog`, `sheet`, `command`, `combobox`, `calendar`, `date-picker`, `scroll-area`, `aspect-ratio`, `hover-card`, `context-menu`, `menubar`, `navigation-menu`, `toggle`, `toggle-group`, `input-otp`, `item`, `button-group`, `input-group`, `carousel`, `chart`, `sidebar`, `form` (the react-hook-form binding), `number-field`, `meter`, `resizable`, `native-select`, and a standalone `label`. `empty` is not on this list: it is resolved to `empty-state-01`, a Block, and the resolution is recorded below |
   | Blocks | `faq-01`, `logo-cloud-01`, `testimonial-01`, `newsletter-01` |
   | Pages | `onboarding-page`, `pricing-page`, `error-page` |
 
@@ -952,3 +957,60 @@ Recorded as facts. None of these is fixed in this document.
 - **A one-way Figma Variables sync is not built.** The DTCG projection under
   `dist/dtcg/` exists; the sync and its plugin ownership do not, and two-way
   sync is out of scope.
+- **A fourth Kind is decided and not built.** `live` is a Kind for surface whose
+  content changes over time without a navigation event, and it is the home for
+  an agent console, an execution flow and a monitoring view. Prism would own the
+  event log surface, the tool-call ledger, the status tiers and the run controls;
+  the consumer owns the socket, the transport and the persistence, so Prism stays
+  transport-agnostic and no permanent client runtime reaches a consumer. It is
+  **not** in `CATALOG_KINDS` and `Kind` in `CONTEXT.md` still reads `component`,
+  `block`, `page`; the glossary is not edited ahead of the code because a
+  vocabulary that names a Kind the catalogue does not have is a second list.
+
+  Adding it is a **breaking change, at 1.0.0**, and the reason is a compile-time
+  tie rather than a judgement. `STORE_KINDS` is tied bidirectionally to
+  `CatalogKind` by the `_KindsMatch` assertion, and `countKinds` holds a
+  `Record<ItemKind, number>`, so a fourth Kind added to one place and not the
+  others is a build failure. Two transcriptions remain untied, both named by
+  issue 72 and neither fixed: the `KINDS` literal in `apps/site/src/lib/catalogue.ts`
+  is a hand-written copy of the catalogue's union, and `kindLabel` in
+  `packages/mcp-server/src/render.ts` is a three-branch fallthrough whose final
+  branch returns `Page` for any input, so an unrecognised Kind is mislabelled to
+  an agent rather than refused. Both are sequenced last, behind the concurrent
+  work on the same three files.
+
+  **The decision's own contents are incomplete.** The four things named above are
+  the things that change while a run is in flight, and that is what makes them
+  `live`. Three more surfaces in the same territory do **not** change in place and
+  so are not `live`: a run history, an approval queue, and a cost ledger. They are
+  read-mostly records that change as a run completes or as a person decides, which
+  makes them Workflows rather than a Kind. They are named here because leaving
+  them unnamed is how the fourth Kind quietly becomes the answer to every agent
+  problem, and it is not. See `docs/history/taxonomy-survey.md`, which found them
+  by reading agent documentation rather than a component catalogue: none of the
+  108 commercial categories names a run, a tool call, an approval, a trace or a
+  cost, and none names an audit trail, a permission matrix, or a retention
+  control either.
+
+  The name is not settled. `live` is the working title; `stream` names an
+  implementation and `console` names a use case, and a Kind named `live` beside a
+  Mode named `dark` invites the confusion that retiring `beam-dark` removed. The
+  map at issue 112 carries the decision and the open question.
+- **Patterns, Templates and Workflows are decided and not built.** They are
+  documentation, not surface: no npm subpath, no registry item, no corpus entry,
+  and `CATALOG_KINDS` unchanged. A Patterns Section is a **prose** Section beside
+  Overview, Foundation and Content, because a Pattern is not a catalogue item. A
+  Pattern declares the Items it composes and a Template declares the Pages it
+  arranges, and both declarations are compared against the catalogue by one gate
+  that lives with the other site joins, so a document naming an Item that does not
+  exist fails the build. A Template's arrangement is the published `DocsNavEntry`
+  union rather than a new vocabulary, which is the shape `DocsShell` already takes
+  and the shape a consumer site already adapts its own tree into.
+
+  Two limits are recorded rather than papered over. **Provenance is asserted, not
+  verified**: a gate can prove a claim was made, not that it is true, so the
+  originality and similarity record is a self-assessment against a stated method,
+  kept as one document per effort rather than one per asset, because the claim is
+  about how the work was done. And the Pattern and Template declarations are
+  checked; the originality claim is not, and does not pretend to be. Issue 112
+  carries the reasoning.

@@ -1,0 +1,84 @@
+---
+slug: components/live-region
+title: LiveRegion
+---
+
+## Overview
+
+A LiveRegion is a region that announces what just changed in it. It renders
+exactly the content it is given and carries the politeness and the busy state a
+screen reader reads, so a result list that filters as you type, a search whose
+count updates, and a stream that appends to the page are all audible rather than
+silent.
+
+It renders nothing at all when it has nothing to say. A live region that is always
+present announces every unrelated state change of its ancestors, so the empty case
+is the absence of the element rather than an empty element.
+
+It owns the region and not the transport. The socket, the retry, the persistence
+and the order events arrive in belong to the consumer.
+
+## Usage
+
+```tsx
+import { LiveRegion } from '@nanisoft/prism-ui/components/live-region'
+
+<LiveRegion label="Run output" busy={streaming}>
+  {lines.map((line) => (
+    <p key={line.id}>{line.text}</p>
+  ))}
+</LiveRegion>
+```
+
+<ComponentDemo slug="live-region" />
+
+## Guidelines
+
+### When to use
+
+Use a LiveRegion when content arrives without the reader having asked for it:
+a filtered result count, a log that grows, a background job that finished. The
+region is what makes the change audible.
+
+Use it around a region that is loading in place, rather than only where the
+change is most important. A reader who hears one announcement and misses the
+next two has been told less than a reader who hears all three at a lower
+interruptiveness.
+
+### When not to use
+
+Do not use a LiveRegion for content the reader asked for and is already looking
+at. Opening a dialog and hearing its contents announced is a reader being told
+what they just did. A Dialog owns its own announcement.
+
+Do not use one as a wrapper for the whole page. A permanently present live
+region announces every state change of its ancestors, which is the noise this
+Component exists to avoid as well as to cause.
+
+Do not use `politeness="assertive"` to make something feel more responsive. It
+does not make it arrive sooner, it makes it interrupt a screen reader
+mid-sentence. Reserve it for a change the reader is genuinely blocked on.
+
+### Best practices
+
+- Set `busy` while more is expected and clear it when the last item lands. A
+  caller that sets it permanently has told assistive technology the stream never
+  ends, which is a claim about the future that is not usually true.
+- Put the region around the region that changes, not around the page. A region
+  that wraps a list and announces its own length is announcing a number a reader
+  cannot use.
+- Pass a `label` when the arrival would otherwise be unplaceable. A run whose
+  messages are self-describing does not need one; a region announcing bare
+  status does, because "running" alone says nothing about what.
+- Keep the visible content and the announced content the same thing. A region
+  that announces a summary of what it renders is two sources of truth, and they
+  drift.
+- Do not put focusable content in the region. A live region is announced, not
+  entered, and a focusable child inside one competes with the announcement for
+  the reader's attention.
+
+### Content guidelines
+
+The words are the consumer's. A shared library cannot know whether a status is
+"Payment declined" or "Seu pagamento foi recusado", and a default that guesses is
+a sentence a reader hears in a language they did not choose.

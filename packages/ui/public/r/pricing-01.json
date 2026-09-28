@@ -16,7 +16,7 @@
   "files": [
     {
       "path": "src/blocks/pricing-01/index.tsx",
-      "content": "export { Pricing01, default } from './pricing'\r\n",
+      "content": "export { Pricing01, default } from './pricing'\n",
       "type": "registry:component",
       "target": "components/blocks/pricing-01/index.tsx"
     },
