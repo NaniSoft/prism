@@ -26,7 +26,7 @@
  */
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -134,8 +134,26 @@ test('the changeset validator reads its root from its own location, not the call
   const fromRoot = run(CHANGESETS, REPO)
 
   assert.equal(fromPackage.status, 0)
+  // The property this test is for: the two runs agree, so the caller's working
+  // directory cannot change what was read.
   assert.equal(fromPackage.stdout, fromRoot.stdout)
-  assert.doesNotMatch(fromPackage.stdout, /none found/)
+  // What it read is checked against the tree rather than against a state. An
+  // earlier version asserted the output did NOT say "none found", which was a
+  // claim about the repository having pending changesets rather than about the
+  // gate. Merging a release consumes every changeset, so that assertion passed
+  // until the day it was guaranteed to fail, and it said nothing about the gate
+  // on any other day.
+  const onDisk = readdirSync(path.join(REPO, '.changeset')).filter(
+    (name) => name.endsWith('.md') && name !== 'README.md',
+  ).length
+  const reported = /read (\d+) changeset\(s\)/.exec(fromPackage.stdout)
+  assert.ok(reported, fromPackage.stdout)
+  assert.equal(reported[1], String(onDisk))
+  // And with nothing pending it says so in the neutral wording rather than
+  // claiming a validation it did not perform.
+  if (onDisk === 0) {
+    assert.match(fromPackage.stdout, /none found, so nothing was validated/)
+  }
 })
 
 test('check-determinism rejects a comparison over zero artifacts', () => {
