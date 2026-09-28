@@ -665,19 +665,38 @@ Allowed everywhere are the authored names and their `var(--...)` reads.
 implies the other, and neither is called a theme in the API. The base pack is the
 absence of `data-pack`, expressed as the plain root default.
 
-**Selectors are attribute-agnostic.** The build emits `[data-pack="<id>"]` and
-`[data-pack="<id>"].dark` rather than the old root-scoped `:root[data-pack]`
-form. This is the cheapest shape by measurement and it makes descendant scoping
-work: any element may carry `data-pack` and `class="dark"` to become a theme
-boundary for itself and its subtree. That closes the previous defect where a
-per-card theme preview rendered in the page's active pack, and it is what lets
-the site show every pack at once. Selection crosses no CSS the consumer writes.
-One pre-existing hazard is unchanged: an unrelated consumer `.dark` class
-triggers the default pack's dark values, because `.dark` is a global class.
+**Selectors are attribute-agnostic.** The build emits `[data-pack="<id>"]` for
+light and the two-member list `[data-pack="<id>"].dark, .dark [data-pack="<id>"]`
+for dark, rather than the old root-scoped `:root[data-pack]` form. This is the
+cheapest shape by measurement and it makes descendant scoping work: any element
+may carry `data-pack` to become a theme boundary for itself and its subtree. That
+closes the previous defect where a per-card theme preview rendered in the page's
+active pack, and it is what lets the site show every pack at once. Selection
+crosses no CSS the consumer writes. One pre-existing hazard is unchanged: an
+unrelated consumer `.dark` class triggers the default pack's dark values, because
+`.dark` is a global class.
 
-**Selection is declarative by default.** Put `data-pack="<id>"` and, for dark,
-`class="dark"` on an element, and it is SSR-safe and flash-free with no
-JavaScript. `default` is expressed by omitting `data-pack`.
+**A boundary carries the pack attribute alone, and wears its ancestor's mode.**
+`data-pack` names the pack; it says nothing about light or dark. The mode a
+boundary resolves is the mode of the element carrying `.dark`, wherever that
+element is, and a boundary with no mode class of its own resolves its pack in the
+document's mode. This is the only form a server can render, because a server
+cannot know the reader's mode: a boundary forced to name a mode would have to
+guess one and would be wrong for half of them.
+
+**A boundary carries the mode class only when it must hold a fixed mode.**
+`[data-pack="<id>"].dark` is the compound form and it is published, not
+deprecated: it is what a dark surface on a light page is, and what a client that
+has already resolved the reader's mode applies. The descendant form was added
+beside it rather than replacing it, and the two are one rule with one declaration
+block, so an element matching both resolves the same way either way. A
+zero-specificity wrapper was considered and rejected: it loses to an unlayered
+consumer rule on import order, and the no-override-path law decides that.
+
+**Selection is declarative by default.** Put `data-pack="<id>"` on an element and
+add `class="dark"` only to one that must hold a fixed mode. It is SSR-safe and
+flash-free with no JavaScript. `default` is expressed by omitting `data-pack`, and
+a boundary that inherits its mode omits both.
 
 **The provider is optional.** A programmatic consumer mounts the provider and
 uses the theme hook to read and write the same two attributes and persist the

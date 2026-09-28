@@ -23,6 +23,24 @@ export const PACK_ATTR = 'data-pack'
  * build or hand-editing `dist`. Ticket 06's default stays root-scoped; the token
  * build ships `attribute-agnostic` (ticket 08's decision), which matches the root
  * or any descendant and so makes a themed subtree expressible in markup alone.
+ *
+ * The `attribute-agnostic` dark selector is a comma-separated selector LIST, and
+ * both halves are load-bearing:
+ *
+ *   - `[data-pack="<id>"].dark` is the compound form: a boundary that holds a
+ *     fixed mode, on either the document or a subtree. This is the form a
+ *     client can apply, and it is retained deliberately - removing it would
+ *     delete a published capability.
+ *   - `.dark [data-pack="<id>"]` is the descendant form, and it exists because a
+ *     server cannot know the reader's mode. A subtree that carries a pack and no
+ *     mode class has to resolve that pack's values for the DOCUMENT's mode, which
+ *     only the ancestor form can express. With only the compound half, a
+ *     server-rendered boundary renders the pack's light values on a dark page.
+ *
+ * The two halves live in ONE rule, so an element matching both resolves to the
+ * same declarations either way and there is no specificity contest to lose. A
+ * zero-specificity wrapper was considered and rejected: it loses to an unlayered
+ * consumer rule on import order, and the no-override-path law decides that.
  */
 const THEME_SELECTOR_STYLES = {
   'root-attribute': {
@@ -35,7 +53,7 @@ const THEME_SELECTOR_STYLES = {
   },
   'attribute-agnostic': {
     light: (id) => `[${PACK_ATTR}="${id}"]`,
-    dark: (id) => `[${PACK_ATTR}="${id}"].dark`,
+    dark: (id) => `[${PACK_ATTR}="${id}"].dark, .dark [${PACK_ATTR}="${id}"]`,
   },
 }
 

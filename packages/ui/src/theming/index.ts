@@ -53,18 +53,26 @@ export function parseStoredTheme(raw: string | null): { pack: PackId; mode: Mode
 }
 
 /**
- * Turns a pack and mode into the two markup attributes that express them.
+ * Turns a pack and a mode into the markup attributes that express them.
  *
  * Returns attributes, never CSS values: a Server Component spreads the result
  * onto `<html>` and gets the declarative form with no client runtime. `default`
  * is expressed by omitting `data-pack`; light is expressed by omitting `dark`.
+ *
+ * `mode` is optional because a server cannot know the reader's mode, and a
+ * required one is that impossibility written into the type: the only way to ask
+ * for a boundary with no mode class of its own would be to pass `'light'` as a
+ * guess, and the guess is wrong for half of them. Omitting it is the honest
+ * spelling of "wear the mode of the element carrying `.dark`", which is what the
+ * token build's descendant selector implements. `pack` stays required, because an
+ * element carrying neither axis is not a theme boundary.
  */
 export function themeAttributes({
   pack,
   mode,
 }: {
   pack: PackId
-  mode: Mode
+  mode?: Mode
 }): { 'data-pack'?: string; className?: string } {
   const attributes: { 'data-pack'?: string; className?: string } = {}
   if (pack !== 'default') attributes[PACK_ATTRIBUTE] = pack
