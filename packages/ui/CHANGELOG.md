@@ -1,5 +1,907 @@
 # @nanisoft/prism-ui
 
+## 0.11.0
+
+### Minor Changes
+
+- 3260391: A card title is a heading again, at a level the Block derives rather than guesses
+  
+  **The defect.** `CardTitle` renders a `div`, and that is correct: four cards in a
+  grid are four titles under one section heading, and four `h2`s under one `h2` is
+  four sections. But that reasoning is about the **element**, and the catalogue was
+  reading it as a reason about the **outline** too. Every Block that drew a titled card
+  drew it as plain text, so a page kept its `h2` and lost every heading below it. A
+  feature grid of five cards was unreadable by heading navigation while looking
+  identical. Found while migrating the company site, whose feature section had five
+  `h4`s before the migration and five `<div>`s after.
+  
+  **The answer is one function, and it is the same answer in all six places.**
+  `childLevel(headingLevel)` steps one level down, so a Block that draws a Section
+  heading and a set of card titles puts the titles *under* the section, and the whole
+  set moves together when the block is composed one level deeper than it was written
+  for. A Block that draws no Section heading passes `headingLevel` directly, because
+  there the card title is the one heading it renders. Both answers are right, and the
+  test carries which is which rather than assuming one for all six.
+  
+  This is what answers the ticket's third criterion, that the same question be
+  answered for *every* Item that draws a titled card. The sites are `FeatureGrid01`,
+  `Pricing01`, `StackGrid01`, `AuthForm01`, `SettingsPanel01` and `AuthPage`, and the
+  test that holds them is one file, because the consistency is the thing under test:
+  five files with one case each would let the next Block answer differently and still
+  pass, which is the failure this was filed about.
+  
+  **`CardTitle` gains `as`, defaulting to `div`.** The change is additive and no
+  existing rendering moves. Its JSDoc previously told a caller to pass Prism's
+  `Heading` inside it, and that was wrong: `Heading` is a step of the *type* scale
+  whose floor is `lg`, and a card title sits at body size, so the only way to use it
+  was to override the size back down, which asks a type-scale component to have no
+  opinion about type. The element and the visual step are separate questions and this
+  is the one that answers the element.
+  
+  **Two levels in one Block that had one hardcoded.** `SettingsPanel01` drew its
+  group headings as a literal `<h3>`, so a panel composed under an `h4` in a document
+  whose sections were `h4` announced its groups as siblings of the panel that
+  introduces them. They are now one step below the panel title, so the panel's whole
+  outline moves when the panel does.
+  
+  **`h6` holds rather than wraps.** A section already at `h6` has no child level.
+  Wrapping to `h1` would put a card title *above* the section that introduces it, which
+  a reader navigating by heading would meet first; holding at `h6` costs a repeated
+  level, which a screen reader announces as the same depth rather than as a break in
+  the outline. The clamp is asserted so a later change to the order is caught.
+  
+  **The proof that the test can fail.** Replacing `childLevel(headingLevel)` with a
+  hardcoded `h3` in `FeatureGrid01` fails two cases, the default and the derived one,
+  which is the exact defect the ticket names. A test that asserts "is a heading" would
+  have passed that.
+- 932ce96: Add `ChartFrame` and `Sidebar`, the two token families that shipped with no consumer
+  
+  `chart-1` through `chart-5` and the eight `sidebar-*` roles were in the contract
+  and used by nothing. These two Components are what consume them honestly.
+  
+  **`ChartFrame` puts the table inside the frame rather than beside it.** Marks and
+  cells are two renderings of one `series` array, so drift is structurally
+  impossible; a table passed as a sibling prop is a table that says last quarter.
+  The table is always in the document and `table="visible" | "hidden"` only decides
+  whether it is *seen*, because `hidden` is `sr-only`: it is still announced and
+  still findable in the page.
+  
+  **One frame means every chart in a product aligns to the same plot box.** Five
+  charts each drawing their own axes is five sets of numbers that do not line up, and
+  a dashboard where two charts disagree by six pixels looks broken in a way nobody
+  can name. `mark="line" | "bar"` is a prop and the marks are internal on purpose: a
+  mark with no axis, no gridline and no baseline is a bar that lies, and exporting
+  one for a caller to place is the exact failure the frame exists to prevent.
+  
+  **`Sidebar`'s collapsed state is the same rail at a smaller width, not a second
+  Component.** Hover surface, focus ring, current marking and accessible name are
+  all present in both states and only the words and the padding change. The name
+  moves to `sr-only` rather than unmounting and the trailing count is `aria-hidden`,
+  so the name is the same *string* at both widths and a reader who collapses the rail
+  loses nothing.
+  
+  ## The measured findings behind both
+  
+  **The sidebar needs its own ring, and the numbers are in the tests.** `ring` on a
+  `sidebar` surface measures 2.86:1 on Mint light, 2.97 on Sky, 3.13 on Peach, 3.16 on
+  Lavender and 3.22 on Blush. Four of the six light-mode packs would have shipped a
+  sub-3:1 focus indicator had the rail inherited the page ring, which is the
+  measured justification for the whole `sidebar-ring` family existing.
+  
+  **The chart tokens are below 3:1 and that is why the legend is not optional.** In
+  light mode `chart-2` measures 2.49:1 against `card` and `chart-3` measures 2.15:1.
+  Both are exempt from the contrast gate as graphic objects, so a mark in either is
+  found by position and shape rather than by colour. That is why the legend is
+  mandatory, the stroke is 2px, and the table is not optional. Past about three
+  series hue is the only channel left, which the documentation states as a consumer
+  decision rather than hiding.
+  
+  **One pair in this family is unmeasured.** `sidebar-ring` against `sidebar-accent`,
+  the surface a focused item sits on while hovered or selected, is 3.19:1 in the
+  base pack's dark mode and 3.82 to 4.21 in the light packs. It passes everywhere
+  and it is the tightest pair in the family with no row in `check-contrast.mjs`, so it
+  is reported rather than papered over.
+  
+  ## Two gate gaps found and closed
+  
+  **`check-variant-ink` listed eleven foreground roles and omitted the two sidebar
+  ones.** `sidebar-primary-foreground` and `sidebar-accent-foreground` are both
+  required 4.5:1 rows in the contrast table, so the list was telling the `Sidebar`
+  that its own required pairing was an inherited one. It is the first Component in
+  the package to put a `sidebar-*` fill in a variant, so nothing had hit it. The
+  alternative was to add a decoy `text-sidebar-foreground` to silence the gate, which
+  would have been a false pass.
+  
+  **`check-focus-indicators` recognised `ring-ring` only**, so a `ring-sidebar-ring`
+  would have been reported non-compliant. The `Sidebar` therefore keeps the browser's
+  outline as well as drawing its ring, which is asserted by a test so it stays a
+  deliberate guarantee rather than an accident. Both ring roles are now accepted.
+- 4650aff: Add `CommandPalette`, so a reader can reach any command by typing three letters
+  
+  Prism had a Select, a DropdownMenu and a set of Tabs, and nothing for the fastest
+  route to an action that lives behind three levels of menu.
+  
+  ```tsx
+  <CommandPalette
+    open={open}
+    onOpenChange={setOpen}
+    label="Commands"
+    inputLabel="Search commands"
+    groups={[
+      {
+        id: 'appearance',
+        label: 'Appearance',
+        items: [
+          {
+            id: 'theme',
+            label: 'Toggle theme',
+            hint: 'Cmd K T',
+            keywords: ['dark', 'light', 'colour'],
+            onSelect: setTheme,
+          },
+        ],
+      },
+    ]}
+    empty={{ message: (query) => `Nothing matches ${query}` }}
+  />
+  ```
+  
+  **It ranks, and that is the difference between this and a filtered menu.** Matches
+  are scored by where the query falls: the start of the name beats the start of a
+  word inside it, which beats a match further along, which beats a keyword-only hit.
+  A palette that filters without ordering shows every command containing the query in
+  declaration order, so the command the reader meant sits below one that merely
+  mentions their query and they scroll.
+  
+  **The groups are ordered by their best match too.** Ranking only *within* a group
+  leaves the premise broken, because an exact match in a late group still sits below
+  a poor match in an early one. Ordering the groups by their strongest member puts
+  the best answer at the top and keeps the headings, which is the whole of what a
+  grouped list is for.
+  
+  **It is composed on the Dialog rather than beside it.** Focus trapping, Escape, the
+  portal, the scroll lock and the return of focus are five behaviours that are correct
+  in the Dialog and would be five chances to get one wrong here. A palette that rolled
+  its own overlay would be a second answer to all five questions, and the second
+  answer is the one that ships the bug.
+  
+  **The matched run is emphasised by weight, not by a background**, which is a
+  deliberate difference from `Mark`. A Mark is right in a list of search results,
+  where the match is the reason the row is there. In a palette the match is a hint
+  while the label is what is being read, and a saturated background on every matched
+  character fights the text it sits inside. Two surfaces, two treatments, one reason.
+  
+  Three behaviours are decisions rather than defaults and are asserted in the tests:
+  
+  - **Enter never runs a command the reader did not point at.** With nothing
+    highlighted it does nothing. This is the one outcome a palette must never
+    produce, and it is invisible in a screenshot because nothing on screen changes
+    when it happens.
+  - **The arrows wrap.** A palette is a transient surface where overshoot is common,
+    and a reader who overshot should not have to press Up to come back.
+  - **The highlight is clamped, not reset, as the list changes.** A reader who arrows
+    down three rows and then types one more character is choosing from a list that
+    moved under them, and yanking the highlight to the top discards where they were.
+  
+  `keywords` is what makes the palette good rather than merely present: a reader who
+  has to name a command exactly already knows it exists, which defeats the surface.
+  `suggest` covers the rest, because a palette that opens onto a bare list makes a
+  reader type before they know what is available. `empty` takes the query so the
+  sentence can be the caller's, which is the only way "no results" avoids shipping in
+  English.
+- 932ce96: Add the data display substrate: item, scroll area, carousel, toggle and the rest
+  
+  Nine Items, and the one that matters most is `item`, because it is the row almost
+  every list in the package hand-rolls today.
+  
+  **`item` is the row and not the list.** A caller writes the `ul`, the `dl` or the
+  grid and composes rows into it, because the same row appears in four different
+  parents and a Component that owned the list would own all four.
+  
+  **`scroll-area` keeps the browser scrolling and takes over only the appearance of
+  the bar.** The alternative is a transform on a `div`, which looks identical in a
+  screenshot and has no scroll position, so no keyboard, no `scrollIntoView` and
+  nothing to announce. The custom bar is also a real accessibility obligation rather
+  than a decoration: a scrollbar is a control, and a control made of `div`s is worse
+  than the one the browser shipped.
+  
+  **`aspect-ratio` takes the ratio as a prop rather than as a class.** Prism's
+  stylesheet scans only Prism's own source, so a consumer's `aspect-[4/3]` is a rule
+  the shipped sheet does not contain, and the box silently collapses.
+  
+  **`carousel` is never the only route to its content.** Every slide stays in the
+  DOM, the controls state where the reader is through a required `position` function,
+  and there is a focus handoff: a control that has just been disabled leaves the tab
+  order without giving up focus, so a reader who pressed "next" onto the last slide
+  would otherwise be stranded inside the carousel.
+  
+  **`toggle` is pressed; a `switch` takes effect at once.** The JSDoc says so and one
+  test asserts the three controls side by side, because confusing them is the usual
+  failure and the confusion is a bug report rather than a compile error.
+  
+  **`toggle-group` changes the role, not the look.** `single` is a `radiogroup` of
+  `role="radio"` with `aria-checked`; `multiple` is a `toolbar` of pressed buttons
+  where the arrows move the highlight without pressing it. A `group` carrying
+  `aria-orientation` is an axe violation, so `group` was not implementable as the
+  issue's phrasing suggested, and the toolbar is the more accurate role anyway.
+  
+  **`native-select` is an addition and not a rival.** The existing `Select` is Base
+  UI: a `button role="combobox"` with a portalled popup, not a `select` element. A
+  native select is right when the platform picker beats anything this package could
+  draw, and wrong the moment an option needs to be more than a string. The test
+  renders both and asserts one is a `SELECT` and the other a `BUTTON`.
+  
+  **`button-group` draws the focus ring once around the group** and the members
+  suppress their own, with the click-versus-keyboard trade stated rather than hidden.
+  
+  **`table-sort` announces the direction it will go next, not the one it is in**, and
+  its cycle returns to unsorted in three clicks, so the caller's original order is
+  reachable from the control the reader already knows.
+- 3260391: `DiagramNode` carries a subtitle and a pack, and an unlabelled `Diagram` is named by its nodes
+  
+  **The subtitle is drawn, not only announced.** `DiagramNode` had one line of text
+  and `DiagramProps` forced `label` on the non-decorative arm, so the only channel
+  to a screen reader was the label. That is a text-only channel: a sighted reader
+  looking at the picture got nothing, and the drawn name and the announced label
+  were two strings a caller had to keep in step by hand. The subtitle is a second
+  `<text>` under the name, and a node without one emits no `<text>` at all, so an
+  absent subtitle is not an empty line.
+  
+  **A derived name makes the drift structurally impossible rather than discouraged.**
+  `DiagramProps` gains a third union arm in which `label` is absent and the name is
+  built from the nodes in draw order: `Tokens (the shared language), Pipeline (the
+  engine), Twins`. The arm is `label?: never` and not `label?: string`, so an unnamed
+  diagram and a diagram named with an empty string cannot be confused, and a blank
+  label falls back to the derived name rather than announcing an unnamed image.
+  
+  Relation words are deliberately **not** in a derived name. Inventing a sentence out
+  of the edges would make `Diagram` write words, which this system does not do; a
+  caller who needs the relations announced passes `label`, and the JSDoc says so.
+  
+  **`pack` is per node and typed `PackId`, not `string`.** A free-text field would
+  accept a name matching no emitted rule and the mark would silently keep the pack
+  above it. The closed six-pack union is the one `ProductMark` already uses. It is
+  per node rather than per diagram because a `pack` is a boundary on a **mark**, and
+  a mark in a diagram is a node; a pack on the whole diagram would be a boundary on
+  the arrangement, which is the thing the boundary law is not for. It is set on the
+  `<circle>` rather than the `<svg>` or the node's `<g>`, so it re-inks that one mark
+  and moves nothing else, and a circle is a shape the pack cannot re-round.
+  `'default'` is the absence of the attribute, as `ProductMark` spells it.
+  
+  `check-pack-boundary` now reads three boundaries and reports 0 findings.
+- 4650aff: Add `Diff`, where the bar measures how much of a line changed
+  
+  A conventional diff marks every changed line with the same coloured wash and a
+  rail. That tells a reader a line changed and nothing about how much, so rewriting
+  one identifier in a long line leaves the same mark as replacing the line outright,
+  and the reader's eye, which is fast at finding saturated bands, is drawn to the
+  least interesting change in the file.
+  
+  ```tsx
+  <Diff
+    lines={[
+      { kind: 'context', oldNumber: 1, newNumber: 1, content: 'export function run() {' },
+      { kind: 'removed', oldNumber: 2, content: '  const limit = 100', changed: [[8, 13]] },
+      { kind: 'added', newNumber: 2, content: '  const limit = 250', changed: [[16, 19]] },
+    ]}
+    label="Changes to run"
+    labels={{ added: 'Added', removed: 'Removed', context: 'Unchanged' }}
+    file="src/run.ts"
+    summary="1 addition, 1 deletion"
+  />
+  ```
+  
+  **The bar is change density.** Its width is the fraction of the line that actually
+  changed, so a one-character edit in a long line is a sliver and a rewritten line
+  fills the gutter. The marks that used to be a wash become a measurement, and the
+  eye goes where the reviewer's attention belongs.
+  
+  **The line numbers carry the side, not the colour.** An added line has a new number
+  and no old one, a removed line the reverse. That asymmetry is structural, it is how
+  every diff reader a developer has used distinguishes the two, and it does not depend
+  on telling red from green. The colour is redundant on top of it, which is the right
+  way round: shape carries the meaning, colour reinforces it.
+  
+  **The changed words are emphasised by weight, not by tint.** A diff that coloured
+  them green and red would spend the two hues a reader is most likely to be unable to
+  distinguish, and would also fight the line's own state colour. Weight survives
+  greyscale, which is the condition any encoding here has to survive eventually.
+  
+  **It is a table**, because a diff is two columns of numbers beside a column of
+  text, and row and column navigation then come from the semantics rather than from a
+  grid of divs.
+  
+  `labels` is required, for the same reason a Dialog's close label is a prop: a
+  shared library cannot know whether the word for this is "added", "ajoute" or
+  "hinzugefugt". `summary` is the caller's too, and a diff of a rename has no
+  additions and no deletions and is still a change, which is the case a computed
+  sentence gets wrong. The counts are exposed as `data-added` and `data-removed` so
+  a caller can style them without the Component shipping a sentence.
+  
+  A test caught a real flaw in the first draft. A minimum bar width was applied to
+  every changed line to keep one visible, which meant a one-character change in a
+  long line was drawn at twelve percent when the data said half a percent. A
+  measurement is not allowed to overstate what it measured, so the floor now applies
+  only where the density is genuinely unknown, which is a changed line the caller
+  gave no ranges for.
+- 3260391: `DocsShell` refuses a page with no address, and renders a link with no words as a label
+  
+  **This is a behavioural change and the honest reading of it is that a previously
+  rendered page now throws.** Two leaks fed it. `DocsNavGroup.href === undefined` was
+  the only guard, so `href: ''` fell to the anchor arm on both arms of the union, and
+  `flatten` copied the same value into `Neighbour`, so one bad row published a second
+  broken link in the pager. `title: string` admitted `''` on both arms, rendering a
+  link announced as "link" and nothing else. Nothing in the type could stop either,
+  and the Component's own JSDoc claimed that it could.
+  
+  An anchor with an empty `href` is a control a keyboard can reach and cannot operate,
+  so the fix is at the tree rather than at the rendering: one pass over both `nav` and
+  `toc` at the top of `DocsShell`, before anything renders, and a **page** with a
+  blank address throws, naming the tree and the entry. Only the page arm is refused. A
+  group with no address has a documented rendering, and a page has nothing to render
+  in place of the link, so a label there would hide a page the tree is missing rather
+  than report it.
+  
+  **Blank counts as absent, and that is required rather than pedantic.** All three
+  consumer adapters write `url: node.index?.url ?? ''` for a folder with no index, so
+  on the group arm `''` is the documented "no route" state and must render as a label.
+  
+  **A second bug surfaced while fixing the first.** `containsHref` read the group's
+  address directly, and `under('', currentHref)` is `currentHref.startsWith('/')`,
+  which is true for every absolute address. Treating `''` as "no address" in the
+  renderer without fixing this would have made every label-only section claim to be
+  the current one at once, so it reads through the same helper the renderer uses.
+  
+  The rail and the pager now ask one function whether an entry is a destination, so a
+  row that is a label on the rail cannot become a neighbour in the pager.
+- 932ce96: Add the feedback substrate: Spinner, Toast and the Empty State Block
+  
+  Three Items, and the one that changes an existing Component's behaviour is the
+  `Toast`.
+  
+  **A pause holds the remaining time rather than restarting it.** A reader who
+  hovers or focuses a toast for ten seconds gets the four seconds they had left, not
+  four fresh ones, because a rest is a fact about the reader and the countdown is
+  about the content. Restarting the clock on every pointer move means a toast can be
+  held open indefinitely by a reader who simply rests on it, which is the opposite of
+  what a pause is for.
+  
+  **`duration` defaults to 4000 with its reason, and `0` turns the clock off.** A
+  toast that vanishes before a screen reader has finished announcing it is worse than
+  no toast at all, and a toast that never leaves strands the reader. Both are
+  judgements about the reader rather than about the content, which is why the
+  default is stated and overridable rather than fixed.
+  
+  **`closeLabel` is required with no default**, and it is the only surface in the
+  package where a default is wrong rather than merely unhelpful. A toast arrives on
+  its own initiative, with no button the reader pressed and no context to carry an
+  implication about the product's language, so four products in two languages cannot
+  all be told the control says "Close". A default is right when the caller may
+  override it; here the string is the whole of the contract and guessing it is
+  guessing a product's words.
+  
+  **The enter and leave are three phases with the handoff on the element's own
+  `transitionend`**, filtered to `opacity` and with no second clock. Two timers for
+  one animation is two things to keep in step, and a mismatch shows as a toast that
+  fades and never goes.
+  
+  **`Spinner` is a server Component.** It holds no state, runs no hook and attaches
+  no handler, so the client directive would be a claim about work it does not do. Its
+  JSDoc states the three-way difference from `Progress` and `Skeleton`, because
+  "reports a position", "has the shape of what is arriving" and "something is
+  happening" are three different claims and the usual failure is using the third when
+  the first or second is what the reader needed. The honest reason a spinner is often
+  wrong is layout shift: it hides the shape of what is coming.
+  
+  **`EmptyState01` requires a `reason` closed to three values**, because
+  `first-run`, `no-match` and `not-permitted` want different words and different
+  actions, and a consumer who cannot say which kind of empty they have writes "No
+  data", which is the state this Block exists to end. It throws rather than shipping
+  a button that lies, following the `instrument-panel-01` precedent.
+  
+  ## Nothing was deleted, and that is a finding
+  
+  The fourth part of this ticket was to remove a superseded `empty` entry. The search
+  was exhaustive across `packages/tokens/src`, the emitted tokens, the catalogue, the
+  registry and the whole tree, and there is no `empty` token, no `empty` Component and
+  no `empty` catalogue entry to remove. It was already resolved: `DESIGN.md` records
+  that the old `empty` Component "returns as `empty-state-01`, a Block", and the
+  change note that renamed it is in the history. Nothing was invented in order to
+  have something to delete.
+- 932ce96: Add the form substrate: combobox, calendar, date picker, number field and the rest
+  
+  Nine Items, and the one that changes an existing Component's behaviour is the
+  `Combobox`.
+  
+  **Typing never discards a choice.** A field showing exactly the chosen label is
+  not narrowing anything, so "chosen and filtered out" is not a reachable state: the
+  answer changes only on an explicit choose or an explicit clear. A combobox that
+  empties its own selection as a reader types is the usual failure, and it loses
+  data silently.
+  
+  **`Command` is the leaf row and it ranks nothing.** `matchRange` is a prop, so
+  whoever filtered the list decides where the match fell, and one command object can
+  be spread onto the row with its `keywords` accepted and never rendered.
+  
+  **`Calendar` keeps a disabled date drawn and in the arrow path, and refuses to be
+  chosen.** A date that is simply absent is indistinguishable from a grid that
+  failed to render that week, and a reader paging with the arrows should not have
+  the path change under them.
+  
+  **`DatePicker` reseeds the month on show from the chosen value**, so re-picking a
+  date in another month does not silently reset the grid to the month the caller
+  created the field in.
+  
+  **`InputGroup` puts the focus on the control and the ring on the control.** The
+  frame is a `div` and is never focused, because putting the ring on a wrapper is how
+  an indicator ends up around the wrong box.
+  
+  **`NumberField` clamps a value as it arrives, not only as it is typed**, and an
+  empty field reports `null` rather than zero. Base UI clamps typing and refuses the
+  steppers past a bound but lets an out-of-range `value` straight through, so the
+  clamp is applied on the way in and the consequence for a controlled consumer is
+  documented: `onValueChange` is the authority.
+  
+  **`OneTimeCode` holds the code as one value, not six.** Backspace removes a
+  character from the string and the rest close up, which is the only rule for an
+  empty box that is not wrong for somebody. Base UI's own field strips the label from
+  the first segment on purpose, so a visually hidden `<label for>` is rendered
+  instead, and its steppers are put back in the tab order because an announced
+  control a keyboard cannot reach is worse than a second stop.
+  
+  **`Form` makes the error and the way out of it one unit.** `FormError` draws the
+  message and the caller's `action` in a single live region that is in the document
+  before either of them, so a server error that arrives with the form is announced
+  rather than appearing silently.
+  
+  **`Label` keeps the required mark as decoration.** The control's own `required` is
+  what is announced and what the form enforces, so a second signal that says
+  something slightly different is the thing to avoid.
+  
+  ## The ranking is now one module, not two surfaces' private copy
+  
+  `locate` and `RANKS` moved to `packages/ui/src/lib/rank.ts`, and the `Combobox`
+  imports them from there rather than from the `CommandPalette`. A command palette
+  and a combobox that each carried their own scorer would agree for a month and then
+  diverge on the case nobody thought about, and a reader would find a query that
+  floats to the top in one surface and sinks in the other. The first version put the
+  scorer inside the palette and the combobox reached into a composite for it, which
+  compiles and typechecks and is still wrong: the next surface to need one has no
+  honest module to import, and the tempting answer is to copy the one it can see.
+- 3260391: A hero action is the element you asked for, and a product row can carry its own sentence
+  
+  **`HeroAction` is a union, so a wrong action is a compile error.** It was one shape
+  with an optional `href`, which made both likely mistakes silent. `{ label: 'Start
+  free' }` compiled and rendered a primary button that went nowhere, and a hero's
+  first action is almost always a link, so that is the likely one and it looks
+  correct on the page. `{ label: 'Start free', href: maybeUrl }` compiled too, and
+  rendered a button whenever `maybeUrl` was `undefined`, which is a runtime branch the
+  type said nothing about.
+  
+  So the link arm **requires** `href` and the button arm **forbids** it, as
+  `href?: never`. The second is the one worth having: a value that is sometimes a
+  string and sometimes `undefined` is now a type error rather than a button. That is
+  the ticket's "a caller should not be able to get it wrong silently", and it is a
+  type rather than a runtime branch, which is the criterion the ticket asked for.
+  
+  **The forward arrow now follows the element, not the position.** It was
+  `index === 0`, so an inert button was the one control in the action row wearing the
+  mark that says it can be followed. A first action that is genuinely a button gets no
+  arrow, and a second action gets none even when it is a link, because the arrow marks
+  the row's one primary destination.
+  
+  The default **variant** stays positional, deliberately, and the two now move
+  separately. What looks primary is a fact about the row's shape; whether it navigates
+  is a fact about the element. Asserting they do not move together is the point,
+  because the arrow used to follow position for both.
+  
+  The ticket's claim that the Block "renders every action as a plain `<Button>`" was
+  stale, the way the Cta01 one was: `CtaLink` had already fixed the rendering. What
+  was left was the half that had not been fixed, the type, plus the arrow and a test
+  file, which did not exist. Eight tests assert the rendered element for each arm, the
+  negative as well as the positive, the arrow on a link and its absence on a button,
+  and `newTab` with its `rel`.
+  
+  **`ProductGrid01Product` gains an optional `detail`, and the JSDoc settles which
+  level a sentence belongs at.** The documentation previously said a second line
+  "belongs above the grid in `description`, where it applies to the set". That is true
+  of a sentence about the set and false of a sentence about one product, and the
+  company site had five products each carrying a sentence that was true of one and
+  vacuous beside the other four. The migration folded nothing in, so three published
+  sentences were dropped and the ledger recorded the loss as a catalogue gap rather
+  than papering over it with a copy edit.
+  
+  Both levels now exist and the question to ask is written down: **does the sentence
+  survive its neighbours?** A `description` would be equally true if you deleted any
+  one row. A `detail` is false, or vacuous, beside the other four. A tagline is the
+  shortest true thing about a member and reads the same in every row, which is what
+  distinguishes it from a `detail`.
+  
+  A `detail` is drawn only when passed. A row that reserved the line would push every
+  row below it down by one, and this is a stack of full-width rules where a ragged
+  left edge is the most visible thing on the page. Six tests render both shapes,
+  because a test asserting only the new field would pass on a Block that had quietly
+  stopped drawing the grid-level description, which is the half every existing caller
+  depends on.
+  
+  **Two proofs that the new tests can fail.** Reverting the arrow to `index === 0`
+  fails exactly one case, the one the defect lives in. Reverting
+  `childLevel(headingLevel)` to a hardcoded `h3` in the card-title work fails two.
+  Neither defect would have been caught by an assertion of the shape the ticket
+  described.
+- 4650aff: Add `Meter`, so a bounded measurement can show the limits it is approaching
+  
+  A disk at 95 percent and a test at 95 percent are the same reading until you say
+  where the line is. Prism had a Progress for a task moving toward an end whose
+  length is not known in advance, and nothing for a quantity that already has an
+  answer against a limit the caller knows.
+  
+  ```tsx
+  <Meter
+    value={97}
+    label="Storage used"
+    valueText="97 gigabytes of 100"
+    thresholds={[
+      { at: 80, tone: 'warning' },
+      { at: 95, tone: 'destructive' },
+    ]}
+  >
+    <span>97 of 100 GB</span>
+  </Meter>
+  ```
+  
+  **The thresholds are the design.** A fill on its own is one number, and a number
+  with no limit beside it cannot be acted on. Drawing the caller's own limits as
+  notches on the track puts the boundary next to the reading, so a consumer passing
+  a latency budget gets a latency budget rather than a generic bar filled to a
+  similar fraction. The Component has no opinion about which numbers matter.
+  
+  **It stays neutral below every threshold.** It can see that a value is 40 percent
+  of a maximum; it cannot see that 40 percent is a problem. The same number is
+  routine on a latency budget and urgent on a disk quota, so a Component that
+  coloured itself would be making a claim about the caller's product on the
+  caller's behalf.
+  
+  **It is drawn as a hairline with ticks, not as a bar.** The Progress in this system
+  is a two-pixel rounded trough, and a Meter that looked like one would be read as
+  one. The difference is visible before it is read.
+  
+  `role="meter"` rather than `progressbar`, which is the ARIA distinction the whole
+  Component turns on, and assistive technology reports the two differently. It is
+  not a live region: the change that moved the reading is usually the thing worth
+  announcing, so a consumer that wants it announced wraps it in a `LiveRegion`.
+  
+  Two failures are handled rather than rendered, because neither is visible in a
+  screenshot. A value past the maximum is clamped to the track instead of drawn
+  past its end, and a scale whose minimum equals its maximum draws an empty track
+  instead of a `NaN` width, while still measuring.
+- 932ce96: Add the overlay and menu substrate: alert dialog, context menu, menubar, sheet
+  
+  The eight Items that every menu-shaped surface in a product otherwise hand-rolls.
+  Each is composed on the Base UI primitive rather than reimplemented, because focus
+  trapping, portals, dismiss-on-outside-press and escape handling are four behaviours
+  that are already correct there and four chances to get one wrong here.
+  
+  Each one makes a decision a consumer would otherwise make badly:
+  
+  - **`alert-dialog`** removes dismissal from the *type*, not just the default.
+    `modal` and `disablePointerDismissal` are omitted from its props, so a caller
+    cannot pass a value that re-enables outside-press dismissal on a surface whose
+    subject is a decision. Escape still closes, and there is no corner X, because an X
+    is a third answer to a question with two. `AlertDialogAction` is its own part,
+    styled destructive by default, because the one button that must exist is that one.
+  - **`context-menu`** knows which rows are commands and which are destinations.
+    `ContextMenuItem` is a `div role=menuitem`; `ContextMenuLinkItem` is a native
+    anchor. Two parts rather than one, so the "open in a new tab" case cannot be a div.
+  - **`hover-card`** can never be the only route to what it shows, which is what makes
+    its delay safe. The trigger is a real anchor, so a long delay costs a reader
+    nothing, and `delay` is a prop because a pointer rest is a fact about the reader.
+  - **`menubar`** is one Tab stop and owns the arrows inside itself, and it requires a
+    `label` because nothing announces a bar until focus lands on it.
+  - **`navigation-menu`** knows it holds links, so it ships no command part at all, and
+    a closed group holds no links with `keepMounted` as the stated seam.
+  - **`sheet`** is the Dialog with an edge. `side` is required and excludes `center`.
+    All six overlay behaviours are inherited, not reimplemented, and a sheet dismisses
+    on an outside press, which is the contrast with the alert dialog.
+  - **`collapsible`** wires the trigger and the region with the library's own
+    `aria-controls` and `aria-expanded`, and unmounts the closed panel so find-in-page
+    and a screen reader see the same page the reader does.
+  - **`resizable`** puts the whole behaviour on a focusable `separator` with a value,
+    and remembers nothing: the position is a prop and a callback, because a design
+    system cannot know a reader's panes.
+  
+  **`resizable` is not composed on Base UI, because Base UI 1.8.0 ships none.** The
+  package's exports were enumerated and there is no `./resizable` and no `Resizable*`
+  symbol, so the separator role, the focusable-divider keyboard model and the pointer
+  drag are authored here. That is the one hand-rolled overlay in the batch, and it is
+  confined to the three things an overlay must not reimplement, none of which a
+  divider needs. It should be revisited when Base UI ships one.
+  
+  The focus-indicators gate test no longer pins which slot happens to sort first in
+  the composite-widget bucket, nor the exact excluded total. Every additional menu in
+  the package adds members to that bucket, so both were tests that failed when a
+  correct Component was added. The count is now bounded from below, which is the
+  invariant that holds as the tree grows.
+- e14a903: `ProcessFlow01`: a pipeline of any length, drawn in order across as many lines as it needs
+  
+  `ProcessRail01` holds two, three or four steps and refuses a fifth in its type, and
+  that decision is not in question. A rail is a claim about a sequence on one line, and
+  a rail that quietly dropped a step to fit a width would be a diagram of a process that
+  is not the process. A company site states six stages and was drawing them as a grid of
+  short points, where the six ordinals and the terminal label were lost: a set read
+  where a sequence had been.
+  
+  So the repair is a second shape rather than a wider tuple. Raising the rail's ceiling
+  to six would have made the fourth column unrepresentable as a type error, which is
+  the property that made the original decision good.
+  
+  **It is one ordered list, and the layout is built around that.** A flow that wrapped
+  into a list per line would be several lists, and a screen reader would announce three
+  lists of two, which is precisely the set-where-a-sequence-was this Block exists to
+  prevent. So the stages are one `<ol>` and the wrapping is done by the grid. That has a
+  consequence worth stating: the Block never learns where a line broke, and therefore
+  cannot draw anything that is only correct on the widest screen.
+  
+  **The ordinal is the continuity mechanism, and it is treated as one.** It runs
+  continuously from `01` to the last stage and it is stated as text rather than only
+  drawn, so a reader who lands on stage four hears `04` and knows it continues stage
+  three at whatever width they are using. Nothing else in the Block is load-bearing for
+  the sequence, and that is why nothing else needs to know where the line broke.
+  
+  **The thread is a line through the stages, not a box around each one.** Each stage
+  draws a top border and the grid separates them by a single pixel, so a run of stages
+  on one line reads as one line broken by hairline gaps and the gap between two lines is
+  wider. It is the rail's technique, and it is chosen here for one reason: it holds at
+  any column count, including the single column a phone gets, without the Block knowing
+  anything about it. A connector drawn between a stage and its successor would need the
+  column count to be right and would be wrong at every width the type does not describe.
+  
+  **`stages` is an array and `columns` is a prop**, which is the split the ticket asks
+  for. The length is content and the grid carries it; how many sit on one line is
+  layout, and a caller who has to state both has to keep them in step by hand.
+  
+  **A flow of fewer than two stages throws.** One stage is a label, not a sequence, and
+  the line the Block draws through it would claim a sequence that is not there. The
+  message names `ProcessRail01` as the answer for two.
+  
+  ## The proof that the tests can fail
+  
+  The two assertions that matter are structural rather than visual, and each was proved
+  by writing the mistake it exists to catch:
+  
+  - An ordinal that restarts per row, which is what a per-row implementation does, fails
+    two cases: the continuous-ordinal assertion and the terminal-label one, because the
+    last stage is then no longer the one the label is attached to.
+  - A list nested per group of three, which is the set-where-a-sequence-was failure
+    arriving through the markup, fails four.
+  
+  An assertion that the flow "looks like" a sequence would have passed both.
+  
+  The stage names are deliberately **not** headings. The sequence is the list, and
+  promoting six stages to headings would put six entries in the outline for one process,
+  so the section title is the only heading this Block renders.
+- 4650aff: Add `RunConsole01`, a run as a heading, a budget and the steps that got there
+  
+  The surface the fourth Kind exists for, and a Block rather than a Component
+  because a run console is not one thing: it is a measurement beside a sequence
+  beside a stream, and a reader needs all three in the same frame to answer the
+  only question they have, which is whether the run will finish and what it is
+  costing.
+  
+  ```tsx
+  <RunConsole01
+    title="Nightly reconcile"
+    streaming={running}
+    copy={{
+      budgetLabel: 'Budget spent',
+      budgetValue: (value, max) => `${value} of ${max} credits`,
+      stepsLabel: 'Run steps',
+      title: 'Run',
+      waiting: 'Waiting for the first step',
+    }}
+    budget={{ value: 4200, max: 5000, thresholds: [{ at: 4500, tone: 'warning' }] }}
+    steps={steps}
+  />
+  ```
+  
+  **It reimplements nothing.** The budget is a `Meter`, which draws the limits the
+  caller named and stays neutral below all of them. The steps are a `Timeline`, which
+  draws each duration to scale against the slowest one. What the Block adds is the
+  arrangement, and two facts belonging to neither component: a run with no budget
+  gets no budget meter, because a local run has no ceiling to be near and an empty
+  meter is a measurement of nothing that is invisible because an empty meter looks
+  like a meter; and the budget sits above the steps, because the first question about
+  a run is whether it will finish and two columns would make the reader choose.
+  
+  **The live region exists only while the run is arriving.** A test caught this. The
+  first draft wrapped the steps unconditionally, which left a live region on the
+  page for a run that had already finished: it announces nothing on mount, but it is
+  still there, and a later re-render with different steps is an unrelated change it
+  will announce. Mounting it when the run starts is also the order that does not
+  lose an announcement, because the region is on the page before the first event
+  arrives, which is when a screen reader is listening. It wraps the steps and not the
+  budget, so an append does not re-read the spending every time.
+  
+  **`LiveRegion` is a server Component, and that is a correction.** It shipped in
+  0.8.0 carrying `'use client'` while reading its props, holding no state, running no
+  hook and taking no event handler. The directive was a claim about work the
+  Component does not do, and sixteen of forty-one components in this package are
+  client. A live region is announced by the browser's own mutation observer rather
+  than by JavaScript, which is the reason it is a good primitive: it works in a
+  server-rendered page.
+  
+  ## The client budget
+  
+  The whole-tree client bundle measures **108.1 KB** with this branch's components
+  in it, against a 116 KB ceiling, and the five components here cost about **0.1 KB**.
+  
+  That is worth stating plainly, because the number looked very different for a
+  while. An earlier draft of this branch reported that the components added 2.3 KB,
+  crossed a 92 KB ceiling, and needed the ceiling raised. That measurement was taken
+  against a gate whose roster read two directories, and it was wrong for the same
+  reason the old ceiling was: 53 emitted client modules were never read. The roster
+  has since been widened to the whole tree, the honest figure is 108 KB, and these
+  components land inside the existing ceiling with about 8 KB of headroom.
+  
+  **No ceiling change is proposed here.** The one that was drafted has been dropped
+  rather than applied, because it would have moved a number to accommodate a
+  measurement that was itself measuring the wrong set of files.
+- 3260391: `StackGrid01` names the real product behind a codename, and `Cta01` states the rule it enforces
+  
+  **`StackPart` gains an optional `realName`.** The value goes inside the tile the
+  Block already draws, so it is an additive optional field, matching `ProductGrid01`'s
+  `pack` and `StatusLedger01`'s `detail`. It renders only when passed: a tile that
+  reserves a line for absent content is a layout shift on the first thing a reader
+  scrolls to, and because the grid is a grid, an empty line in one column would also
+  knock the row's baseline out for every tile beside it. Both are asserted, the
+  second by counting elements rather than by checking a class.
+  
+  **`Cta01`'s JSDoc told consumers the opposite of the truth.** It said a panel wants
+  `default` or `secondary` and never `outline`, which was the answer *before* the
+  `outline` variant was given its ink, and it contradicted the code forty lines below
+  it, where the second action defaults to `outline`. A consumer reading the type would
+  have been actively misled. The settled rule is the inverse on the first variant:
+  `secondary` and `outline` are both fine and `default` is the one to avoid, because
+  the band is `bg-primary` and `default` fills with `--primary`, so a default action
+  on this band is the band's own colour against the band's own colour. Its label is
+  legible, because `primary-foreground` on `primary` is a gated pair, and the control
+  has no edge, which is a different defect and the reason the sentence is about the
+  fill rather than the text.
+  
+  **A test that measured a pair it believed in.** The existing resolved-ink test
+  asserted the pair the test itself thought the defaults resolve to, so it stayed green
+  on a Block that had stopped asking for it. The new case renders `Cta01` with no
+  explicit variant, reads the utilities off the two anchors, maps each to the token it
+  names, and resolves those tokens from the emitted CSS. It asserts the resolved pair
+  rather than the class string, because a class-string assertion passes on a token
+  change, and it adds two things a ratio cannot see: that the ink is stated rather than
+  inherited, and that the fill is one the band is not.
+  
+  The ticket's single lavender-dark figure understated the blast radius. The base pack
+  failed in **both** modes, at 1.00:1 and 1.01:1, and seven of twelve combinations were
+  affected. It is 13.59:1 or better in all twelve now.
+  
+  **The acceptance criterion asked for the wrong instrument.** It asked for a row in
+  the token contrast gate, and that gate structurally cannot see this class of defect:
+  it measures token pairs, and what failed was a component declining to use a value it
+  was relying on by accident. `check-variant-ink.mjs` is the gate that holds it, and it
+  already existed.
+- e14a903: The fourth Kind: `live`, a surface whose content changes without a navigation event
+  
+  **This is a breaking change, released as a minor: 0.11.0.** `CATALOG_KINDS` gains a
+  member, so a consumer switching exhaustively over `kind` is broken. A minor is the
+  right line for a breaking change from a `0.x` version, where anything may change at
+  any time, and taking 1.0.0 would declare the public API stable rather than describe
+  this change. `CONTRIBUTING.md` says a breaking change is a `major` bump, so this is
+  the one place the convention and the record disagree; the disagreement is deliberate
+  and `DESIGN.md` carries it with the reasoning.
+  
+  **A `live` surface is what the other three cannot express.** A Component, a Block and
+  a Page are all rendered from props, and props arrive when the caller says so. A run's
+  event log, a monitoring view, anything fed by a socket, changes on its own. That is
+  the whole of the fourth Kind, and it is why `RunStream01` is the first client
+  Component in the package: a surface that receives events owns the subscription that
+  delivers them, and that is not an accident of implementation.
+  
+  **Prism owns the surface, the consumer owns the transport.** `subscribe` is a
+  function the consumer supplies and a function it tears down. There is no socket, no
+  endpoint, no retry policy, no persistence and no provider to mount, so a consumer
+  that already has a connection passes it in and one that does not has not acquired a
+  client runtime by importing this.
+  
+  **Four transcriptions were found by the compiler rather than by a reader**, which is
+  the argument for the ties that already existed. `STORE_KINDS`'s `_KindsMatch`
+  assertion fired on the first edit. The exhaustive `KIND_LABELS` record added
+  earlier fired the next, and adding a Kind is now a compile error in both places. The
+  corpus builder's `KIND_SEGMENT` produced a mirror path of `undefined` and the
+  `llms` gate reported it. And the site's three copies of the Kind labels were
+  collapsed into one table, so the fourth Kind is one edit rather than three.
+  
+  **One divergence is deliberate and named.** A `live` surface ships as
+  `registry:block`, because the `type` field belongs to the shadcn registry schema,
+  which has no live surface and rejects a type it does not know. The **Kind** is ours
+  and is `live` in `CATALOG_KINDS`, the corpus, the MCP tools and the site's Sections.
+  The registry is a derived internal artefact, never served and never an install lane,
+  so the two vocabularies are allowed to differ because only one of them is ours. The
+  catalogue gate carries it as a named exception keyed on the Item's own `source`, so
+  the exception cannot drift from the thing it excuses, and the other 103 items are
+  still compared strictly.
+  
+  **The Section plurality rule is gone, and two Sections is why.** It read that a
+  Section holding Items is plural. `patterns` broke it from the prose side and `live`
+  from the catalogue side, because `components`, `blocks` and `pages` are plural nouns
+  and `live` is an adjective with no plural. A rule two of nine Sections decline is a
+  convention, not a law, and a second exception would have invited a third. What is
+  asserted instead is the fact underneath it: every Section is registered once, in the
+  root ordering, at a segment the manifest agrees with.
+  
+  ## The proof that the tests can fail
+  
+  `RunStream01`'s fourteen tests are proved by writing the mistakes they exist to catch.
+  Appending instead of sorting, which is the reconnect bug, fails the ordering cases.
+  And three defects were found by the tests rather than reasoned about in advance:
+  
+  - **`statusLabel` rendered twice.** The heading fell back to it when no `title` was
+    given, so "Failed after 3 attempts" was the surface's subject *and* its state. A
+    status is not a heading.
+  - **`initial` was a trap.** It read like the current event list and quietly seeded
+    only once. It now also *reseeds* when `resubscribeKey` changes, which is what a
+    second run in one surface means, and the log clears with it rather than the old
+    run's events growing the new run's.
+  - **A `setNewest` before its declaration**, which the run-switch test caught as a
+    temporal-dead-zone error and which no type checker in this repository would.
+  
+  **A `live` surface is budgeted, not exempted.** A Block composes Components, so its
+  own client figure restates theirs. A live surface is the only client code a consumer
+  pulls in *for itself*, so it has a row: 10 KB, of which `ScrollArea` is 8.1. The
+  figure is set above the measured size, because a budget below it is a wish.
+- 4650aff: Add `Timeline`, so a run of events can be read for where the time went
+  
+  A run's events in order answer "what happened" and are silent on the only other
+  question anyone has about an agent run, a deploy or an import: which step was
+  slow. Today that means reading every number and doing the arithmetic.
+  
+  ```tsx
+  <Timeline
+    entries={[
+      { id: 'plan', title: 'Plan', duration: 900 },
+      { id: 'read', title: 'Read feed', duration: 4200 },
+      { id: 'edit', title: 'Edit source', duration: 1200 },
+      { id: 'done', title: 'Ready' },
+    ]}
+    label="Run steps"
+  />
+  ```
+  
+  **The bars share a left edge and are scaled against the longest step in the run.**
+  That is the whole idea, and the relative scale is the deliberate choice: the shape
+  of the run is the question, and a shared zero baseline would be a second axis
+  nobody reads. The consequence worth stating is that the bars answer "which step was
+  slow" and deliberately do not answer "how long did the run take", because only the
+  caller knows whether its steps ran sequentially or overlapped.
+  
+  **A step with no duration draws no bar.** A run's opening event has no length, and
+  a zero-width bar beside it would read as "this was instant" rather than "this has
+  no duration", which are different claims and only one is true.
+  
+  **It is an ordered list, so the sequence and the count are in the accessibility
+  tree.** The marks and spine are `aria-hidden` on the rail that holds both, and the
+  entry's own words carry the state, so nothing depends on a reader distinguishing
+  the marks. It is not a live region: a run still arriving is normally wrapped in a
+  `LiveRegion` by the caller, because announcing the list itself would re-announce
+  the whole run on every append.
+  
+  Three degeneracies are handled rather than rendered, and all three are invisible in
+  a screenshot: a run where no step reports a duration draws no bars rather than
+  dividing by nothing, a zero duration does not win the longest-step comparison and
+  scale everything else away, and the spine stops at the last entry rather than
+  trailing past the end of the run as though a step had not arrived.
+  
+  The four states are a different vocabulary from the four product-capability tiers
+  a `StatusLedger01` row carries, and they are two lists about two subjects rather
+  than two lists about one: a `planned` agent run is a category error and a `failed`
+  capability is a category error, which is the test that tells them apart.
+
 ## 0.10.2
 
 ### Patch Changes
