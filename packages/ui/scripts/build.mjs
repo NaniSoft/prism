@@ -10,6 +10,11 @@
  *      base layer. A consumer imports only the emitted stylesheet and installs
  *      no Tailwind.
  *
+ * And one repair between them: the emitted tree has its relative specifiers
+ * rewritten to carry file extensions, which is what makes the package loadable by
+ * Node's ESM loader and not only by a bundler. The reasoning for doing it here
+ * rather than in the source is at the step.
+ *
  * The token package's emitted CSS is a build input, so this script refuses to
  * run when `@nanisoft/prism-tokens` has not been built rather than emitting a
  * stylesheet with missing variables.
@@ -63,7 +68,81 @@ execFileSync(process.execPath, [tsc, '-p', 'tsconfig.build.json'], {
   stdio: 'inherit',
 })
 
-/* ── 2. The one stylesheet ───────────────────────────────────────────────── */
+/* ── 2. The extensions Node's loader needs ──────────────────────────────── */
+
+/**
+ * Rewrite every relative specifier in the emitted tree so it carries a file
+ * extension, in both the JavaScript and the declarations.
+ *
+ * **The problem, and it is a packaging defect rather than a consumer
+ * inconvenience.** `tsc` emits an import specifier exactly as it was written in
+ * the source, so `import { cn } from '../../lib/utils'` reaches `dist` unchanged.
+ * Every bundler resolves that, which is why four downstream sites build and why
+ * this went unnoticed. Node's ESM loader does not, and the package's own
+ * `exports` map points at those files, so the manifest invites an `import()` the
+ * artefact refuses.
+ *
+ * **Why the build and not the source.** Writing `./utils.js` in every source file
+ * is the other way to fix this, and it is the wrong way here for one concrete
+ * reason: the repository runs Tailwind over the source, and a dozen gates read
+ * source text. Churning every specifier in `src/**` to satisfy Node would put the
+ * change in the place a human looks when a Component misbehaves, and the benefit
+ * is only observable in the output. The output is therefore where the fix goes.
+ *
+ * It rewrites only relative specifiers. A bare specifier like `react` is already
+ * what Node expects and must not be touched, and a specifier that is already
+ * absolute or already carries an extension is left exactly as it is, so this is
+ * idempotent and a second run changes nothing.
+ */
+function resolveSpecifiers() {
+  const roots = ['.', 'components', 'blocks', 'pages', 'lib', 'provider']
+  let rewritten = 0
+  let inspected = 0
+
+  for (const root of roots) {
+    const dir = path.join(DIST, root)
+    if (!existsSync(dir)) continue
+    for (const entry of readdirSync(dir, { recursive: true, withFileTypes: true })) {
+      if (!entry.isFile()) continue
+      if (!entry.name.endsWith('.js') && !entry.name.endsWith('.d.ts')) continue
+      const file = path.join(entry.parentPath, entry.name)
+      const source = readFileSync(file, 'utf8')
+      inspected += 1
+
+      // `from './x'`, `import './x'` and `export ... from './x'` are the three
+      // shapes that resolve a relative file, and they are matched by the
+      // specifier rather than by the statement so a specifier inside a string or a
+      // comment is not rewritten by accident.
+      const next = source.replace(
+        /(\bfrom\s*|\bimport\s*\(?\s*)(['"])(\.\.?\/[^'"]*)\2/g,
+        (whole, lead, quote, specifier) => {
+          if (path.extname(specifier) !== '') return whole
+          const base = path.resolve(path.dirname(file), specifier)
+          // A directory import resolves through its index, so try that first and
+          // fall back to the file itself. The emitted tree is known at build time,
+          // so this is a filesystem check rather than a guess.
+          const target = existsSync(path.join(base, 'index.js'))
+            ? path.join(base, 'index.js')
+            : `${base}.js`
+          if (!existsSync(target)) return whole
+          let rel = path.relative(path.dirname(file), target).split(path.sep).join('/')
+          if (!rel.startsWith('.')) rel = `./${rel}`
+          return `${lead}${quote}${rel}${quote}`
+        },
+      )
+
+      if (next !== source) {
+        writeFileSync(file, next)
+        rewritten += 1
+      }
+    }
+  }
+  return { rewritten, inspected }
+}
+
+const specifiers = resolveSpecifiers()
+
+/* ── 3. The one stylesheet ───────────────────────────────────────────────── */
 
 const postcss = require('postcss')
 const tailwindcss = require('@tailwindcss/postcss')
@@ -128,5 +207,12 @@ const kb = (file) => `${(statSync(file).size / 1024).toFixed(1)} KB`
 
 console.log(
   `prism-ui: ${js.length} JS, ${declarations.length} declarations, ${maps.length} declaration maps`,
+)
+// Printed because a step that can silently do nothing is a step that will: a
+// future change to the emitted layout that leaves every specifier already
+// qualified would report zero and look like a pass.
+console.log(
+  `prism-ui: ${specifiers.rewritten} of ${specifiers.inspected} emitted file(s) had relative ` +
+    `specifiers resolved to file extensions, so Node's ESM loader can import this package`,
 )
 console.log(`prism-ui: dist/styles.css ${kb(STYLES_OUT)}`)

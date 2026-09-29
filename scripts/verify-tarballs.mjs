@@ -114,6 +114,15 @@ function readTarballJson(tarball, entry) {
   return JSON.parse(out)
 }
 
+/** One text entry out of the packed tarball, or null when it is not in there. */
+function readTarballText(tarball, entry) {
+  try {
+    return execFileSync('tar', ['-xzOf', tarball, entry], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
+  } catch {
+    return null
+  }
+}
+
 function git(command) {
   try {
     return execFileSync('git', command, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
@@ -206,6 +215,46 @@ for (const pkg of publishablePackages()) {
     for (const file of files) {
       for (const leak of LEAK_PATTERNS) {
         if (leak.pattern.test(file)) problems.push(`${leak.message}: ${file}`)
+      }
+    }
+
+    // The tarball has to be importable by Node, not only by a bundler, and it has
+    // to be checked here rather than in the monorepo. Two reasons, and the second
+    // is the one that matters:
+    //
+    //   1. `tsc` emits an import specifier exactly as the source wrote it, so a
+    //      relative import with no extension reaches the tarball unchanged. Every
+    //      bundler resolves that, which is why four downstream sites build and why
+    //      this went unnoticed for a while. Node's ESM loader does not, and the
+    //      package's own `exports` map points at those files, so the manifest
+    //      invites an import the artefact refuses.
+    //   2. A gate that runs inside the monorepo imports through the workspace's
+    //      own symlinks and its own `dist`, so it resolves against a tree that is
+    //      not the one that ships. Only the packed file list can answer this.
+    //
+    // The specifiers are checked against the packed list rather than by executing
+    // the import, because the bare specifiers in a tarball (`react`, `clsx`) are
+    // the consumer's dependency tree and are not in it. Resolution is the part the
+    // package owns, and a relative specifier that does not resolve inside the
+    // tarball is a defect whether or not some environment could execute it.
+    for (const file of files) {
+      if (!file.endsWith('.js') && !file.endsWith('.d.ts')) continue
+      if (!file.startsWith('dist/')) continue
+      const source = readTarballText(tarball, `package/${file}`)
+      if (source === null) continue
+      for (const match of source.matchAll(/(?:\bfrom\s*|\bimport\s*\(?\s*)(['"])(\.\.?\/[^'"]+)\1/g)) {
+        const specifier = match[2]
+        const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(file), specifier))
+        if (files.includes(resolved)) continue
+        if (files.includes(`${resolved}/index.js`)) continue
+        if (path.posix.extname(specifier) === '') {
+          problems.push(
+            `${file} imports "${specifier}" with no file extension, so Node's ESM loader ` +
+              `cannot resolve it; a bundler would, which is why this reaches a tarball`,
+          )
+        } else {
+          problems.push(`${file} imports "${specifier}", which is not in the published tarball`)
+        }
       }
     }
 
