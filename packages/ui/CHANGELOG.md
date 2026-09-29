@@ -1,5 +1,81 @@
 # @nanisoft/prism-ui
 
+## 0.10.0
+
+### Minor Changes
+
+- 75434f8: Add a running figure to the system, and the ambient cycle scale that prices it
+  
+  The system had one law of motion: motion is state feedback, on an 80/160/280
+  millisecond scale, and there are no keyframes anywhere. That law was right and
+  it held. It also meant a product page could say what its product does and show
+  nothing about it, which is what happened to four sites at once.
+  
+  This adds the second law, and it is a separate law rather than an exception to
+  the first. Feedback is a response to something the reader did. A cycle is a
+  demonstration of something the system does, and no reader is waiting for it.
+  The test for which one a motion is does not require taste: stop the animation
+  and ask whether the figure is still true and still legible.
+  
+  **New Components**
+  
+  - `PulseGraph` draws a running system: named nodes, the relations between them, a
+    marker travelling a rail, and a breathing focus. A node's `lane` says it is a
+    stage in a sequence, which draws the rail; a node with no lane is a field.
+    `carries` on a relation says the line is carrying something, and draws a head
+    at its end so the claim survives motion being off.
+  - `PulseSeries` draws a live instrument: columns rising out of a caller-named
+    baseline, with a reticle crossing them once per cycle. The values are the
+    caller's own and the tallest sets the scale.
+  - `SignalField` is a field of marks: the atmosphere a figure is drawn over.
+    Decorative by default, still unless asked to drift, and honestly named as the
+    one component in the system that is texture.
+  
+  **`Hero01` gains the band it was missing**
+  
+  All four sites hand-wrote the same two-column grid, each with its own gap and its
+  own breakpoint. It is now the `instrument` slot, and an action naming an `href`
+  renders as a real link rather than a button that goes nowhere. The centred form
+  is unchanged, so this is additive.
+  
+  **New tokens**
+  
+  `ambient` and `ambient-ease` are two closed groups measured in seconds, separate
+  from `duration` because folding them in would have made one name mean both 280ms
+  and 7.2s. The emitted contract asserts the closed set and fails any cycle under
+  one second, because a sub-second cycle is a flicker and no value in the 80 to
+  280ms band could ever have caught that.
+  
+  **What this does not change**
+  
+  Nothing is hidden. No ambient rule sets `opacity: 0` and nothing waits for a
+  script, an intersection or a timer, so every figure is complete at first paint
+  and a consumer needs no exception to enable the `hidden-state` gate. Reduced
+  motion is one `animation: none`, and because every resting state is the full
+  form, that reader gets the same figure, still. All three are server Components,
+  so this adds zero bytes of client JavaScript.
+
+### Patch Changes
+
+- cb16073: A variant that sets its own fill sets its own ink, and `outline` now says which
+  
+  `Button`'s and `CtaLink`'s `outline` variant carried `bg-background` with no `text-` for the life of the package. On the page ground and on a card the omission was invisible, because the ink a control inherits there is `foreground` and `card-foreground` is equal to it in all twelve pack and mode combinations, so the variant was correct everywhere the design system itself placed it and wrong everywhere else.
+  
+  `Cta01` draws its band as a filled `bg-primary` surface with `--primary-foreground` as the band's ink, and defaulted its second action to `outline`. The second action was therefore `--background` behind `--primary-foreground` and measured **1.00:1 to 1.10:1 in seven of the twelve combinations**: the base pack in both modes, where light mode pairs `#ffffff` with `#ffffff`, and all five pastel packs in dark mode. The button was in the document, focusable, announced, and unreadable. It was found by resolving computed values in a browser, because neither the class name nor the token contract says anything about it.
+  
+  The fix is `text-foreground` on the variant, which is a no-op on the page ground and on a card and correct everywhere else. Measured across all twelve after the change: lowest is 13.59:1.
+  
+  A consumer that passed `variant="secondary"` on that action, as the product site did, saw no difference and needs no change. The default is unchanged, deliberately: `outline` reads as one filled action and one alternative, and it is now a safe default because it carries its own ink rather than because it was made to stop.
+  
+  Two gates hold it, and neither could have caught the original:
+  
+  - `check:variant-ink` fails a variant whose own fill has no `text-` utility of its own, read from the source. It reads source rather than the emitted stylesheet on purpose: Tailwind only emits a variant something uses, so the sheet is a record of what was chosen rather than of what is available. A state fill such as `hover:bg-accent` is exempt, because exempting it is the difference between a rule that finds the defect and a rule nobody can run.
+  - a test resolves the pair from the emitted token CSS for all twelve combinations rather than asserting a class name, and pins the seven that used to fail by name. A test written over class names would have passed against the broken button, because the class name never changed; only the resolved pair did.
+  
+  `Cta01Action`'s `variant` now states which weight a panel wants and why, with the measurement, so a consumer does not have to discover it.
+- Updated dependencies [75434f8]
+  - @nanisoft/prism-tokens@0.10.0
+
 ## 0.9.0
 
 ### Minor Changes
