@@ -956,8 +956,14 @@ Recorded as facts. None of these is fixed in this document.
 - **The client-JavaScript budget reports per item and fails only in total.** The
   per-item thresholds live in the `BUDGETS` table in
   `packages/ui/scripts/check-client-budget.mjs`; a component over its figure is
-  reported, and the deduplicated all-client bundle is held to the 90 KB gzip
-  ceiling and fails.
+  reported, and the deduplicated all-client bundle is held to the 116 KB gzip
+  ceiling and fails. The ceiling has moved twice, 90 to 92 when the roster was
+  completed and 92 to 116 when the roster was widened to the whole emitted tree,
+  which found 53 modules the two-directory roster had never read. The gate's own
+  comment records why each time, and the measured bundle is 108 KB. A ceiling with
+  a fraction of a kilobyte of headroom is not a policy but a pin, because it
+  fails on an unrelated dependency bump and teaches everyone to answer by
+  rerunning it with a bigger number.
 - **`styles.css` has no byte budget.** The client analyzer measures source, not
   the compiled bytes a consumer downloads; a gzip budget is the strongest
   candidate for a future fail gate and is not adopted.

@@ -189,6 +189,28 @@
       ]
     },
     {
+      "name": "command-palette",
+      "title": "Command-palette",
+      "description": "Shared command-palette primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/command-palette.tsx",
+          "type": "registry:component",
+          "target": "components/ui/command-palette.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "cta-link",
       "title": "Cta-link",
       "description": "Shared cta-link primitive. Installed automatically as a dependency of any block that uses it.",
@@ -249,6 +271,28 @@
           "path": "src/components/ui/dialog.tsx",
           "type": "registry:component",
           "target": "components/ui/dialog.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "diff",
+      "title": "Diff",
+      "description": "Shared diff primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/diff.tsx",
+          "type": "registry:component",
+          "target": "components/ui/diff.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -405,6 +449,28 @@
           "path": "src/components/ui/mark.tsx",
           "type": "registry:component",
           "target": "components/ui/mark.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "meter",
+      "title": "Meter",
+      "description": "Shared meter primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/meter.tsx",
+          "type": "registry:component",
+          "target": "components/ui/meter.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -767,6 +833,28 @@
           "path": "src/components/ui/textarea.tsx",
           "type": "registry:component",
           "target": "components/ui/textarea.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "timeline",
+      "title": "Timeline",
+      "description": "Shared timeline primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/timeline.tsx",
+          "type": "registry:component",
+          "target": "components/ui/timeline.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -1348,6 +1436,46 @@
           "path": "src/blocks/product-grid-01/product-grid.tsx",
           "type": "registry:component",
           "target": "components/blocks/product-grid-01/product-grid.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "run-console-01",
+      "title": "Run Console 01 - A Run, Its Budget And Its Steps",
+      "description": "A run as three things a reader needs at the same glance: what the run is, how much of its budget it has spent, and the steps that got there with their durations drawn to scale. A run still arriving is announced and marked busy from one prop. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "live-region",
+        "meter",
+        "timeline"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/run-console-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/run-console-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/run-console-01/run-console.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/run-console-01/run-console.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",

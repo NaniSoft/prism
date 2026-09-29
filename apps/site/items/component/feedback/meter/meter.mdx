@@ -1,0 +1,93 @@
+---
+slug: components/meter
+title: Meter
+---
+
+## Overview
+
+A Meter is a bounded measure drawn as a scale. It shows a value against a limit
+the caller already knows, and it can mark the limits that matter on the track, so
+the reading and the boundary it is approaching are seen together.
+
+It is not a Progress. A Progress is a task moving toward an end whose length is
+not known in advance, and it is read while it moves. A Meter is a quantity that
+already has an answer: a disk at 95 percent, a token budget, a score out of a
+hundred, a queue depth against its ceiling. The two are distinguished to
+assistive technology, which reports them differently.
+
+## Usage
+
+```tsx
+import { Meter } from '@nanisoft/prism-ui/components/meter'
+
+<Meter
+  value={97}
+  label="Storage used"
+  valueText="97 gigabytes of 100"
+  thresholds={[
+    { at: 80, tone: 'warning' },
+    { at: 95, tone: 'destructive' },
+  ]}
+>
+  <span>97 of 100 GB</span>
+</Meter>
+```
+
+<ComponentDemo slug="meter" />
+
+## Guidelines
+
+### When to use
+
+Use a Meter when the quantity has a ceiling the caller knows in advance. Storage,
+a request quota, a token budget, a seat count, a latency threshold, a score. The
+signal is that there is a number at which something changes.
+
+Use `thresholds` whenever there is a number at which the answer changes. A disk at
+95 percent and a disk at 35 percent are the same reading until you say where the
+line is, and a consumer that has to hardcode that line somewhere other than here is
+the reason this prop exists.
+
+### When not to use
+
+Do not use a Meter for a task. A file uploading, a test running and a deploy in
+flight all advance toward an end nobody knows yet, which is what Progress is for. A
+Meter on a moving task is a bar that cannot say whether it is nearly done or nearly
+over budget, which is the one distinction a reader needs.
+
+Do not use one for an unbounded count. "Forty-two results" is a number, not a
+measurement, and there is no limit for it to be near.
+
+Do not use a Meter to show a trend. A reading at a moment in time is a Meter; the
+shape of the last hour is a chart, and a Meter stretched sideways is not one.
+
+### Best practices
+
+- Pass `valueText` whenever the number alone is ambiguous. "72" says nothing about
+  what is measured or in what unit, and a screen reader announces the bare number.
+- Keep the visible value in the caption rather than inside the track. A number
+  printed on a one-pixel rule is unreadable at any size worth reading.
+- Let the Component stay neutral below every threshold. It can see that a value is
+  40 percent of a maximum; it cannot see that 40 percent is a problem. The same
+  number is routine on a latency budget and urgent on a disk quota.
+- Use `max` for the real bound rather than reaching for 100. A meter of 4096
+  gigabytes is as ordinary as one of 100 percent, and the notches land in the
+  right places either way.
+- Wrap it in a LiveRegion when the reading should be announced. A Meter is not a
+  live region, because the change that moved it is usually the thing worth
+  announcing.
+
+### Accessibility
+
+The track carries `role="meter"` with the reading, the bounds and the caller's own
+words for the value. It is not a live region, and it does not announce itself: a
+value that changes is usually the result of something else, and that something
+else is what a reader wants to hear about.
+
+The notches are `aria-hidden`. A tick mark is not a second reading, and a meter
+that announced its own scale would say more about the scale than about the value.
+
+The fill's tone is never the only signal. A neutral fill is the foreground colour
+rather than a green, so a meter below every threshold reads as a measurement
+rather than as a good score, and a reader who cannot distinguish the tones still
+has the number in the caption and the value in the accessible name.

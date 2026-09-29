@@ -1,5 +1,3 @@
-'use client'
-
 import type { ComponentProps, ReactNode } from 'react'
 
 import { cn } from '../../lib/utils'
@@ -79,6 +77,15 @@ export interface LiveRegionProps extends Omit<ComponentProps<'div'>, 'children'>
  * receives what has arrived and announces it. That split is the same one the
  * documentation Page makes with its navigation, and the reason Prism stays
  * transport-agnostic and no consumer inherits a connection it did not ask for.
+ *
+ * **It is a server Component.** It reads its props, it holds no state, it runs no
+ * hook and it takes no event handler, so the client directive would be a claim
+ * about work this Component does not do. A live region is announced by the
+ * browser's own mutation observer rather than by JavaScript, which is the whole
+ * reason it is a good primitive: it works in a server-rendered page. A consumer
+ * that needs to pass an event handler to it does so from their own client
+ * boundary, which is the ordinary arrangement and is not this Component's to
+ * declare.
  */
 function LiveRegion({
   className,

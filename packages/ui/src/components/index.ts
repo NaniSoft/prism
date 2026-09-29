@@ -62,6 +62,10 @@ export {
   TableCell,
   TableCaption,
 } from './ui/table'
+export { Timeline } from './ui/timeline'
+export type { TimelineProps, TimelineEntry, TimelineState } from './ui/timeline'
+export { Diff } from './ui/diff'
+export type { DiffProps, DiffLine, DiffLineKind, DiffLabels } from './ui/diff'
 export { Heading, Text } from './ui/typography'
 export type { HeadingElement } from './ui/typography'
 export { Kbd } from './ui/kbd'
@@ -101,6 +105,10 @@ export { Slider } from './ui/slider'
 export type { SliderProps } from './ui/slider'
 export { Progress } from './ui/progress'
 export type { ProgressProps } from './ui/progress'
+export { Meter } from './ui/meter'
+export type { MeterProps, MeterTone, MeterThreshold } from './ui/meter'
+export { CommandPalette } from './ui/command-palette'
+export type { CommandPaletteProps, CommandGroup, CommandItem } from './ui/command-palette'
 export { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip'
 export type { TooltipProps, TooltipTriggerProps, TooltipContentProps } from './ui/tooltip'
 export {

@@ -1,0 +1,92 @@
+---
+slug: components/diff
+title: Diff
+---
+
+## Overview
+
+A Diff shows a change as lines, with the number each line had before and the number
+it has after. The bar beside each line is not a marker saying the line changed: its
+width is the fraction of the line that actually changed, so the line that was
+rewritten reads differently from the line that was touched.
+
+## Usage
+
+```tsx
+import { Diff, type DiffLine } from '@nanisoft/prism-ui/components/diff'
+
+const lines: DiffLine[] = [
+  { kind: 'context', oldNumber: 1, newNumber: 1, content: 'export function run() {' },
+  { kind: 'removed', oldNumber: 2, content: '  const limit = 100', changed: [[8, 13]] },
+  { kind: 'added', newNumber: 2, content: '  const limit = 250', changed: [[16, 19]] },
+  { kind: 'context', oldNumber: 3, newNumber: 3, content: '}' },
+]
+
+<Diff
+  lines={lines}
+  label="Changes to run"
+  labels={{ added: 'Added', removed: 'Removed', context: 'Unchanged' }}
+  file="src/run.ts"
+  summary="1 addition, 1 deletion"
+/>
+```
+
+<ComponentDemo slug="diff" />
+
+## Guidelines
+
+### When to use
+
+Use a Diff to show what changed in a file, a document or a structured value. It is
+built for line-oriented changes with a before and an after, and it assumes the
+caller has both.
+
+Use `changed` whenever the backend reports it. A diff that shows which lines moved
+is a diff a reader scans; one that also shows which words moved inside them is one
+a reader reads.
+
+### When not to use
+
+Do not use a Diff for two versions a reader must compare side by side rather than
+as a change. That is two panes, and a Diff in front of both of them is a third
+thing to hold in the head.
+
+Do not use one for a value that changed without changing lines. A setting that went
+from one to two is a before and an after, not a diff, and rendering it as one
+invents line numbers that do not exist.
+
+Do not use a Diff to show that something is different without showing what. "Three
+files changed" belongs in a summary beside a Diff, not in place of one.
+
+### Best practices
+
+- Omit `oldNumber` on an added line and `newNumber` on a removed one. That absence
+  is the side indicator, and filling both in makes every line look like a context
+  line.
+- Pass `labels`. A diff that announced its states in English would be a diff every
+  consumer inherits in a language they did not choose.
+- Pass `summary` rather than letting the counts become a sentence. A diff of a
+  rename has no additions and no deletions and is still a change, which is the case
+  a computed summary gets wrong.
+- Give a container rather than a bare line where the surrounding file matters. A
+  changed line out of context is a fact; a changed line in a file is reviewable.
+
+### Accessibility
+
+It is a table, so row and column navigation, the count of lines and the association
+between a line and its number all come from the semantics rather than from a grid
+of divs. A reader moving by cell hears the old number, the new number, then the
+line.
+
+**The numbers carry the side, not the colour.** An added line has a new number and
+no old one; a removed line the reverse. Nothing about that depends on telling red
+from green, and the colour is redundant on top of it, which is the right way round.
+
+**The changed words are emphasised by weight, not by tint.** A diff that coloured
+its changed words green and red would spend the two hues a reader is most likely
+to be unable to distinguish, and would also fight the line's own state colour.
+Weight survives greyscale, which is the condition any encoding here has to survive
+eventually.
+
+Each line's state is named in words on the row, from the caller's `labels`, so a
+reader who cannot see the bar is still told what happened to the line.

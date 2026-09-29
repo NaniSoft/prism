@@ -1,0 +1,107 @@
+---
+slug: blocks/run-console-01
+title: RunConsole01
+---
+
+## Overview
+
+A RunConsole01 is a run as three things a reader needs at the same glance: what
+the run is, how much of its budget it has spent, and the steps that got there with
+their durations drawn to scale. A run still arriving is announced and marked busy
+from a single prop.
+
+It is a Block and not a Component because a run console is not one thing. It is a
+measurement beside a sequence beside a stream, and a reader needs all three in the
+same frame to answer the only question they have, which is whether the run will
+finish and what it is costing.
+
+<ComponentDemo slug="run-console-01" />
+
+## Usage
+
+```tsx
+import { RunConsole01 } from '@nanisoft/prism-ui/blocks/run-console-01'
+
+<RunConsole01
+  title="Nightly reconcile"
+  detail="Started from the schedule"
+  streaming={running}
+  copy={{
+    budgetLabel: 'Budget spent',
+    budgetValue: (value, max) => `${value} of ${max} credits`,
+    stepsLabel: 'Run steps',
+    title: 'Run',
+    waiting: 'Waiting for the first step',
+  }}
+  budget={{ value: 4200, max: 5000, thresholds: [{ at: 4500, tone: 'warning' }] }}
+  steps={steps}
+/>
+```
+
+## What it composes
+
+The Block reimplements nothing. The budget is a `Meter`, which draws the limits the
+caller named and stays neutral below all of them. The steps are a `Timeline`, which
+draws each duration to scale against the slowest one so "where did the time go" is
+answerable by looking. What the Block adds is the arrangement, and two facts that
+belong to neither component:
+
+- **A run with no budget gets no budget meter.** A local run, a test, a command.
+  Drawing an empty Meter for one is showing a measurement of nothing, and it is
+  invisible because an empty meter looks like a meter.
+- **The budget sits above the steps.** A reader's first question about a run is
+  whether it will finish, and the answer is the budget, so it is read first. Two
+  columns would put them at the same height and make the reader choose, which is
+  the choice this Block exists to remove.
+
+## Guidelines
+
+### When to use
+
+Use a RunConsole01 for one run of something that takes time and costs something: an
+agent run, a deploy, an import, a migration, a long build. The signal is that a
+reader watches it and wants to know both whether it will finish and what it is
+spending.
+
+Use it for a single run. Three runs at once is a table of runs, and a console that
+shows three is a console whose reader has to work out which one they are watching.
+
+### When not to use
+
+Do not use it for a task with no budget and no steps worth reading. A button with a
+spinner is a shorter answer to "is this working", and a console around it is three
+components answering a question one line of copy answers.
+
+Do not use it for a history. A finished run the reader is looking up rather than
+watching belongs in a table, where it can be sorted and searched.
+
+Do not use it as a live region yourself. The Block owns the announcement while a
+run is arriving, and a consumer that wraps it in a second `LiveRegion` announces
+every step twice.
+
+### Best practices
+
+- Pass `streaming` from the transport, not from a timer. The prop means "more
+  events are coming", and only the thing producing the events knows that.
+- Set `budget.thresholds` from the limits you actually act on. A meter with no
+  notches is a number; the notches are what make it a measurement.
+- Leave `duration` off any step whose length is meaningless. A run's opening event
+  has no duration, and a bar beside it reads as "this was instant".
+- Omit `detail` rather than inventing one. The Block will not make up where a run
+  came from.
+
+### Accessibility
+
+**The live region exists only while the run is arriving**, and that is a decision
+rather than an optimisation. A region left on the page for a run that has finished
+announces nothing on mount, but it is still there, and a later re-render with
+different steps is an unrelated change it will announce. Mounting it when the run
+starts is also the order that does not lose an announcement: the region is on the
+page before the first event arrives, which is when a screen reader is listening.
+
+**It wraps the steps and not the budget.** Announcing the budget alongside them
+would re-read the spending on every append, and a region that announces more than
+what changed is a region whose announcements stop being read.
+
+The title is a real heading at level two, so a reader navigating by heading can
+both find this run and skip past it.
