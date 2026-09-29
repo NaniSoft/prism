@@ -106,10 +106,19 @@ client.
   vocabulary, and renders no pill beside a heading that has one.
 - **Omit `href` on a group that has no index.** That absence is what makes the
   heading a label rather than a route, and it is the same thing all three sites
-  already spell as `url: node.index?.url ?? ''`, which two of them then restyle
-  back into a label in their own stylesheets. Naming the case in the type makes
-  those rules dead rather than load-bearing, and the type is the only thing that
-  had to change.
+  already spell as `url: node.index?.url ?? ''`. The Page reads an empty or blank
+  `href` on a group as the absence too, so those stylesheet rules are dead rather
+  than load-bearing without a change in any of the three adapters.
+- **A page entry with no address is refused, by name.** `href: string` admits the
+  empty string, and the only type that refuses it is a branded one, which would
+  put an `as` in every adapter. So the Page reads both trees before any of them
+  renders and throws, naming the entry and which tree it came from. A label in
+  its place would hide a page your tree is missing rather than report it.
+- **An entry with no words is a label, not a link.** A link with no accessible
+  name is announced as "link" and nothing else, so a nameless page and a nameless
+  section heading both render as a label, on the same rule as a section with no
+  index, and neither is one of the pager's two neighbours. One malformed row
+  cannot be published twice.
 - **Do not pass a previous and a next.** The pager is derived from `nav` and
   `currentHref`, which removes one derivation from every consumer. It is derived
   rather than passed for a second reason: a caller who passes neighbours can pass
