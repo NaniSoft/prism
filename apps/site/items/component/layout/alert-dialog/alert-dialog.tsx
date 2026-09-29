@@ -64,7 +64,7 @@ export default function AlertDialogDemo() {
         <h3 className="text-sm font-medium">A dialog, for contrast</h3>
         <p className="text-muted-foreground text-sm">
           The same backdrop press closes this one, because a rename is a task and
-          "not now" is a safe answer to a task.
+          not-now is a safe answer to a task.
         </p>
         <div>
           <Dialog>

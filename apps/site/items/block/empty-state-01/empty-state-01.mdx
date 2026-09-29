@@ -1,0 +1,137 @@
+---
+slug: blocks/empty-state-01
+title: EmptyState01
+---
+
+## Overview
+
+EmptyState01 is the state a region shows when it has nothing in it: a dashed
+frame, a mark, a headline, a sentence and at most one action. Every string is
+passed in as a prop.
+
+**The design decision is the required `reason` prop, and it is why this is a Block
+rather than a Component.** An empty state looks like one thing, which is why it
+gets written by hand in every product that has one, and it is actually three
+things that want different words and different actions:
+
+| Reason | What is true | The action is |
+| --- | --- | --- |
+| `first-run` | nothing has ever existed here | make the first one |
+| `no-match` | things exist and the reader's own filter removed all of them | widen or clear the filter |
+| `not-permitted` | things exist and this reader may not see them | ask for access, or change context |
+
+A component with a `title` and a `body` and an `action` cannot express that
+difference, so every consumer re-decides it in their own words and at least one
+of them gets it wrong: a permission boundary offering "Create your first
+project", or a first-run state that says "No results found". Naming the reason
+forces the decision into the open, and gives the Block something to enforce.
+
+The set is closed at three and a fourth such as `error` or `loading` is
+deliberately absent. Those are states the surrounding surface already owns: a
+region that is erroring has an `Alert` and a region that is loading has a
+`Spinner`. A Block that drew them would give a consumer two places to put the
+same fact.
+
+## Usage
+
+```tsx
+import { EmptyState01 } from '@nanisoft/prism-ui/blocks/empty-state-01'
+
+// Nothing has ever existed here, so the action creates.
+<EmptyState01
+  reason="first-run"
+  title="No invoices yet"
+  body="An invoice is what you send when you need to be paid."
+  actionLabel="Create your first invoice"
+  onAction={openComposer}
+/>
+
+// Things exist and the reader's filter removed all of them, so the action
+// clears rather than creates.
+<EmptyState01
+  reason="no-match"
+  title="No invoices match"
+  body="Three filters are active. Clearing them brings back everything you can see."
+  actionLabel="Clear the filters"
+  onAction={resetFilters}
+/>
+
+// A permission boundary has no next step, so it gets no button at all.
+<EmptyState01
+  reason="not-permitted"
+  title="Billing is not on your plan"
+  body="Ask an owner of this workspace to enable it."
+/>
+```
+
+<ComponentDemo slug="empty-state-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for a region the reader has looked at and found empty. The region has to
+be one the reader expected to have content: an empty region that was always going
+to be empty is not a state, it is the absence of a feature.
+
+Use `first-run` the first time a reader arrives at a region they have never used.
+It is the one reason where the action creates.
+
+Use `no-match` when the reader's own filter or search removed everything. It is
+the most common of the three and the one most often written as `first-run` by
+mistake, which is how a reader who has four thousand invoices is told they have
+none.
+
+Use `not-permitted` when the content exists and this reader may not see it. It is
+the reason that must not offer a create action, and the reason the frame is not
+tinted: a permission boundary is not a failure.
+
+### When not to use
+
+Do not use it for an error. A region that failed has an `Alert` and a `Spinner` or
+a retry, and an empty state next to a failed request tells the reader the request
+succeeded with nothing in it.
+
+Do not use it for loading. That is a `Spinner` beside a region of the right size,
+or `Skeleton`s if the shape is known. An empty state is a resting state.
+
+Do not use it for a first run you will immediately follow with onboarding that
+replaces the region. If the reader is going to be walked through creating the
+first thing, that flow is the surface and the empty state is a frame it renders
+inside.
+
+Do not use it inside a control, a row or a cell. This is a region. A table with
+no rows is not a table with an empty state in it.
+
+### Best practices
+
+- Say which of the three it is, every time. The cost of naming it is one word and
+  the cost of guessing is a reader invited to create a thing that already exists.
+- Give a permission boundary no action if the reader has no route. A button the
+  reader cannot use is worse than no button, and inventing one is the failure
+  this Block is shaped to prevent.
+- Keep the headline to what is not here and the body to what to do about it. A
+  headline that explains and a body that repeats gives a reader scanning the
+  headline nothing to scan.
+- Pass the mark as a slot rather than accepting Prism's. The shape that means
+  "nothing here yet" and the shape that means "you cannot see this" are different
+  shapes, and a Block that picked one would be wrong for two of its three reasons.
+- Put everything else in the surrounding surface. One action is the next step;
+  three actions is a form in a region that has nothing to submit.
+- Do not let a heading go here. The empty state is replaced by content that will
+  be a sibling of whatever introduced it, and an outline entry that disappears
+  when data arrives is an entry a reader navigating by heading cannot follow.
+
+### Content guidelines
+
+- Write the headline as a fact about the region, not as a message to the reader:
+  "No invoices match" beats "Nothing to see here". The region is empty; the
+  reader is fine.
+- Write the body as the next step in words, for the reader who never finds the
+  button. "Three filters are active" is a sentence a reader can act on without
+  the button being in their view yet.
+- Name the reason's action for what it does: "Clear the filters", not "Reset".
+  "Create your first invoice" and "Create an invoice" are different buttons and
+  only one of them is true on a first run.
+- Do not apologise in an empty state. "Oops, something went wrong" describes a
+  failure, and the region is not in a failure.

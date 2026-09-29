@@ -94,7 +94,7 @@ function wildcardRegex(target) {
  * either a new internal helper, which belongs in this list with a reason, or a
  * surface that is being kept off the map by accident.
  */
-const INTERNAL = ['dist/lib/utils.d.ts']
+const INTERNAL = ['dist/lib/utils.d.ts', 'dist/lib/rank.d.ts']
 
 const publicFiles = new Set()
 const errors = []

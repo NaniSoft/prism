@@ -2,7 +2,7 @@
 '@nanisoft/prism-ui': minor
 ---
 
-Add the data display substrate: item, scroll area, aspect ratio, carousel, toggle, toggle group, native select, button group and table sort
+Add the data display substrate: item, scroll area, carousel, toggle and the rest
 
 Nine Items, and the one that matters most is `item`, because it is the row almost
 every list in the package hand-rolls today.

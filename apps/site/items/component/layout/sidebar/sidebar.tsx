@@ -33,11 +33,11 @@ import {
  * which page the reader is on.
  */
 const DESTINATIONS: { label: string; href: string; icon: LucideIcon; count?: string }[] = [
-  { label: 'Overview', href: '/overview', icon: Home },
-  { label: 'Projects', href: '/projects', icon: Folder, count: '12' },
-  { label: 'Usage', href: '/usage', icon: BarChart3, count: '3' },
-  { label: 'Team', href: '/team', icon: Users, count: '8' },
-  { label: 'Billing', href: '/billing', icon: CreditCard },
+  { label: 'Accordion', href: '/components/accordion', icon: Home },
+  { label: 'AlertDialog', href: '/components/alert-dialog', icon: Folder, count: '9' },
+  { label: 'AspectRatio', href: '/components/aspect-ratio', icon: BarChart3, count: '3' },
+  { label: 'ButtonGroup', href: '/components/button-group', icon: Users, count: '8' },
+  { label: 'Carousel', href: '/components/carousel', icon: CreditCard },
 ]
 
 export default function SidebarDemo() {
@@ -90,7 +90,7 @@ export default function SidebarDemo() {
               label="Settings"
               href="/settings"
               icon={<Settings />}
-              current={here === '/settings'}
+              current={here === '/components/carousel'}
             />
             <SidebarToggle collapseLabel="Collapse sidebar" expandLabel="Expand sidebar" />
           </SidebarFooter>
@@ -123,7 +123,7 @@ export default function SidebarDemo() {
                 {destination.label}
               </Button>
             ))}
-            <Button size="sm" variant="outline" onClick={() => setHere('/settings')}>
+            <Button size="sm" variant="outline" onClick={() => setHere('/components/carousel')}>
               Settings
             </Button>
             <Button

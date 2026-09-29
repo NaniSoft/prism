@@ -24,6 +24,10 @@ const DECLARATIONS: Record<string, string> = {
   'dist/index.d.ts': 'export declare function Button(): void\n',
   'dist/components/ui/button.d.ts': 'export declare function Button(): void\n',
   'dist/lib/utils.d.ts': 'export declare function cn(...classes: string[]): string\n',
+  // The gate's INTERNAL list names every internal declaration, and it is checked in
+  // both directions, so a fixture that emits only one of the two is reporting a
+  // boundary that is stale. That is the rule working, and the fixture follows it.
+  'dist/lib/rank.d.ts': 'export declare function locate(text: string, query: string): { rank: number }\n',
 }
 
 const manifest = (exports: Record<string, unknown>) =>
@@ -65,11 +69,14 @@ describe('the surface gate', () => {
 
     expect(result.stderr).toBe('')
     expect(result.status).toBe(0)
-    expect(result.stdout).toContain('3 emitted declaration(s), 2 public, 1 internal')
+    // The counts follow the fixture, and the fixture now emits both internal
+    // declarations because the gate names both in its boundary.
+    expect(result.stdout).toContain('4 emitted declaration(s), 2 public, 2 internal')
     expect(result.stdout).toContain(
       'exports["./components/*"] -> ./dist/components/ui/*.js matched 1 declaration(s)',
     )
-    expect(result.stdout).toContain('internal boundary asserted in both directions: dist/lib/utils.d.ts')
+    expect(result.stdout).toContain('internal boundary asserted in both directions:')
+    expect(result.stdout).toContain('dist/lib/rank.d.ts')
   })
 
   it('fails a wildcard target that resolves to nothing, naming the target', () => {
@@ -163,8 +170,15 @@ describe('the surface gate', () => {
 
     expect(result.stderr).toBe('')
     expect(result.status).toBe(0)
-    expect(result.stdout).toMatch(/\d+ emitted declaration\(s\), \d+ public, 1 internal/)
-    expect(result.stdout).toContain('internal boundary asserted in both directions: dist/lib/utils.d.ts')
+    // The internal count and the list beside it are a stated boundary that grows as
+    // the package gains internal helpers, so both are asserted as present and as
+    // naming the two that are deliberately internal, rather than pinned to a total.
+    // A previous version asserted 1 internal and named only utils, which failed
+    // the moment a second internal declaration was added on purpose.
+    expect(result.stdout).toMatch(/\d+ emitted declaration\(s\), \d+ public, \d+ internal/)
+    expect(result.stdout).toContain('internal boundary asserted in both directions:')
+    expect(result.stdout).toContain('dist/lib/utils.d.ts')
+    expect(result.stdout).toContain('dist/lib/rank.d.ts')
     expect(result.stdout).toMatch(
       /exports\["\.\/components\/\*"\] -> \.\/dist\/components\/ui\/\*\.js matched [1-9]\d* declaration\(s\)/,
     )

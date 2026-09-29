@@ -45,7 +45,7 @@ export default function FormDemo() {
         <FormLabel>Email</FormLabel>
         <FormControl type="email" required placeholder="taken@example.com to see the error" />
         <FormDescription>We never share it.</FormDescription>
-        <FormError action={<a href="/sign-in">Sign in instead</a>} />
+        <FormError action={<>Already have an account?</>} />
       </FormField>
 
       <FormField name="team" validate={(value) => (typeof value === 'string' && value.length < 3 && value !== '' ? SHORT : null)}>

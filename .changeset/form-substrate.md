@@ -2,7 +2,7 @@
 '@nanisoft/prism-ui': minor
 ---
 
-Add the form substrate: command, combobox, calendar, date picker, input group, number field, one-time code, label and form
+Add the form substrate: combobox, calendar, date picker, number field and the rest
 
 Nine Items, and the one that changes an existing Component's behaviour is the
 `Combobox`.

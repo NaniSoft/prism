@@ -70,8 +70,23 @@ export interface FormLabelProps extends ComponentProps<'label'> {}
 /** The props the Form description accepts. */
 export interface FormDescriptionProps extends ComponentProps<'p'> {}
 
-/** The props the Form control accepts. */
-export type FormControlProps = ComponentProps<typeof FieldPrimitive.Control>
+/**
+ * The props the Form control accepts.
+ *
+ * Declared here rather than as `ComponentProps<typeof FieldPrimitive.Control>`,
+ * for the same reason `Progress` declares its own props rather than re-exporting
+ * Base UI's (ticket 07 section 6): an upstream type in the signature reaches the
+ * emitted declaration, and the surface gate fails a declaration file that names
+ * an upstream module. A consumer would then need Base UI resolvable to typecheck a
+ * Prism import, which is the seam the rule exists to keep closed.
+ *
+ * It is `ComponentProps<'input'>` because that is the element the control renders
+ * by default, and naming the element is more honest than naming a `div` and being
+ * wrong about every attribute. A caller who swaps the element for a select or a
+ * textarea passes that element's own attributes and the runtime does the rest; the
+ * type here is the default case, not a limit on what may be rendered.
+ */
+export interface FormControlProps extends ComponentProps<'input'> {}
 
 /** The props the Form error accepts. */
 export interface FormErrorProps extends ComponentProps<'div'> {

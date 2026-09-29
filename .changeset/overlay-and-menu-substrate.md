@@ -2,7 +2,7 @@
 '@nanisoft/prism-ui': minor
 ---
 
-Add the overlay and menu substrate: alert dialog, context menu, hover card, menubar, navigation menu, sheet, collapsible and resizable
+Add the overlay and menu substrate: alert dialog, context menu, menubar, sheet
 
 The eight Items that every menu-shaped surface in a product otherwise hand-rolls.
 Each is composed on the Base UI primitive rather than reimplemented, because focus
