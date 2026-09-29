@@ -270,7 +270,7 @@ describe('the manifest itself', () => {
     expect(imports).toEqual([])
   })
 
-  it('declares the eight Sections once each, prose first', () => {
+  it('declares the nine Sections once each, prose first', () => {
     expect(SECTIONS.map((section) => section.segment)).toEqual([
       'overview',
       'foundation',
@@ -279,6 +279,7 @@ describe('the manifest itself', () => {
       'components',
       'blocks',
       'pages',
+      'live',
       'changelogs',
     ])
     expect(new Set(SECTIONS.map((section) => `${section.segment}`)).size).toBe(SECTIONS.length)
@@ -287,25 +288,39 @@ describe('the manifest itself', () => {
      * holds catalogue Items is plural, because it holds many of them and a singular
      * URL would claim there is one.
      *
-     * It was once stated over prose Sections too, and `patterns` is what showed that
-     * half was not a rule. Overview, Foundation and Content are singular, and that
-     * is a fact about those three subjects rather than about prose: a Pattern is
-     * plural for the same reason a Component is, because "Pattern" names a kind of
-     * thing and there is more than one of them. So the rule is stated where it is
-     * true, over the Sections that hold Items, and a prose Section is named for its
-     * subject.
+     * It has since been narrowed twice, and both narrowings were forced by a Section
+     * rather than chosen.
      *
-     * The cost is that `/patterns` no longer tells a reader from the URL whether it
-     * holds installable Items. That is accepted rather than solved by renaming the
-     * Section something singular and less recognisable, and the gate is the thing
-     * that keeps the distinction honest: `check-pattern-composition.mjs` reads the
-     * declarations, so a Pattern cannot quietly start being a catalogue Item.
+     * `patterns` showed the prose half was not a rule: Overview, Foundation and
+     * Content are singular, and that is a fact about those three subjects rather
+     * than about prose, because "Pattern" names a kind of thing and there is more
+     * than one of them.
+     *
+     * `live` showed the catalogue half is not a rule either, for the same reason and
+     * a step further: the other three are plural **nouns** (`components`, `blocks`,
+     * `pages`) and `live` is an **adjective** with no plural. So a Section is named
+     * for its subject, and the subject decides.
+     *
+     * **So the rule is not enforced at all, and what is asserted instead is the fact
+     * underneath it.** The plurality was a way for a reader to guess whether a URL
+     * holds installable Items. Two of nine Sections defeat that guess, so a test
+     * asserting the guess is a test asserting a convention two Sections decline, and
+     * a second exception would have made the third. What holds is that every Section
+     * is registered once, in the root ordering, at a segment the manifest agrees
+     * with, and that the prose Sections are the ones declared prose. Those are the
+     * facts a reader and a crawler depend on; the plural is a naming preference and
+     * the manifest is where a name is actually spelled.
      */
+    const rootMeta = JSON.parse(
+      readFileSync(path.join(SITE, 'content', 'meta.json'), 'utf8'),
+    ) as { pages: string[] }
     for (const section of SECTIONS) {
-      if (section.prose) continue
-      expect(section.segment.endsWith('s'), `${section.segment} is plural`).toBe(true)
+      expect(
+        rootMeta.pages,
+        `${section.segment} is declared in the root ordering`,
+      ).toContain(section.segment)
     }
-    // And the prose Sections are named for their subject, plural or not.
+    // And the prose Sections are named for their subject, plural or singular.
     for (const segment of ['overview', 'foundation', 'content', 'patterns']) {
       expect(SECTIONS.find((section) => section.segment === segment)?.prose).toBe(true)
     }

@@ -97,8 +97,8 @@ type CatalogueConfig = { pageData: CataloguePageData; metaData: MetaData }
 function catalogueSection(
   kind: CatalogKind,
   description: string,
+  segment = `${kind}s`,
 ): { segment: string; title: string; description: string } {
-  const segment = `${kind}s`
   const section = sectionFor(segment)
   if (section === undefined) {
     throw new Error(
@@ -121,6 +121,16 @@ export const SECTIONS: Record<CatalogKind, { segment: string; title: string; des
   page: catalogueSection(
     'page',
     'Complete structural compositions of Blocks and Components that model a whole screen and receive application-owned data.',
+  ),
+  // A `live` surface is one whose content changes over time without a navigation
+  // event: the event log, the tool-call ledger, the status tiers and the run
+  // controls. The segment is passed rather than derived, because `${kind}s` would
+  // publish it at `/lives`, and the irregular segment is named in one place instead
+  // of being spelled out at every read.
+  live: catalogueSection(
+    'live',
+    'Surfaces whose content changes over time without a navigation event. A live surface owns the event log, the ledger, the status tiers and the run controls; the consumer owns the socket, the transport and the persistence.',
+    'live',
   ),
 }
 

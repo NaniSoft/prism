@@ -148,111 +148,92 @@ for (const entry of (await readdir(UI, { withFileTypes: true })).sort((a, b) =>
   })
 }
 
-for (const entry of (await readdir(BLOCKS, { withFileTypes: true })).sort((a, b) =>
-  a.name.localeCompare(b.name),
-)) {
-  if (!entry.isDirectory()) continue
-
-  const dir = path.join(BLOCKS, entry.name)
-  const metaPath = path.join(dir, 'block.json')
-  let meta
-  try {
-    meta = await readJson(metaPath)
-  } catch {
-    console.error(`error src/blocks/${entry.name}: missing or malformed block.json`)
-    process.exit(1)
-  }
-
-  const files = (await collectFiles(dir)).map((file) => ({
-    path: rel(path.join(dir, file)),
-    type: 'registry:component',
-    target: `components/blocks/${entry.name}/${file}`,
-  }))
-
-  // Dedupe: a block that also owns section.tsx must not ship it twice.
-  const seen = new Set()
-  const all = [...files, ...SHARED, UTILS].filter((f) => {
-    if (seen.has(f.path)) return false
-    seen.add(f.path)
-    return true
-  })
-
-  // Derived from every file the block actually ships, not from block.json.
-  //
-  // `block.json` is hand-written, so its `dependencies` was the one declaration in
-  // this registry that could be wrong in either direction, and the error surfaced
-  // in a consumer's `shadcn add`. The block's own sources plus the shared files it
-  // always ships are the same derivation the ui primitives already use, and they
-  // cannot drift from the code. A hand-written entry is still honoured, so an
-  // intentional extra (a peer dep the import scan cannot see) is not lost.
-  const ownDeps = []
-  const ownSources = [
-    ...(await collectFiles(dir)).map((f) => path.join(dir, f)),
-    // SHARED entries carry a path relative to the package root, not to the block.
-    ...SHARED.map((s) => path.join(PKG, s.path)),
-  ]
-  for (const abs of ownSources) {
-    ownDeps.push(...(await npmDependencies(abs)))
-  }
-  const deps = dependenciesFor([...ownDeps, ...(meta.dependencies ?? [])])
-
-  items.push({
-    name: meta.name,
-    title: meta.title,
-    description: meta.description,
-    type: 'registry:block',
-    ...(meta.categories?.length ? { categories: meta.categories } : {}),
-    ...(meta.registryDependencies?.length
-      ? { registryDependencies: meta.registryDependencies }
-      : {}),
-    ...(deps ? { dependencies: deps } : {}),
-    files: all,
-  })
-}
-
 /**
- * Pages: src/pages/<name>/ -> a registry:page item.
+ * Blocks, Pages and live surfaces: one loop over the three composed roots.
  *
- * The v1 Pages directory starts empty (ticket 07 settles the layer before its
- * roster), so this loop running zero times is the expected state rather than a
- * failure. A Page that lands owns an index and a `block.json`, like a Block.
+ * They were two near-identical loops and adding a third Kind would have made three,
+ * which is the arrangement where a fix to one leaves the other two quietly wrong.
+ * They differ in three facts and nothing else, so those are the row: the source
+ * directory, the registry type, and the metadata filename. Everything else is the
+ * same derivation, and the derivation is the part that must not drift, because a
+ * hand-written `dependencies` list is the one declaration here that can be wrong in
+ * either direction and the error surfaces in a consumer's `shadcn add`.
+ *
+ * A live surface is the only one of the three whose metadata is not `block.json`,
+ * and it is carried per row rather than derived: a filename asserting `block` for an
+ * Item of Kind `live` is a small lie that every later reader has to notice.
+ *
+ * **A live surface is emitted as `registry:block`, and that is not a fourth Kind
+ * leaking into a third-party vocabulary.** The `type` field here belongs to the
+ * shadcn registry schema, which has `registry:component`, `registry:block` and
+ * `registry:page` and no notion of a live surface; `shadcn build` rejects a type it
+ * does not know, so inventing one breaks the build. The **Kind** is ours and is
+ * `live` in `CATALOG_KINDS`, the corpus, the MCP tools and the site's Sections. The
+ * registry is a derived internal artefact, never served and never an install lane,
+ * and the two vocabularies are allowed to differ because only one of them is ours.
  */
-for (const entry of (await readdir(PAGES, { withFileTypes: true })).sort((a, b) =>
-  a.name.localeCompare(b.name),
-)) {
-  if (!entry.isDirectory()) continue
+for (const { root, type, meta: metaName } of [
+  { root: 'blocks', type: 'registry:block', meta: 'block.json' },
+  { root: 'pages', type: 'registry:page', meta: 'block.json' },
+  { root: 'live', type: 'registry:block', meta: 'item.json' },
+]) {
+  const base = path.join(PKG, 'src', root)
+  for (const entry of (await readdir(base, { withFileTypes: true })).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  )) {
+    if (!entry.isDirectory()) continue
 
-  const dir = path.join(PAGES, entry.name)
-  const metaPath = path.join(dir, 'block.json')
-  let meta
-  try {
-    meta = await readJson(metaPath)
-  } catch {
-    console.error(`error src/pages/${entry.name}: missing or malformed block.json`)
-    process.exit(1)
+    const dir = path.join(base, entry.name)
+    const metaPath = path.join(dir, metaName)
+    let meta
+    try {
+      meta = await readJson(metaPath)
+    } catch {
+      console.error(`error src/${root}/${entry.name}: missing or malformed ${metaName}`)
+      process.exit(1)
+    }
+
+    const own = await collectFiles(dir)
+    const files = own.map((file) => ({
+      path: rel(path.join(dir, file)),
+      type: 'registry:component',
+      target: `components/${root}/${entry.name}/${file}`,
+    }))
+
+    const ownDeps = []
+    for (const file of own) ownDeps.push(...(await npmDependencies(path.join(dir, file))))
+    // SHARED entries carry a path relative to the package root, not to the Item's
+    // own directory, so they join the scan for a Block and not for a Page or a
+    // live surface. A live surface ships `SHARED` too, because it is the only
+    // client entry point and the shared client files are what it depends on.
+    if (root === 'blocks' || root === 'live') {
+      for (const shared of SHARED) ownDeps.push(...(await npmDependencies(path.join(PKG, shared.path))))
+    }
+    const deps = dependenciesFor([...ownDeps, ...(meta.dependencies ?? [])])
+
+    // Dedupe: a Block that also owns section.tsx must not ship it twice.
+    const seen = new Set()
+    const all = [...files, ...SHARED, UTILS].filter((file) => {
+      if (seen.has(file.path)) return false
+      seen.add(file.path)
+      return true
+    })
+
+    items.push({
+      name: meta.name,
+      title: meta.title,
+      description: meta.description,
+      type,
+      ...(meta.categories?.length ? { categories: meta.categories } : {}),
+      ...(meta.registryDependencies?.length
+        ? { registryDependencies: meta.registryDependencies }
+        : {}),
+      ...(deps ? { dependencies: deps } : {}),
+      files: all,
+    })
   }
-
-  const files = (await collectFiles(dir)).map((file) => ({
-    path: rel(path.join(dir, file)),
-    type: 'registry:page',
-    target: `components/pages/${entry.name}/${file}`,
-  }))
-
-  const ownDeps = []
-  for (const file of await collectFiles(dir)) {
-    ownDeps.push(...(await npmDependencies(path.join(dir, file))))
-  }
-  const deps = dependenciesFor([...ownDeps, ...(meta.dependencies ?? [])])
-
-  items.push({
-    name: meta.name,
-    title: meta.title,
-    description: meta.description,
-    type: 'registry:page',
-    ...(deps ? { dependencies: deps } : {}),
-    files: [...files, UTILS],
-  })
 }
+
 
 /**
  * The registry homepage, read from this package's own manifest.

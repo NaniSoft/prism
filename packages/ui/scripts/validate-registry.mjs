@@ -230,8 +230,15 @@ for (const item of registry.items ?? []) {
    * leaves the catalogue entry pointing at a module the package no longer
    * publishes".
    */
-  const emitted =
-    item.type === 'registry:component'
+  // The emitted module is derived from the item's **own** file list, not from its
+  // type. A `live` surface is emitted as `registry:block` because the shadcn schema
+  // has no other type for it, and deriving `dist/blocks/<name>/index.js` from that
+  // looked for the surface in a directory it does not ship to. The target already
+  // carries the real directory, so the registry is asked rather than assumed.
+  const own = (item.files ?? []).find((file) => /(^|\/)index\.tsx$/.test(file.path ?? ''))
+  const emitted = own
+    ? path.join('dist', String(own.target).replace(/^components\//, '').replace(/\.tsx$/, '.js'))
+    : item.type === 'registry:component'
       ? path.join('dist', 'components', 'ui', `${item.name}.js`)
       : item.type === 'registry:block'
         ? path.join('dist', 'blocks', item.name, 'index.js')

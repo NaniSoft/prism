@@ -1125,27 +1125,43 @@ Recorded as facts. None of these is fixed in this document.
 - **A one-way Figma Variables sync is not built.** The DTCG projection under
   `dist/dtcg/` exists; the sync and its plugin ownership do not, and two-way
   sync is out of scope.
-- **A fourth Kind is decided and not built.** `live` is a Kind for surface whose
-  content changes over time without a navigation event, and it is the home for
-  an agent console, an execution flow and a monitoring view. Prism would own the
-  event log surface, the tool-call ledger, the status tiers and the run controls;
-  the consumer owns the socket, the transport and the persistence, so Prism stays
-  transport-agnostic and no permanent client runtime reaches a consumer. It is
-  **not** in `CATALOG_KINDS` and `Kind` in `CONTEXT.md` still reads `component`,
-  `block`, `page`; the glossary is not edited ahead of the code because a
-  vocabulary that names a Kind the catalogue does not have is a second list.
+- **A fourth Kind is built: `live`.** A `live` surface is one whose content changes
+  over time without a navigation event, and it is the home for an agent console, an
+  execution flow and a monitoring view. Prism owns the event log surface, the
+  tool-call ledger, the status tiers and the run controls; the consumer owns the
+  socket, the transport and the persistence, so Prism stays transport-agnostic and
+  no permanent client runtime reaches a consumer. `RunStream01` is the first one, and
+  it is the first client Component in the package, which is why it is client rather
+  than as an accident: a surface that receives events owns the subscription that
+  delivers them.
+
+  **It is a breaking change, and it was staged as one.** The `STORE_KINDS` assertion
+  fired on the first edit, `KIND_LABELS` fired the next, and each transcription
+  below was found by a compiler rather than by a reader. The release is **1.0.0**,
+  and this entry is the reason: `CATALOG_KINDS` gained a member, so a consumer
+  switching exhaustively over `kind` is broken, and that is a real break rather than
+  an additive one.
 
   Adding it is a **breaking change, at 1.0.0**, and the reason is a compile-time
   tie rather than a judgement. `STORE_KINDS` is tied bidirectionally to
   `CatalogKind` by the `_KindsMatch` assertion, and `countKinds` holds a
   `Record<ItemKind, number>`, so a fourth Kind added to one place and not the
-  others is a build failure. Two transcriptions remain untied, both named by
-  issue 72 and neither fixed: the `KINDS` literal in `apps/site/src/lib/catalogue.ts`
-  is a hand-written copy of the catalogue's union, and `kindLabel` in
-  `packages/mcp-server/src/render.ts` is a three-branch fallthrough whose final
-  branch returns `Page` for any input, so an unrecognised Kind is mislabelled to
-  an agent rather than refused. Both are sequenced last, behind the concurrent
-  work on the same three files.
+  others is a build failure. **Both transcriptions this named are now fixed**, and
+  they were the only thing standing between here and the build. The `KINDS` literal
+  in `apps/site/src/lib/catalogue.ts` was a hand-written copy of the catalogue's
+  union while `CATALOG_KINDS` already existed beside the type derived from it, so a
+  fourth Kind would have compiled, built every site, and silently not appeared in
+  the site, which omits it with no error anywhere. `kindLabel` in
+  `packages/mcp-server/src/render.ts` took a `string` and returned `Page` for any
+  input, so a new Kind would have been announced to every agent reading the corpus
+  as a Page, and nothing would have failed. It is now a `Record<ItemKind, string>`
+  keyed on `ItemKind` rather than a chain ending in a default, so a fourth Kind is a
+  compile error instead of a silent mislabel.
+
+  **What is left is a name and a build, and the name is the decision.** The Kind
+  itself is no longer blocked. The working title `live` is still not settled, for
+  the reason given below, and that is a question for a person rather than for a
+  gate.
 
   **The decision's own contents are incomplete.** The four things named above are
   the things that change while a run is in flight, and that is what makes them
@@ -1160,20 +1176,68 @@ Recorded as facts. None of these is fixed in this document.
   cost, and none names an audit trail, a permission matrix, or a retention
   control either.
 
-  The name is not settled. `live` is the working title; `stream` names an
-  implementation and `console` names a use case, and a Kind named `live` beside a
-  Mode named `dark` invites the confusion that retiring `beam-dark` removed. The
-  map at issue 112 carries the decision and the open question.
-- **Patterns, Templates and Workflows are decided and not built.** They are
-  documentation, not surface: no npm subpath, no registry item, no corpus entry,
-  and `CATALOG_KINDS` unchanged. A Patterns Section is a **prose** Section beside
+  **The name is settled: `live`, and the objection to it does not hold.** The
+  working title was `live`, and the recorded worry was that a Kind named `live`
+  beside a Mode named `dark` invites the confusion that retiring `beam-dark`
+  removed. `stream` was rejected for naming an implementation and `console` for
+  naming a use case, which leaves the concern about the adjective.
+
+  It does not hold, and the reason is what `beam-dark` actually was. That was a
+  **token** name in which a pack and a Mode compounded, so `beam-dark` read as a
+  pack name and a reader could not tell a colour from a mode by looking at it. A
+  Kind and a Mode are not in that position: in every surface this repository
+  publishes they appear in **labelled fields**, `kind` and `mode`, so a reader is
+  told which is which rather than inferring it from a compound word. The confusion
+  `beam-dark` caused was caused by compounding two values into one name, and the
+  fourth Kind does not compound anything.
+
+  There is also a cost the other way. `live` is the term the products this Kind
+  exists to serve already use, so an agent reading the corpus is reading a word it
+  has met. A name chosen to avoid a theoretical confusion with a labelled field
+  would be a word the reader has to learn, which is the opposite of what a Kind is
+  for. Issue 112 carried the question; this is the answer and the reasoning.
+- **Patterns and Templates are built. Workflows are decided and not built.**
+  They are documentation, not surface: no npm subpath, no registry item, and
+  `CATALOG_KINDS` unchanged. A Patterns Section is a **prose** Section beside
   Overview, Foundation and Content, because a Pattern is not a catalogue item. A
   Pattern declares the Items it composes and a Template declares the Pages it
-  arranges, and both declarations are compared against the catalogue by one gate
-  that lives with the other site joins, so a document naming an Item that does not
-  exist fails the build. A Template's arrangement is the published `DocsNavEntry`
-  union rather than a new vocabulary, which is the shape `DocsShell` already takes
-  and the shape a consumer site already adapts its own tree into.
+  arranges, and both declarations are compared against the catalogue by one gate,
+  `apps/site/scripts/check-pattern-composition.mjs`, so a document naming an Item
+  that does not exist fails the build. A Template's arrangement is the published
+  `DocsNavEntry` union rather than a new vocabulary, which is the shape
+  `DocsShell` already takes and the shape a consumer site already adapts its own
+  tree into.
+
+  **The declaration is the law, and the gate found a real mistake on its first live
+  run**: a Pattern composed of `Check`, which is an icon from `lucide-react` and not
+  an Item anybody can install. That is the whole argument in one fact, because
+  nothing about a prose page is type-checked and a recipe naming a renamed Item
+  reads perfectly.
+
+  **One clause of the decision above is superseded, and it is worth being explicit
+  about which.** The decision said a Pattern gets "no corpus entry". That clause is
+  about the *Items* store: a Pattern is not a catalogue Item, so it has no name, no
+  kind and no props for `find_item` to return, and it is not in `llms.txt` as a
+  component. It is not about the prose corpus.
+  `check-content-joins.mjs` says so: a content page "is in the tree but not in the
+  Corpus, so no agent can reach it". Leaving Patterns out of the Corpus would have
+  made it the only prose Section an agent cannot read, which inverts the point of a
+  layer whose readers are builders. So `patterns` is in `STORE_SECTIONS` and in
+  `STORE_SECTION_TITLES`, and the reasoning is recorded beside the entry.
+
+  **Two Section rules broke, and one was wrong rather than merely out of date.** The
+  rule that a prose Section is singular and a Section holding Items is plural is now
+  stated over the Sections that hold Items, because "Pattern" names a kind of thing
+  and there is more than one of them, exactly as "Component" does. The cost is that
+  `/patterns` no longer tells a reader from the URL whether it holds installable
+  Items, which is accepted rather than solved by renaming the Section something
+  singular and less recognisable, and the gate is what keeps the distinction honest.
+  Every Section also needs an `index.mdx`, which is what a group heading links to.
+
+  **Workflows remain unbuilt**, and the decision above is why that is not a gap in
+  the roster: a run history, an approval queue and a cost ledger are read-mostly
+  records that change as a run completes or a person decides, which makes them
+  Workflows rather than a Kind. The `live` entry above names what would change them.
 
   Two limits are recorded rather than papered over. **Provenance is asserted, not
   verified**: a gate can prove a claim was made, not that it is true, so the
@@ -1182,3 +1246,18 @@ Recorded as facts. None of these is fixed in this document.
   about how the work was done. And the Pattern and Template declarations are
   checked; the originality claim is not, and does not pretend to be. Issue 112
   carries the reasoning.
+
+  **The record for this effort is `docs/history/provenance.md`**, and the shape it
+  takes is the one the decision above specifies: the provenance record, a
+  thirteen-item originality checklist, a four-axis similarity assessment and an
+  independent implementation declaration, in one document rather than one per
+  asset. `docs/history/` is its home because that is where this repository already
+  keeps a finding that outlives the code that produced it, and a per-asset record
+  would have been forty copies of one paragraph, which is the drift this repository
+  has already had to unpick three times.
+
+  The four axes are chosen so each is checkable by a **different** means, so a
+  finding on one is not automatically a finding on the others: source text,
+  structure and arrangement, interface, and appearance. Each carries a means of
+  checking as well as a finding, because a claim with no way to check it is a claim
+  rather than a record.

@@ -2162,6 +2162,44 @@
       ]
     },
     {
+      "name": "process-flow-01",
+      "title": "Process Flow 01 - Stages In Order, Wrapping",
+      "description": "A pipeline of any length, drawn in order across as many lines as it needs, with a continuous ordinal and an optional label on the last stage. One ordered list, so a wrapped flow is still read as a sequence. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/process-flow-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/process-flow-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/process-flow-01/process-flow.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/process-flow-01/process-flow.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "process-rail-01",
       "title": "Process Rail 01 - Steps On One Line",
       "description": "A process drawn as a rail: two, three or four steps on one line, each with an ordinal, a name and one caption, with an optional label on the last step. The type refuses a fifth step. Every string is passed in as a prop.",
@@ -2521,6 +2559,9 @@
       "title": "Auth Page - Centered Sign-In Screen",
       "description": "A complete authentication screen composing a sign-in form with an optional supporting card. Fields, labels, handlers, the error and the supporting content are all passed in as props.",
       "type": "registry:page",
+      "categories": [
+        "application"
+      ],
       "dependencies": [
         "clsx",
         "tailwind-merge"
@@ -2528,8 +2569,13 @@
       "files": [
         {
           "path": "src/pages/auth-page/index.tsx",
-          "type": "registry:page",
+          "type": "registry:component",
           "target": "components/pages/auth-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -2543,6 +2589,9 @@
       "title": "Blog Post Page - Title, Byline, Body And Trail",
       "description": "A complete blog post screen: the title as the page's own h1, a standfirst, a byline with both the display date and the machine date, tags, the body held at the reading measure, the trail to the neighbouring posts and a way back to the archive. Every fact about the post is passed in as a prop.",
       "type": "registry:page",
+      "categories": [
+        "application"
+      ],
       "dependencies": [
         "clsx",
         "tailwind-merge"
@@ -2550,8 +2599,13 @@
       "files": [
         {
           "path": "src/pages/blog-post-page/index.tsx",
-          "type": "registry:page",
+          "type": "registry:component",
           "target": "components/pages/blog-post-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -2565,6 +2619,9 @@
       "title": "Dashboard Page - Shell, Header, Stats and Table",
       "description": "A complete dashboard screen composing the application shell, a page header, a KPI row and a data table. Navigation, rows, columns, labels and callbacks are all passed in as props.",
       "type": "registry:page",
+      "categories": [
+        "application"
+      ],
       "dependencies": [
         "clsx",
         "tailwind-merge"
@@ -2572,8 +2629,13 @@
       "files": [
         {
           "path": "src/pages/dashboard-page/index.tsx",
-          "type": "registry:page",
+          "type": "registry:component",
           "target": "components/pages/dashboard-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -2587,6 +2649,9 @@
       "title": "Docs Shell - Rail, Document, Contents And Derived Pager",
       "description": "A documentation screen: a navigation rail whose shape arrives as data, the document at the measure, a contents rail, and a pager derived from the navigation. A section is a label, never a control.",
       "type": "registry:page",
+      "categories": [
+        "chrome"
+      ],
       "dependencies": [
         "@nanisoft/prism-ui",
         "clsx",
@@ -2595,13 +2660,18 @@
       "files": [
         {
           "path": "src/pages/docs-shell/docs-shell.tsx",
-          "type": "registry:page",
+          "type": "registry:component",
           "target": "components/pages/docs-shell/docs-shell.tsx"
         },
         {
           "path": "src/pages/docs-shell/index.tsx",
-          "type": "registry:page",
+          "type": "registry:component",
           "target": "components/pages/docs-shell/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -2615,6 +2685,9 @@
       "title": "Marketing Page - Full Landing Composition",
       "description": "A complete marketing landing screen composing a hero, a feature grid, a KPI row, a plan comparison and a closing call to action. Every string, number and action is passed in as a prop.",
       "type": "registry:page",
+      "categories": [
+        "marketing"
+      ],
       "dependencies": [
         "clsx",
         "tailwind-merge"
@@ -2622,8 +2695,13 @@
       "files": [
         {
           "path": "src/pages/marketing-page/index.tsx",
-          "type": "registry:page",
+          "type": "registry:component",
           "target": "components/pages/marketing-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -2637,6 +2715,9 @@
       "title": "Not Found Page - Code, Sentence And Ways Out",
       "description": "A complete not-found screen: the status code as the page's own h1, one sentence about what happened, and the ways out as native links. Every string and every destination is passed in as a prop.",
       "type": "registry:page",
+      "categories": [
+        "application"
+      ],
       "dependencies": [
         "clsx",
         "tailwind-merge"
@@ -2644,8 +2725,13 @@
       "files": [
         {
           "path": "src/pages/not-found-page/index.tsx",
-          "type": "registry:page",
+          "type": "registry:component",
           "target": "components/pages/not-found-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -2659,6 +2745,9 @@
       "title": "Settings Page - Tabbed Settings Forms",
       "description": "A complete settings screen composing the application shell, a page header and tabs of grouped settings forms. Sections, fields, options and labels are all passed in as props.",
       "type": "registry:page",
+      "categories": [
+        "application"
+      ],
       "dependencies": [
         "clsx",
         "tailwind-merge"
@@ -2666,8 +2755,52 @@
       "files": [
         {
           "path": "src/pages/settings-page/index.tsx",
-          "type": "registry:page",
+          "type": "registry:component",
           "target": "components/pages/settings-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "run-stream-01",
+      "title": "Run Stream 01 - An Event Log That Arrives",
+      "description": "The event log of a run, receiving events as they arrive over a subscription the consumer supplies. The first client surface in the package, and the reason the live Kind exists. Prism owns the log, the roles and the status tiers; the consumer owns the socket, the transport and the persistence. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "data-display"
+      ],
+      "registryDependencies": [
+        "live-region",
+        "scroll-area"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/live/run-stream-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/live/run-stream-01/index.tsx"
+        },
+        {
+          "path": "src/live/run-stream-01/run-stream.tsx",
+          "type": "registry:component",
+          "target": "components/live/run-stream-01/run-stream.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
         },
         {
           "path": "src/lib/utils.ts",

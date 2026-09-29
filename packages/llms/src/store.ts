@@ -21,7 +21,7 @@ import type { CatalogKind, ComponentCategory } from '@nanisoft/prism-ui/catalog'
 
 // The runtime list is a projection of the catalogue's type, tied to it at
 // compile time so the two cannot drift.
-export const STORE_KINDS = ['component', 'block', 'page'] as const satisfies
+export const STORE_KINDS = ['component', 'block', 'page', 'live'] as const satisfies
   readonly CatalogKind[]
 type _KindsMatch = CatalogKind extends (typeof STORE_KINDS)[number]
   ? (typeof STORE_KINDS)[number] extends CatalogKind

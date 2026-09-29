@@ -1,10 +1,6 @@
 import type { CatalogKind, ComponentCategory } from '@nanisoft/prism-ui/catalog'
 
-const KIND_LABEL: Record<CatalogKind, string> = {
-  component: 'Component',
-  block: 'Block',
-  page: 'Page',
-}
+import { kindLabel } from '@/lib/kinds'
 
 /**
  * The item page header: the name, the catalogue description as the lede, and
@@ -28,7 +24,7 @@ export function ItemHeader({
       <div className="flex flex-wrap items-center gap-2">
         <h1 className="text-3xl font-semibold tracking-tight">{name}</h1>
         <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px] uppercase">
-          {KIND_LABEL[kind]}
+          {kindLabel(kind)}
         </span>
         {category ? (
           <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px] uppercase">

@@ -36,6 +36,14 @@
       "types": "./dist/blocks/index.d.ts",
       "default": "./dist/blocks/index.js"
     },
+    "./live": {
+      "types": "./dist/live/index.d.ts",
+      "default": "./dist/live/index.js"
+    },
+    "./live/*": {
+      "types": "./dist/live/*/index.d.ts",
+      "default": "./dist/live/*/index.js"
+    },
     "./blocks/*": {
       "types": "./dist/blocks/*/index.d.ts",
       "default": "./dist/blocks/*/index.js"

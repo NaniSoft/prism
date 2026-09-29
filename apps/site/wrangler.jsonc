@@ -26,6 +26,7 @@
       "/components/*.md",
       "/blocks/*.md",
       "/pages/*.md",
+      "/live/*.md",
       "/changelogs/*.md"
     ]
   },

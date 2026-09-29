@@ -80,8 +80,10 @@ Page it is.
 _Avoid_: entry, doc, component (when any kind is meant).
 
 **Kind**:
-The closed discriminator on an item: `component`, `block` or `page`, always
-singular.
+The closed discriminator on an item: `component`, `block`, `page` or `live`, always
+singular. A `live` surface is one whose content changes over time **without a
+navigation event**, which is the one thing the other three cannot express: they are
+rendered from props, and props arrive when the caller says so.
 _Avoid_: type, category, layer.
 
 **Category**:

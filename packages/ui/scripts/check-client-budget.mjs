@@ -132,6 +132,33 @@ const BUDGETS = {
   'command-palette': 8,
   combobox: 12,
   'context-menu': 12,
+  /**
+   * A live surface is budgeted and not exempted, which is the opposite of a Block.
+   * A Block composes Components, so its own figure restates theirs and naming a
+   * number for it states the same bytes twice. A live surface is the only client
+   * code a consumer pulls in **for itself**: nothing composes it, it is what the
+   * consumer is reaching for, and its weight is the weight the consumer pays. The
+   * figure covers `LiveRegion` and `ScrollArea` beside it, because those are
+   * dependencies of this surface rather than things the consumer would otherwise
+   * have loaded, and a budget that excluded them would let this row grow by
+   * pulling them in.
+   */
+  /**
+   * A live surface is budgeted and not exempted, which is the opposite of a Block.
+   * A Block composes Components, so its own figure restates theirs and naming a
+   * number for it states the same bytes twice. A live surface is the only client
+   * code a consumer pulls in **for itself**: nothing composes it, it is what the
+   * consumer is reaching for, and its weight is the weight the consumer pays.
+   *
+   * The figure covers `LiveRegion` and `ScrollArea` beside it, because those are
+   * dependencies of this surface rather than things the consumer would otherwise
+   * have loaded, and a budget that excluded them would let this row grow by pulling
+   * them in. `ScrollArea` is 8.1 KB of the 9.1 KB, so the row is mostly one
+   * dependency and the headroom over it is the surface's own. It is set at 10
+   * rather than at a figure this item cannot meet, because a budget below the
+   * measured size is a wish and reads as one.
+   */
+  'run-stream': 10,
   'date-picker': 14,
   dialog: 9,
   'dropdown-menu': 9,

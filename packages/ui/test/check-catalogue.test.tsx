@@ -47,6 +47,13 @@ interface Fixture {
   blocks?: string[]
   /** Page directory names on disk, each with a `block.json` of the same name. */
   pages?: string[]
+  /**
+   * Live surface directory names on disk, each with an `item.json` of the same
+   * name. A fourth root the fixture has to grow, and the gate failing on a missing
+   * one is how this was found: it refuses a configured root that does not resolve
+   * rather than reporting zero findings against nothing.
+   */
+  live?: string[]
   /** A Block whose `block.json` declares a name other than its directory. */
   blockRenames?: Record<string, string>
   /** The hand-listed roster, or raw file text to plant an unreadable array. */
@@ -120,20 +127,31 @@ function makeRoot(fixture: Fixture): string {
   const components = fixture.components ?? []
   const blocks = fixture.blocks ?? []
   const pages = fixture.pages ?? []
+  // The three composed roots are created whether or not they hold anything. The
+  // gate refuses a configured root that does not resolve rather than reporting zero
+  // findings against nothing, which is the right behaviour and means a fixture with
+  // no live surfaces still has to have the directory.
+  for (const root_ of ['blocks', 'pages', 'live']) {
+    mkdirSync(path.join(root, 'src', root_), { recursive: true })
+  }
   for (const stem of components) {
     write(`src/components/ui/${stem}.tsx`, `export const ${stem} = () => null\n`)
     // A Component's own test file is not a Component, so the fixture plants one
     // to hold the rule the generator applies.
     write(`src/components/ui/${stem}.test.tsx`, '// fixture\n')
   }
-  for (const [root_, dirs] of [
-    ['blocks', blocks],
-    ['pages', pages],
+  for (const [root_, dirs, meta] of [
+    ['blocks', blocks, 'block.json'],
+    ['pages', pages, 'block.json'],
+    // A live surface's metadata is `item.json`, because a filename asserting
+    // `block` for an Item of Kind `live` would be a small lie in a fixture as much
+    // as in the real tree.
+    ['live', fixture.live ?? [], 'item.json'],
   ] as const) {
     for (const dir of dirs) {
       const declared = fixture.blockRenames?.[dir] ?? dir
       write(
-        `src/${root_}/${dir}/block.json`,
+        `src/${root_}/${dir}/${meta}`,
         `${JSON.stringify({ name: declared, title: dir, description: 'A fixture.' }, null, 2)}\n`,
       )
       write(`src/${root_}/${dir}/index.tsx`, 'export const fixture = () => null\n')
@@ -456,7 +474,7 @@ describe('a roster that cannot be read', () => {
     rmSync(path.join(root, 'src', 'pages'), { recursive: true, force: true })
     const result = run(root)
     expect(result.code).toBe(1)
-    expect(result.output).toContain('1 of 6 configured root does not resolve: "src/pages"')
+    expect(result.output).toContain('1 of 7 configured root does not resolve: "src/pages"')
     expect(result.output).toContain('Two causes, and this run cannot tell them apart')
     expect(result.output).toContain('wrong package root')
     expect(result.output).toContain('does not exist in the repository at all')
@@ -646,7 +664,7 @@ describe('roots resolve from the script, not from the working directory', () => 
     expect(Number(onDisk)).toBeGreaterThan(0)
     expect(result.output).toMatch(/16\/16 comparisons passed/)
     expect(result.output).toMatch(/^catalogue: version @nanisoft\/prism-ui /m)
-    expect(result.output).toMatch(/^catalogue: coverage 6 root\(s\) resolved, 0 unresolved; /m)
+    expect(result.output).toMatch(/^catalogue: coverage 7 root\(s\) resolved, 0 unresolved; /m)
   })
 
   it('states the root it read when the override is in effect', () => {

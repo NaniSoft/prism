@@ -108,16 +108,56 @@ const ROOTS = [
   'src/components/ui',
   'src/blocks',
   'src/pages',
+  'src/live',
   'src/catalog.ts',
   'registry.json',
   'package.json',
 ]
 
-/** A registry item type is the kind with a prefix. Only these three are items. */
+/**
+ * A registry item type is the kind with a prefix.
+ *
+ * A `live` surface is emitted as `registry:block` on purpose, so it is absent here.
+ * The `type` field belongs to the shadcn schema, which has no live surface and
+ * rejects one; the Kind is ours and is `live` everywhere ours is read. This table
+ * answers "which kind does a registry item claim to be", and a live surface claims
+ * `block` there while claiming `live` everywhere else.
+ */
 const REGISTRY_KINDS = {
   'registry:component': 'component',
   'registry:block': 'block',
   'registry:page': 'page',
+}
+
+/**
+ * The one place a registry item's kind is not the Kind, and why that is allowed.
+ *
+ * The registry's `type` is a third-party vocabulary and the shadcn schema has no
+ * live surface in it, so `sync-registry.mjs` emits one as `registry:block` and
+ * `shadcn build` accepts the tree. Every kind comparison below has to forgive that
+ * one case, or the fourth Kind is unshippable through the registry at all.
+ *
+ * It is a named exception rather than a loosened rule because the comparison is
+ * load-bearing for the other 103 items: a Kind that drifted between the catalogue
+ * and the disk is a real defect, and a rule that quietly skipped live would have
+ * skipped it for the wrong reason.
+ */
+const REGISTRY_KIND_EXCEPTIONS = {
+  // A live surface's own directory, keyed by the root it ships under.
+  'src/live': 'block',
+}
+
+/**
+ * Whether an item is one of the sanctioned registry-kind divergences.
+ *
+ * Asked of the catalogue entry's own `source`, which is the one place the Kind and
+ * the shipped directory are both stated, so the exception cannot drift from the
+ * thing it excuses. The comparison key is the slug, which says nothing about where
+ * the Item lives, so the entry is what answers.
+ */
+function isRegistryKindException(entry) {
+  const source = typeof entry?.source === 'string' ? entry.source : ''
+  return Object.keys(REGISTRY_KIND_EXCEPTIONS).some((root) => source.startsWith(root))
 }
 
 /** A Component is one `.tsx` file, and its own test file is not a Component. */
@@ -216,7 +256,7 @@ function assertFilesRead(count) {
 const relativePosix = (base, file) => path.relative(base, file).split(path.sep).join('/')
 
 /** Windows editors write a UTF-8 BOM and `JSON.parse` rejects it outright. */
-const stripBom = (text) => text.replace(/^﻿/, '')
+const stripBom = (text) => text.replace(/^ï»¿/, '')
 
 /**
  * Files this run actually opened, which is not the number of files the walk
@@ -519,9 +559,14 @@ function readSourceTree(base) {
     })
   }
 
-  for (const [root, kind] of [
-    ['blocks', 'block'],
-    ['pages', 'page'],
+  for (const [root, kind, metaName] of [
+    // The metadata filename is part of the row rather than a single constant
+    // because `live/` is not a Block and calling its metadata `block.json` would be
+    // a filename asserting a Kind the Item does not have. The integrity rule is
+    // identical for all three: the declared name must equal the directory name.
+    ['blocks', 'block', 'block.json'],
+    ['pages', 'page', 'block.json'],
+    ['live', 'live', 'item.json'],
   ]) {
     const dir = resolveRoot(base, `src/${root}`)
     for (const child of readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
@@ -529,10 +574,11 @@ function readSourceTree(base) {
     )) {
       if (!child.isDirectory()) continue
       const key = child.name
-      const meta = path.join(dir, key, 'block.json')
-      // `sync-registry.mjs` emits a Block or a Page under the `name` in this
-      // file, so it is a second name the disk carries for the same directory and
-      // it is compared with the directory name rather than assumed equal to it.
+      const meta = path.join(dir, key, metaName)
+      // `sync-registry.mjs` emits a Block, a Page or a live surface under the
+      // `name` in this file, so it is a second name the disk carries for the same
+      // directory and it is compared with the directory name rather than assumed
+      // equal to it.
       let declared = null
       try {
         const parsed = JSON.parse(readText(meta, relativePosix(base, meta)))
@@ -611,8 +657,13 @@ function keyFromSource(source) {
   if (parts[0] === 'src' && parts[1] === 'components' && file && COMPONENT_FILE.test(file)) {
     return { key: file.replace(COMPONENT_FILE, ''), kind: 'component' }
   }
-  if (parts[0] === 'src' && (parts[1] === 'blocks' || parts[1] === 'pages') && file === 'index.tsx') {
-    return { key: directory, kind: parts[1] === 'blocks' ? 'block' : 'page' }
+  if (parts[0] === 'src' && ['blocks', 'pages', 'live'].includes(parts[1]) && file === 'index.tsx') {
+    // `blocks` -> `block` and `pages` -> `page`; `live` is already the Kind, so the
+    // singular is the plural's own stem rather than a derivation that would turn it
+    // into `live` -> `live` by accident. Stated as a table because the third entry
+    // is irregular and a reader should not have to work that out.
+    const kind = { blocks: 'block', pages: 'page', live: 'live' }[parts[1]]
+    return { key: directory, kind }
   }
   return null
 }
@@ -719,7 +770,14 @@ function compare(modules, catalogue, registry) {
     comparison(
       'the kind an item is, in the catalogue and in the registry',
       [...generated.keys()]
-        .filter((key) => listed.has(key) && listed.get(key).kind !== generated.get(key).kind)
+        .filter(
+          (key) =>
+            listed.has(key) &&
+            listed.get(key).kind !== generated.get(key).kind &&
+            // The one sanctioned divergence: a live surface ships as
+            // `registry:block` because the shadcn schema has no live type.
+            !isRegistryKindException(listed.get(key)),
+        )
         .map(
           (key) =>
             `"${key}" is a ${listed.get(key).kind} in the catalogue and a ` +
@@ -729,7 +787,12 @@ function compare(modules, catalogue, registry) {
     comparison(
       'the kind an item is, on disk and in the registry',
       [...disk.keys()]
-        .filter((key) => generated.has(key) && disk.get(key).kind !== generated.get(key).kind)
+        .filter(
+          (key) =>
+            generated.has(key) &&
+            disk.get(key).kind !== generated.get(key).kind &&
+            !isRegistryKindException(listed.get(key)),
+        )
         .map(
           (key) =>
             `"${key}" is a ${disk.get(key).kind} on disk (${disk.get(key).where}) and a ` +

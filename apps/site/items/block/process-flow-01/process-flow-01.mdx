@@ -1,0 +1,103 @@
+---
+slug: blocks/process-flow-01
+title: ProcessFlow01
+---
+
+## Overview
+
+ProcessFlow01 draws a pipeline as a flow: the stages in order, wrapping across as many
+lines as they need, with the ordinal running from `01` to the last stage and an
+optional label on the final one.
+
+It exists beside `ProcessRail01` rather than instead of it. The rail holds two, three
+or four steps on one line and refuses a fifth in its type, and that decision is not in
+question: a rail is a claim about a sequence on one line, and a rail that quietly
+dropped a step to fit a width would be a diagram of a process that is not the process.
+A pipeline of six stages is a different shape, and it earns its own Block. Raising
+the rail's ceiling to six would have made the fourth column unrepresentable as a type
+error, which is the property that made the original decision good.
+
+**It is one ordered list, and the layout is built around that.** A flow that wrapped
+into a list per line would be several lists, and a screen reader would announce three
+lists of two, which is precisely the set-where-a-sequence-was this Block exists to
+prevent. So the stages are one `<ol>` and the wrapping is done by the grid. That has a
+consequence worth knowing: the Block never learns where a line broke, and therefore
+cannot draw anything that is only correct on the widest screen.
+
+**The ordinal is the continuity mechanism, and it is treated as one.** It runs
+continuously and is stated as text, not only drawn, so a reader who lands on stage
+four hears `04` and knows it continues stage three at whatever width they are using.
+Nothing else in this Block is load-bearing for the sequence, and that is why nothing
+else needs to know where the line broke.
+
+## Usage
+
+```tsx
+import { ProcessFlow01 } from '@nanisoft/prism-ui/blocks/process-flow-01'
+
+<ProcessFlow01
+  title="The build pipeline"
+  description="Six stages, from an intake to a merge."
+  finalLabel="merged"
+  stages={[
+    { name: 'Intake', description: 'The request arrives and is recorded.' },
+    { name: 'Plan', description: 'The work is broken into steps.' },
+    { name: 'Build', description: 'The steps are executed.' },
+    { name: 'Verify', description: 'The result is checked against the plan.' },
+    { name: 'Review', description: 'A person signs off on the result.' },
+    { name: 'Merge', description: 'The change lands on the main line.' },
+  ]}
+/>
+```
+
+<ComponentDemo slug="process-flow-01" />
+
+## Props
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `stages` | `ProcessStage[]` | required | The stages, in the order the pipeline runs. An array rather than a tuple, because the length is content and the grid carries it. |
+| `columns` | `2 \| 3 \| 4` | `3` | How many stages sit on one line. A prop because a five-stage pipeline and a nine-stage one do not read alike at the same width. |
+| `finalLabel` | `string` | none | A label on the last stage, for a pipeline that ends in a state worth naming. Omit it when it has not finished. |
+| `title` | `string` | none | The section title. Omit it for a flow composed under its own heading. |
+| `eyebrow` | `string` | none | Optional label above the title. |
+| `description` | `string` | none | One or two sentences under the title. |
+| `headingLevel` | `HeadingLevel` | `h2` | Heading level for the section title. |
+| `className` | `string` | none | Merged onto the flow element. |
+
+## Choosing between this and ProcessRail01
+
+Use the **rail** for two to four steps. It is one line, it is shorter to read, and its
+type refuses a length the layout cannot carry, so you find out at compile time rather
+than in a screenshot.
+
+Use the **flow** for five or more, or when the sequence has to survive wrapping. The
+ordinal is what makes a wrapped sequence legible, and it is the same property the
+rail carries, so the two are the same idea at two widths rather than two ideas.
+
+Do not use a grid of cards for either. A card is a surface and a card's title is not
+automatically a stage, which is how a six-stage pipeline ends up drawn as six
+unrelated points with the order in them lost.
+
+## Accessibility
+
+- The stages are one `<ol>`, so the order is in the document rather than in the
+  styling. A reader gets "list, 6 items" and the sequence is announced.
+- The ordinal is text inside each stage, not only a `data-` attribute, so it is
+  announced. A flow whose ordinals were drawn in a pseudo-element would read as six
+  unrelated names.
+- The stage names are **not** headings. The sequence is the list, and promoting six
+  stages to headings would put six entries in the outline for one process. The
+  section title is the only heading this Block renders.
+- A caption of more than about twelve words wraps and the line stops reading as a
+  line. Keep the caption short and put the detail in `description`.
+
+## Notes
+
+**A flow of fewer than two stages throws.** One stage is a label, not a sequence, and
+the line the Block draws through it would claim a sequence that is not there. The
+message names `ProcessRail01` as the answer for two.
+
+**The tracks narrow rather than widen.** Three stage names side by side at phone width
+is three columns of two words each, so the grid steps down to one column per line
+before it steps up to the declared count.

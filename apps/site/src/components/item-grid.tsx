@@ -3,6 +3,8 @@ import { ArrowRight } from 'lucide-react'
 
 import type { CatalogKind, ComponentCategory } from '@nanisoft/prism-ui/catalog'
 
+import { kindLabel } from '@/lib/kinds'
+
 export type GridItem = {
   name: string
   slug: string
@@ -10,12 +12,6 @@ export type GridItem = {
   kind: CatalogKind
   category: ComponentCategory | null
   url: string
-}
-
-const KIND_LABEL: Record<CatalogKind, string> = {
-  component: 'Component',
-  block: 'Block',
-  page: 'Page',
 }
 
 /**
@@ -45,7 +41,7 @@ export function ItemGrid({ items, empty }: { items: GridItem[]; empty?: string }
           <div className="flex items-center justify-between gap-3">
             <h2 className="font-medium tracking-tight">{item.name}</h2>
             <span className="text-muted-foreground shrink-0 font-mono text-[10px] uppercase">
-              {item.category ?? KIND_LABEL[item.kind]}
+              {item.category ?? kindLabel(item.kind)}
             </span>
           </div>
           <p className="text-muted-foreground text-sm text-pretty">{item.description}</p>

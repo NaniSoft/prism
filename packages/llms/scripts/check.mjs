@@ -20,6 +20,8 @@ import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+
+import { STORE_KINDS } from '../dist/store.js'
 import { fileURLToPath } from 'node:url'
 
 import { buildCatalog } from '@nanisoft/prism-ui/catalog'
@@ -38,8 +40,23 @@ const CONTENT_ROOT = path.join(SITE_ROOT, 'content')
 const WORK = path.join(PKG_ROOT, '.turbo', 'check')
 const DIST = path.join(PKG_ROOT, 'dist')
 const README = path.join(PKG_ROOT, 'README.md')
-const KINDS = ['component', 'block', 'page']
-const SEGMENT = { component: 'components', block: 'blocks', page: 'pages' }
+/**
+ * The Kinds and where each is published.
+ *
+ * `KINDS` is read from the **built** store rather than written out. It was a
+ * literal, and a literal is a second list about the same three kinds: the fourth
+ * Kind landed and this gate reported two failures about a mirror path of
+ * `undefined`, which is what a hand-written list does when a Kind is added and it is
+ * not. Read from `dist/store.js` rather than `src/store.ts` because this is a `.mjs`
+ * script and cannot import TypeScript, and the built module is the same declaration
+ * with the `_KindsMatch` assertion already checked against the catalogue.
+ *
+ * `SEGMENT` is a genuine second fact, not a second list: the union does not say
+ * where a Kind is published, and a Kind whose segment is derived from its own name
+ * is the `live` case, which is singular at both ends.
+ */
+const KINDS = [...STORE_KINDS]
+const SEGMENT = { component: 'components', block: 'blocks', page: 'pages', live: 'live' }
 
 async function readText(file) {
   try {
