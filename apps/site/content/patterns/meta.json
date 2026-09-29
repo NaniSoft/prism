@@ -1,0 +1,9 @@
+{
+  "title": "Patterns",
+  "pages": [
+    "settings-surface",
+    "searchable-table",
+    "pricing-and-plans",
+    "empty-state-with-a-next-step"
+  ]
+}

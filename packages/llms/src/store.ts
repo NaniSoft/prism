@@ -73,7 +73,13 @@ export const STORE_STATUSES = ['stable', 'deprecated'] as const
  * had to be edited in the same commit as the rename is a second list that can be
  * half done.
  */
-export const STORE_SECTIONS = ['overview', 'foundation', 'content', 'changelogs'] as const
+export const STORE_SECTIONS = [
+  'overview',
+  'foundation',
+  'content',
+  'patterns',
+  'changelogs',
+] as const
 
 /**
  * The label each content Section is read under, in every artifact that groups
@@ -95,6 +101,21 @@ export const STORE_SECTION_TITLES: Record<StoreSection, string> = {
   overview: 'Overview',
   foundation: 'Foundation',
   content: 'Content',
+  // The Patterns Section is here against one clause of the decision that introduced
+  // it, which said a Pattern gets "no corpus entry". That clause is about the
+  // *Items* store: a Pattern is not a catalogue Item, so it has no name, no kind and
+  // no props for `find_item` to return, and it is not in `llms.txt` as a component.
+  // It is not about the prose corpus, and the distinction matters because
+  // `check-content-joins.mjs` requires every prose Section to be in the Corpus:
+  //
+  //   the content page /patterns/settings-surface is in the tree but not in the
+  //   Corpus, so no agent can reach it
+  //
+  // Leaving it out would have made Patterns the only prose Section an agent cannot
+  // read, which inverts the point of the layer. A Pattern exists to tell a builder
+  // which Items to compose, and the builders reading this repository through an
+  // agent are the ones it is for.
+  patterns: 'Patterns',
   changelogs: 'Changelogs',
 }
 export const STORE_PACKS = ['default', 'blush', 'mint', 'lavender', 'sky', 'peach'] as const

@@ -270,21 +270,44 @@ describe('the manifest itself', () => {
     expect(imports).toEqual([])
   })
 
-  it('declares the seven Sections once each, prose first', () => {
+  it('declares the eight Sections once each, prose first', () => {
     expect(SECTIONS.map((section) => section.segment)).toEqual([
       'overview',
       'foundation',
       'content',
+      'patterns',
       'components',
       'blocks',
       'pages',
       'changelogs',
     ])
     expect(new Set(SECTIONS.map((section) => `${section.segment}`)).size).toBe(SECTIONS.length)
-    // The plurality rule, read off the data rather than restated: the three prose
-    // Sections are singular and the four that hold many Items are plural.
+    /*
+     * The plurality rule, read off the data rather than restated: a Section that
+     * holds catalogue Items is plural, because it holds many of them and a singular
+     * URL would claim there is one.
+     *
+     * It was once stated over prose Sections too, and `patterns` is what showed that
+     * half was not a rule. Overview, Foundation and Content are singular, and that
+     * is a fact about those three subjects rather than about prose: a Pattern is
+     * plural for the same reason a Component is, because "Pattern" names a kind of
+     * thing and there is more than one of them. So the rule is stated where it is
+     * true, over the Sections that hold Items, and a prose Section is named for its
+     * subject.
+     *
+     * The cost is that `/patterns` no longer tells a reader from the URL whether it
+     * holds installable Items. That is accepted rather than solved by renaming the
+     * Section something singular and less recognisable, and the gate is the thing
+     * that keeps the distinction honest: `check-pattern-composition.mjs` reads the
+     * declarations, so a Pattern cannot quietly start being a catalogue Item.
+     */
     for (const section of SECTIONS) {
-      expect(section.segment.endsWith('s'), `${section.segment} is plural`).toBe(!section.prose)
+      if (section.prose) continue
+      expect(section.segment.endsWith('s'), `${section.segment} is plural`).toBe(true)
+    }
+    // And the prose Sections are named for their subject, plural or not.
+    for (const segment of ['overview', 'foundation', 'content', 'patterns']) {
+      expect(SECTIONS.find((section) => section.segment === segment)?.prose).toBe(true)
     }
   })
 })

@@ -22,6 +22,7 @@
       "/overview/*.md",
       "/foundation/*.md",
       "/content/*.md",
+      "/patterns/*.md",
       "/components/*.md",
       "/blocks/*.md",
       "/pages/*.md",

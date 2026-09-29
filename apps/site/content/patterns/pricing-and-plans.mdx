@@ -1,0 +1,63 @@
+---
+title: Pricing and plans
+description: "A set of plans where the comparison is the content and the price is the least of it."
+composes:
+  - Pricing01
+  - Card
+  - Badge
+  - Button
+  - Separator
+  - Table
+  - Kbd
+---
+
+A pricing table is a comparison, and the comparison is not the price. Two plans at
+twice the price with half the features is not the expensive plan. So the features are
+the content, the price is a line in each card, and the reader's real question is
+"which of these is for me", which is answered by the feature list and not by
+ordering the cards cheapest first.
+
+## Three plans, not four
+
+Two is a comparison. Three is a comparison with a middle. Four or more is a table,
+and a table of plans needs `Table` because the reader is now comparing across a row
+rather than down a column. If a fourth plan is genuinely needed, the honest answer is
+a table and not four cards side by side, which is where "Enterprise" usually goes and
+where it stops being comparable to anything.
+
+## Name the middle plan, do not style it louder
+
+`Pricing01` takes a `featured` flag, and it is the only visual difference between the
+three. A `Badge` on the featured plan says which one is recommended, in words, and
+that is worth more than the shadow, because a reader who cannot decide is looking for
+the recommendation rather than inferring it from emphasis.
+
+A featured plan that is not the one most readers should choose is a lie told in CSS.
+Pick it from what the product actually wants to sell.
+
+## The features are a set, so the set is rendered as a set
+
+`Pricing01` draws a tick per included feature, and that is right when every plan has
+every feature, because the reader is scanning for presence. When plans differ in
+*which* features they include, a column of ticks reads as noise: three empty ticks in
+a plan is not information, it is a negative rendered three times.
+
+Differing plans want the shared features as ticks and the differences as text, which
+is what a `Table` over plans gives you. The rule is whether the reader is looking for
+"is this here" (a tick column) or "how do these differ" (a table). The tick is
+`Pricing01`'s own business and not an Item of its own, so it is not in this list.
+
+## The price is a sentence with a period in it
+
+A price is a number, a period, and a cadence. "$24 / month" is two facts; "$24" alone
+promises nothing about what happens in a year. `Kbd` is for the shortcut, not for the
+cadence, and the common mistake is bolding the cadence to make the number look
+smaller, which makes the number harder to compare across cards instead.
+
+## What the button promises
+
+Each card's action is a `Button` and its label is what happens next, not the name of
+the plan. "Start free" and "Talk to us" are decisions; "Choose" and "Select" are
+forms to fill in. The plan that needs a conversation should say so on its own card,
+because a reader who has to infer it from a different button style has been asked to
+do the sales work.
