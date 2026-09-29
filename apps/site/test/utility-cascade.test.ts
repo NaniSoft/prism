@@ -79,6 +79,47 @@ const DEMOTED_LAYER = `
 ${SITE_BUILD}${LIBRARY_BUILD}${THE_TWO}
 `
 
+/**
+ * The second shape of the same defect: both sides are variants.
+ *
+ * The library's build emits `sm:grid-cols-3` for a grid of its own, and the
+ * class the site wrote is the same class, so the same selector appears twice in
+ * the one shared `utilities` layer and the library's copy lands after the site's
+ * `lg:grid-cols-6`. Neither side is a bare rule, so the original assertion, which
+ * asked only whether the winner carried a media query, had nothing to say about a
+ * collision where the winner has one. It is the defect the sixth restatement in
+ * `globals.css` exists for, and the reason that assertion grew a second group.
+ */
+const GRID_COLLISION = `
+@layer utilities {
+  .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  @media (min-width: 40rem) { .sm\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) } }
+  @media (min-width: 64rem) { .lg\\:grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)) } }
+}
+@layer utilities {
+  @media (min-width: 40rem) { .sm\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) } }
+}
+`
+const GRID_RESTATED = `
+@layer utilities {
+  .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  @media (min-width: 40rem) { .sm\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) } }
+  @media (min-width: 64rem) { .lg\\:grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)) } }
+}
+@layer utilities {
+  @media (min-width: 40rem) { .sm\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) } }
+}
+@layer site-variants {
+  @media (min-width: 64rem) { .lg\\:grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)) } }
+}
+`
+
+const GRID_SOURCE = `
+export function PackBand() {
+  return <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6" />
+}
+`
+
 const SOURCE = `
 export function Nav() {
   return <nav className="hidden items-center gap-1 md:flex" />
@@ -122,6 +163,32 @@ describe('the utility-cascade assertions', () => {
     const { findings } = findUtilityCascadeFindings({
       css: RESTATED,
       classLists: SOURCE,
+      widths: WIDTHS,
+    })
+    expect(findings).toEqual([])
+  })
+
+  it('finds the collision two variants cause when the narrower one lands last', () => {
+    // Both contenders carry a media query here, so the first assertion has
+    // nothing to say and a gate that only asked "does the winner have one" would
+    // pass this stylesheet with a band rendering three columns where it asked for
+    // six.
+    const { findings } = findUtilityCascadeFindings({
+      css: `${ORDER}${GRID_COLLISION}${UNRELATED}`,
+      classLists: GRID_SOURCE,
+      widths: WIDTHS,
+    })
+    expect(groups(findings)).toEqual(['variant-order'])
+    expect(findings[0]?.message).toContain('at 1440px')
+    expect(findings[0]?.message).toContain('.sm\\:grid-cols-3')
+    expect(findings[0]?.message).toContain('.lg\\:grid-cols-6')
+    expect(findings[0]?.message).toContain('Restate it in @layer site-variants')
+  })
+
+  it('reports nothing for it once the wider variant is restated above the shared layer', () => {
+    const { findings } = findUtilityCascadeFindings({
+      css: `${ORDER}${GRID_RESTATED}`,
+      classLists: GRID_SOURCE,
       widths: WIDTHS,
     })
     expect(findings).toEqual([])
@@ -205,7 +272,7 @@ describe("the site's own stylesheet", () => {
     }
   })
 
-  it('restates every variant a bare utility would otherwise beat, which is the collision list', () => {
+  it('restates every variant that would otherwise lose, which is the collision list', () => {
     // The class lists that collide, and the utilities they need restated. Written
     // out rather than derived, so a new collision in the source is a diff here
     // rather than a silent gap: `check-utility-cascade.mjs` is what finds the new
@@ -216,6 +283,7 @@ describe("the site's own stylesheet", () => {
       { className: 'hidden sm:inline', restated: 'sm\\:inline' },
       { className: 'bg-background p-4 sm:p-6', restated: 'sm\\:p-6' },
       { className: 'mx-auto grid w-full max-w-6xl gap-6 px-6 py-16 sm:gap-16', restated: 'sm\\:gap-16' },
+      { className: 'grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6', restated: 'lg\\:grid-cols-6' },
     ]
     const selectors = new Set(
       rules

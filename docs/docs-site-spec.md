@@ -41,8 +41,16 @@ Four things change.
   adopted, the sidebar is not replaced, and every visible control remains built
   from Prism Components and Blocks, per "One stylesheet" and "No override path"
   in `AGENTS.md`.
-- **The landing page at `/`.** It keeps composing `Hero01`, `Stats01`,
-  `FeatureGrid01` and `Cta01` from the library.
+- **The landing page at `/` composes the library's own Blocks.** It opens with
+  `Hero01` in its split form, beside an `InstrumentPanel01` holding a
+  `PulseGraph` of the token pipeline, and it closes its measured numbers with
+  `Stats01`. The four rules band and the pack band are site apparatus composing
+  `Section` and `SectionHeading`, because the two jobs a Block could not do were
+  a hairline list of four claims rather than four tiles, and six swatches drawn
+  in each pack's own compiled values. `Cta01` and `FeatureGrid01` are no longer
+  composed there: both rendered the same shape the page had four of at once, and
+  a landing page that repeats one arrangement five times is the arrangement
+  rather than the system. The blocks themselves are unchanged and still ship.
 - **The forty-two catalogue routes.** Component, Block and Page slugs are
   unchanged.
 - **JSDoc as the API source.** The corpus extractor keeps reading

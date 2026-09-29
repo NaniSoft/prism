@@ -29,6 +29,15 @@ clock. This is an operational step, not a new decision ticket.
   `/foundations`; `/foundation/themes` keeps the bare `themes` slug because it is
   a page of the Foundation Section rather than a Section of its own.
 
+**These baselines were re-cut wholesale**, because the landing page was
+recomposed, the header row was re-spaced, the documentation rail moved onto the
+`sidebar` token family and the catalogue index went from a grid of cards to a
+list of rows. Every one of those is an intended change to every route, so a
+per-route diff review had nothing to separate the intended from the accidental.
+The two lanes that can catch an accidental one, `display.spec.ts` and
+`header-fit.spec.ts`, are green, and `check-utility-cascade.mjs` is green on the
+rebuilt stylesheet.
+
 ## The 768 project is committed like every other width
 
 All seven routes are screenshotted at 768 in both Modes, and those fourteen
@@ -37,42 +46,66 @@ baselines are committed, because the header fits at 768 now.
 They were not committed before, and why is worth keeping, because neither lane
 that watches this width could see the defect on its own. The header's horizontal
 navigation was on screen from `md` up, `md` is 768, and the row carries the
-wordmark, seven Section links, the search entry and the two theme controls.
-Measured, that content is 1005 pixels plus two 16 pixel gaps and the 48 pixel
-container gutter, so the row needs 1085 pixels of viewport to sit on one line at
-its designed size. At 768 it measured 1013 against a `clientWidth` of 768: the
-document scrolled 245 pixels sideways, the wordmark folded onto two lines and the
+wordmark, the Section links, the search entry and the two theme controls.
+Measured, that content needed 1085 pixels of viewport at its old spacing, so at
+768 the document scrolled sideways, the wordmark folded onto two lines and the
 mode toggle sat off screen. Every route measured the same, the landing page
 included, so it was the header and not any one page.
 
 The row now switches at `lg` (1024), the same threshold the documentation sidebar
-switches at, and `MobileMenu` carries the seven Sections from `sm` up. So at 768
-the document no longer scrolls sideways and no control is off screen, and the
-change is a no-op at 390, 1024 and 1440.
+switches at, and `MobileMenu` carries every Section from `sm` up. So at 768 the
+document no longer scrolls sideways and no control is off screen, and the change
+is a no-op at 390, 1024 and 1440.
 
-**The residual, at the bottom of the `lg` band.** Between 1024 and 1085 the row
-is up to 61 pixels short of its natural width, and the wordmark is the only
-elastic element in it, so it takes two lines there. That is unchanged by the fix:
-those widths rendered exactly that way before it, because the row was already on
-screen at `md`. Closing the band would take either a threshold the token set does
-not author (`xl` and `2xl` are closed in the emitted theme) or a re-spacing of the
-row, and the second is a design change rather than a responsive one. So the
-numbers are recorded here rather than only in a component comment.
+## Nine Sections, and the row that has to hold them
 
-## What watches the header fit
+The Section manifest has grown since the row was measured: **Patterns** and
+**Live** joined Overview, Foundation, Content, Components, Blocks, Pages and
+Changelogs, so the row carries nine links rather than seven. Nothing about the
+layout changed when they arrived, and the consequence is that the row stopped
+fitting at the threshold it switches at. Measured at 1024 with the old spacing,
+its minimum content width was 1081 pixels against a 1024 pixel viewport: the
+document scrolled 33 pixels sideways and the mode toggle sat off the right edge,
+on every route, in both Modes.
 
-`display.spec.ts` reads the computed display of the navigation row and the mobile
-menu once per project, so it answers which affordance is on screen at a project's
-width and cannot answer whether the row fits: the row computed `display: flex` at
-768 while it was 1013 pixels wide, and that assertion passed the whole time.
+**Three changes, measured, and none of them moves a label, an order or a
+destination:**
 
-`header-fit.spec.ts` reads the measurements instead, sweeping 390, 640, 768, 1024
-and 1440 in both Modes on the landing page and on a documentation route. It
-asserts three things per width: the document does not scroll sideways, every
-control in the header is inside the viewport, and the affordance on screen is the
-one that width is designed for. It also opens the disclosure at 640 and at 768 and
-asserts it carries all seven Sections, so the row moving to `lg` cannot quietly
-cost a route.
+| | before | after |
+| --- | --- | --- |
+| Section link padding | `px-3` (16px) | `px-2` (8px) |
+| Gap between Section links | `gap-1` (4px) | `0` |
+| The row's own gap | `gap-4` (16px) | `gap-2` (8px) |
+| The word beside the search icon | present, `sm:inline` | gone |
+
+The nine labels measure 687 pixels in total after the first two changes, the
+wordmark folds to two lines and is 49 pixels wide, the three controls are 218,
+and the row's own gutters are 72. That is about 1026 against 1024 at the exact
+threshold, so the search trigger also lost its word: an icon with the
+`aria-label="Search documentation"` it already carried, in a square pill the same
+shape and size as the two controls beside it. `SearchEntry` records why that
+trade was taken and what was rejected instead.
+
+**The wordmark is left elastic on purpose.** It is the one element in the row
+that can yield, and it takes two lines rather than pushing the document sideways.
+`whitespace-nowrap` on it would move the overflow rather than remove it, which is
+the harm this lane exists to catch, so it is left wrappable.
+
+**What watches it.** `header-fit.spec.ts` sweeps 390, 640, 768, 1024 and 1440 in
+both Modes on the landing page and on a documentation route, and asserts that the
+document never scrolls sideways, that every header control is inside the
+viewport, and that the affordance on screen is the one that width is designed for.
+It also opens the disclosure at 640 and at 768 and asserts it carries every
+Section **by comparing the rendered links against `TOP_NAV` rather than against a
+count**. It asserted `7`, and the manifest had already moved to nine, so the
+assertion had been describing a roster the site stopped publishing and would have
+failed the next time anyone ran the lane.
+
+`display.spec.ts` answers which affordance is on screen at a project's width and
+cannot answer whether the row fits: the row computed `display: flex` at 768 while
+it was 1013 pixels wide, and that assertion passed the whole time. Its
+header-label lane was rewritten for the same reason: it counted two `sm:inline`
+labels, and there is one now.
 
 ## Running locally
 

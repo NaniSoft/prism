@@ -56,11 +56,25 @@ export function CatalogueIndex({
   return (
     <DocsShell sections={sections} currentUrl={currentUrl} flat={flat}>
       <header className="flex flex-col gap-3">
-        <h1 className="text-3xl font-semibold tracking-tight">{section.title}</h1>
-        <p className="text-muted-foreground max-w-2xl text-lg text-pretty">{section.description}</p>
+        {/*
+          The title is the catalogue's own and the count is read from the build,
+          so a reader opening this page can see how large it is before deciding
+          whether to filter it. The count is in the mono face because it is a
+          number about a build rather than a word about the system, which is the
+          split the type system already draws elsewhere on the site.
+        */}
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{section.title}</h1>
+          <span className="text-muted-foreground font-mono text-sm">
+            {items.length} {items.length === 1 ? 'item' : 'items'}
+          </span>
+        </div>
+        <p className="text-muted-foreground max-w-measure text-lg text-pretty">
+          {section.description}
+        </p>
       </header>
 
-      <CategoryNav segment={section.segment} categories={categories} />
+      <CategoryNav segment={section.segment} categories={categories} items={items} />
 
       <Suspense fallback={<ItemGrid items={items} />}>
         <CategoryGrid items={items} />

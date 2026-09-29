@@ -14,7 +14,7 @@
   "files": [
     {
       "path": "src/blocks/stats-01/index.tsx",
-      "content": "export { Stats01, default } from './stats'\n",
+      "content": "/**\n * The subpath exports the Block and its props, and the props are exported because\n * a caller that builds a `Stat[]` has to be able to name the type it is building.\n * A Block whose prop types are only reachable through inference is a Block whose\n * callers annotate their arrays as `any`, which is the point at which a rename\n * stops being caught by the compiler.\n */\nexport { Stats01, default } from './stats'\nexport type { Stat, Stats01Props } from './stats'\n",
       "type": "registry:component",
       "target": "components/blocks/stats-01/index.tsx"
     },

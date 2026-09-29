@@ -18,7 +18,7 @@ export default function AvatarDemo() {
         <AvatarFallback className="text-xs">SM</AvatarFallback>
       </Avatar>
       <Avatar className="size-12">
-        <AvatarImage src={portrait} alt="Ada Lovelace" />
+        <AvatarImage src={portrait} alt="Priya Raman" />
         <AvatarFallback>AL</AvatarFallback>
       </Avatar>
     </div>
