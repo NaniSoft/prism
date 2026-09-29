@@ -21,6 +21,7 @@ import {
   FieldLabel,
 } from '../../components/ui/field'
 import { Input } from '../../components/ui/input'
+import type { HeadingLevel } from '../../components/ui/section'
 
 export type AuthFormField = {
   id: string
@@ -47,6 +48,15 @@ export type AuthFormRemember = {
 
 export type AuthForm01Props = {
   title: string
+  /**
+   * Heading level for the card's title. See `HeadingLevel`.
+   *
+   * This Block draws no Section heading of its own, so the card title is the one
+   * heading it renders and takes the level directly rather than a step below one.
+   * It is a prop for the same reason every Block's is: the surrounding document
+   * decides where this lands in the outline, not the Block.
+   */
+  headingLevel?: HeadingLevel
   description?: string
   /** The credential fields, in order. */
   fields: AuthFormField[]
@@ -84,12 +94,18 @@ export function AuthForm01({
   pending = false,
   onSubmit,
   footer,
+  headingLevel = 'h2',
 }: AuthForm01Props) {
+  // This Block draws no section heading, so the card title is the one heading it
+  // renders and takes the level directly rather than a step below one.
+  const Title = headingLevel
   return (
     <form onSubmit={onSubmit} className="w-full">
       <Card>
         <CardHeader>
-          <CardTitle>{title}</CardTitle>
+          <CardTitle>
+            <Title>{title}</Title>
+          </CardTitle>
           {description ? <CardDescription>{description}</CardDescription> : null}
         </CardHeader>
 

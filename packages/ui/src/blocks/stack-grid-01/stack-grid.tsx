@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
-import { Section, SectionHeading, type HeadingLevel } from '../../components/ui/section'
+import { Section, SectionHeading, childLevel, type HeadingLevel } from '../../components/ui/section'
 import { cn } from '../../lib/utils'
 
 /**
@@ -161,6 +161,9 @@ export function StackGrid01({
   headingLevel = 'h2',
   className,
 }: StackGrid01Props) {
+  // Both groups are sets of tiles under one section, so a tile name is a heading
+  // one step below it rather than a sibling of it.
+  const Title = childLevel(headingLevel)
   if (own !== undefined && own.length > 0 && !ownLabel) {
     throw new Error(
       'StackGrid01: the in-house group was passed with no ownLabel, so the grid would make the claim ' +
@@ -188,7 +191,9 @@ export function StackGrid01({
             <li key={part.name}>
               <Card className="bg-muted h-full gap-2 py-4">
                 <CardHeader className="gap-1">
-                  <CardTitle className="text-sm">{part.name}</CardTitle>
+                  <CardTitle className="text-sm">
+                    <Title>{part.name}</Title>
+                  </CardTitle>
                   {/*
                     The real product behind a codename, in the same annotation
                     face the in-house group uses for its own words. The element is
@@ -215,7 +220,9 @@ export function StackGrid01({
                 <Card className="border-primary shadow-md h-full gap-2 py-4">
                   <CardHeader className="gap-1">
                     <span className="text-muted-foreground font-mono text-xs">{ownLabel}</span>
-                    <CardTitle className="text-sm">{entry.name}</CardTitle>
+                    <CardTitle className="text-sm">
+                      <Title>{entry.name}</Title>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground text-pretty text-xs">{entry.blurb}</p>

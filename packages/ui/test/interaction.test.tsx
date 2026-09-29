@@ -52,8 +52,14 @@ const form = {
   submitLabel: 'Sign in',
 }
 
+// The panel is titled "Preferences" and not "Settings" because the SettingsPage test
+// below renders it beside a header titled "Settings". A card title is a heading now,
+// so a fixture that gave both the same word would put two headings with one name in
+// the document, and a screen reader would hear "Settings" twice in a row. That is a
+// consumer's choice of words rather than a defect Prism should refuse, so the fix is
+// realistic copy here: a settings page names its panel for what the panel holds.
 const panel = {
-  title: 'Settings',
+  title: 'Preferences',
   sections: [
     { id: 'profile', title: 'Profile', fields: [{ kind: 'text' as const, id: 'name', label: 'Name' }] },
   ],

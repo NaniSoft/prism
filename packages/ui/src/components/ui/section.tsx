@@ -39,6 +39,39 @@ export function Section({
  */
 export type HeadingLevel = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
 
+/** The six levels in outline order, so a level can be stepped rather than compared. */
+const LEVELS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const satisfies readonly HeadingLevel[]
+
+/**
+ * The level one step below a section's own heading, which is the level a title
+ * *inside* that section is composed at.
+ *
+ * **Why a function and not a second prop.** A block that draws a set of titled
+ * cards has two headings in it: the section's own, and one per card. Asking the
+ * caller for both is asking them to keep two levels in step by hand, and the two
+ * drift the moment a block is embedded one level deeper than it was written for.
+ * Deriving the child from the parent means a block moved from an `h2` section to an
+ * `h3` one carries its card titles with it, which is the whole reason
+ * `headingLevel` is a prop.
+ *
+ * This is what answers the question for every block that draws a titled card, so
+ * the answer is one function rather than six independent guesses. A block that
+ * hardcodes `h3` is right exactly once, at the nesting depth it was written for.
+ *
+ * **The clamp at `h6`, and why it is a clamp rather than a wrap.** A section
+ * already at `h6` has no child level, so a card title inside it is asked to be
+ * something it cannot be. Wrapping to `h1` would put a card's title above the
+ * section that introduces it, which is worse than a sibling of it: a reader
+ * navigating by heading would meet the card before the section it belongs to.
+ * Holding at `h6` costs a repeated level, which a screen reader announces as the
+ * same depth rather than as a break in the outline, and a `h6` section holding
+ * cards is already a document that has run out of levels.
+ */
+export function childLevel(level: HeadingLevel): HeadingLevel {
+  const at = LEVELS.indexOf(level)
+  return LEVELS[Math.min(at + 1, LEVELS.length - 1)]
+}
+
 /**
  * The heading a section opens with: an optional eyebrow, the title, an optional
  * supporting line, and the level of the one heading it renders.

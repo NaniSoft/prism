@@ -1,4 +1,6 @@
-import type { ComponentProps } from 'react'
+import type { ComponentProps, ElementType } from 'react'
+
+import type { HeadingElement } from './typography'
 
 import { cn } from '../../lib/utils'
 
@@ -45,15 +47,34 @@ function CardHeader({ className, ...props }: ComponentProps<'div'>) {
 /**
  * The card's title: the one line that names the group of related content.
  *
- * Renders a `div` rather than a heading, because a card's title is not always the
- * heading of the region it sits in: four cards in a grid are four titles under one
- * section heading, and four `h3`s under one `h2` is right while four `h2`s is
- * four sections. Pass Prism's `Heading` inside it when the card is the only thing
- * in its region and the outline should say so.
+ * Renders a `div` by default, because a card's title is not always the heading of
+ * the region it sits in: four cards in a grid are four titles under one section
+ * heading, and four `h3`s under one `h2` is right while four `h2`s is four
+ * sections. So the element is a decision the caller makes with `as`, and a Block
+ * that draws a set of titled cards passes `childLevel(headingLevel)` rather than a
+ * literal, so the titles follow the section when the block is composed one level
+ * deeper than it was written for.
+ *
+ * An earlier version of this note told a caller to pass Prism's `Heading` inside
+ * instead, and that was wrong. `Heading` is a step of the *type* scale and its
+ * floor is `lg`; a card title sits at body size, so the only way to use it was to
+ * override the size back down, which asks a type-scale component to have no opinion
+ * about type. The element and the visual step are separate questions and this is the
+ * one that answers the element.
  */
-function CardTitle({ className, ...props }: ComponentProps<'div'>) {
+function CardTitle({
+  className,
+  as: Tag = 'div',
+  ...props
+}: ComponentProps<'h2'> & { as?: HeadingElement | 'div' }) {
+  // The same cast `Heading` makes, and for the same reason: the element is chosen
+  // at runtime, so the union of the six headings and a `div` is not one prop type.
+  // The props are typed from `h2` rather than `div` because every prop a caller
+  // passes to a card title is valid on a heading, and typing from `h2` would stop a
+  // caller passing one that only a `div` takes.
+  const Element = Tag as ElementType
   return (
-    <div
+    <Element
       data-slot="card-title"
       className={cn('font-semibold leading-none', className)}
       {...props}

@@ -60,8 +60,23 @@ sibling of it.
 
 ### Best practices
 
-- Use one heading per card. `CardTitle` is a title, not a second heading level
-  in the page outline; the card's own section provides that.
+- Give each card one heading, and derive its level rather than choosing it.
+  `CardTitle` renders a `div` by default because a card's title is not always the
+  heading of the region it sits in: four cards in a grid are four titles under one
+  section heading. When the outline *should* say so, pass `as`. A Block that draws
+  a set of titled cards passes `childLevel(headingLevel)`, so its titles follow the
+  section when the block is composed one level deeper than it was written for:
+
+  ```tsx
+  import { childLevel } from '@nanisoft/prism-ui/components/section'
+
+  const Title = childLevel(headingLevel)   // a card title nests under its section
+  // ...
+  <CardTitle as={Title}>{feature.title}</CardTitle>
+  ```
+
+  A Block that draws no section heading of its own passes `as={headingLevel}`
+  instead, because then the card title is the one heading it renders.
 - Keep `CardDescription` to a single sentence. A paragraph belongs in
   `CardContent`.
 - Put the card's action in `CardFooter` so a grid of cards aligns its actions on

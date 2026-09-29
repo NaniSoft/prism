@@ -27,6 +27,7 @@ import {
 } from '../../components/ui/select'
 import { Separator } from '../../components/ui/separator'
 import { Switch } from '../../components/ui/switch'
+import { childLevel, type HeadingLevel } from '../../components/ui/section'
 import { Textarea } from '../../components/ui/textarea'
 
 export type SettingsPanelOption = { label: string; value: string }
@@ -79,6 +80,15 @@ export type SettingsPanelSection = {
 
 export type SettingsPanel01Props = {
   title: string
+  /**
+   * Heading level for the card's title. See `HeadingLevel`.
+   *
+   * This Block draws no Section heading of its own, so the card title is the one
+   * heading it renders and takes the level directly rather than a step below one.
+   * The groups inside take their level from this one, so moving the panel in a
+   * document moves every heading in it together.
+   */
+  headingLevel?: HeadingLevel
   description?: string
   /** The settings groups, each rendered with a heading and its own fields. */
   sections: SettingsPanelSection[]
@@ -194,14 +204,21 @@ export function SettingsPanel01({
   onSubmit,
   secondaryAction,
   footer,
+  headingLevel = 'h2',
 }: SettingsPanel01Props) {
+  // The panel title is the one heading the panel renders, and a group inside it is
+  // one step below, so the whole outline moves together when the panel does.
+  const Title = headingLevel
+  const GroupTitle = childLevel(headingLevel)
   const hasFooter = Boolean(submitLabel || secondaryAction || footer)
 
   return (
     <form onSubmit={onSubmit} className="w-full">
       <Card>
         <CardHeader>
-          <CardTitle>{title}</CardTitle>
+          <CardTitle>
+            <Title>{title}</Title>
+          </CardTitle>
           {description ? <CardDescription>{description}</CardDescription> : null}
         </CardHeader>
 
@@ -211,12 +228,12 @@ export function SettingsPanel01({
               {index > 0 ? <Separator className="my-6" /> : null}
               <section className="flex flex-col gap-4" aria-labelledby={`${section.id}-heading`}>
                 <div className="flex flex-col gap-1">
-                  <h3
+                  <GroupTitle
                     id={`${section.id}-heading`}
                     className="text-lg font-semibold tracking-tight"
                   >
                     {section.title}
-                  </h3>
+                  </GroupTitle>
                   {section.description ? (
                     <p className="text-muted-foreground text-sm">{section.description}</p>
                   ) : null}

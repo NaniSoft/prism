@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 
 import { Card, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
-import { Section, SectionHeading, type HeadingLevel } from '../../components/ui/section'
+import { Section, SectionHeading, childLevel, type HeadingLevel } from '../../components/ui/section'
 
 /**
  * One feature in an icon-bearing grid.
@@ -81,6 +81,10 @@ export type FeatureGrid01Props = FeatureGrid01CommonProps &
  */
 export function FeatureGrid01(props: FeatureGrid01Props) {
   const { eyebrow, title, description, numbered = false, headingLevel = 'h2' } = props
+  // A card title is a heading one step below the section that introduces the set,
+  // derived rather than written, so a Block embedded one level deeper carries its
+  // five headings with it instead of announcing five siblings of the section.
+  const Title = childLevel(headingLevel)
   // Read off `props` rather than destructured, so the two stay one value: taking
   // `variant` and `features` apart is what would let the arm the type checked
   // and the arm the renderer followed come to be two different ones.
@@ -113,7 +117,9 @@ export function FeatureGrid01(props: FeatureGrid01Props) {
                   <feature.icon className="size-5" />
                 </span>
               ) : null}
-              <CardTitle>{feature.title}</CardTitle>
+              <CardTitle>
+                <Title>{feature.title}</Title>
+              </CardTitle>
               <CardDescription>{feature.body}</CardDescription>
             </CardHeader>
           </Card>
