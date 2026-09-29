@@ -4,10 +4,13 @@
 
 The fourth Kind: `live`, a surface whose content changes without a navigation event
 
-**This is a breaking change and it is staged as one.** `CATALOG_KINDS` gains a
-member, so a consumer switching exhaustively over `kind` is broken. The release this
-belongs in is 1.0.0, not the next 0.10.x, and the changeset is marked minor only
-because the version line is chosen at release time.
+**This is a breaking change, released as a minor: 0.11.0.** `CATALOG_KINDS` gains a
+member, so a consumer switching exhaustively over `kind` is broken. A minor is the
+right line for a breaking change from a `0.x` version, where anything may change at
+any time, and taking 1.0.0 would declare the public API stable rather than describe
+this change. `CONTRIBUTING.md` says a breaking change is a `major` bump, so this is
+the one place the convention and the record disagree; the disagreement is deliberate
+and `DESIGN.md` carries it with the reasoning.
 
 **A `live` surface is what the other three cannot express.** A Component, a Block and
 a Page are all rendered from props, and props arrive when the caller says so. A run's

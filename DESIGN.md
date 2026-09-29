@@ -1135,14 +1135,28 @@ Recorded as facts. None of these is fixed in this document.
   than as an accident: a surface that receives events owns the subscription that
   delivers them.
 
-  **It is a breaking change, and it was staged as one.** The `STORE_KINDS` assertion
-  fired on the first edit, `KIND_LABELS` fired the next, and each transcription
-  below was found by a compiler rather than by a reader. The release is **1.0.0**,
-  and this entry is the reason: `CATALOG_KINDS` gained a member, so a consumer
-  switching exhaustively over `kind` is broken, and that is a real break rather than
-  an additive one.
+  **It is a breaking change, and it is released as one: `0.11.0`, a minor.** The
+  `STORE_KINDS` assertion fired on the first edit, `KIND_LABELS` fired the next, and
+  each transcription below was found by a compiler rather than by a reader.
+  `CATALOG_KINDS` gained a member, so a consumer switching exhaustively over `kind` is
+  broken, and that is a real break rather than an additive one.
 
-  Adding it is a **breaking change, at 1.0.0**, and the reason is a compile-time
+  **The decision above said 1.0.0 and it is not what happened, and the reason is
+  worth recording rather than quietly correcting.** A minor is the right line for a
+  breaking change from a `0.x` version, where anything may change at any time, and
+  taking `1.0.0` would *declare the public API stable* rather than describe this
+  change. Those are different statements and only the first one is supported by what
+  has been built: four Kinds, a client runtime in a package that had none, and a
+  Kind whose name the same document records as a naming risk it was argued past. So
+  the line is `0.11.0` and the stable release is a later, separate decision that
+  should be taken on its own evidence rather than as the landing place for a
+  taxonomy change.
+
+  `CONTRIBUTING.md` says a breaking change is a `major` bump, so this is the one
+  place the record and the convention disagree, and the disagreement is deliberate
+  and dated rather than an oversight.
+
+  Adding it is a **breaking change**, and the reason it is a compile-time
   tie rather than a judgement. `STORE_KINDS` is tied bidirectionally to
   `CatalogKind` by the `_KindsMatch` assertion, and `countKinds` holds a
   `Record<ItemKind, number>`, so a fourth Kind added to one place and not the
