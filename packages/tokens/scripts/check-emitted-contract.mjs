@@ -117,6 +117,8 @@ for (const [key, token] of spacing) put(`spacing-${escapeDot(key)}`, readToken(t
 
 for (const [key, token] of groupEntries(foundationTree, ['duration'])) put(`duration-${key}`, readToken(token))
 for (const [key, token] of groupEntries(foundationTree, ['ease'])) put(`ease-${key}`, readToken(token))
+for (const [key, token] of groupEntries(foundationTree, ['ambient'])) put(`ambient-${key}`, readToken(token))
+for (const [key, token] of groupEntries(foundationTree, ['ambient-ease'])) put(`ambient-ease-${key}`, readToken(token))
 
 put('transition-duration-fast', 'var(--duration-fast)')
 put('transition-duration-base', 'var(--duration-base)')
@@ -180,7 +182,7 @@ for (const [name, want] of expected) {
 // 4. No declaration in a bound namespace that the source did not author.
 const NAMESPACES = [
   'font-', 'font-weight-', 'text-', 'leading-', 'tracking-',
-  'duration-', 'ease-', 'shadow-', 'breakpoint-', 'container-',
+  'duration-', 'ease-', 'ambient-', 'ambient-ease-', 'shadow-', 'breakpoint-', 'container-',
   'transition-duration-', 'default-transition-duration', 'default-transition-timing-function',
 ]
 const isBound = (name) =>
@@ -224,6 +226,62 @@ for (const [key, token] of groupEntries(foundationTree, ['ease'])) {
   check(Array.isArray(value) && value.length === 4, `ease.${key} must be a four-number cubic-bezier`)
   if (Array.isArray(value) && value.length === 4) {
     check(value[1] >= 0 && value[1] <= 1 && value[3] >= 0 && value[3] <= 1, `ease.${key} overshoots: control-point y must stay in [0, 1]`)
+  }
+}
+
+/*
+ * The ambient cycle scale, held to the same three rules as `duration` and
+ * `ease`: a closed set, values stated rather than ranged, and no overshoot.
+ *
+ * Why the set is closed is the whole reason this is a gate rather than a
+ * convention. `ambient` exists so that a figure's cycle length is a token, and
+ * a token is a promise that one value is the right one. The moment the group can
+ * grow, a figure can name a cycle nobody has decided on, and "the ambient scale"
+ * stops being a decision and becomes a suggestion. The members are the cycles
+ * the system actually ships: a marker crossing a rail (`travel`), a wavefront
+ * crossing a field (`sweep`), a point drifting on its own long cycle (`drift`),
+ * a scan crossing a chart (`scan`), a node breathing while a packet passes it
+ * (`pulse`), and a figure's own load shimmer (`shimmer`).
+ *
+ * Why the floor is one second rather than zero. The `duration` scale is
+ * bounded above at 280ms because anything longer stops being feedback. This
+ * scale has no such upper bound, because a cycle has no upper bound, but it is
+ * bounded BELOW, and the bound is the gate: a sub-second cycle is a flicker,
+ * and a flicker on a page with a reading passage on it is an accessibility
+ * defect that no duration value in the 80-280ms band would ever have caught,
+ * because a flicker was not a value this repository could previously express.
+ * The check is written as a measurement rather than a list so a future cycle
+ * added to the group is measured against the reason the group exists.
+ */
+const ambientKeys = groupEntries(foundationTree, ['ambient']).map(([key]) => key).sort()
+const AMBIENT_SET = ['drift', 'pulse', 'scan', 'shimmer', 'sweep', 'travel']
+check(
+  JSON.stringify(ambientKeys) === JSON.stringify(AMBIENT_SET),
+  `ambient set must be {${AMBIENT_SET.join(', ')}}, found {${ambientKeys.join(', ')}}`,
+)
+for (const [key, token] of groupEntries(foundationTree, ['ambient'])) {
+  const ms = Number.parseFloat(readToken(token))
+  check(
+    Number.isFinite(ms) && ms >= 1000,
+    `ambient.${key} is ${readToken(token)}, and a cycle shorter than 1s is a flicker rather than a cycle. ` +
+      'A figure that runs faster than once a second is unreadable before it is understood, which is the ' +
+      'accessibility cost this floor exists to price. Use a `duration` token if the thing is feedback.',
+  )
+}
+
+const ambientEaseKeys = groupEntries(foundationTree, ['ambient-ease']).map(([key]) => key).sort()
+check(
+  JSON.stringify(ambientEaseKeys) === JSON.stringify(['drift', 'in-out', 'linear']),
+  `ambient-ease set must be {drift, in-out, linear}, found {${ambientEaseKeys.join(', ')}}`,
+)
+for (const [key, token] of groupEntries(foundationTree, ['ambient-ease'])) {
+  const value = token.$value ?? token.value
+  check(Array.isArray(value) && value.length === 4, `ambient-ease.${key} must be a four-number cubic-bezier`)
+  if (Array.isArray(value) && value.length === 4) {
+    check(
+      value[1] >= 0 && value[1] <= 1 && value[3] >= 0 && value[3] <= 1,
+      `ambient-ease.${key} overshoots: control-point y must stay in [0, 1]`,
+    )
   }
 }
 

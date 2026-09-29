@@ -87,6 +87,281 @@
 /* Class-based dark mode, matching the `.dark` axis the tokens emit. */
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * The ambient motion layer.
+ *
+ * ---------------------------------------------------------------------------
+ * This section exists because the system has two kinds of motion, and until now
+ * it had only the first.
+ * ---------------------------------------------------------------------------
+ *
+ * The motion that was already here is *feedback*: a reader hovered a control, or
+ * focused it, or opened something, and the interface answered inside 280ms. Every
+ * keyframe in this repository was forbidden because feedback that takes longer
+ * than a blink feels broken and feedback that loops forever is a distraction
+ * wearing feedback's clothes. That reasoning is unchanged and everything built
+ * on it stands.
+ *
+ * What was missing is the other kind. A figure that shows a *system running* is
+ * not a response to anything. Nobody hovered it. There is no interaction to
+ * acknowledge, no state to enter, and therefore no transition to run and nothing
+ * for a reader to wait for. It is a claim about what the product does, drawn
+ * rather than asserted, and the four NaniSoft product sites each lost exactly
+ * this when they moved off their old line: a hero that said "this is a factory"
+ * became a hero that said "this is a page".
+ *
+ * Those old heroes were canvas plus `requestAnimationFrame` plus a colour read
+ * at mount, and they were right about the intent and wrong about every
+ * mechanism. A canvas paints pixels it has already resolved, so a pack boundary
+ * landing above it did not re-ink it; it needed a client runtime on a static
+ * export; it shipped invented numbers wearing a data shape; and it ran an
+ * uncancellable loop on a reader who had asked for less motion. So the intent
+ * came back and the mechanism did not.
+ *
+ * The rules that make this layer safe, and every one of them is a rule a
+ * reviewer can check rather than a principle:
+ *
+ *   1. **No keyframe name carries a duration.** Every `animation` shorthand
+ *      below reads its length from `var(--ambient-*)`, the cycle scale authored
+ *      in the token package. A keyframe here cannot invent a timing, so the
+ *      question "how long does this run for" has exactly one answer and it is
+ *      in the token source.
+ *
+ *   2. **Nothing is hidden.** No rule in this layer sets `opacity: 0`, and
+ *      nothing waits for a script, a scroll position or an intersection to
+ *      reveal itself. A figure that starts hidden is a figure a reader with
+ *      scripting off, a slow connection, or a print stylesheet never sees, and
+ *      this system does not author that state. Every figure here renders its
+ *      complete, correct, fully legible form at first paint; the animation only
+ *      ever moves something that is already visible.
+ *
+ *   3. **Reduced motion removes the movement, not the figure.** The
+ *      `prefers-reduced-motion` block at the foot of this section does not fade
+ *      anything out and does not hide anything. It sets `animation: none`, which
+ *      leaves every element in its natural resting state, and the resting state
+ *      is the complete drawing. A reader who asked for less motion gets the
+ *      same figure, still, which is the point.
+ *
+ *   4. **The pause is a first-class state.** `animation-play-state: paused` is
+ *      what a figure uses when it is off screen or inside a collapsed region,
+ *      and it is exposed as a utility rather than left to each consumer to
+ *      write. A loop that keeps computing for a figure nobody is looking at is
+ *      a battery cost with no reader attached to it.
+ *
+ *   5. **Every keyframe animates `transform`, `opacity` or nothing.** There is
+ *      no animated `width`, no animated `top`, no animated `box-shadow`. Those
+ *      are layout and paint properties, they run on the main thread, and a
+ *      figure built from them stutters on a mid-range machine. Compositor-only
+ *      properties are what makes an always-running figure affordable.
+ *
+ * The names are prefixed `prism-` because they compile into the one stylesheet
+ * a consumer downloads and therefore share that namespace with every other
+ * thing in it. The prefix is not decoration: these are global names on a
+ * consumer's page, and a global name without a prefix is a collision waiting
+ * for a different design system's `@keyframes` to land on the same word.
+ */
+
+/*
+ * A marker crossing a rail, end to end. Used by the pipeline figures, where a
+ * thing is visibly carried from one node to the next. Linear on purpose: the
+ * easing token it reads is `ambient-ease-linear`, because a marker that
+ * accelerates out of a node and decelerates into the next one reads as being
+ * served rather than as travelling.
+ */
+@keyframes prism-travel {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--ambient-travel-distance, 100%));
+  }
+}
+
+/*
+ * A wavefront crossing a field, left to right and back. This is the figure that
+ * says "this whole surface is being observed", and it is the one motion in the
+ * system that is allowed to be a gradient rather than a mark, because what it
+ * carries is a change in emphasis across a wide area rather than an object.
+ */
+@keyframes prism-sweep {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(120%);
+  }
+}
+
+/*
+ * A point drifting on its own long cycle. Two axes at once and at different
+ * periods, so the path never visibly repeats: a figure of points that all
+ * returned on the same beat would read as a loop, and a figure that reads as a
+ * loop reads as decoration.
+ */
+@keyframes prism-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(var(--ambient-drift-x, 0.5rem), var(--ambient-drift-y, -0.5rem), 0);
+  }
+}
+
+/*
+ * A scan crossing a chart, the reticle that says which column is being read at
+ * this instant. The trailing wash is a second, slower copy of the same motion
+ * rather than a gradient, so it costs one more transform rather than a repaint.
+ */
+@keyframes prism-scan {
+  from {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  to {
+    transform: translateX(var(--ambient-scan-distance, 100%));
+    opacity: 0;
+  }
+}
+
+/*
+ * A node breathing while something passes it. The only animation in the system
+ * that changes size, and it changes a `scale` rather than a dimension, so it
+ * stays on the compositor.
+ */
+@keyframes prism-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 1;
+  }
+}
+
+/*
+ * A figure's own load shimmer, for a panel whose content is still resolving.
+ * This is the one ambient cycle that is genuinely feedback-shaped rather than
+ * system-shaped, and it is here rather than on `Skeleton` because the panel
+ * frame is what shimmers: the frame is the thing a reader is looking at while
+ * the content arrives, so the frame is the thing that should say so.
+ */
+@keyframes prism-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/*
+ * A column rising out of its baseline, used by the series figures.
+ *
+ * It interpolates from a collapsed height rather than from a translation, and
+ * the transform origin is the baseline, so a column grows upward out of the
+ * axis the way a value grows rather than sliding up to meet it. The difference
+ * is legible at a glance and it is the reason the keyframe is a scale and not a
+ * translate: a column that slid into place reads as a label arriving, and a
+ * column that grows reads as a magnitude being measured.
+ *
+ * It is the only keyframe here that begins from an absence of height, and that
+ * is bounded rather than hidden: the absence lasts one cycle, every column is
+ * at full height in the resting state, and the reduced-motion block does not run
+ * the animation at all. See `PulseSeries` for why that is a measurement rather
+ * than a promise.
+ */
+@keyframes prism-rise {
+  0% {
+    transform: scaleY(0.02);
+  }
+  55% {
+    transform: scaleY(1.04);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@layer base {
+  /*
+   * The ambient utilities. Six names, one per cycle the token scale authors, so
+   * a component picks a cycle by naming the mechanism it wants rather than by
+   * writing a shorthand with a duration in it.
+   *
+   * Each is a class rather than a variant because a variant would still leave
+   * the duration in the component's source, and the duration is the thing that
+   * has to be a token. As a class, the component writes `prism-ambient-travel`
+   * and the length is resolved here, once, from the token.
+   */
+  .prism-ambient-travel {
+    animation: prism-travel var(--ambient-travel) var(--ambient-ease-linear) infinite;
+  }
+
+  .prism-ambient-sweep {
+    animation: prism-sweep var(--ambient-sweep) var(--ambient-ease-in-out) infinite;
+  }
+
+  .prism-ambient-drift {
+    animation: prism-drift var(--ambient-drift) var(--ambient-ease-drift) infinite alternate;
+  }
+
+  .prism-ambient-scan {
+    animation: prism-scan var(--ambient-scan) var(--ambient-ease-linear) infinite;
+  }
+
+  .prism-ambient-pulse {
+    animation: prism-pulse var(--ambient-pulse) var(--ambient-ease-in-out) infinite;
+  }
+
+  .prism-ambient-shimmer {
+    animation: prism-shimmer var(--ambient-shimmer) var(--ambient-ease-linear) infinite;
+  }
+
+  .prism-ambient-rise {
+    animation: prism-rise var(--ambient-shimmer) var(--ambient-ease-out) infinite;
+  }
+
+  /*
+   * The stagger, and the pause.
+   *
+   * `prism-ambient-delay-N` sets a negative `animation-delay`, so a set of
+   * figures starts already part-way through their cycle instead of all in step.
+   * A field of ten points that all breathe together is a heartbeat; ten points
+   * offset by a tenth of a cycle each is a system. Three steps is deliberate:
+   * enough to break the lockstep, few enough that a reader sees one rhythm
+   * rather than ten unrelated ones.
+   *
+   * `prism-ambient-paused` is how a figure stops. It is a utility rather than
+   * something each consumer writes, because the alternative is every consumer
+   * inventing its own stop mechanism and at least one of them getting it wrong
+   * in a way that restarts the cycle when the figure comes back into view.
+   */
+  .prism-ambient-delay-1 {
+    animation-delay: calc(var(--ambient-travel) / -8);
+  }
+
+  .prism-ambient-delay-2 {
+    animation-delay: calc(var(--ambient-sweep) / -6);
+  }
+
+  .prism-ambient-delay-3 {
+    animation-delay: calc(var(--ambient-drift) / -5);
+  }
+
+  .prism-ambient-paused,
+  .prism-ambient-paused * {
+    animation-play-state: paused;
+  }
+}
+
 @layer base {
   /*
    * A default border colour. Components use the `border` utility for a hairline
@@ -105,5 +380,43 @@
     color: var(--foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+  }
+}
+
+/*
+ * Reduced motion, and the whole of what this system does about it.
+ *
+ * It is one `animation: none` and it sits outside every layer, so it is the
+ * last rule the cascade reaches for the property and it wins without needing a
+ * specificity contest. `none` is the whole of it, and the choice matters: the
+ * alternative is a slow version, or a fade, or a shorter cycle, and each of
+ * those still animates a property a reader asked the platform not to animate.
+ *
+ * What this rule deliberately does NOT do is hide anything, and that is a
+ * property of the ambient layer rather than of this block. Because no rule in
+ * the layer sets `opacity: 0` and no figure waits for a script, a figure is
+ * complete at first paint and its resting state is its full form. So a reader
+ * who lands here gets the same figure, motionless, and a print stylesheet gets
+ * the same figure too. There is no state anywhere in this system whose exit
+ * depends on an animation running to completion, which is why this block can be
+ * a single line and why the `hidden-state` gate in the consumer kit has nothing
+ * to check on this side of the seam.
+ *
+ * Feedback motion is untouched by this block beyond the same treatment, and
+ * that is the intended reading of the rule rather than a side effect: the
+ * system's standing position is that motion is "shortened rather than removed
+ * under reduced motion", and for feedback that shortening is to zero. A hover
+ * that still transitions at 80ms when the reader has asked for no motion is a
+ * hover that ignored them.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .prism-ambient-travel,
+  .prism-ambient-sweep,
+  .prism-ambient-drift,
+  .prism-ambient-scan,
+  .prism-ambient-pulse,
+  .prism-ambient-shimmer,
+  .prism-ambient-rise {
+    animation: none;
   }
 }

@@ -1,8 +1,8 @@
 {
   "name": "hero-01",
-  "title": "Hero 01 - Centered Marketing Hero",
-  "description": "A centered hero with an optional eyebrow, headline, supporting line and one or two actions. All copy is passed in as props.",
+  "title": "Hero 01 - Marketing Hero With An Optional Live Figure",
+  "description": "A hero with an optional eyebrow, headline, supporting line and one or two actions, which may sit centered over the container or split with a live figure beside it. All copy and the figure itself are passed in as props.",
   "categories": ["marketing"],
-  "registryDependencies": ["button"],
+  "registryDependencies": ["button", "cta-link"],
   "dependencies": ["lucide-react"]
 }

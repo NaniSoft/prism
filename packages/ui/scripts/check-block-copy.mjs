@@ -219,6 +219,12 @@ const EXCLUSIONS = [
     reason:
       "the name of a key, read from its shape against the closed set the DOM defines rather than from its position, because a key name is compared against `event.key` in a Component that owns a keyboard model and the comparison reads as a sentence to the shape rule. The set is enumerated rather than pattern-matched, and that is the point: an earlier version of this rule matched any `Arrow` followed by capitals, so the literal `\"Press enter to continue\"` was exempted because it *contains* `Enter`. A sentence containing a key name is a sentence, and a set is what tells the two apart.",
   },
+  {
+    name: 'an SVG fit keyword',
+    match: /^(?:x(?:Min|Mid|Max)Y(?:Min|Mid|Max)) (?:meet|slice)$/,
+    reason:
+      'the `preserveAspectRatio` value, which is two keywords from a closed set the SVG specification defines and a space apart by construction. It is the one machine value on an element that the shape rule reads as a sentence, and it is exempted by its own closed shape rather than by the attribute it happens to sit on: an `aria-label` reading `xMidYMid slice` would be nonsense, so exempting the pair costs nothing, and exempting the attribute would have exempted a real sentence.',
+  },
 ]
 
 /**
@@ -653,6 +659,15 @@ for (const result of results) {
 
       if (isModuleSpecifier(source, match.index)) {
         resolved.get(EXCLUSIONS[4]).push(`'${value}' (${shown})`)
+        continue
+      }
+
+      // Resolved here rather than alongside the other shape-based exclusions,
+      // because the position rules below can both claim this literal and neither
+      // can see its shape. Placed after them it would be a rule that fires on
+      // nothing, which is the same finding the stale-exclusion check reports.
+      if (EXCLUSIONS[10].match.test(value)) {
+        resolved.get(EXCLUSIONS[10]).push(`'${value}' (${shown})`)
         continue
       }
 

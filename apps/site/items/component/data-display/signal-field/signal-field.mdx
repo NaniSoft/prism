@@ -1,0 +1,58 @@
+---
+slug: components/signal-field
+title: SignalField
+---
+
+## Overview
+
+SignalField is a field of marks: the atmosphere a figure is drawn over, and the
+one component in this system that is allowed to be nothing more than texture.
+
+It exists because a hero on a hard flat ground reads as a document, and the same
+hero with a field behind it reads as a product with a surface. Everything else
+about it is restraint.
+
+## Usage
+
+```tsx
+import { SignalField } from '@nanisoft/prism-ui/components/signal-field'
+
+<div className="relative overflow-hidden">
+  <SignalField count={40} emphasisAt={0.62} className="absolute inset-0" />
+  <div className="relative">{children}</div>
+</div>
+```
+
+<ComponentDemo slug="signal-field" />
+
+## Guidelines
+
+### When to use
+
+Use it behind something, never beside it. A field is a ground, so it goes
+absolutely positioned behind content that has its own position and its own
+contrast.
+
+Use `emphasisAt` when the field has a focus. One mark takes the brand ink and a
+larger radius and the rest stay quiet, which is what makes a field read as a
+system with a centre rather than as scattered dots.
+
+### When not to use
+
+Do not use it to say something. A field is `aria-hidden` by default for exactly
+this reason: a caller reaching for it has atmosphere, not data. When a figure
+needs to say what it is showing, that figure is `PulseGraph` or `PulseSeries`,
+both of which require a name and both of which a screen reader can be given.
+
+Do not turn on `drift` behind a reading passage. It is the first thing a reader
+with vestibular sensitivity will ask to have gone, and it is off by default for
+that reason rather than because it is expensive.
+
+### Best practices
+
+- Keep the field's contrast far below the content's. It is a ground, and a
+  ground that competes with the type it sits behind has stopped being one.
+- Prefer a still field. Movement is available and the restrained version is the
+  one that reads as a product rather than as a screensaver.
+- Reach for `emphasisAt` before reaching for `drift`. One mark in focus says
+  more than ten marks moving.

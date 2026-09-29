@@ -146,6 +146,37 @@ function staticThemeDecls() {
   emitGroup('duration')
   emitGroup('ease')
 
+  /*
+   * The ambient cycle scale, in its own group and under its own namespace.
+   *
+   * It is not an extension of `duration` because the two measure different
+   * things. `duration` is how long a state change takes: a hover, a focus
+   * ring, a disclosure, all in the 80-280ms band, and all of them a reader
+   * caused. `ambient` is how long one turn of a running figure takes, and it is
+   * measured in seconds because a figure that completes its cycle in under a
+   * second is a flicker rather than a cycle. Folding the two into one scale
+   * would have made `slow` mean both 280ms and 7.2s, and a component could not
+   * name which one it meant.
+   *
+   * The keyframes themselves are NOT here, and the line is worth stating
+   * plainly because a keyframe is the one thing in this repository that a
+   * duration is not. A duration is a value, and values live in the token source
+   * and reach CSS as a custom property. A keyframe is a mechanism: it names a
+   * set of properties and a trajectory, and there is no DTCG type for one, so a
+   * keyframe emitted from here would be a mechanism smuggled into the value
+   * tier. They live in the component package's stylesheet, and the two meet at
+   * exactly one place: an `animation-duration: var(--ambient-travel)` in that
+   * stylesheet, which is a value naming a value. So a keyframe cannot invent a
+   * duration and a duration cannot invent a keyframe, and every cycle in the
+   * system is priced by the token that names it.
+   *
+   * The easings get their own group for the same reason the durations do: an
+   * ambient loop is not a state response, and `ease-out`'s hard deceleration
+   * reads as a stutter when it is played eight times in a row on a loop.
+   */
+  emitGroup('ambient')
+  emitGroup('ambient-ease')
+
   // Tailwind's `duration-*` utility reads `--transition-duration-*`, not
   // `--duration-*`, so the duration tokens are mirrored here.
   push('--transition-duration-fast', 'var(--duration-fast)')

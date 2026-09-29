@@ -78,7 +78,13 @@ const REPO = path.join(HERE, '..', '..', '..')
  * rule is narrow enough that widening it by accident is the way it would be
  * switched off.
  */
-const SCANNED = ['diagram.tsx', 'product-mark.tsx']
+const SCANNED = [
+  'diagram.tsx',
+  'product-mark.tsx',
+  'pulse-graph.tsx',
+  'pulse-series.tsx',
+  'signal-field.tsx',
+]
 
 /** The emitted token CSS the contract is read from, in both modes. */
 const CONTRACT = [
@@ -309,6 +315,20 @@ if (contract.size === 0) {
 /** The contract names without the `--`, which is what a Tailwind class suffix is. */
 const roles = new Set([...contract].map((property) => property.slice(2)))
 
+/**
+ * A class suffix split into its role and its alpha modifier.
+ *
+ * `fill-brand-ink/45` is the `brand-ink` role at 45% and nothing else, and a
+ * role inside a shape that also holds an arbitrary value is left whole so that
+ * the arbitrary-value branch still sees it: splitting on every `/` would turn
+ * `bg-[color:var(--x)]/50` into a role this gate cannot judge.
+ */
+function splitAlpha(suffix) {
+  const at = suffix.indexOf('/')
+  if (at === -1) return [suffix, null]
+  return [suffix.slice(0, at), suffix.slice(at + 1)]
+}
+
 for (const name of SCANNED) {
   const file = path.join(COMPONENTS, name)
   const source = maskComments(readFileSync(file, 'utf8'))
@@ -385,9 +405,33 @@ for (const name of SCANNED) {
     if (raw.includes('[') || raw.includes(']')) continue
     if (!PAINT_PREFIXES.some((prefix) => raw.startsWith(`${prefix}-`))) continue
     classNames += 1
-    const suffix = raw.slice(raw.indexOf('-') + 1)
-    if (roles.has(suffix)) continue
-    if (/^(?:\d+(?:\.\d+)?|\[[^\]]*\])$/.test(suffix)) continue
+    /*
+     * The alpha modifier is split off before the role is read, and the reason is
+     * a line in DESIGN.md rather than a convenience: "Opacity and alpha
+     * modifiers. The colour is a token; the multiplier is Tailwind's." So
+     * `stroke-muted-foreground/50` names the `muted-foreground` role and a
+     * half-transparent version of it, and the role is the part this gate is
+     * about. Judging the whole suffix meant `fill-brand-ink/45` reported as a
+     * paint naming no role, which is the opposite of true: it names a role and
+     * asks the browser for less of it.
+     *
+     * A modifier that is not a plain number still fails below, because
+     * `fill-brand-ink/[0.4]` is caught by the arbitrary-value branch and a
+     * modifier spelled as a variable is a value the drawing is holding, which is
+     * what this gate is for.
+     */
+    const [role, alpha] = splitAlpha(raw.slice(raw.indexOf('-') + 1))
+    if (alpha !== null && !/^\d+(?:\.\d+)?$/.test(alpha)) {
+      findings.push(
+        `${shown}  [unnamed-paint]  "${raw}" carries an alpha modifier of "${alpha}", which is not a` +
+          ' plain percentage. The colour is a token and the multiplier is Tailwind\'s, so a multiplier spelled as' +
+          ' anything else is a value the drawing holds rather than a token it inherits, and a resolved value does' +
+          ' not move when a pack boundary lands above it.',
+      )
+      continue
+    }
+    if (roles.has(role)) continue
+    if (/^(?:\d+(?:\.\d+)?|\[[^\]]*\])$/.test(role)) continue
     const exclusion = EXCLUSIONS.find((rule) => rule.match.test(raw))
     if (exclusion) {
       resolved.get(exclusion).push(`${raw} (${shown})`)

@@ -1,0 +1,81 @@
+---
+slug: components/pulse-graph
+title: PulseGraph
+---
+
+## Overview
+
+PulseGraph draws a running system: named nodes, the relations between them, a
+marker travelling the sequence, and a breathing focus on the node the drawing is
+about.
+
+It is the Component a product page reaches for when its claim is a mechanism. A
+pipeline that runs, a fleet that is observed, a request that crosses six
+services: each is a graph, and a graph described in a sentence is a claim while
+the same graph with a marker crossing it is a demonstration.
+
+## Usage
+
+```tsx
+import { PulseGraph } from '@nanisoft/prism-ui/components/pulse-graph'
+
+<PulseGraph
+  nodes={[
+    { id: 'issue', name: 'issue', x: 0, y: 0.5, lane: 0 },
+    { id: 'build', name: 'build', x: 0.5, y: 0.5, lane: 1, emphasis: true },
+    { id: 'review', name: 'review', x: 1, y: 0.5, lane: 2 },
+  ]}
+  relations={[
+    { from: 'issue', to: 'build', carries: true },
+    { from: 'build', to: 'review', carries: true },
+  ]}
+  label="The build loop, from issue to merged pull request"
+/>
+```
+
+<ComponentDemo slug="pulse-graph" />
+
+## Guidelines
+
+### When to use
+
+Use PulseGraph when the thing you are describing has parts and the parts have an
+order. Give every node a `lane` when there is a sequence, and the graph draws a
+rail with a marker travelling it. Omit `lane` on every node and it draws a field
+instead, with no rail and no marker, which is the right shape for a system with
+no stated order.
+
+Use `carries` on the edges where something moves. Those edges get a head at the
+end of the line, so the claim survives a reader who has turned motion off.
+
+### When not to use
+
+Do not use it to draw a relationship with no running. `Diagram` is the
+relationship, and it is quieter and one item lighter.
+
+Do not pass a figure that is only interesting while it moves. Stop the animation
+and ask whether the drawing still says the thing. If it does not, the drawing is
+atmosphere and it belongs in `SignalField`, where the system is honest that it
+is.
+
+### Accessibility
+
+The drawing is one image with a name, so `label` is required unless the drawing
+is `decorative`, in which case the name is forbidden. Everything inside a
+`role="img"` is presentational, so node names and notes are drawn for sighted
+readers and the surrounding sentence is what a screen reader gets.
+
+Every element is visible at first paint. Nothing waits for a script, an
+intersection or a scroll position, and a reader with reduced motion set gets the
+same figure, still. A print stylesheet gets it too.
+
+### Best practices
+
+- Name the drawing in the caller's own words: what the system does, not what the
+  component is. The label is the only thing a screen reader reads.
+- Mark one node `emphasis`. Two emphasised nodes is a mistake, not a second
+  level; a figure with two focal points has none.
+- Keep node names short. A graph is read at a glance and a name that wraps
+  collides with its neighbour, which this component cannot see.
+- Use `note` for the qualifier a stage needs, such as its role or its cadence.
+  It draws in the mono face under the name and is not announced.
