@@ -35,8 +35,20 @@ export type Hero01Props = {
    * about their product. Pass one if you mean it.
    */
   eyebrow?: string
-  title: string
-  description?: string
+  /**
+   * The headline.
+   *
+   * A `ReactNode` rather than a `string`, because `SectionHeading` already takes
+   * one and a Block that narrowed it would have been the odd one out. Three of the
+   * five product sites set the emphasised word in their own mark rather than in a
+   * wrapper, so a `string` here would have forced each of them to drop the
+   * emphasis or reach for a second component. Every string a site renders is
+   * still the site's, and `check-block-copy.mjs` still holds this Block to
+   * shipping none.
+   */
+  title: ReactNode
+  /** The supporting line. A node for the same reason the title is one. */
+  description?: ReactNode
   actions?: HeroAction[]
   /**
    * Whether the copy is centered in the band or set flush to the left edge of
