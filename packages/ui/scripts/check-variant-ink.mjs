@@ -31,6 +31,38 @@
  * exempting it is the difference between a rule that finds the defect and a rule
  * nobody can run.
  *
+ * **It reads only the Component layer, and that is deliberate, not an oversight.**
+ * It was extended to `src/blocks` and `src/pages` as an experiment and withdrawn,
+ * and the reason is worth keeping because the reasoning is easy to get wrong.
+ *
+ * The Block layer does hold the shape this gate exists for. `StackGrid01` writes
+ * `<Card className="bg-muted">`: a fill override carrying no ink of its own, which
+ * read on its own is precisely the Cta01 defect one layer down. Measured as such
+ * it is a 1.09:1 tile, failing in seven of twelve pack and mode combinations. It
+ * is also not a defect, and the reason is the whole of why the extension fails.
+ *
+ * `Card` declares `bg-card text-card-foreground` on itself, and `cn()` merges the
+ * caller's class over it. The override replaces the *fill*; the *ink* arrives with
+ * the base. The tile therefore renders `--muted` behind `--card-foreground`, which
+ * is 13.88:1 in the base pack's dark mode and 16.44:1 in its light, and no reader
+ * sees anything wrong with it. The ink a rendered element has is a property of the
+ * merge, not of any one string, and a gate that reads strings cannot see it.
+ *
+ * Narrowing the rule to fills on elements that can hold a label, and excluding
+ * `bg-gradient-to-*` and self-closing elements, reduces twenty-six candidate fills
+ * to fifteen, and every one of the fifteen is a case where the ink is supplied by
+ * the component being overridden: a `DialogPrimitive` overlay, a `SwitchPrimitive`
+ * thumb, a `TooltipPrimitive` bubble, a `site-header` whose `bg-background` is the
+ * page ground by definition. Widening the gate here would add fifteen findings
+ * that all have to be explained away, which is a gate nobody runs, against a real
+ * defect it still would not catch.
+ *
+ * So the layer stays as it is, and the judgement to make instead is the one this
+ * gate already models: a Block that wants a different surface says so with a
+ * variant that states both, rather than overriding a fill alone. Where that is
+ * genuinely impossible, the pair belongs in `check-contrast.mjs`, which measures
+ * token pairs and so can be asked about `--muted` on `--card-foreground` directly.
+ *
  * Run: pnpm --filter @nanisoft/prism-ui check:variant-ink
  */
 import { readFileSync, readdirSync, existsSync } from 'node:fs'
