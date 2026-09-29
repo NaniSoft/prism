@@ -2,7 +2,7 @@
 '@nanisoft/prism-ui': minor
 ---
 
-`DiagramNode` carries a subtitle and a pack, and a `Diagram` with no `label` is named by its own nodes
+`DiagramNode` carries a subtitle and a pack, and an unlabelled `Diagram` is named by its nodes
 
 **The subtitle is drawn, not only announced.** `DiagramNode` had one line of text
 and `DiagramProps` forced `label` on the non-decorative arm, so the only channel
