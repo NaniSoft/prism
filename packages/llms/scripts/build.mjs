@@ -65,6 +65,7 @@ import {
   splitChangelog,
 } from '../../../apps/site/scripts/published-packages.mjs'
 import { readItemContent } from '../../../apps/site/scripts/item-content.mjs'
+import { readDeclarations as readDeclarationText } from '../../../apps/site/scripts/declaration-resolution.mjs'
 
 const PKG_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const REPO_ROOT = path.resolve(PKG_ROOT, '..', '..')
@@ -325,30 +326,26 @@ function dtsPath(source) {
  * sibling counted twice names them twice.
  */
 async function readDeclarations(file) {
-  const text = await readFile(file, 'utf8')
-  const dir = path.dirname(file)
-  const parts = [text.replace(/\r\n/g, '\n')]
+  // The walk and its candidate list come from one place, shared with the site's
+  // `generate-api.mjs`. It used to be written twice, and the two copies drifted:
+  // when the emitted declarations began carrying file extensions, both stopped
+  // resolving anything and every Item whose declaration lives in a sibling
+  // published "No additional props are declared for this item" with no error.
+  //
+  // This copy additionally reads the emitted *JavaScript* of each module it
+  // reaches, because a Block's `index.tsx` is one re-export line and every value
+  // import lives in the sibling beside it, so reading only the index's own `.js`
+  // finds nothing. The shared walk reports which modules it resolved for exactly
+  // that reason.
+  const resolved = []
+  const text = await readDeclarationText(file, async (candidate) => {
+    const part = await readText(candidate)
+    if (part !== undefined) resolved.push(candidate)
+    return part
+  })
 
-  // Every module this one reaches by a relative re-export, so the emitted
-  // JavaScript of a sibling is read as well as the declaration of it. A Block's
-  // `index.tsx` is one re-export line and every value import lives in the sibling
-  // beside it, so reading only the index's own `.js` finds nothing.
-  const modules = new Set([file])
-  const read = new Set([file])
-  for (const match of text.matchAll(/from\s+['"](\.[^'"]+)['"]/g)) {
-    const base = path.resolve(dir, match[1])
-    for (const candidate of [`${base}.d.ts`, `${base}.d.mts`, path.join(base, 'index.d.ts')]) {
-      if (read.has(candidate)) continue
-      const part = await readText(candidate)
-      if (part !== undefined) {
-        parts.push(part)
-        modules.add(candidate)
-        read.add(candidate)
-        break
-      }
-    }
-  }
-  for (const module of modules) {
+  const parts = [text.replace(/\r\n/g, '\n')]
+  for (const module of resolved) {
     const emitted = await readText(module.replace(/\.d\.mts$/, '.mjs').replace(/\.d\.ts$/, '.js'))
     if (emitted !== undefined) parts.push(emitted)
   }

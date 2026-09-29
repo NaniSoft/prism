@@ -18,6 +18,8 @@ import { fileURLToPath } from 'node:url'
 import { buildCatalog } from '@nanisoft/prism-ui/catalog'
 import { extractExports } from '@nanisoft/prism-llms/extractor'
 
+import { readDeclarations as readDeclarationText } from './declaration-resolution.mjs'
+
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const SITE = path.join(HERE, '..')
 const REPO = path.join(SITE, '..', '..')
@@ -32,25 +34,14 @@ function dtsPath(source) {
 
 /**
  * Reads a declaration file plus anything it re-exports from a relative path.
- * A block's `index.tsx` re-exports from `./hero`, so the function declaration
- * lives in a sibling file. One hop covers the shapes this repository emits.
+ *
+ * The walk itself lives in `declaration-resolution.mjs`, shared with the corpus
+ * builder. It used to live here, and the two copies drifted: when the emitted
+ * declarations began carrying file extensions, both stopped resolving anything and
+ * every Item whose declaration lives in a sibling published no props at all.
  */
 async function readDeclarations(file) {
-  const text = await readFile(file, 'utf8')
-  const dir = path.dirname(file)
-  const parts = [text]
-  for (const match of text.matchAll(/from\s+['"](\.[^'"]+)['"]/g)) {
-    const base = path.resolve(dir, match[1])
-    for (const candidate of [`${base}.d.ts`, `${base}.d.mts`, path.join(base, 'index.d.ts')]) {
-      try {
-        parts.push(await readFile(candidate, 'utf8'))
-        break
-      } catch {
-        // try the next shape
-      }
-    }
-  }
-  return parts.join('\n')
+  return readDeclarationText(file)
 }
 
 const catalogue = buildCatalog()
