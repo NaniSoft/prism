@@ -76,8 +76,23 @@ const ITEMS_ROOT = path.join(SITE_ROOT, 'items')
 const CONTENT_ROOT = path.join(SITE_ROOT, 'content')
 
 const BASE_URL = 'https://prism.nanisoft.com'
-const KIND_SEGMENT = { component: 'components', block: 'blocks', page: 'pages' }
-const KIND_RANK = { component: 0, block: 1, page: 2 }
+/**
+ * The URL segment each Kind is published at, and the order the catalogue reads in.
+ *
+ * One row per Kind, and the two facts are in one row because a Kind with a segment
+ * and no rank is a Kind that sorts unpredictably, which is a different bug from the
+ * one that got this far and would not have been caught here.
+ *
+ * `live` is singular at both ends: the Kind is singular, the Section is singular,
+ * and the plural is not a Kind anyone has.
+ */
+const KIND_SEGMENT = {
+  component: 'components',
+  block: 'blocks',
+  page: 'pages',
+  live: 'live',
+}
+const KIND_RANK = { component: 0, block: 1, page: 2, live: 3 }
 /**
  * The extensions the content tree is read in: the one it is authored in, and
  * the one it is copied in.

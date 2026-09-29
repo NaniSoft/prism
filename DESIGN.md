@@ -1125,15 +1125,22 @@ Recorded as facts. None of these is fixed in this document.
 - **A one-way Figma Variables sync is not built.** The DTCG projection under
   `dist/dtcg/` exists; the sync and its plugin ownership do not, and two-way
   sync is out of scope.
-- **A fourth Kind is decided and not built.** `live` is a Kind for surface whose
-  content changes over time without a navigation event, and it is the home for
-  an agent console, an execution flow and a monitoring view. Prism would own the
-  event log surface, the tool-call ledger, the status tiers and the run controls;
-  the consumer owns the socket, the transport and the persistence, so Prism stays
-  transport-agnostic and no permanent client runtime reaches a consumer. It is
-  **not** in `CATALOG_KINDS` and `Kind` in `CONTEXT.md` still reads `component`,
-  `block`, `page`; the glossary is not edited ahead of the code because a
-  vocabulary that names a Kind the catalogue does not have is a second list.
+- **A fourth Kind is built: `live`.** A `live` surface is one whose content changes
+  over time without a navigation event, and it is the home for an agent console, an
+  execution flow and a monitoring view. Prism owns the event log surface, the
+  tool-call ledger, the status tiers and the run controls; the consumer owns the
+  socket, the transport and the persistence, so Prism stays transport-agnostic and
+  no permanent client runtime reaches a consumer. `RunStream01` is the first one, and
+  it is the first client Component in the package, which is why it is client rather
+  than as an accident: a surface that receives events owns the subscription that
+  delivers them.
+
+  **It is a breaking change, and it was staged as one.** The `STORE_KINDS` assertion
+  fired on the first edit, `KIND_LABELS` fired the next, and each transcription
+  below was found by a compiler rather than by a reader. The release is **1.0.0**,
+  and this entry is the reason: `CATALOG_KINDS` gained a member, so a consumer
+  switching exhaustively over `kind` is broken, and that is a real break rather than
+  an additive one.
 
   Adding it is a **breaking change, at 1.0.0**, and the reason is a compile-time
   tie rather than a judgement. `STORE_KINDS` is tied bidirectionally to

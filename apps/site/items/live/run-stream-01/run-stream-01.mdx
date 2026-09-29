@@ -1,0 +1,114 @@
+---
+slug: live/run-stream-01
+title: RunStream01
+---
+
+## Overview
+
+RunStream01 draws the event log of a run, receiving events as they arrive.
+
+**This is the first surface in the package that is a client Component**, and that is
+the whole of what the fourth Kind is for. A Block takes its content as props, so it
+is rendered once and re-rendered when the consumer's framework decides. A `live`
+surface's content changes **without a navigation event**, which no amount of
+prop-passing expresses. So this one owns a subscription and the accumulation behind
+it.
+
+**Prism owns the surface, the consumer owns the transport.** `subscribe` is a
+function the consumer supplies and a function it tears down. There is no socket in
+this file, no endpoint, no retry policy and no persistence, and there is no provider
+to mount: a consumer that already has a connection passes it in, and one that does
+not has not acquired a client runtime by importing this.
+
+## Usage
+
+```tsx
+import { RunStream01, type RunEvent } from '@nanisoft/prism-ui/live/run-stream-01'
+
+function AgentRun({ runId, token }: { runId: string; token: string }) {
+  return (
+    <RunStream01
+      // Yours to build: a WebSocket, an EventSource, a poll, or an array in a test.
+      subscribe={(emit) => {
+        const socket = new WebSocket(`/runs/${runId}/events`)
+        socket.addEventListener('message', (message) => emit(JSON.parse(message.data) as RunEvent))
+        return () => socket.close()
+      }}
+      resubscribeKey={runId}
+      status="running"
+      statusLabel="Running"
+      title="Run 41c9"
+      eventsLabel="Events in this run"
+      emptyLabel="Waiting for the first event."
+      liveLabel="New activity"
+    />
+  )
+}
+```
+
+<ComponentDemo slug="run-stream-01" />
+
+## Props
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `subscribe` | `RunSubscribe` | required | Called once with an emitter. Must return an unsubscribe. |
+| `eventsLabel` | `string` | required | The accessible name of the scrolling region. |
+| `resubscribeKey` | `string \| number` | none | Which run this is. Changing it clears the log, reseeds it, and opens a new subscription. |
+| `initial` | `readonly RunEvent[]` | `[]` | Events already known, oldest first. Read when the run opens, not on every render. |
+| `status` | `RunStatus` | none | `queued`, `running`, `waiting`, `done` or `failed`. |
+| `statusLabel` | `string` | none | The word beside the status. |
+| `title` | `string` | none | The surface's heading. |
+| `eyebrow` | `string` | none | Optional label above the heading. |
+| `description` | `string` | none | One or two sentences under the heading. |
+| `emptyLabel` | `string` | none | What the surface says when it holds no events. |
+| `liveLabel` | `string` | none | Names the announcements, for assistive technology. |
+| `limit` | `number` | `500` | How many events to hold. Older events fall off the top. |
+| `className` | `string` | none | Merged onto the surface element. |
+
+## The three decisions inside it
+
+**Events are kept sorted by `at`, not by arrival.** A consumer's transport decides
+when a message is delivered, and a reconnect delivers older events after newer ones.
+Sorting on arrival would put a run's own history out of order in exactly the case
+where a reader is most likely to be watching. Ties break on `id`, so the order is
+total and the same run renders the same log every time.
+
+**A growing list is not a live region.** Announcing a list that grows would make a
+screen reader read the whole run again on every arrival, which is the failure a live
+region on a list guarantees rather than avoids. `LiveRegion` carries the newest
+event's message alone; the log is an ordinary scrollable list a reader moves through
+at their own pace.
+
+**The roles are told apart without relying on colour.** Four roles, each with its own
+mark as well as its own ink, so the tiers are separable in a monochrome render and by
+a reader who cannot see the ink at all. The **words** are yours: Prism owns which
+role looks like what and ships none of the labels.
+
+## Accessibility
+
+- The events are one `<ol>`, so the order is in the document rather than in the
+  styling.
+- The scrolling region is **named**, and `eventsLabel` is required rather than
+  defaulted: a scroll region with no name is announced as a group of focusable
+  nothing, and a keyboard reader who tabs into it cannot tell what is in it.
+- Each event's timestamp is a `<time>` with a machine-readable `datetime`, and the
+  mark beside it is `aria-hidden`, so the role is carried by the data and the mark is
+  decoration rather than announced as a character.
+- The status line is a `<p>`, not a heading. A status is not a heading, and an
+  earlier version of this Item fell back to the status label for the heading, which
+  rendered the same sentence as both the subject of a region and its state.
+
+## Choosing between this and a Block
+
+A Block is right when the content changes because the consumer's framework decided it
+should: a form that re-renders on submit, a table that refetches on navigation. Those
+are server Components and cost the consumer no client JavaScript.
+
+A live surface is right when the content changes on its own, with no navigation and no
+caller asking. A run's event log, a monitoring view, anything fed by a socket.
+
+`RunConsole01` is the boundary case and worth naming: it draws a run console from a
+log passed in as props, so a consumer that already re-renders on a poll should use it
+and pay nothing. Reach for this when the events must arrive without a render being
+triggered from outside.

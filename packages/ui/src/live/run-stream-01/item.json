@@ -1,0 +1,8 @@
+{
+  "name": "run-stream-01",
+  "title": "Run Stream 01 - An Event Log That Arrives",
+  "description": "The event log of a run, receiving events as they arrive over a subscription the consumer supplies. The first client surface in the package, and the reason the live Kind exists. Prism owns the log, the roles and the status tiers; the consumer owns the socket, the transport and the persistence. Every string is passed in as a prop.",
+  "categories": ["data-display"],
+  "registryDependencies": ["live-region", "scroll-area"],
+  "dependencies": []
+}

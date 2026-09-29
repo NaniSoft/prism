@@ -2,7 +2,12 @@ import { readFileSync } from 'node:fs'
 
 import { describe, expect, it } from 'vitest'
 
-import { parsePrismDocsStore, STORE_SECTIONS, STORE_SECTION_TITLES } from '../src/store.js'
+import {
+  parsePrismDocsStore,
+  STORE_KINDS,
+  STORE_SECTIONS,
+  STORE_SECTION_TITLES,
+} from '../src/store.js'
 
 /**
  * The emitted store, validated through the same runtime guard the check gate
@@ -58,7 +63,15 @@ describe('the emitted PrismDocsStore', () => {
 
   it('projects the closed kind union', () => {
     const kinds = new Set(store.items.map((item) => item.kind))
-    expect([...kinds].sort()).toEqual(['block', 'component', 'page'])
+    // Read off the union rather than written out. A transcription of the Kind list
+    // is a second list about the same three (or four) kinds, and the fourth Kind
+    // arrived and failed this test, which is the whole argument for the `_KindsMatch`
+    // assertion that ties the two at compile time where this cannot.
+    expect([...kinds].sort()).toEqual([...STORE_KINDS].sort())
+    // And every Kind is represented, so a Kind with no Item cannot pass quietly.
+    // A Kind with no members advertises a vocabulary the catalogue cannot fill, and
+    // the site cannot publish a Section root for it either.
+    expect(kinds.size).toBe(STORE_KINDS.length)
   })
 
   it('keeps a Component kind from widening to string at compile time', () => {

@@ -54,6 +54,19 @@ const KIND_LABELS: Record<ItemKind, string> = {
   component: 'Component',
   block: 'Block',
   page: 'Page',
+  /**
+   * `Live` is the Kind's discriminator and `Live surface` is what an agent is
+   * told, and the two differ deliberately. The other three are nouns that are also
+   * their own label, so there was nothing to decide; `live` is an adjective, and an
+   * agent handed the bare word `Live` is handed an adjective to reason about. A noun
+   * phrase tells it what it is looking at.
+   *
+   * That also forced the one sentence this label appears in to stop being phrased
+   * around a noun, because "the surface of this Live" reads as an error and "of this
+   * Live surface" reads as a stutter. The sentence is now "A <label> is made of the
+   * exports below", which is true of all four and awkward about none of them.
+   */
+  live: 'Live surface',
 }
 
 function kindLabel(kind: ItemKind): string {
@@ -250,7 +263,7 @@ export function renderItemProps(store: PrismDocsStore, args: ItemArgs): CallTool
   }
   if (item.composition) {
     return text(
-      `# ${item.name} - composition\n\nThe public surface of this ${kindLabel(item.kind)} is the composition below.\n\n${item.composition}\n\nImport rule: ${IMPORT_RULE}`,
+      `# ${item.name} - composition\n\nA ${kindLabel(item.kind)} is made of the exports below.\n\n${item.composition}\n\nImport rule: ${IMPORT_RULE}`,
     )
   }
   return error(

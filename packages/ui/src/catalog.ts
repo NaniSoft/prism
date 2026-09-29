@@ -8,7 +8,7 @@
  * authoritative. Tooling only: a consumer's runtime UI must not import this.
  */
 
-export const CATALOG_KINDS = ['component', 'block', 'page'] as const
+export const CATALOG_KINDS = ['component', 'block', 'page', 'live'] as const
 export type CatalogKind = (typeof CATALOG_KINDS)[number]
 
 export const COMPONENT_CATEGORIES = [
@@ -1040,6 +1040,17 @@ export const catalog: readonly CatalogItem[] = [
       'A pipeline of any length, drawn in order across as many lines as it needs, with a continuous ordinal and an optional label on the last stage.',
     source: 'src/blocks/process-flow-01/index.tsx',
     exports: ['ProcessFlow01'],
+    status: 'stable',
+  },
+  {
+    name: 'RunStream01',
+    slug: 'run-stream-01',
+    kind: 'live',
+    category: null,
+    description:
+      'The event log of a run, receiving events as they arrive over a subscription the consumer supplies.',
+    source: 'src/live/run-stream-01/index.tsx',
+    exports: ['RunStream01'],
     status: 'stable',
   },
   {

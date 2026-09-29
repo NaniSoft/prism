@@ -105,6 +105,11 @@ export const SECTIONS: readonly SiteSection[] = [
   { segment: 'components', title: 'Components', prose: false, searched: true },
   { segment: 'blocks', title: 'Blocks', prose: false, searched: true },
   { segment: 'pages', title: 'Pages', prose: false, searched: true },
+  // The fourth Kind. Singular because `live` is singular, which is the one place
+  // the Section segment is not `${kind}s`; the catalogue's Section table takes the
+  // segment from the manifest rather than deriving it, and throws when the two
+  // disagree, so a Kind with an irregular segment is named in one place.
+  { segment: 'live', title: 'Live', prose: false, searched: true },
   { segment: 'changelogs', title: 'Changelogs', prose: false, searched: false },
 ] as const
 
