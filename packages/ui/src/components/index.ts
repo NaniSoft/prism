@@ -166,6 +166,15 @@ export {
 } from './ui/navigation-menu'
 export { Resizable, ResizablePanel, ResizableHandle } from './ui/resizable'
 export { Item } from './ui/item'
+export { ChartFrame } from './ui/chart-frame'
+export {
+  Sidebar,
+  SidebarHeader,
+  SidebarNav,
+  SidebarItem,
+  SidebarFooter,
+  SidebarToggle,
+} from './ui/sidebar'
 export { ScrollArea } from './ui/scroll-area'
 export { AspectRatio } from './ui/aspect-ratio'
 export { Carousel } from './ui/carousel'

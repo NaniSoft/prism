@@ -1,0 +1,132 @@
+---
+slug: components/sidebar
+title: Sidebar
+---
+
+## Overview
+
+A Sidebar is a navigation rail: its own surface, its own ink, its own focus ring,
+its own border, and a collapsed state that is the same rail at a smaller width
+rather than a second Component.
+
+It exists because `sidebar` through `sidebar-ring` were the one family in the token
+contract with no consumer. Those tokens are not interchangeable with the page
+roles. `ring` is pinned to a step that clears 3:1 against the page ground, and the
+sidebar ground is one step off the page ground in either mode, so on Mint in light
+mode the page ring measures 2.86:1 against the rail where `sidebar-ring` measures
+4.11:1. A rail that inherited the page ring shipped a focus indicator a reader
+could not see in one pack out of six, and it looked correct in the other five.
+
+## Usage
+
+```tsx
+import {
+  Sidebar,
+  SidebarFooter,
+  SidebarItem,
+  SidebarNav,
+  SidebarToggle,
+} from '@nanisoft/prism-ui/components/sidebar'
+
+;<Sidebar label="Sections">
+  <SidebarNav label="Sections">
+    <SidebarItem label="Overview" href="/overview" current />
+    <SidebarItem label="Billing" href="/billing" />
+    <SidebarItem label="New project" onClick={create} />
+  </SidebarNav>
+  <SidebarFooter>
+    <SidebarToggle collapseLabel="Collapse sidebar" expandLabel="Expand sidebar" />
+  </SidebarFooter>
+</Sidebar>
+```
+
+<ComponentDemo slug="sidebar" />
+
+## Guidelines
+
+### When to use
+
+Use a Sidebar for the primary navigation of an application surface: a product with
+more than about six destinations, a dashboard, an admin tool, anything where the
+reader is moving between sections rather than reading down a page.
+
+Compose it from `SidebarHeader` for the brand, `SidebarNav` for the links,
+`SidebarFooter` for the account menu, and `SidebarToggle` wherever the product
+wants the control. The toggle is a part rather than something the rail draws,
+because where a rail's controls belong is the product's decision.
+
+Use it over a top bar when the destinations are sections rather than actions, and
+over a plain list of links when there are enough of them that the reader should be
+able to collapse them.
+
+### When not to use
+
+Do not use it on a marketing page. A header with five links is a header, and a rail
+on a landing page is furniture a reader has to look past.
+
+Do not use it for a rail of icons alone. That is the collapsed state, and it is a
+state of this Component rather than a different one, so an icon-only rail is
+`collapsed` and a reader who lands on it can still hear every name.
+
+Do not use one `SidebarNav` for two different sets of links. The navigation is a
+landmark, and a landmark with no name is announced as "navigation" whatever is in
+it, so pass a `label` for each one.
+
+### Best practices
+
+- **Give every item a `label`.** It is the words beside the icon while the rail is
+  open and the item's accessible name while it is closed, because the words move to
+  `sr-only` rather than leaving the document. An icon is not a name, and a rail
+  that unmounted its labels would be a rail whose links a reader hears as
+  unlabelled links.
+- **Mark the current item with `current`, not with a colour.** It sets
+  `aria-current="page"`, which is what a reader is told and what a browser's
+  find-in-page uses to find the current page, and it draws a rail down the item's
+  leading edge, which is a shape. Colour is the third signal and never the only
+  one.
+- **Control the state when it has to survive a reload.** Pass `collapsed` with
+  `onCollapsedChange` and keep it. A product that forgets the rail on every page
+  load teaches a reader that collapsing it was a mistake.
+- **Put the count on the page, not in the rail.** A trailing slot is `aria-hidden`
+  and is not drawn while the rail is collapsed, so an item's name is its `label` in
+  both states. A count a reader must have is the count where they land.
+- **Use an item with no `href` for something that acts, and give it an
+  `onClick`.** It renders a real button, because an anchor with no `href` is not a
+  link and a keyboard cannot reach it. The handler is a prop for the same reason
+  the label is: a button a reader can find and press with no result is the same
+  defect as a list that renders an empty item.
+
+### Accessibility
+
+The rail is a `div` and carries no name, because a `div` has no role and an
+`aria-label` on one is a label nothing reads. The landmark is `SidebarNav`, and it
+is named there. The toggle carries `aria-expanded` and points `aria-controls` at
+the rail by id, so the region it controls is the element the rail actually
+rendered.
+
+Both states of the rail are the same rail. The hover surface, the focus ring, the
+current rail and the accessible name are all present when the rail is collapsed as
+well as when it is open, and only the words and the padding change. That is the
+claim worth holding: an icon-only rail that dropped any of the four would be a
+worse version of the thing rather than a smaller one.
+
+The focus ring is drawn in `sidebar-ring` at full strength, which is the role
+measured against this surface rather than the page's. It is drawn *in addition to*
+the browser's own outline rather than in place of it. Every other focusable
+Component in Prism suppresses the outline and draws `ring-ring` instead; this one
+does not, because `check-focus-indicators.mjs` recognises exactly one ring role in
+the pattern it reads a full-strength ring from, and a Component that claimed to
+replace the outline here would be claiming a replacement the repository cannot
+verify.
+
+### Measured, not assumed
+
+`sidebar-ring` on `sidebar` is 3.78:1 in the base pack's dark mode, which is the
+tightest required pair in that mode in the whole contrast table. It clears 3:1, but
+with 0.78 of headroom rather than the 1.7 the page ring has on the page ground.
+
+The pair the table does not measure is the one to know about: `sidebar-ring`
+against `sidebar-accent`, the surface a focused item sits on while it is also
+hovered or selected, is 3.19:1 in the base pack's dark mode and 3.82:1 to 4.21:1
+in the light packs. It passes everywhere, and it is the tightest unmeasured pair
+in this family.
