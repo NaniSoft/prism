@@ -39,15 +39,24 @@
  * @property {string} file      the path relative to the content root
  * @property {string} title
  * @property {string} [description]
- * @property {string[]} composes the Item names this Pattern declares
+ * @property {string[]} composes the Item names a Pattern declares
+ * @property {string[]} arranges the Page names a Template declares
  *
  * @typedef {object} PatternFinding
  * @property {string} file
  * @property {string} message
  */
 
-/** The frontmatter keys this gate reads. A Pattern may carry others. */
-const READ_KEYS = new Set(['title', 'description', 'composes'])
+/**
+ * The frontmatter keys this gate reads.
+ *
+ * `composes` and `arranges` are the two halves of the same law, and which one a
+ * document carries is what makes it a Pattern or a Template. A Pattern declares the
+ * Items it composes; a Template declares the Pages it arranges, and the arrangement
+ * itself is the published `DocsNavEntry` union rather than a new vocabulary, which
+ * is the shape `DocsShell` already takes.
+ */
+const READ_KEYS = new Set(['title', 'description', 'composes', 'arranges'])
 
 /**
  * Split an `.mdx` document into its frontmatter block and its body.
@@ -79,10 +88,10 @@ export function splitFrontmatter(source) {
  * YAML and a hand-edited document reaches for either.
  *
  * @param {string} frontmatter
- * @returns {{ title?: string, description?: string, composes?: string[] }}
+ * @returns {{ title?: string, description?: string, composes?: string[], arranges?: string[] }}
  */
 export function readDeclaration(frontmatter) {
-  /** @type {{ title?: string, description?: string, composes?: string[] }} */
+  /** @type {{ title?: string, description?: string, composes?: string[], arranges?: string[] }} */
   const out = {}
 
   // A scalar key: `key: value`, with an optional pair of quotes.
@@ -119,9 +128,9 @@ export function readDeclaration(frontmatter) {
     const key = match[1] ?? ''
     if (!READ_KEYS.has(key)) continue
     const value = unquote(match[2] ?? '')
-    if (key === 'composes') {
+    if (key === 'composes' || key === 'arranges') {
       // The inline flow form, `[Card, Button]`.
-      out.composes = value.startsWith('[')
+      out[key] = value.startsWith('[')
         ? value
             .slice(1, value.lastIndexOf(']'))
             .split(',')
@@ -156,7 +165,13 @@ export function catalogueNames(catalogue) {
 }
 
 /**
- * Check one Pattern against the catalogue.
+ * Check one document against the catalogue.
+ *
+ * Which key it carries is what makes it a Pattern or a Template, and the two are
+ * checked against different populations: a Pattern composes Items of any kind, and a
+ * Template arranges **Pages**, because a Template's subject is a whole screen and a
+ * screen is a Page. A Template naming a Component is a Template that has confused
+ * itself for a Pattern, and the finding says which of the two it did.
  *
  * @param {PatternDoc} pattern
  * @param {Map<string, string>} names
@@ -166,25 +181,57 @@ export function checkPattern(pattern, names) {
   /** @type {PatternFinding[]} */
   const findings = []
 
-  if (pattern.composes.length === 0) {
+  const isTemplate = pattern.arranges.length > 0
+  if (isTemplate && pattern.composes.length > 0) {
     findings.push({
       file: pattern.file,
       message:
-        'a Pattern declares no Items, so it is a document with nothing to check. Add a ' +
-        '`composes` list naming the Items it arranges.',
+        'declares both `composes` and `arranges`, so it is a Pattern and a Template at ' +
+        'once. A Pattern composes Items; a Template arranges Pages. Split it, or say ' +
+        'which one it is, because a document that is both is checked against two ' +
+        'different populations and neither answer is the one a reader wants.',
     })
     return findings
   }
 
-  for (const name of pattern.composes) {
-    if (names.has(name)) continue
+  const declared = isTemplate ? pattern.arranges : pattern.composes
+  const key = isTemplate ? 'arranges' : 'composes'
+  const subject = isTemplate ? 'a Page' : 'an Item'
+
+  if (declared.length === 0) {
     findings.push({
       file: pattern.file,
       message:
-        `\`composes\` names "${name}", which is not in the Catalogue. A Pattern that names ` +
-        `an Item nobody can install is a recipe that cannot be followed, and nothing about a ` +
-        `prose page is type-checked, so this is the only place it can be caught.`,
+        `a document declares no Items, so it is a page with nothing to check. Add a ` +
+        `\`${key}\` list naming the ${isTemplate ? 'Pages' : 'Items'} it ` +
+        `${isTemplate ? 'arranges' : 'composes'}.`,
     })
+    return findings
+  }
+
+  for (const name of declared) {
+    const kind = names.get(name)
+    if (kind === undefined) {
+      findings.push({
+        file: pattern.file,
+        message:
+          `\`${key}\` names "${name}", which is not in the Catalogue. A document that ` +
+          `names ${subject} nobody can install is a recipe that cannot be followed, and ` +
+          `nothing about a prose page is type-checked, so this is the only place it can ` +
+          `be caught.`,
+      })
+      continue
+    }
+    if (isTemplate && kind !== 'page') {
+      findings.push({
+        file: pattern.file,
+        message:
+          `\`arranges\` names "${name}", which is a ${kind}. A Template arranges Pages, ` +
+          `because a Template's subject is a whole screen and a screen is a Page. If ` +
+          `this is a composition of Items rather than an arrangement of screens, it is a ` +
+          `Pattern and it belongs under \`composes\`.`,
+      })
+    }
   }
 
   return findings

@@ -1,0 +1,43 @@
+---
+title: A product marketing site
+description: "The arrangement a marketing site needs, and the two Pages that carry it."
+arranges:
+  - MarketingPage
+  - DocsShell
+---
+
+A Template is not a copy of a site. It is the **arrangement**: which screens exist,
+what order they are reached in, and what a reader can get to from where. The
+arrangement is the published `DocsNavEntry` union rather than a new vocabulary,
+which is the shape `DocsShell` already takes and the shape a consumer site already
+adapts its own tree into.
+
+That reuse is the point. A site that grew its own navigation vocabulary would have a
+second thing to keep in step with the first, and the disagreement would be invisible
+until a reader met it.
+
+## Two screens, and the second one is a decision
+
+`MarketingPage` is the public surface: hero, features, pricing, a closing call to
+action. It fetches nothing and owns no route, so a consumer mounts it wherever the
+frameworks' routing puts a page.
+
+`DocsShell` is the second screen, and whether to have one is a decision rather than a
+default. A product whose API is part of the product needs it. A product whose
+"docs" are three paragraphs does not, and shipping a second shell it does not need
+gives a reader a place to look that has nothing in it.
+
+## The order is the argument
+
+A marketing site's navigation is a claim about what the product is. Putting pricing
+beside features says the product is something you choose between plans; burying it
+says the price is a detail. The order is not a layout decision and it does not belong
+to the design system, which is why a Template states it and does not derive it.
+
+## What the consumer owns
+
+Everything a site needs that the arrangement cannot know: the routes, the data, the
+authentication, the pack and the mode, and the real words. The Template says which
+screen goes where and why. A consumer that has to override the arrangement to fit its
+product has been given the wrong one, and that is worth knowing before the first
+deploy rather than after.

@@ -69,8 +69,14 @@ for (const name of allDocuments) {
     title: declared.title ?? '',
     description: declared.description,
     composes: declared.composes ?? [],
+    arranges: declared.arranges ?? [],
   })
 }
+
+const declaredCount = patterns.reduce(
+  (total, pattern) => total + pattern.composes.length + pattern.arranges.length,
+  0,
+)
 
 const names = catalogueNames(buildCatalog())
 const findings = checkPatterns({
@@ -79,18 +85,16 @@ const findings = checkPatterns({
   names,
 })
 
-const declaredCount = patterns.reduce((total, pattern) => total + pattern.composes.length, 0)
-
 console.log(
-  `pattern-composition: ${patterns.length} Pattern(s) declaring ${declaredCount} Item ` +
+  `pattern-composition: ${patterns.length} document(s) declaring ${declaredCount} Item ` +
     `reference(s), against a catalogue of ${names.size} Item(s); ` +
     `${allDocuments.length - patterns.length} Section root(s) exempt`,
 )
 
 if (findings.length === 0) {
   console.log(
-    'pattern-composition: every Item a Pattern composes is in the Catalogue, and the ' +
-      'Section lists exactly the documents it publishes',
+    'pattern-composition: every Item a Pattern composes and every Page a Template ' +
+      'arranges is in the Catalogue, and the Section lists exactly the documents it publishes',
   )
   process.exit(0)
 }

@@ -23,6 +23,7 @@ import {
 
 const catalogue = catalogueNames([
   { name: 'SettingsPage', kind: 'page' },
+  { name: 'DashboardPage', kind: 'page' },
   { name: 'SettingsPanel01', kind: 'block' },
   { name: 'Button', kind: 'component' },
   { name: 'Card', kind: 'component' },
@@ -32,6 +33,14 @@ const pattern = (composes: string[], file = 'example') => ({
   file: `${file}.mdx`,
   title: 'Example',
   composes,
+  arranges: [] as string[],
+})
+
+const template = (arranges: string[], file = 'example') => ({
+  file: `${file}.mdx`,
+  title: 'Example',
+  composes: [] as string[],
+  arranges,
 })
 
 describe('the frontmatter subset', () => {
@@ -55,6 +64,14 @@ describe('the frontmatter subset', () => {
 
   it('reads the inline flow form too, because both are ordinary YAML', () => {
     expect(readDeclaration('composes: [Button, Card]').composes).toEqual(['Button', 'Card'])
+  })
+
+  it('reads `arranges` exactly as it reads `composes`, because it is the same shape', () => {
+    // One gate for both, so the parsing cannot be right for one and wrong for the
+    // other. That is a real risk when a second form is added later.
+    const block = readDeclaration('title: T\narranges:\n  - SettingsPage\n  - DocsShell\n')
+    expect(block.arranges).toEqual(['SettingsPage', 'DocsShell'])
+    expect(readDeclaration('arranges: [SettingsPage]').arranges).toEqual(['SettingsPage'])
   })
 
   it('keeps a quoted scalar whole, so a title with a colon survives', () => {
@@ -96,6 +113,37 @@ describe('a declared Item must exist', () => {
     const findings = checkPattern(pattern([]), catalogue)
     expect(findings).toHaveLength(1)
     expect(findings[0]?.message).toContain('declares no Items')
+  })
+})
+
+describe('a Template arranges Pages, and only Pages', () => {
+  it('accepts Pages that are in the catalogue', () => {
+    expect(checkPattern(template(['SettingsPage', 'DashboardPage']), catalogue)).toEqual([])
+  })
+
+  it('reports a Page that does not exist', () => {
+    const findings = checkPattern(template(['SettingsPage', 'Nonesuch']), catalogue)
+    expect(findings).toHaveLength(1)
+    expect(findings[0]?.message).toContain('"Nonesuch"')
+  })
+
+  it('reports an Item that is not a Page, and says which document it really is', () => {
+    // A Template's subject is a whole screen and a screen is a Page. A Template
+    // naming a Component has confused itself for a Pattern, so the finding says so
+    // rather than only reporting a type mismatch the reader has to interpret.
+    const findings = checkPattern(template(['Button']), catalogue)
+    expect(findings).toHaveLength(1)
+    expect(findings[0]?.message).toContain('which is a component')
+    expect(findings[0]?.message).toContain('`composes`')
+  })
+
+  it('reports a document that is a Pattern and a Template at once', () => {
+    // Checked against two different populations, so neither answer is the one a
+    // reader wants. The finding asks which one it is rather than picking.
+    const both = { file: 'both.mdx', title: 'Both', composes: ['Button'], arranges: ['SettingsPage'] }
+    const findings = checkPattern(both, catalogue)
+    expect(findings).toHaveLength(1)
+    expect(findings[0]?.message).toContain('both `composes` and `arranges`')
   })
 })
 

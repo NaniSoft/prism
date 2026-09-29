@@ -1,0 +1,49 @@
+---
+title: An application shell with a settings area
+description: "Three screens, and the one that is a Page rather than a Block."
+arranges:
+  - MarketingPage
+  - DashboardPage
+  - SettingsPage
+---
+
+The interesting part of this arrangement is that one of the three is not really a
+peer of the other two. A dashboard and a marketing page are each a whole screen. A
+settings area is a screen that a product grows into, and the arrangement is usually
+the first thing that gives it away.
+
+## `SettingsPage` is the one that constrains the others
+
+`SettingsPage` owns a rail, and the rail is what makes a settings area a settings
+area rather than a form. The consequence runs the other way: once a product has a
+rail, every screen beside it has to say where it sits in that rail, or the reader has
+two places to look for the same setting.
+
+So an application that has `SettingsPage` has committed to a navigation shape, and the
+honest time to notice is while choosing it. The alternative, a settings panel inside
+the dashboard's own layout, is a smaller commitment and a worse product past about
+twenty settings.
+
+## The dashboard is a frame, and the frame is not Prism's
+
+`DashboardPage` composes Blocks and receives its data. It does not fetch, it does not
+route and it does not decide what a metric is. A dashboard whose data arrives as
+props is one whose refresh policy belongs to the consumer, and that is deliberate: a
+polling interval is a product decision about cost and freshness, and a design system
+that hardcoded one would have made the wrong call for every product but one.
+
+## Marketing is a separate screen, not a tab
+
+Keeping `MarketingPage` out of the application is the point of having it as its own
+Page. A marketing page reached through the same shell as the dashboard is a page
+whose reader has already logged in, which is not who that page is for, and it inherits
+a navigation offering destinations that person cannot use.
+
+So the arrangement is: a public screen with no rail, and an application with a rail.
+Two shells is not a duplication when the two audiences have nothing in common.
+
+## What the consumer still owns
+
+Which routes these three are, what a reader is allowed to reach before signing in,
+what a metric means, and the words on every screen. The arrangement says which screen
+goes where and why; it says nothing about what any of them contain.

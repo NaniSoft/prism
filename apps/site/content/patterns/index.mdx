@@ -40,9 +40,36 @@ It is also not a rule. Nothing here is enforced on a consumer. The one thing tha
 *is* enforced is that the Items named here exist, and that is enforced because a
 broken reference in a document is invisible rather than loud.
 
-## The Patterns
+## Templates are the other half
+
+A **Template** declares the **Pages** it arranges, and it is the same kind of
+document making the other claim. Where a Pattern is about how to compose a surface,
+a Template is about which screens a product has and what order a reader meets them
+in. The declaration is the published `DocsNavEntry` union, which is the shape
+`DocsShell` already takes.
+
+## The Patterns and the Templates
 
 Each one opens with what the surface is for, then the decisions inside it, including
 the ones that look like preferences and are not. Read them as arguments. Where two
 of them would give different advice for the same surface, the disagreement is the
 interesting part and it is left in rather than smoothed over.
+
+The two kinds are told apart by which key they declare, and the gate checks them
+against different populations, because they are different claims:
+
+- a **Pattern** declares `composes`, naming the Items it arranges, of any kind
+- a **Template** declares `arranges`, naming the **Pages** it orders
+
+A Template's subject is a whole screen and a screen is a Page, so a Template naming a
+Component has confused itself for a Pattern. The finding says which of the two it
+did rather than only reporting a type mismatch, and a document declaring both is
+asked which one it is instead of being checked against two populations and getting
+neither answer.
+
+A Template is not a copy of a site either. It is the arrangement: which screens
+exist, what order they are reached in, and what a reader can get to from where. The
+arrangement itself is the published `DocsNavEntry` union rather than a new
+vocabulary, which is the shape `DocsShell` already takes and the shape a consumer
+site already adapts its own tree into. A site that grew its own navigation vocabulary
+would have a second thing to keep in step with the first.
