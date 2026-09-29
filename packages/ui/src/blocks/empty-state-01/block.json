@@ -1,0 +1,8 @@
+{
+  "name": "empty-state-01",
+  "title": "Empty State 01 - The Three Reasons A Region Is Empty",
+  "description": "The state a region shows when it has nothing in it: a dashed frame, the caller's headline and sentence, a mark of the caller's choosing, and at most one action. The required reason prop distinguishes a first run from a filter that matched nothing from a permission boundary, because those three want different words and different actions. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["button"],
+  "dependencies": []
+}

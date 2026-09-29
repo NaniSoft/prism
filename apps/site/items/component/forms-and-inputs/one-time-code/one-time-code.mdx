@@ -1,0 +1,101 @@
+---
+slug: components/one-time-code
+title: OneTimeCode
+---
+
+## Overview
+
+A OneTimeCode is a verification code entered one segment at a time. It is built on
+Base UI's OTP field, which owns the segmentation, the clamping to `length` and the
+autofill hint the platform needs for a one-time code.
+
+Three decisions carry the weight.
+
+**A paste of the whole code lands in every segment.** A reader who has the code on
+their clipboard has already done the hard part, and a field that accepted one
+character per paste would make them retype it one box at a time, which is what they
+are on their phone to avoid. `onComplete` fires once, from the paste, rather than
+after six keystrokes.
+
+**A refused character is refused, not stored.** Whitespace is dropped and anything
+outside `characters` is refused, whether it was typed or pasted, so "123 456" pastes
+as `123456` and "12345a6" pastes as `123456`. The alternative, accepting the text
+and rejecting it at the server, gives the reader a field that looks right and a form
+that does not submit. `onInvalid` receives the attempted text so you can decide
+whether a refused character deserves a word.
+
+**The code is one value, not six.** The segments are six views of one string of
+`length` characters, so Backspace removes a character and the characters after it
+close up. Six boxes that each had to be emptied by hand would need a rule for what
+Backspace on an empty box means, and every version of that rule is wrong for
+somebody.
+
+The character set, the normaliser and every segment's accessible name are all
+props, because they are the caller's: which characters a code may contain is
+decided by the service that issued it, folding case is a rule only you know, and
+an ordinal is a phrase in the reader's language.
+
+## Usage
+
+```tsx
+import { OneTimeCode } from '@nanisoft/prism-ui/components/one-time-code'
+
+<OneTimeCode
+  label="Verification code"
+  length={6}
+  characters="numeric"
+  name="code"
+  segmentLabel={(index) => `Digit ${index + 1} of 6`}
+  grouping={{ after: [2], separator: ' ' }}
+  onComplete={verify}
+  onInvalid={(attempted) => setHint(`We could not use ${attempted}`)}
+/>
+```
+
+<ComponentDemo slug="one-time-code" />
+
+## Guidelines
+
+### When to use
+
+Use a OneTimeCode to confirm that a person has access to the channel the code came
+from: a phone number, an inbox, an authenticator. It is the control for a code that
+is already known to be short, fixed in length and single-use.
+
+### When not to use
+
+Do not use it for a password. A password is not six characters, is not pasted from
+an SMS, and should not be laid out in boxes that show how long it is.
+
+Do not use it for a code whose length the reader does not know, such as a recovery
+code of variable length. Clamping to `length` would quietly cut it.
+
+Do not use it as the only factor on a high-value action. A code from an SMS is a
+single factor, whatever the field looks like.
+
+### Best practices
+
+- Pass `characters` to match what your service issued. It decides which
+  keystrokes are refused, and a field that refuses a valid character is worse than
+  one that accepts an invalid one.
+- Pass `segmentLabel` when you can. Without it every segment is named by the field's
+  own label, which satisfies the form but does not tell a reader which of the six
+  they are in.
+- Use `normalize` for the rules the closed set cannot express, such as folding a
+  pasted code to lower case. Keep it idempotent: the field runs it again on every
+  edit.
+- Handle `onComplete` rather than reading the value on submit. A code pasted in one
+  gesture completes in one gesture, and a submit handler that runs after that sees
+  the same code but a slower reader pays for the difference.
+- Use `onInvalid` to say what happened when a paste contained something the field
+  refused. The attempted text is given to you; the sentence is yours.
+- Set `autoSubmit` only when the next step is unambiguous. It submits the form as
+  soon as the code is complete, which is right when verification is the only
+  thing on the page and wrong when it is not.
+
+### Content guidelines
+
+- Name the code for what it confirms: "Verification code", not "Enter the code".
+- Write the segment names as an ordinal in the reader's words: "Digit 3 of 6".
+- Write `onInvalid`'s message about the text the reader supplied, not about what
+  went wrong internally.

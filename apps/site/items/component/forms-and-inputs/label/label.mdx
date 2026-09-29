@@ -1,0 +1,85 @@
+---
+slug: components/label
+title: Label
+---
+
+## Overview
+
+A Label is the accessible name of a control, on its own. `FieldLabel` is the same
+thing inside a `Field`, and is the right choice beside one. A label is needed
+wherever a control is, and a form binding is only one place: a dialog's single
+input, a table's filter row, a settings line with nothing to group because there
+is nothing to group. Taking a `Field` apart to reach its label would be
+rearranging a layout to get at one element of it.
+
+Three things are worth knowing about the shape.
+
+**The association is programmatic.** Pass the control's `id` as `htmlFor`. Adjacent
+text is not a name: it is read by nobody when the reader tabs to the control, and a
+visible label with no `for` is a caption.
+
+**The required mark is decoration and is not announced.** The control's own
+`required` is what is announced and what the form enforces. A mark that were read
+out reaches a reader as the field's name with a glyph on the end of it, and the
+requirement is not decoration, so it does not belong in the name. The mark's text
+is a prop, because an asterisk, a word, a dagger or nothing at all are all
+conventions and the reader's is not this package's.
+
+**A disabled control dims its label.** A label at full strength over a greyed field
+reads as a field that has merely been styled, and the two states should not
+disagree.
+
+It is a server Component. It reads props and renders, so a form built from labels
+costs no client JavaScript for them, and that is most of what a form is.
+
+## Usage
+
+```tsx
+import { Label } from '@nanisoft/prism-ui/components/label'
+import { Input } from '@nanisoft/prism-ui/components/input'
+
+<Label htmlFor="email" required>
+  Email
+</Label>
+<Input id="email" type="email" required />
+```
+
+<ComponentDemo slug="label" />
+
+## Guidelines
+
+### When to use
+
+Use a Label when a control needs a visible name and is not inside a `Field`. A
+dialog with one input, a search box in a toolbar, a filter above a table, a single
+line in a settings panel.
+
+### When not to use
+
+Do not use it beside a `Field`. `FieldLabel` is the same element and is the one
+that belongs there; using both is two labels for one control.
+
+Do not use it for a checkbox's or a switch's own text. That text is inside the
+control's label and is passed to the control, not drawn beside it.
+
+Do not use it as a heading for a group of controls. A group is named by the group's
+own role and its `aria-label`, and a `Label` that names nothing is a caption.
+
+### Best practices
+
+- Always pass `htmlFor` and give the control the matching `id`. An unassociated
+  label is worse than none, because it looks like a name.
+- Pass `required` and put `required` on the control as well. The prop is what the
+  reader can see; the attribute is what the form enforces and what is announced.
+- Pass `disabled` alongside the control's own `disabled`, so the two agree.
+- Pass `requiredText` in the reader's convention when the default asterisk is not
+  it. A locale that marks required fields with a word gets a word.
+- Prefer the visible label to a placeholder. A placeholder disappears on the first
+  keystroke, and it is not read out.
+
+### Content guidelines
+
+- Name the field, not the format: "Email" rather than "Email address (required)".
+- Keep it to one line and to one or two words where you can.
+- Match the capitalisation of the rest of the form's labels rather than the
+  sentence case of this document.

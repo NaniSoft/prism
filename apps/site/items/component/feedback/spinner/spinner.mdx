@@ -1,0 +1,105 @@
+---
+slug: components/spinner
+title: Spinner
+---
+
+## Overview
+
+A Spinner says work is happening and nothing about how much of it is left. It is
+a ring, it names itself, and it is a status rather than a control: a reader is
+told what is busy and the page carries on being usable.
+
+**It is not a Progress and it is not a Skeleton, and the three are confused
+often enough to be worth stating.** A Skeleton stands in for content: it has
+the shape of the thing that is arriving, so the page does not move when the
+content lands. A Progress reports a position: it carries a value, a minimum and
+a maximum, so a screen reader is told "68 percent" rather than the width of a
+coloured bar. A Spinner carries neither a shape nor a value. Pick by the
+question: *what will arrive* is a Skeleton, *how far along* is a Progress, and
+*is anything happening at all* is a Spinner.
+
+**The honest reason a Spinner is often the wrong answer is that it causes a
+layout shift.** The ring is a fixed square, so the content it stands in for is
+not, and everything below it moves twice: once when the content is replaced by
+the ring, and again when the ring is replaced by the content. A reader's eye
+has to find the thing twice. That is the whole cost of this Component, and it
+is not paid when the shape of what is coming is already known.
+
+The `label` is required and there is no default. A busy indicator with no name
+is an animation, and an animation is nothing to a reader who cannot see it. The
+words are the consumer's, because a shared library cannot know whether the
+answer is "Loading invoices" or "Carregando faturas". The ring itself is
+`aria-hidden`, so a reader is told what is busy exactly once.
+
+## Usage
+
+```tsx
+import { Spinner } from '@nanisoft/prism-ui/components/spinner'
+
+<Spinner label="Loading invoices" />
+<Spinner label="Saving" size="sm" />
+<Spinner label="Preparing your workspace" size="lg" />
+```
+
+<ComponentDemo slug="spinner" />
+
+## Guidelines
+
+### When to use
+
+Use a Spinner when something is happening and the reader cannot be told how
+much of it is left: a filter that has not come back yet, a panel whose contents
+are being fetched for the first time, a control that is waiting on a request
+whose size is unknown.
+
+Use it beside the words rather than instead of them. The ring is the
+confirmation that something is happening; the sentence beside it is what a
+reader can act on, and in most of the cases where a Spinner is right there are
+already words on the page saying what is being waited for.
+
+### When not to use
+
+Do not use a Spinner as a page-level loading state where the layout is known.
+A first paint of Skeletons is a better answer, because a Skeleton holds the
+page still. A Spinner alone in the middle of an empty page tells the reader
+nothing about the page they are about to get.
+
+Do not use a Spinner for a task of known length. A countable upload is a
+`Progress`; a bar that shows real information beats a ring that shows anxiety.
+
+Do not use a Skeleton where you mean a Spinner, or the reverse. A Skeleton is
+for content whose shape you know. A Spinner is for work whose extent you do
+not.
+
+Do not use a Spinner for a wait under about a second. A control that disables
+itself for 400ms and then re-enables is a control that flickers.
+
+Do not put a Spinner inside a Button beside a label that already says what is
+happening. The label is the announcement; the ring beside it is a second copy
+of a sentence the reader can already see.
+
+### Best practices
+
+- Name the work, not the Component. "Loading invoices" beats "Loading", and a
+  page with two spinners needs the same distinction a sighted reader gets from
+  seeing which panel each is in.
+- Keep the size to the three authored steps. `className` is layout only on
+  every Component in this package, and a ring sized by a layout decision is a
+  ring that can be invisible.
+- Use one Spinner per region. Two rings in one panel is a reader being told
+  twice that neither has finished.
+- Turn the Spinner off when the work is done, and remove it rather than leaving
+  it at zero. A ring that has stopped meaning anything is a picture.
+- Mark the *region* as busy while more is expected, not the ring. That is what
+  `LiveRegion`'s `busy` prop is for, and a `busy` flag left up permanently has
+  told assistive technology a stream never ends.
+
+### Content guidelines
+
+- Write the label in the present continuous and name the thing: "Saving",
+  "Loading invoices", "Connecting". A past-tense label on a spinner that is
+  still running is a sentence that contradicts the ring.
+- Keep it to a few words. A screen reader reads it in full, and so does
+  everyone using find-in-page.
+- Do not use the label to carry an error. A failure is not a busy state; put it
+  in an `Alert` where the reader is looking and can act on it.

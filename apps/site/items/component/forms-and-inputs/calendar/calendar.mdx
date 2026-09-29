@@ -1,0 +1,109 @@
+---
+slug: components/calendar
+title: Calendar
+---
+
+## Overview
+
+A Calendar is a month grid for picking one date. It is built here rather than
+composed, because Base UI at 1.8.0 ships a combobox, a number field, an OTP field
+and a field, and no calendar. That is worth saying rather than implying, because
+"the docs show one" is not evidence and a wrapper around a module that is not in
+the installed package is the failure this Component could have shipped.
+
+Three decisions carry the weight.
+
+**The grid is always six weeks tall.** A month that needs five rows and a month
+that needs six would otherwise resize as the reader pages through, moving the dates
+under the pointer and under the highlight. The cells that pad the month out are
+hidden from assistive technology rather than filled with the neighbouring month's
+dates, because a date from another month drawn in this grid is a date the reader
+did not come for.
+
+**Every date, weekday name and month name is the caller's.** The caption, the seven
+column headings and the string for each day are all reader-facing text in the
+reader's language. What the Component carries is the geometry: which column a date
+falls in and which day it sits on.
+
+**A disabled date is drawn, reachable and refused.** It stays in the grid and stays
+in the arrow path, announced as unavailable and refusing to be chosen. A date that
+is simply missing is indistinguishable from a grid that failed to draw that week.
+
+The month is a controlled prop, because the first month a calendar may open on is a
+rule about the reader's situation rather than about the calendar: a booking form
+opens on next month, an archive opens on the month the record is in.
+
+## Usage
+
+```tsx
+import { Calendar } from '@nanisoft/prism-ui/components/calendar'
+
+const monthLabel = (month: Date) =>
+  new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' }).format(month)
+
+<Calendar
+  label="Delivery date"
+  monthLabel={monthLabel(month)}
+  weekdayLabels={['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']}
+  firstWeekday={1}
+  previousLabel="Previous month"
+  nextLabel="Next month"
+  month={month}
+  onMonthChange={setMonth}
+  value={date}
+  onValueChange={setDate}
+  isDateDisabled={(candidate) => candidate.getDay() === 0}
+/>
+```
+
+<ComponentDemo slug="calendar" />
+
+## Guidelines
+
+### When to use
+
+Use a Calendar when one date is the answer and the reader benefits from seeing the
+shape of the month around it: a booking, a delivery date, a due date, a birthday.
+Use a `DatePicker` when the date is the answer to a form field; this is the grid
+that field opens.
+
+### When not to use
+
+Do not use it for a range. Two months, a start and an end, and a disabled range in
+between are three more questions, and a single-month grid that answers them by
+clicking twice gives the reader no way back.
+
+Do not use it for a date of birth, unless the reader is under a hundred and ten.
+A calendar that navigates to 1955 by paging backwards is a worse control than a
+text field with a masked input and a clear format.
+
+Do not use it when the reader only needs "today" or "tomorrow". A button labelled
+with the date is faster than a grid for a choice with two answers.
+
+### Best practices
+
+- Format the caption, the weekday headings and the day labels in the reader's
+  locale with `Intl`, and pass them in. That is the Component's whole reason for
+  not shipping a table of month names.
+- Pass `firstWeekday` to match your `weekdayLabels` order. The two are one fact and
+  the Component cannot infer either half of it.
+- Pass `dayLabel` when a day cell's name should be a full date. Without it the cell
+  is named by its number and its column heading, which is what grid navigation
+  already conveys.
+- Reach for `isDateDisabled` for the rules: closed days, blackout dates, dates
+  already taken. Explain them in text beside the grid; a greyed cell on its own
+  says only that it is unavailable.
+- Set `name` to have the chosen date submitted as `YYYY-MM-DD`. That is one format
+  the server can parse without reading the reader's display convention.
+- A `DatePicker` seeds the grid's month from the chosen date each time it opens.
+  If you build your own surface, do the same, or a reader re-picking a date in
+  another month lands in the month the field was created in.
+
+### Content guidelines
+
+- Abbreviate the weekday headings to two or three characters, in the reader's
+  convention. A full name in a seven-column header forces a narrower grid.
+- Name the previous and next controls for what they do, not for where they point:
+  "Previous month" rather than "Go left".
+- Write the grid's `label` as the field it answers, not as the control: "Delivery
+  date", not "Calendar".

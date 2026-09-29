@@ -1,0 +1,153 @@
+---
+slug: components/toast
+title: Toast
+---
+
+## Overview
+
+A Toast reports a fact the reader would otherwise miss: work finished in the
+background, a document was shared with them, a setting took effect. It arrives
+on its own, it is announced, and it leaves again.
+
+**It is deliberately not the place for a message the reader must act on.** A
+message that requires an action cannot be allowed to expire before the action is
+taken, and a toast is a surface whose whole nature is expiring. A toast carrying
+a blocking message is a modal in a costume. An error the reader caused belongs in
+an `Alert` beside the control where they can see what to change; a message that
+blocks belongs in a `Dialog`; a message the reader must act on but that does not
+block can be a toast at `duration={0}`, which turns the clock off.
+
+**It never takes focus.** That is the load-bearing accessibility claim. A surface
+that moves focus to itself has interrupted the reader, and being interrupted is
+the thing a toast exists to avoid: the reader is typing, or reading, or doing
+something else entirely. So the root is a `role="status"` region that is
+announced without being entered, the dismiss control is reachable by Tab from
+wherever the reader already was, and nothing in the Component calls `focus()`.
+
+**It is announced once, and that is why there is no countdown on screen.** A
+visible timer would have to be text or an attribute that changes, and anything
+that changes inside a live region is something a screen reader may announce
+again. A toast that read out its remaining time every second would be read
+thirty times. The clock lives in a ref, changes no text, and the region speaks
+once on arrival and again only if you change the words.
+
+**It pauses on hover and on focus, and the pause holds the remaining time.** A
+reader who has moved the pointer onto a toast is reading it; a reader who has
+tabbed into it is about to press something. In both cases the clock is the enemy
+of what the reader is doing. The pause *holds* what was left rather than
+restarting it, so a reader who hovers for ten seconds and then leaves gets the
+four seconds they had left, not four more.
+
+The default `duration` of 4000 is deliberately longer than a toast usually wants
+to be. The failure it exists to avoid is a toast vanishing before a screen
+reader has finished announcing it, which is worse than no toast at all: the
+reader is told something happened and then told, by its absence, that they missed
+it. `closeLabel` is required with no default, because a toast arrives on its own
+and an icon-only control a reader reaches towards has to say what it is.
+
+**Omitting `onDismiss` makes the toast permanent.** Every way out of the
+Component hands over to you, so with nobody to hand to there is no clock to run,
+no dismiss control to render and no Escape to answer. The alternative would be a
+toast that faded to invisible and was never removed from the document: gone from
+the screen, still in the live region, still taking the pointer.
+
+## Usage
+
+```tsx
+import { Toast } from '@nanisoft/prism-ui/components/toast'
+
+// The caller unmounts. The Toast never removes itself, because an element that
+// disappears immediately has no exit to animate.
+const [open, setOpen] = useState(true)
+
+return open ? (
+  <Toast
+    title="Invoice sent"
+    description="Acme Ltd can see it now."
+    closeLabel="Dismiss notification"
+    onDismiss={() => setOpen(false)}
+  />
+) : null
+```
+
+<ComponentDemo slug="toast" />
+
+## Guidelines
+
+### When to use
+
+Use a Toast for work the reader started and did not have to watch: an upload that
+finished, a document that was shared, a setting that took effect, a background
+job that completed. The reader would miss it entirely if nobody said anything,
+which is the test: if they would not miss it, it is not a toast.
+
+Use it for one thing at a time. A toast that arrives for each of four files
+uploaded is four interruptions, which is the failure the Component is supposed to
+be avoiding. Report the batch as one toast.
+
+Use `duration={0}` for the toast the reader has to do something about, and give
+it a `closeLabel` and an `action`. That is the one case where a toast earns the
+name, because the reader's next step is the toast's entire purpose.
+
+### When not to use
+
+Do not use a Toast for an error the reader caused. Put it in an `Alert` beside
+the control, where the reader can see what to change and fix it. A destructive
+tone on a toast is for a failure the reader did not cause and would not
+otherwise learn: a payment declined on the server, a session that expired, a
+deploy that failed.
+
+Do not use a Toast for anything blocking. That is a `Dialog`, and the difference
+is not politeness: a blocking message has to survive the reader ignoring it, and
+a toast cannot promise that.
+
+Do not put a required action in a toast and nowhere else. A transient surface is
+not a reliable route to anything: the reader may have missed it, or their screen
+reader may not have finished announcing it when it went. Whatever the `action`
+does has to be reachable in the surface they are already looking at, and the
+toast is the shortcut rather than the gate.
+
+Do not use a Toast to confirm a destructive action. "Deleted" arriving as a toast
+means the reader cannot undo from the surface they are on, and undo is the whole
+reason destructive actions are recoverable.
+
+### Best practices
+
+- Unmount on `onDismiss`. The Toast asks to be taken off the page and never takes
+  itself off, because an element that is gone immediately has no exit to
+  animate. A caller who expects it to remove itself will write a no-op and leave
+  a toast parked on the page forever.
+- Always pass `onDismiss`, even for a toast that should not expire. Reach for
+  `duration={0}` for that case, not for a missing handler: without a handler the
+  toast is permanent, which is almost never what a caller meant to write.
+- Keep the title to a few words that are still true, and put the sentence under
+  it. A title is scanned and a sentence is read; a toast that merged them forces
+  a reader to read a heading.
+- Set the tone to match what happened, and remember that `destructive` means the
+  reader did not cause it. Every tone sets its own fill and its own ink, because
+  a toast is the one surface in this package that is a coloured surface with body
+  text sitting on it.
+- Do not put a countdown on screen. It changes a live region four times a second.
+- Use `paused` rather than a long `duration` when a batch of operations is
+  reporting one at a time. It is the same intent and it is reversible.
+- Render toasts inside a fixed layer that has `pointer-events-none`, because a
+  layer over the whole viewport will otherwise swallow the pointer from the page
+  underneath it. The Toast sets `pointer-events-auto` on itself for exactly this
+  reason.
+- One toast host per corner, and do not stack more than three. A wall of toasts
+  is a queue the reader has to read before they can read the page.
+
+### Content guidelines
+
+- Write the title as a completed fact, in the past or present perfect: "Invoice
+  sent", "Changes saved", "Copied to clipboard". A title in the present
+  continuous is a promise, and a promise that expires is worse than silence.
+- Put anything the reader must do in the `action`, not in the words. The words
+  are for information; the action is for the request.
+- Keep `closeLabel` short and specific: "Dismiss notification", not "Close". It is
+  the accessible name of a control a reader reaches for without having opened
+  anything, and four products in two languages cannot all be told the control
+  says "Close".
+- Do not put a sentence in the `title` and a shorter one in the `description`.
+  The order is the scan order, and a reader who only catches the title should
+  still know what happened.

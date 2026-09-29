@@ -1,0 +1,88 @@
+---
+slug: components/toggle
+title: Toggle
+---
+
+## Overview
+
+A Toggle is a two-state button: it is pressed or it is not. It is not a Switch. A
+Switch takes effect the moment it is flipped; a Toggle is *pressed*, which is a
+state the caller holds and decides what to do with, usually on submit.
+
+A Toggle has no `variant`. That is a decision, not an omission: a toggle is a state
+control rather than a command, and giving it the Button's six variants is how a
+pressed state ends up drawn on a destructive surface.
+
+## Usage
+
+```tsx
+import { Toggle } from '@nanisoft/prism-ui/components/toggle'
+
+<Toggle aria-label="Bold" pressed={bold} onPressedChange={setBold}>
+  <BoldIcon />
+</Toggle>
+
+<Toggle pressed={wrap} onPressedChange={setWrap}>
+  Wrap lines
+</Toggle>
+```
+
+<ComponentDemo slug="toggle" />
+
+## Guidelines
+
+### When to use
+
+Use a Toggle for a state that belongs to a form: bold, wrap lines, show whitespace,
+include a footnote. The state is collected and applied when the form is submitted,
+and until then the reader is composing rather than changing the application.
+
+Use it for a formatting choice in a document the reader is editing. The pressed
+state of "bold" is a statement about the text, not about the document.
+
+### When not to use
+
+**Do not use a Toggle where a Switch belongs.** Flipping a Switch applies the change
+at once: notifications are on, a panel is showing, a feature is enabled. Turning a
+feature on the moment a reader presses a word is a change made with no save and no
+confirmation, and a reader who pressed the wrong one has to work out what was
+undone. If the change applies immediately, use a Switch.
+
+Do not use a Toggle for an independent yes-or-no in a form. That is a `Checkbox`,
+which submits with the form and has no pressed styling to suggest it is currently
+on. A row of checkboxes that look like toggles is a form a reader reads as a set of
+switches.
+
+Do not use a Toggle for a choice among mutually exclusive options. That is a
+`ToggleGroup` in single mode or a `RadioGroup`, and a row of Toggles that are
+mutually exclusive is a set of independent controls with a constraint nobody is told
+about.
+
+### Best practices
+
+- Give an icon-only Toggle an `aria-label`. A row of bold, italic and underline is
+  three glyphs, and a screen reader that says "button, button, button" for them is
+  three controls nobody can tell apart.
+- Pair a Toggle that does not apply immediately with a visible save, so the reader
+  knows the change is pending. A Toggle that looks applied and is not is a form a
+  reader fills in and loses.
+- Do not put a Toggle inside a form's submit row next to a Button that saves. A
+  control that changes and a control that commits are two different actions, and one
+  button doing both is a button whose label is wrong half the time.
+- Use `size="sm"` for a row of glyph toggles and the default for a labelled one. The
+  size is the only difference, so a small Toggle is never a different control.
+
+### Accessibility
+
+The control is a native `<button>` carrying `aria-pressed`, which is what makes it
+a toggle rather than a button that happens to change colour. Space and Enter press
+it, Tab reaches it, and none of that is this Component's key handling to get wrong.
+
+The pressed state is an attribute first and a surface second. `aria-pressed` is the
+fact and `data-[pressed]` drives the accent surface, so a reader who cannot separate
+the two inks still knows which way the control is. That order is the same everywhere
+in this package.
+
+Both the hover and the pressed surfaces set their own ink. A state surface with an
+inherited ink is the same control on the page ground and a different one inside a
+Block, which is a real contrast failure this package has had.

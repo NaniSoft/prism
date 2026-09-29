@@ -1,0 +1,99 @@
+---
+slug: components/number-field
+title: NumberField
+---
+
+## Overview
+
+A NumberField is a numeric field that will not hold a value outside its own range.
+It ships as one Component rather than as a root, an input and two steppers, because
+the range and the two ways of moving inside it are one contract, and a caller who
+composes the parts can leave out the steppers and get a field that clamps with no
+affordance to reach the middle of its own range.
+
+**Clamping is the Component, not the HTML.** A field with a `max` that accepts a
+value past it will submit a number the caller has already said is impossible, and
+the browser's own range validation is no answer to that: it reports the problem
+after the reader has typed and leaves them holding a value they cannot submit. So
+the value is clamped on every path that can produce one, typing, the steppers, a
+paste and a value that arrived from outside.
+
+**A character that is not a number never becomes a value.** The field refuses it as
+it is typed, so a reader who mistypes a digit gets a shorter number rather than a
+number the server will reject, and `NaN` never reaches a caller who would compare
+it, submit it and fail on it.
+
+**Empty is a value.** The field reports `null` when it is cleared rather than zero,
+because zero is a number a reader may have meant and an empty field is not.
+
+**The steppers are in the tab order.** Base UI takes them out of it, on the
+reasoning that the arrow keys already step the value and one field should be one
+Tab stop. A control that is announced and cannot be reached is worse for a reader
+than a second stop, so they are put back.
+
+## Usage
+
+```tsx
+import { NumberField } from '@nanisoft/prism-ui/components/number-field'
+
+<NumberField
+  labels={{
+    increment: 'Increase the quantity',
+    decrement: 'Decrease the quantity',
+  }}
+  aria-label="Quantity"
+  name="quantity"
+  unit="kg"
+  min={1}
+  max={20}
+  step={1}
+  defaultValue={1}
+  onValueChange={(value) => setQuantity(value)}
+/>
+```
+
+<ComponentDemo slug="number-field" />
+
+## Guidelines
+
+### When to use
+
+Use a NumberField when the answer is a number inside a known range: a quantity, a
+count of seats, a duration in minutes, a percentage. The steppers are for the
+values a reader counts up to and the clamping is for the values they do not.
+
+### When not to use
+
+Do not use it for a quantity with no upper bound, such as a comment count. A field
+with no `max` has no range, and the steppers are decoration.
+
+Do not use it for a value the reader must be able to type exactly, such as a bank
+account number or a serial. The field refuses the characters it does not expect
+and formats what is there, which is right for a number and wrong for an identifier.
+
+Do not use it where the value is approximate and only the position on a scale
+matters. That is a `Slider`.
+
+### Best practices
+
+- Always pass `min` and `max`. They are what make it a number field rather than a
+  text field that happens to accept digits.
+- Pass `labels` with a name for each stepper, in the reader's words. "Increase" is
+  right in one language and wrong in another, and the Component cannot know which.
+- Pass `unit` for the unit and say the same unit once in the field's description.
+  The visible one is decoration; the description is what a screen reader reaches.
+- Pass `format` when your product groups thousands or fixes decimals, so the field
+  writes numbers the way the rest of your product does.
+- Treat `null` as "not answered" rather than as zero. A form that turns `null` into
+  zero has made a decision this Component refused to make for it.
+- A controlled `value` outside the range displays the clamped number. Take the
+  clamped one back through `onValueChange`; this Component will not rewrite state
+  it does not own.
+
+### Content guidelines
+
+- Write the stepper names as what they do to this field: "Increase the quantity",
+  not "Increment".
+- Keep the unit to one or two characters. It sits inside the field's frame.
+- Name the field for the quantity, not for the control: "Seats", not "Number
+  field".

@@ -1,0 +1,128 @@
+---
+slug: components/chart-frame
+title: ChartFrame
+---
+
+## Overview
+
+A ChartFrame is a chart: the axes, the gridlines, the plot area, the legend, the
+empty state, and the numbers behind all of it. It exists so that two charts in a
+product put their plots in the same box, which is the whole reason a design system
+has a chart frame rather than five charts each drawing their own.
+
+Its vertical axis is a fixed-width gutter and its plot is a fixed height, neither
+derived from the data. A gutter that sized itself to its longest label would move
+the second chart's plot sideways the first time a number grew a digit, and the
+symptom on a dashboard is two plots that no longer line up.
+
+The data table is part of the frame rather than a prop beside it. The marks and the
+cells are two renderings of one `series` array, so they cannot drift: a chart whose
+table is a sibling prop is a chart whose table says last quarter.
+
+## Usage
+
+```tsx
+import { ChartFrame, type ChartSeries } from '@nanisoft/prism-ui/components/chart-frame'
+
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+
+const series: ChartSeries[] = [
+  { id: 'api', label: 'API', color: 'chart-1', values: [120, 180, 150, 240, 210, 300] },
+  { id: 'web', label: 'Web', color: 'chart-2', values: [60, 90, 140, 120, 160, 180] },
+]
+
+<ChartFrame
+  categories={months}
+  series={series}
+  label="Requests per month"
+  title="Requests"
+  tableCaption="Requests per month by surface"
+  categoryHeading="Month"
+/>
+```
+
+<ComponentDemo slug="chart-frame" />
+
+## Guidelines
+
+### When to use
+
+Use a ChartFrame for a value read against a shared baseline across a handful of
+categories: requests per month, signups per week, latency per region, margin per
+quarter. The signal is that a reader wants the shape and one or two exact numbers.
+
+Pass `mark="bar"` when the categories are discrete and the value is read as a
+length. Pass the default `mark="line"` when the value moves continuously and the
+shape between two points is the point.
+
+Use it over a table when there are few enough categories to read without scrolling
+sideways. Past about twenty, a table with sortable columns wins, because a reader
+who wants April should not have to read six other months to find it.
+
+### When not to use
+
+Do not use a ChartFrame for a distribution, a ranking, a correlation, or anything
+else that needs a scale this frame does not have. This is a linear frame with one
+axis, one baseline and up to five series. A box plot, a histogram or a scatter
+belongs to a charting library, and this Component is the frame that library's
+marks should sit in rather than the library.
+
+Do not use it for a single number. A KPI belongs in a Stat, and a chart of one bar
+is a number with axes drawn around it.
+
+Do not use it where the reader is looking a figure up. A chart shows a shape; a
+value a reader has to find is a table row.
+
+### Best practices
+
+- **Assign the colour, never let the frame pick one.** `color` is a claim about
+  what a thing is, so a Component that knows nothing about your product has no
+  business making it. `chart-1` starts at the pack's own brand hue, so put the
+  series a reader should notice first on it.
+- **Keep the number of series to what a reader can hold.** The five roles are
+  distinct from each other in every pack and both modes, and the contrast gate
+  asserts exactly that, but past about three series hue is the only channel left.
+  Two charts of three series beat one chart of six.
+- **Write the empty state.** An empty plot with an axis and no marks reads as a
+  broken chart. Only you know whether the answer is "no data yet" or "nothing
+  matched this filter".
+- **Use `table="hidden"` deliberately.** The table is always in the document either
+  way, so a hidden table is still announced, still reachable by a screen reader's
+  table navigation, and still findable by the reader's own find-in-page. Hide it
+  when a dense dashboard cannot carry five visible tables, and leave it visible
+  when your readers are looking up exact figures.
+- **Pass `format` and leave `tableFormat` alone** unless the table needs
+  different words. An axis has room for four characters; a table does not. A
+  compact axis over an exact table is the split these two jobs want, and one
+  formatter for both would round the table and stop it being the exact
+  representation the whole design rests on.
+- **Give every series an `id`.** It is the key on the mark, the legend entry and
+  the table column, so a reader whose focus is in the table lands in the column
+  for the series they were reading.
+
+### Accessibility
+
+The data table is the chart's accessible representation, and it is part of the
+Component rather than a note in the documentation, because a note is not a
+guarantee. It is a real `<table>` with a caption, a row head for each category and
+a column head naming each series, so a reader navigates it by row and by cell and
+hears the same numbers the marks are drawn from.
+
+The plot itself is `aria-hidden`. A mark is a shape at a position, and announcing
+forty of them would be a list of coordinates rather than a chart; the table is
+where the values are read from.
+
+The legend is drawn whatever the series count, because it is the only statement of
+the series-to-colour assignment on the frame. That matters more than it sounds:
+`chart-2` measures 2.49:1 and `chart-3` 2.15:1 against a light card, so a mark in
+either is found by its position and its shape, not by its colour. A gap and a zero
+are distinguishable in the table, because a gap is an empty cell and a zero is a
+zero.
+
+### What this is not
+
+There is no hover tooltip, no crosshair, no zoom, no stacking, no curve
+interpolation and no draw-in animation. A tooltip answers a question a pointer
+asked, which is a question a keyboard never asks, and a picture a reader cannot
+query is the failure the table exists to prevent. Motion is state feedback, so the
+one transition here is a bar resizing when its value changes.

@@ -84,7 +84,18 @@ const SUPPRESSES = new Set([
 ])
 
 /** The ring colour at full alpha. `ring-ring/50` is not one of these. */
-const FULL_STRENGTH_RING = /^(?:focus-visible:)?ring-ring$/
+/*
+ * A ring at full strength on the focus-visible state.
+ *
+ * The colour is any of the ring roles rather than `ring-ring` alone, because a
+ * surface with its own ink has its own ring: `ring-sidebar-ring` on a navigation
+ * rail is a full-strength indicator, and the earlier version reported it as
+ * non-compliant, which would have pushed the `Sidebar` into keeping the browser's
+ * outline as well as drawing a ring. Two indicators where one is correct is not
+ * worse than one indicator on the wrong surface, and it is worse than the
+ * alternative of a gate that says a token-driven ring is not a ring.
+ */
+const FULL_STRENGTH_RING = /^(?:focus-visible:)?ring-(?:ring|sidebar-ring)$/
 
 /** A ring width that attaches to the focus-visible state. */
 const FOCUS_RING_WIDTH = /^focus-visible:ring-(?:\d+(?:\.\d+)?|\[[^\]]+\])$/

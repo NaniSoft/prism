@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from 'vitest'
 import userEvent from '@testing-library/user-event'
 import axe from 'axe-core'
 
-import { CommandPalette, locate, RANKS, type CommandGroup } from '../src/components/ui/command-palette'
+import { CommandPalette, type CommandGroup } from '../src/components/ui/command-palette'
+import { locate, RANKS } from '../src/lib/rank'
 
 /**
  * A searchable list of commands, over the Dialog this system already has.

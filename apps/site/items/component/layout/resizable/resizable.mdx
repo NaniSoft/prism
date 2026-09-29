@@ -1,0 +1,98 @@
+---
+slug: components/resizable
+title: Resizable
+---
+
+## Overview
+
+A Resizable is two panes with a divider between them that both a pointer and a
+keyboard move. It ships as `Resizable`, `ResizablePanel` and `ResizableHandle`.
+
+The divider is the Component, and everything about it is a decision a consumer
+would otherwise make badly. It is an ARIA separator that is focusable, so the
+split is operable without a pointer at all, and it reports `aria-valuenow` as the
+position along the split, so a reader is told where the divider is rather than
+only being able to feel it. Arrow keys move it by a small step, Home takes it to
+one end and End to the other, and both are clamped, so a reader who holds the key
+stops at the end rather than pushing a pane to nothing and being unable to get it
+back.
+
+It remembers nothing across a reload, and that is deliberate. The position is a
+prop and a callback, so a caller who wants a reader's split to survive a reload
+persists it and passes it back. A design system that wrote to a reader's storage
+unasked would be making a claim about a product it does not know: which pane this
+is, whether a second reader of the same account wants the same number, and
+whether this reader wants it remembered at all.
+
+Both the group and the divider require a `label`, and there is no default for
+either. A resizable is announced as two panes with a divider between them, so two
+unnamed panes are a page where a reader is told "region" twice; and a divider
+with no name is announced as "separator", so a page with three of them is a page
+where a screen reader user cannot tell which one they are about to move.
+
+## Usage
+
+```tsx
+import {
+  Resizable,
+  ResizableHandle,
+  ResizablePanel,
+} from '@nanisoft/prism-ui/components/resizable'
+
+<Resizable label="Runs and details" defaultPosition={40} onPositionChange={save}>
+  <ResizablePanel size={40}>Run list</ResizablePanel>
+  <ResizableHandle label="Resize the run list" />
+  <ResizablePanel size={60}>Run detail</ResizablePanel>
+</Resizable>
+```
+
+<ComponentDemo slug="resizable" />
+
+## Guidelines
+
+### When to use
+
+Use a Resizable where the right amount of space is a matter of what the reader is
+doing: a file tree beside an editor, an inbox beside a message, a log beside its
+details. The reader is the only one who knows how wide their work needs to be.
+
+### When not to use
+
+Do not use a Resizable where the panes have a known right size, such as a form
+and a submit button. A fixed grid is one less thing to get wrong, and a divider
+a reader can drag to nothing is worse than no divider.
+
+Do not use it for a layout that has to survive a reload at a known proportion,
+such as a print view or an export. A reader who drags a pane and comes back to a
+reset split cannot take a screenshot of the layout they meant.
+
+Do not use it on a phone. A divider a reader can drag with a finger on a four
+hundred pixel screen is a divider they will drag by accident, and a two-pane
+layout does not fit there anyway.
+
+### Best practices
+
+- Give both panes a real `size`, and keep them summing to a hundred. A pane left
+  at its default beside a sized one is a split nobody chose.
+- Persist the position yourself. Read `onPositionChange`, store the number
+  wherever your product keeps a preference, and pass it back as `position` or
+  `defaultPosition`. The Component stores nothing.
+- Name each divider for the pane it moves: "Resize the run list". That is the
+  name a screen reader user hears while holding it.
+- Give the group a `label` naming what the two panes are together, not what one
+  of them is.
+- Give the group a height when `orientation` is vertical, and a width when it is
+  horizontal. The group fills its parent, and a parent with no size is a
+  divider with nothing to divide.
+- Set `disabled` on the group while a layout is loading, rather than hiding the
+  divider and shifting the panes underneath the reader.
+
+### Content guidelines
+
+- Put the primary content in the second pane and the navigation in the first, so
+  the divider moving right makes the work wider and moving left makes the list
+  narrower, which is what a reader expects.
+- Do not put a destructive control on the divider. It is a drag target, and a
+  drag that ends on a button is a click the reader did not mean.
+- Keep each pane scrollable on its own. A group that scrolls as one piece makes
+  the divider a way to lose a reader's place in both panes at once.

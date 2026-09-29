@@ -1,0 +1,108 @@
+---
+slug: components/table-sort
+title: TableSort
+---
+
+## Overview
+
+A TableSort is the sortable header affordance for a `Table`. It renders a `th` with
+`scope="col"` and `aria-sort`, containing a button that reports the direction the
+column will be in after the press.
+
+The announcement says what **will** happen, not what is, which is why `announce` is
+a function of the next direction rather than a string. One sentence cannot be right
+for all three states.
+
+## Usage
+
+```tsx
+import { TableSort, type TableSortDirection } from '@nanisoft/prism-ui/components/table-sort'
+
+const announce = (direction: TableSortDirection) => {
+  if (direction === 'ascending') return 'Sorts oldest first'
+  if (direction === 'descending') return 'Sorts newest first'
+  return 'Removes the sort'
+}
+
+<Table>
+  <TableHeader>
+    <TableSort column="spend" direction={sort} onDirectionChange={setSort} announce={announce}>
+      Spend
+    </TableSort>
+    <TableHead>Notes</TableHead>
+  </TableHeader>
+  <TableBody>{rows}</TableBody>
+</Table>
+```
+
+<ComponentDemo slug="table-sort" />
+
+## Guidelines
+
+### When to use
+
+Use a TableSort for a column a reader can reorder: a name, a date, a count, a size.
+The header is the affordance and the `th` is where the state lives, so a reader
+moving across the table with the arrow keys is told the order as they go.
+
+Use it on one column at a time unless the table is genuinely multi-key. Two columns
+both reporting `aria-sort` is a table claiming to be ordered two ways at once, and a
+reader comparing the two hears a contradiction.
+
+### When not to use
+
+Do not use it on a column whose order is fixed. A row number, an icon column and a
+status column are in the order the table puts them in, and a sort control on one is
+a control that can only lie.
+
+Do not use it for a filter. A filter hides rows and a sort reorders them, and a
+header that does both is a control a reader cannot predict. Put a filter in a
+toolbar above the table, which is where `DataTable01` puts it.
+
+Do not use it where there is nothing to sort. A table of four rows whose order is
+fixed by its own meaning does not need a control that claims the order is a choice.
+
+### Best practices
+
+- Pass `announce` every time, and write it as a function of the direction. This is
+  the one prop a caller cannot skip, because the sentence is different in all three
+  states and in every language.
+- Hold the sort in the caller's state and pass `direction`. The Component cannot
+  sort an arbitrary set of records: it does not know whether the column is a number,
+  a date or a name, it does not know the locale a name sorts in, and it does not
+  know the original order it would have to restore.
+- Sort by a stable secondary key. A table with duplicate values reorders
+  unpredictably between clicks unless something breaks the tie.
+- Give a `TableCaption`, or a heading beside the table. A sortable table is a table
+  a reader will move around in, and a caption names what they are moving in.
+- Decide what the third press does and say so in the announcement. This Component
+  returns to unsorted, and "Removes the sort" is the honest description of it.
+
+### Accessibility
+
+`aria-sort` is on the `th`, not on the button inside it, and only on the header where
+the sort is in force. A column header is what a screen reader announces while a
+reader is moving across a table, and the sort state is a property of that column
+rather than of a control inside it.
+
+The announcement is attached with `aria-describedby` and sits **outside** the button.
+Appended inside, the sentence becomes part of the button's name, so a reader hears
+"Spend, sort oldest first" as one string and the column's name is no longer a name
+they can scan a column of headers for. As a description, they hear the column, then
+the control, then what the press will do.
+
+A header with no sort in force states nothing at all rather than stating `"none"`.
+`none` is the default value of the attribute, so writing it on every header of an
+unsorted table is a claim on each of them that the reader has to evaluate and reject.
+
+**The mark is a shape as well as a colour.** An unsorted column carries the
+two-headed mark, an ascending one an up arrow and a descending one a down arrow, and
+it is `aria-hidden` because the state is already on the cell. The sorted header also
+takes the foreground ink rather than the muted one. Three channels: `aria-sort`, the
+shape, and the ink. A table that relies on one is unreadable to somebody.
+
+The cycle is `none`, `ascending`, `descending`, and back to `none`. The third press
+is a decision, not an omission: a reader who sorted to find the largest value and no
+longer cares has to get the original order back from the control they already know,
+because any other route is a second affordance this package would then have to
+document.

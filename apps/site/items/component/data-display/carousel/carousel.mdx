@@ -1,0 +1,107 @@
+---
+slug: components/carousel
+title: Carousel
+---
+
+## Overview
+
+A Carousel is a set of slides with controls that move between them. It hides
+content, so it must never be the only route to it: everything a carousel shows, a
+reader must be able to reach some other way, through a tab, a section below it, a
+list.
+
+The controls say where the reader is. `position` is a required function of the index
+and the total, because a carousel with no position indicator is a guessing game.
+
+## Usage
+
+```tsx
+import { Carousel, type CarouselSlide } from '@nanisoft/prism-ui/components/carousel'
+
+const slides: CarouselSlide[] = [
+  { id: 'one', label: 'The first chart', children: <Chart data={a} /> },
+  { id: 'two', label: 'The second chart', children: <Chart data={b} /> },
+]
+
+<Carousel
+  slides={slides}
+  label="Spend over time"
+  position={(index, total) => `Slide ${index} of ${total}`}
+/>
+```
+
+<ComponentDemo slug="carousel" />
+
+## Guidelines
+
+### When to use
+
+Use a Carousel for a small ordered set of images or charts where only one matters at
+a time and the set has a natural order: a product's shots, the steps of a walkthrough,
+three views of the same data.
+
+Three to five slides is the range. Past that, a reader is scrolling a carousel rather
+than looking at it, and a list or a grid is the honest answer.
+
+### When not to use
+
+**Do not use it as the only route to content.** This is the rule the Component is
+built around. A carousel used as the only presentation of a set of images is a set
+of images a reader on a keyboard, on a screen reader, or with the controls hidden by
+a stylesheet cannot see at all, and a Component cannot detect that case.
+
+Do not use it for text a reader has to read. A paragraph behind a control is a
+paragraph a reader has to find, and carousels have no scroll bar to tell them there
+is more of it.
+
+Do not use it for a set with no order. A grid shows everything at once and a
+carousel makes the reader ask what they are missing.
+
+Do not use it for one thing. A single image is an image, and a carousel of one is a
+picture with two dead buttons. The Component draws the picture alone in that case,
+but the composition is still wrong.
+
+### Best practices
+
+- Pass `label` and `position`. Both are required, both are the caller's words, and
+  Prism cannot write either for a product it knows nothing about.
+- Give every slide a `label`. A carousel hides its content, so the label is often
+  the only way a reader knows which slide they are on before they read it.
+- Do not auto-rotate. A moving carousel takes the content away from a reader who was
+  reading it, and there is no motion in this system that a reader did not ask for.
+- Set `initialIndex` when the carousel is the target of an address. A Component that
+  always opened on slide one would show a reader something the address did not name.
+- Handle a shrinking set. The Component clamps the position when slides disappear,
+  and a caller whose filter narrows the set while the reader is on slide three
+  should expect the third press to have brought them somewhere real.
+- Author `empty`. Zero slides is a state a caller reaches before their data arrives,
+  and it is a gap rather than a state.
+
+### Accessibility
+
+The carousel is a named `region` with `aria-roledescription="carousel"`. A page with
+two carousels is a page where a reader cannot tell which set of slides they are in,
+and the role description is what tells a reader it is a carousel rather than some
+other group of slides.
+
+Every slide stays in the document and is labelled, so the carousel is not the only
+route to its content. The slides that are not current are `aria-hidden`, so they are
+not announced but are still there for anything that reads the markup.
+
+The position is in a polite live region, because a carousel that moves silently
+under a reader is one they cannot follow. Polite rather than assertive, because the
+reader caused the move by pressing a control.
+
+**The controls are real buttons**, so Tab reaches them and Enter and Space press
+them, and none of that is the Component's key handling to get wrong. Left and Right
+move between slides, Home and End jump to the ends, and a key pressed at an end is
+clamped rather than wrapped: a reader who overshoots expects to be at the end, not
+at the other end of a carousel they did not know they were in.
+
+A control that has just been disabled hands focus to the sibling that is still live.
+A disabled button is out of the tab order but does not give up focus, so without
+that a reader who pressed "next" on the last-but-one slide is stranded inside the
+carousel with no working control under their fingers.
+
+The track moves with `duration-base ease-out`, which is the reader's own press being
+reported back. There is no fade on mount and no motion nobody asked for.

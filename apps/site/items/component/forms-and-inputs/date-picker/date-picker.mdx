@@ -1,0 +1,103 @@
+---
+slug: components/date-picker
+title: DatePicker
+---
+
+## Overview
+
+A DatePicker is a field that opens a month grid and holds the date the reader
+picks. It is built on `Calendar`, so the six-row grid, the roving tab stop, the
+arrows that cross into the next month and the rule about disabled dates are the
+ones this system already has rather than a second set written for a picker.
+
+Three decisions carry the weight.
+
+**Choosing a date commits it and closes, in one gesture.** A field that left the
+grid open after a choice asks the reader to confirm an answer they already gave,
+and the Popover returns focus to the trigger, so a reader tabbing onward is where
+they expect to be.
+
+**The month on show follows the answer, every time the field is opened.** A filled
+field opens on the month of its value and an empty one on the current month.
+Without this, re-picking a date in a different month would reset the grid to the
+month the caller seeded it with, which is a silent undo of the navigation the
+reader just did.
+
+**The field shows the caller's formatted date and submits an ISO day.** Those are
+two different strings on purpose. One is read by a person and written in their
+language; the other is read by a machine that has no locale.
+
+## Usage
+
+```tsx
+import { DatePicker } from '@nanisoft/prism-ui/components/date-picker'
+
+const format = (date: Date) =>
+  new Intl.DateTimeFormat(undefined, { dateStyle: 'long' }).format(date)
+
+const monthLabel = (month: Date) =>
+  new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' }).format(month)
+
+<DatePicker
+  label="Delivery date"
+  placeholder="Choose a date"
+  name="delivery"
+  format={format}
+  monthLabel={monthLabel}
+  weekdayLabels={['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']}
+  firstWeekday={1}
+  previousLabel="Previous month"
+  nextLabel="Next month"
+  clearLabel="Clear the delivery date"
+  value={date}
+  onValueChange={setDate}
+/>
+```
+
+<ComponentDemo slug="date-picker" />
+
+## Guidelines
+
+### When to use
+
+Use a DatePicker when one date is the answer to a form field and the reader needs
+to see the shape of the month: a booking, a delivery date, an invoice due date.
+It is the field version of `Calendar`, and it is what a form should use rather
+than the grid on its own.
+
+### When not to use
+
+Do not use it for a date range. Two months, a start and an end and a disabled span
+between are three more questions than this Component asks.
+
+Do not use it for a date of birth. A calendar a reader pages backwards through
+sixty years is a worse control than a masked text field with a clear format.
+
+Do not use it for a choice with two or three answers. A Select or two buttons is
+faster than opening a grid.
+
+### Best practices
+
+- Always pass `format`, `monthLabel` and `weekdayLabels`. They are reader-facing
+  text and this package ships none, so a DatePicker with none of them renders
+  nothing a reader can read.
+- Put a visible `Label` above the field as well as passing `label`. The prop names
+  the field for assistive technology; the visible one tells a sighted reader what
+  they are filling in.
+- Pass `clearLabel` if a reader can undo a choice. Without it there is no clear
+  control, which is deliberate: the words are the caller's.
+- Pass `name` so the form receives `YYYY-MM-DD`. Never post the displayed string.
+- Set `isDateDisabled` for closed days, blackout dates and dates already taken,
+  and say why in text beside the field. A greyed date with no explanation is a
+  question the reader cannot answer.
+- Pass `today` when the renderer's clock is not the reader's, so the mark lands on
+  the right day.
+
+### Content guidelines
+
+- Write `placeholder` as the answer's shape rather than as a command: "Choose a
+  date" rather than "Click here".
+- Write the grid's `label` as the field it answers: "Delivery date", not
+  "Date picker".
+- Write `clearLabel` as what it clears, for this field: "Clear the delivery date"
+  rather than "Clear".

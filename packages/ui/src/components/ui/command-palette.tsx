@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { Dialog, DialogContent, DialogTitle } from './dialog'
+import { locate, RANKS, type Rank } from '../../lib/rank'
 import { cn } from '../../lib/utils'
 
 /**
@@ -74,59 +75,6 @@ export interface CommandPaletteProps {
   empty: { message: (query: string) => string; hint?: string }
   /** Layout only. */
   className?: string
-}
-
-/**
- * Where an item matched, and how well.
- *
- * The scores are ordered rather than equal because the order is the feature. A
- * palette that filters without ranking shows every command containing the query in
- * source order, so a command whose name starts with what you typed sits below one
- * that merely mentions it three rows down, and the reader scrolls. Ranking by
- * where the match falls puts the command you meant first, which is the whole reason
- * a palette beats a menu.
- */
-const RANKS = {
-  /** The query is the start of the label. */
-  prefix: 0,
-  /** The query starts a word inside the label. */
-  wordStart: 1,
-  /** The query appears inside the label. */
-  substring: 2,
-  /** The query appears only in the keywords. */
-  keyword: 3,
-  /** No match. */
-  none: 4,
-} as const
-
-type Ranked = {
-  item: CommandItem
-  rank: number
-  /** The character range in the label that matched, when the label matched. */
-  range?: readonly [number, number]
-}
-
-/** Where the first match of `query` falls in `text`, and how good that match is. */
-function locate(text: string, query: string): { rank: number; range?: readonly [number, number] } {
-  if (query === '') return { rank: RANKS.prefix, range: [0, 0] }
-  const haystack = text.toLowerCase()
-  const needle = query.toLowerCase()
-
-  const at = haystack.indexOf(needle)
-  if (at === -1) return { rank: RANKS.none }
-  // A match at the very start is a prefix match, which is the best possible
-  // answer, and it has to be its own tier rather than sharing the word-start one.
-  // Collapsing the two means "Settings" ties with "Open settings" for "set", and
-  // the reader who typed the start of a command's name is the reader who meant
-  // that command.
-  if (at === 0) return { rank: RANKS.prefix, range: [0, needle.length] }
-  // Otherwise a whole-word match beats a match inside a word, and the boundary is
-  // the character before it. Without this, "se" in "Settings" would outrank "Reset
-  // workspace" for a reader who typed "set". The boundary is tested as a class
-  // rather than compared to a space, because a space is a string literal and the
-  // copy gate is right to ask what a lone space in a Component is for.
-  const isWordStart = /[\s\-/]/.test(haystack.at(at - 1) ?? '')
-  return { rank: isWordStart ? RANKS.wordStart : RANKS.substring, range: [at, at + needle.length] }
 }
 
 /**
@@ -428,4 +376,4 @@ function CommandPalette({
   )
 }
 
-export { CommandPalette, RANKS, locate }
+export { CommandPalette }

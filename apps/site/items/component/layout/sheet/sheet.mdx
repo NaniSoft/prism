@@ -1,0 +1,99 @@
+---
+slug: components/sheet
+title: Sheet
+---
+
+## Overview
+
+A Sheet is a panel anchored to an edge of the viewport. It ships as `Sheet`,
+`SheetTrigger`, `SheetContent`, `SheetHeader`, `SheetFooter`, `SheetTitle`,
+`SheetDescription` and `SheetClose`.
+
+It is the Dialog with an edge, and it inherits the Dialog's behaviour rather
+than reimplementing it. Focus trapping, Escape, the portal, the scroll lock, the
+backdrop and the return of focus to the trigger are six behaviours that are
+already correct in the Dialog, and a panel that rolled its own overlay would be a
+second answer to all six questions, with the second answer being the one that
+ships the bug.
+
+What the sheet adds is a decision a consumer would otherwise get wrong: a panel
+has a side, and the side is named here rather than defaulted. `center` is not on
+`SheetContent`'s type, because a centred panel is a Dialog wearing a different
+name, and a drawer that arrives as a centred card is a product that believes it
+shipped something it did not.
+
+A sheet dismisses on an outside press, and that is the difference from an
+AlertDialog. A sheet holds navigation, filters and detail views: a reader who
+clicks away has said "not now", and the content behind is still there when they
+come back.
+
+## Usage
+
+```tsx
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@nanisoft/prism-ui/components/sheet'
+
+<Sheet>
+  <SheetTrigger>Open filters</SheetTrigger>
+  <SheetContent side="right">
+    <SheetHeader>
+      <SheetTitle>Filters</SheetTitle>
+      <SheetDescription>Narrow the table to the rows you need.</SheetDescription>
+    </SheetHeader>
+  </SheetContent>
+</Sheet>
+```
+
+<ComponentDemo slug="sheet" />
+
+## Guidelines
+
+### When to use
+
+Use a Sheet for a panel that belongs to the page behind it and should not hide
+it: navigation on a narrow screen, a filter set, a detail view beside a list, an
+account panel. The page stays visible and usable, and the panel sits over one
+edge of it.
+
+### When not to use
+
+Do not use a Sheet for a task the reader has to finish before going back. A
+rename, a short form and a confirmation belong in a Dialog, which puts them in
+the middle where they cannot be mistaken for part of the page.
+
+Do not use a Sheet for a destructive decision. It dismisses on an outside press,
+and a stray click would answer a question the reader never read. Use an
+AlertDialog, which refuses dismissal.
+
+Do not use a Sheet for a full page. On a narrow screen a sheet at three quarters
+of the width is a page with a backdrop, and a real page is better.
+
+### Best practices
+
+- Always render a `SheetTitle`. It names the panel for every reader.
+- Name the side deliberately. `right` for a detail view beside a list, `bottom`
+  for filters and actions on a phone, `left` for navigation.
+- Keep the panel's width a fraction of the viewport rather than a fixed pixel
+  count, so the page behind stays visible at every size.
+- Put the primary action at the bottom of a bottom sheet and at the top of a side
+  sheet, so it lands under the same thumb either way.
+- Do not nest a Dialog inside a Sheet unless the dialog is a confirmation about
+  the sheet's own content. A reader who cannot tell which layer is on top will
+  dismiss the wrong one.
+- The close control is rendered by default. Turn it off only when the panel has
+  its own explicit way out.
+
+### Content guidelines
+
+- Make the title the thing the panel is for: "Filters", "Notifications",
+  "Account".
+- One sentence of description, saying what the panel changes about the page
+  behind it.
+- Put the panel's own controls first and the page's content second. A reader who
+  opened a sheet is here to change something, not to read.

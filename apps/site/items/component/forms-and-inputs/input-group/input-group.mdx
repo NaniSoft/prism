@@ -1,0 +1,94 @@
+---
+slug: components/input-group
+title: InputGroup
+---
+
+## Overview
+
+An InputGroup draws related controls as one field: a prefix, a suffix, a unit, an
+action. It ships `InputGroup`, `InputGroupAddon`, `InputGroupButton` and
+`InputGroupInput`.
+
+**The addons are part of the field, not beside it.** They share one border, one
+height, one corner radius and one focus colour, because a currency symbol and the
+number it belongs to are one field with two parts. Three boxes would give the
+reader three things to reason about where there is one.
+
+**The frame answers the focus, the control draws the ring.** The group is a `div`:
+it is never focused and it has nothing to ring. It turns its border to the ring
+token when anything inside it has focus, and the control, which is the element that
+actually has focus, keeps `Input`'s own full-strength ring. Two indicators would be
+two things to read, and putting the ring on a wrapper that is not the thing being
+operated is how an indicator ends up drawn around the wrong box.
+
+**Use `InputGroupInput` inside it rather than `Input`.** A bordered `Input` inside a
+bordered group draws a border inside a border, and the caller should not have to
+know that `border-0 shadow-none` is the fix.
+
+It is presentational. It has no hooks, no state and no event handlers, so it is a
+server Component and a consumer's field costs no client JavaScript for the frame.
+
+## Usage
+
+```tsx
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@nanisoft/prism-ui/components/input-group'
+
+<InputGroup>
+  <InputGroupAddon position="prefix">kg</InputGroupAddon>
+  <InputGroupInput aria-label="Weight" type="text" />
+  <InputGroupButton aria-label="Clear the weight">
+    <XIcon />
+  </InputGroupButton>
+</InputGroup>
+```
+
+<ComponentDemo slug="input-group" />
+
+## Guidelines
+
+### When to use
+
+Use an InputGroup when a control has something permanently attached to it: a unit, a
+currency symbol, a domain, a protocol, a field name. Also when it has an action
+that belongs to the field rather than to the form, such as clearing it or revealing
+a password.
+
+### When not to use
+
+Do not use it for a helper button that is not about the field, such as "Generate
+password" under a new-password field. That is an action in the form, not a part of
+the control, and putting it inside the field's frame makes the form look like it
+has three controls.
+
+Do not use it to stack two fields vertically. That is two fields, and the point of
+joining them is that they are one.
+
+### Best practices
+
+- Put a visible `Label` above the group. The control inside still needs a name, and
+  the addon text is not one.
+- Use `InputGroupAddon` for something static and `InputGroupButton` for something
+  operable. The moment a part can be operated it needs its own accessible name and
+  its own focus ring, and an addon has neither.
+- Name every `InputGroupButton`. An icon-only button with no name is a control no
+  screen reader can announce, and the name is the caller's word.
+- Keep the frame to one field. Two `InputGroupInput`s inside one group is two
+  fields drawn as one, and the reader cannot tell where one ends.
+- Put the unit in the frame with `position="suffix"` when it follows the value, and
+  with `position="prefix"` when it precedes it.
+- A disabled control dims the whole group. Set `disabled` on the control, not on
+  the group, because a `div` cannot be disabled.
+
+### Content guidelines
+
+- Keep the addon to one or two characters, or one short word. It is a hint, not a
+  label.
+- Write the button name as what it does to this field: "Clear the weight", not
+  "Clear".
+- Do not put a placeholder in an `InputGroupAddon`. Placeholders disappear, and the
+  addon does not.

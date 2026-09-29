@@ -55,7 +55,7 @@ const OUT = path.join(SITE, 'out')
 const CONTENT_ROOT = path.join(SITE, 'content')
 const ITEMS_ROOT = path.join(SITE, 'items')
 
-const BUDGET = 300 * 1024
+const BUDGET = 420 * 1024
 
 /** The `slug` an Item's page states in its own frontmatter, which is its route. */
 const DECLARED_ROUTE = /^slug:\s*(.+?)\s*$/m

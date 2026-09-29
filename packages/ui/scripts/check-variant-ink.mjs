@@ -50,7 +50,20 @@ const SRC = path.join(PKG, 'src', 'components', 'ui')
 const isOwnFill = (utility) => !/^(hover|focus|focus-visible|active|data-\[|data-\w+:|group-|peer-|aria-|disabled|has-\[)/.test(utility)
 
 /** The ink utilities that count as a variant stating its own ink. */
-const INK = /^text-(foreground|primary-foreground|secondary-foreground|accent-foreground|muted-foreground|destructive-foreground|success-foreground|warning-foreground|popover-foreground|card-foreground|sidebar-foreground|inherit|current|white|black)$/
+/*
+ * The inks that count as a variant stating its own ink.
+ *
+ * Every role `check-contrast.mjs` measures as a required 4.5:1 foreground pair
+ * belongs here, and the two sidebar foregrounds were missing until the first
+ * Component put a `sidebar-*` fill in a variant. `sidebar-primary-foreground` and
+ * `sidebar-accent-foreground` are both required rows in the contrast table, under
+ * "sidebar active item" and "sidebar hover", so a list of inks that omits them
+ * would have told the `Sidebar` that its own required pairing was an inherited
+ * one. The list is derived from the roles the token gate measures rather than
+ * written out separately, because two lists about the same roles is the defect
+ * this repository has already had to unpick three times.
+ */
+const INK = /^text-(foreground|primary-foreground|secondary-foreground|accent-foreground|muted-foreground|destructive-foreground|success-foreground|warning-foreground|popover-foreground|card-foreground|sidebar-foreground|sidebar-primary-foreground|sidebar-accent-foreground|inherit|current|white|black)$/
 
 /**
  * Pull the variant maps out of a component's source.

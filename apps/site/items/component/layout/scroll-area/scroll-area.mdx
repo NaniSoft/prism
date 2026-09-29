@@ -1,0 +1,92 @@
+---
+slug: components/scroll-area
+title: ScrollArea
+---
+
+## Overview
+
+A ScrollArea is a scrollable region whose scrollbar belongs to this design system.
+The browser's scrollbar is the one piece of a page that belongs to no design system
+at all: it is a rectangle the operating system drew, in a colour chosen for the
+OS's own background rather than for the card the content is on.
+
+The scrolling is still the browser's. The region is a real scroll container in the
+document, so it is reachable by Tab, the arrow keys and Page Up work, and
+`scrollIntoView` works. Only the appearance of the bar is taken over.
+
+## Usage
+
+```tsx
+import { ScrollArea } from '@nanisoft/prism-ui/components/scroll-area'
+
+<ScrollArea label="Run output" className="h-64 rounded-md border">
+  {lines}
+</ScrollArea>
+```
+
+<ComponentDemo slug="scroll-area" />
+
+## Guidelines
+
+### When to use
+
+Use a ScrollArea for a region whose content is taller or wider than the space it has:
+a log, a file tree, a long list inside a panel, a wide table inside a column, a
+stream of events beside a form.
+
+The signal is that the region has a bounded box and unbounded content, and that the
+content beside it is drawn from tokens. A page that scrolls is not a case: the
+document scrollbar belongs to the browser and this is not where that is taken over.
+
+### When not to use
+
+Do not use one to clip content. A region with `overflow: hidden` and no way to reach
+what is past the edge is content a reader cannot read, and wrapping it in a
+ScrollArea is the fix rather than the cause.
+
+Do not use one where the content nearly fits. A region that scrolls by a few pixels
+is a region whose scrollbar is a permanent piece of furniture for one line of
+content; shorten the content or give it more room.
+
+Do not use one for a page-level region that should scroll the document. Locking the
+document scroll and taking over a nested one is a decision about the page, and it
+belongs to the page.
+
+### Best practices
+
+- Set `label` to what a reader would call the region, not where it sits. "Run
+  output" names it; "Sidebar" names a place.
+- Size the region from the outside with `className`. The Component does not measure
+  and does not guess a height, because a height it chose would be a height the
+  caller has to undo.
+- Leave `orientation` at `both` unless the content is known never to overflow on an
+  axis. A bar missing from an axis a reader needs to scroll on is a bar they have
+  to find in the browser's own chrome, which is the thing this Component replaces.
+- Set `keepMounted` only where a region is about to fill, and the affordance should
+  be visible before the content arrives. Everywhere else, a region with nothing to
+  scroll draws no bar.
+
+### Accessibility
+
+**The scroll container is a real scroll container, and that is the point.** The
+alternative, a `div` with `overflow: hidden` whose content is moved by a transform
+on a wheel handler, looks identical in a screenshot and has no scroll position at
+all: no keyboard, no `scrollIntoView`, no momentum, and nothing for a screen reader
+to announce. A custom scrollbar that is a `div` is worse than the browser's,
+because the browser gives a reader all of that for free.
+
+The viewport takes the tab stop only while the region actually overflows, so a
+region with nothing to scroll costs nothing in the tab order. That is the
+accessibility guidance for scrollable regions, and a permanently focusable region is
+a tab stop that does nothing when a reader presses an arrow key inside it.
+
+The name is a required prop and it lands on the scrollable region rather than on the
+bar. The bar is a control over the region, so a name there would name the control
+and leave the content anonymous. A page with three regions and no names is a page
+where a reader tabs into a region and cannot tell what is in it or what is past the
+edge.
+
+The thumb is `bg-border` at rest and the full muted ink while the region is hovered
+or scrolling: two token roles and no third value, so the bar reads on a light card
+and on a dark one from the same string, and a scoped pack boundary restyles both
+through the cascade.
