@@ -7,25 +7,48 @@ import { CtaLink } from '../../components/ui/cta-link'
 import { Section, SectionHeading, type HeadingLevel } from '../../components/ui/section'
 import { cn } from '../../lib/utils'
 
+/**
+ * One action in a hero's action row.
+ *
+ * **The two arms are two elements, and a caller should not be able to reach the
+ * wrong one by accident.** An action that names a destination is an anchor and
+ * navigates; an action that does not is a button, and a Block ships no behaviour,
+ * so that button is inert by design rather than by accident. The arms are a union
+ * rather than one shape with an optional `href` because an optional `href` makes
+ * both mistakes silent:
+ *
+ * - `{ label: 'Start free' }` compiles and renders a primary button that goes
+ *   nowhere. A hero's first action is almost always a link, so this is the likely
+ *   mistake and it looks correct on the page.
+ * - `{ label: 'Start free', href: maybeUrl }` compiles today and renders a button
+ *   whenever `maybeUrl` is `undefined`, which is a runtime branch the type said
+ *   nothing about.
+ *
+ * So the link arm *requires* `href` and the button arm *forbids* it, as
+ * `href?: never`. The second of those is the one worth having: a value that is
+ * sometimes a string and sometimes `undefined` is now a type error rather than a
+ * button, which is the whole of "a caller should not be able to get it wrong
+ * silently".
+ */
 export type HeroAction = {
   label: string
-  /**
-   * Where the action goes. Required for an action that navigates, which is what
-   * an action in a hero almost always is.
-   *
-   * It was optional here and the Component ignored it, which meant an action
-   * with a destination rendered as a `<button>` that went nowhere: a control
-   * that looks like a link and is not one, and a dead end for a reader who
-   * pressed it. An action now renders as a real anchor whenever it names a
-   * destination, and falls back to a button only when it genuinely is one. A
-   * Block ships no behaviour, so a button here is inert by design rather than by
-   * accident, and the two shapes are told apart by exactly this.
-   */
-  href?: string
   variant?: 'default' | 'outline' | 'secondary' | 'ghost'
-  /** Opens the destination in a new tab, with the matching `rel`. */
-  newTab?: boolean
-}
+} & (
+  | {
+      /** Where the action goes. Present makes the action an anchor. */
+      href: string
+      /** Opens the destination in a new tab, with the matching `rel`. */
+      newTab?: boolean
+    }
+  | {
+      /**
+       * Forbidden, so that "a link whose address happens to be undefined" is a
+       * type error rather than a button. Omit the key entirely to mean a button.
+       */
+      href?: never
+      newTab?: never
+    }
+)
 
 export type Hero01Props = {
   /**
@@ -174,19 +197,24 @@ export function Hero01({
         <div className="flex flex-col gap-3 sm:flex-row">
           {actions.map((action, index) => {
             const variant = action.variant ?? (index === 0 ? 'default' : 'outline')
-            // Positional, for the same reason as `pricing-01`'s feature list: the
-            // label is display content, and two actions may share one. Safe here
-            // because the list is static and never reordered.
+            // The arrow is a link affordance, so it follows the element and not the
+            // position. It was `index === 0`, which put a "goes forward" arrow on an
+            // inert button: the one control in the row that cannot be followed wore
+            // the mark that says it can. A first action that is genuinely a button
+            // gets no arrow, and a second action that is a link still gets none,
+            // because the arrow marks the row's primary destination and only one
+            // thing is that.
+            const isLink = action.href !== undefined
             const content = (
               <>
                 {action.label}
-                {index === 0 ? (
+                {index === 0 && isLink ? (
                   <ArrowRight className="motion-safe:transition-transform size-4 group-hover:translate-x-0.5" />
                 ) : null}
               </>
             )
 
-            return action.href ? (
+            return isLink ? (
               <CtaLink
                 key={index}
                 href={action.href}

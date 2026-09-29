@@ -80,3 +80,25 @@ things in it, and a hairline list of two is a list.
 - Keep a tagline to one line. It is what a reader scans.
 - Write the tagline as what the product is, not as what it does for the reader.
 - Use the product's own name, in the case it uses everywhere else.
+- **Decide which level a sentence belongs at by asking whether it survives its
+  neighbours.** A `description` is about the set: a sentence that would be equally
+  true if you deleted any one row. A row's `detail` is about that member: a
+  sentence that is false, or vacuous, beside the other four.
+
+  ```tsx
+  <ProductGrid01
+    title="The products"
+    description="Five products, one platform."        // true of the set
+    products={[
+      { id: 'atlas', name: 'Atlas', tagline: 'The agent factory.',
+        href: '/products/atlas',
+        detail: 'Autonomous software creation, supervised by you.' }, // only Atlas
+      { id: 'borealis', name: 'Borealis', tagline: 'The model foundry.',
+        href: '/products/borealis',
+        detail: "Living models of real systems, built by the factory." },
+    ]}
+  />
+  ```
+
+  A `detail` is rendered only when passed, so a row without one draws exactly what
+  it drew before the field existed and no row below it moves down a line.
