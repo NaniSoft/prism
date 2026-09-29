@@ -1169,10 +1169,26 @@ Recorded as facts. None of these is fixed in this document.
   cost, and none names an audit trail, a permission matrix, or a retention
   control either.
 
-  The name is not settled. `live` is the working title; `stream` names an
-  implementation and `console` names a use case, and a Kind named `live` beside a
-  Mode named `dark` invites the confusion that retiring `beam-dark` removed. The
-  map at issue 112 carries the decision and the open question.
+  **The name is settled: `live`, and the objection to it does not hold.** The
+  working title was `live`, and the recorded worry was that a Kind named `live`
+  beside a Mode named `dark` invites the confusion that retiring `beam-dark`
+  removed. `stream` was rejected for naming an implementation and `console` for
+  naming a use case, which leaves the concern about the adjective.
+
+  It does not hold, and the reason is what `beam-dark` actually was. That was a
+  **token** name in which a pack and a Mode compounded, so `beam-dark` read as a
+  pack name and a reader could not tell a colour from a mode by looking at it. A
+  Kind and a Mode are not in that position: in every surface this repository
+  publishes they appear in **labelled fields**, `kind` and `mode`, so a reader is
+  told which is which rather than inferring it from a compound word. The confusion
+  `beam-dark` caused was caused by compounding two values into one name, and the
+  fourth Kind does not compound anything.
+
+  There is also a cost the other way. `live` is the term the products this Kind
+  exists to serve already use, so an agent reading the corpus is reading a word it
+  has met. A name chosen to avoid a theoretical confusion with a labelled field
+  would be a word the reader has to learn, which is the opposite of what a Kind is
+  for. Issue 112 carried the question; this is the answer and the reasoning.
 - **Patterns and Templates are built. Workflows are decided and not built.**
   They are documentation, not surface: no npm subpath, no registry item, and
   `CATALOG_KINDS` unchanged. A Patterns Section is a **prose** Section beside
@@ -1223,3 +1239,18 @@ Recorded as facts. None of these is fixed in this document.
   about how the work was done. And the Pattern and Template declarations are
   checked; the originality claim is not, and does not pretend to be. Issue 112
   carries the reasoning.
+
+  **The record for this effort is `docs/history/provenance.md`**, and the shape it
+  takes is the one the decision above specifies: the provenance record, a
+  thirteen-item originality checklist, a four-axis similarity assessment and an
+  independent implementation declaration, in one document rather than one per
+  asset. `docs/history/` is its home because that is where this repository already
+  keeps a finding that outlives the code that produced it, and a per-asset record
+  would have been forty copies of one paragraph, which is the drift this repository
+  has already had to unpick three times.
+
+  The four axes are chosen so each is checkable by a **different** means, so a
+  finding on one is not automatically a finding on the others: source text,
+  structure and arrangement, interface, and appearance. Each carries a means of
+  checking as well as a finding, because a claim with no way to check it is a claim
+  rather than a record.
