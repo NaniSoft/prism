@@ -549,6 +549,50 @@
       ]
     },
     {
+      "name": "pulse-graph",
+      "title": "Pulse-graph",
+      "description": "Shared pulse-graph primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/pulse-graph.tsx",
+          "type": "registry:component",
+          "target": "components/ui/pulse-graph.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "pulse-series",
+      "title": "Pulse-series",
+      "description": "Shared pulse-series primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/pulse-series.tsx",
+          "type": "registry:component",
+          "target": "components/ui/pulse-series.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "radio-group",
       "title": "Radio-group",
       "description": "Shared radio-group primitive. Installed automatically as a dependency of any block that uses it.",
@@ -632,6 +676,28 @@
           "path": "src/components/ui/separator.tsx",
           "type": "registry:component",
           "target": "components/ui/separator.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "signal-field",
+      "title": "Signal-field",
+      "description": "Shared signal-field primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/signal-field.tsx",
+          "type": "registry:component",
+          "target": "components/ui/signal-field.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -1054,14 +1120,15 @@
     },
     {
       "name": "hero-01",
-      "title": "Hero 01 - Centered Marketing Hero",
-      "description": "A centered hero with an optional eyebrow, headline, supporting line and one or two actions. All copy is passed in as props.",
+      "title": "Hero 01 - Marketing Hero With An Optional Live Figure",
+      "description": "A hero with an optional eyebrow, headline, supporting line and one or two actions, which may sit centered over the container or split with a live figure beside it. All copy and the figure itself are passed in as props.",
       "type": "registry:block",
       "categories": [
         "marketing"
       ],
       "registryDependencies": [
-        "button"
+        "button",
+        "cta-link"
       ],
       "dependencies": [
         "clsx",

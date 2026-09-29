@@ -70,8 +70,11 @@ downstream code own a style, a token or an animation, it is out of scope.
    it does not fork source or write CSS.
 3. **Contrast is a build gate, not a review step.** A palette change that fails
    is a failed build.
-4. **Motion is state feedback.** 80, 160 and 280 milliseconds, strongly
-   decelerating, zero overshoot, no decorative or entrance animation.
+4. **Motion has two laws, not one.** Feedback is state feedback: 80, 160 and 280
+   milliseconds, strongly decelerating, zero overshoot. A figure that shows a
+   system running is ambient, on its own cycle scale, and is bounded by rules a
+   reviewer can check rather than by a principle: nothing hidden, nothing gated
+   on a script, reduced motion removing the movement and never the figure.
 5. **Agents are first-class.** Every public rule is available in a form an agent
    can read and verify.
 6. **Decisions are recorded.** The constitution documents carry the reasoning,

@@ -184,8 +184,11 @@ interface face.
 - The token contract is shadcn's, unchanged. Semantic names are emitted
   verbatim.
 - Contrast is a build gate, not a review step.
-- Motion is state feedback only, and its tokens reach CSS. There are no
-  decorative keyframes and no entrance or scroll animation.
+- Motion has two laws, not one. Feedback is state feedback, on the 80/160/280
+  millisecond scale, and there is no decorative or entrance animation anywhere.
+  A figure that shows a *system running* is the second law: it is ambient, it
+  runs on its own cycle scale, and it is bounded by rules that are structural
+  rather than a matter of taste.
 - Blocks ship no copy and no sample data; every string and every number is a
   prop. A Component owns some words and not others: a variant name, a state
   name and a landmark name are machine values, and the **accessible name a
@@ -533,6 +536,9 @@ not a role. Blocks and Pages are grouped by kind and have no category.
 - **Motion is by token only.** A component names `duration-fast`, `duration-base`
   or `duration-slow` and `ease-out` or `ease-in-out`; it never writes a
   millisecond value or a `cubic-bezier(...)` literal, and it adds no keyframes.
+  A figure that runs on a cycle names an `ambient-*` token and the
+  `prism-ambient-*` class that resolves it, which is the same law with a
+  different scale; see Motion, below, for why the two are separate.
 - **Documentation lives in a JSDoc comment on the exported component.** The
   declaration build preserves it into the emitted `.d.ts`, which is what the
   corpus reads. A component with no JSDoc block has no corpus entry.
@@ -628,8 +634,10 @@ entry points.
 - **Don't** hardcode copy, a price or a metric inside a Block.
 - **Don't** wipe the token dist before a build. Write over the top and prune
   afterwards; see Token Contract.
-- **Don't** add a keyframe animation or an entrance or scroll effect. The motion
-  doctrine is state feedback, shortened rather than removed under reduced motion.
+- **Don't** add a keyframe animation or an entrance or scroll effect. Feedback
+  motion is state feedback, shortened rather than removed under reduced motion.
+- **Don't** author an ambient cycle outside the six classes the stylesheet
+  publishes, and never give a keyframe a duration of its own.
 - **Don't** add an em dash or an en dash to reader-facing copy. The dash gate
   covers this file and the other root documents.
 
@@ -682,6 +690,145 @@ reference them. Duration is the one namespace that needs a mirror: Tailwind's
 neither can overshoot. `fast` is hover and active feedback, `base` is the
 default and carries focus rings and shadow state, and `slow` is transform or
 layout state such as a disclosure. Spatial transitions keep `motion-safe:`.
+
+## Motion
+
+The system has two laws of motion, and they are different laws rather than one
+law with an exception carved out of it. Everything above this heading is the
+first. This heading is the second, and the second exists because the first alone
+left a hole that four products fell into.
+
+### The hole, stated as a measurement
+
+Before this section, the repository authored one motion scale, one easing pair,
+and zero keyframes, and the rule was that motion is state feedback only. Every
+part of that rule was right, and it held completely: there was no decorative
+animation anywhere in the shipped surface, no entrance effect, and no scroll
+effect, and all four consumer sites inherited that.
+
+What it also produced was four product sites whose heroes said what the product
+was in a sentence and showed nothing about what it did. Each had previously
+drawn the mechanism, on a canvas, with a `requestAnimationFrame` loop, reading
+its colours out of the DOM at mount. The migration removed the canvas. It also
+removed the claim, because the canvas was the only thing on those pages that
+said a pipeline ran, a market was captured, an estate was observed. A hero that
+names a factory and shows a paragraph is a brochure.
+
+So the fix was not to permit decoration. Decoration is the thing the first law
+was written to exclude, and permitting it would have undone a correct decision
+to make an incorrect one. The fix was to name the second kind of motion for what
+it is, and then to bound it with rules that can be checked.
+
+### The two laws
+
+**Feedback is a response.** Something happened because the reader did it: a
+control was hovered, focused, pressed, opened, closed. The reader is waiting for
+an answer, so the answer is fast (80/160/280ms), decelerating, and never
+overshoots. This law is unchanged by this section.
+
+**A cycle is a demonstration.** Something runs because the system does: a marker
+crosses a rail, a reticle crosses a series, a wavefront crosses a field, a point
+drifts. The reader did not cause it and is not waiting for it. Nothing is being
+answered. The figure is making a claim about a mechanism, and the motion is how
+the claim is made visible rather than merely asserted.
+
+The distinction is not a rationalisation for ornament, and the test for which
+one a motion is is falsifiable: **stop the animation. Is the figure still true
+and still legible?** If yes, the motion is emphasis and it belongs here. If the
+figure collapses into nothing, it was a video with extra steps, and the
+component it was built with is the wrong one. `SignalField` is atmosphere and
+says so in its own name; `PulseGraph` and `PulseSeries` carry claims and are
+required to name themselves to a screen reader.
+
+### The ambient scale, and why it is not folded into `duration`
+
+The cycle lengths are a separate group with a separate namespace, and the reason
+is that folding them in would have made one name mean two things by a factor of
+twenty-five. `duration` measures a response in hundreds of milliseconds and is
+capped at 280ms because anything longer stops being feedback. `ambient` measures
+one turn of a running figure and is in seconds, because a cycle measured in
+hundreds of milliseconds is a flicker rather than a cycle.
+
+| Token | Cycle | What it drives |
+| --- | --- | --- |
+| `--ambient-travel` | 7200ms | a marker crossing a rail |
+| `--ambient-sweep` | 9000ms | a wavefront crossing a field |
+| `--ambient-drift` | 18000ms | a point on its own long cycle |
+| `--ambient-scan` | 6000ms | a reticle crossing a series |
+| `--ambient-pulse` | 2400ms | a node breathing while a marker passes |
+| `--ambient-shimmer` | 3200ms | a figure's own load shimmer |
+
+The easings are separate for the same reason, and `ease` and `ambient-ease` are
+both closed to two or three members with no control point y above 1:
+`ambient-ease-linear` is for anything carrying a thing from one place to
+another, because a marker that accelerates out of one node and decelerates into
+the next reads as being served rather than as travelling; `in-out` and `drift`
+are for cycles where the shape of the turn matters more than the transit.
+
+**The floor is one second, and it is a gate rather than a convention.** The
+emitted-contract test measures every `ambient` member and fails below 1000ms,
+with the reason stated in the failure: a cycle faster than once a second is
+unreadable before it is understood, and no duration in the 80 to 280ms band
+could ever have caught that, because a flicker was not a value this repository
+could previously express. The test is written as a measurement rather than a
+list, so a cycle added later is measured against the reason the group exists.
+
+### Why the keyframes are in the stylesheet and the durations are in the tokens
+
+A duration is a value, and values live in the token source and reach CSS as a
+custom property. A keyframe is a mechanism: it names a set of properties and a
+trajectory, and there is no DTCG type for one, so a keyframe emitted from the
+token build would be a mechanism smuggled into the value tier.
+
+They meet at exactly one place, and the meeting is what makes both halves
+checkable: an `animation: prism-travel var(--ambient-travel)
+var(--ambient-ease-linear) infinite` in the component package's stylesheet is a
+duration *naming* a duration. So a keyframe cannot invent a timing and a token
+cannot invent a trajectory, and every cycle in the system is priced by the token
+that names it. A component never writes a keyframe name into a shorthand with a
+length attached, and the six `prism-ambient-*` classes exist precisely so it
+never has to.
+
+### The four rules that make this safe
+
+**Nothing is hidden.** No rule in the ambient layer sets `opacity: 0`, and
+nothing waits for a script, an intersection, a scroll position or a timer. Every
+figure renders its complete, correct, fully legible form at first paint, and the
+animation only ever moves something already visible. A reader with scripting
+off, a slow connection, a print stylesheet, a crawler, or a browser that never
+runs the animation at all sees the whole drawing. This is why a consumer needs
+no exception to enable the `hidden-state` gate: the state does not exist.
+
+**Reduced motion removes the movement, not the figure.** The
+`prefers-reduced-motion` block is one `animation: none`, and it is the reason
+this is safe to ship: because every element's resting state is its full form,
+that reader gets the same figure, still. Not a slower one, not a faded one, not
+a summary of one. The system's standing position is that motion is shortened
+rather than removed under reduced motion; for a cycle, the shortening is to
+zero, and the figure was built so that zero costs the reader nothing.
+
+**The pause is a first-class state.** `prism-ambient-paused` is a published
+utility rather than something each consumer invents, because the alternative is
+every consumer writing its own stop mechanism and at least one of them getting
+it wrong in a way that restarts the cycle when the figure returns to view. A
+loop computing for a figure nobody is looking at is a battery cost with no
+reader attached.
+
+**Compositor properties only.** Every keyframe animates `transform` or
+`opacity` and nothing else. There is no animated `width`, `top` or `box-shadow`
+in the layer, because those are layout and paint properties that run on the main
+thread, and a figure built from them stutters on a mid-range machine. This is
+also why the three-dimensional transforms in `prism-drift` and the `scaleY` in
+`prism-rise` are written the way they are rather than as a width change that
+would read the same.
+
+### What this section does not author
+
+No entrance animation, no scroll-reveal, no parallax, no carousels, no
+attention loop, and no motion on text. The first law's prohibitions are
+untouched by this section, and the reason they were right is the reason they
+stand: a reader who did not ask for a thing moving is owed a page that is still.
+What was missing was a way to say that a system is running, and this is it.
 
 **The emitted format list.** The token package publishes `light.css`,
 `dark.css`, `theme.css`, the resolved token JSON, `index.js`, `themes.json`, the

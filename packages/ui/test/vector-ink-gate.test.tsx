@@ -55,13 +55,33 @@ function withDefect(file: string, from: string, to: string, assertion: (result: 
   }
 }
 
+/**
+ * The drawing Components the staged tree has to carry.
+ *
+ * Read from the gate's own `SCANNED` rather than listed again, because a second
+ * list is a second fact to keep in step and this test would then fail for the
+ * wrong reason every time a drawing Component was added: it would report a
+ * count the gate never claimed, or it would stage a Component the gate no
+ * longer reads and pass on a smaller scan than the real one. The gate resolves
+ * its roots from its own location, so a tree carrying exactly this set is a
+ * tree the gate can judge completely.
+ */
+function scannedComponents(): string[] {
+  const source = readFileSync(
+    path.join(REPO, 'packages', 'ui', 'scripts', 'check-vector-ink.mjs'),
+    'utf8',
+  )
+  const block = source.match(/const SCANNED = \[([\s\S]*?)\]/)
+  if (block === null) throw new Error('check-vector-ink.mjs declares no SCANNED list to read')
+  return [...block[1]!.matchAll(/'([^']+)'/g)].map((match) => match[1]!)
+}
+
 /** A tree the gate can run against, carrying the emitted token CSS. */
 function stageTree() {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'prism-vector-ink-'))
   for (const relative of [
     'packages/ui/scripts/check-vector-ink.mjs',
-    'packages/ui/src/components/ui/diagram.tsx',
-    'packages/ui/src/components/ui/product-mark.tsx',
+    ...scannedComponents().map((name) => `packages/ui/src/components/ui/${name}`),
     'packages/tokens/dist/light.css',
     'packages/tokens/dist/dark.css',
   ]) {
@@ -85,8 +105,15 @@ describe('the vector-ink gate', () => {
     const result = run()
     expect(result.status, result.stdout + result.stderr).toBe(0)
     // The coverage line is the falsifiable part: a reader must be able to see
-    // that the contract was read rather than that a scan found nothing.
-    expect(result.stdout).toMatch(/0 finding\(s\) across 2 of 2 Component\(s\) read/)
+    // that the contract was read rather than that a scan found nothing. The
+    // count is read back from the gate's own list rather than written here, so
+    // adding a drawing Component widens the scan and this assertion keeps
+    // meaning "the scan covered everything the gate declared" instead of slowly
+    // becoming a smaller claim than the run it is checking.
+    const scanned = scannedComponents().length
+    expect(result.stdout).toMatch(
+      new RegExp(`0 finding\\(s\\) across ${scanned} of ${scanned} Component\\(s\\) read`),
+    )
     expect(result.stdout).toMatch(/contract read from 2 emitted mode file\(s\): \d+ custom/)
     // The one gradient in the shipped surface, listed with its stop count.
     expect(result.stdout).toMatch(/gradient at .*product-mark\.tsx:\d+ read, 6 contract stop\(s\)/)

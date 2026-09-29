@@ -260,6 +260,39 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'PulseGraph',
+    slug: 'pulse-graph',
+    kind: 'component',
+    category: 'Data display',
+    description:
+      'A running system drawn as vector markup: named nodes, the edges between them, a marker travelling the sequence and a breathing focus. Token-driven and server-rendered, so it needs no client runtime.',
+    source: 'src/components/ui/pulse-graph.tsx',
+    exports: ['PulseGraph'],
+    status: 'stable',
+  },
+  {
+    name: 'PulseSeries',
+    slug: 'pulse-series',
+    kind: 'component',
+    category: 'Data display',
+    description:
+      'A live instrument: a series of columns rising out of a named baseline, with a reticle crossing them once per cycle. The values are the caller’s own.',
+    source: 'src/components/ui/pulse-series.tsx',
+    exports: ['PulseSeries'],
+    status: 'stable',
+  },
+  {
+    name: 'SignalField',
+    slug: 'signal-field',
+    kind: 'component',
+    category: 'Data display',
+    description:
+      'A field of marks: the atmosphere a figure is drawn over. Decorative by default and still unless asked to move.',
+    source: 'src/components/ui/signal-field.tsx',
+    exports: ['SignalField'],
+    status: 'stable',
+  },
+  {
     name: 'ProductMark',
     slug: 'product-mark',
     kind: 'component',
