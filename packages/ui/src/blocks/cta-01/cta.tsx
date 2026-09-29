@@ -28,23 +28,28 @@ export type Cta01Action = {
   /**
    * Which weight this action draws at, when the caller does not say.
    *
-   * **A panel wants `default` or `secondary`, never `outline`.** This Block draws
-   * its band as a filled `bg-primary` surface and sets the band's ink to
-   * `--primary-foreground`, so every ink inside it is inherited from that panel
-   * rather than from the page. An `outline` action sets its own fill
-   * (`bg-background`) and, before this was settled, left its ink inherited, which
-   * put `--background` behind `--primary-foreground`. In the lavender pack's dark
-   * mode that is `#19171b` behind `#210c33`, or 1.01:1: a focusable, announced,
-   * unreadable button.
+   * **A filled panel wants `secondary` or `outline`, and never `default`.** The
+   * property that decides it is not the ink but the fill: this Block draws its
+   * band as a filled `bg-primary` surface, and `default` fills with `--primary`,
+   * so a `default` action on this band is the band's own colour against the
+   * band's own colour. Its label is legible, because `primary-foreground` on
+   * `primary` is a gated pair, and the control has no edge, which is a different
+   * defect and the reason this sentence is about the fill rather than the text.
    *
-   * Both defaults below are self-contained, which is the property that matters:
-   * `default` pairs `--primary` with `--primary-foreground` and `secondary`
-   * pairs `--secondary` with `--secondary-foreground`, and a pair the Block
-   * chooses cannot be changed by whatever surface the Block is placed on. The
-   * `outline` variant is fixed too, in `cta-link.tsx`, because a variant that
-   * sets a fill should set the matching ink rather than inherit whatever it lands
-   * on. It is kept in the type because a caller may want it once the ink is
-   * explicit, and dropping it would be a smaller answer than the defect.
+   * `secondary` and `outline` are the two that answer, and what makes them
+   * answer is that each states its own ink rather than inheriting one. That is
+   * the part that was broken and is now settled: `outline` carried `bg-background`
+   * with no `text-` of its own, so inside this band it was `--background` behind
+   * the inherited `--primary-foreground`, which in lavender's dark mode measured
+   * 1.01:1 and in the base pack's light mode 1.00:1, a focusable, announced,
+   * unreadable button. The variant is fixed in `cta-link.tsx`, where a variant
+   * that sets a fill now states the matching ink, and
+   * `packages/ui/scripts/check-variant-ink.mjs` is the gate that holds it there.
+   *
+   * So a panel may take all three, and the settled defaults are the two that
+   * carry a fill distinct from the band. Which of the two a given action wants is
+   * the caller's: `secondary` for the one ask, `outline` for the alternative
+   * beside it.
    */
   variant?: 'default' | 'secondary' | 'outline'
 }
@@ -78,10 +83,10 @@ export type Cta01Props = {
    *
    * Its default weight is `outline`, which is the settled answer for the pair:
    * the primary action is filled and this one is not, so the two read as one
-   * decision and one alternative rather than as two competing asks. What `outline`
-   * may not do is inherit its ink from the filled band behind it, and that is
-   * now a property of the variant rather than of where a caller puts it. See
-   * `Cta01Action`'s `variant` for the measurement.
+   * decision and one alternative rather than as two competing asks. It is safe on
+   * the filled band because the variant carries its own ink rather than
+   * inheriting the band's, which is a property of the variant and no longer of
+   * where a caller puts it. See `Cta01Action`'s `variant` for the measurement.
    */
   secondaryAction?: Cta01Action
   /**

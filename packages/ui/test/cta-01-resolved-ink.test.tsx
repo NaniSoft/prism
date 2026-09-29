@@ -20,10 +20,13 @@
  * computes for these variables, not a restatement of what this test believes them
  * to be.
  */
+import { render } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { readFileSync, existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import { Cta01 } from '../src/blocks/cta-01'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const PKG = path.join(HERE, '..')
@@ -142,3 +145,98 @@ describe('a control on a filled surface', () => {
     }
   })
 })
+
+/**
+ * The half that measures the pair the Block actually asks for.
+ *
+ * Everything above measures a pair this test *believes* the defaults resolve to.
+ * That belief is the thing this file could not previously check: a test that
+ * hardcodes `background` against `foreground` passes whether the Block defaults
+ * its second action to `outline` or to something whose fill is the band's, so it
+ * is green on a Block that has stopped asking for the pair it is holding to
+ * 4.5:1. The defect was found in a browser for the same reason: the class name
+ * and the pair are two different claims and only one of them is on the page.
+ *
+ * So these render the Block, read the utilities off the anchors it produced, map
+ * each to the token it names, and resolve those tokens from the emitted CSS. The
+ * assertion is still on the resolved pair, never on the class string: the class
+ * string is read here as *input*, and what is asserted is the colour.
+ */
+describe('the defaults Cta01 ships', () => {
+  it('resolves both actions to a legible pair, and to a fill the band is not', () => {
+    const { container } = render(
+      <Cta01
+        title="Ship it"
+        action={{ label: 'Start a trial', href: '/start' }}
+        secondaryAction={{ label: 'Read the guides', href: '/guides' }}
+      />,
+    )
+
+    const links = [...container.querySelectorAll('a')]
+    expect(links, 'the band carries both actions').toHaveLength(2)
+
+    // The band is the `bg-primary` surface whose ink every control inside it
+    // would inherit. A defaulted action whose own fill is that fill has no edge
+    // against the band, so the band is read the same way the two actions are.
+    const bandFill = ownFill(container.querySelector('[class*="bg-primary"]')!)
+    expect(bandFill, 'the band states its own fill').toBe('primary')
+
+    for (const pack of PACKS) {
+      for (const mode of MODES) {
+        const where = `${pack || 'base'} ${mode}`
+        for (const link of links) {
+          const fill = ownFill(link)
+          const ink = ownInk(link)
+
+          // Both halves stated. An absent ink is the shipped defect: the control
+          // then takes the band's `--primary-foreground`, and the pair measured
+          // is a fill against an ink the Block never asked for. `stated` is what
+          // narrows the pair for the ratio below, so the assertion and the
+          // narrowing are one function rather than an assertion and a hope.
+          const stated = (value: string | null, what: string): string => {
+            expect(value, `${where}: ${label(link)} states ${what}`).toBeTruthy()
+            return value as string
+          }
+          const fillToken = stated(fill, 'its own fill')
+          const inkToken = stated(ink, 'its own ink')
+
+          const r = ratio(token(pack, mode, fillToken), token(pack, mode, inkToken))
+          expect(r, `${where}: ${label(link)} is ${fillToken} on ${inkToken}`).toBeGreaterThanOrEqual(
+            MINIMUM,
+          )
+
+          // The shape half. `default` resolves to `--primary` behind
+          // `--primary-foreground`, which clears the text threshold and is still a
+          // control with no edge, so a legible ratio is not sufficient on its own.
+          expect(fillToken, `${where}: ${label(link)} is a fill the band is not`).not.toBe(bandFill)
+        }
+      }
+    }
+  })
+})
+
+/** The visible text of an anchor, for a failure message. */
+const label = (link: Element): string => link.textContent?.trim() ?? '(no label)'
+
+/** The token an element fills itself with, ignoring a fill on a pseudo-state. */
+const ownFill = (element: Element): string | null => {
+  const own = [...element.classList].filter((u) => /^bg-/.test(u) && !/^(hover|focus|active|group|peer)-/.test(u))
+  return own.length === 0 ? null : own[0].slice('bg-'.length)
+}
+
+/** The token an element inks itself with, ignoring an ink on a pseudo-state. */
+const ownInk = (element: Element): string | null => {
+  const own = [...element.classList].filter(
+    (u) => /^text-/.test(u) && !/^(hover|focus|active|group|peer)-/.test(u) && INK.test(u),
+  )
+  return own.length === 0 ? null : own[0].slice('text-'.length)
+}
+
+/**
+ * The inks a control may state for itself, which is the same closed set
+ * `check-variant-ink.mjs` accepts. It is restated rather than imported because
+ * the gate is not on the test lane's module graph, and a control that states
+ * `text-balance` or `text-sm` states a size rather than an ink, so the test has
+ * to be able to tell the two apart.
+ */
+const INK = /^text-(foreground|primary-foreground|secondary-foreground|accent-foreground|muted-foreground|destructive-foreground|success-foreground|warning-foreground|popover-foreground|card-foreground|sidebar-foreground|sidebar-primary-foreground|sidebar-accent-foreground|inherit|current|white|black)$/

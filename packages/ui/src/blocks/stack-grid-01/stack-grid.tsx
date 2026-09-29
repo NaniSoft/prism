@@ -3,15 +3,41 @@ import { Section, SectionHeading, type HeadingLevel } from '../../components/ui/
 import { cn } from '../../lib/utils'
 
 /**
- * One part a product is assembled from: its name and the role it plays.
+ * One part a product is assembled from: its name, the product it wraps when the
+ * name is a codename, and the role it plays.
  *
- * Both are required, and a part with no role is a logo and a part with no name
- * is a role. A survey grid is a claim that a set of parts is sufficient, and both
- * halves of that claim are the caller's to make.
+ * `name` and `role` are required, and a part with no role is a logo and a part
+ * with no name is a role. A survey grid is a claim that a set of parts is
+ * sufficient, and both halves of that claim are the caller's to make.
  */
 export type StackPart = {
   /** The part's own name, as its authors spell it. */
   name: string
+  /**
+   * The real product underneath a codename, when the name above is not a name a
+   * reader could look up.
+   *
+   * Optional and additive: a part whose name already is its product's own name
+   * omits it, and a tile that omits it renders the two elements it rendered
+   * before this field existed, with no line and no space held open for one.
+   *
+   * It is a field and not a slot, because the value goes inside the tile this
+   * Block already draws. A slot is a value that goes in an element the Block does
+   * not own, and a `StackPart` is a part's data, which is the `li` the Block
+   * renders. It is the same shape as `ProductGrid01`'s `pack` and
+   * `StatusLedger01`'s `detail`: one more value in a row the caller owns.
+   *
+   * Three of the four NaniSoft sites publish their stack under a codename with
+   * the product printed beneath it, and the missing field is what made the
+   * migration drop eight published names rather than move them. It is also the
+   * evidence for the claim the section makes: a grid that says it composes rather
+   * than forks can only be checked by a reader who can see what it composed.
+   *
+   * Pass it when it differs from `name`. The Block renders what it is handed and
+   * does not compare the two, so a caller that passes one name twice prints it
+   * twice.
+   */
+  realName?: string
   /**
    * One phrase about what the part does here. It is a role rather than a
    * description: the grid is a survey of what a product is built from, not a
@@ -39,9 +65,9 @@ export type StackOwn = {
 /**
  * The props a StackGrid01 takes.
  *
- * Every string is a prop and the Block ships none: no part, no role, no blurb
- * and no default "built in-house" mark. A grid that hardcoded a part list would
- * hand every consumer a survey of somebody else's stack.
+ * Every string is a prop and the Block ships none: no part, no role, no
+ * realName, no blurb and no default "built in-house" mark. A grid that hardcoded
+ * a part list would hand every consumer a survey of somebody else's stack.
  */
 export type StackGrid01Props = {
   /** Optional label above the section title. See the No-Default-Eyebrow Rule. */
@@ -113,9 +139,14 @@ export type StackGrid01Props = {
  * the claim is the caller's words. Three of the four sites write three different
  * ones, and the Block does not choose.
  *
- * A tile carries a name and a role and nothing else. A part whose role needs two
- * lines belongs in the section's `description`, where it applies to the group
- * rather than to one tile.
+ * A tile carries a name, the real product behind it when the name is a codename,
+ * and a role. The middle value is optional and additive: eight of the sixteen
+ * parts on the three sites that draw this section are a codename over a product
+ * its reader could look up, and before the field existed the honest answer
+ * inside this surface was to lose those names. A part whose *role* needs two
+ * lines still belongs in the section's `description`, where it applies to the
+ * group rather than to one tile, because that is a claim about every tile rather
+ * than a second name for one of them.
  *
  * It is a server Component: no hook, no state and no client code.
  */
@@ -158,6 +189,16 @@ export function StackGrid01({
               <Card className="bg-muted h-full gap-2 py-4">
                 <CardHeader className="gap-1">
                   <CardTitle className="text-sm">{part.name}</CardTitle>
+                  {/*
+                    The real product behind a codename, in the same annotation
+                    face the in-house group uses for its own words. The element is
+                    rendered only when the caller passes one: a tile that reserves
+                    a line for absent content is a layout shift, and this grid is
+                    the first thing a reader sees scroll.
+                  */}
+                  {part.realName ? (
+                    <span className="text-muted-foreground font-mono text-xs">{part.realName}</span>
+                  ) : null}
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground text-pretty text-xs">{part.role}</p>

@@ -54,3 +54,37 @@ describe('a survey of what a product is built from', () => {
     expect(container.querySelectorAll('[data-slot="stack-grid"] > ul')).toHaveLength(1)
   })
 })
+
+/**
+ * The gap this pair of tests exists to end. A site that publishes a stack under
+ * codenames has two names for one part, `Bedrock` over `Nessie`, and `StackPart`
+ * carried one of them, so the migration had to record the second as removed. The
+ * value is a part's own data, so the assertion is on the part's own tile and in
+ * the order a reader reads it: the codename, the product it wraps, the role.
+ */
+const CODENAMED = [
+  { name: 'Bedrock', realName: 'Nessie, Iceberg', role: 'The data lake' },
+  { name: 'Postgres', role: 'Storage' },
+]
+
+describe('a part with a real product behind its name', () => {
+  it('prints the second name inside the tile that owns it, between the name and the role', () => {
+    const { container } = render(<StackGrid01 parts={CODENAMED} />)
+
+    const tiles = container.querySelectorAll('[data-slot="stack-grid"] > ul > li')
+    expect(tiles[0].textContent).toBe('BedrockNessie, IcebergThe data lake')
+    expect(screen.getByText('Nessie, Iceberg')).toBeInTheDocument()
+  })
+
+  it('renders nothing at all for a part that passes no second name', () => {
+    // The half of the field that is easy to get wrong in the other direction. A
+    // reserved line is a layout shift on the first thing a reader scrolls to, and
+    // the tile has to render exactly what it rendered before the field existed:
+    // the name, the role, and no element standing in for a value nobody passed.
+    const { container } = render(<StackGrid01 parts={CODENAMED} />)
+
+    const tiles = container.querySelectorAll('[data-slot="stack-grid"] > ul > li')
+    expect(tiles[1].textContent).toBe('PostgresStorage')
+    expect(tiles[1].querySelectorAll('span')).toHaveLength(0)
+  })
+})

@@ -6,8 +6,9 @@ title: StackGrid01
 ## Overview
 
 StackGrid01 is a survey of what a product is assembled from, and what it built
-itself. The composed parts sit in one grid, each a name and a role; the in-house
-work sits in a second grid, each a name and a line about it.
+itself. The composed parts sit in one grid, each a name, the real product behind
+it when the name is a codename, and a role; the in-house work sits in a second
+grid, each a name and a line about it.
 
 Three of the four NaniSoft sites publish this section, and each one drew it by
 hand with the same two groups. Three of them also drew the second group
@@ -19,6 +20,10 @@ rather than a flag on the part, because the difference is a claim about provenan
 and a claim is not a property of a row: a part that is assembled and a part that is
 built are the same kind of thing with a different answer to "who wrote it".
 
+The second name on a tile is the other half of that same claim. A product that
+publishes `Bedrock` over `Nessie` is making a statement about what it composed,
+and a reader can only check the statement if the composition is on the page.
+
 ## Usage
 
 ```tsx
@@ -27,8 +32,8 @@ import { StackGrid01 } from '@nanisoft/prism-ui/blocks/stack-grid-01'
 <StackGrid01
   title="How it is built"
   parts={[
+    { name: 'Bedrock', realName: 'Nessie, Iceberg', role: 'The data lake' },
     { name: 'Postgres', role: 'Storage' },
-    { name: 'NATS', role: 'Queue' },
   ]}
   own={[{ name: 'The orchestrator', blurb: 'Decides what runs next.' }]}
   ownLabel="built in-house"
@@ -36,6 +41,10 @@ import { StackGrid01 } from '@nanisoft/prism-ui/blocks/stack-grid-01'
 ```
 
 <ComponentDemo slug="stack-grid-01" />
+
+`realName` is optional. A part whose name is already the product's own name omits
+it, and the tile then renders exactly what it rendered without the field, with no
+line held open for one.
 
 ## Guidelines
 
@@ -70,6 +79,9 @@ is marketing.
 ### Content guidelines
 
 - Use each part's own name, as its authors spell it.
+- Print the real product under a codename, and print it as the product's own
+  authors spell it. Omit it where the two names are the same name, because the
+  block renders what it is given and does not compare them for you.
 - Write a role as what the part does *here*, not as what the part is generally
   capable of.
 - Write a blurb as why it is not assembled. That is the question the group raises.
