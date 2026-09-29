@@ -1,0 +1,84 @@
+---
+slug: components/command
+title: Command
+---
+
+## Overview
+
+`Command` is one row of a command list: the words on it, an optional hint at the
+far end, and the highlight that says which row the arrow keys are on. It renders a
+`role="option"` element, so it belongs inside a `role="listbox"` that the caller
+owns.
+
+It is the leaf. `CommandPalette` is the composite over it: the dialog, the overlay,
+the scroll lock and the return of focus. Use `Command` when you want the row
+without the overlay, which is the case in a settings page whose whole search list
+is fourteen commands, a command menu on a button, or a launcher inside a panel
+that is already a floating surface.
+
+The row ranks nothing. `matchRange` is a prop, so whoever filtered the list decides
+where the match fell and passes the range down. `keywords` is accepted and not
+rendered, so one object per command can be spread onto the row and read by
+whatever is doing the ranking.
+
+## Usage
+
+```tsx
+import { Command } from '@nanisoft/prism-ui/components/command'
+
+<div role="listbox" aria-label="Commands">
+  <Command
+    label="Toggle theme"
+    hint="Ctrl K T"
+    keywords={['dark', 'light']}
+    active
+    onSelect={toggleTheme}
+  />
+  <Command label="Reset workspace" onHover={() => setActive(1)} onSelect={reset} />
+</div>
+```
+
+<ComponentDemo slug="command" />
+
+## Guidelines
+
+### When to use
+
+Use a Command when you are building a list of actions and you want the row to look
+and behave like the one in a palette, without the palette's overlay. Give the
+parent `role="listbox"` and an `aria-label`, and keep the field above the list
+focused so the arrow keys move a highlight rather than moving focus.
+
+### When not to use
+
+Do not use it for the whole palette. `CommandPalette` is that surface, and it owns
+the overlay behaviour that a dialog gets right once: focus trapping, Escape, the
+portal, the scroll lock and the return of focus to the trigger. Re-implementing
+any of the five here is how one of them ships a bug.
+
+Do not use it for a list of values the reader picks from, rather than actions they
+carry out. A `Combobox` or a `Select` is that surface, and a listbox of values that
+behaves like a listbox of commands reads as the wrong control.
+
+### Best practices
+
+- Wrap the rows in an element with `role="listbox"` and a name. A row with no
+  listbox is an option that announces itself as nothing.
+- Pass `matchRange` from the same scorer the list was filtered with. If you rank in
+  one place and emphasise in another, the two answers drift and the emphasised run
+  is on the wrong word.
+- Keep the rows out of the tab order with `tabIndex={-1}`. A row that Tab reaches
+  takes the caret from the field, and a reader who starts typing mid-word gets
+  nothing.
+- Use `hint` for the keyboard shortcut and the region, not for a second line of
+  description. A two-line row doubles the height of every row in the list.
+- Mark a disabled action by not offering it rather than by rendering a row that
+  cannot be chosen. If it must stay visible, say why beside the list.
+
+### Content guidelines
+
+- Write the command as the reader would say it, in sentence case: "Open settings",
+  not "OPEN SETTINGS".
+- Keep the label to two or three words. A command that needs a sentence is a task,
+  and a task belongs behind a button in a form.
+- Write keywords in the words your readers use for the thing, not for the feature.

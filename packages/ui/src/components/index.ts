@@ -180,6 +180,27 @@ export { AspectRatio } from './ui/aspect-ratio'
 export { Carousel } from './ui/carousel'
 export { Toggle } from './ui/toggle'
 export { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
+export { Command } from './ui/command'
+export { Combobox } from './ui/combobox'
+export { Calendar } from './ui/calendar'
+export { DatePicker } from './ui/date-picker'
+export {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from './ui/input-group'
+export { NumberField } from './ui/number-field'
+export { OneTimeCode } from './ui/one-time-code'
+export { Label } from './ui/label'
+export {
+  Form,
+  FormControl,
+  FormDescription,
+  FormError,
+  FormField,
+  FormLabel,
+} from './ui/form'
 export { NativeSelect } from './ui/native-select'
 export { ButtonGroup } from './ui/button-group'
 export { TableSort } from './ui/table-sort'

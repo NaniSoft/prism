@@ -1,0 +1,89 @@
+---
+slug: components/combobox
+title: Combobox
+---
+
+## Overview
+
+A Combobox is a text field that filters a list of options and commits one of them.
+It is the field for an option set too long for a radio group and too short for a
+Select's worth of ceremony: a region, a project, a country.
+
+Two decisions carry most of the weight.
+
+**It ranks.** The scorer is imported from the Command palette rather than written
+again, so the ranking is one table in the system and not one per surface. A
+combobox that filters without ordering shows every option containing the query in
+the order the options were fetched, so the one the reader meant sits below one that
+merely mentions what they typed.
+
+**Typing never discards a choice.** A field showing exactly the chosen label is not
+narrowing anything, so a filled field opened on the list shows every option with
+the chosen one selected. There is no state in which the submitted value is an
+option the reader cannot see, and Escape or a blur puts the answer back in the box
+rather than emptying it. The value changes only when the reader chooses an option
+or empties the field, and both are acts.
+
+## Usage
+
+```tsx
+import { Combobox } from '@nanisoft/prism-ui/components/combobox'
+
+<Combobox
+  label="Region"
+  placeholder="Start typing"
+  name="region"
+  items={[
+    { value: 'pt', label: 'Portugal', keywords: ['lisboa'] },
+    { value: 'br', label: 'Brazil' },
+    { value: 'de', label: 'Germany', disabled: true },
+  ]}
+  empty={{ message: (query) => `No region matches ${query}` }}
+  onValueChange={(value) => setRegion(value)}
+/>
+```
+
+<ComponentDemo slug="combobox" />
+
+## Guidelines
+
+### When to use
+
+Use a Combobox when the reader knows roughly what they want but not exactly what it
+is called, or when the option set is long enough that scrolling a Select is worse
+than typing. Regions, projects, countries, currencies, a long list of people.
+
+### When not to use
+
+Do not use it for five options. A `RadioGroup` shows all of them at once and needs
+no typing, and typing is work.
+
+Do not use it when the reader may choose more than one value or when the value is
+free text. This commits exactly one option; a multi-select is a different surface
+and a free-text field is an `Input`.
+
+Do not use it for actions. A list of things a reader can do is a command list, and
+`Command` plus `CommandPalette` is that surface.
+
+### Best practices
+
+- Pair it with a `Label` above it and pass the same `id`, so the field has a name
+  that is visible as well as announced. The `label` prop is the accessible name and
+  the placeholder is not.
+- Keep the options in the order the reader expects them when nothing is typed. The
+  ranking only reorders once there is a query to rank against.
+- Mark an option `disabled` rather than removing it, so a reader can see that it
+  exists. Say why in text beside the field.
+- Put keywords on the options whose names are not the words readers use. Searchable
+  synonyms are what make a long list findable at all.
+- Add `name` so the form receives the option's `value` rather than its label. The
+  form should never receive a sentence where a value belongs.
+- Do not add your own live region for a result count unless you need one; the empty
+  message is already announced.
+
+### Content guidelines
+
+- Write option labels the way the reader would say them, in sentence case.
+- Make `value` a machine value from your own data, never the label.
+- Write the empty message as an answer, not as an apology: "No region matches
+  atlantis" rather than "Sorry, nothing found".

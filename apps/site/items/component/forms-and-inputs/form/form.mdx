@@ -1,0 +1,106 @@
+---
+slug: components/form
+title: Form
+---
+
+## Overview
+
+A Form is the binding that wires a label, a description, an error and a control
+together for a form, and puts the errors a submission came back with under the
+controls that caused them. It ships `Form`, `FormField`, `FormLabel`,
+`FormControl`, `FormDescription` and `FormError`.
+
+**`Field` is the layout; this is the wiring.** `Field` is presentational and says
+so: nothing in it generates an `id`, so the consumer owns the control's id and
+wires it to the label's `htmlFor` and to the description or error's `id` through
+`aria-describedby`. That is the right default for a layout, and it is a lot of
+hand-written ids in a form with eleven fields, none visible and all load-bearing.
+This module is the part that generates them.
+
+**A server error arrives as data and lands under the control that caused it.**
+`errors` is a record keyed by field name and `FormField` is keyed by the same name,
+so the message a submission came back with is drawn under the control the reader
+has to fix, the control is marked invalid, and the message joins the control's
+accessible description. The errors clear when the record clears: a field that fixed
+itself still shows the server's complaint until you stop passing it, which is as
+honest as it sounds.
+
+**The error and the way out are rendered together, in one live region.** The
+recovery is the half of an error that is usually missing. "That address is already
+registered" with nothing after it is a dead end, and the reader is left to guess
+whether they should sign in instead. `FormError` takes an `action` and draws it in
+the same region as the message, and only while there is a problem. The region is
+in the document before either of them is, because a live region inserted at the
+same moment as its content is not announced by every screen reader.
+
+## Usage
+
+```tsx
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormError,
+  FormField,
+  FormLabel,
+} from '@nanisoft/prism-ui/components/form'
+
+<Form errors={errors} onSubmit={createAccount}>
+  <FormField name="email">
+    <FormLabel>Email</FormLabel>
+    <FormControl type="email" required />
+    <FormDescription>We never share it.</FormDescription>
+    <FormError action={<a href="/account">Sign in instead</a>} />
+  </FormField>
+  <button type="submit">Create the account</button>
+</Form>
+```
+
+<ComponentDemo slug="form" />
+
+## Guidelines
+
+### When to use
+
+Use a Form when a form submits and can fail: a sign-up, a settings panel, a
+checkout. The moment there is a server that can reject a value, there are two
+reports to place, and the binding is what places them.
+
+### When not to use
+
+Do not use it for a search box or a filter row. There is no submission and no
+record of errors, and a field with a `FormField` around it is a field with an
+error region that will never be used.
+
+Do not use it to replace `Field`. `Field` is the layout, `FieldGroup` arranges
+several of them, and this module is what binds one to a name and a server. A form
+built from both uses `FieldGroup` between the fields and `FormField` inside it.
+
+### Best practices
+
+- Use a `FormControl` inside a `FormField`. The control is the part that registers
+  itself, which is what makes the label's `for` resolve and what puts the
+  description and the error into the control's accessible description. A plain
+  `Input` renders and submits and is not registered, so its label points at nothing
+  and its error is never announced with it.
+- Name every field. The name is the key the error arrives under, and a field with
+  no name cannot receive one.
+- Clear the errors by clearing the record. Re-rendering with `errors={{}}` is what
+  says the field is fixed; reloading the page is not.
+- Write `validate` messages as sentences about your rules, and return nothing when
+  the value is valid.
+- Give every error an `action` where there is a next step. A message with a way out
+  is a message; a message without one is a dead end the reader has to solve
+  themselves.
+- Remember that the alert region is in the document even when the field is valid.
+  That is the price of a reliable announcement, and it means one empty node per
+  field.
+
+### Content guidelines
+
+- Write an error as what happened and, where you can, what to do: "That address is
+  already registered" plus "Sign in instead".
+- Write `validate` messages as a correction, not as a rejection: "Enter an address
+  with an @" rather than "Invalid email".
+- Keep the description to the one thing the reader cannot work out from the label
+  alone.

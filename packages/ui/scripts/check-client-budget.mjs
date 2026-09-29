@@ -138,6 +138,7 @@ const BUDGETS = {
   dialog: 9,
   'dropdown-menu': 9,
   'empty-state-01': 4,
+  form: 10,
   'hover-card': 10,
   'input-group': 4,
   menubar: 10,
