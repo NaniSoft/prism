@@ -104,6 +104,19 @@ describe('the Sheet', () => {
     const behind = screen.getByRole('button', { name: 'Behind the sheet' })
     await user.click(trigger)
 
+    // Wait for the trap to be established before tabbing. Opening a portalled
+    // dialog moves focus, inserts the sentinels and renders the panel, and a Tab
+    // pressed before that has settled is measured against a half-built trap.
+    //
+    // This was a real race rather than a platform difference: it passed on
+    // Windows and failed on a faster Linux runner, and a timing-sensitive
+    // assertion is not a portable one. The wait is for the trap, not for a timeout,
+    // so a genuinely broken trap still fails below rather than hanging here.
+    const surface = screen.getByRole('dialog')
+    await waitFor(() => {
+      expect(surface.contains(document.activeElement)).toBe(true)
+    })
+
     // Four Tab presses, and focus never reaches the page behind. A sheet whose
     // focus escapes is a dialog the reader has been let out of without their
     // consent, which is the failure an anchored panel is supposed to avoid. The
@@ -111,7 +124,6 @@ describe('the Sheet', () => {
     // the honest assertion is about where focus must NOT land rather than a
     // specific element it must land on, plus a record that it did visit the
     // panel rather than sitting still between sentinels.
-    const surface = screen.getByRole('dialog')
 
     // The claim is that focus never reaches the page behind. It is asserted as
     // "never on an element the page owns" rather than as "never on
