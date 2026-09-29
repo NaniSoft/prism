@@ -1139,13 +1139,22 @@ Recorded as facts. None of these is fixed in this document.
   tie rather than a judgement. `STORE_KINDS` is tied bidirectionally to
   `CatalogKind` by the `_KindsMatch` assertion, and `countKinds` holds a
   `Record<ItemKind, number>`, so a fourth Kind added to one place and not the
-  others is a build failure. Two transcriptions remain untied, both named by
-  issue 72 and neither fixed: the `KINDS` literal in `apps/site/src/lib/catalogue.ts`
-  is a hand-written copy of the catalogue's union, and `kindLabel` in
-  `packages/mcp-server/src/render.ts` is a three-branch fallthrough whose final
-  branch returns `Page` for any input, so an unrecognised Kind is mislabelled to
-  an agent rather than refused. Both are sequenced last, behind the concurrent
-  work on the same three files.
+  others is a build failure. **Both transcriptions this named are now fixed**, and
+  they were the only thing standing between here and the build. The `KINDS` literal
+  in `apps/site/src/lib/catalogue.ts` was a hand-written copy of the catalogue's
+  union while `CATALOG_KINDS` already existed beside the type derived from it, so a
+  fourth Kind would have compiled, built every site, and silently not appeared in
+  the site, which omits it with no error anywhere. `kindLabel` in
+  `packages/mcp-server/src/render.ts` took a `string` and returned `Page` for any
+  input, so a new Kind would have been announced to every agent reading the corpus
+  as a Page, and nothing would have failed. It is now a `Record<ItemKind, string>`
+  keyed on `ItemKind` rather than a chain ending in a default, so a fourth Kind is a
+  compile error instead of a silent mislabel.
+
+  **What is left is a name and a build, and the name is the decision.** The Kind
+  itself is no longer blocked. The working title `live` is still not settled, for
+  the reason given below, and that is a question for a person rather than for a
+  gate.
 
   **The decision's own contents are incomplete.** The four things named above are
   the things that change while a run is in flight, and that is what makes them
@@ -1164,16 +1173,48 @@ Recorded as facts. None of these is fixed in this document.
   implementation and `console` names a use case, and a Kind named `live` beside a
   Mode named `dark` invites the confusion that retiring `beam-dark` removed. The
   map at issue 112 carries the decision and the open question.
-- **Patterns, Templates and Workflows are decided and not built.** They are
-  documentation, not surface: no npm subpath, no registry item, no corpus entry,
-  and `CATALOG_KINDS` unchanged. A Patterns Section is a **prose** Section beside
+- **Patterns and Templates are built. Workflows are decided and not built.**
+  They are documentation, not surface: no npm subpath, no registry item, and
+  `CATALOG_KINDS` unchanged. A Patterns Section is a **prose** Section beside
   Overview, Foundation and Content, because a Pattern is not a catalogue item. A
   Pattern declares the Items it composes and a Template declares the Pages it
-  arranges, and both declarations are compared against the catalogue by one gate
-  that lives with the other site joins, so a document naming an Item that does not
-  exist fails the build. A Template's arrangement is the published `DocsNavEntry`
-  union rather than a new vocabulary, which is the shape `DocsShell` already takes
-  and the shape a consumer site already adapts its own tree into.
+  arranges, and both declarations are compared against the catalogue by one gate,
+  `apps/site/scripts/check-pattern-composition.mjs`, so a document naming an Item
+  that does not exist fails the build. A Template's arrangement is the published
+  `DocsNavEntry` union rather than a new vocabulary, which is the shape
+  `DocsShell` already takes and the shape a consumer site already adapts its own
+  tree into.
+
+  **The declaration is the law, and the gate found a real mistake on its first live
+  run**: a Pattern composed of `Check`, which is an icon from `lucide-react` and not
+  an Item anybody can install. That is the whole argument in one fact, because
+  nothing about a prose page is type-checked and a recipe naming a renamed Item
+  reads perfectly.
+
+  **One clause of the decision above is superseded, and it is worth being explicit
+  about which.** The decision said a Pattern gets "no corpus entry". That clause is
+  about the *Items* store: a Pattern is not a catalogue Item, so it has no name, no
+  kind and no props for `find_item` to return, and it is not in `llms.txt` as a
+  component. It is not about the prose corpus.
+  `check-content-joins.mjs` says so: a content page "is in the tree but not in the
+  Corpus, so no agent can reach it". Leaving Patterns out of the Corpus would have
+  made it the only prose Section an agent cannot read, which inverts the point of a
+  layer whose readers are builders. So `patterns` is in `STORE_SECTIONS` and in
+  `STORE_SECTION_TITLES`, and the reasoning is recorded beside the entry.
+
+  **Two Section rules broke, and one was wrong rather than merely out of date.** The
+  rule that a prose Section is singular and a Section holding Items is plural is now
+  stated over the Sections that hold Items, because "Pattern" names a kind of thing
+  and there is more than one of them, exactly as "Component" does. The cost is that
+  `/patterns` no longer tells a reader from the URL whether it holds installable
+  Items, which is accepted rather than solved by renaming the Section something
+  singular and less recognisable, and the gate is what keeps the distinction honest.
+  Every Section also needs an `index.mdx`, which is what a group heading links to.
+
+  **Workflows remain unbuilt**, and the decision above is why that is not a gap in
+  the roster: a run history, an approval queue and a cost ledger are read-mostly
+  records that change as a run completes or a person decides, which makes them
+  Workflows rather than a Kind. The `live` entry above names what would change them.
 
   Two limits are recorded rather than papered over. **Provenance is asserted, not
   verified**: a gate can prove a claim was made, not that it is true, so the
