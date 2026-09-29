@@ -13,7 +13,7 @@ export default function StackGrid01Demo() {
       parts={[
         { name: 'Postgres', role: 'Storage' },
         { name: 'NATS', role: 'Queue' },
-        { name: 'Docker', role: 'Isolation' },
+        { name: 'The catalogue', realName: 'Postgres, Iceberg', role: 'Table metadata' },
         { name: 'OpenCode', role: 'The agent' },
       ]}
       own={[

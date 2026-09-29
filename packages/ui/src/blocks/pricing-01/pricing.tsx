@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '../../components/ui/card'
-import { Section, SectionHeading, type HeadingLevel } from '../../components/ui/section'
+import { Section, SectionHeading, childLevel, type HeadingLevel } from '../../components/ui/section'
 
 export type Plan = {
   name: string
@@ -52,6 +52,9 @@ export function Pricing01({
   plans,
   headingLevel = 'h2',
 }: Pricing01Props) {
+  // A plan name is a heading one step below the section that introduces the set,
+  // so three plans under one `h2` are three `h3`s and not three competing sections.
+  const Title = childLevel(headingLevel)
   return (
     <Section>
       {title ? (
@@ -72,7 +75,9 @@ export function Pricing01({
           >
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>{plan.name}</CardTitle>
+                <CardTitle>
+                  <Title>{plan.name}</Title>
+                </CardTitle>
                 {plan.featured && plan.badge ? <Badge>{plan.badge}</Badge> : null}
               </div>
               {plan.body ? <CardDescription>{plan.body}</CardDescription> : null}

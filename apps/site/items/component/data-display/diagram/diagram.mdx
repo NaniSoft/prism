@@ -24,6 +24,14 @@ would make the label size a function of how large a number you happened to use,
 so the same drawing would come out with unreadable labels from `0..1` fractions
 and enormous ones from `0..4000` pixels.
 
+A node carries a `subtitle` for the one-line role the thing plays, drawn under
+its name, and a `pack` for the hue its mark wears. Both exist because the two
+things they carry were being passed around the Component: a role description
+belonged on the picture and had nowhere to go, so it ended up inside the
+accessible name, which reaches a screen reader and leaves a sighted reader
+looking at the drawing with nothing. Omit `label` and the drawing is named from
+its own nodes, so the drawn line and the announced one are the same field.
+
 ## Usage
 
 ```tsx
@@ -32,8 +40,8 @@ import { Diagram } from '@nanisoft/prism-ui/components/diagram'
 <Diagram
   label="How a finding is produced and published"
   nodes={[
-    { id: 'capture', name: 'Capture', x: 0.1, y: 0.5 },
-    { id: 'read', name: 'Read', x: 0.5, y: 0.5, emphasis: true },
+    { id: 'capture', name: 'Capture', subtitle: 'the first draft', x: 0.1, y: 0.5 },
+    { id: 'read', name: 'Read', subtitle: 'a person decides', x: 0.5, y: 0.5, emphasis: true, pack: 'mint' },
     { id: 'publish', name: 'Publish', x: 0.9, y: 0.5 },
   ]}
   relations={[
@@ -77,6 +85,33 @@ unless the drawing is decorative, and the union is what makes the compiler hold
 that: a single optional prop could only be required everywhere or optional
 everywhere, and both halves of that are wrong.
 
+### Naming a drawing
+
+`label` is the drawing's accessible name, and it may be omitted exactly once: when
+the drawing can be named by what it holds. Omit it and the name is derived from
+the nodes in the order you drew them, each node's `name` and its `subtitle` where
+it has one, so the line on the picture and the line that is read aloud are the
+same field and cannot drift apart.
+
+Pass `label` when the drawing needs a name that says what it is rather than what
+it contains, which is most diagrams with no subtitles at all. Relation words are
+never part of a derived name, so a drawing whose relations matter to a screen
+reader user wants a `label`.
+
+### Packs
+
+`pack` is per node, not per drawing, and the boundary lands on the circle that
+node draws. One node wearing a pack re-inks that mark and nothing else: the other
+marks, the node names and the relation words all keep the page's ink, and a
+`pack` of `default` carries no attribute at all and resolves from the page.
+
+That is what lets a diagram section be the second pack region on a page. A
+boundary on the whole drawing would put one pack on the picture and stop a
+schematic of a product set from wearing a different hue per mark, which is the
+one thing a set of marks is for. A boundary also moves the pack's corner radius,
+and a node mark is a circle with no radius concept, so the boundary changes its
+colour and not its shape.
+
 ### Best practices
 
 - Give the Diagram a `label` that says what the drawing is, not what it is called.
@@ -87,14 +122,16 @@ everywhere, and both halves of that are wrong.
   rather than repeating a number.
 - Put the emphasised node near the middle. The eye goes there first and the
   relations read outward from it.
-- Do not nest a pack boundary inside a drawing. A boundary moves the pack's
-  corner radius, and a drawing's marks are circles and paths with no radius
-  concept, so a boundary on one changes its colour and nothing else. That is the
-  property that makes a drawing safe under a boundary.
+- A boundary on a drawing is per node, not per picture. Nesting a boundary around
+  the whole drawing is the one arrangement to avoid: it re-inks every mark in the
+  picture at once and leaves the caller no way to tell a node from its pack.
 
 ### Content guidelines
 
 - Node names are labels: one or two words, sentence case, no period.
+- A node's `subtitle` is one line and it is the role the thing plays: "the shared
+  language", "the engine", "built next". It is drawn under the name and it is
+  read aloud with it, so it is a sentence a reader hears rather than a caption.
 - Relation labels are the verb or preposition that says what the line is: "feeds",
   "confirms", "blocks on".
 - A relation label is placed beside its line rather than on it. A label drawn over

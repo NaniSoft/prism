@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest'
 import { BUILT, BUILT_CORPUS } from '../src/generated/built.js'
 import { renderChangelog, renderItemDoc, renderPage } from '../src/render.js'
 import { BUNDLED_PATH, CORPUS_PATH, readCorpusRaw, readStore, readText } from './helpers.js'
+import { STORE_SECTIONS } from '@nanisoft/prism-llms'
 
 const store = readStore()
 
@@ -25,9 +26,28 @@ describe('the bundled corpus', () => {
     // is the property a consumer of the tools actually depends on.
     expect(store.items.length).toBeGreaterThan(0)
     expect(new Set(store.items.map((item) => item.id)).size).toBe(store.items.length)
-    // Twenty prose pages and the four generated changelog routes, which is the
-    // shape the Changelogs Section adds to the Corpus.
-    expect(store.pages).toHaveLength(24)
+    // Prose pages plus the generated changelog routes.
+    //
+    // Asserted as a shape rather than as a total. The count moved from 24 to 28 when
+    // the Patterns Section joined the Corpus, and a hardcoded total is a snapshot
+    // that fails every time a Section is added while catching nothing about the
+    // Corpus being right. The invariant worth holding is that every page belongs to a
+    // Section the store declares, and that the ids are unique: a page filed under a
+    // Section nobody published is a page an agent cannot ask for by Section, and a
+    // duplicate id is two pages answering to one name.
+    expect(store.pages.length).toBeGreaterThan(0)
+    for (const page of store.pages) {
+      expect(STORE_SECTIONS, `${page.id} is filed under an undeclared Section`).toContain(
+        page.section,
+      )
+    }
+    expect(new Set(store.pages.map((page) => page.id)).size).toBe(store.pages.length)
+    // The Changelogs Section is the one that generates its routes rather than
+    // reading them from files, so it is the one whose presence has to be earned: one
+    // route per changelog, and no more.
+    expect(store.pages.filter((page) => page.section === 'changelogs')).toHaveLength(
+      store.changelogs.length,
+    )
     expect(store.changelogs.length).toBeGreaterThan(0)
   })
 

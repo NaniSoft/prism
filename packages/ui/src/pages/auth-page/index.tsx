@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '../../components/ui/card'
+import type { HeadingLevel } from '../../components/ui/section'
 
 export type AuthPageAside = {
   /** The supporting card's title. */
@@ -29,6 +30,18 @@ export type AuthPageProps = {
   aside?: AuthPageAside
   /** A node under the form, such as a legal line or a link to another screen. */
   footer?: ReactNode
+  /**
+   * Heading level for the two region titles, the form's and the aside's. See
+   * `HeadingLevel`.
+   *
+   * The page draws no heading of its own, so each region names itself and the two
+   * are siblings in the outline. They therefore take one level between them
+   * rather than each choosing one: two regions that announced themselves at
+   * different depths would read as one inside the other, and nothing in the layout
+   * says so. Defaults to `h2`, because a page composes under a document that has
+   * its own `h1`.
+   */
+  headingLevel?: HeadingLevel
 }
 
 /**
@@ -44,7 +57,11 @@ export type AuthPageProps = {
  * split from the large breakpoint up when one is. That keeps the docs preview
  * and a narrow screen on the same, readable path.
  */
-export function AuthPage({ form, aside, footer }: AuthPageProps) {
+export function AuthPage({ form, aside, footer, headingLevel = 'h2' }: AuthPageProps) {
+  // The form and the aside are sibling regions, so they announce themselves at the
+  // same depth: at different depths one would read as inside the other, and
+  // nothing in the layout says so.
+  const Title = headingLevel
   return (
     <div className="bg-background text-foreground flex min-h-svh w-full items-center justify-center px-6 py-16">
       <div
@@ -57,7 +74,9 @@ export function AuthPage({ form, aside, footer }: AuthPageProps) {
         {aside ? (
           <Card>
             <CardHeader>
-              <CardTitle>{aside.title}</CardTitle>
+              <CardTitle>
+                <Title>{aside.title}</Title>
+              </CardTitle>
               {aside.description ? (
                 <CardDescription>{aside.description}</CardDescription>
               ) : null}
@@ -67,7 +86,7 @@ export function AuthPage({ form, aside, footer }: AuthPageProps) {
         ) : null}
 
         <div className="mx-auto w-full max-w-measure-narrow">
-          <AuthForm01 {...form} />
+          <AuthForm01 {...form} headingLevel={headingLevel} />
           {footer ? (
             <div className="text-muted-foreground mt-4 text-center text-sm">{footer}</div>
           ) : null}

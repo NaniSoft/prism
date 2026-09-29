@@ -35,14 +35,38 @@ function fence(code: string, language = 'tsx'): string {
   return `\`\`\`${language}\n${code.replace(/\r\n/g, '\n').replace(/\n$/, '')}\n\`\`\``
 }
 
-function kindLabel(kind: string): string {
-  if (kind === 'component') return 'Component'
-  if (kind === 'block') return 'Block'
-  return 'Page'
+/**
+ * The name an agent is given for a Kind.
+ *
+ * A lookup rather than a chain of `if`s ending in a default, and the parameter is
+ * an `ItemKind` rather than a `string`. The previous version took a string and
+ * returned `'Page'` for anything it did not recognise, which is the worst possible
+ * shape for this function: a Kind added to the store and the catalogue would be
+ * announced to every agent reading the corpus as a Page, and nothing would fail.
+ * An agent that is told a live surface is a page will look for navigation, props
+ * and a documentation file, and will be wrong about all three.
+ *
+ * Narrowing the parameter is what makes the map total. A Kind added to `ItemKind`
+ * makes this function a compile error rather than a silent mislabel, and that is
+ * the entire reason the signature is `ItemKind` and not `string`.
+ */
+const KIND_LABELS: Record<ItemKind, string> = {
+  component: 'Component',
+  block: 'Block',
+  page: 'Page',
+}
+
+function kindLabel(kind: ItemKind): string {
+  return KIND_LABELS[kind]
 }
 
 function countKinds(items: readonly PrismDocsStoreEntry[]): Record<ItemKind, number> {
-  const counts: Record<ItemKind, number> = { component: 0, block: 0, page: 0 }
+  // Built from the label table rather than written out, for the same reason: a Kind
+  // added to `ItemKind` would not be a missing key here, it would be a compile
+  // error, which is the outcome worth having.
+  const counts = Object.fromEntries(
+    Object.keys(KIND_LABELS).map((kind) => [kind, 0]),
+  ) as Record<ItemKind, number>
   for (const item of items) counts[item.kind] += 1
   return counts
 }

@@ -84,10 +84,24 @@ export type SiteSection = {
  * The last Section is the one a reader does not search. `searched` is what says
  * so, and it is the only entry here that answers false.
  */
+/**
+ * The one segment a Pattern Section lives at, named here because the gate that reads
+ * the declarations has to find the Section by name and a literal in the gate would be
+ * a second place to keep in step with this one.
+ */
+export const PATTERN_SECTION = 'patterns'
+
 export const SECTIONS: readonly SiteSection[] = [
   { segment: 'overview', title: 'Overview', prose: true, searched: true },
   { segment: 'foundation', title: 'Foundation', prose: true, searched: true },
   { segment: 'content', title: 'Content', prose: true, searched: true },
+  // A Pattern is a document that declares the Items it composes, and the Section is
+  // prose because a Pattern is not a catalogue Item: it is knowledge about which
+  // Items to arrange, which belongs to whoever is building rather than to whoever
+  // shipped a component. `check-pattern-composition.mjs` reads the declarations and
+  // fails the build on an Item that does not exist, because nothing about a prose
+  // page is type-checked and a recipe that names a renamed Item reads perfectly.
+  { segment: 'patterns', title: 'Patterns', prose: true, searched: true },
   { segment: 'components', title: 'Components', prose: false, searched: true },
   { segment: 'blocks', title: 'Blocks', prose: false, searched: true },
   { segment: 'pages', title: 'Pages', prose: false, searched: true },

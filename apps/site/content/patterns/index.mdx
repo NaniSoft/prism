@@ -1,0 +1,75 @@
+---
+title: Patterns
+description: "Compositions worth copying: which Items to arrange, and why that arrangement."
+---
+
+A Pattern is a document that names the Items it composes. It is not a Block and it is
+not a Component: nothing here ships, and nothing here is imported. What is here is
+the knowledge of *which* Items to arrange and *why*, which outlives any one
+arrangement and belongs to whoever is building rather than to whoever shipped a
+component.
+
+Each Pattern declares its composition in its frontmatter, and the build checks those
+declarations against the catalogue. A Pattern naming an Item that does not exist
+fails the build, because nothing about a prose page is type-checked and a recipe
+that names a renamed Item reads perfectly.
+
+## What a Pattern is for
+
+A Block is a decision already made: a hero, a pricing table, an empty state. You
+import it and pass it content. It is right for the arrangement its author chose, and
+choosing a different arrangement means composing the Items yourself.
+
+A Pattern is for the case where the arrangement is the thing you needed to know. The
+Items already exist and are already published; what nobody wrote down is which six of
+them go together, in what order, and which one carries the state that is not the
+data. That is what a Pattern records, along with the decisions that are easy to get
+wrong and expensive to discover late.
+
+The line between the two is whether you are installing something or reading
+something. `Pricing01` is a Block. Why three plans and not four is a Pattern.
+
+## What a Pattern is not
+
+It is not a template. There is no scaffold to copy, no file to start from, and no
+code that will drift from this page. A Pattern that wanted to be a template would
+have to be maintained against the library, and a document that can be wrong in the
+same way code can be wrong is a worse thing than no document.
+
+It is also not a rule. Nothing here is enforced on a consumer. The one thing that
+*is* enforced is that the Items named here exist, and that is enforced because a
+broken reference in a document is invisible rather than loud.
+
+## Templates are the other half
+
+A **Template** declares the **Pages** it arranges, and it is the same kind of
+document making the other claim. Where a Pattern is about how to compose a surface,
+a Template is about which screens a product has and what order a reader meets them
+in. The declaration is the published `DocsNavEntry` union, which is the shape
+`DocsShell` already takes.
+
+## The Patterns and the Templates
+
+Each one opens with what the surface is for, then the decisions inside it, including
+the ones that look like preferences and are not. Read them as arguments. Where two
+of them would give different advice for the same surface, the disagreement is the
+interesting part and it is left in rather than smoothed over.
+
+The two kinds are told apart by which key they declare, and the gate checks them
+against different populations, because they are different claims:
+
+- a **Pattern** declares `composes`, naming the Items it arranges, of any kind
+- a **Template** declares `arranges`, naming the **Pages** it orders
+
+A Template's subject is a whole screen and a screen is a Page, so a Template naming a
+Component has confused itself for a Pattern. The finding says which of the two it
+did rather than only reporting a type mismatch, and a document declaring both is
+asked which one it is instead of being checked against two populations and getting
+neither answer.
+
+A Template is not a copy of a site either. It is the arrangement: which screens
+exist, what order they are reached in, and what a reader can get to from where. The
+arrangement itself is the published `DocsNavEntry` union rather than a new
+vocabulary, which is the shape `DocsShell` already takes and the shape a consumer
+site already adapts its own tree into. A site that grew its own navigation vocabulary
+would have a second thing to keep in step with the first.

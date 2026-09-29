@@ -11,6 +11,7 @@ import {
   renderThemeDoc,
 } from '../src/render.js'
 import { emptyStore, emptyTokens, makeItem, readStore, readText } from './helpers.js'
+import { STORE_SECTION_TITLES } from '@nanisoft/prism-llms'
 
 const store = readStore()
 
@@ -168,17 +169,26 @@ describe('get_theme_doc', () => {
 describe('list_pages and get_page', () => {
   it('lists the non-item page lanes, including the Changelogs', () => {
     const body = readText(renderListPages(store))
-    // The Section count moved from twenty to twenty-four, four of them the
-    // generated changelog routes, and every group is read from the Store's own
-    // Sections rather than from a list of the three prose Sections. The Sections
-    // are the seven the site publishes, in the order it publishes them, so the
-    // first group an agent reads is the Overview and the last is the Changelogs.
-    expect(body).toContain('# Prism pages - 24 pages')
+    // Every group is read from the Store's own Sections rather than from a list of
+    // the three prose Sections, so a Section added to the store appears here without
+    // this test being edited.
+    //
+    // The header's count is asserted against the store rather than written down. It
+    // was `24 pages` in a literal, and moved to 28 when the Patterns Section joined
+    // the Corpus: a hardcoded total fails on every Section added and catches nothing
+    // about the listing being right. What matters is that the number an agent reads
+    // is the number of pages there are, because a header that disagrees with its own
+    // list is the one thing an agent cannot check for itself.
+    expect(body).toContain(`# Prism pages - ${store.pages.length} pages`)
     expect(body).toContain('## Overview')
     expect(body).toContain('## Foundation')
     expect(body).toContain('**Quickstart**')
     expect(body).toContain('## Changelogs')
     expect(body).toContain('`/changelogs/prism-ui`')
+    // And every Section the store declares has a group, in the order it declares
+    // them, so the last one an agent reads is the last Section published.
+    const groups = [...body.matchAll(/^## (.+)$/gm)].map((match) => match[1] ?? '')
+    expect(groups).toEqual(Object.values(STORE_SECTION_TITLES))
   })
 
   it('reads a page by canonical URL and by its mirror', () => {

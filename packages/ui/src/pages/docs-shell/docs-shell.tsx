@@ -10,12 +10,27 @@ import { cn } from '../../lib/utils'
  * `href` is required. A page in the navigation that goes nowhere is an entry a
  * reader can focus and not follow, and the Page renders every page entry as a
  * native anchor so a reader can see where a destination is before taking it.
+ *
+ * **Required is not the same as enforced, and the difference is stated here
+ * rather than left to be discovered.** `href: string` admits `''`, because the
+ * empty string is a legal `string` and the only type that refuses it is a branded
+ * one, which would put an `as` in every consumer's adapter for three sites this
+ * Page is already published to. So the type admits the value and `readTree`
+ * refuses it, at the boundary, by throwing and naming the entry. The promise this
+ * block used to make was true only of the group arm; it is now true of what the
+ * Page renders, and it says which of the two is doing the work.
+ *
+ * `title` may be the empty string, and an entry with no words is not a page: it
+ * renders as a label on the same rule that makes a group with no index a label,
+ * and it is not a page the pager can reach either. A link with no accessible name
+ * is announced as "link" and nothing else, which is the one thing a link in a
+ * rail must never be.
  */
 export type DocsNavPage = {
   type: 'page'
-  /** The words the reader meets. */
+  /** The words the reader meets. An empty string makes this a label, not a link. */
   title: string
-  /** The address the page is read at. */
+  /** The address the page is read at. An empty string is refused, by name. */
   href: string
 }
 
@@ -43,6 +58,13 @@ export type DocsNavGroup = {
   /**
    * The group's own index page, where it has one. Omit it for a group that is
    * only a heading over its pages.
+   *
+   * An empty or blank string is the same answer as omitting it, and deliberately
+   * so: all three consumer adapters write `url: node.index?.url ?? ''` for a
+   * folder holding no `index.mdx`, so the empty string is how they have always
+   * spelled "this group is not a route", and reading it as the absence is what
+   * keeps those adapters correct without a change in any of them. A page has no
+   * such reading: there, an empty address is a fault, and `readTree` says so.
    */
   href?: string
   /** The pages under this group, in the order a reader should meet them. */
@@ -220,8 +242,19 @@ export type DocsShellProps = {
  * consumer sites all write `url: node.index?.url ?? ''` in their own adapter
  * today, which is the same fact spelled as an empty string, and two of the three
  * then carry a stylesheet rule that styles the resulting anchor-with-no-href
- * back into a label. Naming the case in the type makes those two rules dead
- * rather than load-bearing, and the type is the only place that had to change.
+ * back into a label. So the Page reads an empty or blank `href` as the absence on
+ * this arm, and the two stylesheet rules are dead rather than load-bearing. It
+ * takes one function rather than only a type, because an optional field the
+ * caller spells as `''` is not an optional field the type can see.
+ *
+ * **An entry with no words is a label too, and a page with no address is
+ * refused.** Both halves of "what makes this a destination" are answered in one
+ * function, `destinationOf`, and both the rail and the pager ask it. An entry
+ * that is a label on the rail is not a page the pager reaches either, so one
+ * malformed row cannot become two surfaces' worth of broken link. A page whose
+ * address is empty or blank has no such reading: there is nothing to render in
+ * place of the link, so the Page throws, naming the entry, before any of the tree
+ * renders.
  *
  * **The pager is derived from the navigation rather than passed.** The rail
  * already knows every page and the order a reader meets them in, and deriving the
@@ -271,6 +304,9 @@ export function DocsShell({
   className,
   children,
 }: DocsShellProps) {
+  readTree(nav, 'nav')
+  readTree(toc, 'toc')
+
   const rail = nav && nav.length > 0 ? nav : undefined
   const contents = toc && toc.length > 0 ? toc : undefined
   const neighbours = currentHref === undefined ? undefined : deriveNeighbours(nav ?? [], currentHref)
@@ -356,6 +392,72 @@ export function DocsShell({
 }
 
 /* ------------------------------------------------------------------ *
+ * The tree
+ * ------------------------------------------------------------------ */
+
+/**
+ * The address an entry has, or `undefined` when it has none.
+ *
+ * Blank counts as none, which is not pedantry. All three consumer adapters write
+ * `url: node.index?.url ?? ''` for a folder holding no index, so the empty string
+ * is how they spell "this group is not a route", and a guard that read only
+ * `=== undefined` let that same spelling through to the renderer on the arm where
+ * it means something else entirely.
+ */
+function addressOf(href: string | undefined): string | undefined {
+  return href !== undefined && href.trim() !== '' ? href : undefined
+}
+
+/**
+ * The address an entry is reachable at, or `undefined` when it is not a
+ * destination at all.
+ *
+ * An entry is a destination only when it has an address AND words, and both
+ * halves live here so that one rule answers for both surfaces that read a tree.
+ * The rail asks it to decide between an anchor and a label; the pager asks it to
+ * decide between a neighbour and nothing. Two places deciding that separately is
+ * how one malformed row becomes a nameless anchor in the rail and a nameless
+ * `Next` link under it.
+ */
+function destinationOf(entry: DocsNavPage | DocsNavGroup): string | undefined {
+  return entry.title === '' ? undefined : addressOf(entry.href)
+}
+
+/**
+ * Reads a tree before any of it renders, and refuses the one shape it cannot
+ * render honestly.
+ *
+ * A page entry whose address is empty or blank is an entry whose whole content is
+ * a route the consumer does not have. There is no honest rendering of it: a label
+ * in its place would hide a page the tree is missing rather than report it, and an
+ * anchor would be a control a reader can focus and cannot operate. So the Page
+ * throws, naming the entry, which is the opposite of copy and reaches a developer
+ * rather than a reader.
+ *
+ * Two things are deliberate here. The pass is in the component and not in a
+ * renderer, so it runs once for both trees and cannot be reached only on the path
+ * that happens to draw the bad row. And a GROUP is not refused: no address is a
+ * documented state for a group and the empty string is how all three consumers
+ * already spell it, so it renders as a label. Only the arm where an address is
+ * the entire entry is a fault.
+ */
+function readTree(entries: readonly DocsNavEntry[] | undefined, source: 'nav' | 'toc'): void {
+  for (const entry of entries ?? []) {
+    if (entry.type === 'divider') continue
+    if (entry.type === 'group') {
+      readTree(entry.items, source)
+      continue
+    }
+    if (addressOf(entry.href) === undefined) {
+      throw new Error(
+        `docs-shell: a page entry in the ${source} has no address, and an anchor with no address is a ` +
+          'control a reader can focus and cannot follow. Give the entry the address its page is read at, or ' +
+          `remove it from the tree. Its title is ${JSON.stringify(entry.title)}.`,
+      )
+    }  }
+}
+
+/* ------------------------------------------------------------------ *
  * The rail
  * ------------------------------------------------------------------ */
 
@@ -429,19 +531,23 @@ function NavNode({
     )
   }
 
+  const href = destinationOf(entry)
+
   if (entry.type === 'group') {
     return (
       <li data-slot="docs-nav-group">
         <div className="flex flex-col gap-1">
           {/*
-            The one rule this whole arrangement turns on. A group with an index
-            is a destination and renders an anchor; a group without one is a
-            label and renders a span, so it carries no `href`, is not focusable,
-            and cannot be reached by Tab. There is no third arm and no anchor
-            with an empty `href`, because both publish an address that resolves
-            to nothing.
+            The one rule this whole arrangement turns on, and it has two halves
+            rather than one. An entry is a destination when it has an address AND
+            words to call it by; anything else is a label, which carries no `href`,
+            is not focusable, and cannot be reached by Tab. There is no third arm
+            and no anchor with an empty `href`, because both publish an address
+            that resolves to nothing. `destinationOf` is the whole of that rule and
+            the pager asks it the same question, so a row that is a label here is
+            not a neighbour there.
           */}
-          {entry.href === undefined ? (
+          {href === undefined ? (
             <span
               data-slot="docs-nav-label"
               className={cn(
@@ -454,11 +560,11 @@ function NavNode({
           ) : (
             <a
               data-slot="docs-nav-heading"
-              href={entry.href}
-              aria-current={currentHref === entry.href ? 'page' : undefined}
+              href={href}
+              aria-current={currentHref === href ? 'page' : undefined}
               className={cn(
                 'hover:text-foreground rounded-sm text-sm font-semibold tracking-tight transition-colors duration-fast ease-out',
-                under(entry.href, currentHref) ? 'text-foreground' : 'text-muted-foreground',
+                under(href, currentHref) ? 'text-foreground' : 'text-muted-foreground',
               )}
             >
               {entry.title}
@@ -473,21 +579,34 @@ function NavNode({
     )
   }
 
+  // The page arm. `href` is never empty here: `readTree` refused that above and
+  // named the entry, so what is left to decide is the words. A nameless page is
+  // the same rule as a group with no index, rendered as a label, because a link
+  // with no accessible name is announced as "link" and nothing else.
   return (
     <li data-slot="docs-nav-page">
-      <a
-        data-slot="docs-nav-link"
-        href={entry.href}
-        aria-current={currentHref === entry.href ? 'page' : undefined}
-        className={cn(
-          '-ms-px block border-l-2 py-1 ps-3 text-sm transition-colors duration-fast ease-out',
-          currentHref === entry.href
-            ? 'text-foreground border-primary font-medium'
-            : 'text-muted-foreground hover:text-foreground border-transparent',
-        )}
-      >
-        {entry.title}
-      </a>
+      {href === undefined ? (
+        <span
+          data-slot="docs-nav-label"
+          className="-ms-px block border-l-2 border-transparent py-1 ps-3 text-sm text-muted-foreground"
+        >
+          {entry.title}
+        </span>
+      ) : (
+        <a
+          data-slot="docs-nav-link"
+          href={href}
+          aria-current={currentHref === href ? 'page' : undefined}
+          className={cn(
+            '-ms-px block border-l-2 py-1 ps-3 text-sm transition-colors duration-fast ease-out',
+            currentHref === href
+              ? 'text-foreground border-primary font-medium'
+              : 'text-muted-foreground hover:text-foreground border-transparent',
+          )}
+        >
+          {entry.title}
+        </a>
+      )}
     </li>
   )
 }
@@ -507,17 +626,20 @@ type Neighbour = { title: string; href: string }
  * contributes its children and nothing else, which is the second thing that
  * makes an absent `href` a label rather than a route: there is no page there for
  * the pager to reach either. A divider contributes nothing at all.
+ *
+ * The row a reader can click and the row the pager can reach are decided by the
+ * SAME function, `destinationOf`. A nameless entry is a label on the rail and is
+ * dropped here, so one malformed row cannot be published twice: a nameless anchor
+ * in the rail, and a `Next` link under it carrying the text of whichever entry
+ * happened to follow, is what deriving without asking produced. The two surfaces
+ * do not each get their own opinion about a row that is not a page.
  */
 function flatten(entries: readonly DocsNavEntry[], into: Neighbour[] = []): Neighbour[] {
   for (const entry of entries) {
-    if (entry.type === 'page') {
-      into.push({ title: entry.title, href: entry.href })
-      continue
-    }
-    if (entry.type === 'group') {
-      if (entry.href !== undefined) into.push({ title: entry.title, href: entry.href })
-      flatten(entry.items, into)
-    }
+    if (entry.type === 'divider') continue
+    const href = destinationOf(entry)
+    if (href !== undefined) into.push({ title: entry.title, href })
+    if (entry.type === 'group') flatten(entry.items, into)
   }
   return into
 }
@@ -611,9 +733,15 @@ function under(href: string | undefined, currentHref: string | undefined): boole
  * A group with a route answers for that route and everything under it. A group
  * without one has no route to answer with, so it asks its children, which is the
  * only way a label can still show a reader that they are inside it.
+ *
+ * The group's own address is read through `addressOf`, like every other read of
+ * it. A group whose `href` is the empty string is a label, and a blank string
+ * handed to `under` as though it were a route matches every absolute address on
+ * the site, which is every label-only section claiming to be the current one at
+ * once.
  */
 function containsHref(group: DocsNavGroup, currentHref: string | undefined): boolean {
-  if (under(group.href, currentHref)) return true
+  if (under(addressOf(group.href), currentHref)) return true
   return group.items.some((entry) => {
     if (entry.type === 'page') return under(entry.href, currentHref)
     if (entry.type === 'group') return containsHref(entry, currentHref)

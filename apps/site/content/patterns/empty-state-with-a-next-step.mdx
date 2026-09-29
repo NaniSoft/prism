@@ -1,0 +1,65 @@
+---
+title: An empty state with a next step
+description: "The screen a reader sees when there is nothing yet, which is the first screen of most products."
+composes:
+  - EmptyState01
+  - Button
+  - Card
+  - Prose
+  - Kbd
+---
+
+An empty state is the first screen of most products, and the one most often designed
+last. It is also the only screen every reader is guaranteed to see, because nobody
+installs a product with data already in it.
+
+**An empty state is not an error and must not read like one.** Red ink, a warning
+icon and a sentence beginning "Error" tell a reader they have done something wrong
+when they have simply not started. The tone is the same as a page that has content:
+this is the normal state of a new account, and it should read as ordinary.
+
+## Name what is absent, then offer the way onward
+
+`EmptyState01` takes the name of the thing that is missing and an action. Both are
+props, because a Block ships no words: a state that says "No data" is telling every
+consumer's reader the same thing, which is the thing this system exists to end.
+
+The action is the half that is usually missing. An empty state with no action is a
+notice, and a reader who has just been told their account is empty is left to work
+out what to do about it, which they cannot do if they do not yet know the product's
+vocabulary.
+
+One action, and it is the one that resolves the absence. Two actions on an empty
+state means the reader has to choose before they have any context to choose with.
+
+## Say which filter emptied it, and offer to clear it
+
+An empty result set from a query and an empty table are different sentences, and
+conflating them is the most common empty-state bug.
+
+- **Filtered**: names the filter and offers to remove it. "No invoices for March."
+  with a `Button` that clears the month. The reader arrived with an intention and
+  the product is what lost it.
+- **Unfiltered**: states the fact about the product. "No invoices yet." The reader
+  arrived to look and there is genuinely nothing.
+
+The second with a "Clear filters" action is a page that blames the reader for the
+product's state, and the first with no action is a dead end.
+
+## Do not fill the space to make it look designed
+
+A grid of empty card outlines, a placeholder illustration, or a chart with no data is
+a page pretending to have content. It is worse than the honest empty state, because
+the reader spends a moment working out whether the thing they are looking at is real.
+
+If the space genuinely needs to not be empty, put something **useful** there rather
+than something shaped like the thing that is missing. A `Card` holding one real
+example, or a `Prose` paragraph explaining what will appear, earns its place; a grey
+rectangle does not.
+
+## One empty state per surface, and only on the surface that is empty
+
+A table that is empty and a page that is empty are different states, and showing both
+at once means the reader sees two explanations of one fact. Put the state on the
+narrowest surface that is actually empty: an empty table inside a populated page is a
+table state, not a page state.

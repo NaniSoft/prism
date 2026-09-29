@@ -1,7 +1,8 @@
 import { Diagram } from '@nanisoft/prism-ui/components/diagram'
 
 /**
- * A three-node loop with one emphasised node and one indirect relation.
+ * A four-node loop with one emphasised node, one indirect relation, a second
+ * line under three of the nodes and a pack on one of them.
  *
  * Self-contained: the only import is from the package, and it has a default
  * export. No hook, no mode, no provider, which is the point of the component.
@@ -13,9 +14,17 @@ export default function DiagramDemo() {
     <Diagram
       label="How a finding is produced, checked and published"
       nodes={[
-        { id: 'capture', name: 'Capture', x: 0.12, y: 0.3 },
-        { id: 'read', name: 'Read', x: 0.5, y: 0.62, emphasis: true },
-        { id: 'review', name: 'Review', x: 0.88, y: 0.3 },
+        { id: 'capture', name: 'Capture', subtitle: 'the first draft', x: 0.12, y: 0.3 },
+        {
+          id: 'read',
+          name: 'Read',
+          subtitle: 'a person decides',
+          x: 0.5,
+          y: 0.62,
+          emphasis: true,
+          pack: 'mint',
+        },
+        { id: 'review', name: 'Review', subtitle: 'the automated pass', x: 0.88, y: 0.3 },
         { id: 'publish', name: 'Publish', x: 0.5, y: 0.12 },
       ]}
       relations={[

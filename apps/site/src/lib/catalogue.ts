@@ -1,5 +1,6 @@
 import {
   buildCatalog,
+  CATALOG_KINDS,
   COMPONENT_CATEGORIES,
   type CatalogItem,
   type CatalogKind,
@@ -53,8 +54,18 @@ import { sectionFor } from './sections'
  * instruction that names one keep resolving.
  */
 
-/** The three Kinds, in the order the Sections are built and rendered. */
-export const KINDS = ['component', 'block', 'page'] as const
+/**
+ * The Kinds, in the order the Sections are built and rendered.
+ *
+ * Read from `CATALOG_KINDS` rather than written out, and this is the whole fix.
+ * The list was a second literal about the same three kinds, so a Kind added to the
+ * catalogue and to the store compiles cleanly, builds every site, and then simply
+ * does not appear here: the site omits it with no error anywhere. A list that has
+ * to be edited in step with another one is a list that will eventually be wrong,
+ * and importing the one that already exists is cheaper than any gate that would
+ * have caught it later.
+ */
+export const KINDS: readonly CatalogKind[] = CATALOG_KINDS
 
 /** The catalogue metadata a routed page carries. */
 export type CataloguePageData = PageData & {

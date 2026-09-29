@@ -1,5 +1,5 @@
 import { render, screen, within } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { DocsShell, type DocsNavEntry } from '../src/pages/docs-shell'
 
@@ -680,6 +680,274 @@ describe('the pager is derived from the navigation', () => {
   })
 })
 
+/**
+ * The tree the reported defect was reproduced with, transcribed from the probe: a
+ * page whose address is the empty string and a page whose words are the empty
+ * string, with an address either side of each so the pager has neighbours to hand
+ * to whatever comes next.
+ */
+const MALFORMED: DocsNavEntry[] = [
+  page('First', '/docs/first'),
+  page('Empty href', ''),
+  page('', '/docs/nameless'),
+  page('Last', '/docs/last'),
+]
+
+/**
+ * The same tree with the unaddressable row removed, which is what a consumer sees
+ * once they have taken the Page's advice about it. The nameless row is still in
+ * it, because that row renders.
+ */
+const NAMELESS: DocsNavEntry[] = [
+  page('First', '/docs/first'),
+  page('', '/docs/nameless'),
+  page('Last', '/docs/last'),
+]
+
+/**
+ * React logs a render-phase error before rethrowing it, and the log is not the
+ * assertion. It is silenced for the refusal tests so the run's output says what
+ * passed rather than what React said on the way past.
+ */
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
+function mount(tree: DocsNavEntry[], currentHref: string) {
+  return () =>
+    render(
+      <DocsShell {...LABELS} nav={tree} toc={TOC} currentHref={currentHref}>
+        {BODY}
+      </DocsShell>,
+    )
+}
+
+function mounting(tree: DocsNavEntry[], currentHref: string) {
+  vi.spyOn(console, 'error').mockImplementation(() => {})
+  return mount(tree, currentHref)
+}
+
+describe('a page entry with no address', () => {
+  it('is refused at the boundary, naming the entry and the tree', () => {
+    // `href: string` admits `''`, and the only type that refuses it is a branded
+    // one, which would put an `as` in every consumer's adapter for three sites
+    // this Page is published to. So the type admits it and the Page refuses it.
+    // The refusal names the entry because a message that says "an href is
+    // required" sends a developer looking at the prop rather than at the row.
+    const render1 = mounting(MALFORMED, '/docs/first')
+
+    let thrown: unknown
+    try {
+      render1()
+    } catch (failure) {
+      thrown = failure
+    }
+    expect(String(thrown)).toMatch(/docs-shell/)
+    expect(String(thrown)).toMatch(/nav/)
+    expect(String(thrown)).toContain('Empty href')
+  })
+
+  it('is refused when it is blank rather than empty, because a space is not a route', () => {
+    const render1 = mounting(
+      [page('First', '/docs/first'), page('Blank href', '   '), page('Last', '/docs/last')],
+      '/docs/first',
+    )
+
+    expect(render1).toThrow(/Blank href/)
+  })
+
+  it('is refused two levels down, because depth is not a defence', () => {
+    // The pass walks the whole tree before anything renders, so the entry inside
+    // a group is named rather than skipped.
+    const render1 = mounting(
+      [
+        page('First', '/docs/first'),
+        {
+          type: 'group',
+          title: 'Concepts',
+          href: '/docs/concepts',
+          items: [page('Deep', '/docs/concepts/deep'), page('Also empty', '')],
+        },
+      ],
+      '/docs/first',
+    )
+
+    expect(render1).toThrow(/Also empty/)
+  })
+
+  it('is refused in the contents rail too, because it is a tree of the same shape', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const render1 = () =>
+      render(
+        <DocsShell
+          {...LABELS}
+          nav={NEXUS}
+          toc={[page('Overview', '#overview'), page('Broken', '')]}
+          currentHref="/docs/introduction"
+        >
+          {BODY}
+        </DocsShell>,
+      )
+
+    expect(render1).toThrow(/toc/)
+  })
+
+  it('renders nothing at all rather than half a page', () => {
+    const render1 = mounting(MALFORMED, '/docs/first')
+
+    expect(render1).toThrow(/Empty href/)
+    // The refusal happens before any of the tree renders, so the frame is not
+    // half drawn with the bad row in it. A page that rendered everything else
+    // would be a page still publishing the defect it just reported.
+    expect(document.querySelector('[data-slot="docs-shell"]')).toBeNull()
+  })
+})
+
+describe('an entry with no words', () => {
+  it('renders as a label, the way a group with no index is a label', () => {
+    const { container } = mount(NAMELESS, '/docs/nameless')()
+
+    // A link with no accessible name is announced as "link" and nothing else, so
+    // the Page publishes no link for an entry with no words. It is the same rule
+    // as a group with no index and it uses the same element, so the two cases are
+    // one rule rather than two that happen to agree.
+    const rail = screen.getByRole('navigation', { name: LABELS.navLabel })
+    const labels = [...rail.querySelectorAll('[data-slot="docs-nav-label"]')]
+    expect(labels).toHaveLength(1)
+    expect(labels[0]?.tagName).toBe('SPAN')
+    expect(labels[0]?.closest('a')).toBeNull()
+
+    expect(within(rail).getAllByRole('link').map((link) => link.textContent)).toEqual([
+      'First',
+      'Last',
+    ])
+  })
+
+  it('leaves the frame with no anchor of no name and no address', () => {
+    // The probe's two assertions, restated as the outcome rather than the bug:
+    // anchors rendered with an empty `href`, and links with no accessible name.
+    const { container } = mount(NAMELESS, '/docs/nameless')()
+
+    expect([...container.querySelectorAll('a')].filter((a) => !a.getAttribute('href'))).toEqual([])
+    expect([...container.querySelectorAll('a')].filter((a) => a.textContent === '')).toEqual([])
+  })
+
+  it('keeps the entry out of the pager, so one bad row cannot become two', () => {
+    // The reported second failure: the empty `href` propagated into the derived
+    // pager, so a `Next` link was published carrying the text of whichever entry
+    // happened to follow it. Derivation asks the same question the rail asks, so
+    // the pager steps over the row rather than publishing it a second time.
+    const { container } = mount(NAMELESS, '/docs/first')()
+
+    const pager = screen.getByRole('navigation', { name: LABELS.pagerLabel })
+    expect(within(pager).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
+      '/docs/last',
+    ])
+    for (const anchor of container.querySelectorAll('[data-slot="docs-pager"] a')) {
+      expect(anchor.getAttribute('href')).toBeTruthy()
+      expect(anchor.textContent).not.toBe('')
+    }
+  })
+
+  it('renders a nameless group with a real index as a label, and drops its index from the pager', () => {
+    const tree: DocsNavEntry[] = [
+      page('First', '/docs/first'),
+      {
+        type: 'group',
+        title: '',
+        href: '/docs/concepts',
+        items: [page('Deep', '/docs/concepts/deep')],
+      },
+      page('Last', '/docs/last'),
+    ]
+    const { container } = mount(tree, '/docs/first')()
+
+    // The index page exists, but a destination with no words is announced as
+    // "link" and nothing else. It is not a neighbour either: a pager link built
+    // from it would be the same nameless link a second time. So the pager steps
+    // from First over the group to the page inside it.
+    expect(container.querySelectorAll('[data-slot="docs-nav-heading"]')).toHaveLength(0)
+    const pager = screen.getByRole('navigation', { name: LABELS.pagerLabel })
+    expect(within(pager).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
+      '/docs/concepts/deep',
+    ])
+  })
+})
+
+describe('an empty address on a group', () => {
+  it('is the same answer as omitting it, which is how the sites already spell it', () => {
+    // All three consumer adapters write `url: node.index?.url ?? ''`, so an empty
+    // string on a group is a documented state rather than a fault, and reading it
+    // as the absence is what makes their two dead stylesheet rules dead rather
+    // than load-bearing. Only the page arm has nothing to render in place of the
+    // link, so only the page arm is refused.
+    const tree: DocsNavEntry[] = [
+      page('First', '/docs/first'),
+      {
+        type: 'group',
+        title: 'Architecture',
+        href: '',
+        items: [page('Query', '/docs/architecture/query')],
+      },
+      page('Last', '/docs/last'),
+    ]
+    const { container } = mount(tree, '/docs/first')()
+
+    const rail = screen.getByRole('navigation', { name: LABELS.navLabel })
+    expect(
+      [...rail.querySelectorAll('[data-slot="docs-nav-label"]')].map((label) => label.textContent),
+    ).toEqual(['Architecture'])
+    expect(rail.querySelectorAll('[data-slot="docs-nav-heading"]')).toHaveLength(0)
+    for (const anchor of container.querySelectorAll('a')) {
+      expect(anchor.getAttribute('href'), anchor.textContent ?? '').toBeTruthy()
+    }
+  })
+
+  it('does not make the section claim to hold the current page on its own account', () => {
+    // A blank address handed to the prefix test matches every absolute address on
+    // the site, so every label-only section would claim to be the current one.
+    const tree: DocsNavEntry[] = [
+      page('Introduction', '/docs/introduction'),
+      {
+        type: 'group',
+        title: 'Architecture',
+        href: '',
+        items: [page('Platform flow', '/docs/architecture/platform-flow')],
+      },
+    ]
+    const { container } = mount(tree, '/docs/architecture/platform-flow')()
+
+    // The reader is still inside it, and it still says so, through its children.
+    const active = [...container.querySelectorAll('[data-slot="docs-nav-label"]')].filter((element) =>
+      element.className.includes('text-foreground'),
+    )
+    expect(active).toHaveLength(1)
+    expect(active[0]?.textContent).toBe('Architecture')
+  })
+
+  it('is not one of the two neighbours either', () => {
+    const tree: DocsNavEntry[] = [
+      page('First', '/docs/first'),
+      {
+        type: 'group',
+        title: 'Architecture',
+        href: '',
+        items: [page('Query', '/docs/architecture/query')],
+      },
+      page('Last', '/docs/last'),
+    ]
+    mount(tree, '/docs/architecture/query')()
+
+    // A label is not a page, which was already true for an absent `href` and is
+    // now true for the empty string the three adapters actually write. The pager
+    // steps over the section to reach it, in both directions at once.
+    const pager = screen.getByRole('navigation', { name: LABELS.pagerLabel })
+    expect(within(pager).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
+      '/docs/first',
+      '/docs/last',
+    ])
+  })
+})
 describe('one Page, three sites', () => {
   it('renders all three trees through the one export with no per-site arm', () => {
     for (const [name, nav] of SITES) {

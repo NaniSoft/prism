@@ -29,6 +29,24 @@ export type ProductGrid01Product = {
   /** One line about what the product is. */
   tagline: string
   /**
+   * A second line, about **this product** rather than about the set.
+   *
+   * `tagline` and this are different claims and only one of them belongs on the
+   * row. A tagline is the shortest true thing about a member, and it reads the
+   * same in every row of a set. This is a sentence that is true of *this* product
+   * and would be false or vacuous beside its neighbours, which is the test for
+   * whether it belongs here. The company site's five products each carried one
+   * ("Autonomous software creation, supervised by you."), and folding them into the
+   * tagline would have been a copy edit rather than a fix, so they were dropped and
+   * reported instead.
+   *
+   * Rendered only when passed, so a row without one draws exactly what it drew
+   * before the field existed. See `ProductGrid01`'s JSDoc for which of the two
+   * levels a sentence belongs at, because the answer is a fact about the sentence
+   * and not a preference.
+   */
+  detail?: string
+  /**
    * Where the row goes. Rendered as a native anchor's `href`, so the row is a
    * link with the browser's own affordances rather than a click handler.
    */
@@ -104,9 +122,23 @@ export type ProductGrid01Props = {
  * it, and middle-click opens it in a new tab. The mark is `aria-hidden` inside
  * it, so the link is announced once, by name, rather than as a shape and a word.
  *
- * A row carries one line of tagline. A second line is a second paragraph and
- * belongs above the grid in `description`, where it applies to the set rather
- * than to one member of it.
+ * **Which level a sentence belongs at is a fact about the sentence, and this
+ * settles it.** There are two levels and both are right, for different claims:
+ *
+ * - `description` is about **the set**. "Five products, one platform." or "Every
+ *   one of these runs on the same runtime." A sentence that would be equally true
+ *   if you deleted any one row belongs here, and nowhere else.
+ * - `Product.detail` is about **this member**. "Quantitative trading research for
+ *   the Indian market, the factory's newest build." A sentence that is false, or
+ *   vacuous, beside its neighbours belongs on the row.
+ *
+ * The test is whether the sentence survives its neighbours. A tagline reads the
+ * same in every row, so it is a tagline; the company site's five products each
+ * carried a sentence true of one and not of the four beside it, and the earlier
+ * version of this note told a caller to fold those into `description`, where they
+ * would have claimed to be about all five at once. That advice lost three
+ * published sentences in a migration rather than stating the choice, so both levels
+ * exist and the question above is the one to ask.
  *
  * It is a server Component: no hook, no state, no client code and no mode. The
  * mark resolves its colour through the cascade, so a page that renders this in a
@@ -147,7 +179,16 @@ export function ProductGrid01({
               <span className="flex shrink-0 items-center sm:w-64">
                 <ProductMark id={product.id} name={product.name} pack={product.pack} size="md" />
               </span>
-              <span className="text-muted-foreground text-pretty text-sm">{product.tagline}</span>
+              <span className="flex min-w-0 flex-col gap-0.5">
+                <span className="text-muted-foreground text-pretty text-sm">{product.tagline}</span>
+                {/* A second line, per row, drawn only when there is one. A row that
+                    reserved the space for absent content would push every row below
+                    it down by one line, and this is a stack of full-width rules
+                    where a ragged left edge is the most visible thing on the page. */}
+                {product.detail ? (
+                  <span className="text-pretty text-sm">{product.detail}</span>
+                ) : null}
+              </span>
             </a>
           </li>
         ))}

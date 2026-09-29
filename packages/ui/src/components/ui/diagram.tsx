@@ -1,3 +1,5 @@
+import type { PackId } from '../../theming'
+
 import { cn } from '../../lib/utils'
 
 /**
@@ -9,11 +11,12 @@ import { cn } from '../../lib/utils'
  * another, so a caller that means a column spreads it rather than repeating a
  * number.
  *
- * `emphasis` marks the one node the drawing is about, and it is the only
- * difference a node may carry: the emphasised node takes the brand ink, which
- * DESIGN.md's Brand Ink Rule names as the colour for something that must read
- * as the brand rather than as body text. Two emphasised nodes are a caller's
- * mistake, not a second emphasis level.
+ * A node carries two differences and no more. `emphasis` marks the one node the
+ * drawing is about, and it is the emphasised node that takes the brand ink,
+ * which is what DESIGN.md's Brand Ink Rule names as the colour for something
+ * that must read as the brand rather than as body text; two emphasised nodes are
+ * a caller's mistake, not a second emphasis level. `pack` is the node's own hue,
+ * and it is per node for the reasons given on that field.
  */
 export type DiagramNode = {
   /**
@@ -27,12 +30,48 @@ export type DiagramNode = {
    * reader does not read it: see `DiagramProps` for what carries the meaning.
    */
   name: string
+  /**
+   * The second line printed under the name, which is the one-line role the thing
+   * plays: "the shared language", "the engine", "built next".
+   *
+   * It is a field rather than a word written into `label`, because the two
+   * audiences are different and a role description that exists only inside the
+   * accessible name has been given to one of them and withheld from the other.
+   * It is drawn on the picture, it is read aloud as part of the name when the
+   * caller passes no `label`, and because both come out of the same field they
+   * are the same words and cannot drift.
+   */
+  subtitle?: string
   /** The node's position along the horizontal axis, in the caller's space. */
   x: number
   /** The node's position along the vertical axis, in the caller's space. */
   y: number
   /** Marks the node the diagram is about. See the Brand Ink Rule. */
   emphasis?: boolean
+  /**
+   * The node's pack, which is the hue its mark wears.
+   *
+   * `PackId` rather than `string`, because a pack is one of the six published
+   * packs: a free-text field would accept a name matching no emitted rule, and a
+   * mark under a boundary nothing matches keeps the colour of whatever pack is
+   * above it, which is a silent wrong answer rather than a rejected one.
+   *
+   * **It is per node, and that is settled rather than incidental.** A pack on
+   * the Diagram would be one boundary on the section, and the boundary is the
+   * unit of a second pack on a MARK: `ProductMark` is the item that established
+   * it, and a mark here is a node. Per node is also what a schematic wants. One
+   * drawing of a product set shows one mark per product and each wears its own
+   * hue, which a single boundary could not express at all.
+   *
+   * The boundary lands on the `<circle>` this node draws, and not on the `<svg>`
+   * and not on the node's `<g>`, so it moves that one mark's fill and stroke and
+   * nothing else. A circle has no radius concept, so the pack re-inks the mark
+   * and cannot re-round it, which is the half of the pack boundary law a
+   * consumer implementing only the colour half gets wrong. `default` is the
+   * absence of the attribute, exactly as `themeAttributes` spells it, so a node
+   * on the base pack carries no `data-pack` and resolves from the page.
+   */
+  pack?: PackId
 }
 
 /**
@@ -59,7 +98,7 @@ export type DiagramRelation = {
   indirect?: boolean
 }
 
-/** What both arms of `DiagramProps` carry. */
+/** What every arm of `DiagramProps` carries. */
 type DiagramFigure = {
   /** The things drawn. At least one, or the Diagram renders an empty canvas. */
   nodes: readonly DiagramNode[]
@@ -76,11 +115,18 @@ type DiagramFigure = {
 /**
  * The props a Diagram takes.
  *
- * The name is required unless the drawing is decorative, and it is forbidden
- * when it is. That is a union rather than `label?: string` because only a union
- * lets the type system see the exception: an optional label on one type can
- * only be optional everywhere or required everywhere, and both halves of that
- * are wrong. `Separator` takes the same shape as `decorative`.
+ * The name is required unless the drawing is decorative or the nodes can be read
+ * as the name, and it is forbidden when the drawing is decorative. That is a
+ * union rather than `label?: string` because only a union lets the type system
+ * see the exception: an optional label on one type can only be optional
+ * everywhere or required everywhere, and both halves of that are wrong.
+ * `Separator` takes the same shape as `decorative`.
+ *
+ * The third arm is the one that makes the name derivable. It spells the absence
+ * as `label?: never` rather than `label?: string`, so "the caller named it" and
+ * "the caller passed nothing" cannot be confused for one another and a caller
+ * cannot hand the drawing an empty name by passing one: an unnamed image is the
+ * one outcome this prop must not have.
  */
 export type DiagramProps = DiagramFigure &
   (
@@ -99,7 +145,46 @@ export type DiagramProps = DiagramFigure &
         label: string
         decorative?: false
       }
+    | {
+        /**
+         * No name is passed, so the drawing is named by what its own marks say:
+         * every node's `name`, and its `subtitle` where it has one, in the order
+         * the caller drew them. A caller who gives a node a role description is
+         * describing the picture, and a picture's own words are the honest source
+         * for the name announced over it.
+         */
+        label?: never
+        decorative?: false
+      }
   )
+
+/**
+ * The drawing's accessible name, derived from the text its own marks carry.
+ *
+ * Derived rather than passed because the two audiences are different and a
+ * Component able to reach only one of them reaches neither. Everything inside a
+ * `role="img"` is presentational, so the words drawn on the marks are words no
+ * screen reader reads, and the label is the one thing it does read. A caller who
+ * put a node's role description into the label and not onto the node had
+ * published half of it: the half a sighted reader loses. Reading the name off the
+ * marks is what makes that drift impossible rather than merely discouraged, and
+ * it is why the drawn line and the announced line are the same field.
+ *
+ * Relation words are not part of it, and that is the honest limit of a
+ * derivation rather than an oversight. A derived name says what the drawing
+ * holds; a caller whose relations matter to a screen reader user passes a
+ * `label` that says so. Inventing a sentence out of the relations would be this
+ * Component writing the words, which is the one thing it does not do.
+ */
+function derivedName(nodes: readonly DiagramNode[]): string {
+  return nodes.reduce((name, node) => {
+    // Parentheses between a thing and its role, commas between things, so a
+    // reader hearing the list can tell which words belong to which mark. Both
+    // are punctuation assembled here rather than a word this Component wrote.
+    const words = node.subtitle ? `${node.name} (${node.subtitle})` : node.name
+    return name === '' ? words : `${name}, ${words}`
+  }, '')
+}
 
 /**
  * The canvas the Diagram draws into, in its own user units.
@@ -123,6 +208,12 @@ const CANVAS_HEIGHT = 400
  * and a name is wider than the mark. The band is the honest cost of a server
  * component not being able to measure text, and it is why a name that runs long
  * still lands inside the canvas rather than off its edge.
+ *
+ * A node's subtitle, where it has one, is the deepest ink a node draws, at
+ * `NODE_SUBTITLE_OFFSET` below the mark, and that is inside the band too. The
+ * cost of not being able to measure text is paid once rather than per line, and
+ * paying it for the second line is what keeps the two-line node inside the
+ * canvas rather than under its own floor.
  */
 const PADDING = 56
 
@@ -139,7 +230,18 @@ const NODE_RADIUS = 5
  */
 const NODE_NAME_SIZE = 13
 const NODE_NAME_OFFSET = 20
+const NODE_SUBTITLE_SIZE = 11
 const RELATION_NAME_SIZE = 11
+
+/**
+ * The subtitle's baseline, measured down from the mark's centre.
+ *
+ * The name's baseline, then the subtitle's own size, then a line of leading. It is
+ * the deepest any node draws and it is why `PADDING` has to be what it is; a
+ * second line that were placed on the name rather than below it would collide
+ * with it on every node that had one.
+ */
+const NODE_SUBTITLE_OFFSET = NODE_NAME_OFFSET + NODE_SUBTITLE_SIZE + 5
 
 /**
  * How far a relation's label sits off its line, in user units. Perpendicular to
@@ -199,12 +301,26 @@ function fit(nodes: readonly DiagramNode[]): (node: DiagramNode) => Placed {
  * roster, and a `'use client'` line added here would put it back on that roster.
  *
  * **Accessibility.** A diagram carries meaning, so by default it is one image
- * with a name: `role="img"` and the `label` the caller passes. Everything inside
- * a `role="img"` is presentational, so the node names and relation words are
- * drawn for sighted readers and the surrounding sentence is what a screen reader
- * gets. Pass `decorative` when the sentence already says what the drawing
+ * with a name: `role="img"` and the drawing's name. Everything inside a
+ * `role="img"` is presentational, so the node names, the node subtitles and the
+ * relation words are drawn for sighted readers and the name is what a screen
+ * reader gets. That is why the name is derived from the nodes' own text when the
+ * caller passes no `label`: everything on the marks is invisible to the one
+ * reader who is not looking at the picture, so a role description written only
+ * into a label is a role description a sighted reader never sees. Pass `label`
+ * when the drawing needs a name that says what it is rather than what it holds,
+ * and omit it when the two would be the same sentence written twice. Pass
+ * `decorative` when the surrounding sentence already says what the drawing
  * shows, and the whole tree leaves the accessibility tree with nothing named
  * inside it.
+ *
+ * **A node may wear its own pack.** `pack` on a node puts the boundary on the
+ * circle that node draws, which is the mark, and the mark is the one place a
+ * pack boundary belongs without moving anything but colour: a circle has no
+ * radius concept, so the pack re-inks the mark and cannot re-round it. Nothing
+ * else in the drawing answers to it, the node's name beside the mark keeps the
+ * page's ink, and a page that files two pack regions can make a diagram section
+ * the second one rather than moving it to the header's product switcher.
  *
  * **Shape.** Nodes are circles and relations are paths. Both are shapes with no
  * radius concept, so no corner radius here is a function of `--radius` and a
@@ -251,6 +367,12 @@ function Diagram({
   const place = fit(nodes)
   const byId = new Map(nodes.map((node) => [node.id, node]))
 
+  // An empty `label` is the same answer as no `label`, so the drawing is named by
+  // what its own marks carry rather than announced as an unnamed image. A blank
+  // string is the one value the accessible name must never take, and the caller
+  // who passed it has said no more than the caller who passed nothing.
+  const name = label !== undefined && label.trim() !== '' ? label : derivedName(nodes)
+
   const drawn = relations.flatMap((relation) => {
     const from = byId.get(relation.from)
     const to = byId.get(relation.to)
@@ -264,7 +386,7 @@ function Diagram({
       viewBox={`0 0 ${CANVAS_WIDTH} ${CANVAS_HEIGHT}`}
       xmlns="http://www.w3.org/2000/svg"
       role={decorative ? undefined : 'img'}
-      aria-label={decorative ? undefined : label}
+      aria-label={decorative ? undefined : name}
       aria-hidden={decorative || undefined}
       className={cn('h-auto w-full', className)}
     >
@@ -303,6 +425,10 @@ function Diagram({
 
       {nodes.map((node) => {
         const at = place(node)
+        // `default` is the absence of the attribute, spelled the way the token
+        // build spells it, so a node on the base pack resolves its fill and its
+        // stroke from the page rather than from a selector nothing emits.
+        const boundary = node.pack !== undefined && node.pack !== 'default' ? node.pack : undefined
         return (
           <g
             data-slot="diagram-node"
@@ -314,6 +440,7 @@ function Diagram({
               cx={at.x}
               cy={at.y}
               r={NODE_RADIUS}
+              data-pack={boundary}
               strokeWidth={node.emphasis ? 2 : 1}
               className={cn(
                 node.emphasis ? 'fill-accent stroke-brand-ink' : 'fill-card stroke-border',
@@ -328,6 +455,21 @@ function Diagram({
             >
               {node.name}
             </text>
+            {node.subtitle ? (
+              <text
+                data-slot="diagram-node-subtitle"
+                x={at.x}
+                y={at.y + NODE_SUBTITLE_OFFSET}
+                fontSize={NODE_SUBTITLE_SIZE}
+                textAnchor="middle"
+                // Muted ink rather than the name's own: the line below a name is
+                // supporting, and a reader's eye reaches the name first. Both are
+                // contract roles, so a boundary above either moves it.
+                className="fill-muted-foreground font-mono"
+              >
+                {node.subtitle}
+              </text>
+            ) : null}
           </g>
         )
       })}

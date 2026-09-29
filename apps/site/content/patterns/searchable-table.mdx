@@ -1,0 +1,64 @@
+---
+title: A searchable table
+description: "A query, a result set, and a page of it, with the state that is not the data."
+composes:
+  - DataTable01
+  - CommandPalette
+  - Input
+  - Table
+  - TableSort
+  - Pagination
+  - Badge
+  - EmptyState01
+---
+
+A table with a search box over it is three things that are usually built as one: a
+**query**, a **result set**, and a **page** of that result set. Each has a state that
+is not the data, and each state's most common bug is showing the wrong thing.
+
+## The query is not the search box
+
+`CommandPalette` is a modal query over everything, and an `Input` is a query over one
+table. They are not interchangeable and the difference is what the reader expects to
+happen on a keystroke. Use the palette for "find me anything", the input for "narrow
+this list", and never both over the same rows: two boxes over one result set is a
+page where the reader cannot tell which one narrowed what.
+
+`CommandPalette` ranks across groups rather than within them, so a row that matches a
+later group's name can outrank an earlier group's partial match. That is deliberate
+and it is why a palette over a table is a better answer than an input with a bigger
+result set.
+
+## The result set is never empty, it is waiting
+
+The state a table gets wrong is the one between loading and loaded. `Skeleton` is
+for a table whose shape the reader already knows, and it must match the real column
+count: a skeleton with four bars over a seven-column table teaches the reader the
+wrong shape before the real data arrives and they re-read it.
+
+`Spinner` is for a delay the reader caused, like a query they just typed. A spinner
+over a table that has not been asked anything yet is a page that looks broken.
+
+## The page is not a scroll
+
+`Pagination` is for a result set larger than a screen, and it belongs under the table
+rather than in the rail. The count goes beside it: "1 to 50 of 1,284", because a
+reader who cannot see how much is left cannot decide whether to page or to filter.
+
+## Sorting is a table decision
+
+`TableSort` belongs in the `Table`'s header cells, and it is `aria-sort` rather than an
+arrow a reader has to interpret. A sort that changes the page silently is a table a
+reader cannot reproduce, so a sorted column is stated in the header and the control
+is the header, not a separate control beside it.
+
+## The empty state is a different answer from the error state
+
+No results is not an error and is not a loading state. `EmptyState01` says what is
+absent and what to do next, and it is the only one of the three that should offer an
+action: the reader who searched for something that is not there needs a way onward,
+not a message.
+
+A **filtered** empty state and an **unfiltered** one are different sentences. The
+first names the filter and offers to clear it; the second says the table is empty,
+which is a fact about the product rather than about the reader's query.

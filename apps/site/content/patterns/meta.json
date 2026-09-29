@@ -1,0 +1,11 @@
+{
+  "title": "Patterns",
+  "pages": [
+    "settings-surface",
+    "searchable-table",
+    "pricing-and-plans",
+    "empty-state-with-a-next-step",
+    "a-product-marketing-site",
+    "an-application-shell-with-a-settings-area"
+  ]
+}

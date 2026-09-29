@@ -30,6 +30,10 @@ import { Diagram, type DiagramNode, type DiagramRelation } from '../src/componen
  *      `'use client'` line is invisible to a test that only renders the
  *      Component, and it is the one thing here that would put the drawing in the
  *      all-client bundle.
+ *   4. A node's second line and a node's pack reach the DOM. Both are props a
+ *      migration needed and the Component had nowhere to put, so a type assertion
+ *      would have proved nothing: what matters is the second line on the picture
+ *      and the boundary on the mark.
  */
 
 const REPO = path.resolve(import.meta.dirname, '..', '..', '..')
@@ -54,6 +58,25 @@ const NODES: DiagramNode[] = [
 const RELATIONS: DiagramRelation[] = [
   { from: 'issue', to: 'factory', label: 'queued' },
   { from: 'factory', to: 'review', label: 'built', indirect: true },
+]
+
+/**
+ * A schematic of the shape the company site draws: every thing named, and two of
+ * the three carrying the one-line role it plays. The third deliberately does
+ * not, because a node with no second line is the case a first-class field has to
+ * render rather than leave a gap.
+ */
+const DESCRIBED: DiagramNode[] = [
+  { id: 'tokens', name: 'Tokens', subtitle: 'the shared language', x: 0, y: 0.2 },
+  { id: 'pipeline', name: 'Pipeline', subtitle: 'the engine', x: 1, y: 0.5, emphasis: true },
+  { id: 'twins', name: 'Twins', x: 2, y: 0.8 },
+]
+
+/** Three nodes, three answers about a pack: one wears it, one is the base, one has none. */
+const PACKED: DiagramNode[] = [
+  { id: 'alpha', name: 'Alpha', x: 0, y: 0.2, pack: 'mint' },
+  { id: 'beta', name: 'Beta', x: 1, y: 0.5, pack: 'default' },
+  { id: 'gamma', name: 'Gamma', x: 2, y: 0.8 },
 ]
 
 /** Every paint utility in the rendered output, across the whole tree. */
@@ -123,6 +146,156 @@ describe('a Diagram draws what its data names', () => {
     const svg = container.querySelector('svg')
     expect(svg).toHaveAttribute('data-unresolved-relations', '1')
     expect(container.querySelector('[data-relation="issue-nowhere"]')).toBeNull()
+  })
+})
+
+describe('a node carries a second line, and the name is read off it', () => {
+  it('draws the second line under the name, and draws none for a node with no second line', () => {
+    const { container } = render(<Diagram nodes={DESCRIBED} relations={[]} label="the stack" />)
+
+    for (const node of DESCRIBED) {
+      const drawn = container.querySelector(`[data-node="${node.id}"]`)
+      const second = drawn?.querySelector('[data-slot="diagram-node-subtitle"]')
+
+      if (node.subtitle === undefined) {
+        // No empty text element standing where a line would be: a gap is not a
+        // line, and an empty `<text>` is ink a reader can see and a test counts.
+        expect(second, `${node.id} drew a subtitle it was not given`).toBeNull()
+        expect(drawn?.textContent).toBe(node.name)
+        continue
+      }
+
+      expect(second, `${node.id} lost its second line`).not.toBeNull()
+      expect(second?.textContent).toBe(node.subtitle)
+      // The name is still the name, and the line is under it rather than instead
+      // of it, which is the whole of what "a second line" is.
+      expect([...drawn!.querySelectorAll('text')].map((text) => text.textContent)).toEqual([
+        node.name,
+        node.subtitle,
+      ])
+      expect(Number(second?.getAttribute('y'))).toBeGreaterThan(
+        Number(drawn?.querySelector('text')?.getAttribute('y')),
+      )
+    }
+  })
+
+  it('keeps the second line inside the canvas, because the band pays for it once', () => {
+    // A server Component cannot measure text, so PADDING is a band of user units
+    // paid once for the deepest thing a node draws. A second line that came out
+    // under the band's floor would put a node's own words off the bottom of the
+    // drawing, and the failure would be a drawing that looks finished.
+    const { container } = render(<Diagram nodes={DESCRIBED} relations={[]} label="the stack" />)
+
+    const viewBox = container.querySelector('svg')?.getAttribute('viewBox')
+    const floor = Number(/0 0 \d+ (\d+)/.exec(viewBox ?? '')?.[1])
+    expect(floor).toBeGreaterThan(0)
+
+    for (const text of container.querySelectorAll('[data-slot="diagram-node-subtitle"]')) {
+      expect(Number(text.getAttribute('y'))).toBeLessThan(floor)
+    }
+  })
+
+  it('names the drawing from the nodes own text when the caller names it nowhere', () => {
+    // The defect this replaces: a role description that existed only inside the
+    // accessible name, which served a screen reader and gave a sighted reader
+    // looking at the picture nothing. The name is now read off the marks, so the
+    // drawn line and the announced one are the same field and cannot disagree.
+    render(<Diagram nodes={DESCRIBED} relations={[]} />)
+
+    const image = screen.getByRole('img')
+    expect(image.getAttribute('aria-label')).toBe(
+      'Tokens (the shared language), Pipeline (the engine), Twins',
+    )
+    // Every word of it is a word on the picture, which is what makes it derived
+    // rather than a second sentence about the same drawing.
+    for (const node of DESCRIBED) expect(image.getAttribute('aria-label')).toContain(node.name)
+  })
+
+  it('still lets the caller name the drawing, because a label says what it is', () => {
+    render(<Diagram nodes={DESCRIBED} relations={[]} label="How a finding is published" />)
+
+    expect(screen.getByRole('img', { name: 'How a finding is published' })).toBeTruthy()
+  })
+
+  it('falls back to the derived name rather than announcing an unnamed image', () => {
+    // An empty label is the same answer as no label. Announcing it would be the
+    // one value an accessible name must never take, and the caller who passed it
+    // has said no more than the caller who passed nothing.
+    render(<Diagram nodes={DESCRIBED} relations={[]} label="" />)
+
+    expect(screen.getByRole('img', { name: /Tokens/ })).toBeTruthy()
+  })
+
+  it('leaves a decorative drawing with no name even when its nodes have text', () => {
+    const { container } = render(<Diagram nodes={DESCRIBED} relations={[]} decorative />)
+
+    expect(container.querySelector('svg')).not.toHaveAttribute('aria-label')
+    expect(screen.queryByRole('img')).toBeNull()
+  })
+})
+
+describe('a node wears its own pack, on the mark and nowhere else', () => {
+  it('lands the boundary on the circle the node draws', () => {
+    const { container } = render(<Diagram nodes={PACKED} relations={[]} label="the set" />)
+
+    expect(container.querySelector('[data-node="alpha"] circle')).toHaveAttribute('data-pack', 'mint')
+  })
+
+  it('puts the boundary nowhere else, so one node cannot re-ink the drawing', () => {
+    const { container } = render(<Diagram nodes={PACKED} relations={[]} label="the set" />)
+
+    // Not on the drawing and not on the node's group. A boundary on the `<svg>`
+    // would restyle every mark in the picture from one node's pack, which is the
+    // per-diagram answer the JSDoc rules out rather than forgets to offer.
+    expect(container.querySelector('svg')).not.toHaveAttribute('data-pack')
+    expect(container.querySelector('[data-node="alpha"]')).not.toHaveAttribute('data-pack')
+    // And the marks that were not given a pack are untouched.
+    expect(container.querySelector('[data-node="gamma"] circle')).not.toHaveAttribute('data-pack')
+  })
+
+  it('expresses the base pack as the absence of the attribute, as the token build spells it', () => {
+    const { container } = render(<Diagram nodes={PACKED} relations={[]} label="the set" />)
+
+    // `default` is a real pack and it is a boundary matching no emitted rule if it
+    // is written as an attribute, so it is written as nothing and the mark
+    // resolves from the page. ProductMark spells it the same way for the same
+    // reason.
+    expect(container.querySelector('[data-node="beta"] circle')).not.toHaveAttribute('data-pack')
+  })
+
+  it('keeps the boundary off every shape a pack could re-round', () => {
+    const { container } = render(<Diagram nodes={PACKED} relations={[]} label="the set" />)
+
+    // The pack-boundary law's own sentence: a boundary belongs on a fully
+    // rounded element, on an element carrying no radius utility, or on a shape
+    // with no radius concept. A circle is the third, so the boundary moves colour
+    // and nothing else, and the gate reads the exempt shape off the tag.
+    for (const boundary of container.querySelectorAll('[data-pack]')) {
+      expect(boundary.tagName.toLowerCase()).toBe('circle')
+      expect(boundary.getAttribute('class') ?? '').not.toMatch(/(?:^|\s)rounded/)
+    }
+  })
+
+  it('lands on selectors the emitted contract publishes for that pack, in both modes', () => {
+    // The attribute is only half of a boundary. The other half is that the
+    // contract publishes the selector this Component writes, which is read from
+    // the emitted CSS rather than asserted here, so a pack that stopped emitting
+    // a form fails this rather than passing on a string written in this file.
+    const emitted = (pack: string, mode: string) =>
+      readFileSync(
+        path.join(REPO, 'packages', 'tokens', 'dist', 'themes', pack, `${mode}.css`),
+        'utf8',
+      )
+
+    // Light is the one-member list, and the boundary is a descendant of the
+    // document, so a plain attribute selector is what it has to match.
+    expect(emitted('mint', 'light')).toContain('[data-pack="mint"]')
+    // Dark is the two-member list. A boundary carries the pack attribute alone and
+    // wears its ancestor's mode, so it is the DESCENDANT form a boundary written
+    // by a server Component depends on; the compound form is the published
+    // sibling of it and the gate asserts both are one declaration.
+    expect(emitted('mint', 'dark')).toContain('[data-pack="mint"].dark')
+    expect(emitted('mint', 'dark')).toContain('.dark [data-pack="mint"]')
   })
 })
 

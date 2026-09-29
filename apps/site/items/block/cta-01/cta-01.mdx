@@ -51,6 +51,14 @@ page. The band promises a next step; the action must deliver one.
   band.
 - Use one action. This block takes a single action object rather than a list,
   because two equal choices at the end of a page cancel each other out.
+- Give a second action through `secondaryAction` when the page needs an
+  alternative, and leave it off when it does not. The two are drawn at different
+  weights on purpose: `action` fills and `secondaryAction` does not, so the pair
+  reads as one decision and one alternative rather than as two competing asks.
+- Set `variant` to `secondary` or `outline` for an action on this band, and
+  leave `default` alone. The band is a filled primary surface, so a `default`
+  action is the band's own colour against the band's own colour: the label is
+  legible and the control has no edge.
 - Set `headingLevel` to match the page outline, and leave the default when the
   band is composed under a heading the page already owns.
 - Keep the headline shorter than the hero's. The reader has already read the
