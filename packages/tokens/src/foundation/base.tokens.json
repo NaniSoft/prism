@@ -131,5 +131,22 @@
     "$description": "Easing curves. `out` is the default for state feedback; `in-out` is for a state that moves both ways. No control point overshoots.",
     "out": { "$value": [0.16, 1, 0.3, 1] },
     "in-out": { "$value": [0.65, 0, 0.35, 1] }
+  },
+  "ambient": {
+    "$type": "duration",
+    "$description": "Ambient cycle lengths for a figure that shows a system running. These are deliberately two orders of magnitude longer than `duration`, because they measure a cycle rather than a state change: a packet crossing a rail, a wavefront crossing a field, a scan crossing a chart. A component names one of these and one of the `ambient-ease` curves below, and never a second or a `cubic-bezier(...)` literal. There is no 'loop' keyframe here: the keyframes live in the component package's own stylesheet, because a keyframe is a mechanism and a duration is a value.",
+    "travel": { "$value": { "value": 7200, "unit": "ms" } },
+    "sweep": { "$value": { "value": 9000, "unit": "ms" } },
+    "drift": { "$value": { "value": 18000, "unit": "ms" } },
+    "scan": { "$value": { "value": 6000, "unit": "ms" } },
+    "pulse": { "$value": { "value": 2400, "unit": "ms" } },
+    "shimmer": { "$value": { "value": 3200, "unit": "ms" } }
+  },
+  "ambient-ease": {
+    "$type": "cubicBezier",
+    "$description": "Easing for an ambient cycle, separated from `ease` because the two answer different questions. `ease` shapes a response to something a reader did; these shape a loop nobody triggered, and a loop that eases in and out on every cycle reads as a machine stuttering rather than as one running. `linear` is for anything that carries a thing from one place to another, because a marker that accelerates and decelerates is a marker being served rather than a marker travelling. As in `ease`, no control point y exceeds 1, so nothing here overshoots.",
+    "linear": { "$value": [0, 0, 1, 1] },
+    "in-out": { "$value": [0.42, 0, 0.58, 1] },
+    "drift": { "$value": [0.37, 0, 0.63, 1] }
   }
 }

@@ -1,0 +1,78 @@
+---
+slug: components/pulse-series
+title: PulseSeries
+---
+
+## Overview
+
+PulseSeries draws a live instrument: a run of columns rising out of a named
+baseline, with a reticle crossing them once per cycle to mark which one is being
+read at this instant.
+
+It is the other half of the running-figure set. A `PulseGraph` says how a system
+is connected; a `PulseSeries` says what it is measuring. Together they cover
+most of what a product page wants to show about itself.
+
+## Usage
+
+```tsx
+import { PulseSeries } from '@nanisoft/prism-ui/components/pulse-series'
+
+<PulseSeries
+  bars={READINGS.map((reading) => ({ id: reading.at, value: reading.value }))}
+  baseline="requests per minute"
+  scan
+  label="Requests per minute, captured each minute for the last hour"
+/>
+```
+
+<ComponentDemo slug="pulse-series" />
+
+## Guidelines
+
+### When to use
+
+Use PulseSeries when the numbers you are showing are magnitudes read against a
+baseline, and the reader's question is how big or how much rather than how.
+
+Pass the caller's own numbers. The tallest column sets the scale, so a caller
+passes values in its own units and does not pre-normalise against a maximum it
+had to compute. That matters for more than tidiness: a normalised series has two
+chances to carry a wrong axis, and a mislabelled axis is a lie with a typeface
+on it.
+
+### When not to use
+
+Do not pass numbers you did not collect. This component will draw whatever it is
+given, which is exactly the property that makes it safe, and it means a caller
+who wants a plausible shape has to invent it themselves where the surrounding
+copy can be held to account for it. Draw the shape you measured.
+
+Do not use it for a series read against a diagonal or a curve. That is
+`PulseGraph` territory, and a chart forced into the wrong geometry is harder to
+read than no chart.
+
+### Accessibility
+
+`label` is required unless the drawing is `decorative`, in which case it is
+forbidden. Everything inside the `role="img"` is presentational, so the labels
+under columns are drawn rather than announced, and the surrounding sentence is
+what a screen reader gets.
+
+Every column is present at full height in its resting state. The rise animation
+interpolates from the baseline, so at the start of a cycle the columns are
+short, but that is one cycle rather than a hidden state, nothing waits for a
+script, and reduced motion removes the animation entirely.
+
+### Best practices
+
+- Name the baseline in the caller's units. The prop is optional and has no
+  default, because a default is a claim about the caller's numbers.
+- Mark at most one column `emphasis`. It takes the brand ink and its label is
+  drawn; the rest take muted ink.
+- Label the emphasised column and let the rest go unlabelled, or label a few at
+  the ends. A label under every column of a wide series is an axis the caller
+  can draw themselves.
+- Turn `scan` on when the series is a live view and off when it is a report. The
+  reticle says a column is being read at this instant, which is true of one and
+  false of the other.

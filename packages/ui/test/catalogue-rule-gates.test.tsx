@@ -213,14 +213,17 @@ const cleanBlock = [
 ].join('\n')
 
 /**
- * A Component that exercises the three exclusions the Component layer added.
+ * A Component that exercises the shape-based exclusions the Component layer and
+ * the drawing set added.
  *
  * A type argument, because a Component narrows a type it forwards rather than
  * writing its own; a prop default, because every accessible name a control owns
- * is a default a caller may override; and a vector coordinate, because a drawing
- * is written in numbers that happen to carry a space. The fixture has to carry
- * all three or the gate reports them as exclusions that resolve to nothing, which
- * is the gate's own rule and is the reason this comment exists.
+ * is a default a caller may override; a vector coordinate, because a drawing is
+ * written in numbers that happen to carry a space; and an SVG fit keyword, which
+ * is the one machine value on a drawing element that reads as a sentence. The
+ * fixture has to carry all of them or the gate reports them as exclusions that
+ * resolve to nothing, which is the gate's own rule and is the reason this
+ * comment exists.
  */
 const cleanComponent = [
   "import type { ComponentProps } from 'react'",
@@ -230,7 +233,11 @@ const cleanComponent = [
   ' */',
   "export function Thing({ label = 'Thing' }: Omit<ComponentProps<'div'>, 'onValueChange'>) {",
   "  if (label === 'ArrowDown') return null",
-  "  return <div aria-label={label} data-slot='thing'><line x1='4 4' /></div>",
+  "  return (",
+  "    <svg data-slot='thing' preserveAspectRatio='xMidYMid slice'>",
+  "      <line x1='4 4' />",
+  '    </svg>',
+  '  )',
   '}',
   '',
 ].join('\n')

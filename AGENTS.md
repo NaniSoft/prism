@@ -45,7 +45,10 @@ the source of truth for what a script does today.
   component.
 - **Motion is by token only.** Name `duration-fast`, `duration-base` or
   `duration-slow` and `ease-out` or `ease-in-out`; never a millisecond value or a
-  `cubic-bezier(...)` literal, and never a keyframe.
+  `cubic-bezier(...)` literal, and never a keyframe. A figure that shows a system
+  running is the one other case: name an `ambient-*` token and one of the six
+  `prism-ambient-*` classes the stylesheet publishes, which resolves the cycle
+  for you. Read `DESIGN.md` under Motion before authoring one.
 - **One stylesheet.** A consumer imports `@nanisoft/prism-ui/styles.css` once.
   Tailwind is an internal build dependency of the component package and the site,
   never the consumer's.

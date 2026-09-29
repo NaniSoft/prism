@@ -1,11 +1,50 @@
 ---
 title: Motion
-description: "State feedback only, by token, with no entrance or scroll animation."
+description: "Two laws: feedback on a short scale, and a running figure on a cycle scale, both by token."
 ---
 
-Motion is state feedback. It is never decorative, there are no keyframes, and a
-component names a duration token and an easing token rather than a value.
-Spatial movement is guarded with `motion-safe:` so a reduced-motion preference
-removes it.
+Motion has two laws, and they are different laws rather than one law with an
+exception. The distinction is falsifiable: stop the animation and ask whether
+the figure is still true and still legible.
+
+**Feedback is a response.** Something happened because the reader did it. They
+are waiting for an answer, so the answer is fast, decelerating and never
+overshoots. The scale is `fast` 80ms, `base` 160ms and `slow` 280ms, with
+`ease-out` and `ease-in-out`. A component names a duration token and an easing
+token rather than a value, and spatial movement is guarded with `motion-safe:`.
+
+**A cycle is a demonstration.** A marker crosses a rail, a reticle crosses a
+series, a wavefront crosses a field. The reader did not cause it and is not
+waiting for it: the figure is making a claim about a mechanism and the motion is
+how the claim is made visible. If stopping the animation leaves nothing true and
+nothing legible, the motion was the figure, and the right component is one that
+says it is atmosphere.
+
+The cycle scale is separate because the two measure different things by a factor
+of twenty-five, and one name cannot mean both. `ambient` is in seconds, and the
+emitted contract measures it with a floor of one second: a cycle faster than that
+is unreadable before it is understood.
+
+Three rules bound it, and none of them is a matter of taste.
+
+- **Nothing is hidden.** No ambient rule sets `opacity: 0`, and nothing waits
+  for a script, an intersection or a timer. Every figure is complete at first
+  paint, so a reader with scripting off, a print stylesheet or a crawler sees the
+  whole drawing.
+- **Reduced motion removes the movement, not the figure.** The
+  `prefers-reduced-motion` block is one `animation: none`, and because every
+  resting state is the full form, that reader gets the same figure, still.
+- **Compositor properties only.** Every keyframe animates `transform` or
+  `opacity`. Nothing in the layer animates a layout or paint property.
+
+A keyframe is a mechanism and lives in the component package's stylesheet; a
+duration is a value and lives in the token source. They meet at exactly one
+place, an `animation` shorthand whose length is `var(--ambient-travel)`, so
+neither can invent the other. The six `prism-ambient-*` classes exist so that a
+component picks a cycle by naming a mechanism and never writes a timing.
 
 <TokenTable group="motion" />
+
+<TokenTable group="ambient" />
+
+<TokenTable group="ambient-ease" />
