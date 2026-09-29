@@ -1,0 +1,97 @@
+---
+slug: components/collapsible
+title: Collapsible
+---
+
+## Overview
+
+A Collapsible is one section that shows and hides, in place. It ships as
+`Collapsible`, `CollapsibleTrigger` and `CollapsibleContent`.
+
+A Collapsible is one section; an Accordion is a stack of them. The difference is
+what a reader can do with the result. An accordion lets one section open by
+closing another, which is right for a set of peers and wrong for a page that
+needs two things visible at once. A collapsible keeps its own state and touches
+nothing else, so a reader can have three open, which is usually what a page of
+settings wants and an accordion forbids.
+
+The trigger and the region are wired by the Component rather than by the caller.
+A consumer who writes the two as siblings with their own `aria-expanded` gets a
+button that says "collapsed" while the panel is open, or a panel no button
+controls, and the failure is invisible until a reader meets it. Here the trigger
+is a real button carrying the expanded state and pointing at the panel, so Enter
+and Space open it and the announcement is right without the caller writing a line
+of it.
+
+A reader who collapses something must be able to find it again. The trigger stays
+in the document and keeps its own words, so the way back never depends on the
+panel that was just closed.
+
+## Usage
+
+```tsx
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@nanisoft/prism-ui/components/collapsible'
+
+<Collapsible id="billing">
+  <CollapsibleTrigger>Advanced billing</CollapsibleTrigger>
+  <CollapsibleContent>
+    Usage is billed per seat, at the end of the month.
+  </CollapsibleContent>
+</Collapsible>
+```
+
+<ComponentDemo slug="collapsible" />
+
+## Guidelines
+
+### When to use
+
+Use a Collapsible for a section a reader may want out of the way and may want
+back: advanced settings, a long detail, an optional explanation. It is also the
+right shape when several sections on the page are independent, because nothing
+here closes anything else.
+
+### When not to use
+
+Do not use a Collapsible to hide the primary content of a page. If a section is
+essential, it should be open, not behind a click.
+
+Do not use it when the reader needs two sections at once. That is a page, laid
+out in two columns, and a reader comparing the two cannot do it with either one
+closed.
+
+Do not use an Accordion for one section, and do not use a Collapsible for a set
+of peers where only one may be open. The Accordion is the one that owns that
+rule.
+
+### Best practices
+
+- Give the section an `id`. It is the name a consumer styles from and asserts
+  against, and a generated one is a name nobody else can reach.
+- Put the words that name the section on the trigger. A trigger labelled
+  "Advanced" is a heading, not a disclosure, and the reader has to open it to
+  learn what is in it.
+- Open the section the reader most likely wants, or none at all. Opening all of
+  them restores the wall of text the section was meant to break up.
+- Pass `hiddenUntilFound` on the content when the closed section holds prose a
+  reader may be searching for. A panel that unmounts cannot be found by the
+  browser's own find-in-page, and the reader who searched for a word in it is
+  told the word is not on the page.
+- Keep the chevron. It is the only thing that shows the section is a section, and
+  it turns on the expanded state rather than on a timer.
+- Keep each section's own heading level consistent across the page. The trigger
+  is a button, not a heading, so the page's outline does not change when a
+  section opens.
+
+### Content guidelines
+
+- Name the section for what is inside it: "Advanced billing", "Show raw events",
+  "Keyboard shortcuts". Not "More" and not "Click to expand".
+- Keep the trigger to one line. It is the only thing a reader sees when the
+  section is closed, and a trigger that wraps is a trigger nobody scans.
+- Put the disclosure at the end of the reasoning, not the start. A section a
+  reader has to read before deciding to read it has lost them.

@@ -1,0 +1,107 @@
+---
+slug: components/alert-dialog
+title: AlertDialog
+---
+
+## Overview
+
+An AlertDialog is a dialog that interrupts, and will not let the reader out of it
+by accident. It ships as `AlertDialog`, `AlertDialogTrigger`,
+`AlertDialogContent`, `AlertDialogHeader`, `AlertDialogFooter`,
+`AlertDialogTitle`, `AlertDialogDescription`, `AlertDialogAction` and
+`AlertDialogCancel`.
+
+The difference from a Dialog is the whole Component. A Dialog closes on an
+outside press, because a reader who clicks away from a task has said "not now"
+and the task is still there when they come back. An alert dialog exists for a
+decision that a mis-click would answer, so an outside press is refused outright:
+Base UI hard-wires dismissal off and the root's prop type omits both `modal` and
+`disablePointerDismissal`, so there is no value a caller can pass that turns a
+must-answer decision into something a stray click waves through.
+
+Escape still closes it, and returns focus to the trigger. A keyboard reader must
+always have a way out, and Escape is a deliberate answer where a stray click is
+not.
+
+## Usage
+
+```tsx
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@nanisoft/prism-ui/components/alert-dialog'
+
+<AlertDialog>
+  <AlertDialogTrigger>Delete project</AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Delete this project?</AlertDialogTitle>
+      <AlertDialogDescription>
+        Twelve runs and every log are removed. This cannot be undone.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Keep it</AlertDialogCancel>
+      <AlertDialogAction>Delete it</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+<ComponentDemo slug="alert-dialog" />
+
+## Guidelines
+
+### When to use
+
+Use an AlertDialog when the decision cannot safely be deferred, and where a
+stray click would answer it wrongly: deleting a workspace, discarding a draft,
+ending a session, closing a subscription. The bar is "would this reader be angry
+if they dismissed this by accident", not "is this important".
+
+### When not to use
+
+Do not use an AlertDialog for a short task. A rename, a compact form and a
+filter all belong in a Dialog, which dismisses on an outside press because "not
+now" is a safe answer to a task.
+
+Do not use it to deliver a message nobody has to answer. An alert with no
+decision in it is an alert, and alerts interrupt; a message about something that
+already happened belongs in a Toast or in the page.
+
+Do not use it for a decision the reader can reverse. If they can press Back and
+get the project back, a Dialog is the surface, and a surface that refuses
+dismissal on a reversible action trains readers to press Escape reflexively,
+which is exactly the reflex that makes the next one dangerous.
+
+### Best practices
+
+- Always render an `AlertDialogTitle`. It is the dialog's accessible name and it
+  is what the surface is announced as.
+- Render both buttons, always. The two are the only ways out besides Escape, and
+  a dialog with one button is a notification.
+- Put the action last in the footer, so it is where a keyboard reader lands
+  second and the cancel is the one under their thumb when they change their mind.
+- The action is styled `destructive` by default. Pass `variant="default"` for a
+  decision that is not destructive, and reconsider whether the decision needed
+  to interrupt at all.
+- Name the action for what it does: "Delete it", not "Confirm". "Confirm"
+  confirms whatever the reader last clicked, which is frequently not this.
+- Open it from a menu item or a row action, not from a page-level button. A
+  destructive action offered once per page gets clicked without being read.
+
+### Content guidelines
+
+- The title is the question, in the reader's words: "Delete this project?".
+- The description is the consequence, in one sentence, before the buttons: what
+  is removed, and whether it can be put back. A description that restates the
+  title gives the reader a decision with nothing to decide on.
+- Keep the words short. This is a surface a reader meets in the middle of
+  something else, and a paragraph is a paragraph they will not finish.

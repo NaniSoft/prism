@@ -1,0 +1,100 @@
+---
+slug: components/menubar
+title: Menubar
+---
+
+## Overview
+
+A Menubar is the bar at the top of an application window that owns its commands.
+It ships as `Menubar`, `MenubarMenu`, `MenubarTrigger`, `MenubarContent`,
+`MenubarItem`, `MenubarLinkItem`, `MenubarLabel`, `MenubarSeparator`,
+`MenubarGroup`, `MenubarSub`, `MenubarSubTrigger` and `MenubarSubContent`.
+
+A menubar is one Tab stop, and that is the whole difference from a row of
+dropdowns. Arrow keys move along the bar and open a menu; Tab leaves the bar and
+enters the page. A consumer who composes the same set of menus as a row of
+buttons gets the Tab order of the document instead, which is every button in the
+bar and none of the arrows, and the bar becomes a keyboard trap that happens to
+sit at the top of the page.
+
+`label` is required, and it is usually the application's own name, because that
+is what the bar acts on. A bar is one Tab stop and nothing announces it until
+focus lands there, so two unnamed bars are two things a screen reader calls
+"menu".
+
+Every menu in a bar is modal while it is open, which is the right default for a
+bar: a menu that leaves the page live is a menu a pointer reader clicks straight
+through, and an application menu bar is the one menu where the reader is elsewhere
+while it is open.
+
+## Usage
+
+```tsx
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarTrigger,
+} from '@nanisoft/prism-ui/components/menubar'
+
+<Menubar label="Notion">
+  <MenubarMenu>
+    <MenubarTrigger>File</MenubarTrigger>
+    <MenubarContent>
+      <MenubarItem onClick={newDocument}>Document</MenubarItem>
+    </MenubarContent>
+  </MenubarMenu>
+  <MenubarMenu>
+    <MenubarTrigger>Edit</MenubarTrigger>
+    <MenubarContent>
+      <MenubarItem onClick={cut}>Cut</MenubarItem>
+    </MenubarContent>
+  </MenubarMenu>
+</Menubar>
+```
+
+<ComponentDemo slug="menubar" />
+
+## Guidelines
+
+### When to use
+
+Use a Menubar for the application chrome of a desktop-shaped tool: an editor, a
+mail client, a design tool, anything a reader spends an hour inside. The bar
+names the categories of what the application can do, and each category opens a
+list.
+
+### When not to use
+
+Do not use a Menubar on a marketing page or a documentation site. Those have
+links rather than commands, and a NavigationMenu is the surface for links.
+
+Do not use a Menubar for the commands attached to one control. That is a
+DropdownMenu, and a button that says what it opens is discoverable in a way a bar
+is not.
+
+Do not put a form in a Menubar menu. Every menu in a bar is modal, so an outside
+press closes it and the reader loses what they typed.
+
+### Best practices
+
+- Give the bar a `label`, and make it the application's name.
+- Use `MenubarItem` for a command and `MenubarLinkItem` for a destination. A
+  place can be opened in a new tab and copied by address; a command cannot.
+- Keep the bar to between three and six menus. A bar with nine is a list a reader
+  reads rather than navigates.
+- Put the destructive command last, after a `MenubarSeparator`, with
+  `variant="destructive"`.
+- Mark the state in a checkbox item rather than in the menu title, so a reader who
+  has the menu open can see the setting without closing it.
+- Leave `modal` on. Turn it off only where the bar is a convenience over a page
+  the reader is genuinely still working on.
+
+### Content guidelines
+
+- Name a menu for its category: "File", "Edit", "View". Not "Actions".
+- Name a command for what it does, and name the same command the same way in
+  every menu it appears in.
+- Put the shortcut on the right of the row when there is one, and keep the
+  formatting consistent across the whole bar.

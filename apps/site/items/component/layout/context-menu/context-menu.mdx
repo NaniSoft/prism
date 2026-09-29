@@ -1,0 +1,99 @@
+---
+slug: components/context-menu
+title: ContextMenu
+---
+
+## Overview
+
+A ContextMenu is a menu of commands opened by the secondary pointer gesture over
+a region of the page. It ships as `ContextMenu`, `ContextMenuTrigger`,
+`ContextMenuContent`, `ContextMenuItem`, `ContextMenuLinkItem`,
+`ContextMenuLabel`, `ContextMenuSeparator`, `ContextMenuGroup`, `ContextMenuSub`,
+`ContextMenuSubTrigger` and `ContextMenuSubContent`.
+
+The Component knows whether each row is a command or a destination, and so should
+the caller. `ContextMenuItem` is a command: a `div` with `role="menuitem"`,
+operated by click or Enter, doing something. `ContextMenuLinkItem` is a
+destination: a real `a` with an `href`, so the browser can open it in a new tab,
+copy it by address, and a crawler can follow it. A context menu holding "Copy
+link" beside "Open in new tab" is the case that gets a product wrong, because the
+second is the one a reader expects to middle-click.
+
+Nothing in a context menu is the only route to a command. The gesture is
+secondary: unreachable by a keyboard, undiscoverable by a touch reader, and
+silent on a page that has not taught the reader it exists. Every row must be
+reachable somewhere else on the page.
+
+## Usage
+
+```tsx
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuLinkItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@nanisoft/prism-ui/components/context-menu'
+
+<ContextMenu>
+  <ContextMenuTrigger>{children}</ContextMenuTrigger>
+  <ContextMenuContent label="Run actions">
+    <ContextMenuItem onClick={rerun}>Re-run these</ContextMenuItem>
+    <ContextMenuSeparator />
+    <ContextMenuLinkItem href={`/runs/${id}`}>
+      Open run {id}
+    </ContextMenuLinkItem>
+  </ContextMenuContent>
+</ContextMenu>
+```
+
+`label` is required. A context menu is opened by a gesture on a region rather
+than by a control the reader chose, so nothing on the page has already named it.
+Three menus in one table, each announced as "menu", is a page where a screen
+reader user cannot tell which surface they are in.
+
+<ComponentDemo slug="context-menu" />
+
+## Guidelines
+
+### When to use
+
+Use a ContextMenu for the commands attached to one region: a row in a table, a
+card on a board, a selection in a list. It is the surface for "and also, while
+you are here", not the surface for what the reader came to do.
+
+### When not to use
+
+Do not hide a primary action in a context menu. If it is the thing the reader
+came for, it belongs on the surface where they are looking.
+
+Do not use it as the only route to a command. The gesture is unreachable by a
+keyboard and undiscoverable by a touch reader, so a command that lives only
+behind it is a command a large share of readers do not have.
+
+Do not use a DropdownMenu for a region. If there is a button, the button is
+discoverable, focusable and announces itself.
+
+### Best practices
+
+- Give `ContextMenuContent` a `label` that says what the menu acts on, not what
+  it contains: "Run actions", not "Actions".
+- Use `ContextMenuLinkItem` for anything with an address and
+  `ContextMenuItem` for anything that does something. The tag name is the
+  affordance, and a reader who middle-clicks a `div` gets nothing.
+- Keep the list to about six rows. A context menu is a shortcut, and a shortcut
+  to twenty commands is a page the reader has to scroll.
+- Group related rows with `ContextMenuGroup` and `ContextMenuLabel`, and
+  separate the groups with `ContextMenuSeparator`.
+- Mark the destructive row with `variant="destructive"`, and put it last, after
+  a separator, so it is not the row under the pointer when the menu opens.
+- Do not put a form in a context menu. It closes on an outside press, and a
+  reader who clicks a field mid-answer loses what they typed.
+
+### Content guidelines
+
+- Name a command for what it does: "Re-run these", not "Run".
+- Name a destination for where it goes: "Open run 42", not "Open".
+- Keep the same words the row has in the visible menu, so a reader who learned
+  the menu on the surface recognises it here.

@@ -65,6 +65,29 @@ const WORK_PARENT = path.join(PKG, '.turbo')
  * The whole-tree client bundle measures 108.0 KB. The ceiling is 116 KB, about
  * 7% headroom.
  *
+ * Re-pinned once more, from 116 KB to 208 KB, for the deferred tail: the five
+ * substrate batches (issues 121 to 125) add roughly thirty components, about
+ * twenty-two of them client, and a menu, a calendar and a toast are each
+ * larger than anything the package shipped before. The measured figure moves
+ * from 108 KB to about 170 KB, so the headroom is about 18 percent.
+ *
+ * **This one is a real forecast rather than a correction, and that is a
+ * different kind of number.** The two previous moves repaired a ceiling that was
+ * measuring the wrong set of files, so the honest response was to state the truth
+ * about the past. This move is about work that has not landed yet, which means the
+ * number is an estimate and a wrong one in either direction is a bug in the
+ * estimate rather than a lie about the measurement. It is stated here as an
+ * estimate for that reason, and the next reader should treat the printed figure
+ * as the fact and this as the intention.
+ *
+ * 208 rather than 176 is deliberate headroom rather than a tight fit. The
+ * argument for a tight ceiling is that it forces a conversation per addition, and
+ * the argument against is the one this gate has already learned: a ceiling that
+ * trips on ordinary work stops being a decision point and becomes a thing people
+ * learn to work around. The gate's real instrument is the per-item table above,
+ * which prints every component against a stated number, so the aggregate is left
+ * with enough room to absorb a substrate landing in pieces.
+ *
  * The previous figure was 92 KB against a two-directory roster, and it left 0.3 KB
  * of slack. **A ceiling with a third of a kilobyte of headroom is not a policy, it
  * is a pin:** it fails on an unrelated dependency bump and teaches everyone to
@@ -81,7 +104,7 @@ const WORK_PARENT = path.join(PKG, '.turbo')
  * reason: so the trade-off the one number makes stays visible rather than being
  * discovered by whoever hits it.
  */
-const CEILING = 116 * 1024
+const CEILING = 208 * 1024
 
 /**
  * Ticket 19 section 5, in KB: the Components, and their per-item budgets.
@@ -100,19 +123,46 @@ const CEILING = 116 * 1024
  */
 const BUDGETS = {
   accordion: 4,
+  'alert-dialog': 6,
+  'aspect-ratio': 2,
   avatar: 3,
+  'button-group': 4,
+  calendar: 14,
+  carousel: 12,
   checkbox: 4,
+  collapsible: 6,
   'command-palette': 8,
+  combobox: 12,
+  'context-menu': 12,
+  'date-picker': 14,
   dialog: 9,
   'dropdown-menu': 9,
+  'empty-state-01': 4,
+  'hover-card': 10,
+  'input-group': 4,
+  menubar: 10,
+  meter: 2,
+  'navigation-menu': 10,
+  'number-field': 8,
+  'one-time-code': 6,
   popover: 6,
   progress: 3,
   provider: 2,
   'radio-group': 4,
+  resizable: 8,
+  scroll-area: 6,
   select: 12,
+  sheet: 8,
+  sidebar: 12,
   slider: 7,
+  spinner: 4,
   switch: 3,
+  table-sort: 6,
   tabs: 5,
+  timeline: 3,
+  toast: 10,
+  toggle: 3,
+  'toggle-group': 4,
   tooltip: 5,
   tree: 2,
 }

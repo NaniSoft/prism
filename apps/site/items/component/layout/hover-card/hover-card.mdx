@@ -1,0 +1,96 @@
+---
+slug: components/hover-card
+title: HoverCard
+---
+
+## Overview
+
+A HoverCard is a preview of a destination, shown when the reader rests on a
+link. It ships as `HoverCard`, `HoverCardTrigger` and `HoverCardContent`.
+
+The delay is the Component's decision, and both halves of it are props. A card
+with no open delay opens as the pointer crosses a line of text, so a page of
+links becomes a page of flashes and a reader learns that resting is punished. A
+card with no close delay is worse and quieter: the reader rests, waits, sees the
+card start to appear, moves toward it, and it vanishes in the gap between the
+trigger and the card, so the one reader who did everything right gets nothing.
+`delay` and `closeDelay` are props because how long a reader's pointer rests is a
+fact about the reader and not about the design system.
+
+The trigger is a real anchor, so everything in the card is reachable at the
+destination without the card ever appearing. That is the honest way to express
+"the reader wants this" without punishing a reader on a slow device: the card is
+an accelerant for a reader with a pointer, and removing it costs that reader
+nothing.
+
+The card opens on focus as well as on hover, so a keyboard reader is not a second
+class. It is not a dialog: it takes no focus, traps nothing, and is not announced,
+because a screen reader is already moving through the link text.
+
+## Usage
+
+```tsx
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@nanisoft/prism-ui/components/hover-card'
+
+<p>
+  The principles of good{' '}
+  <HoverCard>
+    <HoverCardTrigger href="/foundation/typography">
+      typography
+    </HoverCardTrigger>
+    <HoverCardContent>
+      <p>A system of arranging type so written language stays clear.</p>
+    </HoverCardContent>
+  </HoverCard>{' '}
+  are older than the screen.
+</p>
+```
+
+<ComponentDemo slug="hover-card" />
+
+## Guidelines
+
+### When to use
+
+Use a HoverCard for a short preview of a destination the reader is about to
+visit: what a person looks like before you follow, what a page contains before
+you open it, what a repository is before you clone it. A few lines, readable at a
+glance, gone the moment the pointer moves on.
+
+### When not to use
+
+Do not use it for anything a reader must read. A touch reader has no hover at
+all, and a fact that lives only in a card does not exist for them.
+
+Do not use it for a form, a menu or anything the reader operates. The card takes
+no focus and traps nothing, so a control inside it is unreachable.
+
+Do not use it where a Tooltip is the right answer. A tooltip names or explains
+the control it is attached to in a few words. A hover card previews somewhere
+else, and it is a link.
+
+Do not use it as a substitute for page load. A card that fetches on hover and
+arrives late is worse than a page that was already there.
+
+### Best practices
+
+- Put nothing in the card that is not also at the destination. That is what makes
+  the card safe to add and the delay safe to be long.
+- Keep it to a few lines. A preview the reader has to read is a page.
+- Leave the defaults unless the content argues for a different delay. The default
+  is a rest, and a rest is what a reader means by staying.
+- If a link is important enough that its readers need the preview, the preview
+  belongs in the page, not in a card.
+- Set `delay` to zero only where the trigger is already obviously a preview
+  surface, such as an avatar grid.
+
+### Content guidelines
+
+- Lead with the destination's own name, so the preview and the page agree.
+- One or two lines. No headings, no lists longer than three items.
+- No calls to action. The reader is either going to follow the link or they are
+  not, and a card that argues for it is a card they have to dismiss.

@@ -1,0 +1,113 @@
+---
+slug: components/navigation-menu
+title: NavigationMenu
+---
+
+## Overview
+
+A NavigationMenu is a list of links with groups that expand and collapse. It
+ships as `NavigationMenu`, `NavigationMenuList`, `NavigationMenuItem`,
+`NavigationMenuTrigger`, `NavigationMenuContent`, `NavigationMenuLink`,
+`NavigationMenuIcon`, `NavigationMenuPortal`, `NavigationMenuPositioner`,
+`NavigationMenuPopup`, `NavigationMenuViewport` and `NavigationMenuBackdrop`.
+
+The Component knows it holds links, and that is what every part is for. A link
+can be opened in a new tab, copied by address, middle-clicked and crawled; a
+command cannot do any of those, and a menu that renders a command where a reader
+expected a destination gives them a middle-click that does nothing. So
+`NavigationMenuLink` is the only interactive leaf, there is no command part to
+reach for by mistake, and a caller who wants commands in a header is using a
+Menubar or a DropdownMenu instead.
+
+`label` is required. The root renders a `nav`, and a `nav` with no name is a
+landmark a screen reader announces only as "navigation". A site header's primary
+links and a footer's link list are both `nav`, and a reader moving between them is
+told nothing about which is which.
+
+A closed group shows nothing at all. The list is a `ul` of triggers, and the
+links live in a group that is only in the document while it is open, so a reader
+with JavaScript off and a crawler see the triggers and nothing else. That is a
+real cost, and `keepMounted` on `NavigationMenuContent` is the seam for the
+consumer who needs the header to read the same either way.
+
+## Usage
+
+```tsx
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from '@nanisoft/prism-ui/components/navigation-menu'
+
+<NavigationMenu label="Primary">
+  <NavigationMenuList>
+    <NavigationMenuItem value="products">
+      <NavigationMenuTrigger>Products</NavigationMenuTrigger>
+      <NavigationMenuContent>
+        <NavigationMenuLink href="/products/alpha" active>
+          Alpha
+        </NavigationMenuLink>
+      </NavigationMenuContent>
+    </NavigationMenuItem>
+  </NavigationMenuList>
+  <NavigationMenuPortal>
+    <NavigationMenuPositioner>
+      <NavigationMenuPopup>
+        <NavigationMenuViewport />
+      </NavigationMenuPopup>
+    </NavigationMenuPositioner>
+  </NavigationMenuPortal>
+</NavigationMenu>
+```
+
+<ComponentDemo slug="navigation-menu" />
+
+## Guidelines
+
+### When to use
+
+Use a NavigationMenu for a site header or a product's primary navigation, when
+the destinations cluster into a few groups and a reader is choosing where to go
+rather than what to do. A documentation site, a product site and a dashboard's
+section switcher all fit.
+
+### When not to use
+
+Do not use it for commands. A navigation menu of commands is a Menubar, and the
+distinction is not cosmetic: a command cannot be opened in a new tab, and a
+reader who middle-clicks one is entitled to expect it to work.
+
+Do not use it for a flat list of fewer than about five links. A row of links is
+a row of links, and a group that opens to reveal two of them is a click the
+reader did not ask for.
+
+Do not put a destination only in a closed group. It exists for the reader who
+opens the group and for nobody else, which includes a crawler and a reader with
+JavaScript off.
+
+### Best practices
+
+- Give every link an `active` prop and set it on the one the reader is on. It
+  renders as `aria-current="page"`, so it survives a theme change and a reader
+  who cannot distinguish the active colour.
+- Give the root a `label` that says which region of links it is: "Primary",
+  "Product", "Footer".
+- Give every item a stable `value`, and control the open group with `value` and
+  `onValueChange` when the state matters beyond the header.
+- Turn on `keepMounted` only when the header has to read the same with and
+  without JavaScript, and own the layout shift that follows.
+- Do not use a DropdownMenu for a group of links. The same rows in a dropdown
+  are unreachable to a crawler and cannot be opened in a new tab.
+
+### Content guidelines
+
+- Name a group for what is inside it: "Products", "Docs", "Company".
+- Keep each group to between three and eight links. A group that needs a scroll
+  is a page.
+- Lead each group with the destination the reader is most likely to want, and
+  leave the long tail to a "See all" link.
+- Use the same words in the group and at the destination, so a reader who
+  remembers the header can find the page.

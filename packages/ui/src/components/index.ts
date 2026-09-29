@@ -109,6 +109,72 @@ export { Meter } from './ui/meter'
 export type { MeterProps, MeterTone, MeterThreshold } from './ui/meter'
 export { CommandPalette } from './ui/command-palette'
 export type { CommandPaletteProps, CommandGroup, CommandItem } from './ui/command-palette'
+export {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from './ui/alert-dialog'
+export { Collapsible, CollapsibleTrigger, CollapsibleContent } from './ui/collapsible'
+export {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuLinkItem,
+  ContextMenuLabel,
+  ContextMenuSeparator,
+  ContextMenuGroup,
+  ContextMenuSub,
+  ContextMenuSubTrigger,
+  ContextMenuSubContent,
+} from './ui/context-menu'
+export { HoverCard, HoverCardTrigger, HoverCardContent } from './ui/hover-card'
+export {
+  Menubar,
+  MenubarMenu,
+  MenubarTrigger,
+  MenubarContent,
+  MenubarItem,
+  MenubarLinkItem,
+  MenubarCheckboxItem,
+  MenubarLabel,
+  MenubarSeparator,
+  MenubarGroup,
+  MenubarSub,
+  MenubarSubTrigger,
+  MenubarSubContent,
+} from './ui/menubar'
+export {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuTrigger,
+  NavigationMenuContent,
+  NavigationMenuLink,
+  NavigationMenuIcon,
+  NavigationMenuPortal,
+  NavigationMenuPositioner,
+  NavigationMenuPopup,
+  NavigationMenuViewport,
+  NavigationMenuBackdrop,
+} from './ui/navigation-menu'
+export { Resizable, ResizablePanel, ResizableHandle } from './ui/resizable'
+export {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetFooter,
+  SheetTitle,
+  SheetDescription,
+  SheetClose,
+} from './ui/sheet'
 export { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip'
 export type { TooltipProps, TooltipTriggerProps, TooltipContentProps } from './ui/tooltip'
 export {
