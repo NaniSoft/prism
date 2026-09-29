@@ -1032,6 +1032,17 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'ProcessFlow01',
+    slug: 'process-flow-01',
+    kind: 'block',
+    category: null,
+    description:
+      'A pipeline of any length, drawn in order across as many lines as it needs, with a continuous ordinal and an optional label on the last stage.',
+    source: 'src/blocks/process-flow-01/index.tsx',
+    exports: ['ProcessFlow01'],
+    status: 'stable',
+  },
+  {
     name: 'RunConsole01',
     slug: 'run-console-01',
     kind: 'block',

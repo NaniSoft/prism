@@ -2162,6 +2162,44 @@
       ]
     },
     {
+      "name": "process-flow-01",
+      "title": "Process Flow 01 - Stages In Order, Wrapping",
+      "description": "A pipeline of any length, drawn in order across as many lines as it needs, with a continuous ordinal and an optional label on the last stage. One ordered list, so a wrapped flow is still read as a sequence. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/process-flow-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/process-flow-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/process-flow-01/process-flow.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/process-flow-01/process-flow.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "process-rail-01",
       "title": "Process Rail 01 - Steps On One Line",
       "description": "A process drawn as a rail: two, three or four steps on one line, each with an ordinal, a name and one caption, with an optional label on the last step. The type refuses a fifth step. Every string is passed in as a prop.",
