@@ -1,0 +1,94 @@
+---
+slug: components/button-group
+title: ButtonGroup
+---
+
+## Overview
+
+A ButtonGroup is a set of related controls joined as one, with the focus ring drawn
+once around the group rather than once per button. That is the reason it is a
+Component and not a flex row: three buttons in a row each drawing their own ring
+means a reader tabbing along the row watches three indicators march across a control
+that reads as one thing.
+
+## Usage
+
+```tsx
+import { ButtonGroup } from '@nanisoft/prism-ui/components/button-group'
+import { Button } from '@nanisoft/prism-ui/components/button'
+
+<ButtonGroup label="Text alignment">
+  <Button variant="outline">Left</Button>
+  <Button variant="outline">Centre</Button>
+  <Button variant="outline">Right</Button>
+</ButtonGroup>
+```
+
+<ComponentDemo slug="button-group" />
+
+## Guidelines
+
+### When to use
+
+Use a ButtonGroup for controls that operate on the same thing and that a reader
+reaches together: an alignment set, an undo and redo pair, a zoom stepper, a view
+switcher, a set of mutually exclusive views.
+
+The signal is that the controls are alternatives or steps within one operation, so
+moving between them is not moving between tasks. A row of three unrelated actions
+beside a form is a row of buttons.
+
+### When not to use
+
+Do not use one for actions that are not alternatives. Save, Cancel and Duplicate are
+three commands, and joining them says they are one. Put them in a `DialogFooter` or
+a toolbar instead.
+
+Do not use one for a row of links. A joined row of anchors reads as tabs, and links
+that navigate are not tabs.
+
+Do not use one where the members are a form's submit row. A primary action among
+secondary ones is a hierarchy, and a joined group has one frame, which is a
+contradiction.
+
+Do not use one for more than about five members. A joined row of seven stops being
+readable as a set and the ring around it stops meaning "these are one thing",
+because the group is now wider than it is tall.
+
+### Best practices
+
+- Always pass `label`. A row of three buttons is announced as three buttons and
+  nothing else, and on a page with four such rows a reader who tabs into one cannot
+  tell which they are in.
+- Compose `Button variant="outline"` inside it. The group draws the frame and
+  removes the members' own borders, and an outline button is the one whose border is
+  safe to remove; a `default` button inside a group has no border to collapse, so
+  the join is a gap.
+- Keep the members the same size. The ring is drawn around the group's bounds, and
+  a group of three different heights has a frame that does not fit what is inside
+  it.
+- Do not put a disabled member at an end and expect the ring to shrink; the frame is
+  the frame. Reach for a different composition instead.
+- Use `orientation="vertical"` for a set that belongs beside a field rather than
+  under it, and pass it, because the group states its orientation and the arrow keys
+  and the geometry have to agree with it.
+
+### Accessibility
+
+**The ring is drawn on the group, once, and the members drop their own.** The cost is
+stated rather than hidden: a ring drawn around a group is on the group, so it is
+visible whether the focus arrived from the keyboard or from a click. That is a real
+trade and it is the right one here, because a group of mutually exclusive or
+sequential actions is nearly always operated from the keyboard, and the ambiguity of
+a ring on a click is much cheaper than three rings marching. A caller who needs the
+per-button indicator back composes a `Toolbar`, which is a different Component with
+a different claim.
+
+The group is a `group` with a name, not a `toolbar`. A toolbar is a set of controls
+that operates on a document, with its own arrow-key model, and a ButtonGroup is
+usually a set of related actions rather than an editing surface. `group` says "these
+belong together" and stops there, which is the claim being made here.
+
+Every member is still a tab stop in the document's order. A joined group is not a
+composite widget: the composite model belongs to a `Toolbar` and a `RadioGroup`, and
+borrowing it would take away a reader's ability to reach the third button directly.

@@ -1,0 +1,90 @@
+---
+slug: components/native-select
+title: NativeSelect
+---
+
+## Overview
+
+A NativeSelect is a native `<select>`, styled to match the rest of this package. It
+is not a second `Select`: the `Select` in this package is Base UI's, a `<button
+role="combobox">` and a popup list, and this is the platform element. Everything the
+browser does with a `<select>` it still does, and the styling is Prism's.
+
+## Usage
+
+```tsx
+import { NativeSelect } from '@nanisoft/prism-ui/components/native-select'
+import { Field, FieldLabel } from '@nanisoft/prism-ui/components/field'
+
+<Field>
+  <FieldLabel htmlFor="density">Density</FieldLabel>
+  <NativeSelect id="density" name="density" defaultValue="comfortable">
+    <option value="compact">Compact</option>
+    <option value="comfortable">Comfortable</option>
+  </NativeSelect>
+</Field>
+```
+
+<ComponentDemo slug="native-select" />
+
+## Guidelines
+
+### When to use
+
+Use a NativeSelect when the platform's picker is better than anything this package
+could draw. A long list of plain strings on a phone, where the OS wheel is exactly
+what the reader expects and a custom popup is not. A form that must submit without
+JavaScript. A control in a page that is already a form and gains nothing from a
+popup that is portalled, positioned and dismissed.
+
+Use it when the options are plain strings. That is the whole of the constraint: an
+`<option>` holds text and nothing else.
+
+### When not to use
+
+Do not use it when an option is more than a string. No description, no count, no
+state, no nested markup, no icon. An option that needs any of those belongs in the
+package's `Select`, whose items are arbitrary content.
+
+Do not use it inside a product UI that never uses a native control anywhere else.
+A platform picker appearing in one field of an otherwise custom product is a moment
+where the design system stops, and it reads as a bug to a reader who has not seen
+the platform's own controls in a while.
+
+Do not use it for a searchable set. There is no type-ahead across a long list beyond
+the platform's own first-letter match, and a reader looking for one of two hundred
+regions needs a `CommandPalette`.
+
+### Best practices
+
+- Pass `name` and put it inside a form. A native select submits because it is the
+  element the HTML specification says submits, and a select outside a form with no
+  name submits nothing.
+- Put a `FieldLabel` beside it. A select with no name is announced as "combo box",
+  which is the same words as every other select on the page.
+- Use `defaultValue` for an uncontrolled field and `value` with a handler when the
+  choice has to be read back. Both shapes are supported, and mixing them is how a
+  field ends up disagreeing with itself.
+- Keep the options short. A long label in a native picker is truncated by the
+  platform with no way to see the rest.
+- Do not style the options. The platform renders them, and a caller who tries gets
+  a control that looks styled until it is opened.
+
+### Accessibility
+
+The control is the platform element, so its accessible name, its value, its
+announced option count and its keyboard model are the platform's and are thirty
+years of behaviour rather than an implementation in this package. It is one tab
+stop, and the platform's own keys open it.
+
+The chevron is `aria-hidden` and it is not focusable. The platform already announces
+the value, and a reader hearing "graphic" after every option set is being told
+something about the drawing rather than about the value.
+
+**Why there are two of these.** The package's `Select` is a custom control: it needs
+JavaScript to open, it cannot be operated by the mobile picker a reader expects when
+they tap a select on a phone, it is invisible to a right-click menu that offers
+"Save as", and it is a set of `div`s where the browser's own is one element. This
+Component is for the cases where those are the wrong trade. Neither is a compromise
+version of the other; they are answers to different questions, and the line between
+them is whether the option needs to be more than a string.

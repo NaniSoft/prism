@@ -1,0 +1,104 @@
+---
+slug: components/item
+title: Item
+---
+
+## Overview
+
+An Item is a row: media, a text block, a value and trailing controls. It is the
+row rather than the list, which is the decision worth knowing about: a caller
+writes the list element its content actually is and composes Items into it.
+
+An Item is a `div`, not a `li`, because the same row appears in a `ul`, in a
+definition list, in a card grid and in a table cell, and a Component that owned the
+list would have to own all four. What a caller stops writing is the row.
+
+## Usage
+
+```tsx
+import { Item, type ItemEntry } from '@nanisoft/prism-ui/components/item'
+
+const rows: ItemEntry[] = [
+  {
+    id: 'tokens',
+    media: <ProductMark id="tokens" name="Tokens" />,
+    title: 'Prism Tokens',
+    description: 'Foundation and semantic tokens',
+    meta: '0.9.0',
+    href: '/packages/tokens',
+    actions: <Button size="sm" variant="outline">Open</Button>,
+    selected: true,
+  },
+]
+
+<ul aria-label="Packages">
+  {rows.map((row) => (
+    <li key={row.id}>
+      <Item entry={row} />
+    </li>
+  ))}
+</ul>
+```
+
+<ComponentDemo slug="item" />
+
+## Guidelines
+
+### When to use
+
+Use an Item for a set of things that share a shape: a search result, a file in a
+tree, a package in a list, a row in a settings index, a person in a mention list.
+The signal is that every entry has the same parts, in the same places, whatever the
+entry is.
+
+Reach for it when a list has been hand-rolling its rows. A column of divs with
+`gap-3 px-3` on each one is a column whose geometry drifts the first time somebody
+adds a thumbnail to one row and not the others.
+
+### When not to use
+
+Do not use an Item for one thing. A single row on its own is not a set, and an
+Item used alone is a row with no siblings to line up against.
+
+Do not use it where the entries are records with columns. That is a `Table`, and a
+row of Items in a grid is a table a reader has to read cell by cell because the
+semantics are not there.
+
+Do not use it to select. An Item shows a thing; a control that changes what the
+page shows is a `Toggle`, a `Switch` or a `RadioGroup`, and an Item that both shows
+a thing and toggles it is two components wearing one row.
+
+### Best practices
+
+- Give `href` to any row that goes somewhere. The trailing actions are *in
+  addition to* the destination, never instead of it. A row of forty whose only
+  destination is behind a kebab menu is a list a screen reader cannot read, because
+  a menu's contents are not in the document until the menu is open.
+- Keep `actions` for the things that are not the destination: remove, duplicate,
+  open in a new tab. If an action is the only way to reach the row, the row needs
+  an `href`.
+- Omit the optional parts rather than passing an empty string. An Item drops any
+  part given `null`, `undefined` or `false`, so `description={cond && <span/>}` is
+  safe and a reserved gap is not.
+- Set `selected` on exactly one row, and note that it sets `aria-current` as well
+  as the surface. A selection that is only a colour is invisible to a reader who
+  cannot separate the two inks.
+- Pass a stable `id`. A list that filters and reorders has a reader's focus and a
+  screen reader's announcement land on a different row when one is inserted above
+  it, and an id that is the row's own key is what prevents that.
+
+### Accessibility
+
+The row keeps no role, because it is not a list: the caller's `ul` supplies
+`listitem`, the count and the position, and a `role="listitem"` here would need a
+list ancestor to mean anything and would silently stop meaning anything in a grid.
+
+The title renders a native anchor when the row has an `href`, so a reader can see
+the address before taking it, open it in a new context, and copy it.
+
+**The title is deliberately not stretched over the row.** The obvious treatment for
+a clickable row is an anchor with `position: absolute; inset: 0` and the actions
+raised above it, which makes the whole row a hit target. It is refused here because
+the ring belongs to the anchor, and an anchor stretched over a row is a box that
+sized itself to the text inside it, so the focus ring a keyboard reader sees is a
+ring around the words rather than around the thing they are about.

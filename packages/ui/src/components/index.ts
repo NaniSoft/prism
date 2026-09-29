@@ -165,6 +165,15 @@ export {
   NavigationMenuBackdrop,
 } from './ui/navigation-menu'
 export { Resizable, ResizablePanel, ResizableHandle } from './ui/resizable'
+export { Item } from './ui/item'
+export { ScrollArea } from './ui/scroll-area'
+export { AspectRatio } from './ui/aspect-ratio'
+export { Carousel } from './ui/carousel'
+export { Toggle } from './ui/toggle'
+export { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
+export { NativeSelect } from './ui/native-select'
+export { ButtonGroup } from './ui/button-group'
+export { TableSort } from './ui/table-sort'
 export {
   Sheet,
   SheetTrigger,

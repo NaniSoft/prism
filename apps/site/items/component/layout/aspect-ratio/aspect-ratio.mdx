@@ -1,0 +1,83 @@
+---
+slug: components/aspect-ratio
+title: AspectRatio
+---
+
+## Overview
+
+An AspectRatio is a box whose height follows its width at a stated ratio. It holds
+arbitrary content: a video, a screenshot, a map, a placeholder that has not loaded.
+
+The ratio is a prop rather than a class, and that is the whole reason this is a
+Component. Prism's stylesheet scans Prism's own source and Tailwind is this
+package's internal build dependency, never the consumer's, so a utility a consumer
+types into their own `className` appears in no Prism source file and is in no
+emitted stylesheet. `aspect-[4/3]` in a consumer's markup is a silently missing
+rule and a box at whatever ratio its content happens to have.
+
+## Usage
+
+```tsx
+import { AspectRatio } from '@nanisoft/prism-ui/components/aspect-ratio'
+
+<AspectRatio ratio={16 / 9}>
+  <video src="/demo.mp4" controls className="size-full" />
+</AspectRatio>
+```
+
+<ComponentDemo slug="aspect-ratio" />
+
+## Guidelines
+
+### When to use
+
+Use an AspectRatio for content whose intrinsic proportions are known and whose box
+is not: a 16:9 video, a 4:3 photograph, a square avatar tile, a 3:2 card image.
+
+Use it for a placeholder. A skeleton that reserves the right shape stops the page
+from jumping when the content arrives, and a box with no reserved shape is a box
+that reflows everything under it the moment an image loads.
+
+### When not to use
+
+Do not use one where the content sets its own height. Text does not have a ratio, and
+a paragraph in a 16:9 box is a paragraph with a large empty region under it.
+
+Do not use one for a drawing. That is a `Diagram`, and the two do not overlap: a
+Diagram draws nodes and the relations between them into a fixed canvas whose
+proportions are its own, and it is `role="img"`, so everything inside it is
+presentational. An AspectRatio holds arbitrary content and keeps it in the
+accessibility tree, which is what a video player or a chart with its own controls
+needs.
+
+Do not use one to crop. It clips, and a clip that removes half a face is a crop the
+reader did not ask for. Put the object-fit on the content and leave the box alone.
+
+### Best practices
+
+- Pass the real ratio as a number: `16 / 9`, `4 / 3`, `1`. A keyword set is closed
+  and short of every ratio a caller actually has.
+- Let the content fill the box. The Component clips, so a child that does not fill
+  it is a child that shows a gap.
+- Pass `overflow-visible` through `className` when the content genuinely should
+  escape. That is a decision about the caller's content rather than about the
+  ratio, and it is the only override the Component has.
+- Do not compute a ratio from data that has not arrived without handling the
+  result. A `NaN` or a `0` is not a ratio, and the Component draws the default
+  rather than collapsing the box, but a caller who never asks for the real ratio
+  will find the default every time.
+
+### Accessibility
+
+The box holds no role and no name. It is a layout box, and giving it a role would be
+a claim it cannot make: a ratio says nothing about what is inside it.
+
+The important property is what it does *not* do. Unlike a `Diagram`, it does not
+make its content presentational, so a video's own controls, a chart's table
+alternative and a link inside an image are all reachable by a screen reader. That
+is the difference between the two Components and the reason they are two rather than
+one with a prop.
+
+A ratio that cannot be drawn falls back to the default and reports the value it
+refused on the element as `data-ratio`, so a substituted ratio is visible in the
+markup rather than only in a screenshot.

@@ -1,0 +1,109 @@
+---
+slug: components/toggle-group
+title: ToggleGroup
+---
+
+## Overview
+
+A ToggleGroup is a set of toggles that behave as one control. The single or multiple
+decision is a prop, and it changes what the group *is* rather than how it looks.
+
+In `single` mode the group is a radiogroup and its members are radios carrying
+`aria-checked`. In `multiple` mode the group is a toolbar and its members are
+pressed buttons carrying `aria-pressed`, and the arrow keys move focus without
+choosing. Those two look identical in a screenshot and are different controls.
+
+## Usage
+
+```tsx
+import { ToggleGroup, ToggleGroupItem } from '@nanisoft/prism-ui/components/toggle-group'
+
+// One answer among several. A radiogroup.
+<ToggleGroup defaultValue={['week']} aria-label="Range">
+  <ToggleGroupItem value="day">Day</ToggleGroupItem>
+  <ToggleGroupItem value="week">Week</ToggleGroupItem>
+  <ToggleGroupItem value="month">Month</ToggleGroupItem>
+</ToggleGroup>
+
+// Several independent toggles. A toolbar.
+<ToggleGroup selectionMode="multiple" defaultValue={['grid']} aria-label="Overlays">
+  <ToggleGroupItem value="grid">Grid</ToggleGroupItem>
+  <ToggleGroupItem value="axes">Axes</ToggleGroupItem>
+</ToggleGroup>
+```
+
+<ComponentDemo slug="toggle-group" />
+
+## Guidelines
+
+### When to use
+
+Use a single-selection group for a small visible set where exactly one answer is
+right and the reader should see all the answers at once: a density, an alignment, a
+zoom level, a date range, a view mode. Three to five members is the range where a
+group beats a select; past that, the members stop being scannable and a `Select` is
+the honest answer.
+
+Use a multiple-selection group for a set of independent switches a reader turns on
+and off: which overlays are visible, which columns are shown, which filters are
+active.
+
+### When not to use
+
+Do not use a single-selection group for a long option list. Seven members with long
+labels stop being scannable and become a form field, and a `Select` says "there are
+many of these" where a group says "these are the ones".
+
+Do not use a multiple-selection group where the members are not independent. Two
+overlays that cannot both be on are one question with two answers, and a
+multiple-selection group that lets a reader set both is a control that has agreed
+with an impossible state.
+
+Do not use a group for actions. A group of "Save", "Cancel" and "Duplicate" is a
+`ButtonGroup`, and a Toggle says a state where a Button says a command.
+
+Do not use a group for a binary setting. That is a `Switch` or a `Checkbox`, and a
+two-member group is a control with a keyboard model a reader did not need.
+
+### Best practices
+
+- Always pass `aria-label`. A group of toggles with no name is announced as an
+  unnamed group, and a page with four of them is a page where a reader cannot tell
+  which they are in.
+- Choose `selectionMode` from the constraint, not from the look. "Only one at a
+  time" is `single`; "any number" is `multiple`. If a reader can turn two on, it is
+  `multiple` whatever the data model says.
+- Keep the members short. A group member is a button with a label beside four
+  others, so a label that wraps turns the row into two ragged rows.
+- In `multiple` mode, treat the pressed set as the state and do not derive it from
+  anything else. The value is an array in press order, and the group reports the
+  whole array rather than a difference so a caller can restore it.
+- In `single` mode, handle an empty value. Pressing the pressed member clears the
+  selection, which is a real state when the question has an optional answer.
+
+### Accessibility
+
+**The role is the decision, and it is the reason this is a Component.** Three
+buttons carrying `aria-pressed` say three independent things can be on at once,
+which is a lie about a set of mutually exclusive choices, and a reader of the
+accessibility tree is left to infer the constraint from nothing. In `single` mode
+the group is a radiogroup and the members are radios with `aria-checked`, which is
+the only description of the constraint that is true.
+
+**The arrow keys do different things in the two modes.** In a single-selection group
+they move *and* choose, which is what a radiogroup does. In a multiple-selection
+group they move focus only, because arrowing past a member of a toolbar of
+independent toggles must not silently turn it on; Space is what presses.
+
+**The group is one Tab stop and it is the current answer.** Tab enters on the
+pressed member, or on the first member when nothing is pressed, and Tab leaves in
+one step. A radiogroup whose Tab lands on the first option when a different one is
+checked reports the wrong current value through the tab order alone.
+
+**The tab stop follows the reader once they move.** A reader who arrows across a
+group and Tabs away expects to arrive back where they were, so the stop is state
+rather than a value recomputed on every render.
+
+**Disabled members are skipped by the arrows** rather than focused and doing
+nothing, and the order the arrows walk is the group's own children, so it is the
+order the reader sees and the order a reordering caller declared.
