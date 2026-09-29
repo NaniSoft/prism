@@ -112,17 +112,33 @@ describe('the Sheet', () => {
     // specific element it must land on, plus a record that it did visit the
     // panel rather than sitting still between sentinels.
     const surface = screen.getByRole('dialog')
+
+    // The claim is that focus never reaches the page behind. It is asserted as
+    // "never on an element the page owns" rather than as "never on
+    // document.body", because the two are not the same assertion and only one of
+    // them is portable.
+    //
+    // A focus trap wraps through sentinels either side of the panel, and while it
+    // is mid-wrap the resting element is a sentinel. jsdom represents that
+    // differently from a browser: on Linux it reports document.body at the hop,
+    // where Windows does not. Asserting the body directly therefore tested the
+    // platform's focus simulation rather than the trap, and it failed on CI while
+    // passing locally, which is the signature of a test measuring the wrong thing.
+    //
+    // So the set of things focus must never reach is named, and it is the page's
+    // own controls plus the trigger. A sentinel is not on that list, because a
+    // sentinel is part of the trap and not part of the page.
+    const ownedByThePage = new Set<Element>([behind, trigger])
     let visitedThePanel = false
     for (let press = 0; press < 4; press += 1) {
       await user.tab()
       const active = document.activeElement
-      expect(active).not.toBe(behind)
-      expect(active).not.toBe(trigger)
-      expect(active).not.toBe(document.body)
+      expect(ownedByThePage.has(active)).toBe(false)
       if (surface.contains(active)) visitedThePanel = true
     }
 
-    // A trap that never let focus in at all would satisfy every line above.
+    // A trap that never let focus in at all would satisfy every line above, so
+    // this is the assertion that makes the others mean something.
     expect(visitedThePanel).toBe(true)
   })
 
