@@ -1,5 +1,19 @@
 # @nanisoft/prism-ui
 
+## 0.10.2
+
+### Patch Changes
+
+- `Hero01`'s headline and supporting line take a node rather than a string
+  
+  `SectionHeading` has always taken a `ReactNode` for both, so a `string` here made
+  this Block the odd one out rather than making it stricter. Three of the five
+  product sites set the emphasised word in their own mark inside the headline, so
+  the narrow type would have cost each of them the emphasis or a second component.
+  
+  A widening, and additive. Every string a site renders is still the site's own, and
+  `check-block-copy.mjs` still holds this Block to shipping no copy of its own.
+
 ## 0.10.1
 
 ### Patch Changes
