@@ -133,8 +133,12 @@ describe('the Sheet', () => {
     for (let press = 0; press < 4; press += 1) {
       await user.tab()
       const active = document.activeElement
-      expect(ownedByThePage.has(active)).toBe(false)
-      if (surface.contains(active)) visitedThePanel = true
+      // Null is a real possibility while a trap wraps and is not a page control, so
+      // it is handled rather than asserted through a cast.
+      if (active !== null) {
+        expect(ownedByThePage.has(active)).toBe(false)
+        if (surface.contains(active)) visitedThePanel = true
+      }
     }
 
     // A trap that never let focus in at all would satisfy every line above, so
