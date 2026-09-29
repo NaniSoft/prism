@@ -63,7 +63,7 @@ export type PulseSeriesProps = PulseSeriesFigure & {
    * with nothing in it is a mistake in the caller's data rather than a state
    * worth an empty message.
    */
-    bars: PulseBar[]
+    bars: readonly PulseBar[]
     /**
      * The line the columns rise from: the zero of the caller's units, named so a
      * reader is told what the columns are counted from rather than left to infer

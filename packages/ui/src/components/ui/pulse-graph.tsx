@@ -82,7 +82,7 @@ type PulseFigure = {
    * with nothing in it is a mistake in the caller's data and not a state worth
    * rendering a friendly empty message for.
    */
-  nodes: PulseNode[]
+  nodes: readonly PulseNode[]
   /**
    * The relations drawn between them. A relation naming a node that is not in
    * `nodes` is dropped, and the count of dropped relations is on the element as
@@ -90,7 +90,7 @@ type PulseFigure = {
    * silently did not draw is the failure this Component exists to make
    * impossible.
    */
-  relations?: PulseRelation[]
+  relations?: readonly PulseRelation[]
   /**
    * Layout only, exactly as on every Component: grid placement and width.
    * Changing a Prism-owned visual property from here is prohibited.

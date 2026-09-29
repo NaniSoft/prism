@@ -1,5 +1,23 @@
 # @nanisoft/prism-ui
 
+## 0.10.1
+
+### Patch Changes
+
+- A drawing's data props accept a read-only array
+  
+  `PulseGraph`, `PulseSeries` and `Diagram` took `SomeNode[]` rather than
+  `readonly SomeNode[]`, so a consumer whose content is held as `as const` had to
+  copy the array at every call site to satisfy the type. Every NaniSoft product site
+  holds its landing content as `as const`, so the copy was not optional: the first
+  consumer to compose a running hero had to write `nodes={[...FIGURE.nodes]}` to get
+  it to compile, which is a cost in exchange for nothing.
+  
+  The props now take a read-only array. This is a widening, so it is additive rather
+  than breaking, and it is the correct shape for a prop that only reads its data: a
+  Component that mutates an array a caller passed is a Component that has taken
+  ownership of it, and none of these three do.
+
 ## 0.10.0
 
 ### Minor Changes
