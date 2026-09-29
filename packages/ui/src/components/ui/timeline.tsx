@@ -80,18 +80,31 @@ export interface TimelineProps extends Omit<ComponentProps<'ol'>, 'children'> {
 }
 
 /**
- * The mark each state draws, and the fill of its duration bar.
+ * The border each state draws its mark in.
  *
- * Every mark is a ring rather than a filled dot, for the measurement reason the
- * StatusLedger01 mark gives: a filled pastel dot fails contrast against a light
- * card, and a state a reader cannot see is not a state. The ring carries the state
- * and the entry's own words carry it too, so nothing here is colour alone.
+ * Every mark is a ring and none of them is filled, for two reasons that point the
+ * same way. The first is the measurement the StatusLedger01 mark gives: a filled
+ * pastel dot fails contrast against a light card, and a state a reader cannot see
+ * is not a state. The second is uniformity: one geometry for all four states means
+ * a reader scanning the column is comparing colours rather than shapes, and a
+ * column where some marks are solid and some are hollow is a column to decode.
+ *
+ * A ring also needs no background of its own. An unfilled mark shows the surface
+ * behind it, which is the page ground or the card it is on, and a ground-coloured
+ * interior inside a coloured ring is exactly what a ring looks like. A filled
+ * variant had to paint `bg-background` into the middle to avoid rendering as a
+ * transparent hole, and that is a fill declaring a surface while carrying nothing
+ * on it.
+ *
+ * The state is not carried by the colour alone. The mark is `aria-hidden` and the
+ * entry's own words carry it, so a reader who cannot separate the four borders
+ * still reads "Failed to fetch" on the entry itself.
  */
 const STATE_MARK: Record<TimelineState, string> = {
-  pending: 'border-border bg-background',
-  running: 'border-primary bg-background',
-  done: 'border-brand-ink bg-brand-ink',
-  failed: 'border-destructive bg-destructive',
+  pending: 'border-border',
+  running: 'border-primary',
+  done: 'border-brand-ink',
+  failed: 'border-destructive',
 }
 
 const STATE_BAR: Record<TimelineState, string> = {
