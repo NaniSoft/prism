@@ -62,9 +62,9 @@ export type DiagramRelation = {
 /** What both arms of `DiagramProps` carry. */
 type DiagramFigure = {
   /** The things drawn. At least one, or the Diagram renders an empty canvas. */
-  nodes: DiagramNode[]
+  nodes: readonly DiagramNode[]
   /** The relations drawn between them. A relation naming a node that is not in `nodes` is dropped. */
-  relations: DiagramRelation[]
+  relations: readonly DiagramRelation[]
   /**
    * Layout only, exactly as on every Component: grid placement and width.
    * Changing a Prism-owned visual property from here is prohibited, and this
