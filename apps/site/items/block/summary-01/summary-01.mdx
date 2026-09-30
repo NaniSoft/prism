@@ -1,0 +1,142 @@
+---
+slug: blocks/summary-01
+title: Summary01
+---
+
+## Overview
+
+Summary01 is a set of line items and their total, as a real table: a row header on
+every line, an optional subtotal, a required total, a footnote and a slot for the
+control that follows. The storefront's version of this pattern is an order summary,
+and the pattern is the same: lines, a total, and the rules that qualify both.
+
+It is a real `<table>` because a summary is read down the line column and across
+the amount column, and a reader using a screen reader navigates it by asking for a
+column and hearing its heading. That reader's question is nearly always a
+comparison, and a grid of divs has no columns to ask for.
+
+## The total is required, and it is a prop
+
+A summary without a total is a list, so `total` is required. And a summary that
+computed one would be pricing a caller's catalogue with the caller's rules it
+cannot see: a threshold discount, a credit already on the account, a tax that
+depends on where the reader is, a floor, a rounding rule applied once at the end.
+So the caller states both the lines and the figure they come to.
+
+`totalLabel` is a separate prop for the same reason. "Total", "What you pay" and
+"Due today" are three products' decisions, and the last is a claim about when money
+moves, which Prism is in no position to make.
+
+## The three states need your words
+
+`included`, `excluded` and `optional` are the three positions a line can be in
+relative to the set, and they are not `Status`'s five tones narrowed. A line is
+not blocked and a line is not degraded. The third state is the one a storefront
+has and a design system is most likely to drop, and it is the reason the union
+exists: `optional` is the only one of the three that asks a question.
+
+`stateLabel` is required whenever `state` is given, and the run throws without it.
+An excluded line is a claim about a contract, and "Not included", "Available on the
+Scale plan" and "Requires a seat" are three different promises.
+
+## Usage
+
+```tsx
+import { Button } from '@nanisoft/prism-ui/components/button'
+import { Summary01, type SummaryLine } from '@nanisoft/prism-ui/blocks/summary-01'
+
+const LINES: SummaryLine[] = [
+  {
+    id: 'collectors',
+    label: 'Market collectors',
+    detail: 'One per exchange feed you connect.',
+    value: '4 included',
+    state: 'included',
+    stateLabel: 'In the Scale plan',
+  },
+  {
+    id: 'runners',
+    label: 'Agent runners',
+    value: 'GBP 240.00 per month',
+    state: 'optional',
+    stateLabel: 'Billed separately if you add one',
+    href: '/pricing/runners',
+    hrefLabel: 'How runners are priced',
+  },
+  {
+    id: 'sso',
+    label: 'Single sign-on',
+    value: 'Not available on this plan',
+    state: 'excluded',
+    stateLabel: 'Held on the Enterprise plan',
+  },
+]
+
+export function WhatThisPlanIncludes() {
+  return (
+    <Summary01
+      eyebrow="Nexus"
+      title="What the Scale plan includes"
+      columns={[
+        { id: 'line', header: 'Capability' },
+        { id: 'state', header: 'Where it stands' },
+        { id: 'amount', header: 'What it costs' },
+        { id: 'href', header: 'More' },
+      ]}
+      lines={LINES}
+      totalLabel="Due today"
+      total={{ amount: 240, currency: 'GBP', locale: 'en-GB' }}
+      footnote="Counted per completed run. A run that fails before its first tool call is not counted."
+      actions={<Button>Start the trial</Button>}
+      empty="This plan lists nothing yet."
+    />
+  )
+}
+```
+
+<ComponentDemo slug="summary-01" />
+
+## Guidelines
+
+### When to use
+
+Use Summary01 where a reader is checking what a set of things includes and what
+they come to together. That is a plan, a quote, a renewal and a receipt, and the
+four are the same frame.
+
+Use it where the reader's real question is a comparison between lines. That is what
+the table is for, and it is why this is a table rather than a list.
+
+### When not to use
+
+Do not use it for a price list per unit. That is `RateCard01`, and the difference is
+that a rate card is one column of amounts against bands of usage rather than a set
+of claims with a total.
+
+Do not use it for a plan comparison across products. That is `PricingCompare01`,
+whose whole claim is a matrix, and a summary is one column wide.
+
+### Best practices
+
+- Name every column you draw, and name the `line` and `amount` cells. A column with
+  no name is a column a screen reader user has to be told about out loud.
+- Pass a `stateLabel` with every `state`. The run throws without one, and the
+  fallback would be the machine value printed into a pricing table.
+- State the total rather than deriving it. The figure is the one thing on the page
+  a reader cannot check for themselves, which is exactly why it should be yours.
+- Put the rounding rule and the billing granularity in `footnote`. That is the
+  sentence that qualifies every number above it.
+- Compose the control that follows into `actions` rather than naming one. A
+  product that sells seats and a product that starts a trial end in different
+  controls.
+
+### Content guidelines
+
+- Write a `line` label as a short noun phrase naming the capability. It is scanned
+  down a column.
+- Write a `detail` as the qualifier the label has no room for, and put a link in it
+  when the feature is worth reading about.
+- Write a `value` as what the line is worth, which is often not an amount. "Ten
+  thousand rows" and "GBP 0" are both values and only one of them is money.
+- Write a `stateLabel` as a claim about the contract, in the words the contract
+  uses.

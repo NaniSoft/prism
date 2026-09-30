@@ -1,0 +1,8 @@
+{
+  "name": "resource-list-01",
+  "title": "Resource List 01 - A Document And Download Index In A Real Table",
+  "description": "A document and download index drawn as a real table with column headers and a row header per document: a name, a kind, a reading for a size, a format or a last-changed moment, and a link. The column names are the caller's, the cells are the Block's, and groupBy renders a body per kind rather than a merged cell. Every string, and the whole set, is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "table", "cta-link"],
+  "dependencies": []
+}

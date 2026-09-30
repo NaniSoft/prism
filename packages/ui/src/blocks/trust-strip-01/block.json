@@ -1,0 +1,8 @@
+{
+  "name": "trust-strip-01",
+  "title": "Trust Strip 01 - Short Assurance Statements, One Per Mark",
+  "description": "A narrow single-row band of short assurance statements, each with a mark, and no visible heading. Prism draws the frame and the caller ships the words, so a strip of certifications, a strip of compliance marks and a strip of a customer count are the same component and none of them is Prism's to assert. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["typography", "section"],
+  "dependencies": ["lucide-react"]
+}

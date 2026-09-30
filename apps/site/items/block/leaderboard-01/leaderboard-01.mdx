@@ -1,0 +1,89 @@
+---
+slug: blocks/leaderboard-01
+title: Leaderboard01
+---
+
+## Overview
+
+Leaderboard01 is a ranked set: a position, a name, an optional mark, a figure with
+the caller's own sentence for it, an optional series beside it, and an optional
+destination. The order is the caller's and the Block never sorts, because a
+leaderboard ranked by a metric the Block cannot see is a list whose order the
+caller has to fix, and a `sort` prop would be a second derivation to keep in step
+with their own data.
+
+`valueLabel` is required on every entry, and it is the sentence the figure is
+announced as. "1,204 runs", "1,204 this month" and "1,204" are three different
+sentences about one figure, and a bare numeral beside a name tells a screen reader
+nothing about what it counts.
+
+`emphasis` is how a caller marks their own rows, and the mark is a border and a
+weight rather than a trophy, because a leaderboard is read by people who are on it.
+
+## Usage
+
+```tsx
+import { Leaderboard01, type Leaderboard01Entry } from '@nanisoft/prism-ui/blocks/leaderboard-01'
+
+<Leaderboard01
+  eyebrow="Last 30 days"
+  title="Who ran the most"
+  unit="runs"
+  entries={ENTRIES}
+  emphasis={['ada']}
+  empty="No runs in the last thirty days. The first one usually takes an afternoon."
+/>
+```
+
+<ComponentDemo slug="leaderboard-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for a small set a reader is ranking in their head: a dozen people, twenty
+projects, five machines. It is a list of names with a figure and a position, drawn
+so the position can be scanned down the leading edge.
+
+Use `rank={false}` for a set a reader is meant to read as peers, where the first
+three positions would say more about the page than about the entries.
+
+### When not to use
+
+Do not use it for a long set. Past about twenty entries a reader is comparing rather
+than ranking, which is a table, and a table is `DataTable01` with the caller's own
+header for every column.
+
+Do not use it for a set where the order is the point but you have not decided it. A
+leaderboard whose order was chosen by a default rather than by a query is a claim
+about who matters that nobody made.
+
+Do not use it where the figure is money and a currency belongs in the reading. The
+figure is a number and the number carries no unit, so the unit is your `unit` and
+the formatted reading is your `valueLabel`.
+
+### Best practices
+
+- Rank in your own query and pass the result. Do not expect this Block to sort, and
+  do not add a `sort` to your page around it: two orderings of one list that
+  disagree is a list whose order nobody can fix.
+- Write `valueLabel` as the figure at a period, and let `unit` be the noun. The row
+  is announced as the noun then your sentence, so a label that already names the
+  noun says it twice.
+- Pass `seriesLabel` whenever you pass a `series`. Two entries whose series are both
+  the last thirty days and one whose series is the same thirty days as a rate are
+  three pictures that look identical and mean three things.
+- Name ids in `emphasis`, not positions. A border that follows a position moves to a
+  different entry after a reorder.
+- Keep the figure in the units your `unit` names. A column of bare numerals reads
+  badly, and a locale-correct grouping is a decision about your readers rather than
+  one this Block can make.
+
+### Content guidelines
+
+- `name` is what a reader would say in conversation.
+- `valueLabel` is a sentence about the figure, in your product's voice, and it is
+  the reading every assistive technology is given.
+- `seriesLabel` names the series, such as "runs per day over the last fortnight".
+- `hrefLabel` says what following the link does. A link whose only words are a name
+  tells a reader nothing.

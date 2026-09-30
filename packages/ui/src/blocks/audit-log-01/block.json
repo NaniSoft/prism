@@ -1,0 +1,8 @@
+{
+  "name": "audit-log-01",
+  "title": "Audit Log 01 - An Append Only Record Of What Changed",
+  "description": "A record of what changed, where the moment, the actor, the target and the change are four separate props and the sixth column shows a before and an after through the Diff component, because Diff already states that it emphasises by weight rather than by colour since it is leaning on the two hues a reader is most likely to be unable to distinguish. A tone needs a caller supplied label whenever it is used and the run throws otherwise, and the order is the caller own because an audit trail that a Block reordered would be a claim about which record came first, and that claim is the record.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "table", "diff", "status", "cta-link"],
+  "dependencies": []
+}

@@ -1,0 +1,115 @@
+---
+slug: components/announcement
+title: Announcement
+---
+
+## Overview
+
+An Announcement is a page-level message bar, with an optional action and an
+optional dismiss. It ships `Announcement` and `AnnouncementTone`, and the five
+tones are the five the semantic contract publishes.
+
+**Every tone states its own fill and its own ink, and the reason is a measured
+failure rather than a preference.** An announcement is body text sitting on a
+coloured surface, so an inherited ink is not the page's foreground by accident: it
+is whatever happened to be behind the viewport, and the failure `Cta01` measured
+was 1.01:1 on exactly that arrangement. A tone that set only a fill would be the
+same bar in a different colour, and no token gate could see it, because the gate
+measures token pairs rather than what a Component leaves out.
+
+**The order is message, then action, then dismiss, and the order is a decision
+about where the eye goes.** The message comes first because it is the reason the
+bar exists. The action comes second because it is what to do about the message. The
+dismiss comes last because it is the only control in the bar that is about the bar
+rather than about the message, and a reader who reaches for it has already read
+the thing.
+
+**A dismissed bar hides itself, and Prism does not persist that.** The state is
+local, so a reload brings the message back, which is the honest behaviour for a
+notice about something still true. A stored dismissal is a record in a consumer's
+storage that says this reader has already been told, and it outlives the message.
+When it expires, whether it is scoped to a message rather than a page, and whether
+a reader who changes a setting should be told again, are decisions about the
+consumer's product. `onDismiss` is the seam: the bar hides itself, and the caller
+owns the half that outlives the page.
+
+## Usage
+
+```tsx
+import { Announcement } from '@nanisoft/prism-ui/components/announcement'
+
+<Announcement
+  tone="warning"
+  message="Two collectors stopped reporting."
+  action={<Button size="sm" variant="outline">See which</Button>}
+  dismissible
+  dismissLabel="Dismiss the collector notice"
+  onDismiss={remember}
+>
+```
+
+<ComponentDemo slug="announcement" />
+
+## Guidelines
+
+### When to use
+
+Use an Announcement for something true about the page right now that a reader
+would otherwise not learn: a background job finished, a setting took effect, a
+plan changed, a feature is temporarily degraded.
+
+Use it when the message is about the page rather than about one control. A failure
+beside the field that caused it is an `Alert`; a failure that blocks is a `Dialog`;
+a fact the reader did not have to be told is a `Toast`.
+
+### When not to use
+
+Do not use an Announcement for something the reader caused and must act on. A
+message that requires an action cannot sit in a bar a reader scrolls past, and the
+control that fixes it has to be somewhere the reader already is.
+
+Do not use it for content that is not transient. If the sentence is true next week
+too, it is a section of the page, not a bar above it.
+
+Do not use `destructive` for a mistake the reader made. It is for a failure they
+did not cause and would not otherwise learn: a payment declined on the server, a
+session that expired, a deploy that failed. A mistake belongs beside the control
+where the reader can see what to change.
+
+### Best practices
+
+- Keep the message to one sentence, or to a short block that a reader can read
+  without scrolling. The bar is a fixed band; a message that wraps to four lines
+  is a section wearing a bar's clothes.
+- Make the action a real link or a real button of your own. A bar at the top of a
+  page is the wrong place for the only route to the thing it is about, and a
+  reader who missed the bar cannot take an action that only existed inside it.
+- Use `info` for a notice and `warning` for something that will cost the reader
+  something if they ignore it. `info` wears the pack's own hue because it is the
+  strongest ink the contract offers on a coloured surface, and a notification is
+  not a decoration.
+- Keep the dismiss label specific. "Dismiss" is a word a reader has to interpret
+  against which of five bars it is, and four consumer products in two languages
+  cannot all be given "Close".
+- Keep the action to one word on a narrow screen. The bar holds three parts on one
+  line and the action is the one that gives way.
+
+### Accessibility
+
+The bar is a `role="status"` and not a `role="alert"`, and the difference is
+whether the reader is interrupted. An announcement is in the document rather than
+arriving into it: it is there on first paint, a reader can find it by browsing,
+and it is not a consequence of the thing they were doing a moment ago. An alert is
+assertive, which cuts across whatever the reader was reading, and that is right
+for a failure the reader caused and has to fix. The cost of `status` is real: a
+reader who arrives mid-page and never looks up misses the bar entirely, and the
+fix is where you place it, not a louder role.
+
+The dismiss control is required to be named whenever the bar can be dismissed, and
+the type makes that a requirement in that shape rather than a default. An
+icon-only control a reader reaches towards has to say what it is before they press
+it.
+
+The action and the dismiss are the last two tab stops in the bar, in that order,
+and the bar takes no focus itself. Nothing here calls `focus()`, so a reader who
+is typing is not interrupted by a notice arriving.

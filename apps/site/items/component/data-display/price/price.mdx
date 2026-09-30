@@ -1,0 +1,93 @@
+---
+slug: components/price
+title: Price
+---
+
+## Overview
+
+A Price is a monetary amount with its currency, optionally what it replaced and
+optionally what it is per. It is the one Component in this system that hands a
+number to the platform rather than printing it itself.
+
+The decision that shapes it is `Intl`. A library that hardcoded a dollar sign and
+two decimal places would be making two claims about every consumer that installed
+it: that the consumer's market is the one that writes dollars, and that the
+consumer's prices have two decimal places of meaning. Both are wrong somewhere in
+the world. `Intl` is the platform's own answer, and it is already localised.
+
+The second decision is that a comparison is a strikethrough rather than a Badge,
+because a strikethrough is the convention every reader already knows, and a Badge
+would put a filled surface and a colour on a claim about a price the consumer
+owns.
+
+## Usage
+
+```tsx
+import { Price } from '@nanisoft/prism-ui/components/price'
+
+<Price amount={19} currency="USD" locale="en-US" compareAt={29} period="/mo" />
+
+<Price
+  amount={19}
+  format={(amount) => `${new Intl.NumberFormat('de-DE', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(amount)}`}
+/>
+```
+
+## Guidelines
+
+### When to use
+
+Use a Price wherever a product states what something costs: a plan, a seat, a
+credit, a line item, a total. It is the Component for a figure whose unit is a
+currency, because a currency is a machine value a platform recognises rather than
+a sentence anyone has to translate.
+
+Pass `locale` on a page that serves more than one language. Omitted, the runtime's
+own default is used, which is the right answer on a server and the wrong one on a
+multilingual page.
+
+Pass `maximumFractionDigits` when the price has no meaningful fraction. A whole
+number of seats with `.00` on the end of every row is a price nobody believes.
+
+Use `compareAt` for the amount this one replaced, and `period` for what the amount
+is per, in the product's own words.
+
+### When not to use
+
+Do not use a Price for a figure that is not money. A token count, a quota and a
+duration are numbers with units, and a currency sign on any of them is a claim
+about what they are.
+
+Do not use it for a range or a "from" price. A formatter that has to assemble two
+amounts is a formatter, and passing one through `format` is how you do that here
+rather than a variant prop.
+
+Do not rely on a Price to hold a layout open while its amount loads. With no
+`amount` it renders nothing, which is the honest answer, and the consequence is
+that the row closes up and reopens. Reserve the space in the surrounding layout
+if the jump matters.
+
+Do not reach for a Badge to mark a discount. A Badge is a compact label with a
+surface. A comparison is a strikethrough.
+
+### Best practices
+
+- With no `amount`, a Price renders an empty fragment. That is deliberate: a dash
+  or a zero would claim the price is zero, which is a claim about a consumer's
+  revenue that no reader can disprove.
+- The period sits with the amount, before the comparison, so a struck-through
+  price never reads as another per-period figure.
+- `format` replaces the platform's formatter completely rather than adjusting it,
+  and the type is a union for that reason: a caller who passes `format` is not
+  also made to invent a currency code for a formatter that will never read it.
+- Sizes are the four authored type-scale steps and nothing else. `xl` is the
+  largest a price can be, because a price set larger than the title beside it stops
+  reading as a price.
+- Both amounts go through the same formatter, so the current price and the price
+  it replaced are never rendered by two different rules.
+
+<ComponentDemo slug="price" />

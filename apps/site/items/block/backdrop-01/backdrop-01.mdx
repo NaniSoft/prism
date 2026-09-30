@@ -1,0 +1,108 @@
+---
+slug: blocks/backdrop-01
+title: Backdrop01
+---
+
+## Overview
+
+Backdrop01 is a band whose content sits over a running figure. The figure is the
+caller's, usually a `SignalField` or a `PulseGraph`; the Block draws the layer it
+rides on, the cycle, an intensity, and a real control that stops the field. The
+band is a layout rather than a template, so the content itself is a slot.
+
+The motion is the second law of this system's motion scale. A cycle is a
+demonstration: something runs because the system does, and the movement is how
+the figure makes its claim visible rather than merely asserting it. The test for
+whether motion belongs here at all is falsifiable, and it is worth stating before
+anything else. Stop the animation and look at the band. If the figure is still
+true and every mark of it is still readable, the movement was emphasis and it
+belongs on a band. If stopping it leaves an empty rectangle, then the thing it was
+built from was never a figure: it was a video with extra steps, and the Component
+it was built with is the wrong one. So the question is asked of the figure rather
+than of the band, which is why `figure` is a required slot.
+
+The three decisions worth reading are the three below. Intensity is opacity and
+never a length, the pause is this Block's own button rather than a slot, and the
+figure is the claim half of the two the motion law sorts figures into, with the
+atmosphere half already owned by `SignalField`.
+
+## Usage
+
+```tsx
+import { Backdrop01 } from '@nanisoft/prism-ui/blocks/backdrop-01'
+import { SignalField } from '@nanisoft/prism-ui/components/signal-field'
+
+<Backdrop01
+  eyebrow="How it runs"
+  title="A line that finishes before anyone asks"
+  description="One collection site, one run, and a figure behind the band that says the same thing."
+  field="travel"
+  intensity="present"
+  pauseControl
+  pauseLabel="Pause the field"
+  resumeLabel="Resume the field"
+  label="The collection line, as a wavefront crossing the field"
+  figure={<SignalField count={40} drift />}
+>
+  <h3>Nothing here polls</h3>
+  <p>
+    The band runs because the pipeline runs. Stop the field and the sentence above
+    is still true, which is the only test that matters.
+  </p>
+</Backdrop01>
+```
+
+<ComponentDemo slug="backdrop-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for a band that has to say a system is doing something, where the copy
+alone would read as a brochure. The four NaniSoft framings all want one: a
+pipeline that runs, a market that is captured, an estate that is observed, and
+work that agents do.
+
+Use `drift` and `pulse` for any figure. They are the two whose resting form is the
+figure's own full form, so nothing is lost when the cycle is at either end of its
+turn. Use `travel`, `sweep`, `scan` and `shimmer` when the figure is drawn wider
+than the band, because those four carry something across a field and the band
+clips what leaves.
+
+Use `pauseControl` on a page that gives a reader reason to want the page still.
+
+### When not to use
+
+Do not use it as a wrapper for a video, a canvas or anything whose meaning is in
+its movement. The test above answers that case before you reach this Block.
+
+Do not use it for a figure that belongs in the layout rather than behind the
+copy. That is `InstrumentPanel01`, and a panel beside the copy says the same thing
+with a border and a title bar instead of an opacity.
+
+Do not reach for it to add movement to a page. There is no entrance animation,
+no scroll effect and no motion on text in this system, and this Block is the one
+place a cycle is allowed, which is exactly why it is not a decoration.
+
+### Best practices
+
+- Test the figure with the field stopped before you ship the band. If the figure
+  is still true, the motion is emphasis. If it is not, change the figure.
+- Leave `pauseControl` off and pass `paused` when the state belongs to something
+  larger than the band, and put the button in `children`. One state and several
+  bands is one state.
+- Prefer `intensity="subtle"` behind body copy. `present` is for a band with a
+  short line over it.
+- Give the figure a name that says what it shows. The Block publishes it, and a
+  field of dots is not something a screen reader should be asked to read.
+- Keep the copy short. It is sitting over a moving figure, which is the one
+  arrangement in this system where legibility is a real cost.
+
+### Content guidelines
+
+- `label` names the figure, not the band. "The collection line, as a wavefront
+  crossing the field" rather than "Our platform".
+- `pauseLabel` and `resumeLabel` are your own words, in your own language. Two
+  call sites that pass different words for the same control are the Block working.
+- The content in `children` is yours. There is no prop per arrangement, because
+  the arrangement is the thing the Block cannot know.

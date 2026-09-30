@@ -1,0 +1,8 @@
+{
+  "name": "chart-group-01",
+  "title": "Chart Group 01 - A Responsive Grid Of Chart Cards",
+  "description": "A grid of chart cards whose column count is derived from how many there are rather than passed: one card is full width, two sit side by side, and three or more are three across at the wide breakpoint and stack below it. Four across would give each figure about 16rem at the 72rem container, of which chart spends 3rem on a fixed axis gutter, so the three-across arrangement gives about 22rem per figure and that is the difference between reading a shape and guessing at one. Each card is the Chart Card 01 Block, so the panel is derived once.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "card", "metric", "chart-card-01"],
+  "dependencies": []
+}

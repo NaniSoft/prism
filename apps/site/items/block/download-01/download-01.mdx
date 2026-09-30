@@ -1,0 +1,113 @@
+---
+slug: blocks/download-01
+title: Download01
+---
+
+## Overview
+
+Download01 is a list of downloadable artefacts, drawn as full-width rows or as
+cards. Each artefact carries a name, an optional format, an optional size, an
+optional digest, an optional note, and a control.
+
+Every artefact has a control, and every control has your words on it. `hrefLabel`
+is required beside `href` rather than beside the type, so you cannot pass one
+without the other. A download link whose accessible name is the file's name tells a
+screen reader user nothing about what activating it will do: they hear the
+destination and not the consequence, and on a metered connection the consequence is
+the fact that decides whether they press it.
+
+`size` is a number of bytes and `formatSize` carries the ladder, for exactly the
+reason `FileUpload` gives: a caller that hands over "1.2 MB" has done the division,
+picked a unit, decided the rounding and written a separator, and has to do all four
+again in every locale the product ships in. The number is a fact about the file and
+the sentence is yours.
+
+`formatSize` is required whenever `size` is, and the run fails without it rather
+than printing a bare number, because a number with no unit and no column header
+above it is a count a reader cannot use. `FileUpload` carries a default that asks
+`Intl` for the number and its unit in the runtime's own locale, and its
+`formatSize` is the one to pass here. There is no default on this Block, and the
+reason is one source of truth: copying that ladder into a second module in one
+package would be byte formatting in two places.
+
+A `checksum` is drawn in the mono face beside the size and is never computed here.
+A digest is a fact about bytes, and the bytes this Block holds are a string of
+source in a file it does not read. The artefact a reader downloads is a build
+output, and hashing this Block's own input would be hashing the wrong thing.
+
+## Usage
+
+```tsx
+import { Download01 } from '@nanisoft/prism-ui/blocks/download-01'
+import { fileUploadFormatSize } from './formatters'
+
+<Download01
+  eyebrow="Reference"
+  title="What is in the build"
+  description="Everything the last publish produced, with the digest the publish printed."
+  files={[
+    {
+      id: 'tarball',
+      name: 'prism-ui-1.5.0.tgz',
+      format: 'gz',
+      size: 412_338,
+      formatSize: fileUploadFormatSize,
+      checksum: 'sha512:9f2c...41ab',
+      href: '/downloads/prism-ui-1.5.0.tgz',
+      hrefLabel: 'Download the package',
+      note: 'Regenerated on every publish. The digest above is the one the publish printed.',
+    },
+    {
+      id: 'guide',
+      name: 'Writing a pack',
+      format: 'PDF',
+      size: 2_411_776,
+      formatSize: fileUploadFormatSize,
+      href: '/downloads/pack-guide.pdf',
+      hrefLabel: 'Download the guide',
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="download-01" />
+
+## Guidelines
+
+### When to use
+
+Use Download01 where a reader's next action is to take a file away: a build
+output, a generated bundle, a report, a dataset, a licence file, a schema.
+
+Use `variant="cards"` for a set of two or three large artefacts whose names and
+notes are longer than their digests. Leave it at `list` for everything else, which
+is a set with four facts beside each name.
+
+### When not to use
+
+Do not use it for a document index a reader browses rather than takes. That is
+`ResourceList01`, whose cells are a name, a kind, a reading and a link.
+
+Do not use it for one artefact. A single download with a paragraph about it is a
+`Cta01` with a sentence.
+
+Do not expect it to verify anything. A digest here is the caller's, from the build
+that made the file.
+
+### Best practices
+
+- Write an `hrefLabel` that says what activating the control does: "Download the
+  package", "Download the guide". Never the file's own name.
+- Pass a `formatSize` whenever you pass a `size`. Compose `FileUpload`'s if you
+  want the platform's own units, or your own if you want a fixed locale.
+- Pass a `checksum` from the build that made the artefact, exactly as that build
+  printed it.
+- Order the artefacts yourself. The Block does not sort, and the most recent
+  release usually belongs at the top rather than at the letter D.
+
+### Content guidelines
+
+- A name is the artefact's own name as the build wrote it.
+- A format is a short mark: "gz", "PDF", "CSV".
+- A note is what a reader needs before they press: a licence, a retention window,
+  a regeneration notice.

@@ -1,0 +1,87 @@
+---
+slug: blocks/rate-card-01
+title: RateCard01
+---
+
+## Overview
+
+RateCard01 is a price list per unit: what something costs, measured by a unit the
+caller names, with the period, the allowance, the overage rate, a footnote and a
+slot for the full document.
+
+Every amount composes the `Price` Component rather than printing a currency. A
+rate card is the one Block where a hardcoded symbol would be a legal claim about a
+market, and it is still the wrong answer, because the symbol is the least of what a
+price needs. A symbol says the currency and nothing else, while a rate card also
+has a currency code, a precision, a period and a locale, and `Intl` already knows
+all four.
+
+The `tier` is the caller's word and there is no ladder in the type. A flat rate
+with a floor, a per-market price and a per-seat price are all real rate cards and
+none of them fits a volume ladder.
+
+## Usage
+
+```tsx
+import { RateCard01 } from '@nanisoft/prism-ui/blocks/rate-card-01'
+
+<RateCard01
+  title="What one agent run costs"
+  unit="agent run"
+  labels={{ tier: 'Band', included: 'Runs included', overage: 'Each run past that' }}
+  rates={[
+    { id: 'first', tier: 'First 500 runs', amount: { amount: 0, currency: 'USD' }, included: 'The whole allowance' },
+    {
+      id: 'next',
+      tier: 'Next 20,000 runs',
+      amount: { amount: 0.024, currency: 'USD' },
+      overage: { amount: 0.031, currency: 'USD' },
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="rate-card-01" />
+
+## Guidelines
+
+### When to use
+
+Use RateCard01 where a product charges by a unit the reader can count: a run, a
+gigabyte, a node, a call. It is the block for metered pricing, where the number
+that matters is small and the reader is checking it.
+
+Use it where the pricing is a list of bands. A single flat price is one rate, and
+one rate renders correctly: the header row, the row and the columns are the same
+with one as with six, and nothing on this Block assumes a second.
+
+### When not to use
+
+Do not use it for plan tiers, which are sets of features rather than bands of
+usage. That is `Pricing01` or `PricingCompare01`.
+
+Do not use it for a single headline figure. A rate card is a list, and a list of
+one is a sentence that wanted to be a paragraph.
+
+### Best practices
+
+- Name the unit precisely. The rate column is headed by it, so "usage" gives a
+  reader nothing and "captured gigabyte per month" gives them the whole card.
+- Pass the period on the amount, not on the unit. "/mo", "per month" and "a month"
+  are three products' decisions and the cell has room for whichever one is yours.
+- Use the `included` string rather than a number for an allowance. "Ten thousand
+  rows", "the first five gigabytes" and "10000" are three different claims and only
+  the first two are ones a reader can check.
+- Let the allowance and overage columns follow the data. A card with no
+  `overage` on any rate has no overage column, and you do not have to say so.
+- Put the rounding rule and the billing granularity in `footnote`. That is the
+  sentence that qualifies every number above it.
+
+### Content guidelines
+
+- Write a `tier` as a short noun phrase naming the band, not the price.
+- Write the three column names in the product's own vocabulary. They are the only
+  words on the card that are not data, and a reader who cannot name a column has
+  to count from the left.
+- Write `unit` in the singular if the amount is per one of something. The heading
+  sits above a column of singular prices and a plural reads as a count of batches.

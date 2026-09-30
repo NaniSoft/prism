@@ -1,0 +1,96 @@
+---
+slug: components/search-field
+title: SearchField
+---
+
+## Overview
+
+A SearchField is a labelled text field for a query, with a leading search mark, an
+optional control that empties it and an optional slot at the end of it for the
+caller's own filter trigger. It is built on `Field` and `InputGroup`, so the
+label, the helper line, the error and the shared border of the group are the ones
+this system already draws rather than a second set written for a search box.
+
+It is controlled, and that is the reason `onValueChange` is required rather than
+optional. A search field that holds its own text cannot be emptied from outside
+itself, so a consumer whose result set goes empty has no way to clear the query
+and the reader has to select all and delete it.
+
+This Component does not own the search landmark. A `<search>` element, or
+`role="search"`, names a region of a page rather than a control, and a page has
+two real search regions only when its two fields answer two different questions.
+Put the landmark on your own container when the page really has one search.
+
+## Usage
+
+```tsx
+import { SearchField } from '@nanisoft/prism-ui/components/search-field'
+
+const [query, setQuery] = useState('')
+
+<SearchField
+  label="Search invoices"
+  placeholder="Number, customer or amount"
+  value={query}
+  onValueChange={setQuery}
+  clearLabel="Clear the invoice search"
+  resultSummary={`${results.length} invoices`}
+  error={query.length > 2 && results.length === 0 ? 'No invoice matches that.' : undefined}
+/>
+```
+
+<ComponentDemo slug="search-field" />
+
+## Guidelines
+
+### When to use
+
+Use a SearchField where a query is the reader's input and the result set changes
+as they type: a results page, a filter bar, a table's own filter row.
+
+Use it for one field on a page that has one search. If the page has two, wrap each
+in its own `<search>` element and give each field a label that says what it
+searches, because two landmarks with the same name is a landmark list a reader
+cannot use.
+
+### When not to use
+
+Do not use it for a filter that is a set of chosen values. A `TagGroup` or a
+`Select` says what is applied; a search field says what the reader is about to
+apply.
+
+Do not use it for a command palette. `CommandPalette` opens a dialog over the page
+and searches its own index, which is a different job with a different lifecycle.
+
+Do not reach for `Input` and an `InputGroup` yourself to save the import. The
+clear control's placement, the result line's live region and the description and
+error wiring are the three things this Component holds, and a hand-built one gets
+each of them half right.
+
+### Best practices
+
+- Always pass `value` and `onValueChange`. The field is controlled, and a caller
+  that only passes `value` gets an input that cannot be typed into.
+- Pass `clearLabel` when the reader should be able to empty the query from the
+  keyboard. Without it there is no clear control, which is deliberate: the words
+  are the caller's.
+- Pass `resultSummary` on the first render, even as an empty string, when you
+  intend to use it. A live region that arrives together with its content is the
+  one case a screen reader is least reliable about.
+- Put the words that say what happens to the results in `description` or
+  `resultSummary`, not in the placeholder. A placeholder disappears on the first
+  keystroke.
+- Pass `trailing` for a filter trigger and give the control inside it its own
+  accessible name. The slot draws no chrome, so the control you compose is the
+  only thing at the end of the field.
+- Put the landmark on your container, never on the field.
+
+### Content guidelines
+
+- Write `label` as the noun the reader searches: "Search invoices", not "Search".
+- Write `resultSummary` as a count with its unit, or as the absence of one: "12
+  invoices", "No matches yet". Never as a bare number.
+- Write `error` with what to do next: "Use at least three characters", not
+  "Invalid search".
+- Write `clearLabel` as what it clears and where: "Clear the invoice search"
+  rather than "Clear".

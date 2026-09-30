@@ -1,0 +1,141 @@
+---
+slug: blocks/gantt-01
+title: Gantt01
+---
+
+## Overview
+
+Gantt01 is a schedule: a left column of task names, a field of bars positioned
+against a date range, a scale above, and a rule for today. Every bar is in its
+final position at first paint, and the same rows are rendered as a hidden table so
+the numbers are readable without sight of the geometry.
+
+The two things that make it correct are worth stating separately, because they are
+the two things a hand-rolled version gets wrong.
+
+**The geometry comes from the range rather than from the widest bar.** A field
+sized to its own content would put the left edge at the earliest bar that happened
+to be there, so a task that starts before every other task would be drawn hanging
+off the left of its own chart, clipped by the field, and a reader would see a short
+bar where the truth is a long one. So the field is a range: yours, or the earliest
+start and the latest end of the tasks. A bar outside a range you passed is clipped
+at the edge rather than pushing the field wider, and the table behind the figure
+carries its true dates.
+
+**There is no motion, so reduced motion costs the reader nothing.** No draw-in, no
+bar that grows from nothing, no scroll effect, no entrance. DESIGN.md's Motion
+section refuses entrance animation outright, and a schedule is the case where that
+is most obviously right: a bar that arrives is a bar whose arrival a reader has to
+wait for before they can read the relationship it has with the bar above it, and
+the whole claim of a Gantt is that relationship.
+
+## The hidden table, and its gaps
+
+The bars are `aria-hidden` and the numbers are in a table, which is the rule
+`sparkline` and `chart` follow. Everything a schedule draws is a position, and a
+position is the one thing a screen reader, a crawler and a print stylesheet cannot
+read. The cost is real and worth naming: a table of every task in the document for
+a figure that is a few hundred pixels tall.
+
+The table has no column headings, and that is a gap with a reason. This Block has
+no words for what a start is called, and inventing "Start" and "End" would be a
+claim about your plan. The row head is the task's own name, the caption is your
+`label`, and the cells carry your words wherever there are any. The date cells
+carry the ISO 8601 reading in the mono face, because this Block was not given a
+`locale` and the ones that format dates were.
+
+## Usage
+
+```tsx
+import { Gantt01 } from '@nanisoft/prism-ui/blocks/gantt-01'
+
+const FROM = '2026-09-21T00:00:00Z'
+const DAY = 86_400_000
+
+function tickLabel(unit, index) {
+  const step = unit === 'day' ? DAY : unit === 'week' ? 7 * DAY : 30 * DAY
+  return new Date(new Date(FROM).getTime() + index * step).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+  })
+}
+
+<Gantt01
+  eyebrow="Nexus"
+  title="Six weeks of work"
+  label="Six weeks of work from 21 September to 2 November 2026"
+  tasks={[
+    {
+      id: 'mapping',
+      name: 'Fix the Okta group mapping',
+      start: '2026-09-21T00:00:00Z',
+      end: '2026-09-25T00:00:00Z',
+      progress: 0.8,
+      progressLabel: (value) => `${Math.round(value * 100)} percent done`,
+      state: 'active',
+      stateLabel: 'Being worked',
+    },
+  ]}
+  range={{ from: FROM, to: '2026-11-02T00:00:00Z' }}
+  scale="week"
+  today="2026-09-29T12:00:00Z"
+  todayLabel="Today"
+  scaleLabel={tickLabel}
+  empty="Nothing is planned."
+/>
+```
+
+<ComponentDemo slug="gantt-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for a plan: a handful of tasks, a range of weeks or months, and a reader
+asking "when does this land and what is on top of it".
+
+Use it when the overlap is the point. Two bars on top of each other is a fact a
+list cannot show at all, and a schedule whose tasks never overlap is a list.
+
+### When not to use
+
+Do not use it for a queue. A schedule says when, and a queue says what is waiting
+now. A backlog that cannot be dated is an `Inbox01`.
+
+Do not use it for more than about forty rows. Past that a schedule is a picture
+nobody can scan and the answer is a table, which is `DataTable01`.
+
+Do not use it for a release history. A dated record of what happened is a
+`Changelog01`, and it reads bottom to top rather than left to right.
+
+### Best practices
+
+- Pass `range` whenever the reader needs to see empty time, and omit it when the
+  work is the whole story. The derived range is the earliest start to the latest
+  end, and a caller who wants a quarter that has not started yet has to say so.
+- Write `scaleLabel` as a function of `unit`, not as a closure over `scale`. That
+  way a scale changed in one place cannot leave a formatter labelling weeks as
+  days.
+- Keep the labels short. The Block draws one tick per unit with no cap, and the
+  labels are your string, so a range that needs shorter labels is a range whose
+  formatter returns shorter ones.
+- Pass `todayLabel` whenever you pass `today`. An unlabelled rule is a mark a reader
+  has to be told the meaning of.
+- Pass `stateLabel` with every `state`. The run fails without it, and the fill
+  colour is a support for the words rather than a substitute for them.
+- Read a bar's exact length from the table when the comparison is between two very
+  short tasks. The narrowest a bar is drawn is half a percent of the field, so two
+  very short bars are both drawn at about the same width.
+
+### Content guidelines
+
+- `name` is one line. It is a truncated column, not a wrapped one, and a name that
+  gets cut is a name a reader cannot match to a ticket.
+- `progress` is a fraction between zero and one. Omit it for planned work, and the
+  bar is drawn whole in its state colour.
+- `progressLabel` is the sentence for that fraction, and a fraction in a cell is a
+  figure no reader can act on.
+- `todayLabel` is a word a reader would use for the day. "Today" in your language
+  is the honest answer.
+- `label` is the figure's accessible name and the table's caption, so it should say
+  what is plotted and over what period. "Schedule" answers no question.

@@ -1,0 +1,136 @@
+---
+slug: blocks/notification-center-01
+title: NotificationCenter01
+---
+
+## Overview
+
+NotificationCenter01 is a list of notifications. Each one carries a mark, a title, a
+body, a moment, a read state and a slot for the caller's own controls, and the header
+carries the unread count and a mark-all control.
+
+Two shapes, and they are the same notifications in different frames. `variant="list"`
+is a page section with a heading. `variant="panel"` is a bounded, scrollable
+`list-panel` for a centre that lives in a shell beside the content, and it draws no
+`Section` because a `Section` owns 4rem of vertical padding and a popover 24rem wide
+does not want it.
+
+## The count is a number and the noun is the caller's
+
+`countLabel` is a function rather than a string for the reason `waitlist-01` gives
+about a position, applied to a different sentence. "3 unread", "3 new" and "3 since
+Monday" are three sentences. They differ in word order, in the noun, in the plural and
+in whether the number comes first at all. A Block that composed one of them would
+compose the English one and ship it into every consumer's product, where a reader in
+any other language is shown a count in a language they did not choose.
+
+## The mark is not a colour
+
+An unread item carries a filled dot, and the dot is `role="img"` with the caller's
+required `unreadLabel` as its name. A colour is not a state a screen reader can be
+told about: a span with a background and no role announces nothing, and a reader who
+cannot separate the ink from the card sees no mark at all. The title is also set at a
+heavier weight on an unread row, so the difference survives where the ink is a tint.
+
+## Read comes from the item, never from the count
+
+The count is computed from the notifications the Block was handed, and it is about
+those notifications. A caller whose badge means something wider, every workspace
+rather than this one, renders that badge in their own header. The two are not in
+conflict because they are not about the same set.
+
+What would be a mismatch is deriving the marks from the count. Four unread items under
+a count of zero would then be four items whose own fields say read, and the reader
+would be told the opposite thing by the same Block from two places.
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { NotificationCenter01, type NotificationCenter01Notification } from '@nanisoft/prism-ui/blocks/notification-center-01'
+import { Bell } from 'lucide-react'
+
+const INITIAL: NotificationCenter01Notification[] = [
+  {
+    id: 'key',
+    title: 'A key was rotated',
+    body: 'The production key was replaced by Bo.',
+    at: '2026-09-30T08:14:00Z',
+    icon: Bell,
+    tone: 'warning',
+    href: '/security/keys',
+    hrefLabel: 'Review the key',
+  },
+  { id: 'sync', title: 'Nightly sync finished', at: '2026-09-30T04:02:00Z', read: true },
+]
+
+export function Centre() {
+  const [items, setItems] = useState(INITIAL)
+  return (
+    <NotificationCenter01
+      title="Notifications"
+      notifications={items}
+      unreadLabel="Unread"
+      countLabel={(count) => (count === 0 ? 'Nothing unread' : `${count} unread`)}
+      onMarkRead={(id) => setItems((all) => all.map((n) => (n.id === id ? { ...n, read: true } : n)))}
+      onMarkAllRead={() => setItems((all) => all.map((n) => ({ ...n, read: true })))}
+      markAllLabel="Mark all as read"
+      empty="You are all caught up."
+    />
+  )
+}
+```
+
+<ComponentDemo slug="notification-center-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a reader has to answer "what needs my attention" and the answer is a list
+of records rather than a set. A workspace's notifications, a release's, an account's
+security events.
+
+Decide the shape by where the centre lives. A page of its own is `list`. A drawer, a
+popover or a sidebar is `panel`, and you owe it a `listLabel` because a scrolling
+region is a tab stop.
+
+### When not to use
+
+Do not use it for a list the reader has to compare across columns. That is
+`data-table-01`, and a notification list is read one at a time.
+
+Do not use it for a live stream that changes without a navigation event. That is the
+one thing a Block cannot express, because a Block is rendered from props and props
+arrive when the caller says so.
+
+Do not pass `variant="panel"` with no `listLabel`. The run throws.
+
+### Best practices
+
+- Pass `countLabel` unless you deliberately want marks and no number. Both readings
+  are honest; a number is quicker to scan and a mark is quicker to act on.
+- Pass `unreadLabel` in the words your product uses. The mark cannot be drawn without
+  it, and the run throws rather than drawing a colour with no state attached.
+- Give the title one line. It is the accessible name of the control that marks the
+  notification read.
+- Put the relative reading in `body` beside the moment, composed with
+  `relative-time`. Prism prints the moment exactly as you pass it and puts the machine
+  value on the `time` element.
+- Mark items read in your own state, from the ids `onMarkRead` hands you. The Block
+  never keeps the read state itself.
+- Validate the set at build time. The Block throws on a link with no words, on a
+  moment the platform cannot read and on an unread item with no words for its mark.
+
+### Content guidelines
+
+- A title is a phrase, not a sentence: "A key was rotated", "Nightly sync finished".
+- A body is the detail the title cannot carry, and it may hold a table, a list or a
+  code block rather than only prose.
+- `hrefLabel` is the action: "Review the key", not "Open".
+- A `tone` marks urgency, and the machine value is printed beside the dot. If your
+  product words these states differently, compose your own mark and leave `tone` off.
+- An `empty` is the sentence a reader with nothing to do is guaranteed to read, and it
+  is the sentence this Block is least entitled to write.

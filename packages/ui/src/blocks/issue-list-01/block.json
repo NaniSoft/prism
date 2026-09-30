@@ -1,0 +1,8 @@
+{
+  "name": "issue-list-01",
+  "title": "Issue List 01 - A Tracker List In A Real Table",
+  "description": "A list of issues as a real table with column and row headers: a reference in the mono face, a title, a state, a priority, an assignee, a last-changed reading and a link, under the caller's own toolbar and above the caller's own footer. The state and the priority are open strings rather than closed unions, because a tracker has its own vocabulary and a design system that closed the set would force a consumer whose tracker says in-review to ship a translation nobody asked for. The tones are still mapped by the Block, matching whole words and falling back to the tone that asserts nothing, and the words are always the caller's. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["badge", "cta-link", "relative-time", "section", "status", "table"],
+  "dependencies": []
+}

@@ -1,0 +1,221 @@
+---
+slug: blocks/magic-link-01
+title: MagicLink01
+---
+
+## Overview
+
+MagicLink01 is a passwordless sign-in: one address field, one control that posts a
+link to it, the caller's own sentence about what is about to arrive, and a confirmation
+that keeps the sent address on screen in full beside a control to change it. Every
+string is passed in as a prop, and the Block ships no sentence of its own anywhere on
+the page.
+
+The storefront's version of this pattern is the magic-link card: an email field, a
+button, and a line that says a link is on its way, whose purpose is to let a shopper
+past the gate without inventing a password they would then have to remember. The
+composition here is that card, unchanged. What the reader is trusting is a link that
+expires and cannot be replayed by whoever finds the inbox, which is why the two states
+below are kept apart.
+
+## Two states, and keeping them apart is the whole design
+
+Not yet sent, and sent. The obvious arrangement is a screen that replaces its form with
+a confirmation the instant the link goes out, which is what the storefront version
+does, and it is the arrangement that makes this screen dangerous on an instrument.
+
+A link posted to a mistyped address produces a page that says it worked. The reader
+opens an inbox that will never contain anything, decides the product is broken, and
+tries again with a second address, which is now two accounts and a support ticket. A
+screen that keeps the address on the screen, in full, beside a control to change it,
+turns four minutes into one glance.
+
+So `sent` is a prop rather than an internal state: you say the link is out, the Block
+draws the address and the change control and nothing else. The cost is named rather
+than hidden, which is that a reader who arrives at a confirmation with no `sent` on
+screen sees a form again and will press it again, so you have to pass `sent` at the same
+moment you pass a `status` of `sent`. That is one piece of state in step with another
+in your own reducer, and it is stated here because the alternative was a Block that
+invented its own sent flag and then could not know whether the link it believed it had
+sent was the one your server had.
+
+## The resend control is a separate action from submit
+
+The two look identical from the outside and are not the same at all. Submitting posts a
+link for an address the reader has just typed. Asking again posts a link for an address
+that is already on the screen in the confirmation. A reader who opened the wrong inbox
+needs the second, and a screen that offers one control for both makes that reader
+retype an address they have already confirmed in order to get the thing they were
+already offered.
+
+So the confirmation carries its own control, your `onResend` receives the address the
+link was sent to rather than whatever happens to be in a field, and the control is
+named twice. Both names are required, because a control that reads the same sentence
+before and after the reader pressed it is an invitation to press it again against a
+limit the Block cannot see. The Block will also refuse to draw the control at all
+unless you pass `sent`, so a caller who passes a handler and two labels without a
+confirmation is told so rather than left with a function that composes and discards.
+
+## Why the description is required here and optional everywhere else
+
+Press the control and nothing visible happens. No page loads, no code appears on the
+screen, no field changes. A reader who does not know a link is about to be posted
+treats the form as broken, presses it again, and the reader is right about the form and
+wrong about the product. A screen that can be pressed three times in four seconds meets
+a rate limiter before the reader has read the sentence that was there all along.
+
+So the type makes it required rather than the Block defaulting to something. The cost
+is named: a product that genuinely has nothing to say about what arrives has to write
+the sentence anyway, and it is usually the sentence it should have written on its
+sign-in screen too.
+
+There is no in-flight state in this Block's `status` union, so the submit control is
+never disabled and a reader can press it as many times as they like while your queue
+works. That is stated rather than papered over: the caller's way to refuse a second
+press is to pass `sent`, which takes the form off the screen, and the sentence in the
+heading is what carries the wait.
+
+## The three decisions this screen has to make, and why none of them is Prism's
+
+| Decision | What a Block that made it would be |
+| --- | --- |
+| Whether the address exists | An account directory, and the enumeration oracle a sign-in surface refuses to be, on the one screen where a reader has just been told a passwordless sign-in is available. |
+| How many links can be asked for | A rate limiter in a component library, shipping one policy to every product that installed it. |
+| Whether the address was right | A format check guessed on the reader's behalf, on the one field where a wrong guess is a lockout for somebody whose address is unusual and perfectly deliverable. |
+
+The honest failure is yours, and a mail transport has more outcomes than one sentence can
+be true of: accepted and delivered, accepted and filtered, accepted and delayed, accepted
+and bounced, refused at the first hop, and refused because your queue is full. A screen
+that says "we sent it" is making a claim about a transport it has never spoken to. So
+`status` is a prop, there is no `sent` flag and no `error` flag in the file, and the
+outcome is drawn in one live region that is rendered on both sides of the state change
+rather than one per state, because a live region that appears together with its first
+message is the one case a screen reader is least reliable about.
+
+## What the Block refuses
+
+| Refused | Why |
+| --- | --- |
+| A blank `identifier.label` | The only name on the page would be "text field", which says nothing about what it is for. |
+| A blank `submitLabel` | A reader would have to guess that pressing it posts a link to an inbox. |
+| `identifier.value` with no `onValueChange` | A reader who mistyped an address is the reader who needs to clear it. |
+| `onResend` with fewer than two names | One name means the control reads the same sentence before and after the reader pressed it. |
+| `onResend` with no `sent` | The control has nowhere to be drawn, and the address it would resend to is not on the screen. |
+| A `sent` with no `changeLabel` | The control that brings the form back is a button a reader can reach and not identify. |
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { MagicLink01, type MagicLink01Sent, type MagicLink01Status } from '@nanisoft/prism-ui/blocks/magic-link-01'
+
+export function PasswordlessSignIn() {
+  const [address, setAddress] = useState('')
+  const [status, setStatus] = useState<MagicLink01Status>()
+  const [sent, setSent] = useState<MagicLink01Sent>()
+
+  async function post(value: { identifier: string }, again: boolean) {
+    setStatus({ state: 'working', message: again ? 'Posting another link.' : 'Posting the link.' })
+    const result = await postMagicLink(value.identifier)
+    if (result.undeliverable) {
+      setStatus({ state: 'error', message: 'That domain cannot receive mail, so nothing was posted.' })
+      return
+    }
+    if (again) {
+      setStatus({ state: 'resent', message: 'Another link is on its way to the same address.' })
+      return
+    }
+    setStatus({ state: 'sent', message: 'A link is on its way. It is good for fifteen minutes.' })
+    setSent({
+      identifier: value.identifier,
+      expiresLabel: 'Good for fifteen minutes, and it stops working the moment it is used once.',
+      changeLabel: 'Use a different address',
+      onChange: (identifier) => {
+        setAddress(identifier)
+        setSent(undefined)
+        setStatus(undefined)
+      },
+    })
+  }
+
+  return (
+    <MagicLink01
+      eyebrow="Nexus"
+      title="Sign in without a secret phrase"
+      description="We post a link to the address below and you open it on the device you want signed in. There is no phrase to remember and nothing to type into a second field."
+      identifier={{ label: 'Work email', autoComplete: 'email', value: address, onValueChange: setAddress }}
+      submitLabel="Post the link"
+      onSubmit={(value) => post(value, false)}
+      onResend={(identifier) => post({ identifier }, true)}
+      resendLabel="Post another link to this address"
+      resendConfirmLabel="Another link is on its way"
+      status={status}
+      sent={sent}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="magic-link-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a product has decided that a phrase is the wrong second thing to ask for,
+and has a mail transport that can be trusted to arrive. The address is the only field
+and the type says so, because a link is posted.
+
+Pass `sent` at the moment your server says the link is out, and pass a `status` of
+`sent` in the same render. Those are two props in step, and they are the cost of not
+letting the Block invent a flag.
+
+Pass `expiresLabel` wherever your links expire, and make it a sentence. It is the one
+line a reader uses to decide whether to go and look in an inbox now or later.
+
+### When not to use
+
+Do not use it where the address is not an inbox. A handle, a staff number and a
+workspace name all identify a person here, and none of them receives a link.
+
+Do not use it as a second factor. A reader who has already proved who they are and is
+being asked for another proof is on `two-factor-01`, and a magic link as a second step
+means the reader is waiting on a message for a factor that was supposed to be faster.
+
+Do not use it twice on one page. Two identical forms compete and the second one reads
+as broken.
+
+Do not expect the Block to tell the reader the link was delivered. It cannot know, and
+the sentence that claims it is yours to write and yours to be wrong about.
+
+### Best practices
+
+- Pass both resend names up front even if you expect only one of the two states. The
+  run throws with fewer than two, and the state you will reach is the one you did not
+  plan for.
+- Report the enumeration question on purpose. "That address cannot receive mail" and
+  "we sent a link anyway" leak different facts, and only you know which of them your
+  threat model allows.
+- Keep the expiry in the caller's words and in the caller's clock. A Block that
+  formatted a duration would be choosing a locale and a granularity on a reader's
+  behalf, on the one line where being vague reads as a shorter life than the link has.
+- Pass `className` for grid placement only. A credential surface at the full container
+  width is a form with a very long row of labels.
+
+### Content guidelines
+
+- Write the title as the absence of a phrase, not as a feature. "Sign in without a
+  secret phrase" tells a reader what is not going to happen.
+- Write the description as the mechanism, the destination and the wait. It is the only
+  thing standing between the reader and a second press.
+- Write the address label as the inbox to use, not as the field's name. "Work email"
+  beats "Email address", and the label is also the field's accessible name.
+- Write `changeLabel` as a sentence about what pressing it does. "Use a different
+  address" is a control a voice control user can say out loud; "change" is a noun.
+- Write `resendLabel` and `resendConfirmLabel` as two different actions. The first asks
+  for a link and the second reports that one was asked for, and a reader who sees the
+  same sentence twice presses twice.
+- Write the `sent` message as a fact about the reader's next action. "A link is on its
+  way" tells them what to do; "we sent you a link" is about you.

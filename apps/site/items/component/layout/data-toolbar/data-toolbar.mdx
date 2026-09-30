@@ -1,0 +1,111 @@
+---
+slug: components/data-toolbar
+title: DataToolbar
+---
+
+## Overview
+
+A DataToolbar is the row above a table or a list: a search slot, a filter slot, a
+view switcher slot and a count, with the ends held by search on the left and the
+trailing slot on the right. It is `DataToolbar` and `DataToolbarGroup`, from the
+same module.
+
+**The default is a plain `div` and not a `role="toolbar"`, and that is the one
+decision worth knowing about.** A toolbar role changes every reader's interaction
+model for the row: it tells assistive technology that the whole row is a single
+control, that the arrow keys move between the things inside it, and that Tab
+should step over the row rather than into it. That is right for a set of controls
+a reader sweeps through, and wrong for a row that is mostly a search box, because
+a reader who Tabs onto the row and presses an arrow key expects to land in the
+field. So the role is a prop. Pass `role="toolbar"` when your row really is a set
+of peer controls, and take the model with the responsibility.
+
+**No arrow-key handling lives here.** Prism owns that keyboard model in
+`ButtonGroup` and `ToggleGroup`, both of which already implement it over their own
+children. A third implementation in a layout row would be a third place for the
+same rule.
+
+**The row wraps rather than scrolls.** A toolbar that scrolls sideways hides its
+own controls behind a gesture, and the scrollbar offering that gesture is the
+operating system's rather than the design system's, which is the one control this
+package took over precisely because it cannot be restyled.
+
+## Usage
+
+```tsx
+import { DataToolbar } from '@nanisoft/prism-ui/components/data-toolbar'
+
+<DataToolbar
+  search={<Input className="w-56" aria-label="Search collectors" />}
+  filters={<NativeSelect size="sm" aria-label="Region" />}
+  view={<ToggleGroup aria-label="View" />}
+  actions={
+    <>
+      <Badge variant="secondary">14 of 40</Badge>
+      <Button size="sm">Add</Button>
+    </>
+  }
+/>
+```
+
+<ComponentDemo slug="data-toolbar" />
+
+## Guidelines
+
+### When to use
+
+Use a DataToolbar above anything that is a set of records: a table, a list panel,
+a grid of cards. The row is where a reader narrows the set and where a reader
+reads how much of it they are looking at.
+
+Reach for it when each part of that row is being hand-written. A row of a search
+box, a select, two buttons and a count, each with its own `gap-2`, is a row whose
+ends drift the first time somebody adds a control in the middle.
+
+Use the named slots for the four things a data row almost always has, and
+`children` with `DataToolbarGroup` for anything else. The slots are what make the
+two ends stay at the two ends.
+
+### When not to use
+
+Do not use a DataToolbar above content that is not a set. A single record with a
+search field above it is a form, and a form's controls belong in a `Field` with
+labels.
+
+Do not use it as a general-purpose row of buttons. A row of actions with nothing
+that narrows the set is an action bar, and `ButtonGroup` is the Component that
+owns a set of related actions and the focus ring around them.
+
+Do not pass `role="toolbar"` because the row looks like a toolbar. Pass it because
+the controls in it are peers a reader sweeps through. The role teaches the arrow
+keys and the single tab stop, and both are wrong on a row whose first control is
+a text field.
+
+### Best practices
+
+- Keep `search` leading and `actions` trailing. A search box at the trailing end
+  of a row of small controls is a control the reader has to find, and a count in
+  the middle is a number the reader reads before they know what it counts.
+- Group each slot with `DataToolbarGroup`, which it does for you, and use
+  `DataToolbarGroup` yourself in `children` so a group is a group by construction
+  rather than by a `gap` somebody remembered.
+- Name every control inside the row. The row's `label` names the row itself, which
+  is a different thing: it is read when the row is a toolbar and it says nothing
+  about the field inside it.
+- Put the count in `actions` rather than in `filters`. The count is a conclusion
+  and a conclusion is the last thing on a line.
+- Give a control in this row a 44px target on a coarse pointer. The row is read
+  on a phone as often as on a desk, and the row itself reflows there.
+
+### Accessibility
+
+The default row is a `div` with no role, so a reader tabs into the search field
+and then into each control in turn, and nothing about the row changes what any
+control does. With `role="toolbar"`, the row becomes one control: Tab steps over
+it and the arrow keys move within it, and a reader has to be told that by the
+role, which is why the role is opt-in.
+
+Each `DataToolbarGroup` is a `div` with no role. A group is a spacing
+relationship, and a `group` role on it would name a set of controls a reader could
+navigate, which is a claim about a keyboard model this row deliberately does not
+have.

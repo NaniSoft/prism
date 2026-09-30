@@ -1,0 +1,108 @@
+---
+slug: pages/status-page
+title: StatusPage
+---
+
+## Overview
+
+StatusPage is a complete service-status screen: the estate's own state, the services under it with
+their own states, the recent incidents with their updates, and slots for your ways to follow along.
+
+**The overall state is your judgement and never a computation over the rows.** An estate can be
+degrading in a way no single service admits to: every node is individually healthy, every job
+finished, and the product is unusable because what a reader came for is the sum of those services
+rather than any of them. A Page that computed the overall state from its own rows would be forced
+into one of two failures, and both are on the same screen. It would over-report, painting a red
+banner over one degraded node out of forty that nobody can feel, which trains a reader to ignore
+the banner. Or it would under-report, drawing green beside forty green rows while the product is
+down, which is the failure that costs a trust once. Neither is something a design system can decide
+for a product, because the weight of a service and the shape of a dependency between them are facts
+about the product and none of them are visible from a row.
+
+**Two vocabularies are on this screen and only one of them is closed.** The estate is one of five
+states, because an estate has one. The four incident states are closed, because an incident is a
+lifecycle and a lifecycle has one right order: looked into, cause found, fix watched, over. A
+*service's* state is a plain string, because that is a product's own vocabulary with as many words
+in it as the product likes. The consequence is visible and is the right one: the estate and each
+incident get a dot, because Prism owns how those two look, and a service's state is drawn as your
+words with the machine value on the row as `data-state`.
+
+**Prism formats no date here.** `at` is your value and `dateLabel` is your reading of it, because
+"12 minutes ago" is a sentence in the reader's language and not a number with a suffix. The cost is
+that a browser cannot read the incident date off this Page as a machine value; compose
+`RelativeTime` where your own `datetime` is when you need that.
+
+## Usage
+
+```tsx
+import { StatusPage } from '@nanisoft/prism-ui/pages/status-page'
+
+<StatusPage
+  title="Nexus Estate"
+  description="Capture, inference and the ledger that records both."
+  overall={{
+    state: 'degraded',
+    label: 'Degraded performance',
+    note: 'Inference requests are queued and the queue is about eleven minutes deep.',
+  }}
+  services={[
+    { id: 'capture', name: 'Live capture', state: 'running', stateLabel: 'Running, behind' },
+    { id: 'inference', name: 'Inference', state: 'degraded', stateLabel: 'Degraded' },
+  ]}
+  incidentsLabel="Recent incidents"
+  incidents={[]}
+  empty="No incident has been opened on this estate in the last ninety days."
+/>
+```
+
+<ComponentDemo slug="status-page" />
+
+## Guidelines
+
+### When to use
+
+Use StatusPage as the body of the route your product's monitoring publishes. It is a whole screen
+and a whole screen is what a status page is: an estate's own state, what that state is made of,
+and what has happened recently.
+
+Use it for the public page. For a status page inside a product's own chrome, compose the same Blocks
+under your own heading instead, so the product's navigation and this screen's data are not fighting
+over one layout.
+
+### When not to use
+
+Do not use it for a component's own health inside a dashboard. That is `StatusLedger01` beside a
+chart, and the difference is that a dashboard row is evidence while a status page is a judgement
+about the whole.
+
+Do not use it as an uptime monitor you poll. This Page renders the props it is given and holds no
+timer, so a screen that refreshes itself is a screen whose banner moves under a reader for reasons
+they cannot see.
+
+### Best practices
+
+- Take the overall state from the same place your alerting takes it, and make it the same
+  judgement. The one thing this Page will not do is reconcile your banner with your own rows.
+- Order the services yourself. The order is a claim about what matters when everything is degraded,
+  and a Page that sorted by severity would be making it with a rule you cannot see.
+- Pass `href` and `hrefLabel` together on a service or an incident, or neither. A link with no words
+  is a control a reader has to guess at.
+- Keep `incidents` newest first and trim it. The band is a reader's short history, not an archive;
+  link to the rest from the `updates` slot.
+- Put your archive, your postmortems and your subscribe form in the slots rather than composing them
+  into the Page. A status page that offers a subscribe control it did not build is a control that
+  cannot act.
+- It is a server Component. It fetches nothing, holds no state and imports no router, and the one
+  function it takes is called while it renders, so a server route can pass it.
+
+### Content guidelines
+
+- Write the overall label as the reader would say it. "Degraded performance" and "All systems
+  operational" are both sentences in your product's voice.
+- Write `empty` as an all-clear, not as an absence. This is the one line on a status page a reader
+  is guaranteed to read, and a status page that cannot say "nothing has happened" is one nobody
+  keeps open in a second tab.
+- Keep the note to one sentence: what is affected, when it will be over, or what a reader should do.
+  Pick one.
+- Keep each incident update to what changed. It is a timeline, and a reader checking whether a fix
+  is holding is reading the last entry far more often than the first.

@@ -1,0 +1,16 @@
+{
+  "name": "forgot-password-01",
+  "title": "Forgot Password 01 - The Confirmation That Names The Next Step",
+  "description": "One identifier, one control, and a confirmation that says the same thing whether or not the account exists. The Block holds no prop that could carry whether an account was found, so the choice between an honest confirmation and an enumeration oracle is the caller's to make in words rather than in a flag this design system would have shipped. A message that differs leaks which addresses are registered; a message that is identical teaches a reader who mistyped that they succeeded; the resolution is a confirmation that names the next step without confirming the account. There is no sentence anywhere in the file. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": [
+    "section",
+    "card",
+    "button",
+    "cta-link",
+    "field",
+    "input",
+    "live-region"
+  ],
+  "dependencies": []
+}

@@ -1,0 +1,171 @@
+---
+slug: blocks/handoff-01
+title: Handoff01
+---
+
+## Overview
+
+Handoff01 is a run being handed from one owner to another: who is handing over, who is
+receiving, what state the run is in, what is still outstanding, and a confirm control.
+
+**The two people are drawn at the same weight, and that is the decision the whole Block
+is shaped around.** A handover is a moment where somebody else becomes responsible, and
+the handover is not complete until the receiver confirms. The confirmation control is
+where it completes, and the confirmation is your state because this Block does not know
+what happened.
+
+So the receiver is drawn beside the sender, the same size, the same ink, the same
+treatment, and neither one is a heading. The obvious arrangement is to emphasise the
+receiver, to draw the sender as a departing figure in the muted ink and the receiver in
+the foreground, because that is what a handover looks like the moment after it
+completes. It is wrong here for two reasons. The drawing would assert something three
+props before it is true, and the one moment at which the receiver does become the owner
+is the one moment this Block cannot draw.
+
+The cost is that a reader cannot tell from the drawing alone who is running the run,
+and the answer is that they cannot, and that is true until your `status` says so in your
+own words.
+
+## The outstanding items are items, not a count
+
+**"3 open" tells a reader nothing about whether they can take the run.** Three open
+items is a comfortable handover on one estate and a catastrophe on another, and the
+difference is entirely in what the three items say. A capture half done, a certificate
+renewal booked and a snapshot that is failing are three things a receiver can look at
+and decide about. A number is not.
+
+The three items are the whole difference between a handover that transfers work and one
+that transfers a question, because a reader who can see them can decide, and a reader
+who can only count them has to ask, and asking is what a handover exists to avoid.
+
+The cost is that the region grows with the number of outstanding items, which you control
+by choosing which items to list. A caller with two hundred open items wants
+`data-table-01` rather than this Block.
+
+## What the Block refuses
+
+| Refused | Why |
+| --- | --- |
+| `onConfirm` with no `confirmLabel` | A button announced as a button, and this is the one control on the page that transfers responsibility for something. |
+| `state` with no `stateLabel`, or the reverse | A handover is read aloud by two people, and the one who did not write the token will not know what it means. |
+| An `href` with no `hrefLabel` on an item | A link whose only words are the item's own label, read by somebody about to be responsible for the thing it points at. |
+| `status.state` of `confirmed` with no `confirmedLabel` | A control that still reads "Take this run" after the run has been taken says the opposite of what happened. |
+
+## Why the state is a string and not a tone
+
+Every other mark in this package takes a tone and hands the sentence back. This one
+refuses the mapping, because a run being handed over is not urgent in a way Prism could
+see. A run that is draining and a run that has been quiet since Thursday are both
+handovers, and one of them is an emergency and the other is a Tuesday. So `state` is
+your words, drawn in the muted ink beside the control as context for the decision, and
+`stateLabel` is required with it so a short token never appears without the sentence that
+names it.
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { Handoff01, type Handoff01Status } from '@nanisoft/prism-ui/blocks/handoff-01'
+
+export function Handoff() {
+  // Your state, your request. This Block writes no flag and asserts nothing.
+  const [status, setStatus] = useState<Handoff01Status>()
+
+  return (
+    <Handoff01
+      eyebrow="Nexus"
+      title="The Tuesday settlement run"
+      description="End of shift. Everything still open is listed, so nobody has to ask."
+      from={{ name: 'Jide Abara', role: 'Settlement engineering' }}
+      to={{ name: 'Margret Haldorsdottir', role: 'Estate observation' }}
+      state="draining"
+      stateLabel="Draining, capture still running"
+      startedAt="2026-09-28T17:00:00Z"
+      open={[
+        { id: 'capture', label: 'The Rotterdam capture is half done', href: '/runs/tue', hrefLabel: 'See the run' },
+        { id: 'cert', label: 'A certificate expires in 61 days', href: '/certs', hrefLabel: 'See the certificate' },
+        { id: 'snap', label: 'The snapshot job is failing on Rotterdam' },
+      ]}
+      onConfirm={async () => {
+        setStatus({ state: 'sending', message: 'Handing the run over' })
+        await handOver()
+        setStatus({ state: 'confirmed', message: 'Margret has the run. It is on her rota until Thursday.' })
+      }}
+      confirmLabel="Take this run"
+      confirmedLabel="Margret has this run"
+      status={status}
+      empty="Nothing outstanding. The run is quiet and everything that was due is done."
+    />
+  )
+}
+```
+
+<ComponentDemo slug="handoff-01" />
+
+## Guidelines
+
+### When to use
+
+Use it at the end of a shift, at the end of a rota, or anywhere one person stops being
+responsible for something and another person starts. It is built for the moment the two
+of them are reading it together, which is why it names both at the same weight.
+
+List every outstanding item, not a selection of them. The receiver's decision depends on
+the list being the whole list, and a handover that omits something is a handover that
+transfers a question.
+
+Write the outstanding items as sentences. "The Rotterdam capture is half done" tells a
+receiver more than "Rotterdam capture", and the sentence is what lets them decide
+without asking.
+
+### When not to use
+
+Do not use it for a run that is being assigned rather than handed. An assignment has one
+owner throughout and no outgoing person, and `handoff-01` needs both because the moment
+it draws is the moment responsibility changes sides.
+
+Do not use it for a notification. That is `announcement`, and an announcement does not
+carry two people and a list of what is open.
+
+Do not expect it to know whether the handover happened. It draws what you told it and
+throws when the two halves of that do not agree, and the moment the receiver becomes the
+owner is yours to report.
+
+Do not list two hundred items. The region grows with the list, and a receiver scrolling a
+handover is not reading it. A long set of outstanding work is a queue, and
+`inbox-01` is the shape for it.
+
+### Best practices
+
+- Pass both `state` and `stateLabel` together or neither. A token on a document two
+  people are reading together is a token one of them does not understand.
+- Pass both button labels up front, even if you only expect one of the two states. The
+  run throws on a confirmed status with no `confirmedLabel`, and that is the state you
+  will reach.
+- Compose `relative-time` yourself if you want a relative phrase beside the moment. The
+  `startedAt` prop is the machine value and the Block draws the platform's absolute
+  reading, which is the right default on a document a receiver reads at the end of a
+  shift.
+- Keep the outstanding list to what a receiver would actually want to know. Ten honest
+  items beat forty that include everything the run has ever touched.
+- Report the confirmation in your own words. A handover that ends with Prism's sentence
+  is a handover whose most important line is a sentence nobody chose.
+
+### Content guidelines
+
+- Write the section title as the run, not as the act. "The Tuesday settlement run" names
+  what is changing hands; "Handover" names the form and tells a reader nothing at the
+  end of a shift.
+- Write the roles as what they do. Both people usually have one and the two together say
+  why the handover is happening.
+- Write `stateLabel` as a sentence a person would say out loud. "Draining, capture still
+  running" is a sentence; "draining" alone is a token.
+- Write an outstanding item as a fact and, where you can, as a link with your own words
+  beside it. Three facts and a number tell a receiver nothing; three facts and three
+  links let them open all three before they say yes.
+- Write `empty` as a fact about the run. "Nothing outstanding" and "I did not check"
+  are different sentences and one of them is a claim you may not be able to make.
+- Do not apologise in a handover. A handover is a transfer of work and the words in it
+  are about the work.

@@ -1,0 +1,8 @@
+{
+  "name": "summary-01",
+  "title": "Summary 01 - A Set Of Lines And What They Come To",
+  "description": "A set of line items and their total, as a real table with a row header on every line, an optional subtotal, a required total that is a prop rather than a number the Block derived, a footnote and a slot for the call to action. Three line states map to the shared status tones and each needs a caller's words, because an excluded line is a claim about a contract. Server Component, so the table costs a consumer nothing in client JavaScript.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "table", "price", "status", "cta-link"],
+  "dependencies": []
+}

@@ -1,0 +1,153 @@
+---
+slug: components/chart
+title: Chart
+---
+
+## Overview
+
+A Chart draws one set of numbers: bars, a line, an area under a line, or a ring
+for a part-to-whole. It takes the series, the categories along the bottom and
+the name a reader will hear, and it derives the vertical axis from the data.
+
+The decision that shapes it is that the chart is never the only way to read the
+numbers. Every Chart draws a table of the same series into the document, visibly
+hidden, whether or not anybody looks at it. A screen reader navigates it by row
+and by cell, a crawler reads the figures out of it, and a print stylesheet loses
+the colour that separated two series and still gets the values. That is the
+argument `Carousel` makes about everything a carousel shows, applied to a
+picture: everything a chart draws, a reader must be able to reach some other way.
+
+The second decision is the axis. Prism derives the maximum and rounds it up to a
+readable step, and it does not take a caller supplied maximum by default, because
+a caller who pre-normalises has two chances to get the axis wrong and a
+mislabelled axis is a lie with a typeface on it. `yMax` is there for the one case
+that needs it, and it says what it costs.
+
+## Usage
+
+```tsx
+import { Chart, type ChartSeries } from '@nanisoft/prism-ui/components/chart'
+
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+
+const series: ChartSeries[] = [
+  { name: 'API', values: [120, 180, 150, 240, 210, 300], tone: 'chart-1' },
+  { name: 'Web', values: [60, 90, 140, 120, 160, 180], tone: 'chart-2' },
+]
+
+<Chart
+  variant="bar"
+  labels={months}
+  series={series}
+  label="Requests per month by surface"
+  caption="April is the month the collector changed."
+/>
+```
+
+<ComponentDemo slug="chart" />
+
+## Guidelines
+
+### When to use
+
+Use a Chart for a value read against a shared baseline across a handful of
+categories: requests per month, signups per week, latency per region, margin per
+quarter. The signal is that a reader wants the shape and one or two exact
+numbers.
+
+Use `variant="bar"` when the categories are discrete and the value is read as a
+length. Use `variant="line"` when the value moves continuously and the shape
+between two points is the point. Use `variant="area"` when the reader wants how
+much there was rather than where it went. Use `variant="donut"` for a
+part-to-whole with two parts and nothing else.
+
+Use it over a table when there are few enough categories to read without
+scrolling sideways. Past about twenty, a sortable table wins, because a reader
+who wants April should not have to read five other months to find it.
+
+### When not to use
+
+Do not use a Chart for a single number. A KPI belongs in a Metric, and a chart
+of one bar is a number with axes drawn around it.
+
+Do not use it for a distribution, a ranking, a correlation or a histogram. This
+is a linear frame with one axis, one baseline and up to five series. Those are a
+charting library's work, and this Component is the frame and the table that
+library's marks should sit inside rather than the library.
+
+Do not use `variant="donut"` for a part-to-whole of three or more parts. At
+three the ring stops being read as a proportion and starts being read as a
+puzzle, and three bars are the honest default. The variant takes exactly two
+series with one value each, or one series with a single value, and refuses
+everything else.
+
+Do not use a Chart where the reader is looking a figure up. A chart shows a
+shape; a value a reader has to find is a table row.
+
+### Best practices
+
+- **Name the tone, or accept that the series is not a series.** `tone` is
+  `chart-1` through `chart-5` and it is optional. Omitted, the series is drawn
+  in the supporting ink rather than in a series role, because a colour is a claim
+  about what a thing is and a Component that knows nothing about your product has
+  no business making it. Naming the tone is how you say the series are meant to
+  be told apart.
+- **Keep the number of series to what a reader can hold.** The five roles are
+  distinct from each other in every pack and both modes, and the contrast gate
+  asserts exactly that, but past about three series hue is the only channel left.
+  Two charts of three series beat one chart of six.
+- **Pass `labels`.** It is the array that makes the chart a claim about your
+  domain rather than about a design system, and it is drawn for `bar` and `line`
+  and read on the table for every variant.
+- **Write the caption.** The sentence under the chart is a claim about the data
+  and only you know which one is true: a fall, a seasonal dip, a collection that
+  changed, a filter that matched nothing.
+- **Reach for `yMax` deliberately and read `data-clamped` in the markup.** A
+  value above the ceiling you set is drawn clamped to the top gridline and
+  counted, so a ceiling that is too low is a fact rather than a mark floating
+  above its own axis.
+- **Move the legend rather than stacking it.** Pass `legend={false}` and render
+  `ChartLegend` where the surrounding layout wants it. The legend is drawn by
+  default once there is more than one series, because it is the only statement
+  of the series to colour assignment anywhere on the figure.
+
+### Accessibility
+
+The table is the chart's accessible representation, and it is part of the
+Component rather than a note in the documentation, because a note is not a
+guarantee. It is a real `<table>` with a `<caption>` naming the figure and its
+series, a row head for each category and a column head for each series. The
+marks and the cells are two renderings of one `series` array, so they cannot
+drift, and there is no prop that turns it off.
+
+The geometry is `aria-hidden`. A mark is a shape at a position, and announcing
+forty of them would be a list of coordinates rather than a chart.
+
+Two of the five roles measure below 3:1 against a light card, `chart-2` at
+2.49:1 and `chart-3` at 2.15:1 in the default pack, so a mark in either is found
+by its position and its shape rather than by its colour. That is what the legend
+is for, and it is why the legend is not decoration on a printed chart either,
+where every series goes to the same grey.
+
+### What this is not
+
+There is no chart library under it, no hover tooltip, no crosshair, no zoom, no
+stacking, no curve interpolation, no second axis and no transition on any of the
+geometry. A tooltip answers a question a pointer asked, which is a question a
+keyboard never asks and a print stylesheet cannot receive.
+
+A bar does not grow. The motion law refuses entrance effects, so a chart would
+not need an argument to be refused, and there is no reason for one: a bar's
+height is its value, so a transition between two values is a transition between
+two facts, and a reader watching one arrive has learned nothing they could not
+have read from the second one. This is a server Component, and the whole figure
+is arithmetic over props.
+
+### Content guidelines
+
+- Name the figure in the caller's own words: what is being plotted, not what the
+  component is. The `label` is the only name a reader hears.
+- Name the series the way the product names them. A legend entry is a word a
+  reader scans, not a sentence.
+- Keep the caption to one sentence and give it a reason. "April is the month the
+  collector changed" is a caption. "Requests" is a title.

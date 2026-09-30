@@ -1,0 +1,8 @@
+{
+  "name": "activity-feed-01",
+  "title": "Activity Feed 01 - A Chronological Record Of What Happened",
+  "description": "A chronological list of what happened, where an actor, an action, a target and a moment are four separate props because a record of what happened has four parts and no others, and a fifth field would be a claim about the reader's product. Rows become real controls when the caller passes a handler, the moment is printed exactly as passed with the machine value on the time element, and grouping by day renders a heading per day with a nested list rather than a merged row. The Block never sorts, because order is a claim about what happened first.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "status", "cta-link"],
+  "dependencies": []
+}

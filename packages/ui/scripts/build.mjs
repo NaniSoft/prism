@@ -93,9 +93,22 @@ execFileSync(process.execPath, [tsc, '-p', 'tsconfig.build.json'], {
  * what Node expects and must not be touched, and a specifier that is already
  * absolute or already carries an extension is left exactly as it is, so this is
  * idempotent and a second run changes nothing.
+ *
+ * **`live` was missing from this list and that was a real hole, not an oversight
+ * of the same kind.** Every other root the manifest publishes is here, and
+ * `live` was published: the `./live` and `./live/*` subpaths resolve to
+ * `dist/live/*.js`, so a consumer importing `@nanisoft/prism-ui/live/run-stream-01`
+ * got a file whose own relative imports carried no extension, which Node's ESM
+ * loader refuses. It went unnoticed for the same reason the rest did: four
+ * downstream sites build, and every bundler resolves an extensionless relative
+ * specifier. What made it findable in 2026-09 is that the roster grew a second
+ * live surface, so the fourth Kind is no longer a single Item a consumer might
+ * never reach: a package that publishes a Kind resolves it in `dist` or it does
+ * not, and a list that omitted one root published a manifest that lied about
+ * exactly one of the four.
  */
 function resolveSpecifiers() {
-  const roots = ['.', 'components', 'blocks', 'pages', 'lib', 'provider']
+  const roots = ['.', 'components', 'blocks', 'pages', 'live', 'lib', 'provider']
   let rewritten = 0
   let inspected = 0
 

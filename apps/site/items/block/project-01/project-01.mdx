@@ -1,0 +1,116 @@
+---
+slug: blocks/project-01
+title: Project01
+---
+
+## Overview
+
+Project01 is one project in full: its name, where it stands, who owns it, the span
+it runs, a progress fill, a row of figures, the stages it is on, and a slot for the
+controls that act on it. A reader who opens it is looking for one project, so
+everything on the surface is scannable and the two things they came for, a state
+and an owner, sit on the first line under the name.
+
+The state is `Status`, the figures are `Metric`, the fill is `Progress` with
+`valueText`, and the stage list is `Steps`. Each was composed rather than redrawn,
+because each already owns a decision a hand-written one gets wrong: that a tone is
+never the only channel, that a bar's value is announced rather than drawn, and that
+the states in a rail differ by shape before they differ by colour.
+
+The dates are the caller's and the sentence beside them is the caller's. The
+moments go to `RelativeTime` untouched, so the absolute reading is the platform's
+in the reader's own language, and `dateLabel` supplies the words next to it.
+
+## Usage
+
+```tsx
+import { Project01 } from '@nanisoft/prism-ui/blocks/project-01'
+
+<Project01
+  name="Warehouse migration, phase two"
+  summary="The second half of the move. The public schema is already live, so everything here is about the tables nothing reads from yet."
+  state="blocked"
+  stateLabel={(state) =>
+    state === 'blocked' ? 'Blocked on a credential' : state === 'active' ? 'Running' : 'Planned'
+  }
+  owner={{
+    name="Ravi Menon',
+    avatar: { name: 'Ravi Menon' },
+    href: '/people/ravi',
+    hrefLabel: 'Open Ravi’s profile',
+  }}
+  startsAt={Date.parse('2026-01-12T00:00:00Z')}
+  endsAt={Date.parse('2026-04-30T00:00:00Z')}
+  dateLabel={(value) => (value === STARTED ? 'Started' : 'Due')}
+  progress={62}
+  progressLabel={(value, project) => `${value} per cent of ${project}`}
+  figures={[
+    { label: 'Tables moved', value: '31 of 48', delta: 12 },
+    { label: 'Rows rewritten', value: '418,204' },
+    { label: 'Open blockers', value: '1', delta: -1 },
+    { label: 'Budget used', value: 'GBP 24,100', delta: 0.08 },
+  ]}
+  stages={[
+    { id: 'shape', name: 'Shape', state: 'done', stateLabel: 'Signed off', at: Date.parse('2026-01-09T00:00:00Z') },
+    { id: 'schema', name: 'Schema', state: 'done', stateLabel: 'Live', at: Date.parse('2026-02-02T00:00:00Z') },
+    { id: 'backfill', name: 'Backfill', state: 'current', stateLabel: 'Running since Tuesday' },
+    { id: 'dual-write', name: 'Dual write', state: 'upcoming', stateLabel: 'Waiting on the backfill' },
+    { id: 'retire', name: 'Retire the old tables', state: 'upcoming', stateLabel: 'Not started' },
+  ]}
+  actions={<Button size="sm">Reassign</Button>}
+/>
+```
+
+<ComponentDemo slug="project-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for a single project, on a page of its own or in a panel. It is the one
+project in full: the name is the section heading, so a page that composes it under
+an `h1` wants `headingLevel="h1"`, and a card that embeds it wants `h3`.
+
+Use `layout="split"` where a reader is comparing this project against another one in
+the same session. The facts and the controls move into an aside and the figures and
+the stages take the width.
+
+### When not to use
+
+Do not use it for a list of projects. `ProjectList01` is the many-projects
+counterpart and it takes the same field names on purpose.
+
+Do not use it for a project with no stages. A project with a name, a state, an
+owner and two figures is a card, and a rail with one step in it is a document about
+an order that has none.
+
+Do not compose two of them to show two projects. The names are both headings, so a
+reader navigating by heading meets two projects of equal weight and no way to tell
+which one the page is about.
+
+### Best practices
+
+- Pass `progress` and `progressLabel` together, or neither. The bar announces the
+  figure as well as drawing it, and a bar with no sentence is a number meaning
+  whatever the reader assumes.
+- Pass `stateLabel` as a function of the state rather than as the string you would
+  have drawn. The state is a colour; the words are the claim.
+- Keep a figure's `value` to the figure. If the change needs a sentence, put the
+  whole reading in `value` as your own node, because a delta here prints as a bare
+  number.
+- Order `stages` the way the project runs them. The rail says "steps" to every
+  reader and to every crawler, so a list in an order the project does not have is a
+  wrong diagram.
+- Put stage dates on the stages that have them. The rail has no room for a moment,
+  so they are drawn beneath it as a definition list.
+
+### Content guidelines
+
+- `name` is the project's own name, the words a reader would use in conversation.
+- `summary` is one or two sentences about what this project is, not about the
+  programme it belongs to.
+- `stateLabel` is your vocabulary. Four products use eleven words for five
+  positions between them, and none of the eleven is Prism's to choose.
+- `progressLabel` takes the project's name as well as the value, so use it.
+- `dateLabel` is given the moment and not the role, so it cannot say whether a
+  reading is the start of the span or the end of it. The order carries that.

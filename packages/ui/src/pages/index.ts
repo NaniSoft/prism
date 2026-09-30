@@ -32,3 +32,19 @@ export type {
   DocsNavDivider,
   DocsPagerLabels,
 } from './docs-shell'
+
+
+/*
+ * the ten screens the 2026-09 expansion added.
+ * Derived by the maintainer rather than authored: each entry is read out of the Item own
+ * index module, so an Item and its barrel line cannot come apart. */
+export { AboutPage } from './about-page'
+export { CareersPage } from './careers-page'
+export { ChangelogPage } from './changelog-page'
+export { ContactPage } from './contact-page'
+export { ErrorPage } from './error-page'
+export { LegalPage } from './legal-page'
+export { OnboardingPage } from './onboarding-page'
+export { PricingPage } from './pricing-page'
+export { SearchPage } from './search-page'
+export { StatusPage } from './status-page'

@@ -1,0 +1,102 @@
+---
+slug: blocks/hero-03
+title: Hero03
+---
+
+## Overview
+
+Hero03 is the editorial form of the hero: a wide headline, a short list of the three
+things the product does beside it, and a full-width rule with a row of proof figures
+under it.
+
+It is the third member of the hero family, and the family is not three tastes about
+what matters on a page. It is three answers to how much room a claim needs:
+
+| Block | The claim | What the band spends its width on |
+| --- | --- | --- |
+| `Hero01` | a sentence | a headline and one supporting figure, five to six |
+| `Hero02` | a figure | four shares of copy and eight of figure, bled to the edge |
+| `Hero03` | three figures and a sentence | a wide headline, a list beside it, and a rule with proofs under it |
+
+A page with one argument uses `Hero01` or `Hero02`. A page whose argument is a body of
+evidence uses `Hero03`.
+
+The proof row is the decision. A hero is the only place on a marketing page where a
+number set beside a headline is not a claim the reader has to be sold, because the
+numbers are the claim itself. That is exactly why every number is a prop: the three
+most persuasive sentences on the page, in the position a reader trusts most, are the
+last place in this system for a value a design system invented. Each figure is
+rendered with the `Metric` Component, so the direction of a delta is derived from its
+sign and the delta is formatted by the Component rather than by the Block.
+
+## Usage
+
+```tsx
+import { Hero03 } from '@nanisoft/prism-ui/blocks/hero-03'
+
+<Hero03
+  headingLevel="h1"
+  eyebrow="nanisoft"
+  title="A pipeline that runs while nobody is watching it."
+  description="Three things happen between an issue and a merged pull request, and all three of them leave a record."
+  points={[
+    { title: 'Capture', body: 'A finding enters the pipeline and is written down once.' },
+    { title: 'Observe', body: 'The estate is walked on a cycle and the differences are kept.' },
+    { title: 'Prove', body: 'Every claim a page makes is traceable to the run that made it.' },
+  ]}
+  proof={[
+    { label: 'Runs completed this week', value: '4,182', delta: 6 },
+    { label: 'Median time to a merged pull request', value: '9m 40s', hint: 'Last 30 days' },
+    { label: 'Findings carried into a release', value: '96%' },
+  ]}
+  actions={[{ label: 'Read a run', href: '/runs' }]}
+/>
+```
+
+<ComponentDemo slug="hero-03" />
+
+## Guidelines
+
+### When to use
+
+Use Hero03 when the argument is a body of evidence rather than one sentence. A page
+that publishes numbers it wants a reader to weigh wants them under the claim they
+weigh, not three sections further down.
+
+Use it when the headline needs its full measure. At seven shares a headline can hold
+a sentence with a subordinate clause in it, which is the shape an editorial claim
+takes.
+
+### When not to use
+
+Do not use it with one proof. A row of one figure under a rule reads as a mistake, and
+`Stats01` is the Block for a set of figures that is not evidence for the claim above
+it.
+
+Do not use it when the numbers are not the strongest thing you have. This hero puts
+them at the bottom of the fold of the page, which is the most persuasive position on a
+page and the wrong place for a figure you would rather a reader looked past.
+
+Do not use it for a single mechanism. That is `Hero02`, and the difference is a page's
+composition rather than a preference.
+
+### Best practices
+
+- Pass between two and four proofs. Three fills the row; one reads as an error.
+- Pass `delta` as the number the reader should read. `Metric` prints the bare number
+  because Prism cannot format a delta it has no unit for, so a percentage is `12` and
+  not `0.12`.
+- Order `points` and `proof` deliberately. Both are claims about which comes first, and
+  the Block renders the order it is given.
+- Set `headingLevel="h1"` when the hero is the page's top-level heading.
+- Pass an eyebrow only when it is true and current.
+
+### Content guidelines
+
+- Write the headline as a sentence, not a noun phrase. This is the form where a
+  headline with a clause in it reads well rather than running long.
+- Write each point as a name and one sentence. A point that needs two sentences is a
+  `FeatureGrid01` row.
+- Write each proof label so the number explains itself: "Median time to a merged pull
+  request" rather than "Median". The figure lands first, so the label is the second
+  thing read and it has to finish the sentence the number started.

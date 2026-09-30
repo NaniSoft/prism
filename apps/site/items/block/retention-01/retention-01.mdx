@@ -1,0 +1,125 @@
+---
+slug: blocks/retention-01
+title: Retention01
+---
+
+## Overview
+
+Retention01 is a retention schedule: what is kept, for how long, in which region,
+under which policy, and when it was last reviewed. It is a real table, and its
+summary row travels inside the table rather than sitting in a band below it.
+
+`period` is a number of days and the sentence is the caller's `periodLabel`, and
+the reason is that a Block cannot know which sentence is right. "30 days", "one
+month" and "a month" are three sentences for the same number, and they are not
+variants of one another. The first is a measurement, and it is the one a regulator
+will check against a system configuration. The second is a rounding of that
+measurement to a calendar unit, which is a different promise, because thirty days
+is not a month. The third is the same promise with the article left off, which
+matters because a period is a noun phrase in one column and a verb phrase in a
+caption. A compliance surface that printed one of them in English would be
+asserting a retention period the reader never agreed to.
+
+## Usage
+
+```tsx
+import { Retention01 } from '@nanisoft/prism-ui/blocks/retention-01'
+
+<Retention01
+  eyebrow="Data"
+  title="What this workspace keeps, and for how long"
+  description="Every line is a promise, so the periods are written in days and the policies are named so you can read them."
+  columns={[
+    { id: 'subject', header: 'What is kept' },
+    { id: 'kind', header: 'Kind' },
+    { id: 'period', header: 'Kept for' },
+    { id: 'region', header: 'Where' },
+    { id: 'policy', header: 'Policy' },
+    { id: 'reviewedAt', header: 'Reviewed' },
+  ]}
+  rows={[
+    {
+      id: 'readings',
+      subject: 'Process readings from every site',
+      kind: 'Operational',
+      period: 730,
+      periodLabel: (days) => `${days} days`,
+      region: 'Dublin, then Frankfurt',
+      policy: 'Operational data',
+      reviewedAt: '2026-06-01',
+      href: '/policies/operational',
+      hrefLabel: 'Read the policy',
+    },
+    {
+      id: 'findings',
+      subject: 'Findings, and the trail of every change to one',
+      kind: 'Accountability',
+      period: 2555,
+      periodLabel: (days) => `${days} days`,
+      region: 'Dublin, then Frankfurt',
+      policy: 'Accountability',
+    },
+    {
+      id: 'sessions',
+      subject: 'Where the workspace was signed in from',
+      kind: 'Security',
+      period: 90,
+      periodLabel: (days) => `${days} days`,
+      region: 'Dublin',
+      policy: 'Security',
+    },
+  ]}
+  summary={[
+    { label: 'Kinds of thing kept', value: '3' },
+    { label: 'Shortest period', value: '90 days' },
+    { label: 'Regions', value: '2' },
+  ]}
+  empty="This workspace keeps nothing that has to be scheduled for deletion."
+/>
+```
+
+<ComponentDemo slug="retention-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for a published schedule: a trust page, a data protection page, an admin
+document, or the answer to a question a customer has already asked twice.
+
+Use it as the schedule your own systems are configured from. A schedule nobody
+checks against a configuration is a schedule that is wrong.
+
+### When not to use
+
+Do not use it for a data processing agreement, a subprocessor list, or a set of
+claims about a standard. `compliance-01` is the shape for a table of claims
+against named standards, and it is a different document with a different burden.
+
+Do not use it for a product's own copy about how long a free trial lasts. A
+retention schedule is a representation and a trial is a feature.
+
+### Best practices
+
+- Write `periodLabel` in days. Every other unit is a promise somebody will check,
+  and "one month" is not thirty days.
+- Pass `reviewedAtLabel` if you want the review date to read as a sentence. The
+  Block prints `reviewedAt` exactly as passed otherwise, which is honest and
+  rarely what was wanted.
+- Name the policy and link it. "Under our policy" with no link is a promise with
+  no document, and the Block refuses a link with no words.
+- Pass `summary` figures in your own units. The value is a node, so a grouped
+  number or a period you formatted yourself both work.
+- Leave a withdrawn schedule rendering. A heading with no rows says the publisher
+  retains nothing, and hiding the section leaves a reader wondering whether it was
+  missed.
+
+### Content guidelines
+
+- `subject` is what is kept, in the words a reader would use. It is the row header,
+  so it is announced with every cell beside it.
+- `kind` is the grouping the reader already uses. Omit it rather than inventing a
+  taxonomy.
+- `policy` is the name of a document that exists somewhere the reader can reach.
+- `empty` is one sentence, and which of the two honest answers it is depends on
+  whether the publisher keeps nothing or has not written the schedule yet.

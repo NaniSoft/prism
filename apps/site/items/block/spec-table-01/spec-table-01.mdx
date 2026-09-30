@@ -1,0 +1,132 @@
+---
+slug: blocks/spec-table-01
+title: SpecTable01
+---
+
+## Overview
+
+SpecTable01 is a capability's limits as a real table: what is measured, its value, its
+unit and the condition it holds under, grouped into bodies you name, with a summary
+band of figures underneath.
+
+The storefront version of this pattern is a product's specification table: a list of
+attributes for an item for sale, the material, the weight, the dimensions, the care
+instructions, in a two-column table under a heading, sometimes grouped into sections.
+Every part of the layout and every part of the accessibility work transfers without a
+change, because a specification is a table whichever subject it describes: a screen
+reader announces the row's name with every cell beneath it in one, and a grid of `div`s
+does not. What does not transfer is the subject. The figures here are a capability's
+limits: what it handles, what it costs, what it will not do.
+
+## What this Block will not do
+
+**It will not derive a value, infer a unit, or round a number.** Those three refusals
+are why it exists rather than a limitation of it.
+
+A specification table is the one surface in this system where a number a reader cannot
+check is a liability rather than a convenience. Every figure on it is something the
+reader is about to plan against, and a figure this package printed would be a
+measurement the product never made.
+
+| Rejected | Why |
+| --- | --- |
+| `value: number` | Forces the caller to format outside the Block or lose the precision the figure belongs to |
+| A `format` prop | Moves the arithmetic and a locale into a package that has no business choosing either |
+| A `compact` or `approximate` boolean | A rounding rule with no name, applied to a figure this package cannot see the meaning of |
+
+So a throughput number is a node you composed, a unit is a string you wrote, and a
+precision is your decision made in your own formatter before the value reached the
+Block. A rounded retention window is a wrong retention window.
+
+## `unit` is a string beside the value
+
+`unit` is a separate field rather than part of `value`, and the reason is that "12k",
+"12 thousand" and "12000" are three renderings of one figure. Which is right is a fact
+about the measurement and the audience rather than about the measurement alone: a
+reader reconciling a bill wants the full number, a reader scanning a column of twelve
+wants the short one, and a machine reading an export wants neither.
+
+The caller owns the rendering in `value` and the precision in `unit`, and the Block
+draws them as two cells. The cost is that a caller who wants them joined has to join
+them, which is the right place for the decision because it is their figure and their
+audience.
+
+## Usage
+
+```tsx
+<SpecTable01
+  title="What the connector handles"
+  columns={[
+    { id: 'label', header: 'What is measured' },
+    { id: 'value', header: 'Value' },
+    { id: 'unit', header: 'Unit' },
+    { id: 'note', header: 'Measured under' },
+  ]}
+  groups={[
+    {
+      title: 'Collection',
+      rows: [
+        {
+          id: 'points',
+          label: 'Points per walk',
+          value: '7,000,000',
+          note: 'Every configured tag, every 15 minutes, per site',
+        },
+      ],
+    },
+  ]}
+  summary={[{ label: 'Points per walk, whole estate', value: '7.0M' }]}
+  empty="We publish no limits for this connector yet."
+/>
+```
+
+<ComponentDemo slug="spec-table-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a reader is deciding whether a capability can carry their estate, their
+market or their run. That is a capability page, a connector's page, or the bottom of a
+pricing page where the tiers' ceilings matter more than their prices.
+
+Use `emphasis` on the one row that decides the answer for everybody else. That is the
+retention window, the ceiling, or the region a capability cannot reach yet.
+
+### When not to use
+
+Do not use it for three or four figures. That is a `Metric` row or a `FactList`, and a
+table with a header row and two rows is a header row and two rows.
+
+Do not use it as the summary. A summary is prose, and a specification is measurements;
+mixing them puts the argument in the middle of the numbers.
+
+Do not pass a value you cannot defend. The Block will print it exactly as composed,
+which is the whole contract and also the whole risk.
+
+### Best practices
+
+- Compose every value in your own formatter before you pass it, including the
+  grouping. That is the decision the Block refuses to make for you.
+- Put the condition in `note` on every row that has one. A figure with no condition is
+  a claim about every case rather than about the one it was measured in.
+- Name your groups. Prism has no opinion about whether the facets of a specification
+  are "Collection", "Retention", "Regions" or "Limits", and the set of groups is a fact
+  about your capability.
+- Use the summary band for the two or three figures the table reduces to, and let
+  `Metric` draw them. A band with six figures is a second table.
+- Declare a column only when at least one row carries it. An empty column throws, and
+  the throw is the point: a column of empty cells is a column every reader scans twice.
+
+### Content guidelines
+
+- Write each row's label as the thing being measured. It is the row header a screen
+  reader announces with every cell beneath it, and a label that wraps costs every other
+  row its alignment.
+- Write each note as the condition, not as a caveat about the caveat. "Ninety fifth
+  percentile across eleven months of walks" is a condition. "Approximate" is not.
+- Write the unit as the notation, not as the sentence. The value cell carries the
+  number you composed; the unit cell carries "levels", "min" or "ms".
+- Write `empty` as the sentence that says which of the three empty states this is. A
+  specification with nothing in it means the capability publishes no limits, or the
+  limits have not loaded, or it is not available in this region.

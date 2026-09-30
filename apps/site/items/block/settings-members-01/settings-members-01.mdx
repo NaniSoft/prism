@@ -1,0 +1,118 @@
+---
+slug: blocks/settings-members-01
+title: SettingsMembers01
+---
+
+## Overview
+
+SettingsMembers01 is who is in a workspace: each member as a row or a table row,
+their role, when they arrived, and one control per row, with the pending
+invitations in their own group and a slot for the caller's own invite control.
+
+Two decisions are worth reading before the code. The first is `isSelf`. It marks
+the reader's own row, and the marking is what stops the Block drawing a role
+control on it. A settings surface that lets a reader remove themselves without
+saying so is a trap, and one that lets a reader change their own role is worse,
+because the consequence is a workspace with nobody left who can undo it. The
+second is the pending-invitations group, where an expired invitation is dimmed
+rather than removed. The only signal is the caller's own `expiresLabel`, and the
+row stays because a list that silently shrinks is a list a reader stops trusting,
+which on this particular surface is the last thing to spend.
+
+## Usage
+
+```tsx
+import { SettingsMembers01 } from '@nanisoft/prism-ui/blocks/settings-members-01'
+
+<SettingsMembers01
+  eyebrow="Workspace"
+  title="Members"
+  description="Four people can reach this workspace. Three more have been invited and have not answered."
+  members={[
+    {
+      id: 'ada',
+      name: 'Ada Okonkwo',
+      email: 'ada@example.com',
+      role: 'owner',
+      avatar: { name: 'Ada Okonkwo' },
+      isSelf: true,
+      selfLabel: 'That is you',
+    },
+    {
+      id: 'bo',
+      name: 'Bo Lindqvist',
+      email: 'bo@example.com',
+      role: 'admin',
+      avatar: { src: '/people/bo.jpg', name: 'Bo Lindqvist' },
+      joined: 1_741_017_600_000,
+      joinedLabel: (value) => new Intl.DateTimeFormat().format(new Date(value)),
+      actions: <Button size="sm" variant="ghost">Remove</Button>,
+    },
+  ]}
+  invitations={[
+    { id: 'inv-1', email: 'cy@example.com', sentAt: '12 March' },
+    { id: 'inv-2', email: 'dee@example.com', sentAt: '2 March', expiresLabel: 'Expired five days ago' },
+  ]}
+  pendingTitle="Invitations you have sent"
+  inviteLabel={<Button>Invite someone</Button>}
+  roleOptions={[
+    { id: 'owner', label: 'Owner' },
+    { id: 'admin', label: 'Admin' },
+    { id: 'member', label: 'Member' },
+  ]}
+  roleLabel={(option) => `${option.label} of this workspace`}
+  onRoleChange={(memberId, roleId) => saveRole(memberId, roleId)}
+  empty="No one else is in this workspace yet."
+/>
+```
+
+<ComponentDemo slug="settings-members-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for a workspace, a project, an organisation or a team where the reader
+came to change somebody's access and leave. It reads well from one member to a
+few dozen.
+
+Pass `columns` when the workspace is large enough that a reader compares a role
+down a column rather than recognising a face. Below that, rows are easier to
+read.
+
+### When not to use
+
+Do not use it for a directory or a people list on a marketing page. A member with
+a portrait, a name and a title and no controls is `member-list-01`, and a
+directory with a role control on it invites a reader to change access from a page
+that has no business doing it.
+
+Do not use it for a single workspace's own permissions. One reader's access to
+one thing is a settings panel, and `settings-panel-01` is the shape for it.
+
+### Best practices
+
+- Mark your own row with `isSelf` and pass `selfLabel`. The Block then draws no
+  role control on it, and that is the whole point of the flag.
+- Pass `roleLabel` as well as `roleOptions`. The option's own `label` is the
+  fallback, and the function is where your product's vocabulary goes.
+- Let the Block's select be uncontrolled. It reports the move and waits for the
+  new value, which is what makes a failed change visible.
+- Keep an expired invitation in the list with `expiresLabel`. The row dims and
+  your words explain it.
+- Name the pending group with `pendingTitle`, or omit `invitations` entirely. A
+  group with no name is not a group.
+- Use `columns` only when the reader is comparing. A table of four people is a
+  table with four cells and a scroll region.
+
+### Content guidelines
+
+- `name` is the person's own name, as they write it.
+- `roleLabel` is a sentence your readers would say, in your own language. It must
+  contain the option's own label, because that is the visible text of the
+  control.
+- `joinedLabel` and `expiresLabel` are yours. The Block prints a `joined` value
+  exactly as passed when you pass no formatter, so a raw timestamp lands beside a
+  colleague's name.
+- `empty` is one of two sentences: one about the workspace, one about the reader
+  who just arrived in it. They are not variants of one another.

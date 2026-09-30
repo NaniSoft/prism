@@ -1,0 +1,115 @@
+---
+slug: blocks/offering-01
+title: Offering01
+---
+
+## Overview
+
+Offering01 is one capability in full: a name, a standfirst, a body, a specification
+list, a price, an availability reading, a panel and an actions slot.
+
+The storefront version of this pattern is a single-product page: an item's name, a
+paragraph about it, a table of specifications, a price, a stock reading and a button
+that adds it to a basket. Every part of the layout and every part of the accessibility
+work transfers without a change. What does not transfer is the noun. The thing on the
+page here is a capability the product offers: a capture source, an agent, a connector,
+a tier. It is not for sale, there is no basket, and the action at the bottom of the
+page is a decision rather than a transaction.
+
+## The state is the reason this is its own Block
+
+`Showcase01` shows what a product does and has no state prop at all, which is right
+for it: a showcase is evidence, and evidence of something unbuilt is a picture of a
+mock. This Block shows what a product plans to do as well as what it does, so the
+state set has four members and `coming-soon` is one of them.
+
+That is not padding. A design system that offered only available and unavailable would
+leave a consumer with two bad options for a roadmap item:
+
+| Choice | What the reader sees |
+| --- | --- |
+| Leave the state off | A capability that is not built, rendered exactly like one that is |
+| Leave the capability off the page | A roadmap nobody can link to and nobody can find |
+
+The first is the one thing a product page must never do, because a reader who believes
+a connector exists will plan an estate around it.
+
+| State | Tone | Why |
+| --- | --- | --- |
+| `available` | `success` | The good news, and the dot should look like it |
+| `in-preview` | `info` | The ordinary state of a capability between built and trusted |
+| `coming-soon` | `neutral` | A plan is not an alarm, and `neutral` asserts nothing |
+| `unavailable` | `destructive` | The one state a reader may have to act on |
+
+`stateLabel` is required whenever `state` is passed, and the run throws without it. A
+state with no words is a coloured dot: invisible to a reader who cannot separate the
+tones, and unreadable to a screen reader whatever the tones are.
+
+## Usage
+
+```tsx
+import { Offering01 } from '@nanisoft/prism-ui/blocks/offering-01'
+
+<Offering01
+  eyebrow="Connector"
+  name="Historian tag normalisation"
+  standfirst="Reads the tag hierarchy a control system already writes and gives every reading one spelling."
+  state="coming-soon"
+  stateLabel={(state) => WORDS[state]}
+/>
+```
+
+<ComponentDemo slug="offering-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where the reader's question is about one thing: does this capability do what I
+need, what does it cost, and can I have it. That is a product page, an add-on's page,
+or one card expanded into its own section.
+
+Use it on a page that also shows what is not built yet. If your product has a roadmap
+you intend to publish, this is the Block that lets you publish it honestly.
+
+### When not to use
+
+Do not use it for a set. A list of capabilities is `OfferingList01`, and a
+capability's limits as a table of figures is `SpecTable01`.
+
+Do not use it where the capability is the page itself and the page has no second
+thing to say. `Showcase01` is the shorter surface: it takes evidence and two actions
+and no state.
+
+Do not use `state="available"` to mean it works for you. Availability is a second
+prop, because the state says whether a capability can be turned on and the
+availability reading says what turning it on depends on. They change on different
+clocks.
+
+### Best practices
+
+- Write the standfirst as what the capability is for, not as a restatement of the name.
+  A name that is self-describing needs no gloss, and a gloss that repeats the name is
+  worse than no gloss.
+- Pass the facts you can be asked to defend. `facts` is a specification, and every
+  row in it is a sentence a reader may check against the product.
+- Compose the price with `PriceProps`, not with a formatted string, so the locale and
+  the precision are yours to choose.
+- Put the qualification of the price in `priceNote`: the billing period, the
+  commitment, what happens when a plan ends.
+- Keep the panel for the evidence a reader cannot check anywhere else, and let the
+  actions be two. A third action is a page that a reader cannot link to.
+- Pass the availability reading even when it is dull. "Twelve named sites" is the
+  sentence that stops a reader asking.
+
+### Content guidelines
+
+- Write the state words as a fact about your product, not as a grade. "In general
+  availability" and "Preview, open to twelve named sites" are both useful; "Beta" on
+  its own is not.
+- Write the availability note as the caveat that changes somebody's decision. The
+  value is the reading and the note is why it may not apply to them.
+- Write each fact's label as the thing being measured. A column of terms is read by
+  scanning its left edge, and a label that wraps costs every other row its alignment.
+- Write the body for a reader who has already read the name and the standfirst. It is
+  the argument those two cannot carry.

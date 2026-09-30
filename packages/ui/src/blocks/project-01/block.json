@@ -1,0 +1,8 @@
+{
+  "name": "project-01",
+  "title": "Project 01 - One Project In Full",
+  "description": "One project: its name, its state, its owner, the span it runs, a progress fill, a row of figures, the stages it is on and a slot for the controls that act on it. The state, the figures and the stage rail are composed Components, and every word, number and date is the caller's. Server Component.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "progress", "metric", "status", "steps", "relative-time", "cta-link", "avatar"],
+  "dependencies": []
+}

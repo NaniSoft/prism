@@ -1,0 +1,80 @@
+---
+slug: components/status
+title: Status
+---
+
+## Overview
+
+A Status is a dot in one of five tones and the caller's words beside it. It is the
+smallest way a product says what state something is in without spending a badge
+on it.
+
+The decision that shapes it is that the tone is required. A Component can see the
+state and it cannot see whether the state is urgent, so a tone is a judgement the
+caller makes, for exactly the reason `Meter` holds its thresholds at arm's length.
+A default would be the quietest way to ship a claim, because it looks like a
+convenience and behaves like an opinion.
+
+The label is required for the second reason: a status with no words is a colour a
+screen reader cannot read and a reader who cannot see colour cannot name.
+
+## Usage
+
+```tsx
+import { Status } from '@nanisoft/prism-ui/components/status'
+
+<Status tone="success" label="All systems operational" />
+
+<Status tone="warning" size="sm" label="2 of 3 replicas lagging" />
+```
+
+## Guidelines
+
+### When to use
+
+Use a Status where a row, a list item or a heading needs a state in words, and
+where the state is a word first and a colour second. A deploy state, a region, a
+plan, a queue, a component's health.
+
+Use `size="sm"` in a dense row where an `md` dot competes with the numbers beside
+it, and the default `md` beside a heading or in a summary card.
+
+Use `neutral` for a state with nothing to alarm about. It is drawn in the muted
+foreground rather than the full ink, because a dot in the foreground colour reads
+as an emphasis mark rather than as a state.
+
+### When not to use
+
+Do not use a Status for the whole of a state. The dot is a redundant channel; the
+label is the meaning. A row that is only a dot is a picture a reader has to
+decode, and a screen reader announces nothing at all.
+
+Do not use one where a Badge belongs. A Badge is a compact label with a surface,
+for a category or a tier the reader is meant to read as a chip. A Status is a dot
+plus a word, and it takes up a fraction of the row.
+
+Do not reach for `info` to mean "not urgent". `info` is a state in its own right,
+and a product whose states are neutral, info, success, warning and destructive has
+five states. A product with three states passes those three.
+
+Do not add a sixth tone because a product has a sixth state. A wider list is a
+wider set of colours a reader has to learn and a maintainer has to keep true, and
+the words are what make each tone legible. If the sixth state is genuinely
+different, request it upstream rather than reaching for the nearest tone.
+
+### Best practices
+
+- Pass the tone you mean rather than the tone that is easiest. The list is
+  `neutral`, `info`, `success`, `warning` and `destructive`, and nothing is
+  derived from the label.
+- Write the label in the product's own vocabulary. A product that says "Degraded"
+  and a product that says "Partially unavailable" are both describing `warning`,
+  and neither word is Prism's to choose.
+- The dot is `aria-hidden` and the label carries the meaning, so a reader who
+  cannot separate the tones still reads which is which. Do not rely on the dot to
+  say something the label does not.
+- `warning` is amber and measures about 2.1:1 against the default pack's light
+  background, so on a light surface that one dot is a tint rather than a mark. The
+  label beside it is what carries the state.
+
+<ComponentDemo slug="status" />

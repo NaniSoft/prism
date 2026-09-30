@@ -1,0 +1,17 @@
+{
+  "name": "provisioning-01",
+  "title": "Provisioning 01 - A Multi-Step Run That Commits",
+  "description": "A multi-step form that commits something: a step rail, the current step's fields the caller declares, a back and a next control, and a confirmation the caller supplies. The step state is derived from the current index and there is no onSelect, because a form whose reader can jump to step four is a form that can commit an unvalidated step. initial is a number and is clamped, and a step with no fields renders a review and a control rather than an empty form. Client Component, because the commit handler is a function and the values have to survive a step boundary.",
+  "categories": ["application"],
+  "registryDependencies": [
+    "button",
+    "field",
+    "input",
+    "live-region",
+    "native-select",
+    "section",
+    "steps",
+    "textarea"
+  ],
+  "dependencies": []
+}

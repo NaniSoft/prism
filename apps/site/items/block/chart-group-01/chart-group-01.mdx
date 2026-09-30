@@ -1,0 +1,118 @@
+---
+slug: blocks/chart-group-01
+title: ChartGroup01
+---
+
+## Overview
+
+ChartGroup01 is a responsive grid of chart cards. Each card is the `chart-card-01`
+Block, so the panel itself is derived once and this Block adds exactly one thing,
+which is the grid.
+
+The column count is derived from the count rather than passed. `columns` is a
+ceiling, not a setting.
+
+## The measurement that sets the ceiling
+
+The container is 72rem with 2rem of padding at each edge, so 68rem of content. A
+four-across grid takes 1rem of gap three times over and leaves about 16rem for each
+figure. `chart` then spends 3rem of that on a fixed axis gutter before any mark is
+drawn, so a four-across bar chart would draw into about 13rem while its category
+labels are truncated to 5rem each.
+
+Three across gives each figure about 22rem, which is about 19rem of plot. That is the
+difference between reading a shape and guessing at one.
+
+| Cards | Columns at `lg` | Width per figure |
+| --- | --- | --- |
+| 1 | 1 | 68rem |
+| 2 | 2 | 33rem |
+| 3 or more | 3 | 22rem |
+
+## Usage
+
+```tsx
+import { ChartGroup01, type ChartGroup01Card } from '@nanisoft/prism-ui/blocks/chart-group-01'
+import { Chart } from '@nanisoft/prism-ui/components/chart'
+
+const CARDS: ChartGroup01Card[] = [
+  {
+    id: 'requests',
+    title: 'Requests',
+    description: 'Per day, by region.',
+    figure: (
+      <Chart
+        variant="bar"
+        label="Requests per day by region"
+        labels={['Mon', 'Tue', 'Wed', 'Thu', 'Fri']}
+        series={[
+          { name: 'eu-west', values: [120, 132, 141, 128, 150], tone: 'chart-1' },
+          { name: 'us-east', values: [90, 88, 96, 104, 99], tone: 'chart-2' },
+        ]}
+      />
+    ),
+    reading: [{ label: 'Peak day', value: '150', delta: 6, deltaFormat: (v) => `${v}` }],
+  },
+]
+
+export function Throughput() {
+  return (
+    <ChartGroup01
+      eyebrow="Nexus"
+      title="Throughput"
+      cards={CARDS}
+      columns={3}
+      empty="No series for this period."
+    />
+  )
+}
+```
+
+<ComponentDemo slug="chart-group-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where the answer to a reader's question is more than one figure and the
+figures are comparable at a glance. A set of charts that share a period, a set of
+service dashboards, a set of per-tenant figures.
+
+Pass the whole set. The layout is derived from the count, so a set that grows changes
+its own grid, and a caller who has to re-choose `columns` every time a figure arrives
+is managing a layout rather than composing a section.
+
+### When not to use
+
+Do not use it for one figure. That is `chart-card-01` on its own, and a grid of one is
+a card with a grid around it.
+
+Do not use it to put six figures across. Six figures at the 72rem container is about
+10rem each, and no chart reads at 10rem. Use a `Page` over two groups, or a
+`list-panel` holding a table of the six.
+
+Do not use it for figures that need to be compared cell by cell. A grid is a scanning
+arrangement; a table is a comparing one, and `data-table-01` is the answer.
+
+### Best practices
+
+- Compose `chart` for the figure and pass `legend={false}` to it when you want the key
+  in the card's `legend` slot. `chart` and `ChartLegend` take the same `series` array,
+  which is the only reason the swatch and the mark cannot disagree.
+- Give every figure a `label`. It is the figure's accessible name and the only name
+  the marks carry, and two charts in a row are two figures a reader cannot tell apart.
+- Pass `deltaFormat` for a reading measured in a unit. Without it `metric` prints the
+  bare number.
+- Check that each figure is readable as numbers. The card does not and cannot check
+  it, because a figure is a slot and a Block cannot see inside one.
+- Keep the readings to three per card. Four share about 5rem each in a `third` card.
+
+### Content guidelines
+
+- A card title names what is plotted, not the period: "Requests", not "Requests this
+  week".
+- A description says the unit and the axis the figure cannot show: "Per day, by
+  region", "Thousands of pounds".
+- A reading label is a noun phrase: "Peak day", "Median latency".
+- An `empty` names what would have been there. A reader looking at nothing wants to
+  know what to widen.

@@ -1,0 +1,107 @@
+---
+slug: blocks/issue-detail-01
+title: IssueDetail01
+---
+
+## Overview
+
+IssueDetail01 is one issue: its key in the mono face, its title, its state, the
+fields the caller declares a reader may be told, the body, the comment thread, and
+slots for the caller's own editor, controls and aside. A reader here is looking for
+one issue, and often for one particular issue, so the key and the sentence are the
+two things they meet first.
+
+The fields are the caller's, and that is the decision the Block rests on. An issue
+detail surface with a fixed set of fields is a surface that decides what a reader
+may be told about an issue, and a tracker whose issues carry a story point, a
+sprint, an epic, a customer and a severity has five facts this system knows
+nothing about. So Prism names no fields and draws the caller's, as a definition
+list.
+
+The thread renders in the order the caller passes it and the Block never sorts. An
+order a Block imposed is a claim about which record came first, and a conversation
+in the wrong order reads as a conversation in that order.
+
+## Usage
+
+```tsx
+import { IssueDetail01, type IssueDetail01Props } from '@nanisoft/prism-ui/blocks/issue-detail-01'
+
+<IssueDetail01
+  issue={{
+    key: 'NX-412',
+    title: 'The operator view times out on a full estate',
+    state: 'in_review',
+    stateLabel: 'In review',
+    author: { name: 'Lior Benali', avatar: { name: 'Lior Benali' } },
+    openedAt: Date.parse('2026-02-11T00:00:00Z'),
+    dateLabel: (value) => 'opened in February',
+    fields: [
+      { id: 'area', label: 'Area', value: 'Operator view' },
+      { id: 'severity', label: 'Severity', value: 'Two' },
+      { id: 'found-in', label: 'Found in', value: '2.14.0' },
+    ],
+    labels: [
+      { id: 'regression', label: 'Regression' },
+      { id: 'estate', label: 'Estate' },
+    ],
+    body: <p>It times out on an estate of about four hundred machines.</p>,
+  }}
+  comments={THREAD}
+  commentForm={<YourEditor />}
+  actions={<YourControls />}
+  sidebar={<YourAside />}
+/>
+```
+
+<ComponentDemo slug="issue-detail-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for one issue, on a page of its own. The title is the section heading, so a
+page that composes it under an `h1` wants `headingLevel="h1"` and a card that
+embeds it wants `h3`.
+
+Use `layout="split"` by default and `stacked` in a narrow column, where a
+two-column layout would put the body at half the reading measure and a reader on a
+phone would have to scroll past the whole thread to reach the aside.
+
+### When not to use
+
+Do not use it for a list of issues. A table of issues is a `DataTable01`.
+
+Do not pass a fixed set of fields and expect them to be the ones a reader needs.
+Declare the fields your issues actually carry, in the order they should be read.
+
+Do not pass comments you have not ordered. The Block draws them in the order they
+arrive, and a store that returns newest first needs `reverse()` in your own code
+where the decision about your data belongs.
+
+### Best practices
+
+- Keep the `key` exactly as your system spells it. It is the value a reader pastes
+  into a search box, so a prettified key is a key they cannot find.
+- Pass a `stateLabel` for every issue. Every issue carries a state, so every issue
+  owes words for it.
+- Order `fields` the way a reader should read them and keep each value to one line
+  where you can. A definition list of twenty values per issue is a table wearing a
+  different hat, and a `DataTable01` is the honest surface for that.
+- Put your editor in `commentForm` rather than composing around this Block. A
+  comment editor is a product decision and the biggest one on this surface, and the
+  slot is why a consumer with a rich editor is not forced to replace the Block.
+- Use `sidebar` for the labels, the watchers and the related issues rather than
+  putting them in `fields`. The aside is a region and the field list is a set of
+  facts, and a reader navigating by landmark should meet them as two things.
+
+### Content guidelines
+
+- `title` is the sentence your reporter wrote. Do not edit it to fit the layout.
+- `body` and every comment are drawn as prose, so paragraphs, lists and code blocks
+  all work and a whole body in one paragraph reads as a caption.
+- `dateLabel` is optional, and the difference from a progress bar is the difference
+  between a figure and a date: a localised date is already a complete reading, and
+  the sentence is there for a reader who wants the age rather than the date.
+- Comments are the caller's order, oldest first by convention. The Block never
+  sorts and never claims which record came first.

@@ -1,0 +1,94 @@
+---
+slug: components/tag-group
+title: TagGroup
+---
+
+## Overview
+
+A TagGroup is a wrapping row of tags the reader chose, each of which can be taken
+back. It ships `TagGroup` for the row, `Tag` for a single chip, and both accept
+the same five tones. The row wraps onto a new line rather than truncating,
+because tags accumulate and a clipped tag is a tag the reader chose and cannot
+see.
+
+A Tag is what the reader chose; a Badge is what they are told. A badge carries a
+status the system decided, such as a count or a plan name. A tag carries
+something the reader picked and can un-pick, and the remove control is all of the
+difference. Folding them together would mean either a badge with a remove
+control, which offers a freedom the status does not have, or a tag with no remove
+control, which is a badge that happens to be round.
+
+A group with no `onRemove` is read-only, and that is a legitimate state rather
+than a missing prop. Tags applied for the reader, by an import or by a saved
+filter, are a real thing, and the honest way to draw them is as tags with no way
+to take one back.
+
+## Usage
+
+```tsx
+import { TagGroup, type TagGroupTag } from '@nanisoft/prism-ui/components/tag-group'
+
+const [tags, setTags] = useState<TagGroupTag[]>([
+  { id: 'design', label: 'Design', tone: 'info' },
+  { id: 'billing', label: 'Billing', tone: 'warning' },
+])
+
+<TagGroup
+  label="Filters"
+  tags={tags}
+  onRemove={(id) => setTags((current) => current.filter((tag) => tag.id !== id))}
+  removeLabel={(label) => `Remove the ${String(label)} filter`}
+  empty="No filters applied."
+/>
+```
+
+<ComponentDemo slug="tag-group" />
+
+## Guidelines
+
+### When to use
+
+Use a TagGroup for values the reader picked and can change: applied filters, chosen
+recipients, a set of skills, selected labels on a record.
+
+Use `Tag` on its own when there is exactly one chip and no set: the selected
+option in a combobox row, or the one filter a panel is showing on its own.
+
+### When not to use
+
+Do not use a TagGroup for a status. A record that is overdue, a plan that is
+active and a licence that has lapsed are `Badge`. Nothing about them can be
+un-picked, and offering a remove control on a status is a promise the product
+cannot keep.
+
+Do not use a TagGroup for navigation. A row of links is a list of links; a chip
+that removes something is not one.
+
+Do not draw an empty placeholder chip to hold the space. A chip where the tags go
+is a chip a reader will try to remove.
+
+### Best practices
+
+- Pass `removeLabel` whenever you pass `onRemove`. The Component throws without
+  it, because it cannot compose a name for a control from a node.
+- Pass `label` when the set needs to say what it is. The same element a sighted
+  reader reads is the one that names the group for a screen reader.
+- Pass `empty` when an empty group should still be visible. Without it an empty
+  group renders nothing at all, which is what `FactList` does.
+- Keep `id` on each tag even when the label is unique. Two readers can add the
+  same value twice, and a remove control named by the label would announce two
+  identical buttons.
+- Render `Tag` outside a group only when there is genuinely one chip. A single
+  chip wrapped in a group draws a label and a role nobody asked for.
+
+### Content guidelines
+
+- Write a tag's `label` as the value itself, in the shortest form the reader would
+  use: "Overdue", "Northwind Traders". Not "Status: overdue".
+- Keep a tag to a word or two. A tag that needs a sentence is a row.
+- Choose the tone for what the tag means, not for how urgent it looks. A
+  destructive tag is a value the reader can remove by removing a permission.
+- Write `removeLabel` as the action and the tag: "Remove the Overdue filter"
+  rather than "Remove".
+- Write `empty` as the absence, not as an invitation: "No filters applied." rather
+  than "Click to add a filter."

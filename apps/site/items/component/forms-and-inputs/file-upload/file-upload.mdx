@@ -1,0 +1,92 @@
+---
+slug: components/file-upload
+title: FileUpload
+---
+
+## Overview
+
+A FileUpload is the list of files a reader has chosen, one row each: the name, the
+size, an optional meter, an optional error and an optional remove control. It
+takes the files as data and never touches a browser `File` object, so the same
+list renders a receipt for a finished upload, a panel for a transfer in flight
+and a list of refusals.
+
+A size is a number of bytes and never a formatted string. A caller that hands
+over "1.2 MB" has done the division, picked a unit, decided the rounding and
+written a separator, and has to do all four again in every locale the product
+ships in. Prism owns one ladder and asks `Intl` for the sentence.
+
+The meter is `Progress` and the failure is `FieldError`, and they were not chosen
+together. A bar that reports a position is a bar, and `Progress` already exposes
+the value through ARIA and already draws at the authored heights. A failure is
+the opposite case: an `Alert` inside a bordered row is a card inside a card, and
+it announces a page-level problem for a problem with one file.
+
+## Usage
+
+```tsx
+import {
+  FileUpload,
+  type FileUploadFile,
+} from '@nanisoft/prism-ui/components/file-upload'
+
+const [files, setFiles] = useState<FileUploadFile[]>([])
+
+<FileUpload
+  label="Attachments"
+  files={files}
+  onRemove={(id) => setFiles((current) => current.filter((file) => file.id !== id))}
+  removeLabel={(name) => `Remove ${name}`}
+  empty="Nothing attached."
+/>
+```
+
+<ComponentDemo slug="file-upload" />
+
+## Guidelines
+
+### When to use
+
+Use a FileUpload whenever a reader has chosen files and the page owes them a list
+of what they chose. It is the receipt half of a `Dropzone` and the only half that
+survives the page being reloaded.
+
+Use it read-only, with no `onRemove`, for a receipt: a sent message, a filed
+return, an invoice that names its attachments. Offering to take an attachment off
+a receipt is a promise the product cannot keep.
+
+### When not to use
+
+Do not use it as the way in. A list with no target above it cannot receive a file;
+pair it with a `Dropzone` or with a file input inside a `Field`.
+
+Do not use it for a set of values with no files behind them. A `TagGroup` is for
+what the reader chose, and a chip named "report.pdf" is a link in a costume.
+
+Do not draw a placeholder row for an empty list. A row with no file in it is a row
+a reader tries to remove.
+
+### Best practices
+
+- Pass `size` in bytes and let the default sentence it. Override `formatSize` only
+  when the caller needs a fixed locale, a different base or a fourth rung.
+- Give every row an `id` the caller owns, not the file name. A reader can add the
+  same file twice, and two rows with the same name are two rows the reader cannot
+  tell apart.
+- Pass `progress` while a transfer is running and stop passing it when the
+  transfer ends, so a finished file is a file with a name and a size and nothing
+  else.
+- Pass `error` as a sentence about the caller's own limit, and omit `onRemove`
+  while a file is still transferring, because this Component cannot see the
+  transfer and will not stop one.
+- Pass `removeLabel` whenever you pass `onRemove`. The Component throws without it.
+- Pass `empty` when the absence should be visible, and omit it when it should not.
+
+### Content guidelines
+
+- Write `label` as the list's noun: "Attachments", "Documents".
+- Write `error` with the limit and the way past it: "Larger than 10 MB. Send a
+  link instead."
+- Write `removeLabel` as the action and the file: "Remove Q3 close.pdf" rather
+  than "Remove".
+- Write `empty` as a fact: "Nothing attached." rather than "Attach a file".

@@ -1,0 +1,7 @@
+{
+  "name": "search-page",
+  "title": "Search Page - Field, Groups, Results And A Pager",
+  "description": "A complete search screen: the heading, a controlled search field, the caller's own count line, the caller's groups of results, and slots for their recent searches and their pager. The Page counts nothing and writes no sentence about finding nothing, so a search that reports no results cannot lie about an index it cannot see.",
+  "categories": ["application"],
+  "dependencies": []
+}

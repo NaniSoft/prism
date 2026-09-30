@@ -1,0 +1,8 @@
+{
+  "name": "shortlist-01",
+  "title": "Shortlist 01 - Capabilities A Reader Is Considering",
+  "description": "A set of capabilities a reader is considering, drawn as cards or rows with a mark slot, a name, a one line reason, an optional price through the Price component, a move control, a remove control and a slot for the caller own controls over the whole set. The controls are part of the item rather than a row action, because a shortlist is a set the reader chose and can change, and both control names are functions because a remove control announced only as Remove gives a screen reader one identical button per item and leaves the reader guessing which one they are on.",
+  "categories": ["application"],
+  "registryDependencies": ["button", "cta-link", "price", "section"],
+  "dependencies": []
+}

@@ -1,0 +1,108 @@
+---
+slug: blocks/hero-02
+title: Hero02
+---
+
+## Overview
+
+Hero02 is the hero for a product whose claim is a figure rather than a sentence. A
+narrow copy column sits on the left and a figure fills the rest of the band, running
+to the edge of the container with no card around it.
+
+It is the third form in the hero family and the family is not three tastes about what
+matters on a page. It is three answers to how much room a claim needs, and each one
+is the right proportion for a different kind of claim:
+
+| Block | The claim | The proportion |
+| --- | --- | --- |
+| `Hero01` | a sentence | the copy and the figure share the band, five to six |
+| `Hero02` | a figure | the copy narrows to four and the figure takes the rest |
+| `Hero03` | three figures and a sentence | a wide headline, a list of points, and a row of proofs |
+
+Hero01's five to six split is a decision its own JSDoc states: the copy needs the
+measure and the figure needs the width, and at that ratio neither is given enough.
+That is right when the drawing is evidence for the sentence. Hero02 is the form for
+when the drawing is the sentence.
+
+Every string is a prop. The figure is required, and the phrase that names it is
+required, because a Block that ships no copy ships no reader-facing copy either.
+
+## Usage
+
+```tsx
+import { Hero02 } from '@nanisoft/prism-ui/blocks/hero-02'
+import { PulseSeries } from '@nanisoft/prism-ui/components/pulse-series'
+
+<Hero02
+  headingLevel="h1"
+  eyebrow="nanisoft"
+  title="One job in. One reviewed pull request out."
+  description="The queue is the product. Everything else is the loop around it."
+  actions={[
+    { label: 'Follow the build', href: '/build' },
+    { label: 'Read the architecture', href: '/docs', variant: 'outline' },
+  ]}
+  figureLabel="Queue depth over the last hour, by stage"
+  figure={
+    <PulseSeries
+      label="Queue depth over the last hour, by stage"
+      baseline="jobs waiting"
+      scan
+      bars={DEPTH}
+    />
+  }
+/>
+```
+
+<ComponentDemo slug="hero-02" />
+
+## Guidelines
+
+### When to use
+
+Use Hero02 when the product does something and showing it is the only honest way to
+make the claim. A pipeline that runs, a surface that is captured, an estate that is
+observed: each of those is a mechanism, and a mechanism read at thumbnail size is a
+picture of a mechanism rather than a mechanism.
+
+Use it when the figure is the argument. If the sentence is the argument and the figure
+is supporting it, Hero01 already gives the figure enough room and Hero02 starves the
+copy for nothing.
+
+### When not to use
+
+Do not use it when there is no figure worth half the page. The proportion is the
+Block: a 4fr copy column with a decorative panel beside it reads as a layout mistake,
+because it is one.
+
+Do not use it twice on one page, and do not use it where `Hero01`'s centered form
+belongs. The centered form is for a page whose claim is a sentence, and this is not
+that page.
+
+Do not use it inside an application screen. It is a marketing composition.
+
+Do not pass a figure that is only interesting while it moves. The test is the one
+DESIGN.md's Motion section states: stop the animation and the figure is still true, or
+it was a video with extra steps.
+
+### Best practices
+
+- Pass `figureLabel`. It is the accessible name of the figure region and Prism will
+  not compose it: "the queue, live" and "the estate, now" are two different claims
+  about two different systems.
+- Pass at most two actions, the first with an `href`. The arrow on the first action
+  appears only when that action is a link that can be followed.
+- Set `headingLevel="h1"` when the hero is the page's top-level heading. The default
+  is `h2`, because a Block is composed rather than a page.
+- Pass an eyebrow only when it is true and current. It renders nothing when absent.
+- Compose the figure yourself. Prism draws no frame here, so a figure that wants the
+  instrument treatment composes `InstrumentPanel01` into the slot.
+
+### Content guidelines
+
+- Keep the headline to about eight words. The column is narrow, so a long headline
+  wraps to three lines and the band stops reading as a headline over a figure.
+- Write the description as one sentence. At this measure it is the only line under
+  the headline and it has to finish quickly.
+- Write `figureLabel` as what the figure shows, not as what it proves: "Queue depth
+  over the last hour" rather than "Fast".

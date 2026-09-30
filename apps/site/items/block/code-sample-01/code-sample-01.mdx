@@ -1,0 +1,101 @@
+---
+slug: blocks/code-sample-01
+title: CodeSample01
+---
+
+## Overview
+
+CodeSample01 is a titled code sample: a name, a sentence about what the code
+shows, the code itself, and a slot for your own controls. It composes `CodeBlock`
+rather than re-deriving the surface, so the header, the gutter and the line count
+are the Component's decisions and stay its decisions.
+
+This is a Block and `code-block` is a Component because the difference is the band
+around the surface, not the surface. `code-block` owns the tinted mono surface,
+the header for the machine words, the gutter and the line count. It owns no title,
+no sentence about what the code is for, and no place to put the controls. Those
+three are what a document puts on either side of a snippet.
+
+The argument for shipping the band is a count. One documentation site has forty of
+these, and before this Item each of the forty was hand-written: forty copies of a
+heading above a code surface, forty places to forget the gutter on the one sample
+where a line number matters, and forty places where a copy control's accessible
+name was written in whatever language the author was in that week.
+
+`layout` is a prop because a documentation page and an application page need
+different things from the same band. A page that owns its own sections composes a
+Page, and a Page with four samples in it and no rhythm between them is a Page
+whose samples float, so `section` draws a `Section` and a Page gets four bands of
+vertical rhythm for free. An application page that wants a sample inside a panel it
+already draws passes `inline`.
+
+## Usage
+
+```tsx
+import { CodeSample01 } from '@nanisoft/prism-ui/blocks/code-sample-01'
+import { Button } from '@nanisoft/prism-ui/components/button'
+
+<CodeSample01
+  title="Composing a Section"
+  description="A Page that has four samples in it and no section between them is a Page whose samples float."
+  language="tsx"
+  filename="Page01.tsx"
+  lineNumbers
+  code={`export function LandingPage(props: LandingPageProps) {
+  return (
+    <Page>
+      <Hero01 {...props.hero} />
+      <CodeSample01 layout="inline" title="..." code={props.code} />
+    </Page>
+  )
+}`}
+  label="Page01.tsx, composing a Section"
+  actions={<Button size="sm" variant="ghost">Copy</Button>}
+/>
+```
+
+<ComponentDemo slug="code-sample-01" />
+
+`label` is required whenever you pass `actions`, and the type says so rather than
+the render discovering it. A control that acts on a figure acts on something, and
+the something has to be nameable.
+
+## Guidelines
+
+### When to use
+
+Use CodeSample01 where a document names a piece of code and refers to it: an
+installation step, a configuration example, a migration, a prop reference, an
+example page on the site.
+
+Use `CodeBlock` directly for a symbol, a command or a filename inside a sentence.
+That is a snippet, and a snippet has no title to give.
+
+### When not to use
+
+Do not use it for a diff. A diff is two surfaces side by side with a comparison,
+and that is `Diff`.
+
+Do not use it for a code sample with no name. Compose `CodeBlock` and put the name
+in the sentence around it.
+
+Do not expect it to highlight anything. Prism ships a code surface and no
+highlighter, and that decision is argued in the `CodeBlock` Item.
+
+### Best practices
+
+- Write a title that names the thing, not the code: "Composing a Section", not
+  "Example". A reader scanning the contents is looking for the task.
+- Write a description that says what to notice in the code, not what the code is.
+- Turn `lineNumbers` on for anything a reader will be asked to find a line in, and
+  off for a three-line command.
+- Compose your own copy control in `actions` and name it. Prism ships no control
+  label a consumer cannot localise.
+
+### Content guidelines
+
+- A `filename` is the file the snippet is from, exactly as it is on disk.
+- A `language` is whatever your own documentation already writes: `tsx`, `ts` and
+  `TypeScript` are all defensible and the one that is right is the one your pages
+  already use.
+- A `label` is a path, a command, or the thing the snippet shows.

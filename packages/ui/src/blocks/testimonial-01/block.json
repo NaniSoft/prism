@@ -1,0 +1,8 @@
+{
+  "name": "testimonial-01",
+  "title": "Testimonial 01 - One Quote, Or A Pair",
+  "description": "One quote with the attribution that makes it weighable, or two side by side. The name is a heading, the role and the company are two separate fields rather than one byline, and a company with a page of its own is a real link. There is no carousel and nothing advances.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "card", "avatar"],
+  "dependencies": []
+}

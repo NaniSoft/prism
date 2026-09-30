@@ -129,6 +129,7 @@ function SignalField({
     >
       {placed.map((mark, index) => (
         <circle
+          key={index}
           data-slot="signal-field-mark"
           data-emphasis={index === emphasised || undefined}
           cx={mark.x}

@@ -1,0 +1,141 @@
+---
+slug: components/list-panel
+title: ListPanel
+---
+
+## Overview
+
+A ListPanel is a titled panel whose body is a scrolling list, with a slot for a
+header toolbar and a slot for a footer. It composes with `Item` for the rows and
+with `ScrollArea` for the scroll, and it ships no row, no count and no copy.
+
+It is the third thing, and the reason it exists is that the other two were
+already taken. `Item` is a row and has no opinion about what encloses it.
+`FactList` is a definition list, short enough that the whole set is meant to be
+read. Neither is a container, and a long list needs one: a titled, bounded,
+scrollable region that gives the list a place to end.
+
+**A ListPanel is not a table.** A panel holds a list: each row is one thing, read
+top to bottom, and the reader is scanning for the one they want. The moment the
+reader needs to compare a value in one row against the same value in another, the
+content is records with columns, and the answer is `Table`.
+
+The region is a real `<section>` named by its own title through `aria-labelledby`,
+so the name a screen reader hears and the name a sighted reader reads are the same
+text. With no `title` there is no invented one: the panel renders anonymous, and
+`label` is the only way to name it.
+
+## Usage
+
+```tsx
+import { ListPanel } from '@nanisoft/prism-ui/components/list-panel'
+import { Item, type ItemEntry } from '@nanisoft/prism-ui/components/item'
+
+const rows: ItemEntry[] = [
+  {
+    id: 'collector-1',
+    title: 'Collector 01',
+    description: 'alpha',
+    meta: '4s',
+    href: '/collectors/1',
+  },
+]
+
+<ListPanel
+  title="Collectors"
+  description="Every collector this account can see"
+  count="14 of 40"
+  label="Collectors"
+  maxHeight={288}
+  actions={<Button size="sm" variant="outline">Add</Button>}
+  footer={<Button size="sm" variant="ghost">Show all 40</Button>}
+>
+  <ul aria-label="Collectors" className="divide-border divide-y">
+    {rows.map((row) => (
+      <li key={row.id}>
+        <Item entry={row} />
+      </li>
+    ))}
+  </ul>
+</ListPanel>
+```
+
+<ComponentDemo slug="list-panel" />
+
+## Guidelines
+
+### When to use
+
+Use a ListPanel when a list is long enough that the page cannot hold it: a set of
+collectors, a run history, a directory of teams, a feed. The panel's reason for
+existing is that the list has an end the reader can reach without leaving the page.
+
+Use it with `maxHeight` when the panel sits beside other content and the reader
+needs both. Use it with `scroll={false}` when the list is short and the panel is
+there for the title, the count and the rule above the footer.
+
+Compose the rows out of `Item` and write the list element yourself. The panel
+draws the frame; the `ul`, the `ol` or the table inside it is the caller's,
+because the shape of the list is a fact about the data.
+
+### When not to use
+
+Do not use a ListPanel for records the reader compares across rows. That is a
+`Table`, and rows in a panel instead is a table a reader has to read cell by cell
+because the semantics are not there.
+
+Do not use it for a handful of rows. A panel with three items in it is a frame
+around almost nothing, and the title and the border cost more attention than the
+three rows do.
+
+Do not use `FactList` inside a ListPanel. A definition list is a scan down a
+column and a list is a scan for one thing; stacking them puts two scanning
+readings in one box and neither of them is what the reader came for.
+
+### Best practices
+
+- Pass a `title` wherever you can. The title is the region's accessible name, and
+  a named landmark is one a screen reader user can skip past deliberately rather
+  than one they walk past twice.
+- Pass `label` whenever the panel scrolls, because a scrollable region is a tab
+  stop and a tab stop with no name is a stop a reader pays for and learns nothing
+  from. The type requires it in that shape rather than leaving it to a default.
+- Write the count as a whole line in `count`, not as a number prop. "12 of 40" is
+  one sentence in one language and a different sentence in another, and the number
+  is only half of it.
+- Keep `actions` for the controls that act on the whole list and `footer` for the
+  ones that end it. The footer does not scroll, so a control the reader needs
+  after scrolling belongs there and not in a row.
+- Omit the parts you do not need rather than passing an empty string. A header
+  with nothing in it is not rendered, and a reserved band is a gap the reader
+  looks through.
+- Size a control placed in the header or the footer for a 44px target on a coarse
+  pointer. `Button` already does this, and a panel that is read on a phone is read
+  by finger.
+
+### Content guidelines
+
+- The title names the set, not the page. "Collectors" and not "Your collectors",
+  because the word "your" is a claim about who is looking and a panel in a shared
+  account is not always that reader's own.
+- The description is one supporting line. It says what the set is or where it
+  comes from, and it does not repeat the count, which has its own line.
+- The count reads as a fraction or a total, never as a bare number. A bare number
+  in a header is a number a reader has to interpret against a list they have not
+  scrolled yet.
+
+### Accessibility
+
+The panel is a `section` named by its title through `aria-labelledby`, so a
+landmark list in a screen reader shows the title a sighted reader sees. With no
+title and no `label` the region renders anonymous, which is deliberate: a panel
+named "Panel" is a claim that is wrong in every consumer's product, and a name is
+a promise that something follows it.
+
+The scroll is `ScrollArea`, so the bar beside the list is this design system's and
+the scrolling is still the browser's. The arrow keys, Page Up, Page Down, Home and
+End all work, and the region is one tab stop rather than one stop per row.
+
+The rows are the caller's own list, so the count and the position in the list come
+from the element the caller wrote. A `ul` of `Item`s is a list to a screen reader;
+a column of `div`s is forty unlabelled regions.

@@ -1,0 +1,126 @@
+---
+slug: blocks/account-01
+title: Account01
+---
+
+## Overview
+
+Account01 is an account in full: a name, a kind, a reference, a set of facts, a
+balance or a plan reading, a slot for the caller's own recent activity, the regions
+and surfaces the account spans, and a slot for the caller's own controls.
+
+The storefront version of this pattern is a customer record, and the shape is
+familiar. A shop shows somebody their customer record: who the account is, what is
+on it, what it owes, what happened on it recently, and the controls the account's
+owner is entitled to press. What changes here is whose account it is and who reads
+it. A NaniSoft account is a workspace rather than a person, and the reader is very
+often not the person who created it.
+
+## This is not a settings page
+
+An account is a fact about who owes what and what they may do. A settings page is a
+set of controls that change one. They are read in opposite directions, they are
+built by different teams, and conflating them is how a read surface turns into a
+screen where a mistake is a data change.
+
+So this Block ships no control of its own. No change plan button, no close button,
+no update card, no edit reference. `controls` and `activity` are slots, and each
+control inside them is your own Component with your own permission check, your own
+confirmation and your own sentence. A Block that drew a "Close account" button would
+be shipping a write path into a read surface, and the harm of that is not a styling
+error: a record is read by people who did not create it, so a control on it is a
+control a reader may press about somebody else's money, and the person who finds the
+bug is neither the person who wrote the code nor the person who pressed the button.
+
+If you want one screen with the record above and the settings below, compose
+`Account01` inside your own `Section` and put `SettingsPanel01` under it. The
+outline then has a heading for each, which is the honest arrangement for two
+different jobs.
+
+## Usage
+
+```tsx
+import { Account01 } from '@nanisoft/prism-ui/blocks/account-01'
+
+<Account01
+  eyebrow="Nexus"
+  name="Northgate Estates"
+  kind="customer"
+  kindLabel="Paying customer on annual terms"
+  reference="NX-CUS-004471"
+  facts={[
+    { id: 'created', label: 'Customer since', value: <RelativeTime date={record.createdAt} /> },
+    { id: 'region', label: 'Billing region', value: 'United Kingdom' },
+    { id: 'owner', label: 'Account owner', value: 'Bo Lindqvist' },
+  ]}
+  balance={{ label: 'Owes on the current invoice', value: { amount: 1204.6, currency: 'GBP' } }}
+  plan={{ name: 'Pipeline, annual', href: '/plans/pipeline', hrefLabel: 'Read the plan' }}
+  states={[
+    { id: 'capture', name: 'Capture estate', state: 'degraded', stateLabel: 'Running with two rejected batches' },
+    { id: 'pipeline', name: 'Pipeline', state: 'active', stateLabel: 'Running' },
+  ]}
+  activity={<EventFeed events={events} />}
+  controls={
+    <Button variant="outline">Open the account</Button>
+  }
+/>
+```
+
+<ComponentDemo slug="account-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a reader came to find out about one account and not to change it. A
+support engineer checking a workspace, somebody in finance reconciling a line, an
+administrator reading a record they did not create.
+
+Use it where the reader's questions are "who owes what" and "what state is it in".
+Both are answered by scanning, which is why the regions are a bounded list rather
+than a table.
+
+### When not to use
+
+Do not use it for the account's own settings. That is `settings-panel-01`, and a
+record with controls on it is a page where a reader is not sure whether looking is
+the same as changing.
+
+Do not use it for a person. A colleague with a portrait, a role and a biography is
+`user-profile-01`, and an account is not a person even when one person is on it.
+
+Do not use it for a single figure. A balance on its own is a `Metric`, and a
+balance with a plan and a renewal date and nothing else is a `FactList` with three
+rows.
+
+### Best practices
+
+- Treat `controls` and `activity` as slots for your own Components, and put your
+  permission check inside each control rather than around the Block. The Block
+  cannot know who is reading.
+- Pass `reference` and expect it to render in the mono face. That is deliberate: an
+  identifier is machine notation, the same rule `SectionHeading` states for its own
+  `index` prop, and a contract reference is the one string on the page a reader may
+  read aloud.
+- Map your own state words into `stateLabel` and expect the tone table to fall back
+  to the supporting ink for anything it does not hold. The value is on the row as
+  `data-state` so you can see which ones need mapping.
+- Use `layout="split"` on a wide screen where the reader is comparing two accounts
+  in one session. It moves no control, only the column they sit in.
+- Let the fact list be empty. An account with a name, a kind and a balance is a
+  complete record, and the Block draws no box where a fourth fact would have been.
+
+### Content guidelines
+
+- `name` is the account's own name as your product writes it. It is the section
+  heading, so a reader who arrives by link can navigate back to it.
+- `kind` is what the account is to your product: a customer, a subscriber, a
+  partner, a trial. It is the supporting line under the name, not a fact, because
+  it is the answer to the question the reader arrived with.
+- `stateLabel` is a sentence your readers would say. It is required, and the machine
+  value is never printed in its place.
+- `balance.note` and `plan.detail` are where the qualifying sentence goes: the
+  period, the credit note, the renewal date, the link to the invoice.
+- `defaultLabel` on a billing source and `stateLabel` here are the same rule in two
+  places: the words are the information and the colour is the reminder, and a mark
+  with no words beside it is a claim no reader can check.

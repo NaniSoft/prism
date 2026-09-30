@@ -1,0 +1,150 @@
+---
+slug: blocks/waitlist-01
+title: Waitlist01
+---
+
+## Overview
+
+Waitlist01 is the queue, not just the form: a heading, a labelled field, one control,
+a required line saying what happens to the address, a caller-formatted position, an
+optional referral code, and a region that announces the outcome. Every string is
+passed in as a prop.
+
+**Everything it says about the address it inherits from `Newsletter01`, and the
+inheritance is worth stating.** `onSubmit` is required and the Block sends nothing,
+so the address is never handled, stored, retried or forgotten by a component that was
+installed to draw a form. `consent` is required, because a waitlist form that can
+ship without saying what happens to the address lets a consumer make a legal claim
+they did not write, and a waitlist has more to disclose than a newsletter: that a
+position is not a date, that the list may close, that the address is not sold.
+`status` is a prop and never an internal state, because a success sentence this
+package wrote would be inherited verbatim by every consumer and would be the one
+sentence on the page most certainly wrong.
+
+## The position sentence is a function
+
+`position.label` is `(position) => string`. It is not a template, and the difference
+is the whole design of the prop.
+
+| | Written as | Composed by |
+| --- | --- | --- |
+| English | 1,204 of 5,000 | the Block, in English, forever |
+| German | 1.204 von 5.000 | the Block, in English, forever |
+| Japanese | 5,000 名中 1,204 番目 | the Block, in English, forever |
+
+A Block that composed the sentence would ship the English one into every consumer's
+product. The numbers are facts and Prism takes them; the sentence is a fact about
+the reader's language and the caller owns it.
+
+## Usage
+
+```tsx
+import { useState } from 'react'
+import { Waitlist01 } from '@nanisoft/prism-ui/blocks/waitlist-01'
+
+export function LaunchWaitlist() {
+  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [message, setMessage] = useState<React.ReactNode>(null)
+  const [copied, setCopied] = useState(false)
+
+  return (
+    <Waitlist01
+      eyebrow="Nexus"
+      title="Join the queue"
+      description="We open a seat every Thursday."
+      label="Email address"
+      consent="We hold your address until you ask us to delete it. We never sell it, and one line a month tells you when your place is close."
+      submitLabel="Take a place"
+      position={{
+        current: 1204,
+        total: 5000,
+        label: ({ current, total }) =>
+          new Intl.NumberFormat(undefined).format(current) +
+          (total === undefined
+            ? ''
+            : ` ${localeWord('of')} ${new Intl.NumberFormat(undefined).format(total)}`),
+      }}
+      referral={{
+        value: 'NEXUS-4KD2-1190',
+        label: 'Your referral code',
+        copyLabel: 'Copy code',
+        copied,
+      }}
+      status={{
+        state,
+        message: copied ? 'Copied to the clipboard.' : message,
+      }}
+      onSubmit={async (value) => {
+        setState('sending')
+        const result = await joinQueue(value.email)
+        setState(result.ok ? 'sent' : 'error')
+        // Both sentences are this product's, and so is the copied confirmation.
+        setMessage(
+          result.ok
+            ? `You are number ${result.position}.`
+            : 'The queue is full. We will open it again next month.',
+        )
+      }}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="waitlist-01" />
+
+## Guidelines
+
+### When to use
+
+Use it on a page whose whole subject is a thing that does not exist yet, where the
+reader's real question is how far away it is. That is what the position line is for,
+and a waitlist with nothing to count is better served by an ordinary form.
+
+Use `position` whenever there is a number. Omit it only for a list that opens empty,
+and note that a position the caller cannot source is a position Prism will not
+invent.
+
+Use `referral` once the caller has somewhere for a referred reader to go. A code
+with no landing behind it is a promise about a page that does not exist.
+
+### When not to use
+
+Do not use it to collect anything but an address. A waitlist form with a name field
+is a lead capture form, and it wants its own fields and its own consent sentence.
+
+Do not use it where a position is not a fact. If the number is an estimate, say so
+in your own `label`, because the sentence is where a reader decides whether to trust
+it.
+
+Do not use it for a queue you cannot actually serve. A position that never moves is
+worse than no position, and the Block will happily print whatever number you hand it
+for as long as you write the sentence.
+
+### Best practices
+
+- Write `label` with `Intl.NumberFormat` for both numbers. The grouping separator is
+  the reader's locale, and Prism gives you the numbers rather than the digits so you
+  can ask for it.
+- Put the copied confirmation in `status`, next to the outcome of the form. Prism
+  marks the control's state and writes no sentence, because a control saying
+  "Copied" is a sentence every consumer would inherit and it is a sentence about an
+  event Prism cannot see.
+- Clear `copied` on a timer you own. Prism has no clock and no effect, so a stale
+  "copied" state is a decision the caller makes.
+- Keep the consent line to what is true of this list specifically. The sentence is
+  wired to the field, so it is read at the moment the reader focuses the address.
+- Never pass a `status` with a default `message` in a wrapper. That is how a success
+  sentence this package did not write ends up on your page.
+
+### Content guidelines
+
+- Write the position sentence as a reader's place, not as a statistic. "You are
+  number 1,204 of 5,000" says something about the reader; "1,204 / 5,000" says
+  something about your database.
+- Write the field label as the address and nothing else. "Email address" is a name;
+  "Work email so we do not mail your personal one" is a condition, and conditions
+  belong in the consent line where they can be read before the reader decides.
+- Write each outcome as a fact about what happened, including the bad ones. "The
+  queue is full" is the sentence a reader needs and the one most often replaced by
+  a polite nothing.
+- Do not describe a waitlist position as a delivery date anywhere on this band.

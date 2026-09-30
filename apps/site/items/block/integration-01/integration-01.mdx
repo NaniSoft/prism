@@ -1,0 +1,114 @@
+---
+slug: blocks/integration-01
+title: Integration01
+---
+
+## Overview
+
+Integration01 is the set of systems a product connects to, as a grid of cards or a
+list of rows. Each entry carries a mark, a name, one line about the capability, a
+state, and separate links to the integration and to its documentation.
+
+Three decisions are worth reading before the code. The four states are
+`connected`, `available`, `coming-soon` and `unavailable`, and shipping the third
+is what makes the honest answer expressible: a design system that offers only
+connected and available leaves a consumer with exactly one way to render a
+capability it has announced and not shipped, and the one way on offer is to draw
+it as available. The mark is a slot and Prism ships no vendor marks, because a
+vendor's mark is a licensed asset with terms attached and a set of them in a
+design system is a set of marks that will be wrong within a year. And
+`stateLabel` is a required function rather than a record of four strings, because
+a state name in English in a consumer's integration list is exactly the defect the
+copy gate was written to end.
+
+## Usage
+
+```tsx
+import { Integration01 } from '@nanisoft/prism-ui/blocks/integration-01'
+
+<Integration01
+  eyebrow="What it connects to"
+  title="The systems this workspace talks to"
+  description="Marks, names and states are yours. Prism supplies the tile, the position and the rule."
+  stateLabel={(state, name) =>
+    state === 'connected'
+      ? `Connected as the workspace owner`
+      : state === 'available'
+        ? `${name} can be connected`
+        : state === 'coming-soon'
+          ? `Arriving next quarter`
+          : `Not offered in this region`
+  }
+  groupBy="category"
+  variant="cards"
+  integrations={[
+    {
+      id: 'scada',
+      name: 'The historian',
+      capability: 'Reads process values from every site, continuously.',
+      state: 'connected',
+      category: 'The estate',
+      href: '/settings/scada',
+      hrefLabel: 'Manage the connection',
+      docsHref: '/docs/scada',
+      docsLabel: 'How the reader works',
+    },
+    {
+      id: 'lms',
+      name: 'The historian, two years back',
+      capability: 'Fills a gap in the archive before the estate was observed.',
+      state: 'coming-soon',
+      category: 'The estate',
+    },
+    {
+      id: 'warehouse',
+      name: 'The warehouse',
+      capability: 'Where the readings land, and where the findings are written.',
+      state: 'connected',
+      category: 'Where the work happens',
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="integration-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for a product's own list of integrations, on a settings page, a product
+page or a comparison. It reads well at four to twelve entries.
+
+Use `variant="rows"` for a long list or a narrow column, and `groupBy="category"`
+when your integrations fall into groups a reader already knows.
+
+### When not to use
+
+Do not use it for a comparison of features across products. A comparison is a
+table, and a table with check marks is `compare-01`.
+
+Do not use it for a partner or customer list. A logo beside a name is evidence a
+reader can check, and `logo-cloud-01` is the honest shape for one.
+
+### Best practices
+
+- Supply your own marks. They are licensed assets and they go out of date.
+- Use all four states where they are true. The value of `coming-soon` is that it
+  is available to use.
+- Write `stateLabel` per integration where you can. "Needs an admin to approve it"
+  and "Connected as the workspace owner" are the two sentences a reader needs and
+  neither is derivable from the state.
+- Give the two links different words. One goes to the integration and one goes to
+  its documentation, and a reader who cannot tell them apart will open the wrong
+  one.
+- Name every integration you group. One with no category still renders, under no
+  title, and the count is on the list element as `data-ungrouped`.
+
+### Content guidelines
+
+- `name` is the system's own name, as the system spells it.
+- `capability` is one line about what connecting it gets the reader. A fact they
+  can check by trying it, not a sentence about your product.
+- `stateLabel` is a sentence your readers would say, in your own language.
+- `hrefLabel` and `docsLabel` say what each destination is for.

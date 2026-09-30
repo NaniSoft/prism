@@ -1,0 +1,148 @@
+---
+slug: blocks/settings-security-01
+title: SettingsSecurity01
+---
+
+## Overview
+
+SettingsSecurity01 is the security surface of a workspace: the ways in, the form
+that changes the one secret a reader is most likely to have forgotten, the places
+it is signed in from, and whether there is a second factor.
+
+Two decisions are worth reading before the code. The reveal control is on the new
+password and the confirmation and not on the current one, because a reader
+retyping a password they have just chosen is checking their own memory, while a
+reader typing the one they set six months ago is proving they know it, and a
+reveal control there turns the proof into a lookup. And the revoke control is
+offered on the session the reader is currently in: every instinct on a security
+page is to withhold the dangerous control from that row, and a reader who wants
+to end the session they are in is a reader who will find another way.
+
+## Usage
+
+```tsx
+import { SettingsSecurity01 } from '@nanisoft/prism-ui/blocks/settings-security-01'
+
+<SettingsSecurity01
+  eyebrow="Security"
+  title="How this workspace keeps its readers in"
+  labels={{
+    methods: 'Ways to sign in',
+    password: 'Change your password',
+    sessions: 'Where this workspace is signed in',
+    twoFactor: 'A second factor',
+  }}
+  methods={[
+    {
+      id: 'passkey',
+      name: 'A passkey on this device',
+      state: 'enabled',
+      stateLabel: 'In use',
+      detail: 'Held by the browser on this device, and never sent to us.',
+      addedLabel: 'Added 3 March',
+    },
+    {
+      id: 'app',
+      name: 'A code from the mobile app',
+      state: 'enabled',
+      stateLabel: 'In use',
+      addedLabel: 'Added 3 March',
+    },
+    {
+      id: 'backup',
+      name: 'A recovery code',
+      state: 'pending',
+      stateLabel: 'Waiting for you to confirm it',
+      detail: 'A code was generated on 28 August and has not been written down.',
+    },
+  ]}
+  onMethodChange={(id) => toggleMethod(id)}
+  methodToggleLabel={(method, on) =>
+    on ? `Turn ${method.name.toLowerCase()} on` : `Turn ${method.name.toLowerCase()} off`
+  }
+  changePassword={{
+    fields: [
+      { id: 'current', label: 'Your current password', type: 'current' },
+      { id: 'next', label: 'A new password', type: 'new' },
+      { id: 'confirm', label: 'The new password again', type: 'confirm' },
+    ],
+    onSubmit: (value) => changePassword(value),
+    submitLabel: 'Change the password',
+    revealLabel: 'Show the password',
+    hideLabel: 'Hide the password',
+  }}
+  sessions={[
+    { id: 's1', device: 'This laptop', location: 'Where you are', isCurrent: true, currentLabel: 'Signed in here' },
+    {
+      id: 's2',
+      device: 'A phone',
+      location: 'Somewhere else',
+      startedAt: Date.UTC(2026, 6, 14),
+      startedAtLabel: (value) =>
+        new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(value)),
+    },
+  ]}
+  onRevokeSession={(id) => revoke(id)}
+  revokeLabel={(session) => `Sign out ${session.device.toLowerCase()}`}
+  twoFactor={{
+    state: 'off',
+    stateLabel: 'Not turned on',
+    action: <Button size="sm">Turn it on</Button>,
+  }}
+  empty="This workspace has no way to sign in yet."
+/>
+```
+
+<ComponentDemo slug="settings-security-01" />
+
+## Guidelines
+
+### When to use
+
+Use it as the security page of a product that has more than one thing to say
+about a reader's account: two or more sign-in methods, a password, sessions, or a
+second factor.
+
+Use it for one reader's own account, on a personal settings page. For a workspace
+where the reader is managing somebody else's access, the members surface is
+`settings-members-01` and this one is still the right home for the methods.
+
+### When not to use
+
+Do not use it for a sign-in page. Nothing here is a credential and the Block never
+sees a secret, so a form that signs a reader in is `auth-form-01`.
+
+Do not use it for a product with one sign-in method and nothing else. A panel with
+one switch and a heading is `settings-panel-01`, and a security surface implies
+there is more to read.
+
+### Best practices
+
+- Mark a method `pending` when its setup is half finished, and expect the Block to
+  draw no control on it. A half-finished setup is not a setting that is on.
+- Pass `methodToggleLabel` and `revokeLabel`, and have both contain the visible
+  name of the thing they act on. The Block refuses a control whose name the caller
+  did not write.
+- Pass `labels` for the groups you draw. A group with no name is not a mystery,
+  but four named groups are four headings a reader navigating by heading can use.
+- Expect the revoke control on your own session. It is offered on purpose, and
+  what it needs from you is a confirmation, which is the `revoke` slot.
+- Pass `revealLabel` and `hideLabel` on `changePassword`. There is no English
+  default for either, on purpose.
+- Read `status` from your product. The Block clears the three entries when the
+  status becomes `done`, and it disables the submit control while it is `sending`.
+
+### Content guidelines
+
+- `method.name` is the method's own name, as a reader would say it.
+- `stateLabel` is a sentence your readers would say. On a pending method it is
+  where the reason goes.
+- `addedLabel` is already written as it should be read. Compose `relative-time` in
+  your own code if you want it relative.
+- `field.label` is one phrase per field. The type decides whether the field draws
+  a reveal control, so say "your current password" and "a new password" rather
+  than making the type carry the meaning.
+- `revokeLabel` names the device, because "revoke" and "revoke" on two rows are
+  not instructions a reader can act on.
+- `empty` is one sentence. Which of the two honest answers it is depends on
+  whether the workspace has no methods or failed to load them.

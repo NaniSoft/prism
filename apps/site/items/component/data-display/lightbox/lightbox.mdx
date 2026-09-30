@@ -1,0 +1,149 @@
+---
+slug: components/lightbox
+title: Lightbox
+---
+
+## Overview
+
+A Lightbox is one image at full size, in a dialog, with its own caption and an
+optional rail of thumbnails. It exists because an image the reader cannot
+enlarge is an image the reader cannot read, and an image carries text for a great
+many products: a chart exported as a picture, a screenshot of a console, a
+diagram, a photograph of a receipt, a logo lockup with a wordmark in it. At 320
+pixels wide none of that is readable, and a reader who cannot read it has been
+shown a thumbnail and told it was the thing.
+
+It is a dialog rather than a re-derivation of one. The focus trap, the restore
+of focus to whatever opened it, the Escape key, the outside press, the scroll
+lock and the portal are all already solved by `Dialog`, and all of them are
+solved badly twice as often as they are solved well. An overlay built on a `div`
+and a `keydown` listener gets the Escape key and no focus trap, so a keyboard
+reader tabs behind the image into a page they cannot see.
+
+The four accessible names are props, and that is the same rule the copy gate
+holds the dialog's own close button for. A hardcoded label is a sentence a
+consumer cannot localise, so a product in any language but English inherits an
+English control in the middle of its own interface, and the only fix is a fork.
+
+## Usage
+
+```tsx
+import { Lightbox } from '@nanisoft/prism-ui/components/lightbox'
+
+const [open, setOpen] = useState(false)
+const [at, setAt] = useState(0)
+
+<Button onClick={() => setOpen(true)}>Open the diagram</Button>
+
+<Lightbox
+  open={open}
+  onOpenChange={setOpen}
+  src={shots[at].src}
+  alt={shots[at].alt}
+  caption="The pipeline, after the collector change."
+  thumbnails={shots}
+  index={at}
+  onIndexChange={setAt}
+  zoomLabel="Image size"
+  previousLabel="Show the previous image"
+  nextLabel="Show the next image"
+  closeLabel="Close the image"
+/>
+```
+
+<ComponentDemo slug="lightbox" />
+
+## Guidelines
+
+### When to use
+
+Use a Lightbox when the image carries something the reader has to read: text in
+the picture, a detail that is lost at thumbnail size, a chart that was exported
+rather than built from data. Pass `alt` for every image, including every
+thumbnail, because the rail's buttons are named by their own `alt` and that is
+what makes them tellable.
+
+Use it when the surrounding page already shows the image small. A Lightbox is not
+a gallery in itself; it is the enlargement of a picture the page has already
+introduced.
+
+### When not to use
+
+Do not use a Lightbox for an image that is already legible where it sits. A dialog
+costs a focus trap, a scroll lock and a position in the page, and spending that
+on a picture the reader can already read is a cost with nothing behind it.
+
+Do not use it as a gallery with no page behind it. Reach for `Carousel` or a
+`Grid` of figures. A reader who has to open four dialogs to see four images has
+been given four interruptions instead of one page.
+
+Do not pass `alt=""`. An enlarged image with no description is a picture a reader
+can see more of and still not read, and the reader has paid a modal, a focus trap
+and an Escape key for it.
+
+### Best practices
+
+- **Own the sequence.** `src` and `alt` are props, so this component cannot move
+  the image, and every control asks for an index rather than setting one. Pass
+  `index` and `onIndexChange` and keep the state in the caller; omit both and the
+  lightbox remembers where it was on its own.
+- **Keep `src` and the rail entry in step.** When `thumbnails` is given, `src`
+  and `alt` are expected to be the entry at the current index. The rail marks the
+  current one by index, so a caller who moves the image without moving the index
+  gets a rail pointing at the wrong picture.
+- **Pass all four labels, even for one image.** They are required because a
+  required prop is a question asked at build time, and because adding thumbnails
+  later should not be the release where two missing labels are discovered. A
+  lightbox with no rail draws no previous and no next control, so two of the four
+  go unused there and cost nothing.
+- **Use a rail only for more than one image.** A rail of one is a picture of the
+  picture you are already looking at.
+- **Write a caption string when you can.** A string becomes the dialog's visible
+  name as well as its caption, so one sentence names the figure instead of the
+  same sentence appearing twice. A node is drawn under the image and the dialog
+  is named by `alt` instead.
+- **Do not fight the zoom.** It is fitted or actual size, and the frame scrolls
+  once the image is larger than it is. There is no pinch, no drag and no double
+  tap, so let the reader pan with the scroll keys rather than building a bespoke
+  pointer model on top.
+- **Give the zoom a noun.** One name covers both directions and the state is
+  announced with `aria-pressed`, so "Image size" is honest where "Enlarge" is a
+  claim about what the press will do and the press does whichever of the two the
+  state is not.
+
+### Accessibility
+
+The dialog is `Dialog`, so focus is trapped while it is open, focus returns to
+whatever opened it, the Escape key closes it, and the page behind it does not
+scroll. The dialog has a name: the caption when the caption is a string, and
+`alt` otherwise.
+
+Every control in the bar is a real button with an accessible name the caller
+passed, and every one draws its focus ring at full strength. The icons are
+`aria-hidden`, because a button named "Show the next image" that also announces
+a chevron is announced twice for no gain.
+
+The rail is a list of buttons, each named by its own `alt`, with the current one
+carrying `aria-current`. The inner thumbnail image is marked decorative with an
+empty `alt`, so the button's name is the description of the picture rather than a
+doubled reading of the same pixels.
+
+### What this is not
+
+There is no pinch to zoom, no drag to pan, no double tap, no swipe between
+images, no full screen API, no download, and no rotation control. Each of those
+is a bespoke gesture model a reader has to discover, and a scrollable frame is a
+thing every reader already knows.
+
+It is a client component, and only because `Dialog` is one.
+
+### Content guidelines
+
+- Write `alt` as a description of what the image says, not of what it is. "A
+  pipeline of four stages with a marker crossing the third" is an alt. "Diagram"
+  is a filename.
+- Write every thumbnail's `alt` for the picture in it, not for its position. The
+  button's name is the description, so a set of six alts all reading "Thumbnail
+  3" tells a reader nothing about the third.
+- Keep the caption to one sentence, and give it the thing the enlarged view adds.
+  What the reader can now see that they could not before.

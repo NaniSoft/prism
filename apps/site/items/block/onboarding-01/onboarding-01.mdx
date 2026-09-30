@@ -1,0 +1,89 @@
+---
+slug: blocks/onboarding-01
+title: Onboarding01
+---
+
+## Overview
+
+Onboarding01 is a setup checklist: a set of steps, each with a state, an optional
+action and an optional destination, a progress figure whose sentence is the
+caller's, and a completion note the caller writes.
+
+The two forms answer different questions, and `checklist` is the default because a
+reader who has been here once is looking for the one thing left. A rail of numbered
+steps is a document about the order, which is what a reader needs on a first run and
+is one screen too much on a return visit. `steps` is for the first run, when the
+order is the point, and it composes the rail.
+
+A blocked step is a first-class state. A checklist that can only say done, and not
+done and next, will read as broken to a reader who is genuinely stuck, and a reader
+who thinks a product is broken stops trusting the product.
+
+It is a client Component, because `onSelect` is a handler and a handler cannot be
+passed across a server boundary.
+
+## Usage
+
+```tsx
+import { Onboarding01, type OnboardingStep } from '@nanisoft/prism-ui/blocks/onboarding-01'
+
+<Onboarding01
+  eyebrow="Getting started"
+  title="Three things and you are running"
+  steps={STEPS}
+  progressLabel={(done, total) => `${done} of ${total} done`}
+  completion="The last step can wait until Monday. Nothing runs until you do it."
+  empty="This workspace has nothing to set up."
+/>
+```
+
+<ComponentDemo slug="onboarding-01" />
+
+## Guidelines
+
+### When to use
+
+Use `checklist` for a reader who has been here before, which is most of the time.
+The one outstanding thing should be findable in a glance, and the list of what is
+outstanding is the shape that makes it findable.
+
+Use `steps` for the first run, when the reader has never seen the setup and needs
+to know what comes after what. The rail is refused anything a rail has no room for:
+a description, a control, a destination, and a blocked step, because a blocked step
+is a fact about this run rather than a position in the order.
+
+### When not to use
+
+Do not use it for a document about how a product works. That is prose, and `Prose`
+in a section is the honest surface.
+
+Do not use it for a wizard. A wizard owns its own position, its own validation and
+its own back button, and a Block that owned those would be a wizard that four
+products had to rewrite.
+
+Do not set `onSelect` on a checklist whose steps carry their own actions. A row
+cannot be a control and contain one, and the run says so.
+
+### Best practices
+
+- Pass `progressLabel` as a function of the two counts. It has a plural and every
+  language words it differently, and a Block that composed it would compose the
+  English one.
+- Pass a `stateLabel` for every step, and make the four of them read as four
+  different things to do rather than four shades of the same one.
+- Mark a blocked step `blocked` rather than leaving it `current`. A step that has
+  not moved in three days is not the step the reader is on, and drawing it as the
+  current one is the arrangement that makes a reader think the product is broken.
+- Put your own control in a step's `action` rather than composing around this Block.
+  Which control a step offers is your fact: a connect, a retry, a skip.
+- Write `completion` for the reader who has just finished the last step. That is the
+  one moment a setup is read all the way through.
+
+### Content guidelines
+
+- `name` is what the step is, in the words a reader would use in conversation.
+- `description` is for a reader who has arrived at the step, so it can be a
+  sentence, a link or a code sample.
+- `stateLabel` is your voice. "Connected" and "Waiting on your key" are the same
+  position in a setup and two different things for a reader to do about it.
+- `hrefLabel` says what following the link does.

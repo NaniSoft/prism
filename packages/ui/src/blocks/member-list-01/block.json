@@ -1,0 +1,8 @@
+{
+  "name": "member-list-01",
+  "title": "Member List 01 - People With Presence And A Last-Seen Reading",
+  "description": "A dense row list for an application surface: a portrait, a name, a role, one of three presence tones beside the caller's own words, a last-seen reading and a slot for the caller's row actions. The tones are mapped here and the words are the caller's, because a presence is a claim about a colleague. Nothing is formatted and no member, word or presence is passed in as anything but a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "avatar", "status"],
+  "dependencies": []
+}

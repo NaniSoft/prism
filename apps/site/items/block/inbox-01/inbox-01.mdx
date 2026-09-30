@@ -1,0 +1,116 @@
+---
+slug: blocks/inbox-01
+title: Inbox01
+---
+
+## Overview
+
+Inbox01 is a work queue drawn as a real table: a priority, a source, a subject, a
+moment, a state, and a slot for the caller's own row controls, under a toolbar the
+caller supplies and a count they wrote themselves.
+
+It is the frame for a queue the consumer populates, and that is worth saying first
+because the name invites the wrong reading. It is not a place a queue is fetched,
+read, refreshed or marked as seen. A Block takes its content as props and fetches
+no application data, and that is held by a gate rather than by a habit:
+`packages/ui/scripts/check-block-imports.mjs` fails a Block that imports a router
+or a data client or calls a network function. A Block that fetched its own queue
+would have to be reimplemented by every consumer whose queue lives somewhere else,
+and there is no version of that which is not a fork.
+
+The decision that shapes the table is that the priority and the state are closed
+unions the Block maps to a tone, and the words for both are required props. A queue
+that printed `urgent` and `waiting` in English into a consumer's operations tool
+would be putting a sentence a consumer cannot translate inside a design system
+rather than inside their own code, which is where a translation tool is least
+likely to look.
+
+## Usage
+
+```tsx
+import { Inbox01 } from '@nanisoft/prism-ui/blocks/inbox-01'
+
+<Inbox01
+  eyebrow="Nexus"
+  title="What is waiting for a person"
+  description="The columns, the priority words and the state words are all yours."
+  columns={[
+    { id: 'subject', header: 'What is waiting' },
+    { id: 'source', header: 'From' },
+    { id: 'priority', header: 'How pressing' },
+    { id: 'at', header: 'Arrived' },
+    { id: 'state', header: 'Where it is' },
+  ]}
+  items={[
+    {
+      id: 'inv-4471',
+      subject: 'Invoice 4471 charged twice',
+      source: 'Billing',
+      priority: 'urgent',
+      priorityLabel: () => 'Overdue by nine days',
+      at: '2026-09-02T08:14:00Z',
+      state: 'open',
+      stateLabel: 'With billing',
+    },
+  ]}
+  count="1 of 1 waiting"
+  onSelect={(id) => open(id)}
+  empty="Nothing is waiting."
+/>
+```
+
+<ComponentDemo slug="inbox-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for a queue somebody works: an operations inbox, a triage list, a support
+desk, anything with items that are waiting on a person and a person who will decide
+what to do about them.
+
+Use it when the reader is comparing rather than reading. A queue is read by asking
+which of these is most pressing, how many are urgent, and which source keeps
+producing them, and comparison is what a table is for. A list where each row is one
+thing to read on its own is a `ListPanel` or a `NoteGrid01` instead.
+
+### When not to use
+
+Do not use it for a list the reader cannot act on. A list of documents is a
+`ResourceList01`, and a list of things that are merely true is a `NoteGrid01`.
+
+Do not use it for records with more than about six facts per row, or for a set the
+reader wants to sort and page. That is a `DataTable01`, which takes a render
+function per column and comes with a toolbar of its own.
+
+Do not use it as an inbox that fetches. It cannot, by design.
+
+### Best practices
+
+- Declare the `subject` column and put it first. It is the row header every other
+  cell is read under, and the run fails without it.
+- Pass `priorityLabel` and `stateLabel` on every item that declares a tone. The run
+  fails without them, and it fails at the call rather than shipping a coloured dot
+  with no sentence beside it.
+- Filter in the caller. The Block renders the array it is given and never filters
+  it, so the state that narrows a queue belongs next to the query that produced it.
+- Pass a `DataToolbar` in `toolbar` and the sentence in `count`. The Block draws a
+  bare number nowhere, because a number beside a search box is a number with
+  nothing to say what it counts.
+- Keep the subject to one line. It is the column a reader scans, and a subject that
+  wraps to two costs every other row its alignment.
+- Pass `href` with `hrefLabel` or neither. A link whose only words are the subject
+  tells a reader nothing about what activating it does.
+
+### Content guidelines
+
+- `subject` is what the item is, in the words a reader would use about it.
+- `source` is where it came from, in your vocabulary. It is a facet a reader
+  compares, so it is a column and not a prefix on the subject.
+- `priorityLabel` is usually per product rather than per item, and it is worth
+  writing per priority: "overdue by nine days" is a better sentence than "urgent".
+- `excerpt` is one line. It is drawn under the subject in the muted ink and never
+  truncated, so three lines of it is a paragraph in a table cell.
+- `at` takes a `Date`, epoch milliseconds, or a string the platform parses. It is
+  rendered through `relative-time`, so a number arrives as a date in the reader's
+  own locale.

@@ -1,0 +1,136 @@
+---
+slug: blocks/offering-categories-01
+title: OfferingCategories01
+---
+
+## Overview
+
+OfferingCategories01 is a set of kinds of capability: a grid of tiles, each with a
+name, a count, a one-line description and a link, or a tab row with your own panel
+underneath it.
+
+The storefront version of this pattern is a category strip: a row of departments a shop
+sells in, each tile carrying the department's name, a line about it, how many products
+are in it, and a link into the department. Every part of the layout and every part of
+the accessibility work transfers unchanged, because a tile is a tile and a count is a
+count whichever set it counts. What does not transfer is what the categories are. The
+kinds here are kinds of capability: capture sources, agents, connectors, tiers. A
+reader is not looking for the aisle their shopping falls in, so the count beside a tile
+is not a shelf size.
+
+## The grid is the default, and the reason is force
+
+Tabs hide five of six answers behind a control. A reader who arrives looking for their
+own kind of capability and does not see it among the visible tiles has to work out
+whether it is behind a tab, and a reader who does not work it out is a reader who
+leaves.
+
+So the cost of hiding is charged to the caller rather than to the reader. The
+arrangement is opt-in, and a caller who passes `variant="tabs"` is making the argument
+that their kinds are alternatives a reader chooses between rather than a set a reader
+checks membership of.
+
+The rejected default was tabs, which is the shape most category strips reach for first,
+because it looks more like an interface and less like a page.
+
+| Passed | Answers visible at once |
+| --- | --- |
+| Nothing, or `variant="grid"` | All of them |
+| `variant="tabs"` | One, until the reader asks for another |
+
+The tabs arrangement also needs three props the grid does not: `tabsLabels`, `content`,
+and the two words on the controls that move along the strip. `content` is the caller's
+own panel, because the Block knows which kind is showing and nothing at all about what
+is in it.
+
+## The count needs a label function
+
+"12 sources" and "12 supported" and "12" are three sentences, and they are three
+sentences because a count means different things on different pages: on one it is how
+many things exist, on another it is how many regions are covered, on a third it is how
+many of them a given plan may use.
+
+A Block that picked one would be picking a meaning, and it would be picking it for
+every consumer at once. So `count` is a number and `countLabel` is a function of the
+number and the kind's own name, and a count with no label throws.
+
+```
+countLabel={(count, category) => `${count} ${category.toLowerCase()} shipped`}
+```
+
+The cost of the requirement is that a caller who counts in three places writes one
+function. That is the correct outcome: a count that means one thing on one page and
+another on the next is a number nobody can act on.
+
+## Usage
+
+```tsx
+<OfferingCategories01
+  title="Five kinds of capability"
+  categories={[
+    {
+      id: 'agents',
+      name: 'Agents',
+      description: 'What acts on a finding, and what it may touch when it does.',
+      count: 6,
+      countLabel: (count) => `${count} agents on the runtime`,
+      href: '/capabilities/agents',
+      hrefLabel: 'Read about the agents',
+    },
+  ]}
+  empty="No kinds match that."
+/>
+```
+
+<ComponentDemo slug="offering-categories-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a reader's first question is "is the thing I need one of these". That is a
+capabilities index, a platform overview, or the top of a documentation site whose
+subjects are kinds rather than tasks.
+
+Use `variant="tabs"` only where each kind has a real panel behind it and the reader is
+expected to pick one and read it. A grid of six panels nobody scrolls is a page that
+answers nothing about the other five.
+
+### When not to use
+
+Do not use it for the capabilities themselves. That is `OfferingList01`, and the grid
+here is a way of finding the list rather than a substitute for it.
+
+Do not use it where each tile needs a paragraph. A tile is a name, a count and one
+line, and at two lines of description the tile stops being a list entry and starts
+being a paragraph.
+
+Do not pass a count you cannot source. A count is a claim about your own catalogue and
+the sentence around it is the sentence a reader will believe.
+
+### Best practices
+
+- Give every tile a description. The field is required and the run throws without it,
+  because a tile with only a name is a navigation menu and a menu answers "where can I
+  go" rather than "does this recognise my week".
+- Write the count sentence to name what is counted. "12 sources connected" and "12
+  supported" are different claims and only one of them is yours to make.
+- Pass `tabsLabels` only in the tabs arrangement, and `content` only in it too. Both
+  throw in the other arrangement rather than sitting in the markup drawing nothing.
+- Put the panel in `content` and let it be your own list, table or grid. A panel drawn
+  here would be the Block inventing content for the one place on the page where
+  content is most specific.
+- Keep the tile's `hrefLabel` as what following the link does, not as the kind's name
+  again.
+
+### Content guidelines
+
+- Write the kind's name as the product spells it. It is the card title and the tab
+  trigger, and a reader switching tabs is scanning it in one line.
+- Write the description as one line about what the kind is. The longer answer belongs
+  in the panel the link points at.
+- Write the two control words as the directions your interface already uses. They are
+  visible words on the buttons rather than accessible names for two arrows, because a
+  reader who cannot tell which arrow moves back has to guess.
+- Write `empty` as the sentence that tells a reader what happened. An empty category
+  list means three different things to three different readers.

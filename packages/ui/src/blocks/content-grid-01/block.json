@@ -1,0 +1,8 @@
+{
+  "name": "content-grid-01",
+  "title": "Content Grid 01 - Dated Entries As Cards, Rows Or A Compact Index",
+  "description": "A grid of dated entries composed from whatever the caller passes: a name, a summary, an optional reading, category, length, figure and link, drawn as cards, as full-width rows, or as a compact index. Every string, every figure and every annotation is a prop, and the slug claims no publication, because the shape is needed by a changelog, a research index, a release history and a case study set and by none of them a blog.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "card", "cta-link"],
+  "dependencies": []
+}

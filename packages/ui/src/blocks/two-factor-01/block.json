@@ -1,0 +1,8 @@
+{
+  "name": "two-factor-01",
+  "title": "Two Factor 01 - The Screen Where A Machine Is Allowed To Act",
+  "description": "A second factor: a caller-declared method list with the selected one marked by aria-current rather than by colour alone, a segmented code field composed from one-time-code so a paste of the whole code lands in every segment and a refused character is refused rather than stored, a resend control with three names, a remember row, a submit control and an announced status region. The Block does not verify the code, does not count the attempts and does not own the lockout, because a design system that limited attempts would be shipping a lockout policy into every product that installed it and a lockout is an availability decision that belongs to the product. The description is required, because on this screen the reader cannot tell what is being asked for by looking at the screen. There is no accepted sentence anywhere in the file: the outcome is a prop. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "card", "button", "checkbox", "field", "live-region", "one-time-code"],
+  "dependencies": []
+}

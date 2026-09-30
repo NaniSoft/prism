@@ -1,0 +1,128 @@
+---
+slug: components/steps
+title: Steps
+---
+
+## Overview
+
+A Steps rail says where a reader is in a sequence: an import, a checkout, a
+migration, a four stage release. The caller passes the steps and the index the
+reader is on, and every mark is derived from those two facts, so moving the
+reader moves all of them and no combination of the props can say they have
+finished the thing they are doing.
+
+`state` exists as a per step override, and it is there for a sequence that is
+not the process. A reviewer approved a line out of band, a stage was completed by
+hand last night, a reader has already answered the question step two would have
+asked. In those cases the position and the state are two different facts, and a
+derived mark would draw a claim the data contradicts. The cost is named in the
+component's documentation: an override is a second source of truth about a
+position, which is why it is one prop on one step rather than a mode.
+
+The rule between the steps is the indicator, and the reason is that the
+alternatives restate the same fact. A filled bar under every completed step says
+"this one is done" once per step, so a reader is handed the same sentence six
+times and has to combine them to learn the one thing they came for. The
+connector says it once, and it measures the space between two stages, so it is
+the only element that shows the sequence has a length at all.
+
+## Usage
+
+```tsx
+import { Steps, type Step } from '@nanisoft/prism-ui/components/steps'
+
+const IMPORT: Step[] = [
+  { label: 'Choose a source', description: 'A repository or an upload' },
+  { label: 'Map the columns', description: 'Six fields we can read' },
+  { label: 'Preview', description: 'Nothing is written yet' },
+  { label: 'Write', description: 'One transaction' },
+]
+
+<Steps
+  label="Import progress"
+  steps={IMPORT}
+  current={2}
+/>
+```
+
+<ComponentDemo slug="steps" />
+
+## Guidelines
+
+### When to use
+
+Use Steps when a reader is partway through a process with an order they are
+following, and knowing where they are saves them from reading the whole list. An
+import, a checkout, a migration, a release, a four question form.
+
+Use `description` for the qualifier a reader who has just arrived at that step
+wants, and keep `label` to the short noun or verb phrase they are scanning for.
+The two answer different questions and have different room.
+
+### When not to use
+
+Do not use Steps for navigation. A list of links the reader chooses between is a
+`Nav` or a `Menu`; a rail implies a route through the sequence rather than a set
+of places.
+
+Do not use Steps for a task with no sequence. That is `Progress`, and a bar that
+reports one value is quieter than four numbered discs and a rule.
+
+Do not use Steps to show history. A rail is read as the present and the future,
+not as a log; a run of past events with times is a `Timeline`.
+
+Do not override `state` on every step. A caller who has done that has replaced the
+rule with their own and gained nothing over passing `current` alone.
+
+### Best practices
+
+- **Pass `current` and let the states derive.** That is the arrangement that
+  cannot disagree with itself. Move `current` and every mark moves with it.
+- **Override one step, with a reason.** `state` is for a step that was reached
+  out of band, and the reason belongs in that step's `description` so the rail
+  itself stays a rail. Overriding a step that is not the current one with
+  `'current'` is refused: exactly one step is current and the component throws
+  rather than draw two answers to where the reader is.
+- **Keep `current` in range.** It is clamped, so a stale value from a state that
+  has not caught up lands on the nearest real step rather than on nothing.
+- **Name the rail when a page has two.** A checkout and an import both have four
+  steps and look identical without their names, so pass `label` whenever a page
+  carries more than one rail.
+- **Keep labels to a few words.** Six steps in a row share the width, and the
+  label that gets truncated is chosen by the container rather than by the reader.
+
+### Accessibility
+
+The rail is an `<ol>`, so a reader moving by list item is told which item this is
+and how many there are, and the current one carries `aria-current="step"`. That
+attribute is on the current step and nowhere else, because a colour is not a
+position in a sequence.
+
+The three states are not announced, and that is deliberate. They are consequences
+of the position, so a reader who has been told "item two of six, current" knows
+the state of the other five without being told six more words. Announcing them
+would also mean shipping the words "complete" and "upcoming" into every
+consumer's product, which is the defect the copy gate holds a dialog's close
+button for.
+
+The three states also differ by shape before they differ by colour: a filled disc
+for a step that is done, an outlined one for the step the reader is on, and a
+filled muted one for a step ahead. A reader who cannot separate mint from a mint
+outline is being told the same thing about two different steps, and the ordinal
+on every disc keeps the sequence countable when the colour is gone.
+
+The rule between the steps is `aria-hidden`. It is a measurement of how far
+through the reader is, and the position that measurement describes is already on
+the list item.
+
+### Content guidelines
+
+- Write labels as short noun or verb phrases, in the reader's terms. "Map the
+  columns", not "Column mapping".
+- Write descriptions for the step the reader has just reached, not for the step
+  in general. "Nothing is written yet" tells a reader what is safe to do; "This
+  step is optional" does not.
+- Use past tense for what has happened and an infinitive for what has not, so the
+  text agrees with the rail without repeating its state.
+- Say why a step was reached out of band in that step's description, so an
+  overridden state is never the only record of what happened.

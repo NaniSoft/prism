@@ -1,0 +1,8 @@
+{
+  "name": "offering-01",
+  "title": "Offering 01 - One Capability, Its Limits, Its Cost And Its State",
+  "description": "One capability in full: a name, a standfirst, a body, a specification list, a price, an availability reading, a panel and an actions slot. The state set makes in-preview, coming-soon and unavailable first class, so a capability that is planned is rendered as planned rather than as built, and a state with no caller-supplied words throws rather than drawing a bare dot. Every figure, word and currency is the caller's.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "fact-list", "price", "status"],
+  "dependencies": []
+}

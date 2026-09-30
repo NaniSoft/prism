@@ -1,0 +1,8 @@
+{
+  "name": "retention-01",
+  "title": "Retention 01 - A Retention Schedule",
+  "description": "A retention schedule as a real table: what is kept, for how long as a number of days, in which region, under which policy and when it was last reviewed, with the caller's own sentence for every period and a summary row whose figures travel inside the table.",
+  "categories": ["application"],
+  "registryDependencies": ["metric", "section", "table"],
+  "dependencies": []
+}

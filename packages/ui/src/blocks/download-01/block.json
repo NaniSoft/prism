@@ -1,0 +1,8 @@
+{
+  "name": "download-01",
+  "title": "Download 01 - A List Of Downloadable Artefacts",
+  "description": "A list of downloadable artefacts as full-width rows or as cards: a name, a format, a size, a digest, a note and a control whose accessible name is the caller's and is required, because a link named after its file tells a screen reader user nothing about what activating it will do. The size is a number of bytes and the caller carries the ladder, for the reason file-upload gives, and a digest is drawn beside it and never computed, because a Block that hashed its own string would be hashing the wrong bytes.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "card", "cta-link"],
+  "dependencies": []
+}

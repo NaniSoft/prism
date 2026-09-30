@@ -1,0 +1,8 @@
+{
+  "name": "help-01",
+  "title": "Help 01 - An Index, A Field And The Categories Under It",
+  "description": "A help index with a controlled search field, a set of caller-supplied categories and the articles under them, filtered in the browser as the reader types. The Block filters what it was given and searches nothing, so a consumer composes it with a static JSON index in the shape search-dialog already takes. The no-results sentence is required and the count line is a function, because both are sentences Prism would otherwise write in English. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["card", "cta-link", "search-field", "section"],
+  "dependencies": []
+}

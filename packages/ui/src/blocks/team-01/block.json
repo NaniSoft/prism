@@ -1,0 +1,8 @@
+{
+  "name": "team-01",
+  "title": "Team 01 - People As Cards Or Rows",
+  "description": "A grid or a list of people: a portrait where there is one, a name, a role, an uncropped biography at the reading measure and an optional labelled link. Card titles follow the section heading level, and highlight takes ids so a stronger border cannot drift onto the wrong person after a reorder. Every word is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "card", "avatar"],
+  "dependencies": []
+}

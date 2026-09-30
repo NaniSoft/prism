@@ -1,0 +1,93 @@
+---
+slug: components/dropzone
+title: Dropzone
+---
+
+## Overview
+
+A Dropzone is a target a reader drops files onto, which is also a button that
+opens the platform's own file picker. It takes the files through `onFiles` and
+does nothing else with them: no upload, no reading, no storing, because what
+happens to a file after the reader hands it over is the consumer's decision and
+only the consumer's.
+
+It is a real `<button>` and not a `<div>` with handlers on it. A div is not
+reachable by keyboard, cannot be pressed with Enter or Space, and has no border
+to draw a focus ring on. The result is a control that looks usable, works with a
+mouse and is invisible to the reader the gate on focus indicators exists for.
+
+The visible label is the caller's `label` prop and there is no default. A drop
+target that says "Drop files here" in a consumer's product is a claim in a
+language the consumer did not choose, in the one place on the page where a reader
+is about to act.
+
+Disabled means `aria-disabled`, and the control stays in the tab order. A removed
+focus target is a keyboard reader's dead end: they tab onto it, press Enter, and
+nothing happens with no announcement to say why.
+
+## Usage
+
+```tsx
+import { Dropzone } from '@nanisoft/prism-ui/components/dropzone'
+
+const [files, setFiles] = useState<File[]>([])
+
+<Dropzone
+  label="Drop a file here, or choose one"
+  description="A single file, up to 10 MB."
+  hint="Accepted: PDF, PNG, CSV."
+  accept=".pdf,.png,.csv"
+  onFiles={(chosen) => setFiles(chosen)}
+/>
+```
+
+<ComponentDemo slug="dropzone" />
+
+## Guidelines
+
+### When to use
+
+Use a Dropzone where a reader brings their own files: an attachment, an import, a
+proof, a dataset. It is the only control in this system that takes a file from
+the reader, and it hands the files over rather than uploading them.
+
+Use `FileUpload` beside it, not instead of it. The Dropzone is the way in and the
+FileUpload is the list of what came in.
+
+### When not to use
+
+Do not use it for a single optional image with a known shape. A file input inside
+a `Field` is smaller, and a target the size of a panel invites a drag that was
+never going to work.
+
+Do not use it when the reader must choose from files already on the server. That
+is a `Select` or a `CommandPalette`, and a target that accepts a drop cannot show
+what is available.
+
+Do not build a drop target out of a div and your own handlers. The three things
+that go wrong are a missing `type`, a missing accessible name and a missing focus
+ring, and all three are invisible in a screenshot.
+
+### Best practices
+
+- Filter the files in `onFiles`. `accept` is a hint to the platform's own picker
+  and to nothing else, so a file dragged onto the target arrives whatever it is.
+- Pass `multiple={false}` when one file is the answer, so a second file is never
+  collected and then dropped by the caller.
+- State the limit in `hint` or in `description`, and check it in `onFiles`. A
+  target that says nothing about size and refuses a file afterwards is a target
+  that wasted the reader's time.
+- Pair it with `FileUpload` so the reader can see what they handed over and take
+  it back. A target with no list is a target with no receipt.
+- Use `disabled` rather than removing the target. A control that disappears leaves
+  a keyboard reader with nothing to explain the gap.
+
+### Content guidelines
+
+- Write `label` as what the reader should do, in their language: "Drop a file
+  here, or choose one", or the caller's own phrasing. This Component ships none.
+- Write `description` as what happens to the file: "A single file, up to 10 MB."
+- Write `hint` as the accepted types, as a reader would read them: "Accepted: PDF,
+  PNG, CSV."
+- Keep the three lines to one line each. A target is a control with an
+  instruction, not a paragraph with a drop area.

@@ -1,0 +1,110 @@
+---
+slug: pages/careers-page
+title: CareersPage
+---
+
+## Overview
+
+CareersPage is a complete careers screen. It composes the roles list, three
+optional sets of titled things, and a closing way on, and it passes each band its
+own content, so the page adds the sequence and nothing else.
+
+| Order | Band | Question it answers |
+| --- | --- | --- |
+| 1 | Careers01 | Is there a job here for me? |
+| 2 | ContentGrid01 | What do you believe? |
+| 3 | ContentGrid01, as rows | Who would I work with? |
+| 4 | ContentGrid01 | What would I get? |
+| 5 | the caller's closing band | Where do I send something? |
+
+**The decision that makes this a Page rather than a `careers-01` is the empty
+state, and the page makes it by refusing to branch on it.** A careers page with no
+open roles is one of the two states a careers page is always in, and it is the one
+a list is worst at: a list that renders nothing has told a reader nothing, and a
+route that 404s in the week a company closes its last vacancy fails exactly when
+somebody is most likely to be checking. So the roles band is always rendered and
+always given `empty`, and it draws the caller's sentence in place of the rows with
+the rest of the screen unchanged around it.
+
+**The page heading is the roles band's own heading.** `Careers01` requires a title
+because a page that lists roles without saying why it exists reads as a job
+board, so the page's `h1` is the one doing the saying and the page draws no
+heading of its own above it.
+
+**The values, the teams and the benefits are the same Block three times.** Each is
+a set of titled things with a sentence under it and no date, no figure and no
+status. A page that drew them three different ways would be inventing differences
+its data does not contain.
+
+## Usage
+
+```tsx
+import { CareersPage } from '@nanisoft/prism-ui/pages/careers-page'
+
+<CareersPage
+  title="Come and build the thing that runs itself"
+  description="One or two sentences under the heading."
+  roles={roles}
+  closedLabel="No longer open"
+  openings={[
+    { label: 'All roles', href: '/careers' },
+    { label: 'Platform', href: '/careers?team=platform' },
+  ]}
+  openingsLabel="Narrow the roles by team"
+  empty="There are no open roles this week. The teams below are still hiring."
+  values={values}
+  teams={teams}
+  benefits={benefits}
+  contact={{
+    title: 'Nothing here today? Send something anyway',
+    href: '/careers/speculative',
+    hrefLabel: 'Write to us',
+  }}
+/>
+```
+
+<ComponentDemo slug="careers-page" />
+
+## Guidelines
+
+### When to use
+
+Use CareersPage for a public careers route whose job is to be usable in every
+week, including the week there is nothing to apply for.
+
+Use it with a subset. A company that publishes roles and little else passes
+`roles` and `empty` and the rest is absent.
+
+### When not to use
+
+Do not use it for a job board with filters, sorting and pagination. `Careers01` is
+the Block for a list a reader is searching, and a careers page is a page somebody
+reads.
+
+Do not reach for a contact form in the closing band. The band is a heading and a
+link. Compose `Contact01` beside this page if you want a form, because its
+`onSubmit` is a function and a function cannot cross from a server component to a
+client component.
+
+### Best practices
+
+- Always pass `empty`. It is required, and a careers page that renders an empty
+  list is the state this page exists to handle.
+- Pass `closedLabel` whenever any role is closed. The list throws without it,
+  because a dimmed row with no words on it is a row a reader cannot tell from a
+  rendering fault.
+- Pass `openingsLabel` whenever `openings` is given. The page throws without it,
+  because a navigation region with no name is announced as nothing in particular.
+- The narrowing row is links, not controls, and that is deliberate: a set of links
+  under a query parameter filters a list on a server render with no client code.
+- Pass `headingLevel` one deeper when the page is embedded under a heading the
+  consumer already owns.
+
+### Content guidelines
+
+- The standfirst is a string, because the roles band holds it. If it needs a link
+  or a mark in it, compose your own opening band above this page.
+- The empty state says what to do instead, not only that there is nothing. "Check
+  back" is a sentence; "There are no open roles this week" is a dead end.
+- A team's count is a number and `rolesLabel` is the words for it, in your own
+  language. A bare numeral beside a name tells a screen reader nothing.

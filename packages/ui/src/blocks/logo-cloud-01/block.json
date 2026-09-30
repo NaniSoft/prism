@@ -1,0 +1,8 @@
+{
+  "name": "logo-cloud-01",
+  "title": "Logo Cloud 01 - A Grid Of Customer Marks",
+  "description": "A grid of customer or partner marks, each one a slot the caller fills with the mark, the name and an optional destination. The marks are muted rather than recoloured, every mark carries its name in a hidden node, and there is no scrolling form: the marquee is refused by name. Every mark and every name is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section"],
+  "dependencies": []
+}

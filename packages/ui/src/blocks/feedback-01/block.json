@@ -1,0 +1,18 @@
+{
+  "name": "feedback-01",
+  "title": "Feedback 01 - A Scale, A Comment And The Thing They Are Talking About",
+  "description": "A feedback panel with a caller-declared sentiment scale rendered as a radio group, an optional free-text comment with an optional character counter, an optional file to attach, and a live region for the outcome. The scale is the caller's data rather than five faces Prism chose, because the number of points and the words at each end are the caller's product knowledge. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": [
+    "button",
+    "card",
+    "dropzone",
+    "field",
+    "file-upload",
+    "live-region",
+    "radio-group",
+    "section",
+    "textarea"
+  ],
+  "dependencies": []
+}

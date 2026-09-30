@@ -1,0 +1,8 @@
+{
+  "name": "hero-02",
+  "title": "Hero 02 - Narrow Copy, Figure To The Container Edge",
+  "description": "The hero for a product whose claim is a figure: a narrow copy column at four shares and a figure at eight, running to the edge of the container with no card around it. The figure is required and is named by the caller. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["button", "cta-link"],
+  "dependencies": ["lucide-react"]
+}

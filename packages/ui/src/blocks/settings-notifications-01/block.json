@@ -1,0 +1,8 @@
+{
+  "name": "settings-notifications-01",
+  "title": "Settings Notifications 01 - Per Channel Preferences",
+  "description": "Notification preferences as one group per channel with a switch per event, where an event the product cannot work without is marked by the caller, drawn read-only so a keyboard reader still meets it, and explained by one note the whole section shares.",
+  "categories": ["application"],
+  "registryDependencies": ["field", "section", "switch"],
+  "dependencies": []
+}

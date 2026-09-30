@@ -1,0 +1,125 @@
+---
+slug: blocks/changelog-01
+title: Changelog01
+---
+
+## Overview
+
+Changelog01 is a dated record of what changed, grouped by release or by date. Each
+release carries a version, an optional moment, an optional summary, and its
+records. Each record carries one of five kinds, a line about what changed, an
+optional body, and an optional link.
+
+The five kinds are a taxonomy of change records, not a severity ladder, and the
+tones follow from that. `added` takes the success tone, `changed` and `fixed`
+share the info tone, `removed` takes neutral, and `security` takes warning.
+
+`security` is the one worth arguing. Severity is the reader's judgement, not the
+record's property: a security fix in a package nobody installed is not more urgent
+than a typo fix in the package everybody did, and the record cannot tell the two
+apart. A design system that coloured it destructively would make that claim for
+every consumer in every release for ever. The cost of `warning` is stated in the
+Item's JSDoc too: a consumer with a genuinely serious advisory has no louder mark
+available, because the tone is fixed by the kind. The answer is that a serious
+advisory is a sentence, and the sentence is the title and the body you wrote.
+
+The outline is section, then release, then record, and all three levels are
+derived from `headingLevel`. A changelog is a set of groups, so a reader
+navigating by heading looks for a version and then for a record inside it.
+
+## Usage
+
+```tsx
+import { Changelog01 } from '@nanisoft/prism-ui/blocks/changelog-01'
+
+<Changelog01
+  eyebrow="Releases"
+  title="What changed"
+  description="Every published release, newest first."
+  releases={[
+    {
+      id: '1-4-0',
+      version: '1.4.0',
+      at: '2026-09-02',
+      summary: 'The token build publishes its contract as a file.',
+      entries: [
+        {
+          id: 'contract-file',
+          kind: 'added',
+          title: 'The emitted token contract is published as a single CSS file',
+          body: 'One file, one mode, every semantic role in it.',
+          href: '/changelog/1-4-0#contract-file',
+          hrefLabel: 'Read the full record',
+        },
+        {
+          id: 'duration-contract',
+          kind: 'changed',
+          title: 'Motion durations are named tokens rather than values',
+        },
+      ],
+    },
+    {
+      id: '1-4-1',
+      version: '1.4.1',
+      at: '2026-09-16',
+      entries: [
+        {
+          id: 'pack-radius',
+          kind: 'fixed',
+          title: 'A pack whose declared radius did not match its emitted scale',
+        },
+      ],
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="changelog-01" />
+
+A release with no records draws its version and its moment and no list under them.
+An empty release is a legitimate state: a release that was cut before anything
+landed, or a milestone with a name and nothing under it. What it must not draw is
+a frame, because a bordered empty group reads as content that failed to load.
+
+## Guidelines
+
+### When to use
+
+Use Changelog01 for a published release history: a product changelog, a package
+changelog, a migration log for a platform that versions its behaviour.
+
+Use it grouped by version when a reader asks "what is in the current release". Use
+it grouped by date when a reader asks "what changed on the day we migrated".
+
+### When not to use
+
+Do not use it for a set of dated notes. A note has an author, a category and a
+summary and no kinds, and that is `ContentGrid01`.
+
+Do not use it for a status page. A status record says what a system's state was
+and when it recovered, and the kinds here would be a vocabulary invented for it.
+
+Do not use it for an audit log. An audit record has an actor and an outcome and is
+appended rather than grouped into releases.
+
+### Best practices
+
+- Order the releases yourself. The Block does not sort, because a version string
+  sorts `1.10.0` before `1.9.0` and because a changelog's order is a publication
+  decision with a long tail of exceptions.
+- Order the records inside a release deliberately. A security fix usually belongs
+  beside the change that made it necessary rather than at the top of the list.
+- Pass `href` and `hrefLabel` together. The run fails on a link with no words.
+- Pass `showKinds={false}` where each record's title already says what kind it is,
+  and save the mark for a page with many records per release.
+
+### Content guidelines
+
+- A title is one line saying what changed. Half of a good changelog is a single
+  line, and a record with a sentence under a complete line is worse than the line.
+- A body is for the part the line cannot hold: why it changed, what it affects,
+  what to do about it. A migration step list belongs here.
+- A `summary` on a release is one line for a reader deciding whether to read on.
+  It is not a second title.
+- An `hrefLabel` says what following the link does. It is never the record's own
+  title.

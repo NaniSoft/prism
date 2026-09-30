@@ -1,0 +1,8 @@
+{
+  "name": "dashboard-01",
+  "title": "Dashboard 01 - An Overview Screen Composed Of Slots",
+  "description": "An overview screen whose composition is the caller's: a header slot for their own PageHeader01, a row of figures drawn on the Metric and Sparkline components, a six-track grid of titled panels each with its own width, and an optional narrow rail at the right. The Block holds no opinion about what a dashboard is for, because a pipeline wants the run queue wide and a watchlist beside it while an estate wants the reverse. Every string and every figure is a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "card", "metric", "sparkline", "cta-link"],
+  "dependencies": []
+}

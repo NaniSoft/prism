@@ -1,0 +1,8 @@
+{
+  "name": "showcase-01",
+  "title": "Showcase 01 - One Capability In Depth",
+  "description": "One product or capability shown in depth: a large name, a standfirst, a specification list composed with FactList, an optional framed media panel and at most two actions. The panel's side is a prop. Every string is passed in as a prop, and the block carries no price.",
+  "categories": ["marketing"],
+  "registryDependencies": ["fact-list", "button", "cta-link"],
+  "dependencies": ["lucide-react"]
+}

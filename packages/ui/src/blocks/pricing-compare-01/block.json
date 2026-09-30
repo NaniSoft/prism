@@ -1,0 +1,8 @@
+{
+  "name": "pricing-compare-01",
+  "title": "Pricing Compare 01 - Feature By Plan Matrix",
+  "description": "A comparison matrix with the plans across the top and the features down the side, rendered as a real table so a screen reader can navigate it by row and column header. Every plan, price, feature name and cell value is passed in as a prop, and a cell that is a yes or a no announces the caller's own word.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "table", "price", "cta-link"],
+  "dependencies": ["lucide-react"]
+}

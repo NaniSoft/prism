@@ -1,0 +1,8 @@
+{
+  "name": "onboarding-01",
+  "title": "Onboarding 01 - A Setup Checklist Or A Rail Of The Order",
+  "description": "A setup checklist: a set of steps each with a state, an optional action, and a progress figure whose sentence is the caller's, plus a completion note the caller writes. A blocked step is first class, because a checklist that cannot say a reader is stuck will read as broken. The steps form composes the rail and the checklist form draws the marks, and a client Component because onSelect is a handler.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "metric", "steps", "cta-link"],
+  "dependencies": []
+}

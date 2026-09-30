@@ -1,0 +1,103 @@
+---
+slug: blocks/trend-01
+title: Trend01
+---
+
+## Overview
+
+Trend01 is a ranked list of rising values. Each row carries a name, a current
+reading, the change against the previous reading, and a small series beside it.
+The rows are one ordered list, the rank is the position in the array, and the
+Block draws a cap rather than a page.
+
+A row is a metric with a shape beside it, and the Block composes `Metric` and
+`Sparkline` rather than drawing either of them. That is the decision the whole
+Item rests on. `Metric` owns the arrangement a headline figure is read in, the
+derivation of the direction from the sign of the number, and a rising mark that is
+a glyph so assistive technology names it in the reader's own language.
+`Sparkline` owns the shape and, more importantly, the fact that the numbers behind
+the shape are in the document: a ninety-six pixel line with no axis is a picture a
+reader cannot query, so the numbers are also rendered as a table. A Block that
+hand-rolled either would be a second implementation, and it would be the one
+without the table.
+
+Three props are required by a diagnostic rather than by a type, because the Block
+cannot know the words: `deltaLabel` on any row with a `delta`, `seriesLabel` on any
+row with a `series`, and `hrefLabel` on any row with an `href`.
+
+## Usage
+
+```tsx
+import { Trend01 } from '@nanisoft/prism-ui/blocks/trend-01'
+
+<Trend01
+  eyebrow="What is moving"
+  title="Five things that went up this week"
+  description="Ranked by the change against last week. The order is yours; the readings are yours too."
+  limit={5}
+  items={[
+    {
+      id: 'throughput',
+      label: 'Rows loaded per hour',
+      value: '18.4k',
+      delta: 12.4,
+      deltaLabel: (d) => `up ${d.toFixed(1)} percent on last week`,
+      series: [14.1, 15.2, 15.0, 16.8, 18.4],
+      seriesLabel: 'Rows loaded per hour, the last five readings',
+      href: '/estate/throughput',
+      hrefLabel: 'Read the series',
+    },
+    {
+      id: 'coverage',
+      label: 'Sites under observation',
+      value: '11',
+      delta: 3,
+      deltaLabel: (d) => `${d} more than last week`,
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="trend-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for a short ranked list of things that moved, where the reader wants the
+direction and the shape rather than the axis. Five to eight rows reads well; a
+longer set of the same thing is a `DataTable01`.
+
+Use `limit` when the data is longer than the section should be. It is a cap
+rather than a page, so the list stays one list.
+
+### When not to use
+
+Do not use it for a collection the reader wants to filter, sort, page or select.
+That is `DataTable01`, and a trend list that grew those affordances would be a
+table with a worse column set.
+
+Do not use it for a comparison between two things. A trend is one thing over
+time, and a side-by-side of two series is a `Chart`.
+
+### Best practices
+
+- Rank in your own data and pass the array in that order. There is no `sort` prop
+  because the Block cannot see what you are ranking by.
+- Pass `deltaLabel` on every row that has a `delta`. A signed number printed
+  beside a figure is a number with an arithmetic symbol on it, and a screen reader
+  reads that as a formula.
+- Pass `seriesLabel` on every row that has a `series`. A column of unnamed
+  pictures is a column of shapes a reader has to guess the meaning of.
+- Compose the series' values in your own units. Do not pre-normalise them into
+  percentages of a maximum; the shape is drawn against the data's own range.
+- Format `value` yourself if you need a unit, a currency or grouped thousands.
+  Prism prints the node it was given and formats nothing.
+
+### Content guidelines
+
+- `label` is what a reader would call the thing in conversation, in a few words.
+- `seriesLabel` says what the readings are and over what period. "Rows loaded per
+  hour, the last five readings" rather than "Trend".
+- `deltaLabel` is a sentence, not a format. Write the one your readers would say.
+- `hrefLabel` says what following it gets you. A destination is not a label.

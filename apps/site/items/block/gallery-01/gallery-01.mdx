@@ -1,0 +1,118 @@
+---
+slug: blocks/gallery-01
+title: Gallery01
+---
+
+## Overview
+
+Gallery01 is a grid of images where every tile is a real button that opens the
+lightbox at full size. Each tile has a caption under it and the set has a count
+on it. The four control names the enlarged image draws are yours.
+
+The enlarged surface is `Lightbox`, and the argument for composing it rather than
+drawing a dialog is the same one `Lightbox` makes about `Dialog`: an overlay built
+on a `div` and a `keydown` listener gets the Escape key and no focus trap, so a
+keyboard reader tabs behind the image into a page they cannot see, and the defect
+is invisible in review because the overlay works for the person writing it. The
+focus trap, the restore of focus, the Escape key, the outside press, the scroll
+lock and the portal all come from `Dialog` and are all solved once.
+
+The tile's accessible name is composed from the two values you passed and never
+from a word Prism chose. With no caption the name is the `alt`. With a string
+caption the name is the caption and then the `alt`, because the caption is what
+the reader can already see and the description is what they cannot get from a
+thumbnail. Prism adds a separator and nothing else.
+
+`ratio` is a number handed to `AspectRatio`, not a Tailwind keyword. Prism's
+stylesheet is built by scanning Prism's own source, so `aspect-square` written
+here would be a utility no consumer's stylesheet contains, and a portrait ratio is
+not a keyword at all.
+
+## Usage
+
+```tsx
+import { Gallery01 } from '@nanisoft/prism-ui/blocks/gallery-01'
+
+<Gallery01
+  eyebrow="Field"
+  title="What the floor looks like"
+  description="Nine captures from four sites. Every one of them is unreadable at the size a tile is drawn."
+  columns={3}
+  ratio="landscape"
+  items={[
+    {
+      id: 'glassworks',
+      src: '/figures/glassworks-01.png',
+      alt: 'A shift log on paper beside a tablet showing the same week',
+      caption: (
+        <a href="/work/glassworks">
+          The glassworks, week 14
+        </a>
+      ),
+    },
+    {
+      id: 'cannery',
+      src: '/figures/cannery-01.png',
+      alt: 'A cold chain chart on a wall and a printed compliance report',
+    },
+  ]}
+  labels={{
+    zoom: 'Image size',
+    previous: 'Show the previous figure',
+    next: 'Show the next figure',
+    close: 'Close the figure',
+  }}
+/>
+```
+
+<ComponentDemo slug="gallery-01" />
+
+The count is drawn whenever there is more than one image, and there is no prop for
+it. A count of one names nothing and a count of zero is not on the page.
+
+## Guidelines
+
+### When to use
+
+Use Gallery01 for a set of images a reader chooses between and then looks at
+closer: screenshots of a product, captures from a site, photographs, diagrams
+exported as pictures.
+
+Use `ratio="portrait"` for a set of pages or of people, `ratio="square"` for a set
+of marks, and leave it at `landscape` for the commonest case, which is a
+screenshot or a photograph.
+
+### When not to use
+
+Do not put a link on a tile. The type says `never` and the run fails, because a
+tile that is both a lightbox trigger and a link is two controls in one hit area.
+Put the link in the caption, which is drawn outside the button.
+
+Do not use it for a hero figure. A hero figure is beside the copy rather than
+under it, and that is `Hero01`.
+
+Do not use it for one image. A single image with a caption is a `figure` and a
+`Prose`, and a grid of one is a grid with one thing in it.
+
+### Best practices
+
+- Write an `alt` that says what is in the picture, not what the picture is called.
+  It is the button's name, the rail button's name and the enlarged image's
+  description, so it is read three times.
+- Pass a string caption when you want your words in the tile's accessible name. A
+  caption that is a node contributes nothing to the name, because a name is a
+  string and a node may be a list or a button.
+- Pass your own link in the caption, not on the tile. It gets its own accessible
+  name, its own focus position after the tile, and the words you chose on it.
+- Localise all four labels. There is no shape in which one of them is absent, not
+  even with a single image.
+
+### Content guidelines
+
+- An `alt` describes the content: "A shift log on paper beside a tablet showing
+  the same week". It is never the file's name.
+- A caption is a sentence about the figure and the set, and it is where a link and
+  its words go.
+- A `zoom` label is a noun for the thing being changed, "Image size", not a verb
+  for one of the two directions, because a press does whichever of the two the
+  state is not.

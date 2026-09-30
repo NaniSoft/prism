@@ -1,0 +1,8 @@
+{
+  "name": "user-profile-01",
+  "title": "User Profile 01 - One Person In Full",
+  "description": "A profile header for one person: a portrait where there is one, the name as the section heading, a role, an untruncated biography, a composed fact list, a slot for the caller's own controls and a slot for the caller's own sections. The portrait is a slot and no mark is drawn in its place, because a person-shaped fallback is a claim about a person the system knows nothing about. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "avatar", "fact-list", "separator"],
+  "dependencies": []
+}

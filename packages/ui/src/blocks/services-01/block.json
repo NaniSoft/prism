@@ -1,0 +1,8 @@
+{
+  "name": "services-01",
+  "title": "Services 01 - Engagements And Capabilities",
+  "description": "A set of engagements or capabilities, each a title, a body, a deliverables list and an outcome, as a three-across grid with an opt-in zero-padded ordinal. Every engagement is a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "card", "cta-link"],
+  "dependencies": ["lucide-react"]
+}

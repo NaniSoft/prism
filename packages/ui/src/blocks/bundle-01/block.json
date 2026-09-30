@@ -1,0 +1,8 @@
+{
+  "name": "bundle-01",
+  "title": "Bundle 01 - A Selection Of Things With Quantities And What They Come To",
+  "description": "A selection of things with a mark, a name, a description, a quantity stepper, a unit price, a line total and a remove control, over a required breakdown and a total that is a prop rather than a number the Block derived. The stepper is the number field Component and the remove control is a real button, because a div with a handler is not reachable by a keyboard. Client Component, because onQuantityChange and onRemove are functions.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "price", "number-field", "button", "cta-link"],
+  "dependencies": []
+}

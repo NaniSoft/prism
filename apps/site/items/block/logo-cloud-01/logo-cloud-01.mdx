@@ -1,0 +1,88 @@
+---
+slug: blocks/logo-cloud-01
+title: LogoCloud01
+---
+
+## Overview
+
+LogoCloud01 is a grid of customer or partner marks, each one a real slot the
+caller fills. It is the `logo-cloud-01` DESIGN.md's Known Open Items records as
+deferred to v1.1, and `logo-strip-01` is its sibling rather than its earlier
+draft.
+
+The two make different claims. The strip is a line of words about what the
+consumer sells, and every word in it is the consumer's. The cloud is a set of
+marks belonging to other organisations, where Prism contributes the grid and
+nothing inside the cell. A strip that named a real customer would be a design
+system asserting a relationship on the consumer's behalf. This Block exists so
+that the mark, the name and the relationship are the caller's, and the frame is
+Prism's.
+
+There is no scrolling form. The `marquee-off` variant is the still version of the
+band that slides, and the name is on the prop so the decision travels with the
+code.
+
+## Usage
+
+```tsx
+import { LogoCloud01 } from '@nanisoft/prism-ui/blocks/logo-cloud-01'
+
+<LogoCloud01
+  label="Data partners"
+  columns={4}
+  logos={[
+    { id: 'northbank', name: 'Northbank Clearing', href: 'https://northbank.example' },
+    { id: 'meridian', name: 'Meridian Registry' },
+  ]}
+/>
+```
+
+<ComponentDemo slug="logo-cloud-01" />
+
+## Guidelines
+
+### When to use
+
+Use LogoCloud01 to show a set of organisations that work with the product, when
+the organisations own the marks and the set is worth a grid rather than a line.
+Three to twelve marks is the useful range; past about a dozen the grid stops
+being scannable and a reference section or a table of names serves a reader
+better.
+
+Use it where a logo band would otherwise go, and pass `variant="marquee-off"` so
+the arrangement that is not moving is the one the markup says it is.
+
+### When not to use
+
+Do not use it for a line of words. That is `LogoStrip01`, and the difference is
+whether the content is a claim about the consumer's product or a claim about
+other organisations.
+
+Do not use it for your own products. A set of Prism's own marks is a
+`ProductGrid01`, which draws a mark Prism owns rather than marks the caller
+hosts.
+
+Do not use it as a marquee. A band that advances on its own is an attention loop,
+and DESIGN.md's Motion section refuses attention loops by name.
+
+### Best practices
+
+- Give it a `label`. It is required, it is the list's accessible name, and it is
+  no visible text, so "Customers", "Partners" and "Integrations" are three
+  different claims about the same six marks and the word that says which is yours.
+- Pass monochrome marks. The Block mutes a mark and cannot recolour one, so a set
+  of full-colour logos stays a set of full-colour logos and fights the pack in
+  both modes.
+- Pass `href` only where the organisation told you where their mark goes. A mark
+  with no `href` is inert by design and that is correct.
+- Keep every `id` stable across renders. It is the key and it is what a test uses
+  to name one cell.
+
+### Content guidelines
+
+- Name each organisation exactly as it names itself. The name is read aloud by a
+  screen reader as the cell's content, so a trading name here is a public claim.
+- Do not put a strapline in a `mark` node. The name carries the identification
+  and the cell carries the mark.
+- Pass your own marks only. An installed Block must not assert a relationship
+  between a consumer and a company that consumer has not chosen to publish.

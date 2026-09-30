@@ -1,0 +1,8 @@
+{
+  "name": "rate-card-01",
+  "title": "Rate Card 01 - A Price List Per Unit",
+  "description": "A price list measured by a unit the caller names, with the period, the allowance, the past-the-allowance rate, a footnote and a slot for the full document. Every amount composes the platform's own currency formatter, so no symbol is hardcoded anywhere.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "table", "price"],
+  "dependencies": []
+}

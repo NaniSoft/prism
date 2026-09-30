@@ -1,0 +1,150 @@
+---
+slug: blocks/dashboard-01
+title: Dashboard01
+---
+
+## Overview
+
+Dashboard01 is an overview screen, and the composition is the caller's. It takes a
+header slot for their own `PageHeader01`, a row of figures, a grid of panels each of
+which declares how much width it takes, and an optional narrow rail at the right.
+
+The figures are drawn on `metric` and `sparkline`, and the panels are `card`. A
+dashboard that hand-drew its own metric row would be a second implementation of a
+Component whose whole argument is that the delta's direction is derived from the
+sign of a number rather than declared beside it, which is exactly the mistake a
+reader sees and a type checker does not.
+
+## The composition is the design
+
+An overview screen's shape is a fact about the product, not about the design system.
+A pipeline wants the run queue wide and the ledger beside it. An estate wants
+capacity wide and a watchlist down the side. A trading floor wants the watchlist
+wide. Every one of those is right for its own screen, and a Block that picked one
+would be a template that every consumer inherits along with its opinion about
+hierarchy.
+
+So `panels` is a list with a width on each entry, and the only opinion left in this
+Block is the six-track grid they are placed on:
+
+| `span` | Tracks | At the 72rem container, no rail | With a rail |
+| --- | --- | --- | --- |
+| `third` | 2 | about 22rem | about 16rem |
+| `half` | 3 | about 33rem | about 24rem |
+| `full` | 6 | 68rem | about 50rem |
+
+The rail is a slot and not a property of a row, because the right-hand column of a
+dashboard is a queue in one product, a watchlist in another and a set of links in a
+third, and a Block cannot know which.
+
+## Usage
+
+```tsx
+import { Dashboard01 } from '@nanisoft/prism-ui/blocks/dashboard-01'
+import { PageHeader01 } from '@nanisoft/prism-ui/blocks/page-header-01'
+import { ListPanel } from '@nanisoft/prism-ui/components/list-panel'
+
+export function PipelineOverview() {
+  return (
+    <Dashboard01
+      eyebrow="Nexus"
+      title="Overview"
+      description="What ran overnight, what is running now, and what is waiting."
+      header={
+        <PageHeader01
+          headingLevel="h1"
+          breadcrumbs={[{ label: 'Nexus', href: '/' }, { label: 'Overview' }]}
+          title="Overview"
+          description="Updated a moment ago."
+        />
+      }
+      metrics={[
+        {
+          label: 'Runs queued',
+          value: '12',
+          delta: -3,
+          deltaFormat: (value) => `${value}`,
+          hint: 'vs yesterday',
+          sparkline: [4, 6, 5, 9, 8, 12, 11],
+          sparklineLabel: 'Runs queued over the last week',
+          href: '/runs?state=queued',
+          hrefLabel: 'Open the queue',
+        },
+        { label: 'Succeeded', value: '1,284', delta: 41, deltaFormat: (v) => `${v}` },
+        { label: 'Failed', value: '3', delta: 1, deltaFormat: (v) => `${v}` },
+        { label: 'Median duration', value: '42s', hint: 'last hour' },
+      ]}
+      panels={[
+        {
+          id: 'queue',
+          span: 'full',
+          title: 'Run queue',
+          toolbar: <button type="button">Refresh</button>,
+          children: <ListPanel scroll={false} label="Run queue">...</ListPanel>,
+          footer: 'Twelve runs waiting.',
+        },
+        { id: 'ledger', span: 'half', title: 'Recent activity', children: <ul>...</ul> },
+        { id: 'errors', span: 'half', title: 'Errors', children: <ul>...</ul> },
+      ]}
+      rail={<aside>{/* a queue, a watchlist, or a set of links */}</aside>}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="dashboard-01" />
+
+## Guidelines
+
+### When to use
+
+Use it on the first screen of a product, where a reader arrives with one question
+and several answers to look at. The figures are the answers they scan for, the panels
+are the detail they open, and the rail is whatever the product keeps within reach.
+
+Pass the whole panel set. The Block draws no panel of its own, so a dashboard whose
+arrangement is Prism's is a dashboard four products cannot share.
+
+### When not to use
+
+Do not use it for a page that is one long list. That is a `Page` over
+`data-table-01`, and a dashboard whose only panel is the list has put a grid and a
+rail around something that did not need either.
+
+Do not use it where the reader is doing one thing repeatedly. A console, a form and a
+settings screen are all single-task surfaces, and framing them as an overview says
+there is more to look at than there is.
+
+Do not pass a `third` panel beside a rail and expect it to be comfortable. The
+measurement is in the table above and it is the cost of the narrow column.
+
+### Best practices
+
+- Order `metrics` and `panels` yourself. Both are a claim about what matters first
+  and the Block makes no other claim about either.
+- Compose `relative-time` above the dashboard for the reading of when the data was
+  last refreshed. A dashboard with no freshness statement is a set of numbers a
+  reader has to guess the age of.
+- Pass `deltaFormat` for every figure measured in a unit. Without it `metric` prints
+  the bare number, which is honest and is almost never what was wanted.
+- Pass `page-header-01` into `header` rather than passing a title twice. The header
+  is a composition your product has already made, and Prism drawing a second one
+  beside it is two headers.
+- Validate the panel set at build time. The Block throws on a metric with an `href`
+  and no `hrefLabel`, and on a sparkline with no name, and a build that runs this is
+  a build that fails before a reader sees the gap.
+- Fill the rail with one thing. A rail holding a queue and a watchlist and a set of
+  links has stopped being a rail.
+
+### Content guidelines
+
+- A metric label is a noun phrase in sentence case: "Median duration", "Runs
+  queued".
+- A `hint` names the period and the comparison: "vs last week", "last hour". A
+  figure with no hint is a number whose age the reader has to guess.
+- A panel title is the name of the thing in it, not a category: "Run queue", not
+  "Operations".
+- An `empty` is a way forward. Two routes beat one: the thing to do and the person
+  to ask.
+- A link label is the action, not a repeat of the figure. Four tiles all reading
+  "Open" is a row of four identical controls.

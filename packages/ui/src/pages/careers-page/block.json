@@ -1,0 +1,7 @@
+{
+  "name": "careers-page",
+  "title": "Careers Page - Roles, Values, Teams, Benefits And A Way On, With The Empty State Handed In",
+  "description": "A complete careers screen composing the roles list, three optional sets of titled things and a closing way on. The roles band is never conditional: it is given the caller's empty state and renders it in place of the rows, so a week with no vacancies still says who the company is and how to reach it. Every string, number, destination and count label is a prop.",
+  "categories": ["marketing"],
+  "dependencies": []
+}

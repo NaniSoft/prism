@@ -1,0 +1,8 @@
+{
+  "name": "handoff-01",
+  "title": "Handoff 01 - A Run Changing Hands",
+  "description": "A run being handed from one owner to another: who is handing over, who is receiving at the same weight because the handover is not complete until the receiver confirms, the run's own state, the outstanding items drawn in full rather than counted, and a confirm control whose words in both states are the caller's. The Block does not decide whether the handover happened, and a confirmed state with no words for the control throws. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "avatar", "button", "cta-link", "live-region", "relative-time"],
+  "dependencies": []
+}

@@ -1,0 +1,8 @@
+{
+  "name": "billing-source-01",
+  "title": "Billing Source 01 - The Sources A Workspace Has On File",
+  "description": "The billing sources a workspace has on file inside a bounded panel: a name the caller supplies, a kind, a brand mark slot, an expiry reading written by the caller, a default mark with a caller supplied sentence, a link, and a set of per-source controls. The mark is a slot and this Block ships no card marks at all, because Prism icon lane is Lucide, a card network mark is a licensed asset with brand rules this repository has no business restating, and a set of them in a design system is a set that is out of date within a year. Two sources marked as the default throws, because the mark is the only thing on the page saying where the charges fall and two of them is a question a reader cannot answer.",
+  "categories": ["application"],
+  "registryDependencies": ["badge", "button", "cta-link", "list-panel", "section"],
+  "dependencies": []
+}

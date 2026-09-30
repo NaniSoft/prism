@@ -1,0 +1,141 @@
+---
+slug: blocks/audit-log-01
+title: AuditLog01
+---
+
+## Overview
+
+AuditLog01 is an append-only record of what changed. Each entry carries a moment, an
+actor, a target, the change in the caller's own words, an optional before and after,
+an optional urgency, and a link.
+
+It is a real table. Every column has a `th scope="col"` above it and every row has a
+`th scope="row"`, and the row header is the change, because that is the one cell that
+says what the record is.
+
+## The order is the caller's
+
+The Block never sorts. Every other Block in this package refuses to sort because order
+is a claim about importance, and here it is a claim about fact, which is the record.
+
+A collector whose records arrive out of order has a problem, and the honest responses
+are to sort them at the collector with a stable comparison on the moment plus a
+sequence number, or to pass them through and let the log read as it was received. Both
+are decisions about a system's truth, and a Block that made either one would be
+inserting itself into a record.
+
+## The diff is `diff.tsx`
+
+A before and an after is drawn by the `diff` Component and not by hand. `diff.tsx`
+states the whole argument this Block would otherwise have to make again:
+
+- A diff emphasises by weight and not by colour, because a diff that tinted its
+  changed words would be leaning on the two hues a reader is most likely to be unable
+  to distinguish.
+- The line numbers carry the side rather than the colour, which is how every diff
+  reader a developer has ever used tells an addition from a removal, and which does not
+  depend on telling red from green.
+- The bar is change density rather than a side marker, so a reader's eye goes to the
+  line that was rewritten rather than the line that was touched.
+
+A second implementation with a green tint and a red tint would lose all three, and an
+audit log is the last place to lose them.
+
+## Usage
+
+```tsx
+import { AuditLog01, type AuditLog01Entry } from '@nanisoft/prism-ui/blocks/audit-log-01'
+
+const COLUMNS = [
+  { id: 'at', header: 'When' },
+  { id: 'actor', header: 'Who' },
+  { id: 'change', header: 'What changed' },
+  { id: 'diff', header: 'Before and after' },
+  { id: 'link', header: '' },
+] as const
+
+const ENTRIES: AuditLog01Entry[] = [
+  {
+    id: '1',
+    at: '2026-09-30T08:14:00Z',
+    actor: 'bo@nine',
+    target: 'billing.invoice.limit',
+    change: 'Raised the per invoice limit',
+    before: '10000',
+    after: '50000',
+    tone: 'warning',
+    toneLabel: 'Needs review',
+    href: '/audit/1',
+    hrefLabel: 'Open the full record',
+  },
+]
+
+export function AuditTrail() {
+  return (
+    <AuditLog01
+      eyebrow="Nexus"
+      title="Audit log"
+      description="Every change to a billing setting, newest first."
+      columns={COLUMNS}
+      entries={ENTRIES}
+      diffLabels={{ added: 'Now', removed: 'Before' }}
+      empty="No changes have been recorded in this period."
+    />
+  )
+}
+```
+
+<ComponentDemo slug="audit-log-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a reader has to be able to say what changed, when, and by whom, and where
+the order of the records matters as much as their content. A billing log, a
+permissions log, a configuration log, anything a customer may be shown.
+
+Name your own columns. The order is a claim about what a reader checks first, and on a
+log that is usually the actor or the moment rather than the change.
+
+### When not to use
+
+Do not use it as a screen of operational status. That is `status-ledger-01` for what a
+product can do and `data-table-01` for records a reader compares across columns. A log
+is read one change at a time and in sequence.
+
+Do not use it to display a diff of a file. That is `diff.tsx` composed on its own page,
+and a log's diff is two values, not a document.
+
+Do not sort the entries in your own component and expect this Block to help. Sorting
+is a decision about a system's truth and it belongs at the collector.
+
+### Best practices
+
+- Pass `diffLabels` whenever any entry carries a `before` or an `after`. The run throws
+  otherwise, and it should: a diff with no words for its two sides is two lines and no
+  way to tell which is which.
+- Pass `toneLabel` with every `tone`. The machine value is not printed as a fallback
+  into a document a reader may have to show somebody else.
+- Put `diff` in `columns` only when the log is allowed to be about 24rem wide. A diff
+  in a narrow column is a diff a reader cannot read.
+- Pass `showDiffs={false}` for a log whose entries name a change in prose. The `diff`
+  column is then dropped rather than filled with empty cells.
+- Compose `relative-time` above the log for the reading of when the data was last
+  collected, because a log with no collection statement is a record of unknown age.
+- Validate the set at build time. The Block throws on a link with no words, on a moment
+  the platform cannot read, on a tone with no label, on a diff with no labels, and on
+  an empty column list.
+
+### Content guidelines
+
+- An `actor` is who the system knows: a person by the identifier it uses, or a process
+  by its name. "Nightly" is an actor; "the system" is not.
+- A `change` is a past-tense phrase naming the action: "Raised the per invoice
+  limit", "Removed the old export".
+- A `target` is the thing that changed, written the way the system's own
+  configuration names it.
+- A `before` and an `after` are values, not sentences. A diff of two sentences is a
+  paragraph with a green line through it.
+- An `empty` is the sentence a reader looking at nothing is guaranteed to read, and on
+  this surface it is the one Prism is least entitled to write.

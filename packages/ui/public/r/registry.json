@@ -74,6 +74,30 @@
       ]
     },
     {
+      "name": "announcement",
+      "title": "Announcement",
+      "description": "Shared announcement primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "class-variance-authority",
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/announcement.tsx",
+          "type": "registry:component",
+          "target": "components/ui/announcement.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "aspect-ratio",
       "title": "Aspect-ratio",
       "description": "Shared aspect-ratio primitive. Installed automatically as a dependency of any block that uses it.",
@@ -87,6 +111,28 @@
           "path": "src/components/ui/aspect-ratio.tsx",
           "type": "registry:component",
           "target": "components/ui/aspect-ratio.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "avatar-group",
+      "title": "Avatar-group",
+      "description": "Shared avatar-group primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/avatar-group.tsx",
+          "type": "registry:component",
+          "target": "components/ui/avatar-group.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -300,6 +346,28 @@
       ]
     },
     {
+      "name": "chart",
+      "title": "Chart",
+      "description": "Shared chart primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/chart.tsx",
+          "type": "registry:component",
+          "target": "components/ui/chart.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "checkbox",
       "title": "Checkbox",
       "description": "Shared checkbox primitive. Installed automatically as a dependency of any block that uses it.",
@@ -315,6 +383,28 @@
           "path": "src/components/ui/checkbox.tsx",
           "type": "registry:component",
           "target": "components/ui/checkbox.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "code-block",
+      "title": "Code-block",
+      "description": "Shared code-block primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/code-block.tsx",
+          "type": "registry:component",
+          "target": "components/ui/code-block.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -438,6 +528,29 @@
       ]
     },
     {
+      "name": "contribution-graph",
+      "title": "Contribution-graph",
+      "description": "Shared contribution-graph primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "a little here",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/contribution-graph.tsx",
+          "type": "registry:component",
+          "target": "components/ui/contribution-graph.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "cta-link",
       "title": "Cta-link",
       "description": "Shared cta-link primitive. Installed automatically as a dependency of any block that uses it.",
@@ -452,6 +565,28 @@
           "path": "src/components/ui/cta-link.tsx",
           "type": "registry:component",
           "target": "components/ui/cta-link.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "data-toolbar",
+      "title": "Data-toolbar",
+      "description": "Shared data-toolbar primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/data-toolbar.tsx",
+          "type": "registry:component",
+          "target": "components/ui/data-toolbar.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -576,6 +711,29 @@
       ]
     },
     {
+      "name": "dropzone",
+      "title": "Dropzone",
+      "description": "Shared dropzone primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/dropzone.tsx",
+          "type": "registry:component",
+          "target": "components/ui/dropzone.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "fact-list",
       "title": "Fact-list",
       "description": "Shared fact-list primitive. Installed automatically as a dependency of any block that uses it.",
@@ -611,6 +769,51 @@
           "path": "src/components/ui/field.tsx",
           "type": "registry:component",
           "target": "components/ui/field.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "file-upload",
+      "title": "File-upload",
+      "description": "Shared file-upload primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/file-upload.tsx",
+          "type": "registry:component",
+          "target": "components/ui/file-upload.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "filter-panel",
+      "title": "Filter-panel",
+      "description": "Shared filter-panel primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/filter-panel.tsx",
+          "type": "registry:component",
+          "target": "components/ui/filter-panel.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -776,6 +979,51 @@
       ]
     },
     {
+      "name": "lightbox",
+      "title": "Lightbox",
+      "description": "Shared lightbox primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/lightbox.tsx",
+          "type": "registry:component",
+          "target": "components/ui/lightbox.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "list-panel",
+      "title": "List-panel",
+      "description": "Shared list-panel primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/list-panel.tsx",
+          "type": "registry:component",
+          "target": "components/ui/list-panel.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "live-region",
       "title": "Live-region",
       "description": "Shared live-region primitive. Installed automatically as a dependency of any block that uses it.",
@@ -857,6 +1105,74 @@
           "path": "src/components/ui/meter.tsx",
           "type": "registry:component",
           "target": "components/ui/meter.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "metric",
+      "title": "Metric",
+      "description": "Shared metric primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/metric.tsx",
+          "type": "registry:component",
+          "target": "components/ui/metric.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "mini-calendar",
+      "title": "Mini-calendar",
+      "description": "Shared mini-calendar primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/mini-calendar.tsx",
+          "type": "registry:component",
+          "target": "components/ui/mini-calendar.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "mode-toggle",
+      "title": "Mode-toggle",
+      "description": "Shared mode-toggle primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/mode-toggle.tsx",
+          "type": "registry:component",
+          "target": "components/ui/mode-toggle.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -960,6 +1276,28 @@
       ]
     },
     {
+      "name": "pack-swatch",
+      "title": "Pack-swatch",
+      "description": "Shared pack-swatch primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/pack-swatch.tsx",
+          "type": "registry:component",
+          "target": "components/ui/pack-swatch.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "pagination",
       "title": "Pagination",
       "description": "Shared pagination primitive. Installed automatically as a dependency of any block that uses it.",
@@ -983,6 +1321,29 @@
       ]
     },
     {
+      "name": "password-field",
+      "title": "Password-field",
+      "description": "Shared password-field primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/password-field.tsx",
+          "type": "registry:component",
+          "target": "components/ui/password-field.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "popover",
       "title": "Popover",
       "description": "Shared popover primitive. Installed automatically as a dependency of any block that uses it.",
@@ -997,6 +1358,28 @@
           "path": "src/components/ui/popover.tsx",
           "type": "registry:component",
           "target": "components/ui/popover.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "price",
+      "title": "Price",
+      "description": "Shared price primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/price.tsx",
+          "type": "registry:component",
+          "target": "components/ui/price.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -1163,6 +1546,28 @@
       ]
     },
     {
+      "name": "relative-time",
+      "title": "Relative-time",
+      "description": "Shared relative-time primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/relative-time.tsx",
+          "type": "registry:component",
+          "target": "components/ui/relative-time.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "resizable",
       "title": "Resizable",
       "description": "Shared resizable primitive. Installed automatically as a dependency of any block that uses it.",
@@ -1223,6 +1628,29 @@
           "path": "src/components/ui/search-dialog.tsx",
           "type": "registry:component",
           "target": "components/ui/search-dialog.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "search-field",
+      "title": "Search-field",
+      "description": "Shared search-field primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/search-field.tsx",
+          "type": "registry:component",
+          "target": "components/ui/search-field.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -1412,6 +1840,28 @@
       ]
     },
     {
+      "name": "sparkline",
+      "title": "Sparkline",
+      "description": "Shared sparkline primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/sparkline.tsx",
+          "type": "registry:component",
+          "target": "components/ui/sparkline.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "spinner",
       "title": "Spinner",
       "description": "Shared spinner primitive. Installed automatically as a dependency of any block that uses it.",
@@ -1425,6 +1875,50 @@
           "path": "src/components/ui/spinner.tsx",
           "type": "registry:component",
           "target": "components/ui/spinner.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "status",
+      "title": "Status",
+      "description": "Shared status primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/status.tsx",
+          "type": "registry:component",
+          "target": "components/ui/status.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "steps",
+      "title": "Steps",
+      "description": "Shared steps primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/steps.tsx",
+          "type": "registry:component",
+          "target": "components/ui/steps.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -1516,6 +2010,29 @@
           "path": "src/components/ui/tabs.tsx",
           "type": "registry:component",
           "target": "components/ui/tabs.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "tag-group",
+      "title": "Tag-group",
+      "description": "Shared tag-group primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/tag-group.tsx",
+          "type": "registry:component",
+          "target": "components/ui/tag-group.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -1706,6 +2223,219 @@
       ]
     },
     {
+      "name": "about-01",
+      "title": "About 01 - The Statement Band With Principles And Figures",
+      "description": "A present-tense band with a large statement, a paragraph at the reading measure, a grid of principles as cards and an optional row of figures. Every word, figure and principle is a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "metric",
+        "prose",
+        "button",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/about-01/about.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/about-01/about.tsx"
+        },
+        {
+          "path": "src/blocks/about-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/about-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "accept-invite-01",
+      "title": "Accept Invite 01 - The Screen Where The Refusal Is Required",
+      "description": "Whose workspace is being joined, in what role, who sent it, a secret with a reveal control named in the caller's own language, and a required refusal beside the acceptance at the same size and in the same row. A person invited to a workspace they do not want to be in must be able to say no, and a required decline makes the refusal unmissable. The Block does not decide whether the invitation is still valid, whether the workspace has room or what the role may do, and the role it renders is the one the invitation named rather than the one the reader chose. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "avatar",
+        "card",
+        "button",
+        "field",
+        "input",
+        "live-region",
+        "meter",
+        "password-field"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/accept-invite-01/accept-invite.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/accept-invite-01/accept-invite.tsx"
+        },
+        {
+          "path": "src/blocks/accept-invite-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/accept-invite-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "account-01",
+      "title": "Account 01 - A Record Of Who Owes What And What They May Do",
+      "description": "An account in full: a name, a kind, a reference in the mono face as an identifier is machine notation, a set of facts composed through the Fact List component, a balance or a plan reading, a slot for the caller's own recent activity, the regions and surfaces the account spans with the status tones and the caller own words, and a slot for the caller's own controls. An account record is not a settings page: an account is a fact about who owes what and a settings page is a set of controls that change it, so this Block ships no control of its own and the two slots are never props it acts on.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "cta-link",
+        "fact-list",
+        "price",
+        "section",
+        "separator",
+        "status"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/account-01/account-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/account-01/account-01.tsx"
+        },
+        {
+          "path": "src/blocks/account-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/account-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "activity-feed-01",
+      "title": "Activity Feed 01 - A Chronological Record Of What Happened",
+      "description": "A chronological list of what happened, where an actor, an action, a target and a moment are four separate props because a record of what happened has four parts and no others, and a fifth field would be a claim about the reader's product. Rows become real controls when the caller passes a handler, the moment is printed exactly as passed with the machine value on the time element, and grouping by day renders a heading per day with a nested list rather than a merged row. The Block never sorts, because order is a claim about what happened first.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "status",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/activity-feed-01/activity-feed-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/activity-feed-01/activity-feed-01.tsx"
+        },
+        {
+          "path": "src/blocks/activity-feed-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/activity-feed-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "address-book-01",
+      "title": "Address Book 01 - Records, A Search And An Empty State",
+      "description": "A set of address records as cards or rows: a name, an organisation, the postal lines, a telephone link and an email link, each with a caller-supplied label because a link whose accessible name is an address is announced as punctuation, a tag, and a slot for the caller's own row controls. A record with no address is refused at run time, and the Block filters what it was given and fetches nothing, so a consumer composes it with the store it already has. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "badge",
+        "cta-link",
+        "search-field"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/address-book-01/address-book-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/address-book-01/address-book-01.tsx"
+        },
+        {
+          "path": "src/blocks/address-book-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/address-book-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "app-shell-01",
       "title": "App Shell 01 - Rail, Top Bar and Mobile Sheet",
       "description": "An application shell with a desktop navigation rail, a top bar and a mobile navigation sheet. Navigation, actions and content are passed in as slots.",
@@ -1734,6 +2464,48 @@
           "path": "src/blocks/app-shell-01/index.tsx",
           "type": "registry:component",
           "target": "components/blocks/app-shell-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "audit-log-01",
+      "title": "Audit Log 01 - An Append Only Record Of What Changed",
+      "description": "A record of what changed, where the moment, the actor, the target and the change are four separate props and the sixth column shows a before and an after through the Diff component, because Diff already states that it emphasises by weight rather than by colour since it is leaning on the two hues a reader is most likely to be unable to distinguish. A tone needs a caller supplied label whenever it is used and the run throws otherwise, and the order is the caller own because an audit trail that a Block reordered would be a claim about which record came first, and that claim is the record.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "table",
+        "diff",
+        "status",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/audit-log-01/audit-log-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/audit-log-01/audit-log-01.tsx"
+        },
+        {
+          "path": "src/blocks/audit-log-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/audit-log-01/index.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",
@@ -1792,6 +2564,822 @@
       ]
     },
     {
+      "name": "awards-01",
+      "title": "Awards 01 - Recognitions With The Year Beside The Body",
+      "description": "A list of recognitions as hairline rows or as cards: the work, the organisation that gave the recognition, the year it was given and a link to the record. The year is required and rendered in the mono face beside the organisation, because an award without a date is a logo with words attached. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "badge"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/awards-01/awards.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/awards-01/awards.tsx"
+        },
+        {
+          "path": "src/blocks/awards-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/awards-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "backdrop-01",
+      "title": "Backdrop 01 - A Band With A Live Ambient Field Behind It",
+      "description": "A band whose content sits over a running figure, with the cycle chosen from the seven the stylesheet publishes, an intensity that is opacity rather than speed, and a real pause control whose two labels are the caller's. The figure is the caller's and survives being still. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "button"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/backdrop-01/backdrop.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/backdrop-01/backdrop.tsx"
+        },
+        {
+          "path": "src/blocks/backdrop-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/backdrop-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "bento-01",
+      "title": "Bento 01 - Cells With An Explicit Span",
+      "description": "An asymmetric six-track grid whose cells arrive with an explicit span, so the caller composes the arrangement and the block only lays it out and frames it. Three named spans and three surfaces. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "card",
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/bento-01/bento-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/bento-01/bento-01.tsx"
+        },
+        {
+          "path": "src/blocks/bento-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/bento-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "billing-source-01",
+      "title": "Billing Source 01 - The Sources A Workspace Has On File",
+      "description": "The billing sources a workspace has on file inside a bounded panel: a name the caller supplies, a kind, a brand mark slot, an expiry reading written by the caller, a default mark with a caller supplied sentence, a link, and a set of per-source controls. The mark is a slot and this Block ships no card marks at all, because Prism icon lane is Lucide, a card network mark is a licensed asset with brand rules this repository has no business restating, and a set of them in a design system is a set that is out of date within a year. Two sources marked as the default throws, because the mark is the only thing on the page saying where the charges fall and two of them is a question a reader cannot answer.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "badge",
+        "button",
+        "cta-link",
+        "list-panel",
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/billing-source-01/billing-source-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/billing-source-01/billing-source-01.tsx"
+        },
+        {
+          "path": "src/blocks/billing-source-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/billing-source-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "bundle-01",
+      "title": "Bundle 01 - A Selection Of Things With Quantities And What They Come To",
+      "description": "A selection of things with a mark, a name, a description, a quantity stepper, a unit price, a line total and a remove control, over a required breakdown and a total that is a prop rather than a number the Block derived. The stepper is the number field Component and the remove control is a real button, because a div with a handler is not reachable by a keyboard. Client Component, because onQuantityChange and onRemove are functions.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "price",
+        "number-field",
+        "button",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/bundle-01/bundle.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/bundle-01/bundle.tsx"
+        },
+        {
+          "path": "src/blocks/bundle-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/bundle-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "calendar-01",
+      "title": "Calendar 01 - A Month Grid Of Scheduled Items",
+      "description": "A month of scheduled work: the published mini-calendar for the month, the locale, the weekday headings and the paging, and the caller's items grouped under the days they fall on. The cap of three items a day exists because a month grid with nine items on one day is a month grid nobody can read, and the overflow line is always drawn and always in the caller's own words, because a day that looks complete and is not is the one failure a calendar may not have. The tone is the Status tone and the words beside it are required. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "button",
+        "cta-link",
+        "mini-calendar",
+        "section",
+        "status"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/calendar-01/calendar.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/calendar-01/calendar.tsx"
+        },
+        {
+          "path": "src/blocks/calendar-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/calendar-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "capacity-01",
+      "title": "Capacity 01 - What Is Committed And What Is Left",
+      "description": "A table of resources with a committed figure, a limit, a remaining figure and a state, over a summary row of estate-wide metrics. The Block does not compute the remaining figure, because a design system that subtracted one figure from another would be asserting an arithmetic fact about an estate it cannot see. Four states map to the shared status tones and each needs a caller's words, and a row with no state asserts nothing. Server Component.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "table",
+        "metric",
+        "status",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/capacity-01/capacity.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/capacity-01/capacity.tsx"
+        },
+        {
+          "path": "src/blocks/capacity-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/capacity-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "careers-01",
+      "title": "Careers 01 - Open Roles As A List Or Cards",
+      "description": "Open roles carrying the title, team, location, working pattern and an apply link, as rows or cards, with a slot for the caller's own team and location filters and a dimmed state for a role that has closed.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/careers-01/careers.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/careers-01/careers.tsx"
+        },
+        {
+          "path": "src/blocks/careers-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/careers-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "case-studies-01",
+      "title": "Case Studies 01 - A Grid Or List Of Studies",
+      "description": "A set of case studies as a grid of summary cards or a list of full-width rows, each holding the same customer, sector, summary and results a single-study band holds. Every study is a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "fact-list",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/case-studies-01/case-studies.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/case-studies-01/case-studies.tsx"
+        },
+        {
+          "path": "src/blocks/case-studies-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/case-studies-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "case-study-01",
+      "title": "Case Study 01 - A Customer, An Account And The Figures They Assert",
+      "description": "One case study in full: a named customer, a sector, the problem, what was done, a row of figures the caller asserts and an optionally labelled quotation, stacked or split. Every number is a prop and none is shipped here, because a figure a design system chose would be a false advertising claim installed into every consumer product. quoteLabel is required with a quotation.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "metric",
+        "prose",
+        "badge"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/case-study-01/case-study.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/case-study-01/case-study.tsx"
+        },
+        {
+          "path": "src/blocks/case-study-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/case-study-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "changelog-01",
+      "title": "Changelog 01 - A Dated Record Of What Changed, Grouped By Release",
+      "description": "A record of what changed, grouped by release or by date: a version, a moment, a summary, and records carrying one of five kinds, a line about what changed, an optional body and an optional link. The five kinds map to five tones that are a reading order rather than a severity scale, so security takes the warning tone and not the destructive one, because severity is the reader's judgement. A release with no records draws no list. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "status",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/changelog-01/changelog.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/changelog-01/changelog.tsx"
+        },
+        {
+          "path": "src/blocks/changelog-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/changelog-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "chart-card-01",
+      "title": "Chart Card 01 - A Titled Panel Holding One Figure",
+      "description": "A titled panel holding one figure, the key for it, the controls that act on it, and the figures the card states about it. The figure is a slot rather than a prop with a mark, because a Block that named a chart type would be choosing the caller's data shape and a chart is the one thing on an operate screen a consumer most often replaces. The card does not check that the figure is readable as numbers, because a Block cannot see inside a slot, and this documentation says so rather than pretending it verified it.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "card",
+        "metric",
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/chart-card-01/chart-card-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/chart-card-01/chart-card-01.tsx"
+        },
+        {
+          "path": "src/blocks/chart-card-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/chart-card-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "chart-group-01",
+      "title": "Chart Group 01 - A Responsive Grid Of Chart Cards",
+      "description": "A grid of chart cards whose column count is derived from how many there are rather than passed: one card is full width, two sit side by side, and three or more are three across at the wide breakpoint and stack below it. Four across would give each figure about 16rem at the 72rem container, of which chart spends 3rem on a fixed axis gutter, so the three-across arrangement gives about 22rem per figure and that is the difference between reading a shape and guessing at one. Each card is the Chart Card 01 Block, so the panel is derived once.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "metric",
+        "chart-card-01"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/chart-group-01/chart-group-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/chart-group-01/chart-group-01.tsx"
+        },
+        {
+          "path": "src/blocks/chart-group-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/chart-group-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "code-sample-01",
+      "title": "Code Sample 01 - A Titled Snippet With A Sentence And A Control",
+      "description": "A titled code sample: a name, a sentence about what the code shows, the code in the code block Component with its header and gutter, and a slot for the caller's own controls. The title is required, because a sample with no name is a snippet and a snippet is a code block the reader cannot refer to. A section of its own by default, or a band inside a section the caller already owns.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "code-block"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/code-sample-01/code-sample.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/code-sample-01/code-sample.tsx"
+        },
+        {
+          "path": "src/blocks/code-sample-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/code-sample-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "community-01",
+      "title": "Community 01 - Where A Product's Community Is",
+      "description": "A set of channels or spaces as cards or rows: a mark, a name, what the space is for, member and activity readings the caller words, and a link whose label is the caller's sentence about joining. The counts are numbers and the labels are functions, because the sentences are the caller's. Every string and every number is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/community-01/community.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/community-01/community.tsx"
+        },
+        {
+          "path": "src/blocks/community-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/community-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "compare-01",
+      "title": "Compare 01 - Two Things Side By Side, No Verdict",
+      "description": "Two things compared in the shape the word implies: a real table with a shared row of labels down the left, or a stacked form that puts one arm above the other on a narrow screen. Prism ships no winner, no check on the better column and no highlight, because a design system that marks a winner is making a claim about a market.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "table",
+        "card"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/compare-01/compare.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/compare-01/compare.tsx"
+        },
+        {
+          "path": "src/blocks/compare-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/compare-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "compliance-01",
+      "title": "Compliance 01 - Claims With A Standard, A State And Evidence",
+      "description": "A table of what is claimed, to which standard, over what scope, when it was last reviewed and where the evidence is. The state set makes in-progress and not-applicable first class, a held claim with no standard throws rather than drawing a bare tick, and an evidence link with no words is refused. Every cell is the caller's own statement.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "table",
+        "status"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/compliance-01/compliance.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/compliance-01/compliance.tsx"
+        },
+        {
+          "path": "src/blocks/compliance-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/compliance-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "consent-01",
+      "title": "Consent 01 - A Notice With Two Peers And No Memory",
+      "description": "A cookie and tracking notice with a filled accept beside an outlined reject of the same size, a quieter settings route, and a link to the caller's own policy. Reject and accept are peers because a notice whose reject is a ghost beside a filled accept is a dark pattern this design system would have shipped the styling for. Both handlers are required, so no arm of the Block shows a reader a notice they cannot refuse, and the Block persists nothing, so the stored decision and its consequences are the consumer's. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "button",
+        "card",
+        "cta-link",
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/consent-01/consent.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/consent-01/consent.tsx"
+        },
+        {
+          "path": "src/blocks/consent-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/consent-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "contact-01",
+      "title": "Contact 01 - A Form The Caller Declares, Beside The Address",
+      "description": "A contact section whose fields the caller declares, drawn beside an optional address block with a real mailto link that carries the caller's own accessible name. The declared field list is the whole design: a contact form with a fixed set of fields decides what a reader may say, and one that cannot ask for an order number, a company size or a budget loses the message it was given. The submit handler is required and the Block sends nothing, and no success message is rendered. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "button",
+        "cta-link",
+        "field",
+        "input",
+        "live-region",
+        "native-select",
+        "section",
+        "textarea"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/contact-01/contact.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/contact-01/contact.tsx"
+        },
+        {
+          "path": "src/blocks/contact-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/contact-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "content-grid-01",
+      "title": "Content Grid 01 - Dated Entries As Cards, Rows Or A Compact Index",
+      "description": "A grid of dated entries composed from whatever the caller passes: a name, a summary, an optional reading, category, length, figure and link, drawn as cards, as full-width rows, or as a compact index. Every string, every figure and every annotation is a prop, and the slug claims no publication, because the shape is needed by a changelog, a research index, a release history and a case study set and by none of them a blog.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/content-grid-01/content-grid.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/content-grid-01/content-grid.tsx"
+        },
+        {
+          "path": "src/blocks/content-grid-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/content-grid-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "cta-01",
       "title": "CTA 01 - Filled Banner",
       "description": "A closing call to action on a filled primary surface. Headline, supporting line and the action are passed in as props, and the action carries a required destination and renders a native link.",
@@ -1817,6 +3405,48 @@
           "path": "src/blocks/cta-01/index.tsx",
           "type": "registry:component",
           "target": "components/blocks/cta-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "dashboard-01",
+      "title": "Dashboard 01 - An Overview Screen Composed Of Slots",
+      "description": "An overview screen whose composition is the caller's: a header slot for their own PageHeader01, a row of figures drawn on the Metric and Sparkline components, a six-track grid of titled panels each with its own width, and an optional narrow rail at the right. The Block holds no opinion about what a dashboard is for, because a pipeline wants the run queue wide and a watchlist beside it while an estate wants the reverse. Every string and every figure is a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "metric",
+        "sparkline",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/dashboard-01/dashboard-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/dashboard-01/dashboard-01.tsx"
+        },
+        {
+          "path": "src/blocks/dashboard-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/dashboard-01/index.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",
@@ -1876,6 +3506,131 @@
       ]
     },
     {
+      "name": "delivery-01",
+      "title": "Delivery 01 - A Thing In Transit Over A Stage Rail",
+      "description": "A thing moving through stages: what it is, where it stands, which stage it has reached, and an expected reading, over a rail composed from the steps Component. The words travel as strings because this Block is a server Component and the progress bar is a client one, and a function cannot cross that seam. A stage that has not happened carries a name, a date and nothing else, because a screen that shows a delivery time as though it had happened is lying to a reader who is waiting.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "steps",
+        "progress",
+        "status",
+        "relative-time"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/delivery-01/delivery.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/delivery-01/delivery.tsx"
+        },
+        {
+          "path": "src/blocks/delivery-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/delivery-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "directory-01",
+      "title": "Directory 01 - People Or Things A Reader Can Search, Browse And Follow",
+      "description": "A directory with a controlled search field, a set of caller-supplied categories and the members under them, filtered in the browser as the reader types, as cards or as rows. Every member's link carries a caller-supplied sentence, because a person's name is a name and the sentence saying that following it is a thing you can do belongs to the caller, which is the same rule community-01 and careers-01 make. The Block filters what it was given and searches nothing. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "avatar",
+        "badge",
+        "card",
+        "cta-link",
+        "search-field"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/directory-01/directory-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/directory-01/directory-01.tsx"
+        },
+        {
+          "path": "src/blocks/directory-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/directory-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "download-01",
+      "title": "Download 01 - A List Of Downloadable Artefacts",
+      "description": "A list of downloadable artefacts as full-width rows or as cards: a name, a format, a size, a digest, a note and a control whose accessible name is the caller's and is required, because a link named after its file tells a screen reader user nothing about what activating it will do. The size is a number of bytes and the caller carries the ladder, for the reason file-upload gives, and a digest is drawn beside it and never computed, because a Block that hashed its own string would be hashing the wrong bytes.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/download-01/download.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/download-01/download.tsx"
+        },
+        {
+          "path": "src/blocks/download-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/download-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "empty-state-01",
       "title": "Empty State 01 - The Three Reasons A Region Is Empty",
       "description": "The state a region shows when it has nothing in it: a dashed frame, the caller's headline and sentence, a mark of the caller's choosing, and at most one action. The required reason prop distinguishes a first run from a filter that matched nothing from a permission boundary, because those three want different words and different actions. Every string is passed in as a prop.",
@@ -1900,6 +3655,46 @@
           "path": "src/blocks/empty-state-01/index.tsx",
           "type": "registry:component",
           "target": "components/blocks/empty-state-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "faq-01",
+      "title": "FAQ 01 - Questions, Accordion Or List",
+      "description": "A question and answer list with the section heading, an accordion by default and a list form for a reader who wants every answer open at once, plus an optional contact control rendered as a real link. Every question, answer and label is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "accordion",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/faq-01/faq.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/faq-01/faq.tsx"
+        },
+        {
+          "path": "src/blocks/faq-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/faq-01/index.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",
@@ -1939,6 +3734,340 @@
           "path": "src/blocks/feature-grid-01/index.tsx",
           "type": "registry:component",
           "target": "components/blocks/feature-grid-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "feature-rows-01",
+      "title": "Feature Rows 01 - Copy And A Framed Visual, Alternating",
+      "description": "A set of two-column rows, each with a copy column and a framed visual, with the visual alternating sides down the set. The alignment is derived from each row's position rather than passed per row. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/feature-rows-01/feature-rows-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/feature-rows-01/feature-rows-01.tsx"
+        },
+        {
+          "path": "src/blocks/feature-rows-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/feature-rows-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "feedback-01",
+      "title": "Feedback 01 - A Scale, A Comment And The Thing They Are Talking About",
+      "description": "A feedback panel with a caller-declared sentiment scale rendered as a radio group, an optional free-text comment with an optional character counter, an optional file to attach, and a live region for the outcome. The scale is the caller's data rather than five faces Prism chose, because the number of points and the words at each end are the caller's product knowledge. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "button",
+        "card",
+        "dropzone",
+        "field",
+        "file-upload",
+        "live-region",
+        "radio-group",
+        "section",
+        "textarea"
+      ],
+      "dependencies": [
+        "bad",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/feedback-01/feedback.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/feedback-01/feedback.tsx"
+        },
+        {
+          "path": "src/blocks/feedback-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/feedback-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "field-map-01",
+      "title": "Field Map 01 - A Source To Target Field Mapping",
+      "description": "A mapping table for a pipeline or an estate: what a field is called at the source, what it becomes at the target, whether it is required, what type it is and what transformation it needs. A real table with row and column headers, four states drawn from the semantic tones with the caller's own words, and the caller's sentence in place of an empty cell. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "table",
+        "status"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/field-map-01/field-map.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/field-map-01/field-map.tsx"
+        },
+        {
+          "path": "src/blocks/field-map-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/field-map-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "forgot-password-01",
+      "title": "Forgot Password 01 - The Confirmation That Names The Next Step",
+      "description": "One identifier, one control, and a confirmation that says the same thing whether or not the account exists. The Block holds no prop that could carry whether an account was found, so the choice between an honest confirmation and an enumeration oracle is the caller's to make in words rather than in a flag this design system would have shipped. A message that differs leaks which addresses are registered; a message that is identical teaches a reader who mistyped that they succeeded; the resolution is a confirmation that names the next step without confirming the account. There is no sentence anywhere in the file. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "button",
+        "cta-link",
+        "field",
+        "input",
+        "live-region"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/forgot-password-01/forgot-password.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/forgot-password-01/forgot-password.tsx"
+        },
+        {
+          "path": "src/blocks/forgot-password-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/forgot-password-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "gallery-01",
+      "title": "Gallery 01 - An Image Grid That Opens One At Full Size",
+      "description": "A grid of images where each tile is a real button that opens the lightbox at full size, with a caption under every tile and a count on the set. The tile's accessible name is composed from the caller's own alt and caption and never from a word Prism chose, and an href on a tile is refused because a tile cannot be both a trigger and a link. The four control labels are the caller's.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "aspect-ratio",
+        "lightbox"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/gallery-01/gallery.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/gallery-01/gallery.tsx"
+        },
+        {
+          "path": "src/blocks/gallery-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/gallery-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "gantt-01",
+      "title": "Gantt 01 - A Time Banded Schedule Of Named Tasks",
+      "description": "A schedule drawn as a left column of task names and a field of bars positioned on a caller-supplied date range, with a scale above and a rule for today. Every bar is placed from the range rather than from the widest bar, so a task that starts before all the others is inside the field rather than clipped by it, and every bar is in its final position at first paint, so reduced motion costs the reader nothing. The same rows are rendered as a hidden table so the numbers are readable without sight of the geometry. The tick labels and the today label are the caller's own words. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "cta-link",
+        "section",
+        "status",
+        "table"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/gantt-01/gantt.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/gantt-01/gantt.tsx"
+        },
+        {
+          "path": "src/blocks/gantt-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/gantt-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "handoff-01",
+      "title": "Handoff 01 - A Run Changing Hands",
+      "description": "A run being handed from one owner to another: who is handing over, who is receiving at the same weight because the handover is not complete until the receiver confirms, the run's own state, the outstanding items drawn in full rather than counted, and a confirm control whose words in both states are the caller's. The Block does not decide whether the handover happened, and a confirmed state with no words for the control throws. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "avatar",
+        "button",
+        "cta-link",
+        "live-region",
+        "relative-time"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/handoff-01/handoff-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/handoff-01/handoff-01.tsx"
+        },
+        {
+          "path": "src/blocks/handoff-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/handoff-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "help-01",
+      "title": "Help 01 - An Index, A Field And The Categories Under It",
+      "description": "A help index with a controlled search field, a set of caller-supplied categories and the articles under them, filtered in the browser as the reader types. The Block filters what it was given and searches nothing, so a consumer composes it with a static JSON index in the shape search-dialog already takes. The no-results sentence is required and the count line is a function, because both are sentences Prism would otherwise write in English. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "card",
+        "cta-link",
+        "search-field",
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/help-01/help.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/help-01/help.tsx"
+        },
+        {
+          "path": "src/blocks/help-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/help-01/index.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",
@@ -1993,6 +4122,215 @@
       ]
     },
     {
+      "name": "hero-02",
+      "title": "Hero 02 - Narrow Copy, Figure To The Container Edge",
+      "description": "The hero for a product whose claim is a figure: a narrow copy column at four shares and a figure at eight, running to the edge of the container with no card around it. The figure is required and is named by the caller. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "button",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/hero-02/hero-02.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/hero-02/hero-02.tsx"
+        },
+        {
+          "path": "src/blocks/hero-02/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/hero-02/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "hero-03",
+      "title": "Hero 03 - Wide Headline, Points And A Proof Row",
+      "description": "An editorial hero: a wide headline with a short list of what the product does beside it, and a row of figures under a full-width rule, composed with the Metric component. The figures are passed in as props and the block ships none. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "metric",
+        "button",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/hero-03/hero-03.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/hero-03/hero-03.tsx"
+        },
+        {
+          "path": "src/blocks/hero-03/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/hero-03/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "history-01",
+      "title": "History 01 - What A Workspace Has Been Charged For And Consumed",
+      "description": "A real table of what a workspace has been charged for and what it has consumed: a moment, a reference in the mono face as an identifier is machine notation, a kind, an amount composed through the Price component so no symbol is hardcoded, an optional quantity that needs a caller written unit, a state whose tone comes from the semantic roles and whose words are required, and a link. The order is the caller own and the Block never sorts, because a history this Block reordered would be a claim about which charge came first and on a billing surface that claim is a bill.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "cta-link",
+        "metric",
+        "price",
+        "section",
+        "status",
+        "table"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/history-01/history-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/history-01/history-01.tsx"
+        },
+        {
+          "path": "src/blocks/history-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/history-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "inbox-01",
+      "title": "Inbox 01 - A Queue Of Things Awaiting A Person",
+      "description": "A work queue drawn as a real table: a priority, a source, a subject, a moment, a state and a slot for the caller's own row controls, under a toolbar slot and a count. The column names are the caller's and the tones are mapped from the semantic status roles, but both the priority words and the state words are required, because a queue that printed urgent or waiting in English would put a sentence a consumer cannot translate into their operations tool. Every string, and the whole queue, is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "button",
+        "cta-link",
+        "relative-time",
+        "section",
+        "status",
+        "table"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/inbox-01/inbox.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/inbox-01/inbox.tsx"
+        },
+        {
+          "path": "src/blocks/inbox-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/inbox-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "industries-01",
+      "title": "Industries 01 - Sectors As A Grid, List Or Tabs",
+      "description": "The sectors a product serves, each a name, a one-line problem and a link into the work, as a grid of tiles, a list of rows or a set of tabs. The grid is the default because hiding answers behind a control is opt-in.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "tabs",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/industries-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/industries-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/industries-01/industries.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/industries-01/industries.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "instrument-panel-01",
       "title": "Instrument Panel 01 - Titled Bar Around A Slot",
       "description": "A bordered panel with a titled bar, a state dot with the caller's own words beside it, a slot for the instrument, an optional control and an optional footnote. The frame is the Block; the instrument is the consumer's. Every string is passed in as a prop.",
@@ -2014,6 +4352,385 @@
           "path": "src/blocks/instrument-panel-01/instrument-panel.tsx",
           "type": "registry:component",
           "target": "components/blocks/instrument-panel-01/instrument-panel.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "intake-01",
+      "title": "Intake 01 - A Stream Of Arriving Work, Fed By The Consumer",
+      "description": "A stream of arriving work with a source, a subject, a moment drawn through relative-time, a state tone beside the caller's own words, and up to two controls whose labels are functions of the item. A Block and not a live surface: it holds no socket, no poll and no timer, and its content changes when the consumer re-renders it with a new array. An href with no words is refused and a state with no words is refused, because a coloured dot with no sentence beside it is invisible. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "button",
+        "relative-time",
+        "status"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/intake-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/intake-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/intake-01/intake-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/intake-01/intake-01.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "integration-01",
+      "title": "Integration 01 - The Systems A Product Connects To",
+      "description": "A grid of cards or a list of rows: a caller-supplied mark, a name, one line about the capability, one of four states with the caller's own words, and separate links to the integration and to its documentation. The coming-soon state is first class, and Prism ships no vendor marks. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "status",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/integration-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/integration-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/integration-01/integration.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/integration-01/integration.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "invite-user-01",
+      "title": "Invite User 01 - A Machine Being Authorised, Beside The Invitations Already Sent",
+      "description": "An address, a role the caller names, a note the caller writes, one control and an announced status region, beside a bounded list of the invitations already sent under a heading of their own. The list is a second group and not a second form because a reader who cannot see the invitation they just sent will send another, and a second invitation is a support ticket. A stale invitation is dimmed rather than removed, on the caller's own signal. The role list is a readonly array so an as-const fixture compiles, and it is the caller's because the set of roles a workspace has is that workspace's own fact. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "button",
+        "field",
+        "input",
+        "list-panel",
+        "live-region",
+        "native-select",
+        "textarea"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/invite-user-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/invite-user-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/invite-user-01/invite-user.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/invite-user-01/invite-user.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "issue-detail-01",
+      "title": "Issue Detail 01 - One Issue, Its Declared Fields And Its Thread",
+      "description": "One issue: its key in the mono face, its title, its state, the fields the caller declares a reader may be told, the body, the comment thread in the caller's order, and slots for the caller's own editor, controls and aside. Every field, word, moment and comment is the caller's. Server Component, and the thread is never sorted.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "status",
+        "prose",
+        "relative-time",
+        "tag-group",
+        "avatar"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/issue-detail-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/issue-detail-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/issue-detail-01/issue-detail.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/issue-detail-01/issue-detail.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "issue-list-01",
+      "title": "Issue List 01 - A Tracker List In A Real Table",
+      "description": "A list of issues as a real table with column and row headers: a reference in the mono face, a title, a state, a priority, an assignee, a last-changed reading and a link, under the caller's own toolbar and above the caller's own footer. The state and the priority are open strings rather than closed unions, because a tracker has its own vocabulary and a design system that closed the set would force a consumer whose tracker says in-review to ship a translation nobody asked for. The tones are still mapped by the Block, matching whole words and falling back to the tone that asserts nothing, and the words are always the caller's. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "badge",
+        "cta-link",
+        "relative-time",
+        "section",
+        "status",
+        "table"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/issue-list-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/issue-list-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/issue-list-01/issue-list.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/issue-list-01/issue-list.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "kanban-01",
+      "title": "Kanban 01 - Columns Of Cards With No Drag And No Drop",
+      "description": "A board of titled columns, each a named section holding a stack of cards with a title, an optional mark, a state, an owner, tags and a link. There is no drag and no drop, and that is the decision rather than the omission: a drag is continuous spatial motion this system does not author, and a Block that moves a caller's data would have to own the ordering, the persistence and the conflict, all three of which are the consumer's. The board scrolls sideways rather than wrapping, because a wrapped column is not a column. A caller who needs drag composes their own control in a slot. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "badge",
+        "cta-link",
+        "section",
+        "status"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/kanban-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/kanban-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/kanban-01/kanban.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/kanban-01/kanban.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "leaderboard-01",
+      "title": "Leaderboard 01 - A Ranked Set With The Caller's Own Readings",
+      "description": "A ranked set: a position, a name, an optional mark, a figure with the caller's own sentence for it, an optional series beside it and an optional destination. The order is the caller's and the Block never sorts, the reading of every figure is a required function, and the caller's own rows are marked with a border and a weight rather than a trophy. Server Component.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "sparkline",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/leaderboard-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/leaderboard-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/leaderboard-01/leaderboard.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/leaderboard-01/leaderboard.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "login-01",
+      "title": "Login 01 - The Screen Where A Person Authorises A Machine",
+      "description": "A sign-in: a caller-declared identifier field, a secret with a reveal control named in the caller's own language, an optional remember row, one submit control, an announced status region, and slots for a second factor and a provider row whose marks are the caller's licensed assets. The Block will not rate-limit, will not decide whether the identifier exists and will not say whether the secret was right, because a Block that made any of those three would be a rate limiter, an account directory and a password verifier in a component library. There is no failure sentence anywhere in the file: the outcome is a prop, so the sentence about a refused sign-in is the product's own. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "button",
+        "cta-link",
+        "checkbox",
+        "field",
+        "input",
+        "live-region",
+        "password-field"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/login-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/login-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/login-01/login-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/login-01/login-01.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "logo-cloud-01",
+      "title": "Logo Cloud 01 - A Grid Of Customer Marks",
+      "description": "A grid of customer or partner marks, each one a slot the caller fills with the mark, the name and an optional destination. The marks are muted rather than recoloured, every mark carries its name in a hidden node, and there is no scrolling form: the marquee is refused by name. Every mark and every name is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/logo-cloud-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/logo-cloud-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/logo-cloud-01/logo-cloud.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/logo-cloud-01/logo-cloud.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",
@@ -2066,6 +4783,172 @@
       ]
     },
     {
+      "name": "magic-link-01",
+      "title": "Magic Link 01 - A Link That Expires And Cannot Be Replayed",
+      "description": "A passwordless sign-in: one address field, one control that posts a link to it, the caller's own sentence about what is about to arrive, which is required here and optional everywhere else because this screen's whole mechanism is invisible, and a confirmation that keeps the sent address on screen in full beside a control to change it. The resend control is a separate action from submit and is named twice, once at rest and once after it has been pressed. The Block will not look the address up, will not rate-limit how many links can be asked for and will not judge whether the address was right. There is no sent sentence anywhere in the file: the outcome is a prop. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "button",
+        "field",
+        "input",
+        "live-region"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/magic-link-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/magic-link-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/magic-link-01/magic-link-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/magic-link-01/magic-link-01.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "member-list-01",
+      "title": "Member List 01 - People With Presence And A Last-Seen Reading",
+      "description": "A dense row list for an application surface: a portrait, a name, a role, one of three presence tones beside the caller's own words, a last-seen reading and a slot for the caller's row actions. The tones are mapped here and the words are the caller's, because a presence is a claim about a colleague. Nothing is formatted and no member, word or presence is passed in as anything but a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "avatar",
+        "status"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/member-list-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/member-list-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/member-list-01/member-list.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/member-list-01/member-list.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "milestone-timeline-01",
+      "title": "Milestone Timeline 01 - Reached And Not Yet",
+      "description": "A dated sequence of what a system has reached, on a rail with a rule down one side, a state mark per milestone and a composed Progress fill for the milestones that were work rather than a moment. Distinct from Timeline, which shows a live run, and from Story01, which arranges a company's past. Every string and every number is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "progress",
+        "status",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/milestone-timeline-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/milestone-timeline-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/milestone-timeline-01/milestone-timeline.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/milestone-timeline-01/milestone-timeline.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "newsletter-01",
+      "title": "Newsletter 01 - The Band That Takes An Address",
+      "description": "A signup band with a heading, one labelled field, one control, a required line saying what happens to the address, and a live region for the outcome. The submit handler is required and the Block sends nothing, so the address is never handled by a component that was installed to draw a form. No success message is rendered: the outcome is a prop, because a success sentence this package wrote would be inherited verbatim by every consumer. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "button",
+        "field",
+        "input",
+        "live-region",
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/newsletter-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/newsletter-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/newsletter-01/newsletter.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/newsletter-01/newsletter.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "note-grid-01",
       "title": "Note Grid 01 - Titled Points In Columns",
       "description": "A grid of short points: a title and a sentence or two each, on a hairline above every point, with no tile and no icon. Rendered as a definition list so each title is announced with its own body. Every string is passed in as a prop.",
@@ -2090,6 +4973,298 @@
           "path": "src/blocks/note-grid-01/note-grid.tsx",
           "type": "registry:component",
           "target": "components/blocks/note-grid-01/note-grid.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "notification-center-01",
+      "title": "Notification Center 01 - A List Of Notifications With An Unread Count",
+      "description": "A list of notifications where each carries a mark, a title, a body, a moment, a read state and a per item action slot, with the unread count computed from the items and the words for it handed back through a function, because three unread, three new and three since Monday are three sentences. An unread item carries a filled dot that is also a graphic with the caller own name, because a colour is not a state a screen reader can be told about, and read is derived from each item own field and never from the count. Two shapes: a page section, or a bounded panel for a shell.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "list-panel",
+        "status",
+        "button",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/notification-center-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/notification-center-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/notification-center-01/notification-center-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/notification-center-01/notification-center-01.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "offer-01",
+      "title": "Offer 01 - Promotion Band With Its Terms",
+      "description": "A promotion band with an eyebrow, a headline, a supporting line, an optional code in a labelled mono chip, one control and the terms that state the expiry, the scope and the exclusions. The terms are required, because a discount without them is a different offer.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/offer-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/offer-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/offer-01/offer.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/offer-01/offer.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "offering-01",
+      "title": "Offering 01 - One Capability, Its Limits, Its Cost And Its State",
+      "description": "One capability in full: a name, a standfirst, a body, a specification list, a price, an availability reading, a panel and an actions slot. The state set makes in-preview, coming-soon and unavailable first class, so a capability that is planned is rendered as planned rather than as built, and a state with no caller-supplied words throws rather than drawing a bare dot. Every figure, word and currency is the caller's.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "fact-list",
+        "price",
+        "status"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/offering-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/offering-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/offering-01/offering.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/offering-01/offering.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "offering-categories-01",
+      "title": "Offering Categories 01 - Kinds Of Capability As A Grid Or A Tab Row",
+      "description": "A set of kinds of capability, each with a name, a one-line description, a caller-composed count and a link, drawn as a grid of tiles or as a tab row with the caller's own panel underneath. The grid is the default because tabs hide five of six answers behind a control, and a count with no label function throws rather than printing a bare numeral.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "cta-link",
+        "button",
+        "tabs"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge",
+        "this product has none"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/offering-categories-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/offering-categories-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/offering-categories-01/offering-categories.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/offering-categories-01/offering-categories.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "offering-list-01",
+      "title": "Offering List 01 - A Set Of Capabilities As Cards Or A Real Table",
+      "description": "A capability catalogue with an optional search field, a filter slot, a caller-written result line and an empty state, drawn as cards or as a real table with named columns. The search is a pair, so a set of twelve rows does not carry a field that cannot reduce anything, and the state on each row is an open string with the tones mapped by whole-word match.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "cta-link",
+        "fact-list",
+        "price",
+        "search-field",
+        "status",
+        "table"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/offering-list-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/offering-list-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/offering-list-01/offering-list.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/offering-list-01/offering-list.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "onboarding-01",
+      "title": "Onboarding 01 - A Setup Checklist Or A Rail Of The Order",
+      "description": "A setup checklist: a set of steps each with a state, an optional action, and a progress figure whose sentence is the caller's, plus a completion note the caller writes. A blocked step is first class, because a checklist that cannot say a reader is stuck will read as broken. The steps form composes the rail and the checklist form draws the marks, and a client Component because onSelect is a handler.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "metric",
+        "steps",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/onboarding-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/onboarding-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/onboarding-01/onboarding.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/onboarding-01/onboarding.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "ops-checklist-01",
+      "title": "Ops Checklist 01 - A Runbook With Expected Readings, Actual Readings And Verdicts",
+      "description": "A runbook for an estate: groups of checks, each with a name, the reading that should be there, the reading that was taken, a verdict in one of four tones and an optional note, with the caller's figures composed as metrics above. The Block does not decide a verdict, because a design system that computed pass or fail would be asserting an infrastructure fact about an estate it cannot see, on thresholds it does not have. The verdict words are required, because a coloured dot with no sentence beside it is invisible. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "metric",
+        "status"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/ops-checklist-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/ops-checklist-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/ops-checklist-01/ops-checklist-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/ops-checklist-01/ops-checklist-01.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",
@@ -2145,6 +5320,87 @@
       ]
     },
     {
+      "name": "passkey-01",
+      "title": "Passkey 01 - The List Of Credentials A Machine May Act Under",
+      "description": "The caller's registered authenticators as a list of names, moments and transports, a register control whose callback is where the browser own ceremony runs, and a remove control on every row including the reader own. The Block opens no credential store, calls no WebAuthn API and owns no ceremony, because a ceremony chooses the origin, the user-verification flag and the relying party identifier, and a design system that called navigator.credentials would be choosing all three for every consumer that installed it. The transport is the caller own string, because this phone and this laptop are sentences. There is no registered sentence anywhere in the file: the outcome is a prop. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "button",
+        "live-region"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/passkey-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/passkey-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/passkey-01/passkey-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/passkey-01/passkey-01.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "permission-matrix-01",
+      "title": "Permission Matrix 01 - Roles Against Capabilities",
+      "description": "A permission matrix as a real table, with the roles across the top and the permissions down the side, where a cell is granted, refused, or a third answer the caller wrote for a permission that depends on something the reader has to look up. Three marks, a required key, and every answer in the caller's own words.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "table"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/permission-matrix-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/permission-matrix-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/permission-matrix-01/permission-matrix.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/permission-matrix-01/permission-matrix.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "pricing-01",
       "title": "Pricing 01 - Three Tier With Highlight",
       "description": "A three-up plan comparison with one plan lifted. Plans, prices, features and actions are all passed in as props.",
@@ -2172,6 +5428,48 @@
           "path": "src/blocks/pricing-01/pricing.tsx",
           "type": "registry:component",
           "target": "components/blocks/pricing-01/pricing.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "pricing-compare-01",
+      "title": "Pricing Compare 01 - Feature By Plan Matrix",
+      "description": "A comparison matrix with the plans across the top and the features down the side, rendered as a real table so a screen reader can navigate it by row and column header. Every plan, price, feature name and cell value is passed in as a prop, and a cell that is a yes or a no announces the caller's own word.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "table",
+        "price",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/pricing-compare-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/pricing-compare-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/pricing-compare-01/pricing-compare.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/pricing-compare-01/pricing-compare.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",
@@ -2301,6 +5599,386 @@
       ]
     },
     {
+      "name": "project-01",
+      "title": "Project 01 - One Project In Full",
+      "description": "One project: its name, its state, its owner, the span it runs, a progress fill, a row of figures, the stages it is on and a slot for the controls that act on it. The state, the figures and the stage rail are composed Components, and every word, number and date is the caller's. Server Component.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "progress",
+        "metric",
+        "status",
+        "steps",
+        "relative-time",
+        "cta-link",
+        "avatar"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/project-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/project-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/project-01/project.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/project-01/project.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "project-dashboard-01",
+      "title": "Project Dashboard 01 - One Overview, Composed Of Panels",
+      "description": "One project's overview: a row of figures and a grid of titled panels whose spans the caller declares. Every panel is a slot, because what a project overview leads with is a fact about the project. The Block owns the grid, the spans and the figures row and nothing else, and every string and number is the caller's. Server Component.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "metric",
+        "status"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/project-dashboard-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/project-dashboard-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/project-dashboard-01/project-dashboard.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/project-dashboard-01/project-dashboard.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "project-list-01",
+      "title": "Project List 01 - A List Of Projects, As Rows Or A Table",
+      "description": "A list of projects with a toolbar, a filter column and a caller-written empty state, drawn either as scanned rows or as a real table with row and column headers. The two forms answer different questions and take the same field names as the project detail Block, so a consumer with a project model has one model. Server Component, and the toolbar is a slot so the client boundary stays the caller's.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "table",
+        "status",
+        "progress",
+        "relative-time",
+        "tag-group",
+        "cta-link",
+        "avatar"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/project-list-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/project-list-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/project-list-01/project-list.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/project-list-01/project-list.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "provisioning-01",
+      "title": "Provisioning 01 - A Multi-Step Run That Commits",
+      "description": "A multi-step form that commits something: a step rail, the current step's fields the caller declares, a back and a next control, and a confirmation the caller supplies. The step state is derived from the current index and there is no onSelect, because a form whose reader can jump to step four is a form that can commit an unvalidated step. initial is a number and is clamped, and a step with no fields renders a review and a control rather than an empty form. Client Component, because the commit handler is a function and the values have to survive a step boundary.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "button",
+        "field",
+        "input",
+        "live-region",
+        "native-select",
+        "section",
+        "steps",
+        "textarea"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/provisioning-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/provisioning-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/provisioning-01/provisioning.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/provisioning-01/provisioning.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "quick-view-01",
+      "title": "Quick View 01 - A Summary Panel A Reader Opens Without Leaving The Page",
+      "description": "A summary in a Dialog the caller controls: a title at the caller's heading level, a short body, a keyed specification list, an optional mark and up to two actions. It composes Dialog rather than re-deriving the focus trap, the escape key, the outside press and the overlay, and its required closeLabel is the one prop the pattern costs. Everything it shows must also be reachable on the page it sits on.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "dialog",
+        "fact-list"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/quick-view-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/quick-view-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/quick-view-01/quick-view.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/quick-view-01/quick-view.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "rate-card-01",
+      "title": "Rate Card 01 - A Price List Per Unit",
+      "description": "A price list measured by a unit the caller names, with the period, the allowance, the past-the-allowance rate, a footnote and a slot for the full document. Every amount composes the platform's own currency formatter, so no symbol is hardcoded anywhere.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "table",
+        "price"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/rate-card-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/rate-card-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/rate-card-01/rate-card.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/rate-card-01/rate-card.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "reset-password-01",
+      "title": "Reset Password 01 - The Screen Most Of Its Life Is Expired",
+      "description": "A new secret with a reveal control named in the caller's own language, a repeat that is not compared for the caller, a strength note that is the caller's own function of what has been typed, one submit control, an announced status region, and an expired arm that takes the form away rather than letting a reader type into it only to be refused. Whether the two entries match is the product's validation and the words beside the mismatch are its too, so this Block draws no comparison and no sentence. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "button",
+        "field",
+        "input",
+        "live-region",
+        "meter",
+        "password-field"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/reset-password-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/reset-password-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/reset-password-01/reset-password.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/reset-password-01/reset-password.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "resource-list-01",
+      "title": "Resource List 01 - A Document And Download Index In A Real Table",
+      "description": "A document and download index drawn as a real table with column headers and a row header per document: a name, a kind, a reading for a size, a format or a last-changed moment, and a link. The column names are the caller's, the cells are the Block's, and groupBy renders a body per kind rather than a merged cell. Every string, and the whole set, is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "table",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/resource-list-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/resource-list-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/resource-list-01/resource-list.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/resource-list-01/resource-list.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "retention-01",
+      "title": "Retention 01 - A Retention Schedule",
+      "description": "A retention schedule as a real table: what is kept, for how long as a number of days, in which region, under which policy and when it was last reviewed, with the caller's own sentence for every period and a summary row whose figures travel inside the table.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "metric",
+        "section",
+        "table"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/retention-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/retention-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/retention-01/retention.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/retention-01/retention.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "run-console-01",
       "title": "Run Console 01 - A Run, Its Budget And Its Steps",
       "description": "A run as three things a reader needs at the same glance: what the run is, how much of its budget it has spent, and the steps that got there with their durations drawn to scale. A run still arriving is announced and marked busy from one prop. Every string is passed in as a prop.",
@@ -2327,6 +6005,171 @@
           "path": "src/blocks/run-console-01/run-console.tsx",
           "type": "registry:component",
           "target": "components/blocks/run-console-01/run-console.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "services-01",
+      "title": "Services 01 - Engagements And Capabilities",
+      "description": "A set of engagements or capabilities, each a title, a body, a deliverables list and an outcome, as a three-across grid with an opt-in zero-padded ordinal. Every engagement is a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/services-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/services-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/services-01/services.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/services-01/services.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "settings-integrations-01",
+      "title": "Settings Integrations 01 - Connections With Four States",
+      "description": "The systems a workspace connects to, one row each, in four states including needs-attention, which is the state a two-state design system cannot express honestly. The mark slot draws no frame so a PackSwatch keeps its own boundary, and the connect control is drawn only on a state that can be connected.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "button",
+        "cta-link",
+        "section",
+        "status"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/settings-integrations-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/settings-integrations-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/settings-integrations-01/settings-integrations.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/settings-integrations-01/settings-integrations.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "settings-members-01",
+      "title": "Settings Members 01 - Workspace Roster",
+      "description": "The members of a workspace as rows or a real table, with a role control on every row but the reader's own, a pending-invitations group where an expired invitation is dimmed rather than removed, and a slot for the caller's own invite control.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "avatar",
+        "field",
+        "list-panel",
+        "section",
+        "select",
+        "table"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/settings-members-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/settings-members-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/settings-members-01/settings-members.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/settings-members-01/settings-members.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "settings-notifications-01",
+      "title": "Settings Notifications 01 - Per Channel Preferences",
+      "description": "Notification preferences as one group per channel with a switch per event, where an event the product cannot work without is marked by the caller, drawn read-only so a keyboard reader still meets it, and explained by one note the whole section shares.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "field",
+        "section",
+        "switch"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/settings-notifications-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/settings-notifications-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/settings-notifications-01/settings-notifications.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/settings-notifications-01/settings-notifications.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",
@@ -2372,6 +6215,181 @@
           "path": "src/blocks/settings-panel-01/settings-panel.tsx",
           "type": "registry:component",
           "target": "components/blocks/settings-panel-01/settings-panel.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "settings-security-01",
+      "title": "Settings Security 01 - Methods, Password, Sessions And A Second Factor",
+      "description": "The security surface of a workspace: the ways in, a change-password form whose reveal control is on the new entry rather than the one a reader is proving they know, a sessions list where revocation is offered on the reader's own session, and a second factor with three states rather than two.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "button",
+        "card",
+        "field",
+        "input",
+        "password-field",
+        "section",
+        "status",
+        "switch"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/settings-security-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/settings-security-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/settings-security-01/settings-security.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/settings-security-01/settings-security.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "shortlist-01",
+      "title": "Shortlist 01 - Capabilities A Reader Is Considering",
+      "description": "A set of capabilities a reader is considering, drawn as cards or rows with a mark slot, a name, a one line reason, an optional price through the Price component, a move control, a remove control and a slot for the caller own controls over the whole set. The controls are part of the item rather than a row action, because a shortlist is a set the reader chose and can change, and both control names are functions because a remove control announced only as Remove gives a screen reader one identical button per item and leaves the reader guessing which one they are on.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "button",
+        "cta-link",
+        "price",
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/shortlist-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/shortlist-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/shortlist-01/shortlist-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/shortlist-01/shortlist-01.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "showcase-01",
+      "title": "Showcase 01 - One Capability In Depth",
+      "description": "One product or capability shown in depth: a large name, a standfirst, a specification list composed with FactList, an optional framed media panel and at most two actions. The panel's side is a prop. Every string is passed in as a prop, and the block carries no price.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "fact-list",
+        "button",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/showcase-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/showcase-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/showcase-01/showcase-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/showcase-01/showcase-01.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "signup-01",
+      "title": "Signup 01 - An Account A Machine May Act Under",
+      "description": "An account creation: a caller-declared field list, the terms the caller supplies, a secret with a reveal control and a strength reading that is a caller function returning the caller's own label and number, one submit control, and an announced status region. The Block will not score the secret, will not decide whether the address is already registered and will not send a verification, because each of those is a security decision rather than a rendering one. There is no success sentence anywhere in the file: the outcome is a prop, and the form is cleared when the caller's own status says the account exists. The terms are optional in the type, and the JSDoc names what a consumer can make a legal claim they did not write by omitting them. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "button",
+        "cta-link",
+        "field",
+        "input",
+        "live-region",
+        "native-select",
+        "password-field",
+        "progress"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/signup-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/signup-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/signup-01/signup-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/signup-01/signup-01.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",
@@ -2535,6 +6553,46 @@
       ]
     },
     {
+      "name": "spec-table-01",
+      "title": "Spec Table 01 - A Capability's Limits, Its Units And Its Conditions",
+      "description": "A capability's limits as a real table: what is measured, its value, its unit and the condition it holds under, grouped into caller-named bodies with a row-group header each, and a summary band of figures underneath. Every value is a node the caller composed, the unit is a string beside the value rather than part of it, and the Block derives nothing, infers no unit and rounds no number.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "table",
+        "metric"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/spec-table-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/spec-table-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/spec-table-01/spec-table.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/spec-table-01/spec-table.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "stack-grid-01",
       "title": "Stack Grid 01 - Composed Parts And In-House Work",
       "description": "A survey of what a product is assembled from, and a second grid of what it built itself. Both groups carry a name and one line; the second carries the caller's own words for the claim it makes. Every string is passed in as a prop.",
@@ -2651,6 +6709,492 @@
       ]
     },
     {
+      "name": "story-01",
+      "title": "Story 01 - A Milestone Rail In Past Tense",
+      "description": "A milestone history as a vertical rail with a rule down one side, or a horizontal rail that collapses to vertical below md. Dates are passed as already written strings, so the caller keeps its own locale.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/story-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/story-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/story-01/story.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/story-01/story.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "summary-01",
+      "title": "Summary 01 - A Set Of Lines And What They Come To",
+      "description": "A set of line items and their total, as a real table with a row header on every line, an optional subtotal, a required total that is a prop rather than a number the Block derived, a footnote and a slot for the call to action. Three line states map to the shared status tones and each needs a caller's words, because an excluded line is a claim about a contract. Server Component, so the table costs a consumer nothing in client JavaScript.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "table",
+        "price",
+        "status",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/summary-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/summary-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/summary-01/summary.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/summary-01/summary.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "team-01",
+      "title": "Team 01 - People As Cards Or Rows",
+      "description": "A grid or a list of people: a portrait where there is one, a name, a role, an uncropped biography at the reading measure and an optional labelled link. Card titles follow the section heading level, and highlight takes ids so a stronger border cannot drift onto the wrong person after a reorder. Every word is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "avatar"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/team-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/team-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/team-01/team.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/team-01/team.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "testimonial-01",
+      "title": "Testimonial 01 - One Quote, Or A Pair",
+      "description": "One quote with the attribution that makes it weighable, or two side by side. The name is a heading, the role and the company are two separate fields rather than one byline, and a company with a page of its own is a real link. There is no carousel and nothing advances.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "avatar"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/testimonial-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/testimonial-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/testimonial-01/testimonial.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/testimonial-01/testimonial.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "todo-01",
+      "title": "Todo 01 - A Task List With An Aggregate Bar",
+      "description": "A task list with a checkbox, a title, an optional note, an owner, a due reading and a state per task, plus an aggregate progress bar. The checkbox is the published control rather than a clickable div, so it owns its focus ring and its hit target and a keyboard reader can reach every task. A finished task stays in the list, struck through and muted, because a completed task a reader cannot find is a task they will redo. The bar takes the caller's words as a string rather than a callback, because a function cannot cross from a server Component into a client one. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "avatar",
+        "checkbox",
+        "cta-link",
+        "progress",
+        "relative-time",
+        "section",
+        "status"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/todo-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/todo-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/todo-01/todo.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/todo-01/todo.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "trend-01",
+      "title": "Trend 01 - A Ranked List Of Rising Values",
+      "description": "A ranked list where each row is a name, a current reading, the caller's own words for the change, and a small series beside it. The rows are composed from Metric and Sparkline, the order is the caller's, and the limit is a cap rather than a page. Every string and every number is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "metric",
+        "sparkline",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/trend-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/trend-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/trend-01/trend.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/trend-01/trend.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "trust-strip-01",
+      "title": "Trust Strip 01 - Short Assurance Statements, One Per Mark",
+      "description": "A narrow single-row band of short assurance statements, each with a mark, and no visible heading. Prism draws the frame and the caller ships the words, so a strip of certifications, a strip of compliance marks and a strip of a customer count are the same component and none of them is Prism's to assert. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "typography",
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/trust-strip-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/trust-strip-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/trust-strip-01/trust-strip-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/trust-strip-01/trust-strip-01.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "two-factor-01",
+      "title": "Two Factor 01 - The Screen Where A Machine Is Allowed To Act",
+      "description": "A second factor: a caller-declared method list with the selected one marked by aria-current rather than by colour alone, a segmented code field composed from one-time-code so a paste of the whole code lands in every segment and a refused character is refused rather than stored, a resend control with three names, a remember row, a submit control and an announced status region. The Block does not verify the code, does not count the attempts and does not own the lockout, because a design system that limited attempts would be shipping a lockout policy into every product that installed it and a lockout is an availability decision that belongs to the product. The description is required, because on this screen the reader cannot tell what is being asked for by looking at the screen. There is no accepted sentence anywhere in the file: the outcome is a prop. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "button",
+        "checkbox",
+        "field",
+        "live-region",
+        "one-time-code"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/two-factor-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/two-factor-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/two-factor-01/two-factor-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/two-factor-01/two-factor-01.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "user-profile-01",
+      "title": "User Profile 01 - One Person In Full",
+      "description": "A profile header for one person: a portrait where there is one, the name as the section heading, a role, an untruncated biography, a composed fact list, a slot for the caller's own controls and a slot for the caller's own sections. The portrait is a slot and no mark is drawn in its place, because a person-shaped fallback is a claim about a person the system knows nothing about. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "avatar",
+        "fact-list",
+        "separator"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/user-profile-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/user-profile-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/user-profile-01/user-profile-01.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/user-profile-01/user-profile-01.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "verify-email-01",
+      "title": "Verify Email 01 - Five States And Five Screens",
+      "description": "What is being verified, where the verification has got to, the caller's own resend and the route out for a reader this screen does not help. The five states are five screens rather than five messages: checking is progress, verified is a destination, pending is a wait, failed is a retry and expired is a request for a new link. There is no code field, because the link is the proof and a field invites a reader to type a code they do not have. The wait takes the neutral tone, which is the tone that asserts least, because a destructive dot on a reader who has just clicked a link is a claim made before any evidence exists. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "card",
+        "button",
+        "cta-link",
+        "live-region",
+        "spinner",
+        "status"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/verify-email-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/verify-email-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/verify-email-01/verify-email.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/verify-email-01/verify-email.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "waitlist-01",
+      "title": "Waitlist 01 - The Queue, Its Position And The Code To Pass On",
+      "description": "A waitlist band with the same required handler and required consent line as a signup band, plus a caller-formatted position and an optional referral code with a caller-driven copy control. The position sentence is a function rather than a template, so it is composed in the reader's locale rather than in the one this package was written in. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "button",
+        "field",
+        "input",
+        "live-region",
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/waitlist-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/waitlist-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/waitlist-01/waitlist.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/waitlist-01/waitlist.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "about-page",
+      "title": "About Page - Statement, History, People, Engagements And A Way On, In That Order",
+      "description": "A complete about screen composing the statement band, the milestone rail, the team grid, the engagement grid and a closing way on, in the order a reader arrives with the five questions. Every word, date, person and destination is a prop, and the bands after the first are optional without the order changing.",
+      "type": "registry:page",
+      "categories": [
+        "marketing"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/about-page/index.tsx",
+          "type": "registry:component",
+          "target": "components/pages/about-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "auth-page",
       "title": "Auth Page - Centered Sign-In Screen",
       "description": "A complete authentication screen composing a sign-in form with an optional supporting card. Fields, labels, handlers, the error and the supporting content are all passed in as props.",
@@ -2697,6 +7241,96 @@
           "path": "src/pages/blog-post-page/index.tsx",
           "type": "registry:component",
           "target": "components/pages/blog-post-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "careers-page",
+      "title": "Careers Page - Roles, Values, Teams, Benefits And A Way On, With The Empty State Handed In",
+      "description": "A complete careers screen composing the roles list, three optional sets of titled things and a closing way on. The roles band is never conditional: it is given the caller's empty state and renders it in place of the rows, so a week with no vacancies still says who the company is and how to reach it. Every string, number, destination and count label is a prop.",
+      "type": "registry:page",
+      "categories": [
+        "marketing"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/careers-page/index.tsx",
+          "type": "registry:component",
+          "target": "components/pages/careers-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "changelog-page",
+      "title": "Changelog Page - A Record Of What Changed, With Caller Owned Filters And A Place To Link One Release",
+      "description": "A complete record screen composing one changelog band per release, with a caller owned filter row, a caller owned way of reaching the older releases and a closing subscribe band. The order is the order things happened and the page never sorts. Every release is linkable, so a product that says since last time can point at one release. Every string and version is a prop.",
+      "type": "registry:page",
+      "categories": [
+        "marketing"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/changelog-page/index.tsx",
+          "type": "registry:component",
+          "target": "components/pages/changelog-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "contact-page",
+      "title": "Contact Page - Heading, Declared Form, Offices And The Questions Before Them",
+      "description": "A complete contact screen: the page heading, a form whose fields the caller declares, a band of offices and regions drawn as facts rather than controls, and a closing band for the questions a reader should not have to ask. Every field, label, destination, office line and outcome sentence is passed in as a prop.",
+      "type": "registry:page",
+      "categories": [
+        "marketing"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/contact-page/index.tsx",
+          "type": "registry:component",
+          "target": "components/pages/contact-page/index.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",
@@ -2777,6 +7411,66 @@
       ]
     },
     {
+      "name": "error-page",
+      "title": "Error Page - Code, Sentence, Retry And Ways Out",
+      "description": "A complete failure screen, and the sibling of the not-found screen: the status code as the page's own h1, one sentence about what happened, the retry drawn first because the request may well succeed again, and the ways out as native links. Every string and every destination is passed in as a prop, and the retry is the caller's own client control.",
+      "type": "registry:page",
+      "categories": [
+        "application"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/error-page/index.tsx",
+          "type": "registry:component",
+          "target": "components/pages/error-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "legal-page",
+      "title": "Legal Page - The Table Of Documents And The Selected One At The Reading Measure",
+      "description": "A complete legal screen: the page heading with the date the document last changed, a named table of the documents with the selected one marked by aria-current rather than by colour alone, and the selected document as a caller authored node at the reading measure. The page does not own the text and does not parse it. Every string is a prop.",
+      "type": "registry:page",
+      "categories": [
+        "marketing"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/legal-page/index.tsx",
+          "type": "registry:component",
+          "target": "components/pages/legal-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "marketing-page",
       "title": "Marketing Page - Full Landing Composition",
       "description": "A complete marketing landing screen composing a hero, a feature grid, a KPI row, a plan comparison and a closing call to action. Every string, number and action is passed in as a prop.",
@@ -2837,6 +7531,96 @@
       ]
     },
     {
+      "name": "onboarding-page",
+      "title": "Onboarding Page - Heading, Checklist And A Way Out Of A Setup That Is Going Wrong",
+      "description": "A complete setup screen composing the checklist with a way to ask for help and a closing band. Every step, state, count and label is passed in as a prop, and the progress figure is handed back as a function rather than composed.",
+      "type": "registry:page",
+      "categories": [
+        "application"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/onboarding-page/index.tsx",
+          "type": "registry:component",
+          "target": "components/pages/onboarding-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "pricing-page",
+      "title": "Pricing Page - Heading, Change Note, Plan Row And Comparison, In That Order",
+      "description": "A complete pricing screen: the page heading, an optional notice that the prices moved, a row of plans with at most one highlighted, a comparison band whose matrix the caller composes, and any bands below it in the caller's order. Every string, amount and destination is passed in as a prop.",
+      "type": "registry:page",
+      "categories": [
+        "marketing"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/pricing-page/index.tsx",
+          "type": "registry:component",
+          "target": "components/pages/pricing-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "search-page",
+      "title": "Search Page - Field, Groups, Results And A Pager",
+      "description": "A complete search screen: the heading, a controlled search field, the caller's own count line, the caller's groups of results, and slots for their recent searches and their pager. The Page counts nothing and writes no sentence about finding nothing, so a search that reports no results cannot lie about an index it cannot see.",
+      "type": "registry:page",
+      "categories": [
+        "application"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/search-page/index.tsx",
+          "type": "registry:component",
+          "target": "components/pages/search-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "settings-page",
       "title": "Settings Page - Tabbed Settings Forms",
       "description": "A complete settings screen composing the application shell, a page header and tabs of grouped settings forms. Sections, fields, options and labels are all passed in as props.",
@@ -2853,6 +7637,36 @@
           "path": "src/pages/settings-page/index.tsx",
           "type": "registry:component",
           "target": "components/pages/settings-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "status-page",
+      "title": "Status Page - Estate, Services And Incidents",
+      "description": "A complete service-status screen: the caller's judgement of how the estate as a whole is standing, the services under it with their own states and words, the recent incidents with their updates, and slots for the caller's own ways to follow along. The overall state is never computed from the rows, and the four incident states are a lifecycle rather than a product's vocabulary.",
+      "type": "registry:page",
+      "categories": [
+        "application"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/status-page/index.tsx",
+          "type": "registry:component",
+          "target": "components/pages/status-page/index.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",
@@ -2892,6 +7706,46 @@
           "path": "src/live/run-stream-01/run-stream.tsx",
           "type": "registry:component",
           "target": "components/live/run-stream-01/run-stream.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "tool-ledger-01",
+      "title": "Tool Ledger 01 - The Tool Calls Of A Run",
+      "description": "The tool-call ledger of a run in flight, receiving calls as they arrive over a subscription the consumer supplies. The second live surface, and the one beside the event log: it says what was called and what it cost in structure rather than in words. Prism owns the rows, the five states and the window; the consumer owns the socket, the transport, the durations and the persistence. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "data-display"
+      ],
+      "registryDependencies": [
+        "button",
+        "live-region",
+        "scroll-area"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/live/tool-ledger-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/live/tool-ledger-01/index.tsx"
+        },
+        {
+          "path": "src/live/tool-ledger-01/tool-ledger.tsx",
+          "type": "registry:component",
+          "target": "components/live/tool-ledger-01/tool-ledger.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",

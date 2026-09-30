@@ -1,0 +1,8 @@
+{
+  "name": "waitlist-01",
+  "title": "Waitlist 01 - The Queue, Its Position And The Code To Pass On",
+  "description": "A waitlist band with the same required handler and required consent line as a signup band, plus a caller-formatted position and an optional referral code with a caller-driven copy control. The position sentence is a function rather than a template, so it is composed in the reader's locale rather than in the one this package was written in. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["button", "field", "input", "live-region", "section"],
+  "dependencies": []
+}

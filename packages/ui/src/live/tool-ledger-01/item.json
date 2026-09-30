@@ -1,0 +1,8 @@
+{
+  "name": "tool-ledger-01",
+  "title": "Tool Ledger 01 - The Tool Calls Of A Run",
+  "description": "The tool-call ledger of a run in flight, receiving calls as they arrive over a subscription the consumer supplies. The second live surface, and the one beside the event log: it says what was called and what it cost in structure rather than in words. Prism owns the rows, the five states and the window; the consumer owns the socket, the transport, the durations and the persistence. Every string is passed in as a prop.",
+  "categories": ["data-display"],
+  "registryDependencies": ["button", "live-region", "scroll-area"],
+  "dependencies": []
+}

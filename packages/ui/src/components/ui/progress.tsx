@@ -29,6 +29,23 @@ export interface ProgressProps extends ComponentProps<'div'> {
   locale?: Intl.LocalesArgument
   /** Returns the text alternative announced for a value. */
   getAriaValueText?: (formattedValue: string, value: number | null) => string
+  /**
+   * The text alternative for the value, already resolved to a string.
+   *
+   * **This exists because `getAriaValueText` cannot cross a server boundary, and
+   * `Progress` is a client Component.** A Block that composes this one and is
+   * itself a server Component has to hand the announced text over as data, and a
+   * function prop from a server Component to a client Component is a build error
+   * in every framework that draws that line, not a warning. The rule is worth
+   * stating once: a callback prop is only expressible when the caller is already
+   * in the client graph, and a published Component that composes another published
+   * Component has to offer the data form for the case where it is not.
+   *
+   * `valueText` wins over `getAriaValueText` when both are passed, because a
+   * string the caller computed is the one they meant; a thrown diagnostic says so
+   * rather than silently preferring either.
+   */
+  valueText?: string
 }
 
 /**
@@ -40,11 +57,21 @@ export interface ProgressProps extends ComponentProps<'div'> {
  * instead. Pass `value={null}` for a task of unknown length, where the bar is
  * announced as indeterminate.
  */
-function Progress({ className, ...props }: ProgressProps) {
+function Progress({ className, valueText, getAriaValueText, ...props }: ProgressProps) {
+  if (valueText !== undefined && getAriaValueText !== undefined) {
+    throw new Error(
+      'Progress: a bar was given both valueText and getAriaValueText, so the announced sentence is two ' +
+        "different answers to the same question and the reader gets whichever one the framework happens to " +
+        'prefer. Pass the one you meant.',
+    )
+  }
+
   return (
     <ProgressPrimitive.Root
       data-slot="progress"
       className={cn('flex w-full flex-col gap-2', className)}
+      aria-valuetext={valueText}
+      {...(getAriaValueText ? { getAriaValueText } : {})}
       {...props}
     >
       <ProgressPrimitive.Track

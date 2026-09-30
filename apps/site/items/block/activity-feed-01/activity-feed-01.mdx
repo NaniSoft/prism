@@ -1,0 +1,130 @@
+---
+slug: blocks/activity-feed-01
+title: ActivityFeed01
+---
+
+## Overview
+
+ActivityFeed01 is a chronological list of what happened. Each record is an actor, an
+action, a target and a moment, with an optional line under it. Rows become real
+controls when the caller passes a handler, and the moment is printed exactly as the
+caller wrote it.
+
+The four fields are four because a record of what happened has four parts and no
+others. The fifth field every similar surface reaches for, a source or a category or a
+severity, is `tone` and `detail`, both optional and one of them a node.
+
+## The words are the caller's
+
+A feed that composed the sentence would ship English into every consumer's product.
+"Ada published a release four hours ago" is a word order, an article, an inflected
+verb and a relative phrase. A Block that assembled it would have assembled the
+English one and given the consumer no way to translate it, inflect it or reorder it,
+because the string would be inside a package rather than inside their own code.
+
+So `at` is printed exactly as passed, and the machine value goes on the `time`
+element's `dateTime`. A caller who wants a localised reading with a relative phrase
+composes `relative-time` and passes the node in `detail`, beside the record.
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { ActivityFeed01, type ActivityFeed01Event } from '@nanisoft/prism-ui/blocks/activity-feed-01'
+import { RelativeTime } from '@nanisoft/prism-ui/components/relative-time'
+
+const EVENTS: ActivityFeed01Event[] = [
+  {
+    id: 'e1',
+    actor: 'Ada',
+    action: 'published a release for',
+    target: 'nexus-api',
+    at: '2026-09-30T08:14:00Z',
+    tone: 'success',
+    detail: (
+      <RelativeTime
+        date="2026-09-30T08:14:00Z"
+        renderRelative={(at) => new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(-1, 'hour')}
+      />
+    ),
+    href: '/releases/2.4.0',
+    hrefLabel: 'Read the release note',
+  },
+  { id: 'e2', actor: 'Nightly', action: 'finished', target: 'ledger rebuild', at: '2026-09-30T04:02:00Z' },
+  { id: 'e3', actor: 'Bo', action: 'signed in', at: '2026-09-29T21:40:00Z' },
+]
+
+export function Activity() {
+  const [open, setOpen] = useState<string | null>(null)
+  return (
+    <ActivityFeed01
+      eyebrow="Nexus"
+      title="What has happened"
+      groupBy="day"
+      dayLabel={(key) => new Intl.DateTimeFormat('en', { dateStyle: 'full', timeZone: 'UTC' }).format(new Date(key))}
+      events={EVENTS}
+      onSelect={setOpen}
+      limit={50}
+      empty="Nothing has happened in this workspace yet."
+    />
+  )
+}
+```
+
+<ComponentDemo slug="activity-feed-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a reader's question is "what has been going on" and the answer is a
+sequence of records rather than a set. A workspace's history, a run's activity, a
+document's revisions, an account's sessions.
+
+Pass the events newest first yourself. The Block never sorts, because a feed is where
+a pinned record lives and a Block cannot know one is pinned.
+
+Use `groupBy="day"` once the feed runs past a screen. A flat list of two hundred
+records is a list a reader scrolls; a list of thirty days is a list a reader picks
+from.
+
+### When not to use
+
+Do not use it for records the reader compares across columns. That is
+`data-table-01`, and a feed is scanned one record at a time while a table is read by
+comparing a value in one row against the same value in another.
+
+Do not use it for a run's own steps. That is `timeline.tsx` inside
+`run-console-01`, and a Timeline draws each step's duration to scale, which is a
+measurement a feed has nowhere to put.
+
+Do not use it to hide records behind a `limit` with nothing said about the rest. See
+the note on `limit` below.
+
+### Best practices
+
+- Compose `relative-time` in `detail` when the feed should read as "four hours ago".
+  Prism formats the absolute reading and hands the sentence back, so the phrase is
+  yours in every language you ship.
+- Put your own link in `detail` when an event needs a destination and the row is also
+  selectable. The row's own link is drawn from `href` and `hrefLabel`, and the two
+  together are how a reader opens the thing and the caller marks it read.
+- Keep `actor` to two or three words. The feed is scanned down that edge and an actor
+  that wraps is an edge that does not line up.
+- Pass `limit` only when you can stand behind what it hides. A capped feed that says
+  nothing about the rest is a feed a reader believes is complete.
+- Validate the event set at build time. The Block throws on a link with no words and
+  on a moment the platform cannot read.
+
+### Content guidelines
+
+- An `action` is a verb in the product's own vocabulary, present tense: "published a
+  release for", "signed in", "rotated the key for".
+- A `target` is a name a reader recognises: a service, a document, a person. Omit it
+  rather than writing "the workspace".
+- An `at` string is written the way a reader would read it. The Block prints it
+  verbatim, so `2026-09-30` is a machine reading and "30 September" is a sentence.
+- An `empty` says what to do next. Two routes beat one: a filter to widen and a place
+  to ask.

@@ -1,0 +1,8 @@
+{
+  "name": "delivery-01",
+  "title": "Delivery 01 - A Thing In Transit Over A Stage Rail",
+  "description": "A thing moving through stages: what it is, where it stands, which stage it has reached, and an expected reading, over a rail composed from the steps Component. The words travel as strings because this Block is a server Component and the progress bar is a client one, and a function cannot cross that seam. A stage that has not happened carries a name, a date and nothing else, because a screen that shows a delivery time as though it had happened is lying to a reader who is waiting.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "steps", "progress", "status", "relative-time"],
+  "dependencies": []
+}

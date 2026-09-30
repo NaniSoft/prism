@@ -1,0 +1,8 @@
+{
+  "name": "offer-01",
+  "title": "Offer 01 - Promotion Band With Its Terms",
+  "description": "A promotion band with an eyebrow, a headline, a supporting line, an optional code in a labelled mono chip, one control and the terms that state the expiry, the scope and the exclusions. The terms are required, because a discount without them is a different offer.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section"],
+  "dependencies": []
+}

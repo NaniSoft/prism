@@ -1,0 +1,8 @@
+{
+  "name": "inbox-01",
+  "title": "Inbox 01 - A Queue Of Things Awaiting A Person",
+  "description": "A work queue drawn as a real table: a priority, a source, a subject, a moment, a state and a slot for the caller's own row controls, under a toolbar slot and a count. The column names are the caller's and the tones are mapped from the semantic status roles, but both the priority words and the state words are required, because a queue that printed urgent or waiting in English would put a sentence a consumer cannot translate into their operations tool. Every string, and the whole queue, is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["button", "cta-link", "relative-time", "section", "status", "table"],
+  "dependencies": []
+}

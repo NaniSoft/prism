@@ -1,0 +1,16 @@
+{
+  "name": "verify-email-01",
+  "title": "Verify Email 01 - Five States And Five Screens",
+  "description": "What is being verified, where the verification has got to, the caller's own resend and the route out for a reader this screen does not help. The five states are five screens rather than five messages: checking is progress, verified is a destination, pending is a wait, failed is a retry and expired is a request for a new link. There is no code field, because the link is the proof and a field invites a reader to type a code they do not have. The wait takes the neutral tone, which is the tone that asserts least, because a destructive dot on a reader who has just clicked a link is a claim made before any evidence exists. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": [
+    "section",
+    "card",
+    "button",
+    "cta-link",
+    "live-region",
+    "spinner",
+    "status"
+  ],
+  "dependencies": []
+}

@@ -1,0 +1,137 @@
+---
+slug: blocks/provisioning-01
+title: Provisioning01
+---
+
+## Overview
+
+Provisioning01 is a multi-step form that commits something: a step rail, the
+current step's fields, a back and a next control, and a confirmation the caller
+supplies. The storefront's version of this pattern is a checkout, and the pattern
+is identical. A sequence of steps, each with its own fields, a back, a next, and a
+commit at the end. What is provisioned is not a parcel.
+
+The fields are the caller's declaration, not this package's opinion about what a
+reader may be asked. Prism names the five control types it can draw and supplies no
+fields, so a run that asks for a licence key, a region and a maintenance window is
+three fields and a select.
+
+## The rail is not a control, and that is the decision
+
+A multi-step form whose reader can jump to step four is a form that can submit an
+unvalidated step. The reader lands on the commit step with three required fields
+behind them they never saw, and the run is committed with three values this Block
+never asked for.
+
+So the step state is derived from the current index, and there is no `onSelect`.
+A caller who wants to open a run at step two passes `initial`, which is a number
+and not an affordance. A step's state is never taken per step either, because a
+position and a state are two sources of truth about the same thing, and this
+package is organised to avoid the second.
+
+## Usage
+
+```tsx
+import { useState } from 'react'
+import { Provisioning01, type ProvisioningValue } from '@nanisoft/prism-ui/blocks/provisioning-01'
+
+export function ProvisionAnEstate() {
+  const [value, setValue] = useState<ProvisioningValue | null>(null)
+
+  return (
+    <Provisioning01
+      eyebrow="Nexus"
+      title="Provision an estate"
+      steps={[
+        {
+          id: 'target',
+          name: 'The estate',
+          fields: [
+            { id: 'name', label: 'Estate name', type: 'text', required: true },
+            {
+              id: 'region',
+              label: 'Region',
+              type: 'select',
+              required: true,
+              options: [
+                { value: 'eu-west-2', label: 'London' },
+                { value: 'us-east-1', label: 'Virginia' },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'access',
+          name: 'Access',
+          fields: [
+            { id: 'owner', label: 'Owner address', type: 'email', required: true },
+            { id: 'notes', label: 'Anything we should know', type: 'textarea' },
+          ],
+        },
+        {
+          id: 'review',
+          name: 'Review',
+          description: 'Two regions, one owner, nothing scheduled yet.',
+        },
+      ]}
+      backLabel="Back"
+      nextLabel="Continue"
+      confirmLabel="Create the estate"
+      terms="This creates a region, a bucket and an owner record. It bills from the moment it lands."
+      onConfirm={(next) => setValue(next)}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="provisioning-01" />
+
+## Guidelines
+
+### When to use
+
+Use Provisioning01 where a reader has to supply several things before anything
+happens, and the things are grouped so that one group does not make sense before
+another has been given. That is a run, an enrolment, an application and a
+checkout, and the four are the same frame.
+
+Use it where the last press is irreversible on the reader's side. The confirm
+control carries its own words rather than reusing the next one, because "Continue"
+on the button that creates an estate has told the reader the wrong thing about the
+only control on the page that matters.
+
+### When not to use
+
+Do not use it for one screen of fields. A run with a single step is a form, and
+`Contact01` is the Block for that, with the same declared field list and none of
+the rail.
+
+Do not use it to collect a file or a set of things. A run that gathers a bundle
+has two Blocks, not one form with a strange field.
+
+### Best practices
+
+- Declare the fields. A fixed set of fields inside the Block decides what a reader
+  may be asked, and that decision is invisible in a review because the form looks
+  complete.
+- Validate in `onConfirm` and put the sentence in `status`. The browser writes the
+  `required` message in the reader's own language, and Prism writes nothing.
+- Read `onNext` and `onBack` as notifications. The reader advances whatever they
+  say, because a next control that can be refused is a step list that is not the
+  route.
+- Give a review step by making the last step's `fields` empty. An empty form is a
+  form a reader cannot fill and a page that looks broken.
+- Disable nothing a reader can undo. Back is not drawn on the first step, because
+  a control there has nothing to do.
+
+### Content guidelines
+
+- Write a step name as the thing the step is about, in four words or fewer. The
+  rail is scanned.
+- Write a field `description` as what the field is for, not as a restatement of the
+  label. It is announced with the control.
+- Write `terms` for what the last press actually creates and what it costs. It is
+  the one sentence a reader can read before something happens.
+- Write each `status.message` as a fact about the run, including the bad outcomes.
+  A provisioning run can be queued, refused, partly failed and still rolling out
+  an hour later, and one sentence cannot be true of all four.

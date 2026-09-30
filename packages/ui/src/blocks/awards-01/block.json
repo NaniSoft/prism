@@ -1,0 +1,8 @@
+{
+  "name": "awards-01",
+  "title": "Awards 01 - Recognitions With The Year Beside The Body",
+  "description": "A list of recognitions as hairline rows or as cards: the work, the organisation that gave the recognition, the year it was given and a link to the record. The year is required and rendered in the mono face beside the organisation, because an award without a date is a logo with words attached. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "card", "badge"],
+  "dependencies": []
+}

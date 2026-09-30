@@ -1,0 +1,8 @@
+{
+  "name": "case-studies-01",
+  "title": "Case Studies 01 - A Grid Or List Of Studies",
+  "description": "A set of case studies as a grid of summary cards or a list of full-width rows, each holding the same customer, sector, summary and results a single-study band holds. Every study is a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "card", "fact-list", "cta-link"],
+  "dependencies": []
+}

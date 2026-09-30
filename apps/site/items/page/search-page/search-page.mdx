@@ -1,0 +1,104 @@
+---
+slug: pages/search-page
+title: SearchPage
+---
+
+## Overview
+
+SearchPage is a complete search screen: the heading, the field the reader types into, the count
+line, the caller's groups of results, and slots for their recent searches and their pager.
+
+**The decision this screen exists to make is that it counts nothing and claims nothing.** There is
+no result count this Page computes, no sentence it writes when nothing matched, and no total it
+can stand behind. All three are yours: `summary` is a function you compose from the number of
+results you passed, and `empty` is a node you wrote.
+
+The argument for the other side is real, and it is the argument most search screens win with: a
+count is the most useful single thing on a results page, and a screen without one leaves a reader
+unsure whether their query ran at all. The argument against it is what the count is a count *of*.
+An index is one file on a static route, or a vector store, or three stores and a cache with a
+ranking in front of them, and this Page sees a `results` array and nothing else. A number composed
+here is a number about the subset you handed over, presented as the whole, and a search that reports
+no results when the index is one file and the reader's term is in another has lied to somebody
+looking for a document they were told exists.
+
+`SearchDialog` is the counter-example that makes this rule sharper rather than softer, and it is
+worth naming because it is in this package and it does own a count. The dialog fetches the whole
+index itself, so the array it ranks is the array it counts. A Page is handed its results, and what
+it was handed is not the world.
+
+**It composes `SearchField`** for the four things that field already gets right: the clear control
+that stays where it was when the field is empty, the platform's own clear mark switched off, the
+label naming the control from your own words, and the polite live region the count line rides in.
+The count line is drawn by that Component, so pass an empty summary on the first paint: a live
+region that arrives together with its content is the one case a region is least reliable about.
+
+**`selectedId` is marked with `aria-current`, and with a fill and a left rule.** A screen reader
+reads the attribute, a reader who is not using one sees the rule, and the rule is the same width
+whether it is drawn or not, so marking one result does not move the rows beside it.
+
+## Usage
+
+```tsx
+import { SearchPage } from '@nanisoft/prism-ui/pages/search-page'
+
+<SearchPage
+  title="Search the handbook"
+  description="Every document on this site."
+  label="Search the handbook"
+  clearLabel="Clear the handbook search"
+  value={query}
+  onValueChange={setQuery}
+  summary={(matches) => `${matches} of ${total} documents match`}
+  groupLabel="Results"
+  results={results}
+  empty="Nothing in the index matches that."
+  pagination={<Pagination label="Result pages">{/* yours */}</Pagination>}
+/>
+```
+
+<ComponentDemo slug="search-page" />
+
+## Guidelines
+
+### When to use
+
+Use SearchPage as the body of the route that answers a query. It is the screen for a reader who
+already knows what they are looking for and typed it, which is a different reader from the one
+who arrived at a home page.
+
+Use it for every search on a site, however the index is built. The Page holds no index and searches
+nothing, so a static JSON file filtered in the browser, a server-side query and a store's own
+search all produce the same screen with no search code in this package.
+
+### When not to use
+
+Do not use it for a search box inside a product. That is `SearchField` on its own, or
+`SearchDialog` when the search belongs in a dialog over the current page.
+
+Do not use it for an index a reader browses. That is `Help01` or `ResourceList01`, which filter
+what they were given and ship a heading for the set as well as for each entry.
+
+### Best practices
+
+- Keep the query in your own state and, if you have a router, in the address. This Page reads no
+  URL and imports no router, so the query string stays your fact.
+- Pass a `summary` from the first paint, even an empty one. The count line is the only thing on the
+  screen that tells a reader their query ran.
+- Write `empty` for the case you can detect and let the Page use it for the rest. This Page cannot
+  tell an empty query from a query that matched nothing: both arrive as an empty `results` array.
+- Pass `hrefLabel` when your titles are written to match a query rather than to promise what
+  following them does, and omit it when the title is the sentence you want on the link. Passing
+  both would give the row two destinations.
+- Use `recent` for your own recent searches and `pagination` for your own pager. A pager is where
+  the total and the page size live, and this Page has just declined to claim a total.
+- It is a client Component, because a callback prop cannot cross from a server Component to a client
+  one and this Page takes two. A consumer that cannot make its search route a client module composes
+  `SearchField` in a client component of its own, and this Page is not the answer for them.
+
+### Content guidelines
+
+- Write the empty state as a fact and a next step. "Nothing in the index matches that. Try a
+  shorter phrase" is two things a reader can act on; "No results" is neither.
+- Keep the group names to nouns. A group is a place a reader is looking, not a sentence.
+- Keep a result's summary to one line. It is context for a decision, not the document.

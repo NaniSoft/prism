@@ -1,0 +1,8 @@
+{
+  "name": "settings-integrations-01",
+  "title": "Settings Integrations 01 - Connections With Four States",
+  "description": "The systems a workspace connects to, one row each, in four states including needs-attention, which is the state a two-state design system cannot express honestly. The mark slot draws no frame so a PackSwatch keeps its own boundary, and the connect control is drawn only on a state that can be connected.",
+  "categories": ["application"],
+  "registryDependencies": ["button", "cta-link", "section", "status"],
+  "dependencies": []
+}

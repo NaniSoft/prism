@@ -1,0 +1,190 @@
+---
+slug: blocks/contact-01
+title: Contact01
+---
+
+## Overview
+
+Contact01 is a contact section whose fields the caller declares, beside an optional
+address block with a real mailto link. The declared field list is the whole design,
+and the reason is that a contact form is a form about the message. A Component with
+a fixed set of fields decides what a reader may say, and it decides invisibly,
+because four labelled controls and a submit button read as a finished surface in a
+screenshot.
+
+The cost of a fixed list is the message. A form that cannot ask for an order number
+is a form a reader abandons and retried through a support channel. A form that
+cannot ask for a company size sends a one-line hello to a sales team that then
+spends a week on discovery calls. A form that cannot ask for a budget guarantees
+the reply nobody wanted, because the reader has already told the sender what they can
+afford and the send has nowhere to put it.
+
+So `fields` is a prop list of the caller's own, and Prism names the five control
+types it can draw and supplies no fields at all.
+
+| Prop | Why it cannot be optional |
+| --- | --- |
+| `fields` | A Component that decides what a reader may say is a Component making a claim about the caller's product. |
+| `onSubmit` | A Block that collects a message and then has nowhere to put it is a form that takes a personal datum and discards it silently. |
+| `submitLabel` | The label on a submit control is a sentence in the caller's product, not a word. |
+| `address.emailLabel` | A mailto link announced as the address itself is unreadable as a sentence and cannot be copied. |
+
+## The five control types, and nothing else
+
+`text`, `email`, `tel`, `textarea` and `select`, drawn from `Input`, `Textarea` and
+`NativeSelect`. `ContactField` is a union, so `options` is required inside the
+select arm and forbidden beside the other four. A select with no options is a
+question no reader can answer, and it looks answered only because the control is
+there and focusable.
+
+`NativeSelect` is the platform's own element rather than the popup one, which is
+what a form inside a page already being submitted wants. The honest limit is that an
+`<option>` holds text and nothing more, so a caller who needs a description, a count
+or anything nested beside a choice is reaching for a control the platform cannot
+render.
+
+## Usage
+
+```tsx
+import { useState } from 'react'
+import { Contact01, type ContactField } from '@nanisoft/prism-ui/blocks/contact-01'
+
+const FIELDS: ContactField[] = [
+  { id: 'name', type: 'text', label: 'Your name', required: true, autoComplete: 'name' },
+  { id: 'email', type: 'email', label: 'Email address', required: true, autoComplete: 'email' },
+  {
+    id: 'order',
+    type: 'text',
+    label: 'Order number',
+    required: false,
+    description: 'Only if you are writing about an order.',
+  },
+  {
+    id: 'topic',
+    type: 'select',
+    label: 'What is this about?',
+    required: true,
+    options: [
+      { value: 'sales', label: 'Buying' },
+      { value: 'support', label: 'Something is broken' },
+      { value: 'press', label: 'Writing about you' },
+    ],
+  },
+  { id: 'message', type: 'textarea', label: 'What would you like to say?', required: true },
+]
+
+export function Contact() {
+  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [message, setMessage] = useState<React.ReactNode>(null)
+
+  return (
+    <Contact01
+      eyebrow="Nexus"
+      title="Write to us"
+      description="A person reads every one of these, usually within a working day."
+      fields={FIELDS}
+      submitLabel="Send"
+      consent="We use what you send to answer you and nothing else."
+      address={{
+        lines: ['Nexus Software', '14 Ashfield Row', 'Bristol BS1 4TR'],
+        email: 'hello@nexus.example',
+        emailLabel: 'Email us directly',
+        hours: <p>Monday to Friday, 9am to 5pm UK time.</p>,
+      }}
+      status={{ state, message }}
+      onSubmit={async (value) => {
+        setState('sending')
+        const sent = await postEnquiry(value)
+        // Four outcomes, four sentences, all of them this product's. A third is
+        // the one a real inbox produces most and a demo never reaches for.
+        if (sent === 'held') {
+          setState('sent')
+          setMessage('We have it. It is with the spam filter, which we check by hand.')
+        } else if (sent === 'no-reply') {
+          setState('error')
+          setMessage('That address does not accept mail, so nothing was sent.')
+        } else {
+          setState('sent')
+          setMessage('Sent. We will write back to the address you gave.')
+        }
+      }}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="contact-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a reader has a reason to write to a person and the reader is the one
+who knows what they want to say. That is a contact page, a support desk, a press
+address, a sales enquiry.
+
+Declare the fields the enquiry actually needs and nothing more. Nine fields on a
+contact form is a sales funnel, and a reader who came to ask one question leaves it
+at field four.
+
+Use the `split` layout where the address is a real destination rather than a
+decoration, which is most of the time. Use `stacked` on a narrow page and wherever a
+reader on a phone would otherwise scroll past four postal lines to reach the field
+they came for.
+
+Add a `select` when the answer routes the message, and use the option values as keys
+your own desk can act on rather than as the sentences a reader picks from.
+
+### When not to use
+
+Do not use it for a signup. That is `Newsletter01`, and the difference is not the
+field count: it is who holds the address afterwards and what they may do with it.
+
+Do not use it for support on a product with an account. A reader who is signed in
+already told you who they are, and a form asking them again is a form that treats
+them as a stranger.
+
+Do not use it where a reader is blocked. A form a reader has to get past before they
+can read the page is a different decision with different consequences, and it belongs
+in whatever surface the rest of the product already uses for that.
+
+Do not put an `address` block in place of the form. This Block is for a reader who
+wants to write, and the address is for the reader who wants to know where you are.
+
+### Best practices
+
+- Read `value` by your own field ids. The record that arrives is shaped like the
+  declaration that produced it, so a field renamed in one place is renamed in one
+  place.
+- Pass `autoComplete` on the fields the browser can fill. A reader on a phone
+  retyping an address they have typed before is a reader who abandons.
+- Distinguish delivered from held in your own words. They are two different facts
+  and a reader deserves to know which one happened.
+- Never make `onSubmit` optional in your own wrapper. The type is what stops a
+  message appearing where nobody sent it, and a wrapper that defaults the handler is
+  a wrapper that has undone the only decision this Block makes.
+- Validate in your handler, not in the Block. Prism ships no address format rule, no
+  message length and no spam rule, because each of those is a decision about your
+  product and your data.
+- Compose two of these for a two-column form. This Block draws one column in the
+  order the list gives, which is the mirror of the argument above.
+- Compose `Button` in your own panel if you want the accept quieter than the
+  refusal, or the reverse. Prism will not be restyled, and the no-override-path rule
+  is the reason the decisions in this package are made here rather than in each
+  product.
+
+### Content guidelines
+
+- Write the heading as the thing the reader is about to do. "Write to us" is an
+  action; "Contact" is a category.
+- Write each field label as the answer it asks for. "What is this about?" tells a
+  reader what to write; "Enquiry type" tells them there is a dropdown.
+- Mark the optional fields with a `description`, not by softening the label. A
+  label that says "Order number (if you have one)" is a sentence a screen reader
+  reads before the field; a description is the same fact where the reader looks for
+  it.
+- Write `emailLabel` as the action, not as the address. "Email us directly" is a
+  sentence; the address belongs in the `href`, where a reader can copy it.
+- Do not put the reply time in the submit label. It is a fact about the desk rather
+  than about the act, and it belongs in the description or in the status sentence you
+  write.

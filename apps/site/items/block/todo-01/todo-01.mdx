@@ -1,0 +1,120 @@
+---
+slug: blocks/todo-01
+title: Todo01
+---
+
+## Overview
+
+Todo01 is a task list: a checkbox, a title, an optional note, an owner, a due
+reading and a state per task, with an aggregate bar above the list and an empty
+sentence the caller writes.
+
+The checkbox is the published control rather than a clickable `div`, and that is
+the decision worth reading first. `checkbox.tsx` owns its focus ring at full
+strength, it grows its hit target to 44 pixels on a coarse pointer, and it renders
+a hidden native input beside itself so the whole thing submits and validates like
+a checkbox in a form. A `div` with an `onClick` has none of those: it is not in the
+tab order at all, it cannot be operated with Space, and a screen reader announces
+a group of text rather than a control that can be changed. On a task list that is
+not a nicety, because ticking a box is the only thing a reader does with one.
+
+The title is the checkbox's own `<label>`, which is a decision about the hit target
+as much as the accessible name. A bare sixteen pixel control is a control a reader
+has to aim at, and a task list is a list of things people read on a phone while
+walking.
+
+## The bar takes a string, not a callback
+
+The aggregate is `Progress` with the `valueText` prop and not with
+`getAriaValueText`, and the reason is the server boundary rather than taste. This
+Block is a server Component until `onToggle` is passed and a client Component
+after it, because a handler is a function, a function is a piece of state, and
+state is a client module. `Progress` is a client Component either way. A function
+prop from a server Component into a client one is a build error rather than a
+warning, so `getAriaValueText` is not expressible from half the callers this Block
+has. `valueText` is the form that crosses: you compose the words, the Block counts
+the rows, and the bar announces a string.
+
+The same rule applies to every Block in this package that composes a client
+Component with a callback. The words travel as data across the seam, and
+`progressLabel` is how you write them once.
+
+## Usage
+
+```tsx
+import { Todo01 } from '@nanisoft/prism-ui/blocks/todo-01'
+
+<Todo01
+  eyebrow="Nexus"
+  title="This week"
+  tasks={[
+    {
+      id: 'reconcile',
+      title: 'Reconcile the September invoice run against the ledger',
+      owner: 'Priya Raman',
+      due: '2026-09-29T17:00:00Z',
+      dueLabel: () => 'Tuesday',
+    },
+  ]}
+  onToggle={(id, done) => save(id, done)}
+  showProgress
+  progressLabel={(done, total) => `${done} of ${total} done`}
+  empty="Nothing is on the list this week."
+/>
+```
+
+<ComponentDemo slug="todo-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for work a person is going to do today or this week, and for anything where
+the done state matters enough to be visible afterwards.
+
+Use `variant="checklist"` when the titles are short and the owner matters more than
+the note. Use the default `list` when a task carries a paragraph and the paragraph
+is part of the task.
+
+### When not to use
+
+Do not use it for records. A row per customer is a `DataTable01`, and a list of
+links somebody has to choose between is a `ResourceList01`.
+
+Do not use it to show progress on a job. A progress bar on its own is a
+`MeterTone` meter, and a set of them is an `InstrumentPanel01`.
+
+Do not use it for a release plan with dates. That is a `Gantt01`, which is a
+figure of bars over a range rather than a list of checkboxes.
+
+### Best practices
+
+- Pass `onToggle` or pass nothing. With no handler the checkboxes render read
+  only, which is honest: a list nobody can change is a list someone is reading.
+  Do not pass a handler that does nothing.
+- Write `progressLabel` as a sentence, not a number. "3 of 7 done" is one this
+  package cannot write for you, and it is a sentence in your language.
+- Leave a finished task in the list. The Block strikes it through and mutes it and
+  does nothing else, because a completed task a reader cannot find is a task they
+  will redo.
+- Keep a blocked task's checkbox live and pass `blockedLabel`. The mark is a mark
+  and not a lock, because a control that has stopped asking is a control the reader
+  has stopped reading.
+- Pass `due` as a value when you want the platform's localised reading, and as a
+  node when you want both halves in your own voice. `dueLabel` is used only for
+  the relative half.
+
+### Content guidelines
+
+- `title` is the checkbox's label, so keep it to one line. It is also the hit
+  target.
+- `note` is one line. It is drawn under the title and never truncated, so three
+  lines of it is a paragraph in a list.
+- `owner` is a name a reader would use in conversation. `ownerAvatar.name` is
+  required whenever an avatar is passed, because the fallback initials are made
+  from it and a face with no name beside it identifies nobody.
+- `blockedLabel` says what the block is, not that there is one. "Waiting on the
+  data owner" tells a reader what to do; "Blocked" tells them what they already
+  knew.
+- `empty` is the one sentence a reader is guaranteed to read, and it is the most
+  load-bearing one on the page.

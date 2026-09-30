@@ -1,0 +1,125 @@
+---
+slug: blocks/resource-list-01
+title: ResourceList01
+---
+
+## Overview
+
+ResourceList01 is a document and download index: a name, a kind, a reading for a
+size, a format or a last-changed moment, and a link, drawn as a real table. The
+column names are yours. The four cells are the Block's. `groupBy` renders a body
+per kind rather than one table with merged cells.
+
+The table is the decision the whole Item rests on. A resources index is the one
+section on a site where a reader is comparing things rather than reading them, and
+comparison is what a table is for. A grid of `div`s gets three things wrong that a
+reader of a file index needs: there is no `th` to navigate by, so a screen reader
+announces cells as a bare run of values with no idea which is the size and which is
+the kind; there is no association between a row's name and its cells, so a reader
+who lands on one cell is not told which document they are in; and there is nothing
+for a browser's own table commands to act on.
+
+`columns` is required for the same reason `DataTable01`'s is, and the argument is
+the same one: a resource table whose columns are counted rather than named is
+unreadable to a screen reader, and a Block that named them itself would put one
+product's vocabulary of file kinds into every consumer's page. What this Block does
+not take from `DataTable01` is the `cell` function, because the four cells are
+closed. A consumer whose index has a fifth fact per document cannot render it here,
+and the answer is `DataTable01`.
+
+## Usage
+
+```tsx
+import { RelativeTime } from '@nanisoft/prism-ui/components/relative-time'
+import { ResourceList01 } from '@nanisoft/prism-ui/blocks/resource-list-01'
+
+<ResourceList01
+  eyebrow="Reference"
+  title="Documents and downloads"
+  description="Everything here is generated from the same source as the site."
+  groupBy="kind"
+  columns={[
+    { id: 'name', header: 'Document', className: 'w-2/5' },
+    { id: 'kind', header: 'Format' },
+    { id: 'detail', header: 'Size and last changed' },
+    { id: 'href', header: 'Open' },
+  ]}
+  resources={[
+    {
+      id: 'token-contract',
+      name: 'The emitted token contract',
+      kind: 'CSS',
+      detail: (
+        <span className="flex flex-col">
+          <span>41 KB</span>
+          <RelativeTime date={updatedAt} relative="last month" />
+        </span>
+      ),
+      href: '/downloads/tokens.css',
+      hrefLabel: 'Download the contract',
+    },
+    {
+      id: 'pack-guide',
+      name: 'Writing a pack',
+      kind: 'Guide',
+      detail: (
+        <span className="flex flex-col">
+          <span>18 pages</span>
+          <RelativeTime date={updatedAt} />
+        </span>
+      ),
+      href: '/downloads/pack-guide.pdf',
+      hrefLabel: 'Download the guide',
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="resource-list-01" />
+
+`detail` is a node on purpose. A size, a page count, a licence and a
+`RelativeTime` are four facts with four formats, and the Block picks none of them.
+Compose `RelativeTime` yourself where you want a localised reading and a relative
+phrase; pass a string where you already have the words.
+
+## Guidelines
+
+### When to use
+
+Use ResourceList01 for a set of documents, files, licences, schemas or fixtures
+that a reader compares rather than reads: a downloads page, a reference index, a
+legal index, a fixtures directory.
+
+Use `groupBy="kind"` when the kind is what a reader is browsing by, and the kinds
+first appear in the order you passed them. The Block groups in first-appearance
+order and never sorts.
+
+### When not to use
+
+Do not use it for rows you need to select, filter, page or search. That is
+`DataTable01`, and it takes a toolbar and a caller's own cells.
+
+Do not use it for a fifth fact per document. The four cells are closed, and the
+type says so rather than the render saying nothing.
+
+Do not use it for a list a reader reads rather than compares. A resources index
+with three long descriptions is a content grid, and that is `ContentGrid01`.
+
+### Best practices
+
+- Name the columns. "Format", "Type" and "Kind" are three names for one cell and
+  only you can say which is right for your set.
+- Keep the `name` column in `columns`. It is the row header, and the run fails
+  without it rather than drawing a header row a cell short.
+- Pass `href` and `hrefLabel` together. The run fails on a link with no words.
+- Put a `RelativeTime` in `detail` rather than a formatted date string, so the
+  reading is in the reader's own language.
+
+### Content guidelines
+
+- A name is the document's own name, as its authors spell it.
+- A kind is what sort of thing it is, in the words your set already uses. It is
+  also the group heading when you group by it, so it has to read as a heading on
+  its own.
+- An `hrefLabel` says what following the link does: "Download the contract",
+  "Open the guide". It is never the document's own name.

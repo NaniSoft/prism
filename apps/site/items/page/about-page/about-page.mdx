@@ -1,0 +1,102 @@
+---
+slug: pages/about-page
+title: AboutPage
+---
+
+## Overview
+
+AboutPage is a complete about screen. It composes five bands in one fixed order
+and passes each one its own content, so the page adds the sequence and nothing
+else: the statement band, the milestone rail, the team grid, the engagement grid
+and a closing way on.
+
+| Order | Band | Question it answers |
+| --- | --- | --- |
+| 1 | About01 | What is this, and for whom? |
+| 2 | Story01 | How did it get here? |
+| 3 | Team01 | Who is behind it? |
+| 4 | Services01 | What does it do? |
+| 5 | the caller's closing band | How do I reach it? |
+
+**The order is the decision the page makes.** Each of the five is a question a
+reader arrives with, and this is the order they are asked in: a reader does not
+want the history before they know what the thing is, and a name with no history
+behind it is a logo.
+
+**The order costs something.** A company whose story belongs after the team
+cannot reorder this page. The honest answer is to compose two pages and accept
+two page rhythms where the author wanted one, which is the correct price of an
+opinionated order. An `order` prop would have moved the decision to every call
+site, which is to say it would have stopped being a page.
+
+**The page does not decide which bands appear, only in what order.** `milestones`,
+`people`, `services` and `contact` are all optional, and omitting one removes it
+without moving any other, so a product with no story to tell passes no
+`milestones` and reads the same four questions in the same order.
+
+## Usage
+
+```tsx
+import { AboutPage } from '@nanisoft/prism-ui/pages/about-page'
+
+<AboutPage
+  title="We run the thing we sell"
+  description="One or two sentences under the heading."
+  statement="A large sentence saying what this is, in the present tense."
+  principles={principles}
+  milestones={milestones}
+  people={people}
+  services={engagements}
+  contact={{
+    title: 'A closing line',
+    description: 'A sentence that says what happens next.',
+    cta: { label: 'Get in touch', href: '/contact' },
+  }}
+/>
+```
+
+<ComponentDemo slug="about-page" />
+
+## Guidelines
+
+### When to use
+
+Use AboutPage for a public about route whose job is to answer, in this order,
+what a company is, how it got here, who is behind it and what it does.
+
+Use it with a subset. A product with no history to publish passes no `milestones`
+and the remaining four questions still arrive in the same order.
+
+### When not to use
+
+Do not use it for a product page. A product page answers what the thing does and
+what it costs, and `MarketingPage` is the composition for that.
+
+Do not use it for a company whose people are the argument and whose story belongs
+after them. Compose two pages, one holding the team and one holding the history.
+
+Do not compose `Contact01` into the closing band. Its `onSubmit` is a function, a
+function cannot cross from a server component to a client component, and a page
+that composed it would have to be a client component itself.
+
+### Best practices
+
+- The page heading is the about band's own section heading, at the page's
+  `headingLevel`. There is one `h1` on the screen and the page does not have to
+  police that.
+- The bands after the first are untitled, so every titled thing on the page is one
+  step below the page heading. That is deliberate: a section title per band is a
+  prop per band whose value is a heading the page would then own.
+- A person or an engagement with an `href` and no `hrefLabel` throws. A link
+  announced by its address is punctuation, not a name.
+- Compose at one level deeper when the page is embedded under a heading the
+  consumer already owns. Pass `headingLevel="h2"` and the whole outline follows.
+
+### Content guidelines
+
+- The statement is present tense and about the reader's situation now. Past tense
+  belongs in the milestones.
+- A principle is a short name and one sentence saying what holding to it means.
+- A milestone body is what changed for the reader, not what the company decided.
+- The closing band asks for one thing. Two destinations is a page the consumer
+  composes.

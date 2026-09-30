@@ -1,0 +1,8 @@
+{
+  "name": "passkey-01",
+  "title": "Passkey 01 - The List Of Credentials A Machine May Act Under",
+  "description": "The caller's registered authenticators as a list of names, moments and transports, a register control whose callback is where the browser own ceremony runs, and a remove control on every row including the reader own. The Block opens no credential store, calls no WebAuthn API and owns no ceremony, because a ceremony chooses the origin, the user-verification flag and the relying party identifier, and a design system that called navigator.credentials would be choosing all three for every consumer that installed it. The transport is the caller own string, because this phone and this laptop are sentences. There is no registered sentence anywhere in the file: the outcome is a prop. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "card", "button", "live-region"],
+  "dependencies": []
+}

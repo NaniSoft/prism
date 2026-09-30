@@ -1035,19 +1035,27 @@ Recorded as facts. None of these is fixed in this document.
   live at cutover.
 - **`CODEOWNERS` carries a placeholder owner line.** The project has one
   maintainer and no confirmed team handle yet; the cutover confirms it.
-- **The v1.1 roster tail is deferred, not dropped.** (Roster composition as
-  specified on 2026-09-28, when the count was 28 Components, 10 Blocks and 4
-  Pages; the live roster is whatever `check-catalogue.mjs` reports and this table
-  is a specification of what is still to come, not a count of what is there.)
-  Every deferred item is additive
-  and non-breaking, because Base UI already ships each primitive it needs, so
-  v1.1 introduces no new upstream engine:
+- **The v1.1 roster tail is no longer deferred. It shipped.** (Specified on
+  2026-09-28 when the count was 28 Components, 10 Blocks and 4 Pages, and
+  discharged in 2026-09 by the roster expansion recorded in
+  `docs/history/roster-expansion.md`, which took the catalogue from 106 Items to
+  236.) Every name the table below deferred is now in the tree, with one
+  resolution and one withdrawal, so v1.1 has no roster work left and
+  `check-catalogue.mjs` is the only count there is:
 
-  | Kind | Deferred to v1.1 |
-  | --- | --- |
-  | Components | the shadcn baseline tail: `collapsible`, `spinner`, `toast`, `alert-dialog`, `sheet`, `command`, `combobox`, `calendar`, `date-picker`, `scroll-area`, `aspect-ratio`, `hover-card`, `context-menu`, `menubar`, `navigation-menu`, `toggle`, `toggle-group`, `input-otp`, `item`, `button-group`, `input-group`, `carousel`, `chart`, `sidebar`, `form` (the react-hook-form binding), `number-field`, `meter`, `resizable`, `native-select`, and a standalone `label`. `empty` is not on this list: it is resolved to `empty-state-01`, a Block, and the resolution is recorded below |
-  | Blocks | `faq-01`, `logo-cloud-01`, `testimonial-01`, `newsletter-01` |
-  | Pages | `onboarding-page`, `pricing-page`, `error-page` |
+  | Kind | Was deferred to v1.1 | Shipped as |
+  | --- | --- | --- |
+  | Components | the shadcn baseline tail: `collapsible`, `spinner`, `toast`, `alert-dialog`, `sheet`, `command`, `combobox`, `calendar`, `date-picker`, `scroll-area`, `aspect-ratio`, `hover-card`, `context-menu`, `menubar`, `navigation-menu`, `toggle`, `toggle-group`, `input-otp`, `item`, `button-group`, `input-group`, `carousel`, `chart`, `sidebar`, `form` (the react-hook-form binding), `number-field`, `meter`, `resizable`, `native-select`, and a standalone `label` | all of them, and `input-otp` resolved to `one-time-code` |
+  | Blocks | `faq-01`, `logo-cloud-01`, `testimonial-01`, `newsletter-01` | all four, and `logo-cloud-01` now sits beside the `logo-strip-01` already published |
+  | Pages | `onboarding-page`, `pricing-page`, `error-page` | all three |
+
+  **`input-otp` is withdrawn as a name and `one-time-code` takes its place.** The
+  deferred name said what the thing is used for and the shipped name says what it
+  is. A code field is composed by `two-factor-01` and by nothing else, and a
+  component named for its use invites a second use; the shipped name is also the
+  one the `two-factor-01` Block was written against, so the two agree. Nothing
+  imports `input-otp`, because nothing imported the deferred name, which is the
+  only reason a rename is free here.
 
   `footer-01` is not on this list because it is no longer deferred: the footer
   shipped as `site-footer` in the fourteen-item release, as a Block, because all
@@ -1056,9 +1064,11 @@ Recorded as facts. None of these is fixed in this document.
   and a navigation rather than holding one job. The name follows the four import
   lines rather than the shape of this table, because a published name cannot be
   cheaply changed and there is no redirect lane for item routes. `logo-cloud-01`
-  above is the deferred spelling of the logo strip, which also shipped as
-  `logo-strip-01`; that name keeps the `-01` suffix its entry was given and no
-  consumer imports it yet.
+  above was the deferred spelling of the logo strip, which had already shipped as
+  `logo-strip-01`; both names are now in the tree, because the cloud is a
+  trademark strip with a claim to make and the strip is a set of marks with none,
+  and a design system that has both is more useful than one that made the reader
+  choose. Neither is imported by a consumer yet.
 
   **The old "the docs shell never ships" line is withdrawn, and the reason it
   was written no longer holds.** It said the documentation frame is site chrome
@@ -1103,14 +1113,24 @@ Recorded as facts. None of these is fixed in this document.
 - **The client-JavaScript budget reports per item and fails only in total.** The
   per-item thresholds live in the `BUDGETS` table in
   `packages/ui/scripts/check-client-budget.mjs`; a component over its figure is
-  reported, and the deduplicated all-client bundle is held to the 116 KB gzip
-  ceiling and fails. The ceiling has moved twice, 90 to 92 when the roster was
-  completed and 92 to 116 when the roster was widened to the whole emitted tree,
-  which found 53 modules the two-directory roster had never read. The gate's own
-  comment records why each time, and the measured bundle is 108 KB. A ceiling with
-  a fraction of a kilobyte of headroom is not a policy but a pin, because it
-  fails on an unrelated dependency bump and teaches everyone to answer by
-  rerunning it with a bigger number.
+  reported, and the deduplicated all-client bundle is held to the 260 KB gzip
+  ceiling and fails. The ceiling has moved four times: 90 to 92 when the roster
+  was completed, 92 to 116 when the roster was widened to the whole emitted tree,
+  which found 53 modules the two-directory roster had never read, 116 to 208 for
+  the deferred substrate tail, and 208 to 260 for the 2026-09 roster expansion,
+  which took the catalogue from 106 Items to 236 and the measured bundle from
+  156.6 KB to 250.4 KB. The gate's own comment records why each time, and the
+  reason the moves are allowed to differ is worth stating once: the first two
+  corrected a ceiling that was measuring the wrong set of files, and the last two
+  are forecasts about weight that had not landed when they were written, which is
+  a different kind of number and is treated as one. A ceiling with a fraction of
+  a kilobyte of headroom is not a policy but a pin, because it fails on an
+  unrelated dependency bump and teaches everyone to answer by rerunning it with a
+  bigger number.
+  **Pages carry no per-item budget and that is deliberate.** A Page is a
+  composition of Blocks already in the table, so a budget for the Page would
+  count the same bytes a second time and let one screen look like it costs what a
+  screen costs when it costs what its parts cost.
 - **`styles.css` has no byte budget.** The client analyzer measures source, not
   the compiled bytes a consumer downloads; a gzip budget is the strongest
   candidate for a future fail gate and is not adopted.

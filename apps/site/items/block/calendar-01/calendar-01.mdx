@@ -1,0 +1,136 @@
+---
+slug: blocks/calendar-01
+title: Calendar01
+---
+
+## Overview
+
+Calendar01 is a month of scheduled work: the published `mini-calendar` for the
+month, the locale, the weekday headings and the paging, and your items grouped
+under the days they fall on.
+
+It is named `Calendar01` and not `Calendar01` because `calendar.tsx` is
+already a Component in this package, and a Block with the same short name would be
+two surfaces a reader could not tell apart in an import.
+
+The grid is `mini-calendar` and the Block composes it rather than drawing a second
+one, and that is a decision about keyboard behaviour rather than about dates. That
+Component owns a roving tab stop so the grid is one stop rather than forty-two,
+arrow keys that cross a month boundary, a `Home` and an `End` that go to the ends
+of the row, a month name announced when the reader pages, a weekday row formatted
+from the first week's own cells so a heading cannot drift from the column it sits
+over, and a fixed six-week height so paging a month does not move the dates out
+from under the pointer.
+
+## The items are a day list, and that is a cost
+
+The items are a list beside the grid rather than marks inside its cells, because
+`mini-calendar` draws days and takes no content per day. Adding a slot to a
+published Component for the sake of one Block would be a change to a surface four
+products already compose, made in a Block's name, which is the arrangement this
+repository keeps separate on purpose.
+
+It is also the better reading for a queue: the grid answers which days have work on
+them and the list answers what is on Tuesday, and a reader working a backlog wants
+the second answer more often than the first. The cost is named rather than hidden.
+A reader who wants to know that the fifteenth has anything on it has to look at
+the list, and a consumer who needs the mark composes their own `mini-calendar`
+beside this Block and passes the same `items` to both.
+
+## The cap, and why it is never silent
+
+A month grid with nine items on one day is a month grid nobody can read. Six pixel
+entries in a forty pixel cell are not a denser calendar, they are a calendar a
+reader has given up on, and the reader who gives up is the one who then believes
+the day was quiet. So `maxPerDay` caps at three and the rest are named, in your own
+words, by a required `overflowLabel`. A cap that hides items with no overflow
+control is a silent loss, and it is the one failure a calendar may not have: it
+would look finished when it is not.
+
+## Usage
+
+```tsx
+import { Calendar01 } from '@nanisoft/prism-ui/blocks/calendar-01'
+
+<Calendar01
+  eyebrow="Nexus"
+  title="October"
+  month={month}
+  onMonthChange={setMonth}
+  locale="en-GB"
+  weekStartsOn={1}
+  previousLabel="The month before"
+  nextLabel="The month after"
+  label="Scheduled work, by month"
+  items={[
+    { id: 'a', date: '2026-10-02', label: 'Access review with the data owner' },
+    {
+      id: 'c',
+      date: '2026-10-05',
+      label: 'Reconcile September invoices',
+      state: 'warning',
+      stateLabel: 'Blocked on billing',
+    },
+  ]}
+  maxPerDay={3}
+  overflowLabel={(count) => `${count} more on this day`}
+  empty="Nothing is scheduled this month."
+/>
+```
+
+<ComponentDemo slug="calendar-01" />
+
+## Guidelines
+
+### When to use
+
+Use it when the month is the unit a reader arrives with, and when the work is
+placed on named days rather than on instants.
+
+Use it beside a list when a reader's question is "what is on Tuesday" more often
+than "what is this month".
+
+### When not to use
+
+Do not use it for events with a clock time. A grid of days cannot show an hour, and
+a day with three timed things on it wants a `ListPanel` or a `DataTable01` sorted
+by time.
+
+Do not use it to pick a single date in a form. That is `DatePicker`, which owns
+the field, the popover and the roving tab stop for a form control.
+
+Do not use it for a release history. A `Changelog01` reads top to bottom, which is
+the opposite of what a month grid is for.
+
+### Best practices
+
+- Pass `month` with `onMonthChange`, or pass `defaultMonth` and nothing. A
+  controlled month with no `onMonthChange` draws two paging controls that cannot
+  page.
+- Pass `locale`. Nothing in the Block holds a month name, a weekday name or a digit
+  set, so the locale tag is the whole of the translation surface.
+- Pass `stateLabel` with every `state`. The five values are the `Status` tones
+  themselves, so there is nothing to translate between two lists; the words are the
+  only thing missing and the run fails without them.
+- Write `date` as a `YYYY-MM-DD` key when you mean a calendar day. It is read as
+  that day in the reader's own timezone, where a plain parse of the same string
+  would put the item on the previous day for every reader west of Greenwich.
+- Pass `empty` only when a quiet month would be mistaken for a broken one. The
+  empty list beside the grid already says so.
+- Raise `maxPerDay` for a month of single-item days. The overflow line stops
+  appearing on its own.
+
+### Content guidelines
+
+- `label` is the grid's accessible name and it says which question the grid
+  answers. "Calendar" answers no question, and a page with two of them gives a
+  reader two identical names.
+- `previousLabel` and `nextLabel` are announced names for two controls with icons
+  on them, so they have to be words. "Previous" in your language is enough.
+- `label` on an item is what a reader would call the thing. A grid cell is not
+  enough room for a sentence, so keep it to a few words and put the rest in the
+  destination.
+- `stateLabel` says what the tone is for. "Blocked on billing" is useful; "Warning"
+  is the dot again.
+- `overflowLabel` takes the number of hidden items and returns the whole sentence,
+  because the sentence around a number belongs to the product.

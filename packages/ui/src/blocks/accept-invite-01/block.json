@@ -1,0 +1,18 @@
+{
+  "name": "accept-invite-01",
+  "title": "Accept Invite 01 - The Screen Where The Refusal Is Required",
+  "description": "Whose workspace is being joined, in what role, who sent it, a secret with a reveal control named in the caller's own language, and a required refusal beside the acceptance at the same size and in the same row. A person invited to a workspace they do not want to be in must be able to say no, and a required decline makes the refusal unmissable. The Block does not decide whether the invitation is still valid, whether the workspace has room or what the role may do, and the role it renders is the one the invitation named rather than the one the reader chose. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": [
+    "section",
+    "avatar",
+    "card",
+    "button",
+    "field",
+    "input",
+    "live-region",
+    "meter",
+    "password-field"
+  ],
+  "dependencies": []
+}

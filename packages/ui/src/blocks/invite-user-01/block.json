@@ -1,0 +1,18 @@
+{
+  "name": "invite-user-01",
+  "title": "Invite User 01 - A Machine Being Authorised, Beside The Invitations Already Sent",
+  "description": "An address, a role the caller names, a note the caller writes, one control and an announced status region, beside a bounded list of the invitations already sent under a heading of their own. The list is a second group and not a second form because a reader who cannot see the invitation they just sent will send another, and a second invitation is a support ticket. A stale invitation is dimmed rather than removed, on the caller's own signal. The role list is a readonly array so an as-const fixture compiles, and it is the caller's because the set of roles a workspace has is that workspace's own fact. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": [
+    "section",
+    "card",
+    "button",
+    "field",
+    "input",
+    "list-panel",
+    "live-region",
+    "native-select",
+    "textarea"
+  ],
+  "dependencies": []
+}

@@ -85,27 +85,50 @@ const kib = (bytes) => `${(bytes / 1024).toFixed(1)} KiB`
 /**
  * The routes a serialised index holds, read from whichever shape it has.
  *
- * Advanced mode serialises one document per heading and per content block, each
- * naming the page it came from, so the routes are the union of `page_id` over the
- * documents. Simple mode serialises one document per page, addressed by its own
- * id and with no `page_id` at all, so the routes are the document ids.
+ * **The array is the shape this site emits.** `app/api/search/route.ts` serves the
+ * pages themselves, because the bar's `SearchDialog` filters an array of
+ * `{ id, title, url, description?, content? }` in the browser and defends itself
+ * against anything else by treating it as empty. So the routes are the `url` of each
+ * entry.
  *
- * Both shapes are read because the mode is a decision and not a constant: a gate
- * that understood one of them would read zero routes out of the other and pass
- * the size half while proving nothing about coverage, which is the whole reason
- * the coverage half exists. A shape this reader does not recognise is an error,
- * never an empty set.
+ * The two engine shapes are still read, because they are what a re-enabled
+ * serialised index would produce and a gate that recognised only the array would read
+ * zero routes out of one and pass the size half while proving nothing about coverage,
+ * which is the whole reason the coverage half exists. Advanced mode serialises one
+ * document per heading and per content block, each naming the page it came from, so
+ * the routes are the union of `page_id` over the documents. Simple mode serialises one
+ * document per page, addressed by its own id and with no `page_id` at all, so the
+ * routes are the document ids.
+ *
+ * A shape this reader does not recognise is an error, never an empty set.
  *
  * @param {Buffer} bytes the built index
  * @returns {string[]}
  */
 function indexedRoutes(bytes) {
   const index = JSON.parse(bytes.toString('utf8'))
+
+  if (Array.isArray(index)) {
+    const byUrl = new Set()
+    for (const entry of index) {
+      if (typeof entry?.url === 'string') byUrl.add(entry.url)
+    }
+    if (byUrl.size === 0) {
+      throw new Error(
+        'the built index is an array but no entry carries a `url`, so the routes it holds cannot be ' +
+          'read. The array shape is one entry per page and every entry names its own route. Refusing ' +
+          'to report zero pages held.',
+      )
+    }
+    return [...byUrl].sort()
+  }
+
   const documents = index?.docs?.docs
   if (documents === null || typeof documents !== 'object') {
     throw new Error(
-      'the built index has no documents.docs, so the routes it holds cannot be read and the ' +
-        'coverage half of this gate has nothing to compare. Refusing to pass a check it could not run.',
+      'the built index is neither an array of pages nor a serialised engine index with documents.docs, ' +
+        'so the routes it holds cannot be read and the coverage half of this gate has nothing to ' +
+        'compare. Refusing to pass a check it could not run.',
     )
   }
 
@@ -123,8 +146,9 @@ function indexedRoutes(bytes) {
   if (routes.size === 0) {
     throw new Error(
       'the built index carries documents but none of them names a page, by `page_id` or by `url`, so the ' +
-        'routes it holds cannot be read. The two shapes this gate knows are an advanced index, whose documents ' +
-        'name their page, and a simple index, whose documents are pages. Refusing to report zero pages held.',
+        'routes it holds cannot be read. The shapes this gate knows are an array of pages, an advanced ' +
+        "index whose documents name their page, and a simple index whose documents are pages. Refusing " +
+        'to report zero pages held.',
     )
   }
   return [...routes].sort()

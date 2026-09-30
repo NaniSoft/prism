@@ -1,0 +1,8 @@
+{
+  "name": "leaderboard-01",
+  "title": "Leaderboard 01 - A Ranked Set With The Caller's Own Readings",
+  "description": "A ranked set: a position, a name, an optional mark, a figure with the caller's own sentence for it, an optional series beside it and an optional destination. The order is the caller's and the Block never sorts, the reading of every figure is a required function, and the caller's own rows are marked with a border and a weight rather than a trophy. Server Component.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "sparkline", "cta-link"],
+  "dependencies": []
+}

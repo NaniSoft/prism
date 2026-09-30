@@ -124,6 +124,69 @@ export type { FactListProps, Fact } from './components/ui/fact-list'
 export { ProductSwitcher } from './components/ui/product-switcher'
 export type { ProductSwitcherProps, SwitcherProduct } from './components/ui/product-switcher'
 
+/*
+ * The roster expansion of 2026-09. The twenty-two here are every new Component
+ * except `ModeToggle`, and the one exclusion is this file's own header rather
+ * than a judgement: importing this entry must not pull the provider, and a
+ * theme toggle is the one Component that writes the theme rather than reading
+ * it. A consumer on the declarative path uses `PrismThemeScript` and their own
+ * button; a consumer that wants this one imports it from
+ * `@nanisoft/prism-ui/components/mode-toggle`.
+ */
+export { Metric } from './components/ui/metric'
+export type { MetricProps, MetricDelta } from './components/ui/metric'
+export { Status } from './components/ui/status'
+export type { StatusTone } from './components/ui/status'
+export { Price } from './components/ui/price'
+export type { PriceProps } from './components/ui/price'
+export { RelativeTime } from './components/ui/relative-time'
+export type { RelativeTimeProps } from './components/ui/relative-time'
+export { Sparkline } from './components/ui/sparkline'
+export type { SparklineProps } from './components/ui/sparkline'
+export { ContributionGraph } from './components/ui/contribution-graph'
+export type { ContributionGraphProps, ContributionLevel } from './components/ui/contribution-graph'
+export { Chart, ChartLegend } from './components/ui/chart'
+export type { ChartProps, ChartData, ChartForm } from './components/ui/chart'
+export { CodeBlock, Code } from './components/ui/code-block'
+export type { CodeBlockProps } from './components/ui/code-block'
+export { Lightbox } from './components/ui/lightbox'
+export type { LightboxProps } from './components/ui/lightbox'
+export { Steps } from './components/ui/steps'
+export type { StepsProps, Step } from './components/ui/steps'
+export { SearchField } from './components/ui/search-field'
+export type { SearchFieldProps } from './components/ui/search-field'
+export { PasswordField } from './components/ui/password-field'
+export type { PasswordFieldProps } from './components/ui/password-field'
+export { TagGroup, Tag } from './components/ui/tag-group'
+export type { TagGroupProps, TagProps, TagGroupTag } from './components/ui/tag-group'
+export { Dropzone } from './components/ui/dropzone'
+export type { DropzoneProps } from './components/ui/dropzone'
+export { FileUpload } from './components/ui/file-upload'
+export type { FileUploadProps, FileUploadFile } from './components/ui/file-upload'
+export { MiniCalendar } from './components/ui/mini-calendar'
+export type { MiniCalendarProps } from './components/ui/mini-calendar'
+export { ListPanel, ListPanelHeader, ListPanelBody, ListPanelFooter } from './components/ui/list-panel'
+export type {
+  ListPanelProps,
+  ListPanelHeaderProps,
+  ListPanelBodyProps,
+  ListPanelFooterProps,
+} from './components/ui/list-panel'
+export { DataToolbar, DataToolbarGroup } from './components/ui/data-toolbar'
+export type { DataToolbarProps, DataToolbarGroupProps } from './components/ui/data-toolbar'
+export { FilterPanel, FilterPanelHeader, FilterPanelFooter } from './components/ui/filter-panel'
+export type {
+  FilterPanelProps,
+  FilterPanelHeaderProps,
+  FilterPanelFooterProps,
+} from './components/ui/filter-panel'
+export { AvatarGroup } from './components/ui/avatar-group'
+export type { AvatarGroupProps } from './components/ui/avatar-group'
+export { PackSwatch } from './components/ui/pack-swatch'
+export type { PackSwatchProps } from './components/ui/pack-swatch'
+export { Announcement } from './components/ui/announcement'
+export type { AnnouncementProps, AnnouncementTone } from './components/ui/announcement'
+
 export { Hero01 } from './blocks/hero-01'
 export { FeatureGrid01 } from './blocks/feature-grid-01'
 export { Stats01 } from './blocks/stats-01'

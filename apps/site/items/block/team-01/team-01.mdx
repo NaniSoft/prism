@@ -1,0 +1,94 @@
+---
+slug: blocks/team-01
+title: Team01
+---
+
+## Overview
+
+Team01 is a grid or a list of people: a portrait where there is one, a name, a
+role, a biography and a destination where the consumer publishes one. All four
+NaniSoft sites publish a team section, and each one wrote it by hand, for the
+people who watch a pipeline, who read a market, and who keep an estate observed.
+
+The reason the section is worth a Block is the opposite of the usual one. It is
+where a marketing page is most tempted to make a claim about a person: a card
+with a portrait and a job title under it reads as an endorsement. So the
+arrangement keeps the person's own name as the anchor, keeps the role in the
+words the consumer wrote, and invents neither.
+
+The biography is not truncated. A Block that cut a biography at three lines with
+an ellipsis would be deciding which part of a person's account of their own work
+matters, and cutting mid-sentence removes the qualification rather than the
+flattery. A caller who wants three lines writes three lines.
+
+## Usage
+
+```tsx
+import { Team01 } from '@nanisoft/prism-ui/blocks/team-01'
+
+<Team01
+  title="Who works on this"
+  variant="cards"
+  highlight={['p-mehta']}
+  people={[
+    {
+      id: 'p-mehta',
+      name: 'Priya Mehta',
+      role: 'Pipeline operations',
+      bio: 'Watches every scheduled capture and reads the ones that stopped early.',
+      avatar: { name: 'Priya Mehta' },
+      href: 'https://example.com/people/priya-mehta',
+      hrefLabel: 'Profile',
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="team-01" />
+
+## Guidelines
+
+### When to use
+
+Use Team01 on a page whose subject is people rather than a product: a team page, an
+about page, a practice page that introduces the people who do the work. Between
+one and twelve people reads well in the cards arrangement; past twelve a list or
+an index serves a reader better than a grid.
+
+Use `variant="list"` when the biographies run longer than a caption, and the
+default cards arrangement when they are one sentence.
+
+### When not to use
+
+Do not use it to summarise a large group. `AvatarGroup` is the Component for a set
+a page is pointing at rather than showing: a row of overlapping discs with a count
+for the rest says the set is longer than the space, which is a statement about a
+membership rather than about a person.
+
+Do not use it for a testimonial or a quote from a person. A named quotation with
+its context is `testimonial-01`.
+
+Do not use it for members of a project with a presence and a last-seen column.
+That is an application surface and it is `member-list-01`.
+
+### Best practices
+
+- Pass a `src` on the portrait, or pass the `avatar` field with a `name` and no
+  `src` for the initials. Pass neither for a person the consumer has no
+  photograph of, rather than passing a silhouette.
+- Give `hrefLabel` whenever you pass `href`. A link announced by its address is
+  punctuation a screen reader cannot act on, so the words naming the destination
+  are required rather than optional.
+- Pass `highlight` as ids, never as positions. A border is a claim about who
+  matters on the page, and a claim that follows a sort is a claim that drifts.
+- Leave the biography at whatever length it is. If a card is too tall, write a
+  shorter biography.
+
+### Content guidelines
+
+- Write roles as the people write them. "Platform lead" and "Head of Platform"
+  are different claims about a person and the second one is often not true.
+- Do not put an endorsement in a role line. The arrangement around a portrait
+  already reads as one.
+- Keep the register even across the set. One biography in the first person and
+  five in the third reads as a recruitment page inside a company page.

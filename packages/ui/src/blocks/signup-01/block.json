@@ -1,0 +1,19 @@
+{
+  "name": "signup-01",
+  "title": "Signup 01 - An Account A Machine May Act Under",
+  "description": "An account creation: a caller-declared field list, the terms the caller supplies, a secret with a reveal control and a strength reading that is a caller function returning the caller's own label and number, one submit control, and an announced status region. The Block will not score the secret, will not decide whether the address is already registered and will not send a verification, because each of those is a security decision rather than a rendering one. There is no success sentence anywhere in the file: the outcome is a prop, and the form is cleared when the caller's own status says the account exists. The terms are optional in the type, and the JSDoc names what a consumer can make a legal claim they did not write by omitting them. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": [
+    "section",
+    "card",
+    "button",
+    "cta-link",
+    "field",
+    "input",
+    "live-region",
+    "native-select",
+    "password-field",
+    "progress"
+  ],
+  "dependencies": []
+}

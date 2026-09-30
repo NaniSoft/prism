@@ -1,0 +1,17 @@
+{
+  "name": "contact-01",
+  "title": "Contact 01 - A Form The Caller Declares, Beside The Address",
+  "description": "A contact section whose fields the caller declares, drawn beside an optional address block with a real mailto link that carries the caller's own accessible name. The declared field list is the whole design: a contact form with a fixed set of fields decides what a reader may say, and one that cannot ask for an order number, a company size or a budget loses the message it was given. The submit handler is required and the Block sends nothing, and no success message is rendered. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": [
+    "button",
+    "cta-link",
+    "field",
+    "input",
+    "live-region",
+    "native-select",
+    "section",
+    "textarea"
+  ],
+  "dependencies": []
+}

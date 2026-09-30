@@ -1,0 +1,89 @@
+---
+slug: blocks/trust-strip-01
+title: TrustStrip01
+---
+
+## Overview
+
+TrustStrip01 is a narrow band of short assurance statements, one per mark, with no
+visible heading. It sits above the fold or immediately under it, between a hero and the
+first section that follows.
+
+Prism draws the frame and the caller ships the words. That division is the Item. A
+strip of badges reads as free assurance, so the obvious version of this component ships
+a row of certifications and a row of customer logos, and every consumer of the library
+then publishes NaniSoft's own claims. Here a strip of certifications, a strip of
+compliance marks and a strip of a customer count are all the same component and none of
+them is Prism's to assert.
+
+It is not a logo cloud. A name beside a mark is evidence, because the reader can look
+the organisation up; a sentence beside a mark is a claim, and a claim cannot be checked
+by looking. `LogoCloud01` takes marks rather than sentences, so a page with real marks
+to show uses that one.
+
+The marks are hidden from assistive technology, because the label beside a mark is the
+statement. The band is a `ul`, so a reader is told how many statements there are before
+hearing the first.
+
+## Usage
+
+```tsx
+import { TrustStrip01 } from '@nanisoft/prism-ui/blocks/trust-strip-01'
+import { Lock, FileCheck, Gauge, LifeBuoy } from 'lucide-react'
+
+<TrustStrip01
+  heading="What we can commit to"
+  items={[
+    { icon: Lock, label: 'Read-only by default', detail: 'Tokens never leave the package' },
+    { icon: FileCheck, label: 'Every claim traceable', detail: 'To the run that made it' },
+    { icon: Gauge, label: 'No runtime dependency', detail: 'One stylesheet' },
+    { icon: LifeBuoy, label: 'Maintained in the open', detail: 'Issues are public' },
+  ]}
+/>
+```
+
+<ComponentDemo slug="trust-strip-01" />
+
+## Guidelines
+
+### When to use
+
+Use TrustStrip01 for three to six statements that are true of the product and short
+enough to read in one glance. More than six is a list and belongs in `NoteGrid01` or
+`FeatureGrid01`, where each statement can have a sentence under it.
+
+Use it in one place per page. A strip above the hero and another at the foot are two
+claims competing, and the second one is read as the page running out of things to say.
+
+### When not to use
+
+Do not use it for logos. That is `LogoCloud01`, and the difference is evidence against
+assertion: a name beside a mark can be looked up, a sentence cannot.
+
+Do not use it for a claim Prism cannot check. If a statement would be false for one
+consumer of the library, it does not belong in a component.
+
+Do not use it as a substitute for a real answer. "Trusted by thousands" is not an
+assurance, it is a number wearing one, and it belongs on a page that can show where
+the number came from.
+
+### Best practices
+
+- Write statements the caller can stand behind for every consumer of the library, or at
+  least for theirs alone. The Block cannot tell the difference.
+- Keep each label to about four words. The band is scannable in one glance and a
+  statement that wraps turns the band into a paragraph.
+- Use `detail` for the qualifier a bare statement cannot carry: where the fact comes
+  from, or the period it covers.
+- Pass `heading` when the band is one item among a page of sections, and set
+  `headingLevel` to match where it sits. The heading is in the outline and not on the
+  page.
+- Set `align="left"` under a flush left hero and leave it centered under a centered one.
+
+### Content guidelines
+
+- Write labels as commitments, not as adjectives: "Read-only by default" rather than
+  "Secure".
+- Write `detail` as the evidence for the label, not as a repetition of it.
+- Order the items by how much a reader is likely to ask about them. Order is a claim
+  about which assurance matters first.

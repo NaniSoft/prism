@@ -1,0 +1,283 @@
+---
+slug: blocks/two-factor-01
+title: TwoFactor01
+---
+
+## Overview
+
+TwoFactor01 is a second factor: a caller-declared method list with the selected one
+marked by `aria-current`, a segmented code field composed from `one-time-code`, a resend
+control with three names, a remember row, a submit control, and an announced status
+region. Every string is passed in as a prop, and the Block ships no sentence of its own
+anywhere on the page.
+
+The storefront's version of this pattern is a verification screen: a method line saying
+where the code came from, a field for the code, a "send another" link, a "remember this
+device" tick, a button and the way back, whose purpose is to confirm that the person
+holding the card is the person who has the account before a purchase is taken. The
+composition here is that screen, unchanged, down to the composition of the code field.
+What the screen authorises is a machine acting on this reader's behalf for the first
+time, and that is why the standard for what it refuses is higher here than anywhere else
+in this package.
+
+## It does not verify the code, it does not count the attempts, and it does not own the lockout
+
+Those three sentences are the Block, and each one is a security decision rather than a
+rendering one.
+
+A Block that counted attempts would be shipping a lockout policy into every product that
+installed it: three tries on one product and five on another, with no configuration
+point a consumer can find, in a file none of them reads. A lockout is an availability
+decision and it belongs to the product, because only the product knows what being locked
+out costs. It costs a two-person shift nothing when a market is closed, and it costs a
+whole capture window when the market is open, and the number of attempts you will accept
+on Tuesday is not the number you will accept on Wednesday at nine.
+
+Worse, a lockout is a denial of service that anybody can aim at a reader. A component
+library that enforces one has handed every installer a way for a stranger to lock a
+colleague out of their own work by typing six wrong characters, and it has done that
+invisibly.
+
+So the Block hands the code across a form boundary and draws what it is given. It keeps
+no count because it has no memory between the reader's attempts to record, it has no
+clock to expire a lockout with, and it cannot know whether an attempt even reached your
+server. Your `status` is the only thing on this screen that says whether anything
+happened, and your `code.error` is the only thing that says what was wrong with the
+entry.
+
+## The three decisions are the caller's
+
+| Decision | What a Block that made it would be |
+| --- | --- |
+| Whether the code is right | A verifier, which is the mechanism this package is furthest from owning. |
+| How many tries there are | A lockout policy, shipped invisibly into every product that installed it. |
+| When the lockout ends | A clock, and an availability decision about your product rather than about a form. |
+
+It also will not generate a code and will not say how long one is valid. Both of those
+are your verification service, and a Block that drew an expiry it had invented would be
+telling a reader their code is still good when your server has already stopped accepting
+it, which is the one error on this screen that costs a reader a second attempt they
+could have avoided. There is no `expiresLabel` prop here on purpose: there is no honest
+reading of a duration this Block can reach, and a caller who wants to state one composes
+it into `description` or `status.message` where it is your sentence and not this Block's
+claim.
+
+## Why the code field is `one-time-code` and not six inputs
+
+The Component's own arguments are the reason, and they are worth restating because this
+is the screen they matter on.
+
+A paste of the whole code lands in every segment. A reader who has the code on their
+clipboard has already done the hard part, and a field that accepted one character per
+paste would make them retype it one box at a time, which is what they are on their phone
+to avoid. A refused character is refused rather than stored, so "123 456" pastes as
+`123456` and `12345a6` pastes as `123456`, because the alternative is a field that looks
+right and a form that does not submit. The code is one value and not six, so Backspace
+removes a character from the string and the characters after it close up, because six
+boxes that each had to be emptied by hand would need a rule for what Backspace on an
+empty box means and every version of that rule is wrong for somebody. And the whole code
+is one Tab stop, so the reader reaches the first segment once and the rest follow as
+they type.
+
+Five decisions, each of which is wrong in a different product if this Block made its
+own. The two members the Component offers that this Block forwards are `characters` and
+`segmentLabel`: without the first, a Block that did not expose the set would be deciding
+that every second factor in every product that installed it is six digits, which is
+false for a set of printed recovery codes; without the second, all six segments
+announce the code's own label, which satisfies the form and tells a reader nothing about
+which of them they are in.
+
+One thing the Component deliberately does not do is forward further props, so
+`code.description` is drawn above the field where a reader reaches it first and
+`code.error` is drawn below it with `role="alert"`. That is the next best arrangement
+available and it is stated rather than hidden, because on a security surface a wiring
+somebody assumed and did not check is exactly the kind of thing this Block's
+documentation exists to prevent.
+
+## The honest failure is your sentence, and the distinction is itself a security fact
+
+The code can be wrong, expired, already used, for a factor the reader did not choose, for
+a session that has gone, or for an account that your attempt counter has just locked. The
+reader can dismiss a prompt, arrive with a code for another device, or be rate limited.
+And the distinction between those is itself a fact worth protecting: a screen that says
+"that code has expired" is telling a reader something an attacker learns too.
+
+So `status` and `code.error` are both props with your words, there is no accepted flag
+and no failure flag in the file, and what the Block does about an outcome is the two
+rendering decisions: the submit and resend controls are refused while your own state
+says a request is in flight, because a second press is a second attempt counted against
+a limit the Block cannot see, and the outcome is drawn in one live region, `assertive`
+for the refusal, because a reader who has typed six characters and got nothing back is a
+reader who will type six more.
+
+## Why the description is required here
+
+On this screen the reader cannot tell what is being asked for by looking at the screen.
+A sign-in says what it wants in its title, because the reader knows they are signing in.
+A second factor arrives after the reader has already proved who they are, sometimes on
+another device, sometimes minutes after they started, and the code in front of them
+could be for a message, a token, a key or a printed backup. A reader who does not know
+will type the code they were given an hour ago, and a reader who types the wrong factor's
+code has failed an attempt against a limit the Block cannot see.
+
+So the type makes it required rather than the Block defaulting to something. The cost is
+named: a product with one factor and nothing to add has to write the sentence anyway,
+and it is usually the sentence that should have been on the sign-in screen.
+
+## The method list is drawn and never changed
+
+`selected` is your state, because which factor a session is asking for is a fact about
+a half-completed sign-in on your server. The selected row is marked with `aria-current`
+and a rule in the pack's own primary colour, so the mark is not a colour alone, which is
+the arrangement DESIGN.md's Do list names for exactly this case. Two methods marked
+selected is refused, because that is a screen asking for one factor and reporting
+another.
+
+The cost is that the Block cannot offer the reader another way in. A product with three
+factors and a reader without access to the one being asked for has a problem, and the
+honest answer is a control that changes the selection, which is a request to your server
+and a state this Block would then be reporting rather than holding. A consumer who needs
+the chooser composes their own beside this Block.
+
+## What the Block refuses
+
+| Refused | Why |
+| --- | --- |
+| A blank `code.label` | Six anonymous segments, and a reader who cannot say out loud which one they were in. |
+| A `code.length` below one | A field that renders no segments, which is a form that cannot be completed and looks exactly like a broken one. |
+| A blank `submitLabel` | The one control that verifies the reader, announced as a button. |
+| Two methods marked `selected` | A screen that asks for one factor and hands your caller another. |
+| A remember row with no `label` | A tick box a reader cannot find, and a tick box they cannot find is a session somebody can walk into on a shared machine. |
+| A resend or cancel control with no `label` | Two buttons on this screen that a reader can reach and not identify. |
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { TwoFactor01, type TwoFactor01Status } from '@nanisoft/prism-ui/blocks/two-factor-01'
+
+export function VerifySecondFactor() {
+  const [code, setCode] = useState('')
+  const [status, setStatus] = useState<TwoFactor01Status>()
+
+  return (
+    <TwoFactor01
+      eyebrow="Nexus"
+      title="One more thing before your machine may act"
+      description="The six digits are in the message we sent to the phone ending 41. They are good for ten minutes and they stop working the moment they are used once."
+      methods={[
+        { id: 'message', name: 'A message to your phone', detail: 'Sent to the number ending 41.', selected: true },
+        { id: 'token', name: 'The token in your keychain', detail: 'Registered in March.' },
+      ]}
+      code={{
+        label: 'The six digits from the message',
+        length: 6,
+        value: code,
+        onValueChange: setCode,
+        description: 'Paste the whole code. The segments fill themselves.',
+        error: error,
+      }}
+      remember={{
+        label: 'Do not ask this device again for thirty days',
+        value: remember,
+        onValueChange: setRemember,
+      }}
+      resend={{
+        label: 'Send another message',
+        onResend: resend,
+        confirmLabel: 'Another message was sent',
+        cooldownLabel: 'Wait for the one you asked for',
+      }}
+      submitLabel="Verify and let this machine act"
+      submitting={status?.state === 'working'}
+      status={status}
+      cancel={{ label: 'Not you. Take me back to the sign-in.', onCancel: goBack }}
+      onSubmit={async (value) => {
+        setStatus({ state: 'working', message: 'Checking the code.' })
+        // Your verifier, your attempt counter, your lockout, your three sentences.
+        const result = await verify(value.code, value.method)
+        if (result.wrong) {
+          setStatus({ state: 'error', message: 'The code was refused.' })
+        } else if (result.locked) {
+          setStatus({ state: 'error', message: 'This account is locked. An administrator has to unlock it.' })
+        } else {
+          setStatus({ state: 'idle', message: 'Your machine may act on this account now.' })
+        }
+      }}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="two-factor-01" />
+
+## Guidelines
+
+### When to use
+
+Use it wherever a reader has already proved an identity and the product needs a second
+one. It is the screen where a machine is allowed to act, so the description is the most
+important string on it.
+
+Pass `characters` on the code. The default is numeric, which is right for a message and
+wrong for a printed recovery set, and a reader who cannot type a letter into a field
+that refuses letters cannot finish signing in and has no way to find out why.
+
+Pass `methods` when the account has more than one factor, and mark exactly one of them
+`selected`. A list of one is a heading over a single row, and a product with one factor
+usually wants the description instead.
+
+### When not to use
+
+Do not use it as a sign-in. That is `login-01`, and the difference is what is being
+granted: one opens a session for a person and the other decides whether the machine
+that person is holding may act for them.
+
+Do not use it for a first factor that happens to be a code. A product that signs readers
+in with a code and no phrase has a `magic-link-01` or nothing, not a second factor
+behind a sign-in.
+
+Do not use it to collect a code the product issued itself for something other than
+authentication. That is an `one-time-code` on its own, and a second factor surface
+around an email confirmation is a claim about somebody's identity that neither of you
+can support.
+
+Do not use it where the reader cannot retry. A factor that can be entered once and only
+once is a factor that locks people out, and the lockout policy is yours and this Block
+cannot see it.
+
+### Best practices
+
+- Pass `submitting` as well as `status`. On this screen the request in flight might be a
+  resend rather than a submit, and the resend control is refused in both cases.
+- Pass both optional resend names if you can. A control that still reads "send another
+  message" immediately after the reader pressed it invites a second press against your
+  limit, and the run does not throw for it, so it is your judgement.
+- Count the attempts in your own handler and write the count into `code.error`. The
+  Block has no memory and no clock, and the sentence a reader reads after a wrong code
+  is the most security-relevant string on the screen.
+- Pass `segmentLabel` where your product cares about which character a reader is on. It
+  is a function and the words are yours.
+- Pass `className` for grid placement only. A credential form at the full container
+  width is a form with a very long row of labels.
+
+### Content guidelines
+
+- Write the title as what is about to be granted. "One more thing before your machine
+  may act" says the grant; "Verification" names a form.
+- Write the description as where the code is, how long it lives, and how many times it
+  can be used. All three are facts a reader needs before they go and look, and a
+  description that has none of them is a description that cannot be required.
+- Write each method name as the factor, and the detail as where it went. "A message to
+  your phone" beside "Sent to the number ending 41" is what a reader checks against
+  their phone.
+- Write the remember label as a sentence about a duration. "Do not ask this device again
+  for thirty days" is a claim about a cookie, and on a shared machine it is the wrong
+  claim.
+- Write the resend labels as two different actions and then a wait. Ask, report, and
+  then say what to do while they wait for the one they asked for.
+- Write `code.error` as a fact about the attempt, not about the account. "That is not
+  the one we sent, two tries left" is something a reader can act on; "invalid code" is
+  a token.

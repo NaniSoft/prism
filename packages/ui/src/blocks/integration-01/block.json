@@ -1,0 +1,8 @@
+{
+  "name": "integration-01",
+  "title": "Integration 01 - The Systems A Product Connects To",
+  "description": "A grid of cards or a list of rows: a caller-supplied mark, a name, one line about the capability, one of four states with the caller's own words, and separate links to the integration and to its documentation. The coming-soon state is first class, and Prism ships no vendor marks. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "card", "status", "cta-link"],
+  "dependencies": []
+}

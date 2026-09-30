@@ -1,0 +1,149 @@
+---
+slug: blocks/feedback-01
+title: Feedback01
+---
+
+## Overview
+
+Feedback01 is the panel that asks a reader one question properly: a scale, a place to
+say more, and optionally the thing they are talking about. The scale, the comment and
+the attachment are each optional except the scale, and every string is passed in as a
+prop.
+
+**The scale is the caller's data, and this is the design decision.** Prism does not
+supply five faces, three faces or any faces. The number of points and the words at
+each end are product knowledge, and they differ per product:
+
+| Product | Points | The ends |
+| --- | --- | --- |
+| Support | 3 | Resolved, Blocked |
+| Product feedback | 5 | Not what I needed, Exactly what I needed |
+| A rating scale | 10 | numbers the reader already knows |
+| A design review | not ordered at all | and a radio group is the wrong control, which is the caller's call to make |
+
+A five-point scale labelled from "bad" to "great" is a survey instrument, and a
+feedback form usually is not one. It is one reader telling one team something they
+could not have guessed, so the words at the ends are the whole instrument and Prism
+has no standing to pick them.
+
+## The scale is a radio group, and not five buttons
+
+That is a decision with an accessibility consequence, not a visual one. A set of
+mutually exclusive options is a radio group, and a screen reader announces the size
+of the set and the checked state only when it is one. The keyboard model follows: the
+arrows move inside the group and Tab crosses it as one stop.
+
+Five buttons get the look right and everything else wrong. Each is a Tab stop, none
+of them is a set, and a reader of them is told he is on the third of five
+undifferentiated controls rather than that he has chosen three out of five.
+
+## Usage
+
+```tsx
+import { useState } from 'react'
+import { Feedback01 } from '@nanisoft/prism-ui/blocks/feedback-01'
+
+const SCALE = [
+  { id: 'blocked', label: 'Blocked', value: 1 },
+  { id: 'slow', label: 'Slow', value: 2 },
+  { id: 'fine', label: 'Fine', value: 3 },
+]
+
+export function ReportAProblem() {
+  const [rating, setRating] = useState<string>()
+  const [comment, setComment] = useState('')
+
+  return (
+    <Feedback01
+      eyebrow="Nexus"
+      title="Tell us what went wrong"
+      description="A support engineer reads every one of these."
+      scale={SCALE}
+      scaleLabel="How is it going?"
+      value={rating}
+      onValueChange={setRating}
+      comment={{
+        label: 'What happened?',
+        value: comment,
+        onValueChange: setComment,
+        maxLength: 500,
+        counter: true,
+      }}
+      submitLabel="Send"
+      status={{ state: 'idle', message: null }}
+      onSubmit={async (value) => {
+        await openTicket({
+          rating: value.rating,
+          impact: value.ratingValue,
+          note: value.comment,
+          attachments: value.files,
+        })
+      }}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="feedback-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where one reader has something to say to your team and your team will read it.
+That is a support request, a product report, a bug with a screenshot attached.
+
+Use the comment field whenever the scale alone cannot carry the message. A rating of
+"blocked" with no note tells a team nothing they can act on.
+
+Use the artefact field when the reader is describing something they can see. A
+screenshot is worth more than a paragraph, and the panel renders the chosen files
+with their sizes so a reader can see they picked the right one.
+
+### When not to use
+
+Do not use it as a survey. A survey has a sample, a scale chosen for comparability
+across runs, and an instrument somebody validated. This panel is one reader telling
+one team one thing, and the scale is theirs to change between releases.
+
+Do not use it for a rating you will aggregate into a public score. That is a survey
+instrument with the sampling problems of one, and a number nobody can trust is worse
+than no number.
+
+Do not use it when the reader has already told you. A confirmation panel asking
+"was that helpful" immediately after a support reply is a second interruption in the
+same conversation, and the reply itself is the better place.
+
+Do not use it for a permission boundary. A reader who cannot see the thing cannot
+report it, and a panel that accepts a report about a screen they never saw is
+collecting noise.
+
+### Best practices
+
+- Write both ends of the scale as the reader's situation rather than as a judgement.
+  "Blocked" names a fact about their day; "bad" names a judgement about your
+  product, which is the judgement you are asking them for.
+- Keep the scale short enough to read in one pass. More than seven points and a
+  reader starts treating the middle of the scale as the safe answer.
+- Read `ratingValue` rather than `rating` when you aggregate. `rating` is your own
+  key and survives a reorder of the scale; `ratingValue` is the number, which is what
+  a mean needs.
+- Validate in your own handler. Prism has no minimum length, no required point and no
+  file size rule, because each of those is a decision about your product and your
+  data.
+- Never wrap this Block so that `onSubmit` becomes optional. A feedback panel that
+  collects a report and drops it is worse than no panel, and the required handler is
+  what stops that quietly.
+
+### Content guidelines
+
+- Write the heading as the thing the reader is about to do, not as the feature they
+  are reporting on. "Tell us what went wrong" is an action; "Feedback" is a
+  category.
+- Write the comment label as the question the note answers. "What happened?" tells
+  a reader what to write; "Additional comments" tells them there is a box.
+- Write the attachment label as what may be attached and nothing more. "A screenshot
+  of the error" is a fact; "Attachments (optional, max 10 MB)" is a rule, and rules
+  belong in your own hint line under the control where you can add them.
+- Do not thank the reader in the heading. They have not sent anything yet, and the
+  sentence that thanks them belongs in your own `status`, after you have it.

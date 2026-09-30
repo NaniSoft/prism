@@ -1,0 +1,217 @@
+---
+slug: blocks/login-01
+title: Login01
+---
+
+## Overview
+
+Login01 is a sign-in: a caller-declared identifier field, a secret with a reveal
+control, an optional remember row, one submit control, an announced status region, and
+slots for a second factor and for a provider row. Every string is passed in as a prop,
+and the Block ships no sentence of its own anywhere on the page.
+
+The storefront's version of this pattern is the sign-in card: an email field, a
+password with an eye, a remember-me tick, a button, a row of third-party marks and two
+links, whose purpose is to get a shopper past the gate so their order history is
+waiting. The composition here is that card, unchanged. What it authorises is a session
+on an instrument, which is a claim with consequences a shopping account does not have,
+and the difference shows up in exactly one place: the sentence on the failure.
+
+## The three decisions this screen has to make, and why none of them is Prism's
+
+A credential surface has to decide three things, and a Block that decided any of them
+would not be a composition:
+
+| Decision | What a Block that made it would be |
+| --- | --- |
+| Whether to rate-limit | A rate limiter in a component library, shipping one policy to every product that installed it, in a file none of them read. |
+| Whether the identifier exists | An account directory, and an enumeration oracle: the difference between "no such account" and "wrong password" is the difference between a screen that can be used to discover who has an account and one that cannot. |
+| Whether the secret was right | A password verifier, which is the mechanism this package is furthest from owning. |
+
+So the Block hands over what was typed and draws what it was given. Your
+`onSubmit` receives `{ identifier, secret, remember }` and nothing else happens here.
+What the Block does about a request in flight is one thing: while `status.state` reads
+`working`, or while you pass `submitting`, the submit control is disabled, because a
+second press is a second credential sent to your server and a second attempt counted
+against a limit the Block cannot see.
+
+## The honest failure is your sentence
+
+A sign-in can fail because the identifier is unknown, because the secret is wrong,
+because the account is disabled, because the address was never verified, because the
+session was revoked elsewhere, because a rate limit was reached, because a
+breached-secret list caught the phrase, because the second factor was declined,
+because your identity provider is down, or because your database is unreachable. Eleven
+outcomes, eleven different sentences, and which of them a reader is told about is a
+disclosure decision with a security consequence.
+
+So `status` is a prop, there is no `error` flag and no success flag in the file, and
+`secret.error` is your sentence too. There is no `Alert` in the Block either: an alert
+beside the live region would announce the same sentence twice, which on the one screen
+where a reader is waiting for an answer is the least forgivable place to double an
+announcement.
+
+## Why the provider row is a slot
+
+A provider's mark is a trademark this repository has no right to ship and no licence to
+redistribute, and Prism's icon lane is Lucide, whose whole vocabulary is line drawings
+of objects. So the marks, the names, the order and the accessible names of three
+identity providers are yours, and so is whatever separates that row from the form above
+it: the Block draws a rule and no words, because the honest separator on a sign-in
+screen is a sentence in your language and the word that most often appears there is the
+one a design system has no business choosing.
+
+## The two names a reveal control needs
+
+`revealLabel` and `hideLabel` are required and cannot be defaulted. A reveal control
+that says one sentence in a product whose interface is in another language looks
+localised, because the icon is the same everywhere and the half a screen reader user
+actually hears is English. Two names rather than one name and `aria-pressed` is the same
+argument `password-field` makes: a name has to describe what pressing the control will
+do, not what is currently true.
+
+The secret is composed from `password-field` rather than from an `input` with your own
+button beside it, for that Component's reason and it matters most here: a reveal
+control you write is a `<button>` with three things that can each be wrong in a way
+nothing on screen shows. Leave `type` off and it submits the form, so pressing it on a
+phone keyboard's go key posts a half-typed secret before the reader has read a
+character of it.
+
+## What the Block refuses
+
+| Refused | Why |
+| --- | --- |
+| `identifier.value` with no `onValueChange` | A field the caller cannot clear, and a reader who mistyped an address is the reader who needs to clear it. |
+| A blank `identifier.label` or `secret.label` | Two nameless fields on one page are announced identically. |
+| `remember` with no `label` | A tick box with nothing beside it, so a reader cannot tell what ticking it changes about the session. |
+| A `forgot` or `signup` link with no `label` | The anchor's accessible name would be its destination, which a screen reader reads as a run of characters. |
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { Login01, type Login01Status } from '@nanisoft/prism-ui/blocks/login-01'
+
+export function SignIn() {
+  const [identifier, setIdentifier] = useState('')
+  const [secret, setSecret] = useState('')
+  const [status, setStatus] = useState<Login01Status>()
+
+  async function signIn(value: { identifier: string; secret: string; remember: boolean }) {
+    setStatus({ state: 'working', message: 'Checking the credentials.' })
+    // Your rate limiter, your directory, your verifier, and all three sentences.
+    const result = await checkCredentials(value)
+    if (result.unknown) {
+      setStatus({ state: 'error', message: 'That address is not on the list.' })
+    } else if (result.wrong) {
+      setStatus({ state: 'error', message: 'That phrase is not the one on file. Three tries left.' })
+    } else if (result.secondFactor) {
+      setStatus({ state: 'error', message: 'One more thing before your machine may act.' })
+    } else {
+      setStatus({ state: 'error', message: 'Signed in. The machine on this account is now live.' })
+    }
+  }
+
+  return (
+    <Login01
+      eyebrow="Nexus"
+      title="Sign in to run an estate"
+      description="An account here acts on your behalf: it observes estates, starts captures and holds the keys those runs use."
+      identifier={{
+        label: 'Work email',
+        type: 'email',
+        autoComplete: 'email',
+        value: identifier,
+        onValueChange: setIdentifier,
+      }}
+      secret={{
+        label: 'Secret phrase',
+        revealLabel: 'Show the secret phrase',
+        hideLabel: 'Hide the secret phrase',
+        value: secret,
+        onValueChange: setSecret,
+      }}
+      remember={{ label: 'Keep this device signed in for thirty days' }}
+      submitLabel="Sign in"
+      submitting={status?.state === 'working'}
+      status={status}
+      forgot={{ label: 'Reset the secret phrase', href: '/reset' }}
+      signup={{ label: 'Create an account instead', href: '/signup' }}
+      onSubmit={signIn}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="login-01" />
+
+## Guidelines
+
+### When to use
+
+Use it as the whole of a sign-in surface, and as the step of a longer one: a product
+that asks for a second factor after this composes `two-factor-01` into the
+`secondFactor` slot and passes your own state through `status`.
+
+Declare `identifier.type` as `text` where the identifier is a handle, a staff number or
+a workspace name. Leave it at `email` otherwise, and pass `autoComplete` yourself,
+because a password manager keys an account on the identifier and the right hint depends
+on what your product calls a person.
+
+Keep the identifier and the secret in your own state and pass the pair, or pass neither
+and let the Block hold them. Passing `value` with no `onValueChange` is refused,
+because a control and a value that are about to disagree is worse than either.
+
+### When not to use
+
+Do not use it to collect anything else. A name, a phone number or a workspace selector
+turns a sign-in into a form, and a sign-in that asks for a field the reader has already
+given you is a screen that teaches a reader to type things they do not have to.
+
+Do not use it where the identifier is not the point. A product whose whole sign-in is a
+passkey ceremony has no field for this Block to draw, and a passkey screen with a text
+field under it invites readers to type a secret into a box that will not help.
+
+Do not use it for a second factor. That is `two-factor-01`, and the reason the two are
+different Blocks is that one of them verifies an identity and the other verifies that
+the identity in front of the screen is the one that was proved a moment ago.
+
+Do not put a second `onSubmit` handler on the page by wrapping this one. Two forms on
+one screen compete, and the second one is the one a reader assumes is broken.
+
+### Best practices
+
+- Report the refusal in your own words, and report the enumeration question on purpose.
+  "That address is not on the list" and "That phrase is not the one on file" leak
+  different facts to a stranger, and the choice between them is yours.
+- Pass a `status` message with your first `working` sentence. `LiveRegion` renders
+  nothing when it has no message, so a region that appears together with its first
+  sentence is the one case a screen reader is least reliable about.
+- Pass both `submitting` and `status` if your transport is a server action. The first is
+  the control, the second is the outcome, and they answer different questions.
+- Compose your own second factor into the `secondFactor` slot rather than reaching for
+  a second control below the form. The slot is drawn behind a rule, so the words that
+  separate it are yours.
+- Pass `className` for grid placement only. Changing a visual property from here is
+  prohibited, and a consumer that needs a different surface should say so with a variant
+  upstream rather than a fill.
+
+### Content guidelines
+
+- Write the title as what the reader is about to authorise, not as the form. "Sign in to
+  run an estate" names the grant; "Sign in" names the box.
+- Write the description as what the account will do once it exists. A reader is being
+  asked to give a machine authority, and the sentence is the only place that says what
+  the authority covers.
+- Write the identifier label as the thing to type, not as the field's name. "Work
+  email" beats "Email address", and "Which workspace" beats "Workspace".
+- Write the remember label as a sentence about a duration. "Keep this device signed in
+  for thirty days" is a claim about a cookie; "Remember me" is a claim about nothing.
+- Write both link labels as sentences about where they go. "Reset the secret phrase"
+  rather than "Forgot?", because the words a reader can see are the words a voice
+  control user has to be able to say out loud.
+- Do not use the word "success" in any of these sentences. It describes the request
+  rather than the reader's position, and the reader does not yet know whether their
+  machine is live.

@@ -1,0 +1,8 @@
+{
+  "name": "offering-categories-01",
+  "title": "Offering Categories 01 - Kinds Of Capability As A Grid Or A Tab Row",
+  "description": "A set of kinds of capability, each with a name, a one-line description, a caller-composed count and a link, drawn as a grid of tiles or as a tab row with the caller's own panel underneath. The grid is the default because tabs hide five of six answers behind a control, and a count with no label function throws rather than printing a bare numeral.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "card", "cta-link", "button", "tabs"],
+  "dependencies": []
+}

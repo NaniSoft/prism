@@ -1,0 +1,8 @@
+{
+  "name": "capacity-01",
+  "title": "Capacity 01 - What Is Committed And What Is Left",
+  "description": "A table of resources with a committed figure, a limit, a remaining figure and a state, over a summary row of estate-wide metrics. The Block does not compute the remaining figure, because a design system that subtracted one figure from another would be asserting an arithmetic fact about an estate it cannot see. Four states map to the shared status tones and each needs a caller's words, and a row with no state asserts nothing. Server Component.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "table", "metric", "status", "cta-link"],
+  "dependencies": []
+}

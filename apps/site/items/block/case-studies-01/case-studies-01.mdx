@@ -1,0 +1,84 @@
+---
+slug: blocks/case-studies-01
+title: CaseStudies01
+---
+
+## Overview
+
+CaseStudies01 is a set of case studies, as a grid of summary cards or a list of
+full-width rows. Each study carries a customer, an optional sector, a summary, an
+optional set of results, an optional figure, and an optional link with the words
+that say what following it does.
+
+The relationship to `case-study-01` runs in both directions and it is the reason
+this Block exists in the shape it does. One study is a full band: a reader who has
+decided to read one about a named customer gets the situation, the approach and the
+results at length. Many studies are a set of summaries: a reader scanning a grid is
+choosing between them, and the grid has to hold the same facts at a quarter of the
+length. Because both take the same `customer`, `sector`, `summary` and `results`
+fields, a consumer that has a data model for one has it for both, and a study
+promoted from the grid into its own band is the same record rather than a second
+shape of record to keep in step.
+
+## Usage
+
+```tsx
+import { CaseStudies01 } from '@nanisoft/prism-ui/blocks/case-studies-01'
+
+<CaseStudies01
+  eyebrow="Evidence"
+  title="What it does for a plant that runs on paper"
+  studies={[
+    {
+      id: 'glassworks',
+      customer: 'A glassworks in the west',
+      sector: 'Glass',
+      summary: 'Two lines, a paper log and a supplier asking for the same reading every morning.',
+      results: [
+        { label: 'Time to a decision', value: '18 min' },
+        { label: 'Unplanned stops', value: 'Down 31%' },
+      ],
+      href: '/work/glassworks',
+      hrefLabel: 'Read the glassworks study',
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="case-studies-01" />
+
+## Guidelines
+
+### When to use
+
+Use CaseStudies01 where a page shows more than one study: a landing page's proof
+section, a sector page's related work, an index of everything published.
+
+Use `variant="list"` when the page has already narrowed to one sector and the
+studies are read one after another rather than compared.
+
+### When not to use
+
+Do not use it for one study. A single study with a full account is `case-study-01`,
+which has room for the approach and the result that a card does not.
+
+Do not use it for a testimonial. A quote with a name and a company is a claim about
+a person, and this Block is a claim about a result.
+
+### Best practices
+
+- Give every `href` an `hrefLabel` that says what the destination holds. The type
+  requires it, and a link whose text is the customer name reads as a name.
+- Keep summaries to about three sentences. The full account belongs in the
+  single-study band, and a grid of long summaries is a grid nobody scans.
+- Use the same `results` labels across every study, so a reader comparing two of
+  them is reading two answers rather than two vocabularies.
+- Give a `media` figure to at most one study in a grid of three.
+
+### Content guidelines
+
+- `customer` is the name as that customer writes it, with the legal suffix only if
+  the customer insists on it.
+- `sector` is the sector in two or three words, and it is the field a page filters
+  on, so it has to be consistent between studies.
+- A result `label` says what is measured; the `value` carries the unit.

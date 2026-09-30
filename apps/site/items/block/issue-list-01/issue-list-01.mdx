@@ -1,0 +1,141 @@
+---
+slug: blocks/issue-list-01
+title: IssueList01
+---
+
+## Overview
+
+IssueList01 is a list of issues as a real table with column and row headers: a
+reference, a title, a state, a priority, an assignee, when it last moved and a
+link, under a toolbar you supply and above a footer you supply.
+
+The table is `table.tsx` and the title is a row head, and that is the whole
+accessibility claim. A tracker is the surface where a reader compares most and
+reads least: they are looking for the one issue they have to pick up, scanning a
+column of references and a column of states. Every header is a `th` with
+`scope="col"` and the title is a `th` with `scope="row"`, so a reader who has
+navigated into a single cell is told which issue they are looking at rather than
+hearing a state with nothing to attach it to.
+
+## The reference is set in the mono face
+
+`SectionHeading` says it for its `index` prop: a position in a sequence is machine
+notation rather than a word, and the mono stack is what this repository annotates
+machine-readable values with. An issue's own reference is exactly that, and it
+matters more here than anywhere, because a reference is the value a tracker reader
+scans for. They are looking for `NEX-412`, not for the sentence beside it, and a
+column of references set in the sans face is a column a reader has to read one at a
+time to confirm. The mono face gives the letters a fixed width so the column aligns
+and the shapes of the references are distinguishable at a glance.
+
+## The state and the priority are strings, and that is the argument
+
+A design system that closed the set would force a consumer whose tracker says
+`in-review`, or `waiting-on-third-party`, or `needs-info` to map that onto one of
+the system's words and ship a translation nobody asked for. The translation is the
+part that rots: the week a tracker adds a state, every product's map is a version
+behind and the table is confidently wrong about where its own issues are, with
+nothing on the page to say so.
+
+So the words cross untouched. The tones are still mapped, and the mapping is a
+guess: the Block matches your word, lowercased and whole, against a stated list of
+words a tracker might plausibly use, and anything it does not name comes out
+`neutral`. The default is the design. `neutral` is the tone that asserts nothing,
+so a state this Block has never heard of costs a colour and not a lie. The matching
+is whole-word for the same reason, so `unresolved` is not read as `resolved` and
+`not-blocked` is not read as `blocked`. A consumer whose states need different
+colours draws its own `Status` in a column of its own, and that costs them a column
+rather than costing every consumer a wrong tone.
+
+## Usage
+
+```tsx
+import { IssueList01 } from '@nanisoft/prism-ui/blocks/issue-list-01'
+
+<IssueList01
+  eyebrow="Nexus"
+  title="What the team is carrying"
+  columns={[
+    { id: 'key', header: 'Reference', className: 'w-28' },
+    { id: 'title', header: 'What is wrong' },
+    { id: 'state', header: 'Where it is' },
+    { id: 'priority', header: 'How pressing' },
+    { id: 'assignee', header: 'Who has it' },
+    { id: 'updated', header: 'Moved' },
+    { id: 'href', header: 'Go' },
+  ]}
+  issues={[
+    {
+      id: '1',
+      key: 'NEX-412',
+      title: 'Okta group mapping drops the engineering role',
+      state: 'blocked',
+      priority: 'p1',
+      priorityLabel: (priority) => `${priority}, two enterprise accounts`,
+      assignee: 'Tomas Berg',
+      updated: '2026-09-28T09:12:00Z',
+      href: '/issues/NEX-412',
+      hrefLabel: 'Open NEX-412',
+    },
+  ]}
+  footer="5 of 5 issues, sorted by when they last moved"
+  empty="Nothing is carrying."
+/>
+```
+
+<ComponentDemo slug="issue-list-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for a tracker's list, or any list of records where the reader is scanning a
+reference column and a state column to find the one they own.
+
+Use it when the reader needs to move into one issue and work it. The reference, the
+state and the assignee are the three values a reader scans, and a table is what
+makes them scannable.
+
+### When not to use
+
+Do not use it when the reader wants to change the workflow rather than read it.
+This Block renders; it does not sort, filter, page or open anything.
+
+Do not use it for records with more than about eight facts per row, or for a set
+the reader wants to configure. That is a `DataTable01`, which takes a render
+function per column and comes with a toolbar of its own.
+
+Do not use it for a list of links a reader chooses between. That is a
+`ResourceList01`, and it will read better.
+
+### Best practices
+
+- Declare the `title` column and put it first. It is the row header every other
+  cell is read under, and the run fails without it.
+- Put the `key` column beside the title. The order is yours and the Block does not
+  reorder it, and a reference at the far end of a wide table is a reference nobody
+  scans.
+- Pass your words and let the Block guess the tone. If a state comes out in the
+  wrong tone, draw your own `Status` in a column of your own rather than mapping
+  the word to fit the table.
+- Filter in the caller. The Block renders the array it is given, so the state that
+  narrows a list belongs next to the query that produced it.
+- Pass `href` with `hrefLabel` or neither. A link whose only words are the title
+  tells a reader nothing about what activating it does.
+- Pass a `DataToolbar` above and a sentence in `footer`. The Block draws no count
+  of its own, because the sentence around a number belongs to the product.
+
+### Content guidelines
+
+- `key` is your tracker's own reference, exactly as it spells it. It is set in the
+  mono face and read as notation, so keep it to what the notation is.
+- `state` is a word or a short phrase from your tracker, unchanged. It is rendered
+  as given and never translated.
+- `stateLabel` is for the states whose own word is not a sentence a reader can act
+  on. It falls back to `state`, so a caller whose states are already words passes
+  nothing.
+- `priorityLabel` exists because a priority is very often a notation: `P1`, `sev-1`
+  and `blocker` all need expanding somewhere, and this is the one place to do it.
+- `empty` is the most load-bearing sentence on the page for a tracker, because
+  "nothing is carrying", "nothing matches this filter" and "the query failed" are
+  three different facts.

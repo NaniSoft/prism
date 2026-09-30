@@ -1,0 +1,102 @@
+---
+slug: blocks/services-01
+title: Services01
+---
+
+## Overview
+
+Services01 is what the product does, as a set of engagements. Each one carries a
+title, a body, a list of deliverables and an outcome, optionally with a mark and a
+link. The set is three across, and the `numbered` variant puts a zero-padded mono
+ordinal above each title.
+
+The ordinal is derived from the position rather than taken from the item, so a
+reordered list cannot end up with numbers that disagree with its order. A list that
+carried its own numbers would render `03, 01, 02` after a sort and nothing in the
+page would catch it. The numbers are also opt-in, because a number on a card is a
+claim that the set is a sequence, and a set of capabilities usually is not. A
+reader who sees numbers looks for the capability they are missing, and for a reason
+the numbering does not carry.
+
+`deliverables` renders as a real list and an empty array renders nothing. An array
+of zero is a caller with nothing to promise, and the honest rendering of that is
+absence rather than a titled gap.
+
+## Usage
+
+```tsx
+import { Cog, Radar, Route } from 'lucide-react'
+import { Services01 } from '@nanisoft/prism-ui/blocks/services-01'
+
+<Services01
+  eyebrow="What we do"
+  title="Three things, in the order they happen"
+  variant="numbered"
+  services={[
+    {
+      id: 'observe',
+      title: 'Instrument the estate',
+      icon: Radar,
+      body: 'One line per site, reading what the site already reports, and nothing invented on the way.',
+      deliverables: ['A run per site, on a schedule', 'A reading a person can trace back to a sensor'],
+      outcome: 'The estate is observed rather than visited.',
+      href: '/work/observe',
+      hrefLabel: 'See the observation work',
+    },
+    {
+      id: 'decide',
+      title: 'Decide what changed',
+      icon: Cog,
+      body: 'A run compares the reading against the last one and against the plan, and says which of the two moved.',
+      deliverables: ['One finding per change, with its evidence'],
+      outcome: 'A finding arrives with a reason attached.',
+    },
+    {
+      id: 'act',
+      title: 'Hand it to an agent',
+      icon: Route,
+      body: 'The finding goes to an agent that can act on it, and a person is woken only when the decision is not the agent’s to make.',
+      deliverables: ['A run log per finding', 'An escalation rule the caller writes'],
+      outcome: 'The work gets done rather than filed.',
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="services-01" />
+
+## Guidelines
+
+### When to use
+
+Use Services01 where a page's subject is what the product does, described as work
+rather than as features. It reads best with three or four engagements, which is
+why the grid is three across.
+
+Use `variant="numbered"` when the engagements are a sequence a reader can follow.
+Use `variant="plain"` when they are a set a reader is comparing.
+
+### When not to use
+
+Do not use it for a features grid. `FeatureGrid01` is that, its blurbs are shorter,
+and it is about capability rather than about work.
+
+Do not use it for pricing. A price is a figure with a period, and `Pricing01`
+carries it.
+
+### Best practices
+
+- Filter the list before it reaches the Block rather than passing a `number`. The
+  ordinal is derived, so the only way to skip a retired engagement is to leave it
+  out of the array, where a reader of the caller's data can see why.
+- Keep each `body` to about three lines, and put the detail in the deliverables.
+- Write the `outcome` as an effect on the reader's situation, not as a restatement
+  of the body.
+- Pass an empty `deliverables` array or omit it. Either renders nothing.
+
+### Content guidelines
+
+- A service title is a verb phrase naming the work, in three or four words.
+- A deliverable is a short noun phrase, not a sentence.
+- An outcome is one line saying what is different afterwards, in the reader's
+  terms.

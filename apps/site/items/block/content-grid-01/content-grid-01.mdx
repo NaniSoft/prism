@@ -1,0 +1,116 @@
+---
+slug: blocks/content-grid-01
+title: ContentGrid01
+---
+
+## Overview
+
+ContentGrid01 is a grid of dated entries composed from whatever the caller
+passes. Each entry carries a name, a summary, and whichever annotations the set
+needs: a reading, a category, a length, a figure, a link. It draws them as
+cards, as full-width rows, or as a compact index.
+
+The name is the one decision in this Item worth stating at the top, because it is
+the only slug in this wave that is not off a published list. DESIGN.md rules that
+the old `blog-layout` never ships, and the reason it gives is that the blog does
+not exist. A dated-entry grid is needed anyway, by four surfaces here and by every
+product that keeps one: the changelog, the resources index, the case study set,
+and this documentation site. So the shape ships and the word does not. A consumer
+composes it with a documentation changelog, a research index, a release history,
+or a case study set, and the four differ in their annotations rather than in their
+shape.
+
+The three variants answer three different questions. `cards` is for choosing: a
+reader scanning a page is deciding which entry to open, and a comparison wants
+the peers visible at once. `rows` is for reading, and gives each entry a full line
+and a summary with room. `compact` is for skimming a long index, where the reader
+wants the names and the dates and nothing else.
+
+## Usage
+
+```tsx
+import { ContentGrid01 } from '@nanisoft/prism-ui/blocks/content-grid-01'
+
+<ContentGrid01
+  eyebrow="Guides"
+  title="How the factory works"
+  description="Written down, dated, and revised when it stops being true."
+  columns={3}
+  entries={[
+    {
+      id: 'idempotence',
+      title: 'Every run is a pure function of its input',
+      summary: 'What a rebuild is allowed to reuse, and what it has to earn again.',
+      at: '2026-08-14',
+      category: 'Design',
+      readingTime: '9 min',
+      href: '/docs/idempotence',
+      hrefLabel: 'Read the note',
+    },
+    {
+      id: 'retention',
+      title: 'What a market capture keeps, and for how long',
+      summary: 'The three retention tiers, and the one that is deliberately short.',
+      at: '2026-06-02',
+      category: 'Policy',
+      readingTime: '5 min',
+    },
+  ]}
+  empty={<EmptyState01 reason="first-run" title="No notes yet" />}
+/>
+```
+
+<ComponentDemo slug="content-grid-01" />
+
+Every annotation is optional and an entry with none of them draws its name and its
+summary with no line held open. A grid of six cards where four have a reading and
+two have a blank under the title reads as two entries whose readings were lost, not
+as a set where the readings vary.
+
+## Guidelines
+
+### When to use
+
+Use ContentGrid01 wherever a page sets down a set of dated things and lets a
+reader choose between them: notes, changelogs, research write-ups, release notes,
+case study summaries, documentation pages.
+
+Use `variant="rows"` when a page has already narrowed the set to one category and
+the entries are read one after another. Use `variant="compact"` for a long index
+where the reader is looking for a name they half remember.
+
+### When not to use
+
+Do not use it for a set with no dates and no summaries. A grid of names and
+nothing else is a list, and `ProductGrid01` is one.
+
+Do not use it for a release history. A release carries a version, a group of
+entries, and a per-entry kind, and that is a shape with three more fields than
+this one has: compose `Changelog01`.
+
+Do not use it where a row needs several columns a reader compares. A grid is
+scanned; a table is compared. Compose `Table` or `DataTable01`.
+
+### Best practices
+
+- Order the entries yourself, and do not lean on the Block to sort them. Order in
+  a set of dated entries is already a claim about which one leads.
+- Pass `href` and `hrefLabel` together. A link with no words on it fails the run
+  rather than shipping, and the words are yours because they describe your
+  destination.
+- Keep a summary to a line or two. An entry whose summary runs past four lines is
+  a page, and the page is what `href` is for.
+- Pass the reading as the string you already have. Prism prints it verbatim, so
+  `2026-08-14`, `August 2026`, `Q3` and `2.4.0` all render as written. Compose
+  `RelativeTime` yourself where you want a localised reading and a relative
+  phrase.
+
+### Content guidelines
+
+- An entry name is a noun phrase, not a sentence. The grid is scanned down its
+  left edge.
+- A category is a word that says what kind of entry this is: "Guide", "Release",
+  "Case study". It is your vocabulary, not a tier Prism chose.
+- A reading time is written the way your own pages write one.
+- An `hrefLabel` says what following the link does: "Read the note", "Open the
+  changelog". It is never the entry's own name.

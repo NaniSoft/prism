@@ -1,0 +1,8 @@
+{
+  "name": "compliance-01",
+  "title": "Compliance 01 - Claims With A Standard, A State And Evidence",
+  "description": "A table of what is claimed, to which standard, over what scope, when it was last reviewed and where the evidence is. The state set makes in-progress and not-applicable first class, a held claim with no standard throws rather than drawing a bare tick, and an evidence link with no words is refused. Every cell is the caller's own statement.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "table", "status"],
+  "dependencies": []
+}

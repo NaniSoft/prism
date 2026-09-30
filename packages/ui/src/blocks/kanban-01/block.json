@@ -1,0 +1,8 @@
+{
+  "name": "kanban-01",
+  "title": "Kanban 01 - Columns Of Cards With No Drag And No Drop",
+  "description": "A board of titled columns, each a named section holding a stack of cards with a title, an optional mark, a state, an owner, tags and a link. There is no drag and no drop, and that is the decision rather than the omission: a drag is continuous spatial motion this system does not author, and a Block that moves a caller's data would have to own the ordering, the persistence and the conflict, all three of which are the consumer's. The board scrolls sideways rather than wrapping, because a wrapped column is not a column. A caller who needs drag composes their own control in a slot. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["badge", "cta-link", "section", "status"],
+  "dependencies": []
+}

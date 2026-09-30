@@ -1,0 +1,146 @@
+---
+slug: blocks/quick-view-01
+title: QuickView01
+---
+
+## Overview
+
+QuickView01 is a summary panel a reader opens without leaving the page: a title, a short
+body, a specification list, an optional mark, and up to two actions, presented in a
+`Dialog` the caller controls.
+
+The storefront version of this pattern is a quick-view modal on a product tile: the
+item's name, one paragraph, three or four attributes, the price, and an add to basket
+button. Every part of the layout transfers unchanged, and the parts are the same parts
+a reader of a capability page meets. What does not transfer is the noun in the panel
+and the transaction at the bottom. The panel here summarises a capability the product
+offers, and the action at the bottom is a decision rather than a purchase.
+
+## The rule this Block exists to enforce
+
+**A quick view may not be the only place the information exists.** Everything a quick
+view shows, a reader must be able to reach some other way: the card underneath, a row
+in the table behind it, a section further down the page.
+
+That is the same law `Carousel` states about everything a carousel shows, and a quick
+view is a carousel's mistake with a dialog instead of a slider. It hides content behind
+a deliberate act, it costs the reader a modal and a focus trap to see, and it takes the
+content off the page when they close it.
+
+A carousel whose images exist nowhere else is a set of images a reader on a keyboard,
+on a screen reader, or with the controls hidden by a stylesheet cannot see at all. A
+quick view whose specification exists nowhere else is a specification a reader has to
+know exists before they can find it.
+
+**The Block cannot enforce it.** There is no prop that would tell it the page also
+carries the summary, and a Block that took one would take a boolean a caller could
+pass and forget. So the law is in this documentation, where a caller meets it, and the
+caller is the only party who can keep it.
+
+## Why the overlay is `Dialog`
+
+A panel built on a `div` and a `keydown` listener gets the Escape key and no focus
+trap, so a keyboard reader tabs behind the panel into a page they cannot see, and the
+defect is invisible in review because the panel works for the person writing it.
+
+The focus trap, the restore of focus to whatever opened it, the Escape key, the outside
+press, the scroll lock and the portal all come from `Dialog` and are all solved once.
+What this Block adds is the three things `Dialog` does not know about: the summary's
+own shape, the title at the caller's heading level, and the statement of the law above.
+
+The cost is the one required prop, `closeLabel`. `Dialog` draws a dismiss control in
+its corner, and that control is the one thing every reader needs a name for. It is a
+prop rather than a default so a product whose interface never uses the word this
+package's default would carry is a consumer who cannot fix it.
+
+## It does not compose `Section`
+
+Every other Block opens with `Section` so it inherits the container and the vertical
+rhythm. A modal has no container to inherit: `Section` is a `max-w-6xl` column with
+the page's vertical padding, and putting that inside a panel at most `max-w-lg`
+produces a page layout applied to a four-hundred pixel box.
+
+`Lightbox` and `SearchDialog` are absent from `Section` for the same reason. The
+corollary is that this Block draws no `SectionHeading` either, and its heading is its
+own element, aligned flush left by construction rather than by a prop.
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+
+import { QuickView01 } from '@nanisoft/prism-ui/blocks/quick-view-01'
+
+export function Summaries() {
+  const [openAt, setOpenAt] = useState<number | null>(null)
+  const current = rows[openAt ?? 0]
+
+  return (
+    <>
+      {/* the grid, which already carries everything the panel shows */}
+      <QuickView01
+        open={openAt !== null}
+        onOpenChange={(open) => !open && setOpenAt(null)}
+        closeLabel="Close the summary"
+        headingLevel="h4"
+        title={current.name}
+        facts={current.facts}
+      />
+    </>
+  )
+}
+```
+
+<ComponentDemo slug="quick-view-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a reader is choosing between capabilities on a page and wants to check one
+without losing their place. That is a grid of cards, a table of rows, or a list of
+short entries where the decision needs three more lines than the row has room for.
+
+Use it with a controlled `open`, so the panel closes when the thing it describes has
+gone: a row deleted, a filter that no longer includes it, a route that moved.
+
+### When not to use
+
+Do not use it for content that exists nowhere else. That is the law above, and a panel
+built that way is a page a reader cannot link to, cannot bookmark, and cannot return to
+with the back button.
+
+Do not use it for a decision or a short task. That is what `Dialog` is for, and a
+Dialog with a form in it is a better answer than a summary with a form in it.
+
+Do not use it for three actions. Three actions is where a summary stops being a
+summary and becomes a page, and the Block will not stop you, because a slot cannot be
+counted.
+
+### Best practices
+
+- Keep the panel to the lines a reader checks before they decide to leave. About six is
+  the honest ceiling; past that the panel is a page.
+- Pass `headingLevel` as the level the thing you open it from sits at. A dialog's title
+  is still a heading in the outline of the page that opened it, so a panel opened from
+  a card under an `h3` wants an `h4`.
+- Pass `size` rather than utilities. `sm` is two or three lines, `md` is the default,
+  and `lg` is for a summary carrying more than four lines.
+- Draw the trigger yourself. The trigger is a claim about where the control goes, and
+  the four answers, a card's whole tile, a button beside a name, a row, a keypress, are
+  each right somewhere.
+- Close on navigation. Follow a link out of the panel and the panel should not be
+  waiting behind the page you land on.
+
+### Content guidelines
+
+- Write the title as the thing's own name. It is the panel's accessible name and the
+  only heading in it.
+- Write the body as one or two sentences a reader can act on, not as the page's
+  introduction. The page has one.
+- Write `closeLabel` as your own interface's word for closing something. It is read out
+  by a screen reader and seen by nobody, because `Dialog` draws the control as an icon.
+- Write the `mark` so it works on a tinted square, or pass nothing. A panel that
+  reserves room for a mark that is not there is a hole.

@@ -1,0 +1,8 @@
+{
+  "name": "magic-link-01",
+  "title": "Magic Link 01 - A Link That Expires And Cannot Be Replayed",
+  "description": "A passwordless sign-in: one address field, one control that posts a link to it, the caller's own sentence about what is about to arrive, which is required here and optional everywhere else because this screen's whole mechanism is invisible, and a confirmation that keeps the sent address on screen in full beside a control to change it. The resend control is a separate action from submit and is named twice, once at rest and once after it has been pressed. The Block will not look the address up, will not rate-limit how many links can be asked for and will not judge whether the address was right. There is no sent sentence anywhere in the file: the outcome is a prop. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "card", "button", "field", "input", "live-region"],
+  "dependencies": []
+}

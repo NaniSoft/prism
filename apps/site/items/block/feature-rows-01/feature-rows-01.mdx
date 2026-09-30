@@ -1,0 +1,92 @@
+---
+slug: blocks/feature-rows-01
+title: FeatureRows01
+---
+
+## Overview
+
+FeatureRows01 is a set of two-column rows. Each row is a copy column and a visual,
+and the visual alternates sides down the set: copy left, copy right, copy left.
+
+The alternation is derived from each row's position. `align` on the Block sets the
+side the first row's copy takes and the index does the rest, and the row type declares
+`align?: never` so that a per-row value is a compile error rather than a fourth
+decision that will disagree with the other three the first time somebody inserts a row.
+
+Each visual sits inside a panel the Block draws. A bare figure on the page ground reads
+as an illustration; the same figure inside a bordered panel reads as an instrument,
+which is what it is. `mediaAlt` is required alongside `media`, and the Block throws
+without it.
+
+## Usage
+
+```tsx
+import { FeatureRows01 } from '@nanisoft/prism-ui/blocks/feature-rows-01'
+import { Chart } from '@nanisoft/prism-ui/components/chart'
+
+<FeatureRows01
+  eyebrow="How it works"
+  title="Three capabilities, each in depth"
+  description="A row is a topic of its own, so a reader can jump to the one they came for."
+  rows={[
+    {
+      eyebrow: 'Capture',
+      title: 'One finding enters once',
+      body: 'The record is written where it was found and never copied forward.',
+      media: <Chart variant="bar" series={SERIES} labels={DAYS} label="Findings per day" />,
+      mediaAlt: 'Findings per day over the last week',
+    },
+    {
+      title: 'The estate is walked on a cycle',
+      body: 'Two walks of the same estate are compared, and only the differences are kept.',
+      media: <PulseGraph nodes={NODES} relations={EDGES} label="The estate, as one graph" />,
+      mediaAlt: 'The estate as one graph',
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="feature-rows-01" />
+
+## Guidelines
+
+### When to use
+
+Use FeatureRows01 when each capability deserves its own paragraph and its own visual,
+and when the page is long enough for a reader to want to jump rather than scroll. The
+rows are sections in the outline, so they are reachable by heading.
+
+Use it when the visuals are the same kind of thing. A set where the first visual is a
+chart, the second a screenshot and the third a logo reads as a page that has not
+decided what its evidence looks like.
+
+### When not to use
+
+Do not use it for short blurbs. A title and one sentence each is `FeatureGrid01`, and a
+grid of tiles is a better shape for three lines than a two-column row.
+
+Do not use it for two capabilities. Two rows alternate for the sake of alternating, and
+a set of two reads as a comparison the Block is not drawing.
+
+Do not use it inside an application screen. It is a marketing composition.
+
+### Best practices
+
+- Set `align` for the first row and let the rest follow. Passing `align` on a row is a
+  type error, and that is the mechanism: a per-row alignment is one decision made four
+  times over.
+- Pass `mediaAlt` with every `media`. The Block throws without it.
+- Omit `media` on a row that is copy only. The grid copes, and a row with an empty
+  panel is a layout shift when its media arrives.
+- Keep a row's copy to a title and one or two sentences. A row is a topic, not a
+  section.
+- Set `headingLevel` when the Block is composed deeper in the document than `h2`. The
+  row titles follow it.
+
+### Content guidelines
+
+- Write a row title as a capability stated as a fact about the product, not as a label
+  the reader has to decode.
+- Write the body in the present tense and in the product's own vocabulary.
+- Write `mediaAlt` as what the visual shows: "Findings per day over the last week"
+  rather than "Fast" or "Results".

@@ -79,11 +79,15 @@ const REPO = path.join(HERE, '..', '..', '..')
  * switched off.
  */
 const SCANNED = [
+  'chart.tsx',
+  'contribution-graph.tsx',
   'diagram.tsx',
+  'pack-swatch.tsx',
   'product-mark.tsx',
   'pulse-graph.tsx',
   'pulse-series.tsx',
   'signal-field.tsx',
+  'sparkline.tsx',
 ]
 
 /** The emitted token CSS the contract is read from, in both modes. */
@@ -137,6 +141,18 @@ const EXCLUSIONS = [
     match: /^text-(?:xs|sm|base)$/,
     reason:
       "a step of the authored type scale, set on a word beside a mark. The scale is a `rem` token and lives in the static theme block, not in the colour contract.",
+  },
+  {
+    name: 'a text alignment',
+    match: /^text-(?:left|center|right|justify|start|end)$/,
+    reason:
+      "an alignment, set on a label inside a figure or on a numeric column in a table. The rule reads the `text-` prefix and cannot tell an alignment from a colour, and excluding the attribute would have exempted `text-red-500`; so this is a closed set of the six words CSS defines, matched by shape, which is the same treatment `text-xs` gets for the type scale. `chart.tsx` and `chart-frame.tsx` both set one, in a donut centre and in a numeric table cell.",
+  },
+  {
+    name: 'a border edge or width',
+    match: /^border-[xystblrse](?:-[0-9]+)?$/,
+    reason:
+      "which edges a border is on, or how wide it is, on an element that already carries its colour from `border-border`. The rule reads the `border-` prefix and reads the direction as a colour role, which it is not: `border-e` narrows a border to the inline-end edge and `border-e-0` removes it, and neither names a colour. It is a closed set of the eight direction words plus an optional numeric width, matched by shape, so `border-red-500` is still a finding. `pack-swatch.tsx` sets one to separate the two halves of a swatch with a rule that inherits the surface's own border colour.",
   },
 ]
 

@@ -1,0 +1,8 @@
+{
+  "name": "trend-01",
+  "title": "Trend 01 - A Ranked List Of Rising Values",
+  "description": "A ranked list where each row is a name, a current reading, the caller's own words for the change, and a small series beside it. The rows are composed from Metric and Sparkline, the order is the caller's, and the limit is a cap rather than a page. Every string and every number is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "metric", "sparkline", "cta-link"],
+  "dependencies": []
+}

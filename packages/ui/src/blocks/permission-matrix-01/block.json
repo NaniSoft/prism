@@ -1,0 +1,8 @@
+{
+  "name": "permission-matrix-01",
+  "title": "Permission Matrix 01 - Roles Against Capabilities",
+  "description": "A permission matrix as a real table, with the roles across the top and the permissions down the side, where a cell is granted, refused, or a third answer the caller wrote for a permission that depends on something the reader has to look up. Three marks, a required key, and every answer in the caller's own words.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "table"],
+  "dependencies": []
+}

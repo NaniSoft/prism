@@ -1,0 +1,137 @@
+---
+slug: live/tool-ledger-01
+title: ToolLedger01
+---
+
+## Overview
+
+ToolLedger01 is the tool-call ledger of a run in flight: what was called, what it returned, and
+what it cost, as it arrives.
+
+**The surface opens no connection, and that is the whole boundary.** There is no socket in the
+module, no endpoint, no retry policy, no backoff and no persistence, and there is no provider to
+mount. `subscribe` is a function you supply and a function it tears down, which is what makes a
+WebSocket, an `EventSource`, a polling timer and a test's own array all the same shape to this
+surface. Nothing here knows which one it got.
+
+**It is the second of the two surfaces Prism owns for a run, and they are separate because a reader
+debugging a run wants them at different times and in different shapes.** `RunStream01` says what
+happened in words: an ordered log of events, each one a sentence you wrote, which is what a reader
+reads to follow what an agent is doing. This one says what was called and what it cost in structure:
+a name, a state, an elapsed figure, the arguments, the return value or the error, keyed and ordered
+so two calls can be compared. The word log answers "what did it say" and the word ledger answers
+"what did it spend", and one surface with both would be a table and a narrative fighting over one
+scroll, each half as good at the job the other was for.
+
+**It times nothing, measures nothing, and does not decide that a call succeeded.** `at` is your
+timestamp and `durationLabel` is your sentence, and the surface never starts a clock and never
+infers a duration from the gap between one call and the next: that gap is how long your transport
+took to deliver two consecutive events, which is a fact about the transport, and a ledger that
+printed it in a column headed "took" would be reporting a figure nobody produced. The only
+subtraction is between two sightings of the *same* `id`, both of them your own `at` values, and
+only when the second is later than the first.
+
+**`limit` drops the oldest and says how many.** A run that calls a tool four hundred times is
+normal, and a ledger is a bounded set of rows a reader scans while a log is a sequence a reader
+searches. Keeping all four hundred would put four hundred rows in front of a reader who wants the
+last ten, in a list inside a scroll region, at the moment the run is still going and the rows at the
+bottom are the ones that explain it. A bounded list that does not say it is bounded reads as the
+whole thing.
+
+## Usage
+
+```tsx
+import { ToolLedger01, type ToolCall } from '@nanisoft/prism-ui/live/tool-ledger-01'
+
+function RunLedger({ runId, token }: { runId: string; token: string }) {
+  return (
+    <ToolLedger01
+      // Yours to build: a WebSocket, an EventSource, a poll, or an array in a test.
+      subscribe={(emit) => {
+        const socket = new WebSocket(`/runs/${runId}/calls?token=${token}`)
+        socket.addEventListener('message', (message) => emit(JSON.parse(message.data) as ToolCall))
+        return () => socket.close()
+      }}
+      resubscribeKey={runId}
+      label="Tool calls in this run"
+      empty="No tool has been called yet."
+      limit={200}
+      droppedLabel={(count) => `${count} earlier calls are not shown`}
+      pauseControl
+      pauseLabel="Pause the ledger"
+      resumeLabel="Resume the ledger"
+    />
+  )
+}
+```
+
+<ComponentDemo slug="tool-ledger-01" />
+
+## Props
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `subscribe` | `ToolSubscribe` | required | Called once with an emitter. Must return an unsubscribe. The only way content arrives. |
+| `label` | `string` | required | The accessible name of the ledger. |
+| `empty` | `ReactNode` | required | What the surface says while it holds no calls. |
+| `callbacks` | `readonly ToolCall[]` | none | Calls already known when the run is opened, oldest first. Read on open, not on every render. |
+| `resubscribeKey` | `string` | none | Which run this is. Changing it clears the ledger, reseeds it and opens a new subscription. |
+| `limit` | `number` | `200` | How many calls to hold. The oldest fall off the top. |
+| `droppedLabel` | `(count: number) => string` | none | Your sentence about what is not shown. |
+| `pauseControl` | `boolean` | none | Draws the pause control, and requires both labels below. |
+| `pauseLabel` | `string` | with `pauseControl` | The words on the control while the ledger is recording. |
+| `resumeLabel` | `string` | with `pauseControl` | The words on the control while it is paused. |
+| `paused` | `boolean` | `false` | Whether the surface opens paused. The control owns it after the first press. |
+| `className` | `string` | none | Merged onto the surface element. |
+
+## The four decisions inside it
+
+**The connection is yours.** Nothing here opens one, closes one, retries one or remembers one. A
+paused ledger drops what arrives rather than queueing it, and it does not close your subscription
+either, because you may be sharing one socket between this surface and a `RunStream01` beside it.
+The way to get the dropped calls back is a new `resubscribeKey` with `callbacks` reseeded from your
+own record.
+
+**Every entry is keyed on `id` and never on its index.** A ledger that grows at the top re-keys
+every row below it when each index moves, and React then replaces those rows rather than moving
+them. A replaced node is a new node to assistive technology, so a call the reader had already
+reached is announced again as though it had just happened, once per arrival, in the one surface
+whose job is to report arrivals. The same `id` is also the same call, so a transport that reports
+`queued`, `running` and then `succeeded` under one `id` updates one row rather than adding three.
+
+**The five states are a lifecycle and the words are yours.** `queued`, `running`, `succeeded`,
+`failed` and `cancelled` are the same order in every agent runtime worth naming, so the set is
+closed and Prism draws it. There is no `stateLabel`, and that is deliberate: a `ToolCall` is one
+event on a transport, and a transport does not send a translated sentence with every event. The
+words for a call are its name, its arguments, its result and its error, and a failed call carries
+`errorText` by your own design.
+
+**A paused ledger stops recording, not the run.** Queuing is the alternative and it is worse in
+both directions: a queue that grows is a list whose contents the surface cannot show, and a queue
+that flushes on resume dumps a hundred rows at once at the reader who pressed pause in order to
+read.
+
+## Accessibility
+
+- The calls are one `<ol>`, so the order is in the document rather than in the styling, and every
+  entry is keyed on the call's own `id`.
+- The scrolling region is **named**, and `label` is required rather than defaulted: a scroll region
+  with no name is announced as a group of focusable nothing.
+- New arrivals are announced once, politely, and the list is not a live region. Announcing a
+  growing list would make a screen reader read the whole run again on every arrival, which is the
+  failure a live region on a list guarantees. `LiveRegion` carries the newest call's name alone.
+- The state's tick is `aria-hidden` and the elapsed figure is the same fact as the `datetime` on the
+  `time` element, so neither is announced as a character.
+- The pause control is a `Button` with `aria-pressed`, and its words move with its state.
+
+## Choosing between this and RunStream01
+
+`RunStream01` is the narrative and this is the structure. Reach for the log when you are following
+what an agent is doing, because that is a sequence of sentences in the order they happened. Reach
+for the ledger when you are asking what a run spent, which tools it called more than once, or
+whether one of them failed and what it cost.
+
+Put both on the same screen when your reader has both questions, which is the usual case for
+somebody debugging a run: the log above for the story and the ledger below for the bill. They are
+two surfaces rather than one because a reader wants them at different times, and a single surface
+with both is a table and a narrative competing for one scroll.

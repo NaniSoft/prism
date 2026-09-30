@@ -1,0 +1,99 @@
+---
+slug: pages/legal-page
+title: LegalPage
+---
+
+## Overview
+
+LegalPage is a complete legal screen. It composes `Section`, `SectionHeading`,
+`Prose` and the caller's own document list, so the page supplies the heading, the
+named table of documents and the reading measure, and nothing else.
+
+| Order | Band | Role |
+| --- | --- | --- |
+| 1 | the page heading band | the title, and the date the document last changed |
+| 2 | the table of documents | a named `nav`, with the selected document marked |
+| 3 | the body band | the selected document, as a caller authored node at the measure |
+| 4 | the footer slot | whatever the caller puts after the document |
+
+**The decision the page makes is that it does not own the text and does not parse
+it.** A legal document is prose a lawyer wrote, it has a structure a design system
+knows nothing about, and a page that imposed a section grammar on it would be
+rewriting the document it exists to publish. So `body` is a `ReactNode` and Prism
+supplies the measure, the rhythm and the block treatments.
+
+**The selected document is marked three ways and only one of them is a colour.**
+The `aria-current` is what a screen reader announces, the weight is what a reader
+scanning the left edge sees, and the colour is the weakest of the three. A current
+item is a position, not a hue.
+
+**The document list is a `nav` and not a `ContentGrid01`.** That Block is a grid of
+dated entries and a legal document has no date, and it carries no current mark, so
+composing it would have meant either losing the position or reaching around it with
+a colour.
+
+## Usage
+
+```tsx
+import { LegalPage } from '@nanisoft/prism-ui/pages/legal-page'
+
+<LegalPage
+  title="Legal"
+  updatedLabel="Last changed"
+  updatedAt="12 August 2026"
+  documentsLabel="Legal documents"
+  documents={[
+    { id: 'terms', title: 'Terms of service', summary: 'What the service is.', selected: true },
+    { id: 'privacy', title: 'Privacy notice', href: '/legal/privacy' },
+  ]}
+  bodyLabel="Terms of service"
+  body={<TermsBody />}
+/>
+```
+
+<ComponentDemo slug="legal-page" />
+
+## Guidelines
+
+### When to use
+
+Use LegalPage for a legal route that serves one document and lets a reader reach
+the others: a terms page, a privacy notice, a cookie notice, a subprocessors
+list.
+
+Use it with more than one document. A screen with one document and a list of one
+is a page, and the list is a heading and a link.
+
+### When not to use
+
+Do not pass a Markdown string and render it yourself into the body. This package
+exists to keep that out of the tree, and a legal document is the one place on a
+site where a rendering bug is a compliance problem rather than a visual one.
+
+Do not use it for a document with a wide figure, a full-bleed attachment or a
+synced table of contents. The measure belongs to `Prose` and it does not bend.
+
+Do not use it to publish a policy the consumer has not approved. A Page supplies
+the frame; the words are theirs and so is the review.
+
+### Best practices
+
+- Mark exactly one document `selected`, and mark it only when it is the one in the
+  body. Two marked documents say the reader is in two places, which is the one
+  state `aria-current` cannot represent.
+- Always pass `updatedLabel` with `updatedAt`. The page throws without it, because
+  a bare date under a legal heading reads as the publication date, and those are
+  two different facts.
+- Always pass `documentsLabel`. The list is a navigation landmark and a landmark
+  with no name is announced as "navigation".
+- Pass `bodyLabel` when the route serves more than one document. A `<section>`
+  with no accessible name is not a landmark, so the label is what turns the band
+  into a region a screen reader can jump to.
+
+### Content guidelines
+
+- The document's own title is the page heading. The set is named by the `nav` label
+  and the document is named by the page.
+- Every document in the list gets a summary when there are more than two. A reader
+  choosing between six documents is reading the summaries, not the titles.
+- The body's headings are yours. Write them at one level below the page heading.

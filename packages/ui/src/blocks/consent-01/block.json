@@ -1,0 +1,8 @@
+{
+  "name": "consent-01",
+  "title": "Consent 01 - A Notice With Two Peers And No Memory",
+  "description": "A cookie and tracking notice with a filled accept beside an outlined reject of the same size, a quieter settings route, and a link to the caller's own policy. Reject and accept are peers because a notice whose reject is a ghost beside a filled accept is a dark pattern this design system would have shipped the styling for. Both handlers are required, so no arm of the Block shows a reader a notice they cannot refuse, and the Block persists nothing, so the stored decision and its consequences are the consumer's. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["button", "card", "cta-link", "section"],
+  "dependencies": []
+}

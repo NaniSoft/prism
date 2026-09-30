@@ -1,0 +1,8 @@
+{
+  "name": "hero-03",
+  "title": "Hero 03 - Wide Headline, Points And A Proof Row",
+  "description": "An editorial hero: a wide headline with a short list of what the product does beside it, and a row of figures under a full-width rule, composed with the Metric component. The figures are passed in as props and the block ships none. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["metric", "button", "cta-link"],
+  "dependencies": ["lucide-react"]
+}

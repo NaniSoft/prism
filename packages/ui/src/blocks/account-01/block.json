@@ -1,0 +1,8 @@
+{
+  "name": "account-01",
+  "title": "Account 01 - A Record Of Who Owes What And What They May Do",
+  "description": "An account in full: a name, a kind, a reference in the mono face as an identifier is machine notation, a set of facts composed through the Fact List component, a balance or a plan reading, a slot for the caller's own recent activity, the regions and surfaces the account spans with the status tones and the caller own words, and a slot for the caller's own controls. An account record is not a settings page: an account is a fact about who owes what and a settings page is a set of controls that change it, so this Block ships no control of its own and the two slots are never props it acts on.",
+  "categories": ["application"],
+  "registryDependencies": ["cta-link", "fact-list", "price", "section", "separator", "status"],
+  "dependencies": []
+}

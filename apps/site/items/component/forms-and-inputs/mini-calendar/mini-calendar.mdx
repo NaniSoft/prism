@@ -1,0 +1,99 @@
+---
+slug: components/mini-calendar
+title: MiniCalendar
+---
+
+## Overview
+
+A MiniCalendar is a compact month grid for placing in a panel, a filter list or a
+sidebar. It is the small sibling of `Calendar`, and the difference is where it
+lives: `Calendar` is a full control drawn inside a popover, and this one is a
+grid you place. It owns no popover and no trigger, because the two things a
+trigger needs are the caller's in a filter panel.
+
+Everything else is deliberately the same as `Calendar`. Six rows, a roving tab
+stop, arrows that cross a month boundary, and a rule about what a date outside the
+range means. Two date grids in one product that behave differently is the failure
+this Component exists to prevent, so the keyboard model is `Calendar`'s rather
+than a second answer written for a smaller box.
+
+Every name and every number comes from `Intl` and from `locale`, and there is no
+array of weekday names anywhere in the file. A calendar whose weekday row is a
+literal array of English abbreviations is wrong in every locale the caller has,
+in a way no screenshot of the control shows, and it is the most common single
+defect in a date control.
+
+The table is the structure and the buttons are the controls. The grid is always
+six weeks tall and a day outside `min` and `max` is drawn, reachable and refusing,
+because a day that is simply missing is indistinguishable from a grid that failed
+to render that week.
+
+## Usage
+
+```tsx
+import { MiniCalendar } from '@nanisoft/prism-ui/components/mini-calendar'
+
+const [from, setFrom] = useState<Date | undefined>(undefined)
+
+<MiniCalendar
+  label="Booked from"
+  locale="en-GB"
+  weekStartsOn={1}
+  previousLabel="Previous month"
+  nextLabel="Next month"
+  min={new Date()}
+  selected={from}
+  onSelect={setFrom}
+/>
+```
+
+<ComponentDemo slug="mini-calendar" />
+
+## Guidelines
+
+### When to use
+
+Use a MiniCalendar where the grid is the whole control and it is already in the
+right place: a filter panel, a sidebar, a popover the caller opened themselves,
+a card that is about dates and nothing else.
+
+Use `DatePicker` when the answer is a field in a form, and `Calendar` when the
+caller is composing a popover themselves and wants the full six-week grid with
+their own weekday headings.
+
+### When not to use
+
+Do not use it for a date of birth. A grid a reader pages backwards through sixty
+years is a worse control than a masked text field with a stated format.
+
+Do not use it for a date range. A start, an end and a disabled span between are
+three more questions than this Component asks.
+
+Do not use it for a choice with two or three answers. Two buttons are faster than
+opening a grid.
+
+### Best practices
+
+- Pass `label` and name the question, not the widget: "Booked from", not
+  "Calendar". A filter panel with two grids gives a reader two identical names.
+- Pass `locale`. It is one tag, and it decides the month name, the weekday
+  headings and the digits.
+- Pass `weekStartsOn` for a Monday-first locale. Prism asks rather than infers
+  because a grid that guesses Sunday is wrong in a Monday-first country with
+  nothing on screen to say so.
+- Pass `min` and `max` rather than disabling dates by omission, and say why in
+  text beside the grid. A greyed day with no explanation is a question the reader
+  cannot answer.
+- Control the month with `month` and `onMonthChange` when a filter panel is
+  already showing which month is open. A controlled month with no callback would
+  draw two paging controls that cannot page.
+- Name the grid and nothing else. The month is a `<caption>`, so the table is
+  already named by its own structure.
+
+### Content guidelines
+
+- Write `label` as the filter the grid answers: "Booked from", "Delivery month".
+- Write `previousLabel` and `nextLabel` as the action and the unit: "Previous
+  month", not "Previous".
+- Write the reason a range stops where it stops in prose beside the grid, in the
+  caller's own words: "Bookings open 30 days ahead."

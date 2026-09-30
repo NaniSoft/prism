@@ -1,0 +1,96 @@
+---
+slug: blocks/careers-01
+title: Careers01
+---
+
+## Overview
+
+Careers01 lists open roles. Each row carries the role, the team, the location, the
+working pattern, a sentence of summary where there is room, and a link to apply.
+The rows are a list by default and cards on request, and there is a slot for the
+caller's own team and location controls.
+
+A role that has closed is rendered dimmed with the caller's own `closedLabel`
+beside it, and the Block throws when a closed role arrives without that label. A
+reader who was told a role existed and finds it gone learns nothing, and a list
+that silently shrinks is a list a reader stops trusting.
+
+The framing behind this is the recruiting pattern translated. A pipeline that runs
+needs people watching it, and the shape every one of these marketing sites wants is
+the same: here is the work, here is who does it, here is where they sit, and here
+is the sentence that says what applying does. A Block that shipped the words would
+put a headcount into every consumer's careers page, so the roles, the teams, the
+locations and the closed label are all props.
+
+## Usage
+
+```tsx
+import { Careers01 } from '@nanisoft/prism-ui/blocks/careers-01'
+
+<Careers01
+  eyebrow="Working here"
+  title="Somebody has to watch the pipeline"
+  description="The plant runs whether or not anybody is looking at it, and that is the job."
+  closedLabel="No longer open"
+  roles={[
+    {
+      id: 'controls',
+      title: 'Controls engineer',
+      team: 'Instrumentation',
+      location: 'Bristol',
+      pattern: 'Hybrid',
+      summary: 'The layer between a sensor and an agent that has to be able to act on it.',
+      href: '/careers/controls-engineer',
+      hrefLabel: 'Apply for this role',
+    },
+    {
+      id: 'agent-runtime',
+      title: 'Agent runtime engineer',
+      team: 'Platform',
+      location: 'Remote, UK and EU',
+      href: '/careers/agent-runtime',
+      hrefLabel: 'Apply for this role',
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="careers-01" />
+
+## Guidelines
+
+### When to use
+
+Use Careers01 on a page whose subject is working at the company, and on a page
+where the roles are the content. It reads best with between one and twelve rows.
+
+Use `variant="cards"` when the page has narrowed to two or three roles and each one
+deserves a summary.
+
+### When not to use
+
+Do not use it for a team directory. A directory answers who works here; this
+answers what is open, and the difference is the whole of the section.
+
+Do not build a `teams` prop in front of it. The `filters` slot is where the
+caller's own control goes, and a list filtered here would be filtering a copy of
+data the caller owns.
+
+### Best practices
+
+- Pass `closedLabel` whenever a role is closed, and write the words you mean. The
+  Block throws without it, and the reason is that a dimmed row with no explanation
+  is a row a reader cannot tell from a rendering fault.
+- Pass `filters` as your own composed control, wire it to a query you fetch, and
+  hand the narrowed list back through `roles`. Nothing in the Block needs to know.
+- Pass `empty` for a filter that has narrowed the list to nothing, because only
+  the caller knows whether the filter or the data is the reason.
+- Compose `RelativeTime` for `postedAt` so the date reads in the reader's locale,
+  or pass a string your own content model has already formatted.
+
+### Content guidelines
+
+- A role title is the title in the posting, in the company's own words.
+- The team name is the name a reader would recognise on an org chart.
+- A location is a place and, where relevant, the jurisdictions it covers.
+- `closedLabel` is one short phrase in the reader's language, not a status token.

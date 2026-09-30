@@ -1,0 +1,8 @@
+{
+  "name": "faq-01",
+  "title": "FAQ 01 - Questions, Accordion Or List",
+  "description": "A question and answer list with the section heading, an accordion by default and a list form for a reader who wants every answer open at once, plus an optional contact control rendered as a real link. Every question, answer and label is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "accordion", "cta-link"],
+  "dependencies": []
+}

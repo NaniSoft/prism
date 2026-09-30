@@ -1,0 +1,231 @@
+---
+slug: blocks/signup-01
+title: Signup01
+---
+
+## Overview
+
+Signup01 is an account creation: a caller-declared field list, the terms the caller
+supplies, a secret with a reveal control and a strength reading that is a caller
+function, one submit control, and an announced status region. Every string is passed
+in as a prop, and the Block ships no sentence of its own anywhere on the page.
+
+The storefront's version of this pattern is the registration card: a name, an address,
+a password with an eye and a strength bar, a line about the terms, a button and a link
+back to signing in, whose purpose is to turn a visitor into a shopper with a saved
+address. The composition here is that card, unchanged. What it creates is an identity a
+machine may act under, and the difference from the storefront shows up in three places:
+the reading is yours, the terms are yours, and the sentence on the failure is yours.
+
+## The field list is yours, and that is the design
+
+An account form with a fixed set of fields is a form that decides what a person may say
+about themselves, and the decision is invisible in a review because the rendered form
+looks complete. It is also the decision that loses the signup: a form that cannot ask
+for a workspace name sends a free agent into a product where every entity is scoped to
+one, and a form that cannot ask which estate somebody is observing sends half a dozen
+accounts onto a queue that belongs to one person.
+
+So `fields` is your declaration, Prism names the four controls it can draw and supplies
+no field at all. The cost is stated rather than hidden: one column in the order the list
+gives, so a consumer that wants a two-column form composes two of these or reaches for
+a Page. A `select` requires its `options` in the type and forbids them everywhere else,
+so a select with nothing in it is caught by the compiler rather than by a diagnostic.
+
+## The reading is a function, and that is the whole argument
+
+A strength reading is a judgement, and a judgement has two parts that both belong to
+your product: the word for it, which is a vocabulary, and the number behind it, which
+is a policy. So `password.strength` is a function returning `{ label, value }`, both
+yours.
+
+A Block that accepted a label would still have to know the scale to draw a bar, and a
+Block that drew the bar would be shipping a rule about what makes a secret acceptable
+into every product that installed it, invisibly, in a component library, where no
+consumer reads it. The bar itself is a `Progress` and not a `Meter` for the same reason:
+a `Meter` needs a tone per threshold, and a tone on a password reading is a claim that
+the reader's secret is now a hazard, which is a policy. The cost is that the bar is
+drawn against 100 because the Block cannot know your scale, so pass a percentage, and
+that a bar which never changes colour cannot warn anybody.
+
+## The terms are optional, and the cost of that is named here
+
+A consumer who can ship this Block without stating terms can make a legal claim they did
+not write. The form on the page will read as an account creation with nothing said about
+what the account is for, who can see what is entered, and what happens to it afterwards.
+So the gate is yours and this Block cannot see it: `terms` is a node you compose, and
+the check that it was accepted belongs beside your own submit control, because only you
+know whether refusing the terms is a refusal, a disabled control, or a message under
+the field.
+
+The alternative was making `terms` required, and the cost of that is real: a product
+whose account creation genuinely states no terms, which is a workspace invited through a
+link and creates its record on first use, would have had to write a sentence describing
+the absence, and that sentence would sit in their source describing something they do
+not render. What the Block does supply is the one thing that is not yours to arrange,
+which is the place: the terms are drawn between the fields and the control, so a reader
+meets them at the moment they are about to press it.
+
+## The three decisions this screen has to make, and why none of them is Prism's
+
+| Decision | What a Block that made it would be |
+| --- | --- |
+| Whether to score the secret | A security policy shipped into every product that installed it, in a file none of them read. |
+| Whether the address is already registered | An account directory, and the enumeration oracle a sign-in surface refuses to be. |
+| Whether to send a verification | A transport, a sender, a reputation and a legal claim, none of which is a rendering decision. |
+
+The honest failure is therefore yours as well, and an account creation has more shapes
+than one sentence can be true of: the address is already registered, the domain can never
+receive mail, a name in the list is not a name, your own field validation refuses an
+answer, the terms were not accepted, a breached-secret list caught the phrase, a rate
+limit was reached, your identity provider is down, or your database is unreachable. So
+`status` is a prop, and there is no `done` flag and no `error` flag in the file.
+
+What the Block does write is one piece of state, and it is yours that triggers it: when
+`status.state` reads `done`, the whole form empties, the secret included, because a
+secret and a half-written address sitting in a form after the account exists is a worse
+thing than a caller who wanted to keep them.
+
+## What the Block refuses
+
+| Refused | Why |
+| --- | --- |
+| A field with no `label` | Two nameless fields on one page are announced identically. |
+| A `select` with no `options` | A question no reader can answer that looks answered only because the control is there and focusable. |
+| A blank `password.revealLabel` or `hideLabel` | A button announced as a button, on the one screen a reader is watching while they choose a secret. |
+| A `signIn` link with no `label` | The anchor's accessible name would be its destination. |
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { Signup01, type Signup01Reading, type Signup01Status } from '@nanisoft/prism-ui/blocks/signup-01'
+
+// Your vocabulary and your policy, both in one place.
+function read(password: string): Signup01Reading {
+  if (password.length < 12) return { label: 'Too short to be worth having', value: 20 }
+  if (password.length < 18) return { label: 'Workable, and one more word would help', value: 60 }
+  return { label: 'Long, and not a word from a dictionary', value: 95 }
+}
+
+export function CreateAccount() {
+  const [status, setStatus] = useState<Signup01Status>()
+
+  return (
+    <Signup01
+      eyebrow="Nexus"
+      title="Create an account that may run an estate"
+      description="The account acts on your behalf, so it is created with the estate in mind rather than as a shop."
+      fields={[
+        { id: 'name', type: 'text', label: 'Your name', required: true, autoComplete: 'name' },
+        { id: 'email', type: 'email', label: 'Work email', required: true, autoComplete: 'email' },
+        {
+          id: 'sector',
+          type: 'select',
+          label: 'What the estate is',
+          required: true,
+          options: [
+            { value: 'pipeline', label: 'A pipeline' },
+            { value: 'market', label: 'A market' },
+            { value: 'estate', label: 'An estate' },
+          ],
+        },
+      ]}
+      password={{
+        label: 'Secret phrase',
+        revealLabel: 'Show the secret phrase',
+        hideLabel: 'Hide the secret phrase',
+        strength: read,
+      }}
+      terms={<>You agree to the terms and acknowledge the processing notice.</>}
+      submitLabel="Create the account"
+      submitting={status?.state === 'working'}
+      status={status}
+      signIn={{ label: 'Sign in to an account you already have', href: '/login' }}
+      onSubmit={async (value) => {
+        setStatus({ state: 'working', message: 'Creating the account.' })
+        const result = await createAccount(value)
+        if (result.registered) {
+          setStatus({ state: 'error', message: 'That address already has an account.' })
+        } else if (result.undeliverable) {
+          setStatus({ state: 'error', message: 'That domain cannot receive mail, so the account would never be confirmed.' })
+        } else {
+          // The Block empties the form, the secret included, on your own `done`.
+          setStatus({ state: 'done', message: 'The account exists.' })
+        }
+      }}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="signup-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where an account is created by a person filling in a form, and nowhere else. A
+workspace invited through a link and created on first use has no form, and a form for it
+is a form that asks for information nobody needs.
+
+Declare every field the reader has to give and mark it `required` or not. There is no
+third state worth having, and a `required?: boolean` leaves a caller who passed nothing
+unable to say which of the two they meant.
+
+Pass a `strength` function unless your product genuinely has no opinion about secret
+length. A caller with no function gets no reading, which is the honest arrangement for a
+product whose policy document is somebody else's.
+
+Pass `terms` unless your account creation genuinely states no terms, and if you do not,
+know that you are the one making the claim.
+
+### When not to use
+
+Do not use it to collect payment details, an address for shipping, or anything else
+that belongs to another screen. A signup form that grows into a checkout is two Blocks
+that have been confused for one, and the second one needs a different consent.
+
+Do not use it when the reader has already proved who they are and the only thing
+missing is a choice. That is `two-factor-01`.
+
+Do not use it for an invitation. An accepted invitation is a control on a row and not a
+form, and `invite-user-01` is the shape for it.
+
+Do not expect the Block to check that your fields are the right shape. It forwards
+`type` and `required` to the platform and reads nothing back, so the sentence saying a
+name is not a name is the browser's or yours.
+
+### Best practices
+
+- Keep the declared field ids stable. They are the keys your `onSubmit` receives, and
+  renaming one renames it in one place, which is the whole benefit of a declared list.
+- Give the platform hints on the fields a password manager keys on: `email`, `name`,
+  `tel`, `new-password` for the secret, which this Block already passes.
+- Set `status` to `done` only once the account exists. That state is what empties the
+  form, and a caller who sets it optimistically will clear a form whose account was
+  refused.
+- Report the enumeration question on purpose. "That address already has an account" is
+  a different disclosure from "check the address and try again", and the choice is
+  yours.
+- Compose the accepted-terms control yourself, beside your own submit control, and keep
+  the `terms` node for the document and the summary.
+
+### Content guidelines
+
+- Write the title as what the account will be able to do. "Create an account that may
+  run an estate" names the grant; "Sign up" names the form.
+- Write the description as the scope of that authority. A reader is about to give a
+  machine the ability to act, and the sentence above the fields is the only place that
+  says what the authority covers.
+- Write each field label as the thing to type. "Which estate do you observe" beats
+  "Estate", and the label is also the field's accessible name.
+- Write the strength labels as judgements a person can act on. "Too short to be worth
+  having" tells a reader what to do; "weak" is a token.
+- Write the terms as the two facts a reader can check, and link the documents from
+  there. The Block draws the node where you pass it and nothing else.
+- Write the sign-in link as a sentence about where it goes. "Sign in to an account you
+  already have" beats "Sign up", because the words a reader can see are the words a
+  voice control user has to be able to say out loud.

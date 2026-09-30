@@ -1,0 +1,90 @@
+---
+slug: blocks/bento-01
+title: Bento01
+---
+
+## Overview
+
+Bento01 is an asymmetric grid whose cells arrive with an explicit span. The caller
+composes the arrangement; the block lays it out and frames it.
+
+The grid is six tracks. `sm` takes two, `md` takes three and `lg` takes all six, so the
+composition is three relationships added together: two thirds side by side, a half
+above a third and a third, a full width row above three small ones.
+
+`span` is a union of three names rather than a number, and that is what makes the
+composition composable. A `colSpan: 3` would hand the block a grid to reproduce rather
+than a cell to lay out, and a `colSpan: 7` in a six-track grid type-checks, renders, and
+produces a composition nobody can reason about.
+
+This block holds no opinion about which cell is the big one. A bento whose hierarchy is
+fixed is a template, and a template is what a design system refuses to ship: every
+consumer inherits the opinion and the consumer whose argument belongs on the right has
+three bad answers.
+
+## Usage
+
+```tsx
+import { Bento01 } from '@nanisoft/prism-ui/blocks/bento-01'
+
+<Bento01
+  eyebrow="What it does"
+  title="Three things, and the middle one is the argument"
+  cells={[
+    { id: 'run', span: 'md', title: 'Runs', body: 'A job that walks the estate and writes down what changed.', tone: 'primary' },
+    { id: 'walk', span: 'md', title: 'Walks', body: 'The cycle itself, with the state of the last pass.' },
+    { id: 'record', span: 'sm', title: 'Records', body: 'Every difference kept, forever.' },
+    { id: 'diff', span: 'sm', title: 'Diffs', body: 'What changed between two walks.' },
+    { id: 'alert', span: 'sm', title: 'Alerts', body: 'The one thing worth interrupting for.' },
+    { id: 'export', span: 'lg', title: 'Exports', body: 'The whole record, in the format the caller asks for.' },
+  ]}
+/>
+```
+
+<ComponentDemo slug="bento-01" />
+
+## Guidelines
+
+### When to use
+
+Use Bento01 when the page has a set of things of visibly different sizes and the sizes
+are themselves the argument. A bento is the only arrangement in this system where the
+area a cell occupies says something.
+
+Use it for four to six cells. Two thirds side by side is a two-column section and
+`FeatureRows01` draws it better; eight small cells are a grid of tiles and
+`FeatureGrid01` draws it better.
+
+### When not to use
+
+Do not use it when the cells are the same size. A uniform set in an asymmetric grid is
+a grid wearing a costume, and the reader is invited to read a hierarchy that is not
+there.
+
+Do not use it for prose. A cell with a title and a paragraph in it is a section, and a
+page of six sections is a page with no shape.
+
+Do not reach for `tone="primary"` twice. It means "read this cell first", and a reader
+given two focal points has none.
+
+### Best practices
+
+- Compose the arrangement with spans and order, not with `tone`. The tone changes the
+  surface; the span changes the reading.
+- Give every cell a title. A cell with no title renders its body alone and a reader
+  navigating by heading cannot reach it.
+- Keep the spans adding up. Six tracks is the grid, so two `md` cells fill a row and
+  three `sm` cells fill a row, and a row that adds to five leaves a gap the block
+  cannot fill.
+- Pass `media` for a figure and `body` for words. A cell with both is a cell with two
+  arguments in it.
+- Set `headingLevel` when the block is composed deeper in the document than `h2`. The
+  cell titles follow it.
+
+### Content guidelines
+
+- Write a cell title as a noun of at most two words. A cell title sits at body size and
+  the cell may be a third of the container wide.
+- Write the body as one sentence. The cell is a stop on a page, not a section.
+- Reserve `tone="primary"` for the cell that carries the page's claim, and write that
+  cell's body as the claim rather than as a description.

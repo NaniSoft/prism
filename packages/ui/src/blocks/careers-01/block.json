@@ -1,0 +1,8 @@
+{
+  "name": "careers-01",
+  "title": "Careers 01 - Open Roles As A List Or Cards",
+  "description": "Open roles carrying the title, team, location, working pattern and an apply link, as rows or cards, with a slot for the caller's own team and location filters and a dimmed state for a role that has closed.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "card", "cta-link"],
+  "dependencies": []
+}

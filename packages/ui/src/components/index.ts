@@ -292,3 +292,72 @@ export { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs'
 export type { TabsProps, TabsListProps, TabsTriggerProps, TabsContentProps } from './ui/tabs'
 export { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
 export type { AvatarProps, AvatarImageProps, AvatarFallbackProps } from './ui/avatar'
+
+/*
+ * The roster expansion of 2026-09. Twenty-three Components, and the reason each
+ * is here is the one `docs/history/roster-expansion.md` records: each answers a
+ * role no existing Component held, rather than a role an existing Component
+ * already answered in a different spelling.
+ *
+ * `ModeToggle` is the only one that does not also reach the curated root barrel,
+ * and the reason is that barrel's own header: importing it must not pull the
+ * provider. A theme toggle is the one Component that writes the theme rather
+ * than reading it, so it is the one that needs the provider, and a consumer who
+ * wants the declarative path takes `PrismThemeScript` and their own button
+ * instead.
+ */
+export { Metric } from './ui/metric'
+export type { MetricProps, MetricDelta } from './ui/metric'
+export { Status } from './ui/status'
+export type { StatusTone } from './ui/status'
+export { Price } from './ui/price'
+export type { PriceProps } from './ui/price'
+export { RelativeTime } from './ui/relative-time'
+export type { RelativeTimeProps } from './ui/relative-time'
+export { Sparkline } from './ui/sparkline'
+export type { SparklineProps } from './ui/sparkline'
+export { ContributionGraph } from './ui/contribution-graph'
+export type { ContributionGraphProps, ContributionLevel } from './ui/contribution-graph'
+export { Chart, ChartLegend } from './ui/chart'
+export type { ChartProps, ChartData, ChartForm } from './ui/chart'
+export { CodeBlock, Code } from './ui/code-block'
+export type { CodeBlockProps } from './ui/code-block'
+export { Lightbox } from './ui/lightbox'
+export type { LightboxProps } from './ui/lightbox'
+export { Steps } from './ui/steps'
+export type { StepsProps, Step } from './ui/steps'
+export { SearchField } from './ui/search-field'
+export type { SearchFieldProps } from './ui/search-field'
+export { PasswordField } from './ui/password-field'
+export type { PasswordFieldProps } from './ui/password-field'
+export { TagGroup, Tag } from './ui/tag-group'
+export type { TagGroupProps, TagProps, TagGroupTag } from './ui/tag-group'
+export { Dropzone } from './ui/dropzone'
+export type { DropzoneProps } from './ui/dropzone'
+export { FileUpload } from './ui/file-upload'
+export type { FileUploadProps, FileUploadFile } from './ui/file-upload'
+export { MiniCalendar } from './ui/mini-calendar'
+export type { MiniCalendarProps } from './ui/mini-calendar'
+export { ListPanel, ListPanelHeader, ListPanelBody, ListPanelFooter } from './ui/list-panel'
+export type {
+  ListPanelProps,
+  ListPanelHeaderProps,
+  ListPanelBodyProps,
+  ListPanelFooterProps,
+} from './ui/list-panel'
+export { DataToolbar, DataToolbarGroup } from './ui/data-toolbar'
+export type { DataToolbarProps, DataToolbarGroupProps } from './ui/data-toolbar'
+export { FilterPanel, FilterPanelHeader, FilterPanelFooter } from './ui/filter-panel'
+export type {
+  FilterPanelProps,
+  FilterPanelHeaderProps,
+  FilterPanelFooterProps,
+} from './ui/filter-panel'
+export { AvatarGroup } from './ui/avatar-group'
+export type { AvatarGroupProps } from './ui/avatar-group'
+export { PackSwatch } from './ui/pack-swatch'
+export type { PackSwatchProps } from './ui/pack-swatch'
+export { Announcement } from './ui/announcement'
+export type { AnnouncementProps, AnnouncementTone } from './ui/announcement'
+export { ModeToggle } from './ui/mode-toggle'
+export type { ModeToggleProps } from './ui/mode-toggle'

@@ -1,0 +1,109 @@
+---
+slug: components/pack-swatch
+title: PackSwatch
+---
+
+## Overview
+
+A PackSwatch is a small preview of one pack, drawn on a surface that carries that
+pack's own `data-pack` boundary. The sample is a `primary` band over a `muted` one
+with a `border-border` hairline between them, so the three things a pack changes
+are all visible at once.
+
+**The radius follows the pack, and that is not a defect in the sample.** A
+`data-pack` boundary moves the corner radius beneath it, because radius is the
+only non-colour member of a pack block and the token build emits it the same way it
+emits colour. So `--radius` resolves from the nearest ancestor carrying
+`data-pack`, and the five packs range from 0.5rem to 1rem. A swatch that showed
+only the colour would be a swatch that lied by omission. The swatch is therefore
+fully rounded, which is the one placement the boundary law allows, and it is the
+one place where a pack's radius is visible as itself.
+
+**The swatch draws two halves: the mode the page is in, and the dark mode, which
+the second half forces with its own `dark` class.** That is the published
+descendant selector, so one `data-pack` on the parent resolves both. On a page the
+reader has put in dark mode, the two halves are the same, and this Component does
+not pretend otherwise: a boundary wears its ancestor's mode, and the token build
+publishes no selector that forces light from inside a dark subtree. The
+alternative, reading the two modes' compiled values and painting them as inline
+colours, would be a Component holding resolved values, which is what the vector
+ink gate exists to prevent. Pass `showModes={false}` for a swatch that is a dot
+beside a name where the mode is already known.
+
+**`default` omits the attribute rather than setting it.** The base pack is
+expressed by the absence of `data-pack`, so a swatch for it would render
+`data-pack="default"`, match no emitted rule, and resolve every token beneath it
+from whatever ancestor happened to carry a real pack.
+
+**The swatch is a preview and not a control.** It renders no button, takes no
+click and carries no pressed state; it is a `role="img"` with a name. A caller who
+wants a control wants `ProductSwitcher`, which moves between a set of named things
+and marks the current one with `aria-current`.
+
+## Usage
+
+```tsx
+import { PackSwatch } from '@nanisoft/prism-ui/components/pack-swatch'
+
+<PackSwatch pack="lavender" label="Lavender" />
+<PackSwatch pack="sky" label="Sky" size="lg" showModes={false} />
+```
+
+<ComponentDemo slug="pack-swatch" />
+
+## Guidelines
+
+### When to use
+
+Use a PackSwatch wherever a reader is choosing or identifying a pack: a pack
+chooser, a settings row naming the current pack, a legend beside a table of what
+each colour means, a theme gallery.
+
+Use it wherever a site draws the same little pack preview twice. The boundary, the
+radius and the three utilities are the three things a hand-written swatch gets
+wrong, and only the first is visible in review.
+
+### When not to use
+
+Do not use a PackSwatch to colour a section, a surface or a heading. A pack is a
+signal and this design system keeps it off the page ground, so a swatch beside a
+heading is a decoration wearing a semantic meaning.
+
+Do not put a `data-pack` boundary on it yourself. Pass `pack`. A boundary on an
+element that is not fully rounded moves that element's corner radius as well as
+its colour, and a `rounded-lg` boundary is a swatch whose shape changes with its
+palette, six times over in a row of six.
+
+Do not use it as a control. Six pictures that look clickable are a control a
+reader has to discover, and `ProductSwitcher` is the Component that already moves
+between a set of products and marks where they are.
+
+### Best practices
+
+- Always pass `label`. The swatch carries no text of its own, so without a name a
+  screen reader meets an element that looks like a figure and says nothing, and a
+  row of six of them is six unidentified marks.
+- Leave `showModes` on wherever a reader is choosing. A pack's dark values are not
+  the light ones with the brightness turned down: the dark mode re-points a dozen
+  roles, and a reader choosing on one mode is choosing on half the evidence. Expect
+  the two halves to match on a page the reader has put in dark mode, because a
+  boundary wears its ancestor's mode and nothing in the token contract can force the
+  other one.
+- Use one size per context. `sm` beside a name in a settings row, `md` on its own,
+  `lg` in a gallery where the swatch is the point.
+- Put the name beside the swatch as visible text as well as passing it as
+  `label`. A picture with a name only in its alternative text is a picture a
+  sighted reader has to guess at.
+
+### Accessibility
+
+The swatch is a `role="img"` with a required `label`, so the three bands inside it
+are presentational: a screen reader reads the pack's name once rather than reading
+a brand band, a surface band and a hairline.
+
+The boundary is declared on the element itself and only there, so the swatch wears
+the pack it was given rather than the pack the page happens to be in, and one
+scoped boundary resolves both halves. The halves are marked
+`data-swatch-mode="inherited"` and `data-swatch-mode="dark"` rather than
+`light` and `dark`, so a test can tell which is which without reading the CSS and
+the markup never names a mode the page has already decided.

@@ -1,0 +1,131 @@
+---
+slug: blocks/kanban-01
+title: Kanban01
+---
+
+## Overview
+
+Kanban01 is a board of titled columns, each a named section holding a stack of
+cards with a title, an optional mark, a state, an owner, tags and a link. Each
+column carries its own count.
+
+There is no drag and there is no drop, and that is a decision rather than the thing
+the Block is missing. Three arguments, and each one is a reason.
+
+**The motion law refuses it.** DESIGN.md's Motion section refuses entrance
+animation and attention motion outright, on the grounds that a reader who did not
+ask for a thing moving is owed a page that is still. A draggable card is a
+continuous spatial motion with a lift and a shadow that follows the pointer across
+a column, and the reader did not ask for it on the frame it begins: they press a
+card, and then they are dragging a card.
+
+**A Block that moves a caller's data owns three things it should not.** The
+ordering is a claim about what the caller's board means, and two products with the
+same column names mean different things by them. The persistence is a write to a
+store this package has no opinion about. The conflict is the interesting one: two
+people moving two cards into the same column at once is a case every caller solves
+differently, and there is no answer here that is right for all of them.
+
+**There is a way to have it that is honest.** A caller who needs drag composes
+their own control in the card's `mark` slot, using whatever library owns their
+board's state, and passes the result in. The card stays a card and the drag stays
+the consumer's.
+
+## The columns are sections, and the board scrolls
+
+A column is a labelled region a reader navigates to, so it is a `<section>` with
+`aria-labelledby` rather than a `div role="group"`, which conveys the name and
+nothing else. The board scrolls sideways on a narrow screen rather than wrapping,
+because four columns at phone width are four columns of about eighty pixels each,
+and a wrapped column is not a column: the board would read as four lists and the
+left to right order that says which stage comes next would be gone.
+
+## Usage
+
+```tsx
+import { Kanban01 } from '@nanisoft/prism-ui/blocks/kanban-01'
+
+<Kanban01
+  eyebrow="Nexus"
+  title="How the work moved this week"
+  columns={[
+    {
+      id: 'inbox',
+      label: 'Inbox',
+      cards: [
+        {
+          id: 'nex-412',
+          title: 'Okta group mapping drops the engineering role',
+          mark: 'NEX-412',
+          state: 'blocked',
+          stateLabel: 'Blocked on the identity team',
+        },
+      ],
+    },
+    {
+      id: 'active',
+      label: 'In progress',
+      limit: 2,
+      limitLabel: (limit, count) => `${count} cards, ${limit} shown`,
+      cards: [/* ... */],
+    },
+  ]}
+  empty="Nothing here."
+/>
+```
+
+<ComponentDemo slug="kanban-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for a board whose columns are stages somebody moves work through, where the
+column a card is in is the most important fact about it.
+
+Use it when the reader's question is "what is where", not "what is this". A board
+is read by column first and card second, and a reader looking for one card will
+usually look for the column.
+
+### When not to use
+
+Do not use it for a pipeline of steps. A rail or a flow says what happens in what
+order, and a board says where work is sitting now. A stage that happens in a fixed
+order is a `ProcessRail01`, not a column.
+
+Do not use it when the reader needs to compare a value across cards. A board is a
+set of stacks, not a table, and the answer to a comparison is a `DataTable01` or a
+`ListPanel`.
+
+Do not reach for it because you want drag. If the board's whole point is that
+cards move, this is the wrong Block and the honest answer is a page composed
+around your own board component.
+
+### Best practices
+
+- Pass `stateLabel` on every card that declares a state. The run fails without it.
+  The Block colours the four states it was given and will not colour a fifth.
+- Set `limit` and `limitLabel` together. A cap that hides cards with nothing said
+  about the hiding is a board that looks finished.
+- Keep a card title to one line. It is a heading a reader navigates to, and a
+  title that wraps to three lines costs every other card in the column its
+  alignment.
+- Put the reference in `mark`, not in the title. The title is the heading; the mark
+  is the notation.
+- Treat the columns' order as the claim it is. The Block does not sort them, and a
+  board sorted alphabetically is a diagram of a filing system.
+- Leave `empty` out if a quiet column does not need a sentence. Four of six columns
+  filled with text is a board nobody reads.
+
+### Content guidelines
+
+- `label` is the column's own name and the accessible name of its region. A board
+  with anonymous columns is a set of columns a screen reader user cannot navigate
+  to.
+- `stateLabel` says what the state is for this card, not what the state is. "Blocked
+  on the identity team" is useful; "Blocked" is the dot again.
+- `mark` is machine notation: a reference, a count, a key. `body` is prose.
+- `owner` is a name a reader would use in conversation. `ownerAvatar.name` is
+  required whenever an avatar is passed.
+- `tags` are your facets. Three is comfortable, six is a card a reader has to read
+  across rather than scan.

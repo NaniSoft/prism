@@ -1,0 +1,8 @@
+{
+  "name": "spec-table-01",
+  "title": "Spec Table 01 - A Capability's Limits, Its Units And Its Conditions",
+  "description": "A capability's limits as a real table: what is measured, its value, its unit and the condition it holds under, grouped into caller-named bodies with a row-group header each, and a summary band of figures underneath. Every value is a node the caller composed, the unit is a string beside the value rather than part of it, and the Block derives nothing, infers no unit and rounds no number.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "table", "metric"],
+  "dependencies": []
+}

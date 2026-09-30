@@ -1,0 +1,8 @@
+{
+  "name": "issue-detail-01",
+  "title": "Issue Detail 01 - One Issue, Its Declared Fields And Its Thread",
+  "description": "One issue: its key in the mono face, its title, its state, the fields the caller declares a reader may be told, the body, the comment thread in the caller's order, and slots for the caller's own editor, controls and aside. Every field, word, moment and comment is the caller's. Server Component, and the thread is never sorted.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "status", "prose", "relative-time", "tag-group", "avatar"],
+  "dependencies": []
+}

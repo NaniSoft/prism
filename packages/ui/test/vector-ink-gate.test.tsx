@@ -204,27 +204,83 @@ describe('the vector-ink gate', () => {
     })
   })
 
-  it('accepts the two declared exclusions, and says what each is for', () => {
+  it('accepts the four declared exclusions, and says what each is for', () => {
     const result = run()
+    // Each assertion names the exclusion and one class it resolved to, and none of
+    // them asserts WHICH class came first. That was the previous version's one
+    // mistake, and adding `chart.tsx` to SCANNED found it: the gate reports its
+    // exclusions in the order it read the files, `chart` sorts before
+    // `product-mark`, and a test pinned to `text-xs` immediately after the colon
+    // was asserting the shape of an array rather than the rule. A gate that
+    // printed its exclusions in alphabetical order would have failed it.
     expect(result.stdout).toMatch(/excluded, no paint: fill-none \(.*diagram\.tsx\)/)
-    expect(result.stdout).toMatch(/excluded, a type-scale step on a name: text-xs/)
+    expect(result.stdout).toMatch(/excluded, a type-scale step on a name: text-(?:xs|sm|base)/)
+    // Two more arrived with the 2026-09 roster. Both are the same shape of false
+    // positive as the type scale: a prefix the rule reads as a paint and a word
+    // that is not a colour. `chart.tsx` centres a donut's value and right-aligns a
+    // numeric table cell; `pack-swatch.tsx` separates a swatch's two halves with
+    // an edge rather than a colour. Both are closed sets matched by shape, so
+    // `text-red-500` and `border-red-500` are still findings, and the assertions
+    // below are what keep the widening from becoming a loophole.
+    expect(result.stdout).toMatch(/excluded, a text alignment: text-(?:center|right)/)
+    expect(result.stdout).toMatch(/excluded, a border edge or width: border-e/)
     expect(result.stdout).toMatch(/because an SVG path with no paint/)
     expect(result.stdout).toMatch(/because a step of the authored type scale/)
+    expect(result.stdout).toMatch(/because an alignment, set on a label inside a figure/)
+    expect(result.stdout).toMatch(/because which edges a border is on, or how wide it is/)
+  })
+
+  it('and the two new exclusions are closed sets rather than prefixes', () => {
+    // The widening is only safe because both entries name their members. A
+    // prefix exemption would have taken `text-red-500` and `border-red-500` with
+    // it, which is the defect every exclusion in this gate is written to avoid.
+    withDefect('chart.tsx', 'text-center', 'text-red-500', (result) => {
+      expect(result.status).toBe(1)
+      expect(result.stderr).toMatch(/\[unnamed-paint\]/)
+      expect(result.stderr).toMatch(/text-red-500/)
+    })
+    withDefect('pack-swatch.tsx', 'border-e', 'border-red-500', (result) => {
+      expect(result.status).toBe(1)
+      expect(result.stderr).toMatch(/\[unnamed-paint\]/)
+      expect(result.stderr).toMatch(/border-red-500/)
+    })
   })
 
   it('fails an exclusion that resolves to nothing', () => {
     // An exclusion that fires on nothing is indistinguishable from a rule that
     // found nothing to say, so a declared entry with no live class is a finding
-    // rather than a line that quietly stops appearing. All three type-scale steps
-    // go at once, because leaving one behind would keep the exclusion live and
-    // the case would pass for the wrong reason.
+    // rather than a line that quietly stops appearing.
+    //
+    // **The defect goes into EVERY scanned Component that sets a type-scale step,
+    // and the previous version put it in one file.** `product-mark.tsx` was the
+    // only drawing with a `text-xs` when this was written. `chart.tsx` joined the
+    // scanned set with the 2026-09 roster and also sets one, so replacing the
+    // steps in `product-mark.tsx` alone left the exclusion live and the case
+    // stopped testing what it says it tests. The loop below is the fix and it is
+    // also the reason a second drawing Component has to be added here: a gate
+    // rule's proof is a fixture, and a fixture that assumed one file was a
+    // fixture that was wrong about the tree.
     const dir = stageTree()
     try {
-      const file = path.join(dir, 'packages', 'ui', 'src', 'components', 'ui', 'product-mark.tsx')
-      const source = readFileSync(file, 'utf8')
-      const staged = source.replace(/'text-xs'|'text-sm'|'text-base'/g, "'text-lg'")
-      expect(staged, 'the staged defect did not take').not.toBe(source)
-      writeFileSync(file, staged, 'utf8')
+      // The bare token, with no quote either side, because that is what the gate
+      // classifies: it splits a class string on whitespace and looks at each
+      // token. Two earlier versions of this fixture matched `'text-xs'` with
+      // quotes and the first of them passed for the wrong reason: `chart.tsx`
+      // writes its steps inside a multi-class string such as `"h-full text-xs"`,
+      // where no quote touches the token, so a quoted pattern removed
+      // `product-mark.tsx`'s steps and left `chart.tsx`'s and the exclusion stayed
+      // live. A fixture that matches one file's formatting rather than the shape
+      // the rule reads is a fixture that will keep passing for the wrong reason.
+      const STEP = /text-(?:xs|sm|base)/g
+      let changed = 0
+      for (const name of scannedComponents()) {
+        const file = path.join(dir, 'packages', 'ui', 'src', 'components', 'ui', name)
+        const source = readFileSync(file, 'utf8')
+        if (!/text-(?:xs|sm|base)/.test(source)) continue
+        writeFileSync(file, source.replace(STEP, 'text-lg'), 'utf8')
+        changed += 1
+      }
+      expect(changed, 'no scanned Component set a type-scale step, so the case cannot fire').toBeGreaterThan(0)
 
       const red = runStaged(dir)
       expect(red.status).toBe(1)
@@ -232,7 +288,7 @@ describe('the vector-ink gate', () => {
       // right, and the exclusion that no longer has a class is a second.
       expect(red.stderr).toMatch(/\[unnamed-paint\]/)
       expect(red.stderr).toMatch(/text-lg/)
-      expect(red.stderr).toMatch(/a type-scale step on a name/)
+      expect(red.stderr).toMatch(/the declared exclusion "a type-scale step on a name" resolved to no class string/)
       expect(red.stderr).toMatch(/resolved to no class string/)
     } finally {
       cleanup([dir])

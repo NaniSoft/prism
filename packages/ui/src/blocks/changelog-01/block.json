@@ -1,0 +1,8 @@
+{
+  "name": "changelog-01",
+  "title": "Changelog 01 - A Dated Record Of What Changed, Grouped By Release",
+  "description": "A record of what changed, grouped by release or by date: a version, a moment, a summary, and records carrying one of five kinds, a line about what changed, an optional body and an optional link. The five kinds map to five tones that are a reading order rather than a severity scale, so security takes the warning tone and not the destructive one, because severity is the reader's judgement. A release with no records draws no list. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "status", "cta-link"],
+  "dependencies": []
+}

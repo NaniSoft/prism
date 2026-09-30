@@ -1,0 +1,107 @@
+---
+slug: blocks/compliance-01
+title: Compliance01
+---
+
+## Overview
+
+Compliance01 is a table of what is claimed, to which standard, over what scope,
+when it was last reviewed, and where the evidence is.
+
+The reason this Item exists is not the table. A table is `Table`, and `Table` is
+already in this package. What a design system is tempted to do on a compliance
+surface is render a tick for a claim nobody has checked. The tick is the reward,
+it is the thing the marketing copy reaches for, and a compliance section that
+defaults its state to the good one is how a package ships a certification mark it
+did not earn.
+
+So the state set makes the honest answers first class: `in-progress` and
+`not-applicable` are members rather than edge cases, which is what stops a
+publisher from reading the two quiet states as an admission to be hidden by
+claiming the first one instead. A row that claims to hold something with no
+standard behind it throws rather than drawing a bare tick.
+
+Every word in every cell is the caller's legal statement. That is load-bearing
+here and not a formality: a compliance surface is a set of representations made to
+regulators, customers and auditors, and a design system that contributed a word to
+one would be publishing a representation it has no standing to make.
+
+## Usage
+
+```tsx
+import { Compliance01 } from '@nanisoft/prism-ui/blocks/compliance-01'
+
+<Compliance01
+  title="What we publish"
+  columns={{
+    claim: 'Claim',
+    standard: 'Standard',
+    scope: 'Scope',
+    reviewedAt: 'Last reviewed',
+    state: 'State',
+    evidence: 'Evidence',
+  }}
+  rows={[
+    {
+      id: 'sso',
+      claim: 'Single sign-on for every administrative surface',
+      standard: 'OIDC',
+      scope: 'Production estate',
+      reviewedAt: '2026-06',
+      state: 'held',
+      stateLabel: 'Held',
+      evidenceHref: 'https://example.com/docs/sso',
+      evidenceLabel: 'Access control standard',
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="compliance-01" />
+
+## Guidelines
+
+### When to use
+
+Use Compliance01 where a page makes representations about standards, controls or
+certifications and wants a reader to be able to check them. The evidence column
+is the reason to reach for it: a claim with no published document behind it is a
+marketing claim wearing a table.
+
+Use it when the honest state of at least one row is not the good one. If every
+row is `held` with a standard and a link, a list of certifications is the honest
+thing and this Block is ceremony around it.
+
+### When not to use
+
+Do not use it as a marketing badge rail. A set of certification logos with no
+claim, no scope, no review date and no evidence is a `logo-cloud-01`.
+
+Do not use it for awards. A recognition has an awarding body and a year rather
+than a standard and a review date, which is `awards-01`.
+
+Do not use it to publish a status of your own service. That is
+`status-ledger-01`, whose tiers are about what a product can do rather than what
+a publisher attests to.
+
+### Best practices
+
+- Give every row a `standard` if it is in the `held` state. Without one the Block
+  throws, and that is the point.
+- Give every row words for its state. The tone is Prism's and the vocabulary is
+  yours, because your regime says "attested" where another's says "held".
+- Name the evidence in words, not with the document title alone. The name is the
+  link's accessible name and a link announced by its address is punctuation.
+- Put a relative reading beside the table when recency matters, by composing
+  `relative-time` yourself. This Block prints the string you pass and formats
+  nothing, because formatting a review date is a Component's job.
+
+### Content guidelines
+
+- Write each claim as the assertion a reader can check. "Encryption at rest" is
+  checkable; "enterprise grade" is not, and the table will render it beside a
+  standard as though it were.
+- Scope every claim. A claim with no scope reads as a claim about everything,
+  which is stronger than most publishers can support.
+- Publish the weak states. A section that lists only what is held tells a reader
+  that the publisher has nothing else, which is a larger claim than the table.

@@ -1,0 +1,173 @@
+---
+slug: blocks/address-book-01
+title: AddressBook01
+---
+
+## Overview
+
+AddressBook01 is a set of address records with a search field above them: a name, an
+organisation, the postal lines, a telephone link, an email link, a tag, and a slot for
+the caller's own row controls. Cards or full-width rows, one set of data, and a
+caller-supplied sentence for the query that matched nothing.
+
+**This Block filters what it was given and it fetches nothing.** It holds no book, it
+fetches no book, and there is no prop that points at one. That is a law rather than a
+limitation, and the gate that holds it is
+`packages/ui/scripts/check-block-imports.mjs`, which fails a Block that imports a
+router or a data client or calls a network function.
+
+A Block that fetched an address book would be a Block every consumer whose contacts
+live in its own store has to rewrite. Four consumers with four stores would each either
+patch the fetch or fork the Block, and the corpus publishes it as a product agnostic
+section, so an agent composing a page from it composes a request the consumer never
+asked for. The Block that exists instead is a frame over an array, and the frame is the
+part a consumer can install.
+
+## The three sentences are the caller's
+
+| Prop | Why it is not a default |
+| --- | --- |
+| `label` | A control with no name is announced as a search box, which is the one name every other field of its kind on the page shares. |
+| `clearLabel` | An icon-only button with no name is announced as "button". It is also what makes the control exist at all: `search-field` draws the clear control only when this is passed. |
+| `phoneLabel`, `emailLabel` | A `tel:` link whose accessible name is the number is announced as characters read one at a time, and a `mailto:` link is the same run behind the word mailto. |
+| `empty` | A reader who has typed something and got nothing is reading exactly one line, and that line is the most load-bearing sentence on the page. |
+| `summary` | It is a function, not a string, because the count a reader reads is a sentence whose word order and noun inflection belong to the reader's language. |
+
+## What the Block refuses
+
+`lines` is a non-empty array and the run throws on an empty one, because a record with
+no address is a record with nothing to record. A contact with a name, an organisation
+and two telephone numbers is a real thing, and it belongs in your own store beside this
+Block rather than in an address book, because a reader looking at a list of people they
+cannot post anything to is not reading an address book.
+
+`phone` and `phoneLabel` are a union, and so are `email` and `emailLabel`. A caller
+cannot build a record with a number and no sentence, or a sentence and no number,
+without the compiler saying so. The run throws anyway for a JavaScript caller and for a
+value that came out of a store with the type's guarantee already gone.
+
+## What is searched
+
+The name, the organisation, the address lines and the tag. Deliberately not the phone
+number and not the email address: a reader looking for a colleague remembers the name,
+the firm, the street or the city, and a reader who remembers the number already has the
+record they were looking for.
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { AddressBook01, type AddressBook01Record } from '@nanisoft/prism-ui/blocks/address-book-01'
+import { Button } from '@nanisoft/prism-ui/components/button'
+
+// Your own store, your own shape, rendered into props. The Block never sees the
+// query that produced it.
+const RECORDS: AddressBook01Record[] = [
+  {
+    id: 'settlements-office',
+    name: 'NaniSoft settlements',
+    organisation: 'NaniSoft',
+    lines: ['Unit 4, Kiln Wharf', 'Bristol BS1 6QH'],
+    tag: 'Bristol',
+    phone: '+441173000000',
+    phoneLabel: 'Call the settlements desk',
+    email: 'settlements@example.com',
+    emailLabel: 'Write to settlements',
+  },
+  {
+    id: 'observatory',
+    name: 'The observatory',
+    organisation: 'NaniSoft',
+    lines: ['2nd floor, 41 Corn Street', 'Bristol BS1 1HT'],
+    email: 'observatory@example.com',
+    emailLabel: 'Write to the observatory',
+  },
+]
+
+export function Addresses() {
+  const [query, setQuery] = useState('')
+
+  return (
+    <AddressBook01
+      eyebrow="Nexus"
+      title="Where we are"
+      description="Two desks, both in Bristol. Search by name, by firm, by street or by the label we put on the record."
+      value={query}
+      onValueChange={setQuery}
+      label="Search the address book"
+      clearLabel="Clear the search"
+      records={RECORDS}
+      empty="Nothing here matches that. Try a street, a firm, or a label such as Bristol."
+      summary={(matches) => (matches === 0 ? null : `${matches} record${matches === 1 ? '' : 's'}`)}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="address-book-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for a set of places a reader might send something to: a branch list, a set of
+sites, a supplier register, a small directory of offices. It reads well from about
+three records to about two hundred.
+
+Use `variant="rows"` for a long book or a narrow column, where the postal lines want to
+wrap under the name and a three-column grid would put four columns of address in a
+phone's width.
+
+Write a different `phoneLabel` and `emailLabel` per record where you can. "Call the
+settlements desk" and "Call the observatory" are two different offers, and a book of
+twelve records whose telephone link all reads the same is a list a reader has to read
+twice to learn which desk is which.
+
+### When not to use
+
+Do not use it for personal contacts. A name, a mobile number and no postal address is a
+contact card, and the run refuses it here on purpose. Keep that list in your own store
+and render it with your own row.
+
+Do not use it for people. That is `member-list-01` for an application surface and
+`team-01` for a marketing page, and neither of them wants a postal address.
+
+Do not use it for four records and a phone number at the foot of a page. That is a
+paragraph, not an index.
+
+Do not pass an `href` with no label to see what happens. The run throws.
+
+### Best practices
+
+- Pass the whole book. The filtering is a substring test per record and it costs
+  nothing on a few hundred entries, so there is no reason to hold any of it back.
+- Format nothing yourself into the record. The postal lines are lines, drawn as lines.
+- Compose `Badge` or your own control in `actions` rather than reaching for a fourth
+  field on the record. A caller with a site, a region and a category composes all three
+  in the slot.
+- Pass an empty summary on the first paint. `search-field` draws the result region only
+  once `resultSummary` is passed, and a region that appears together with its first
+  content is the one case a live region is least reliable about.
+- Wrap the section in your own `search` region if the page really does have one search.
+  A landmark on a field turns a screen reader's list of landmarks into a list of text
+  boxes.
+- Validate the whole set at build time rather than trusting the runtime. The Block
+  throws on a nameless link and on a record with no address, and a build that runs this
+  is a build that fails before a reader sees the gap.
+
+### Content guidelines
+
+- Write the record name as the place, not as the function. "NaniSoft settlements" and
+  "the observatory" are places; "Head office" is a function and tells a reader nothing
+  about where to go.
+- Write the postal lines the way the post writes them, one per line, most specific
+  last. The Block draws them in the order you pass them.
+- Write the contact labels as the action or the offer, not as a repeat of the address.
+  "Call the settlements desk" and "Write to settlements" are sentences a reader can
+  act on before they press anything.
+- Write the tag as a classification a reader would use to filter: a city, a region, a
+  category. It is searched, so a broad tag is a broad match.
+- Write `empty` as a way forward. Two routes are better than one: a shorter phrase to
+  try, and a person to write to.

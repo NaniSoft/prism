@@ -1,0 +1,111 @@
+---
+slug: pages/changelog-page
+title: ChangelogPage
+---
+
+## Overview
+
+ChangelogPage is a complete record screen. It composes one `Changelog01` per
+release, above a page heading the Page draws itself, with a filter row, a way of
+reaching the older releases and a closing subscribe band that the caller fills.
+
+| Order | Band | Role |
+| --- | --- | --- |
+| 1 | the Page's own heading band | the page title, present in every state |
+| 2 | the filter row | the caller's control, and the legend of what they have turned on |
+| 3 | one Changelog01 per release | the record, in the order things happened |
+| 4 | the older slot | the caller's pager, load-more control or archive link |
+| 5 | the subscribe band | the caller's own control |
+
+**It is a record rather than a document, so the order is the order things happened
+in and this page never sorts.** A document has one reading order a reader follows
+from the top. A record has an order that is a claim about what happened, which is
+why `Changelog01` takes the order it is given. Sorting by the version string would
+put `1.10.0` before `1.9.0` for every consumer whose versions happen to be strings,
+and sorting by the date would move a release whose records were written in a
+different order into one that was not.
+
+**Every release is linkable, and the release's own heading is the anchor.** This is
+the page a product points at when it says "since last time": an email, a status
+dashboard and a support answer all want to send a reader to one release. The
+caller's `id` goes on the element that wraps each release, so a fragment link lands
+on the release rather than a band above it.
+
+**The filters and the older slot are the caller's, because which kinds a reader
+wants is a fact about the reader.** Filtering means holding state, and a server page
+holds none, so `filters` is a slot for a control the caller wired themselves and
+`kinds` is a legend this page draws from the state they reported. A row of
+pressed-looking marks with no way to press them would be a row of lies.
+
+**`version` and `at` are two different facts and both are required by different
+readers.** A product with nightly builds has a moment and no meaningful version. A
+product with a monthly cadence has a version a reader can compare against their own
+lockfile and almost no use for the hour. The page prints what it was handed and
+invents neither.
+
+## Usage
+
+```tsx
+import { ChangelogPage } from '@nanisoft/prism-ui/pages/changelog-page'
+
+<ChangelogPage
+  title="Everything that has changed"
+  description="How this record is grouped and what the kinds mean."
+  kinds={[
+    { id: 'added', label: 'Added', state: 'on' },
+    { id: 'security', label: 'Security', state: 'on' },
+  ]}
+  filters={<MyFilterControl />}
+  releases={releases}
+  older={<MyPager />}
+  subscribe={{
+    title: 'Get told when this changes',
+    cta: <MySubscribeForm />,
+  }}
+  empty="Nothing has been published on this page yet."
+/>
+```
+
+<ComponentDemo slug="changelog-page" />
+
+## Guidelines
+
+### When to use
+
+Use ChangelogPage for a public record route a product links to from somewhere
+else, including from an email about a specific change.
+
+Use it with a subset. A product that publishes one release at a time passes one
+release and a pager, and the older releases come from the caller's own route.
+
+### When not to use
+
+Do not use it as a blog. A publication has one reading order and a reader follows
+it from the top; a record has an order that is a claim about what happened.
+
+Do not pass a sorted list and expect the page to fix it. Nothing on this page
+sorts, by design.
+
+Do not build the filter as a set of buttons on your side of the boundary. A button
+on a server page is a control that does nothing; pass your own wired control in
+`filters` and the narrowed set back through `releases`.
+
+### Best practices
+
+- Always pass `empty`. A route with no releases is a real state, and a route that
+  draws nothing is a route a reader cannot tell from a broken one.
+- Use a release `id` that is legal in a URL fragment, and use it in the links you
+  publish. The version is for reading, not for anchoring.
+- Keep `filters` and `kinds` in step. `kinds` is the legend for the control in
+  `filters`, and a legend that disagrees with the control is worse than no legend.
+- Pass `headingLevel` one deeper when the page is embedded under a heading the
+  consumer already owns. The release headings follow the page heading.
+
+### Content guidelines
+
+- The standfirst says how the record is grouped, because a reader who does not know
+  whether it is by version or by date cannot use it.
+- A record's title is a complete line. Half of what a changelog publishes is one
+  line that needs nothing under it, and a sentence under it is noise.
+- The empty state distinguishes "nothing published yet" from "your filter matched
+  nothing", because only the caller knows which one the reader is looking at.

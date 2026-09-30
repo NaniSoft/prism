@@ -1,0 +1,8 @@
+{
+  "name": "community-01",
+  "title": "Community 01 - Where A Product's Community Is",
+  "description": "A set of channels or spaces as cards or rows: a mark, a name, what the space is for, member and activity readings the caller words, and a link whose label is the caller's sentence about joining. The counts are numbers and the labels are functions, because the sentences are the caller's. Every string and every number is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "card", "cta-link"],
+  "dependencies": ["lucide-react"]
+}

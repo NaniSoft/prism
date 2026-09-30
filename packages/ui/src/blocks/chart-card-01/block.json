@@ -1,0 +1,8 @@
+{
+  "name": "chart-card-01",
+  "title": "Chart Card 01 - A Titled Panel Holding One Figure",
+  "description": "A titled panel holding one figure, the key for it, the controls that act on it, and the figures the card states about it. The figure is a slot rather than a prop with a mark, because a Block that named a chart type would be choosing the caller's data shape and a chart is the one thing on an operate screen a consumer most often replaces. The card does not check that the figure is readable as numbers, because a Block cannot see inside a slot, and this documentation says so rather than pretending it verified it.",
+  "categories": ["application"],
+  "registryDependencies": ["card", "metric", "section"],
+  "dependencies": []
+}

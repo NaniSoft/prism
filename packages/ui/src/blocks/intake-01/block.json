@@ -1,0 +1,8 @@
+{
+  "name": "intake-01",
+  "title": "Intake 01 - A Stream Of Arriving Work, Fed By The Consumer",
+  "description": "A stream of arriving work with a source, a subject, a moment drawn through relative-time, a state tone beside the caller's own words, and up to two controls whose labels are functions of the item. A Block and not a live surface: it holds no socket, no poll and no timer, and its content changes when the consumer re-renders it with a new array. An href with no words is refused and a state with no words is refused, because a coloured dot with no sentence beside it is invisible. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "button", "relative-time", "status"],
+  "dependencies": []
+}

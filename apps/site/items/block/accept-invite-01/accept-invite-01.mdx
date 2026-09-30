@@ -1,0 +1,175 @@
+---
+slug: blocks/accept-invite-01
+title: AcceptInvite01
+---
+
+## Overview
+
+AcceptInvite01 is the screen where somebody lets a machine act on their behalf: whose
+workspace is being joined, in what role, who sent it, a secret they set, one control
+that accepts and one that refuses. Every string is passed in as a prop.
+
+**The `decline` control is required and it sits beside the acceptance, and that is the
+most important decision in this file.** A person invited to a workspace they do not want
+to be in must be able to say no. An invitation screen with only an accept is a screen
+that asks for a decision the reader cannot refuse: the only way out of it is to abandon
+the tab, and an abandoned tab leaves an invitation the sender is still waiting on and a
+reader who never learned whether saying no would have been easy.
+
+Making the control required moves the question to you, where it is answerable, and a
+type that requires it is a type that cannot be quietly dropped by a wrapper. A screen
+where the refusal sits beside the acceptance, at the same size and in the same row, is
+the only version of this that is honest. Not a link at the foot of the page, which is
+where a design system puts the thing it is least sure anybody will use, and not a
+control behind a menu, which is a control the reader has to go looking for at the exact
+moment they have decided they want to leave. The acceptance is filled and the refusal is
+outlined, because a screen with two identical buttons is a screen where a reader has to
+read both to work out which one is the trap.
+
+**What this Block does not decide, and these are the three the reader cannot check for
+themselves.**
+
+- Whether the invitation is still valid.
+- Whether the workspace has room.
+- What the role may do.
+
+All three are your product's, and all three are your own facts about your own tenancy.
+The `role` the Block renders is the one the invitation named and not the one the reader
+chose, because there is no control here and there is not going to be one: a role a
+reader picks for themselves is a role they picked without reading what it allows. The
+consequence is that the reader is trusting the sender on the strength of a name and a
+sentence, which is why the sender is drawn and why the expiry is a first-class arm.
+
+**The summary is three names with qualifiers and no labels above them**, drawn the way
+`SettingsMembers01` draws a member: the name on one line, the qualifier under it in the
+muted ink. The labels would be words this package would have to invent, and a workspace
+summary whose rows are labelled Workspace and Role in English is three sentences every
+consumer inherits, published by the corpus as this design system's own voice. Compose
+`FactList` beside this Block if you want the terms named.
+
+## Usage
+
+```tsx
+import { useState } from 'react'
+import { AcceptInvite01 } from '@nanisoft/prism-ui/blocks/accept-invite-01'
+
+export function AcceptYourInvitation({ invitation }: { invitation: Invitation }) {
+  const [secret, setSecret] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [mismatch, setMismatch] = useState(false)
+
+  return (
+    <AcceptInvite01
+      eyebrow="You have been invited"
+      title={`Accept the invitation to ${invitation.workspace.name}`}
+      workspace={invitation.workspace}
+      role={invitation.role}
+      invitedBy={invitation.sentBy}
+      secret={{
+        label: 'Choose a secret',
+        revealLabel: 'Show the secret',
+        hideLabel: 'Hide the secret',
+        value: secret,
+        onValueChange: setSecret,
+      }}
+      confirm={{
+        label: 'Type it again',
+        value: confirm,
+        onValueChange: setConfirm,
+        error: mismatch ? 'Those two are not the same.' : undefined,
+      }}
+      submitLabel="Accept and set the secret"
+      decline={{
+        label: 'Decline this invitation',
+        onDecline: () => declineInvitation(invitation.id),
+      }}
+      status={
+        mismatch
+          ? { state: 'error', message: 'Nothing was created. Correct the second entry and try again.' }
+          : undefined
+      }
+      expired={
+        invitation.expired
+          ? {
+              message: 'This invitation has run out. Invitations last seven days.',
+              requestLabel: 'Ask for a new one',
+              onRequest: () => requestNewInvitation(invitation.id),
+            }
+          : undefined
+      }
+      onSubmit={async (value) => {
+        if (value.secret !== value.confirm) {
+          setMismatch(true)
+          return
+        }
+        await acceptInvitation(invitation.id, value.secret)
+      }}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="accept-invite-01" />
+
+## Guidelines
+
+### When to use
+
+Use it at the destination of an invitation link, and only there. It is a whole section
+rather than a dialog because the reader has to be able to read the workspace, the role
+and the sender before they choose a secret, and a dialog is the arrangement that hides
+all three.
+
+Keep `invitedBy` if you have a name for the sender. A sender identified only by an
+address is a sender the reader cannot place and cannot ask about afterwards.
+
+Pass `expired` from the first paint when you already know the invitation is dead.
+Rendering two fields to a reader who cannot use them, and then refusing on submit,
+wastes what they typed and pushes the condition into your own error handling.
+
+### When not to use
+
+Do not use it for an authenticated reader changing their own settings. There is no link
+and no refusal in that arrangement, and a screen that asks a signed-in person whether
+they want to be in their own account has lost the plot.
+
+Do not add a role control. The reader does not get to choose what they are let into, and
+a control here turns an invitation into a self-service grant.
+
+Do not use it for an invitation into something the reader already administers. The
+refusal is not a nonsense control, but it is not a question either, and drawing it for a
+colleague who already has the access is a control that costs a reader a decision they
+did not need to make.
+
+### Best practices
+
+- Pass `value` and `onValueChange` together or neither. A value the Block holds and you
+  cannot see is a value you cannot clear.
+- Compare the two entries in your handler and put the sentence in `confirm.error`. That
+  keeps the rule in one place and the words next to the control they are about.
+- Treat `done` and `declined` as the end of the screen. The Block takes the form away in
+  both, because a reader who has said no does not get to keep being asked by a form that
+  no longer has a question.
+- Do not pass `expired` and a status that is not a refusal. The Block throws, because the
+  two together would show a reader a confirmation beside an arm saying the invitation is
+  dead.
+- Write `role.detail` as what the role can do rather than as what it is called. It is the
+  only sentence on the screen that tells a reader what they are agreeing to, and it is
+  the one they will not read carefully.
+
+### Content guidelines
+
+- Write the title as the decision being asked for, with the name in it. "Accept the
+  invitation to Nexus Estate" is what a reader scans for; "Join workspace" is not.
+- Write `decline.label` as a sentence about what declining does, because it is the
+  control a reader is least likely to have read the rest of the page for. "Decline this
+  invitation" is speakable and unambiguous; "Not now" leaves the reader guessing whether
+  it ends the invitation or defers it.
+- Write `expired.requestLabel` as who has to do something, when the answer is that
+  somebody has to send another one. "Ask Bo for a new one" beats "Resend" on a screen
+  where the reader does not know who sent the first.
+- Write the declined message so the sender is told, so the reader knows it worked, and so
+  nothing is left half-created. All three in one sentence.
+- Do not put "Are you sure?" anywhere on this screen. The reader arrived from a link and
+  chose to be here; a confirmation step on top of a required refusal turns a decision
+  into a gauntlet.

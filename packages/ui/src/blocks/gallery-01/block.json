@@ -1,0 +1,8 @@
+{
+  "name": "gallery-01",
+  "title": "Gallery 01 - An Image Grid That Opens One At Full Size",
+  "description": "A grid of images where each tile is a real button that opens the lightbox at full size, with a caption under every tile and a count on the set. The tile's accessible name is composed from the caller's own alt and caption and never from a word Prism chose, and an href on a tile is refused because a tile cannot be both a trigger and a link. The four control labels are the caller's.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "aspect-ratio", "lightbox"],
+  "dependencies": []
+}

@@ -1,0 +1,102 @@
+---
+slug: components/avatar-group
+title: AvatarGroup
+---
+
+## Overview
+
+An AvatarGroup is a row of overlapping discs with a count for the people past
+the cap. Each disc is an `Avatar` with the caller's initials as its fallback, so a
+reader who cannot see a photograph still recognises the name.
+
+**The order is the caller's, because a group of five people has no natural order
+and which of them is visible is a decision rather than a fact.** The array is
+rendered in the order it arrives and the first `max` are shown. Prism does not
+sort, does not rotate and does not pick a representative to lead, because a set of
+members has an owner or a most recent signer or the alphabetical result of a
+directory query, and each of those is a claim about importance only the consumer
+can make. Put the person who matters first, or pass `reverse` so the last one is
+the whole disc.
+
+**`overflowLabel` is required rather than defaulted, and that is about the number
+rather than the language.** A count is a numeral, and a screen reader reading a
+bare "3" out of a row of faces has been told a quantity and nothing about what it
+is a quantity of. The sentence is also the consumer's, in the consumer's language,
+with the consumer's plural rules, so Prism will not ship it. Pass a function of
+the count. Setting `max` makes the prop required in the type, because that is the
+shape in which truncation is possible.
+
+## Usage
+
+```tsx
+import { AvatarGroup } from '@nanisoft/prism-ui/components/avatar-group'
+
+<AvatarGroup
+  avatars={team}
+  max={4}
+  overflowLabel={(count) => `+${count}`}
+  reverse
+/>
+```
+
+<ComponentDemo slug="avatar-group" />
+
+## Guidelines
+
+### When to use
+
+Use an AvatarGroup wherever a set of people is shown as a summary: the members of
+a project, the reviewers on a change, the people with access to a resource. The
+signal is that the reader wants to know how many there are and roughly who, not
+to work through them.
+
+Reach for it when a hand-written stack of `img` tags has appeared. A stack that
+re-implements the loading state, the missing image and the ring between two
+overlapping discs gets one of the three wrong, and nothing in the rendered result
+says which.
+
+### When not to use
+
+Do not use an AvatarGroup for one person. A single avatar is an `Avatar`, and a
+group of one is a count of nothing.
+
+Do not use it where the reader needs to reach every person. A group that truncates
+is a summary, and a member list a reader has to work through is a list of `Item`s
+or a table.
+
+Do not put a link or a button on the discs. The discs are pictures. A control that
+belongs to the whole group goes in the trailing slot, and a link to one person
+belongs in the row that names them.
+
+Do not use it where the separator matters more than the width. The rings between
+the discs are drawn in the page ground, so a group on a card or on the muted
+surface reads its separators against a slightly different surface. Non-overlapping
+discs with a real gap have no such problem.
+
+### Best practices
+
+- Sort `avatars` yourself, and sort it for a reason you could say out loud. The
+  array order is the visible order, and the first `max` are the ones a reader
+  sees.
+- Pass `max` whenever the set could be long, and pass `overflowLabel` with it. The
+  default cap is four, so a set of nine truncates even with no `max`, and the type
+  cannot warn you about that because whether it happens depends on your data.
+- Pass a name for every person. The name is the initials' source, the image's
+  alternative text, and what a person with no photograph still has.
+- Use one size per group. A group is read as one thing, and mixed sizes read as a
+  hierarchy that is not there.
+- Turn on `reverse` when the array is sorted so that the most recent or the most
+  senior is last, which is the common shape of a members list.
+
+### Accessibility
+
+Each disc's image carries the person's name as its alternative text, because in a
+group there is no adjacent label to identify them. The initials fallback is not
+read separately: it renders only while the image is unavailable, and a screen
+reader reads whichever of the two is present rather than both.
+
+The count is a badge and not a truncated array. The people past `max` are not drawn
+at all, so a group never looks complete when it is not, and the badge says how
+many are missing. Pass `overflowLabel` so the number is read as a sentence; without
+it the badge holds the bare numeral, which is a state the caller chose by not
+passing one.

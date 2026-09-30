@@ -1,0 +1,104 @@
+---
+slug: blocks/showcase-01
+title: Showcase01
+---
+
+## Overview
+
+Showcase01 shows one product or capability in depth: a large name, a standfirst, a
+specification list, an optional media panel, and at most two actions.
+
+The layout is the pattern a storefront's product page needs, and the writing is Prism's.
+Everything structural transfers unchanged: a specification is a description list
+whichever product it describes, and a gallery is a figure a reader has to be able to
+name. What does not transfer is the framing, so the Demo is written from the domains
+Prism serves: a pipeline that runs, a market that is captured, an estate that is
+observed. A Block ships no copy, so none of that vocabulary is in the component.
+
+The specification is composed with the existing `FactList` Component, which draws a real
+`<dl>` with the term before its answer. Because `Fact.value` is a node rather than a
+string, a row can hold a `CodeBlock`: a specification whose answer is a command or a
+fragment is a specification, and a caller who cannot put source in a cell ends up with
+a paragraph underneath instead.
+
+This is not a pricing Block. It carries no price, no period, no currency and no tier,
+and the reason is the refusal rather than the omission: a Block that holds a number the
+caller has to remember to change is a Block that ships a stale claim, and a stale price
+is the one number on a marketing page a reader acts on.
+
+## Usage
+
+```tsx
+import { Showcase01 } from '@nanisoft/prism-ui/blocks/showcase-01'
+import { CodeBlock } from '@nanisoft/prism-ui/components/code-block'
+import { PulseGraph } from '@nanisoft/prism-ui/components/pulse-graph'
+
+<Showcase01
+  layout="panel-right"
+  eyebrow="Capture"
+  name="Market capture"
+  standfirst="A market is walked, priced and written down once, in the source's own currency."
+  facts={[
+    { label: 'Cadence', value: 'Every 15 minutes' },
+    { label: 'Sources', value: '14 exchanges, 3 vendor feeds' },
+    {
+      label: 'Run it yourself',
+      value: (
+        <CodeBlock language="bash" code="nanisoft capture run --market spot" />
+      ),
+    },
+    { label: 'State of the last run', value: 'complete', href: '/runs/812' },
+  ]}
+  mediaLabel="The capture loop, as one graph"
+  media={<PulseGraph nodes={NODES} relations={EDGES} label="The capture loop" />}
+  actions={[{ label: 'Read a run', href: '/runs/812' }]}
+/>
+```
+
+<ComponentDemo slug="showcase-01" />
+
+## Guidelines
+
+### When to use
+
+Use Showcase01 once per capability, on a page that is about one thing in depth. The
+section is a topic with a name, a standfirst and a specification, and three of them on
+one page is a page with three topics and no shape.
+
+Use it where the specification is the argument. A capability whose value is "here is
+exactly what it does" wants a description list rather than a paragraph.
+
+### When not to use
+
+Do not use it for a price. Compose `Price` and `Pricing01` beside it.
+
+Do not use it for a set of comparable things. A row per capability is `FeatureRows01`
+and a tile per capability is `FeatureGrid01`, and both draw a comparison this Block
+does not.
+
+Do not use it without `mediaLabel` if you pass `media`. The Block throws.
+
+### Best practices
+
+- Pass `mediaLabel` with every `media`. The name is the only thing that tells one
+  showcase's figure from another's.
+- Set `layout` rather than passing utility classes to swap the panel. The side is a
+  composition decision a page makes more than once.
+- Keep the copy column first in the DOM on both layouts. The reading order is the name,
+  the standfirst, the actions and then the specification, whichever side the panel is
+  drawn on.
+- Use `href` on a fact whose value is a destination and leave it off one whose value is
+  the whole answer. `FactList` turns the first into an anchor and leaves the second as
+  text.
+- Set `headingLevel` when the block is composed deeper in the document than `h2`.
+
+### Content guidelines
+
+- Write `name` as a noun phrase that names the thing. It is the one heading here that
+  is not a claim, and it is set at the section's step.
+- Write `standfirst` as one sentence saying what the thing is for, not what it is made
+  of.
+- Write each fact's label as a term that fits a two-column scan: "Cadence", "Sources",
+  "Retention". A label that wraps costs the whole column its alignment.
+- Omit `standfirst` for a name that says what the thing is. A gloss that repeats the
+  name is worse than no gloss.

@@ -1,0 +1,85 @@
+---
+slug: components/contribution-graph
+title: ContributionGraph
+---
+
+## Overview
+
+A ContributionGraph is a calendar of days, one square each, filled by a
+five-step intensity scale. It answers a question a chart does not: not what the
+values are, but which days had any.
+
+The decision that shapes it is that the caller passes counts and the Component
+does the arithmetic. There is no `max` prop to divide by, because a caller that
+pre-normalises has two chances to get the scale wrong and a mislabelled scale is a
+lie with a typeface on it. The largest count in the drawn window is the maximum,
+and the default bucketing is quartiles of it.
+
+The second decision is that an absent day is an absence rather than a zero, and
+the two are drawn the same way on purpose. A short `days` array leaves the leading
+weeks of the window empty rather than compressing the days it has.
+
+## Usage
+
+```tsx
+import { ContributionGraph } from '@nanisoft/prism-ui/components/contribution-graph'
+
+<ContributionGraph
+  label="Commits per day, last 26 weeks"
+  weeks={26}
+  dayLabel={(day) => `${day.count} commits on ${day.date}`}
+  days={days}
+/>
+```
+
+## Guidelines
+
+### When to use
+
+Use a ContributionGraph when the reader's question is about consistency rather
+than magnitude. A commit calendar, a days-active chart, a release cadence, an
+uptime grid. The shape of the answer is "they keep going", and that is a claim
+about a run of days rather than a single figure.
+
+Pass `weekStartsOn` when the product's week is not Monday. A grid that starts on
+Monday when the caller's week starts on Sunday puts a Saturday above a Monday, and
+the reader has to work that out before they can read anything.
+
+Pass `dayLabel`. It is required, and it is a function rather than data because
+Prism cannot compose a name for a day: "4 commits on 1 March 2026" is a sentence
+in a language and a calendar, and a design system that wrote it would put English
+and a Gregorian month name into every consumer's product.
+
+### When not to use
+
+Do not use it for a series of unrelated values. There is no axis, because a
+calendar has no axis, and a metric per day with no shared scale is a chart.
+
+Do not use it when the reader needs the numbers. The counts are in a visually
+hidden table, so finding one is a deliberate act. A visible table is a table.
+
+Do not use it to grade people. A grid of daily counts is legible at a glance in a
+way a table is not, which is exactly what makes it the wrong shape for anything a
+person is judged on.
+
+Do not pass a `days` array in place of the window. The window is the most recent
+`weeks` weeks ending with the latest day given, so days older than the window are
+not drawn. Pass the range you mean.
+
+### Best practices
+
+- Expect quartiles to flatten a distribution with one outlier. If one day is a
+  hundred times the median, most squares land at level one or two, which is what
+  quartiles of an outlier are. Pass `levelFor` and the cost goes away.
+- The five levels are one token at four strengths over a muted empty cell, so the
+  grid moves with a pack and with a mode. A grid of five authored colours would be
+  a second set of colour tokens for a scale the alpha modifier already expresses.
+- The maximum is taken from the days that are drawn, so an older day in the array
+  does not stretch the scale around squares that are not in the picture.
+- A day with a count of zero and a day nobody reported look the same, and the
+  difference survives in the table: a reported zero has a row reading zero and an
+  unreported day has no row.
+- `dayLabel` runs once per reported day, so keep it short. It is announced a
+  square at a time, and a hundred and eighty-two stops is a lot of stops.
+
+<ComponentDemo slug="contribution-graph" />

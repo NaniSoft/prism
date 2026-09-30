@@ -1,0 +1,127 @@
+---
+slug: blocks/field-map-01
+title: FieldMap01
+---
+
+## Overview
+
+FieldMap01 is a source-to-target field mapping: what a field is called on one
+side, what it becomes on the other, whether it is required, what type it is, and
+what transformation it needs. It is the artefact a pipeline and an estate both
+produce, and it is a document somebody acts on rather than a picture somebody
+scans.
+
+The table is a real table. The header cells are `<th scope="col">` and the field
+name is a `<th scope="row">`, so a reader navigating by cell hears which column
+and which field each value belongs to. The two system columns come from
+`sourceLabel` and `targetLabel` and are not in `columns`, because the Block
+already has them and a list that could also name them would be a list with two
+entries the table ignores.
+
+The two system names are required together, and that is the decision worth
+reading first. A header that says "Source" and "Destination" has replaced the two
+named systems with the shape of the operation, and the resulting table is
+misread in every deployment where the names differ, and nobody catches it because
+the table looks finished.
+
+## Usage
+
+```tsx
+import { FieldMap01 } from '@nanisoft/prism-ui/blocks/field-map-01'
+
+<FieldMap01
+  eyebrow="The migration"
+  title="How a customer becomes a row in the warehouse"
+  description="Both names are yours. The direction of the migration is the claim this table makes, and a generic destination heading is how a migration gets run backwards."
+  sourceLabel="Salesforce"
+  targetLabel="Warehouse, public.buyers"
+  columns={[
+    { id: 'required', header: 'Required at the target' },
+    { id: 'type', header: 'Type at the source' },
+    { id: 'transform', header: 'Transformation' },
+    { id: 'state', header: 'State' },
+  ]}
+  stateLabel={(state, source) =>
+    state === 'mapped'
+      ? `${source} lands under the same name`
+      : state === 'unmapped'
+        ? `${source} has no counterpart yet`
+        : state === 'transformed'
+          ? `${source} is reshaped on the way in`
+          : `${source} is deliberately not carried across`
+  }
+  requiredLabel={(required) => (required ? 'The target will not accept the row without it' : 'Optional')}
+  unmappedLabel="No counterpart in the target yet. This is a task."
+  rows={[
+    {
+      id: 'account-id',
+      source: 'Account.Id',
+      target: 'account_id',
+      required: true,
+      type: 'string(18)',
+      transform: 'Strip the 15-character prefix Salesforce puts on every id.',
+      state: 'transformed',
+    },
+    {
+      id: 'close-date',
+      source: 'Account.CloseDate',
+      required: false,
+      type: 'date',
+      state: 'mapped',
+    },
+    {
+      id: 'last-task',
+      source: 'Account.LastTaskDate',
+      type: 'datetime',
+      note: 'Held back until the team decides whether a closed task is a close date.',
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="field-map-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for the document that sits beside a migration, an ingestion contract or a
+data dictionary. It reads well at four to fifteen rows; past that it is a
+reference page rather than a section, and a reader will want to sort it.
+
+Use it for either direction. A pipeline mapping a vendor's API into a warehouse
+and an estate mapping a warehouse back out to an operator are the same table with
+the two names the other way round.
+
+### When not to use
+
+Do not use it for a table of records. A row per customer is a `DataTable01`.
+
+Do not use it to show a schema as prose. If the reader wants the shapes rather
+than the correspondence, a `CodeBlock` with the two definitions side by side is
+the honest surface, and it copies.
+
+### Best practices
+
+- Name both systems, in full, in the two labels. The direction of the migration
+  is the claim the table makes, and the heading is where a reader reads it.
+- Set `state` on every row whose state the data does not settle. A renamed field
+  looks exactly like a mapped one until somebody says otherwise, and a field
+  deliberately left behind looks exactly like one somebody forgot.
+- Pass `unmappedLabel` as the sentence a reader in your team would say, and make
+  it say whether the row is a task or a decision. Those are opposite actions on
+  the same empty cell.
+- Order `columns` the way the row should be read. The two system columns are
+  always first and are always in that order.
+- Keep `transform` to one line where you can. It is a sentence, and a cell with
+  three lines of it is a document rather than a table.
+
+### Content guidelines
+
+- `source` is the field's name as the source system spells it, not as you would
+  like it spelled.
+- `type` is the source system's own type name, in the source system's own words.
+- `stateLabel` takes the field name as well as the state, and the honest sentence
+  is usually per row. Use it.
+- `requiredLabel` is a sentence too. "Required" and "Optional" are fine if that is
+  what your readers say.

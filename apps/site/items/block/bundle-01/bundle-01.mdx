@@ -1,0 +1,134 @@
+---
+slug: blocks/bundle-01
+title: Bundle01
+---
+
+## Overview
+
+Bundle01 is a selection of things a reader has put aside: a mark, a name, a
+description, a quantity, a unit price, a line total and a remove control per row,
+over a required breakdown and a total. The storefront's version of this pattern is
+a cart. A cart holds products a reader is about to buy; this row holds a set of
+nodes an operator is about to provision onto an estate. The pattern underneath is
+the same one, and every word on the page is the caller's.
+
+Two decisions shape it. The quantity stepper is `NumberField` and the remove
+control is a `Button`, because a `div` with a handler is not reachable by a
+keyboard, announces nothing, and does not take Space. And the breakdown is
+required while the total is a prop, because a selection with a total and no
+breakdown is a total the reader cannot check.
+
+## The total is a prop, and why
+
+A caller's catalogue has rules this Block cannot see: a discount over a threshold,
+a credit already on the account, a tax that depends on where the reader is, a
+floor under the whole run, a rounding rule applied once at the end rather than per
+line. A Block that added the rows up would be choosing between those rules without
+knowing any of them.
+
+So `summary` is a required list the caller states, and `total` is a `PriceProps`
+the caller supplies. A derived total is a number the Block chose, and this Block
+never chooses one.
+
+The line total inside a row is the exception, and it is a multiplication of two
+figures on the same row that the reader can see either side of. A caller whose
+line total is not a multiple of its unit price composes the figure into `note`.
+
+## Usage
+
+```tsx
+import { useState } from 'react'
+import { Button } from '@nanisoft/prism-ui/components/button'
+import { Bundle01, type BundleItem } from '@nanisoft/prism-ui/blocks/bundle-01'
+
+export function NodeSelection() {
+  const [items, setItems] = useState<BundleItem[]>([
+    {
+      id: 'collector',
+      name: 'Market collector',
+      detail: 'Reads one exchange feed and writes normalised events.',
+      quantity: 3,
+      min: 1,
+      max: 12,
+      unit: { amount: 48, currency: 'GBP', locale: 'en-GB' },
+      note: 'Billed yearly. The first month is free.',
+    },
+  ])
+
+  return (
+    <Bundle01
+      title="Nodes to provision"
+      items={items}
+      quantityLabels={{
+        increment: 'One more collector',
+        decrement: 'One fewer collector',
+        field: (item) => `Collectors for ${item.name}`,
+      }}
+      onQuantityChange={(id, quantity) =>
+        setItems((held) =>
+          held.map((one) => (one.id === id ? { ...one, quantity } : one)),
+        )
+      }
+      onRemove={(id) => setItems((held) => held.filter((one) => one.id !== id))}
+      removeLabel={(item) => `Take ${item.name} off this run`}
+      summary={[
+        { id: 'subtotal', label: 'Lines before discount', value: 'GBP 144.00' },
+        { id: 'credit', label: 'Existing credit', value: 'GBP 24.00' },
+        { id: 'due', label: 'Due on the first of the month', value: 'GBP 120.00', emphasis: true },
+      ]}
+      total={{ amount: 120, currency: 'GBP', locale: 'en-GB' }}
+      actions={<Button>Provision these nodes</Button>}
+      empty="Nothing selected. Add a node type to start a run."
+    />
+  )
+}
+```
+
+<ComponentDemo slug="bundle-01" />
+
+## Guidelines
+
+### When to use
+
+Use Bundle01 where a reader has chosen some things and the next thing that happens
+is that something else commits them. That is a provisioning run, a reservation, a
+quote and a checkout, and the four are the same frame.
+
+Use it where the quantity is a real decision. A stepper over a quantity nobody can
+change is a control that looks live and is not, and this Block draws no stepper at
+all without a handler for it.
+
+### When not to use
+
+Do not use it for a list of things with no quantities and no totals. A catalogue
+index is `ResourceList01` and a plan comparison is `PricingCompare01`.
+
+Do not use it to choose which of several mutually exclusive options applies. A
+group of radios is a different question, and the two are not the same frame: a
+selection here is a set of things, each with a count.
+
+### Best practices
+
+- Hold the items in your own state and pass them down. The Block holds the
+  quantity field's rendered value only; the row is yours.
+- Pass `quantityLabels` whenever you pass `onQuantityChange`. The run throws
+  without them, because two steppers with no accessible name are announced as
+  "button" twice.
+- Write `removeLabel` as a function of the row. "Remove" on four rows is one name
+  for four different things, and a reader who hears it cannot tell which node is
+  about to leave.
+- Compute the total in your own code and pass it in. Do not pass a line and let a
+  reader do the addition.
+- Put the rounding rule and the billing granularity in a `summary` line or in
+  `actions`. That is the sentence that qualifies every figure above it.
+
+### Content guidelines
+
+- Write `name` as a short noun phrase. It is scanned down a column, and a name
+  that wraps to two lines is a row whose figures sit below their neighbours.
+- Write `detail` as the thing the name cannot carry, and put a link in it when the
+  catalogue entry is worth reaching.
+- Write `note` for the one thing about a line the figures do not say: prorated,
+  yearly, the second one free.
+- Write each `summary` label as what the line is for, not as its position. "Lines
+  before discount" is a fact a reader can check; "Line 1" is a label they count.

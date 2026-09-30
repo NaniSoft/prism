@@ -1,0 +1,16 @@
+{
+  "name": "todo-01",
+  "title": "Todo 01 - A Task List With An Aggregate Bar",
+  "description": "A task list with a checkbox, a title, an optional note, an owner, a due reading and a state per task, plus an aggregate progress bar. The checkbox is the published control rather than a clickable div, so it owns its focus ring and its hit target and a keyboard reader can reach every task. A finished task stays in the list, struck through and muted, because a completed task a reader cannot find is a task they will redo. The bar takes the caller's words as a string rather than a callback, because a function cannot cross from a server Component into a client one. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": [
+    "avatar",
+    "checkbox",
+    "cta-link",
+    "progress",
+    "relative-time",
+    "section",
+    "status"
+  ],
+  "dependencies": []
+}

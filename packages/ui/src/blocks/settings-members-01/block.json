@@ -1,0 +1,8 @@
+{
+  "name": "settings-members-01",
+  "title": "Settings Members 01 - Workspace Roster",
+  "description": "The members of a workspace as rows or a real table, with a role control on every row but the reader's own, a pending-invitations group where an expired invitation is dimmed rather than removed, and a slot for the caller's own invite control.",
+  "categories": ["application"],
+  "registryDependencies": ["avatar", "field", "list-panel", "section", "select", "table"],
+  "dependencies": []
+}

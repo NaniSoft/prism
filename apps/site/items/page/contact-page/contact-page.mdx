@@ -1,0 +1,127 @@
+---
+slug: pages/contact-page
+title: ContactPage
+---
+
+## Overview
+
+ContactPage is a complete contact screen: the page heading, a form whose fields the
+caller declares, a band of offices and regions, and a closing band for the questions
+a reader should not have to ask to find this screen.
+
+| Order | Region | Who owns it |
+| --- | --- | --- |
+| 1 | the page heading, at `h1` | the Page |
+| 2 | the form band, one step below | the Page, from the caller's `fields` |
+| 3 | the offices, as facts | the Page, from the caller's `offices` |
+| 4 | the questions | the caller, passed in as `footer` |
+
+**The offices are the part that makes this a page rather than a `contact-01`.** A
+contact block is a band: one form, in one column, with the caller's fields. A
+contact screen is the band, the places, and the questions, and the two extras are
+what a reader actually arrives with, because a reader who wants to write has a
+fallback and a reader who has run out of patience has a map.
+
+**The offices are facts and not controls.** A postal line is a string a reader
+copies, `detail` is a node because the honest thing under a place is sometimes a
+sentence and sometimes a table of hours, and the only link a card may carry is your
+own map link, with words on it. A screen that turned its regions into navigation
+would be telling a reader that a place is a topic they can read about, and the only
+topic any of them has is how to get there.
+
+**The status is `Contact01`'s own, and this page ships no success sentence.** A
+contact request can be delivered, held by a filter, filed by a bot, refused as a
+duplicate and answered, and one sentence cannot be true of all five. So you own the
+promise and write the words.
+
+## Usage
+
+```tsx
+import { ContactPage } from '@nanisoft/prism-ui/pages/contact-page'
+
+<ContactPage
+  title="Tell us what is going wrong"
+  description="Who reads this and what happens next."
+  form={{ title: 'Write to the estate desk' }}
+  fields={[
+    { id: 'name', label: 'Your name', type: 'text', required: true },
+    { id: 'email', label: 'Where to reply', type: 'email', required: true },
+    {
+      id: 'topic',
+      label: 'What this is about',
+      type: 'select',
+      required: true,
+      options: [{ value: 'collector', label: 'A collector that will not start' }],
+    },
+    { id: 'message', label: 'What happened', type: 'textarea', required: true },
+  ]}
+  onSubmit={send}
+  submitLabel="Send it"
+  consent="We keep what you write until the request is closed."
+  status={status}
+  officesLabel="Where we are"
+  offices={[
+    {
+      id: 'london',
+      name: 'London',
+      lines: ['Nexus Software Ltd', '2 Bevis Marks', 'London EC3A 7BD'],
+      mapHref: '/offices/london',
+      mapLabel: 'Open the map',
+    },
+  ]}
+  footer={<Faq01 {...questions} />}
+/>
+```
+
+<ComponentDemo slug="contact-page" />
+
+## Guidelines
+
+### When to use
+
+Use ContactPage for a public route whose job is to get an enquiry to a person: a
+support desk, a sales enquiry, a security disclosure.
+
+Use it with the offices omitted. A product with one desk and one form passes no
+`offices` and the screen is the heading, the form and the questions.
+
+### When not to use
+
+Do not use it for a sign-in problem. `ForgotPassword01`, `Login01` and
+`MagicLink01` are blocks that own their own transport, and a contact form is a slow
+way to reset a secret.
+
+Do not use it for a newsletter. `Newsletter01` is the block for that, and it needs
+a consent sentence this screen does not require.
+
+Do not use it when there is exactly one postal address beside exactly one form.
+`Contact01`'s `address` arm puts the two side by side in one band, which is the
+better arrangement for one address, and composing the block is four lines.
+
+### Best practices
+
+- Every field carries a `label`, and every field is yours. The field list is the
+  design: a form with a fixed set of fields decides what a reader may say, and the
+  decision is invisible in a screenshot because the rendered form looks complete.
+- A `select` field carries `options`, and the page throws without them. A control
+  with nothing in it is a question no reader can answer that looks answered only
+  because it is there and focusable.
+- `officesLabel` is required wherever `offices` is. "Offices", "Where we are" and
+  "Locations" are three products' words, and a row of addresses with nothing above
+  it is the region every contact screen forgets to name.
+- `mapLabel` is required wherever `mapHref` is, and forbidden where it is not. A map
+  control announced by its coordinates is punctuation rather than a name.
+- Pass `headingLevel="h2"` when the screen is embedded under a heading the consumer
+  already owns.
+
+### Content guidelines
+
+- The page heading says what the reader should write about. "Tell us what is going
+  wrong" beats "Contact us", which is a word about the page rather than about the
+  reader's situation.
+- The form band heading names the desk, not the action. "Write to the estate desk"
+  says who will read it.
+- The `description` says who reads the message and what happens next. It is the
+  sentence that decides whether somebody writes at all.
+- An office's `detail` is the thing a reader needs and cannot infer: the hours the
+  desk is read, the languages it answers in, the nearest station.

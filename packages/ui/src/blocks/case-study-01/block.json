@@ -1,0 +1,8 @@
+{
+  "name": "case-study-01",
+  "title": "Case Study 01 - A Customer, An Account And The Figures They Assert",
+  "description": "One case study in full: a named customer, a sector, the problem, what was done, a row of figures the caller asserts and an optionally labelled quotation, stacked or split. Every number is a prop and none is shipped here, because a figure a design system chose would be a false advertising claim installed into every consumer product. quoteLabel is required with a quotation.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "metric", "prose", "badge"],
+  "dependencies": []
+}

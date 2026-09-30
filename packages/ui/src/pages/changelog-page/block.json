@@ -1,0 +1,7 @@
+{
+  "name": "changelog-page",
+  "title": "Changelog Page - A Record Of What Changed, With Caller Owned Filters And A Place To Link One Release",
+  "description": "A complete record screen composing one changelog band per release, with a caller owned filter row, a caller owned way of reaching the older releases and a closing subscribe band. The order is the order things happened and the page never sorts. Every release is linkable, so a product that says since last time can point at one release. Every string and version is a prop.",
+  "categories": ["marketing"],
+  "dependencies": []
+}

@@ -1,0 +1,7 @@
+{
+  "name": "onboarding-page",
+  "title": "Onboarding Page - Heading, Checklist And A Way Out Of A Setup That Is Going Wrong",
+  "description": "A complete setup screen composing the checklist with a way to ask for help and a closing band. Every step, state, count and label is passed in as a prop, and the progress figure is handed back as a function rather than composed.",
+  "categories": ["application"],
+  "dependencies": []
+}

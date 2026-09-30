@@ -1,0 +1,8 @@
+{
+  "name": "directory-01",
+  "title": "Directory 01 - People Or Things A Reader Can Search, Browse And Follow",
+  "description": "A directory with a controlled search field, a set of caller-supplied categories and the members under them, filtered in the browser as the reader types, as cards or as rows. Every member's link carries a caller-supplied sentence, because a person's name is a name and the sentence saying that following it is a thing you can do belongs to the caller, which is the same rule community-01 and careers-01 make. The Block filters what it was given and searches nothing. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "avatar", "badge", "card", "cta-link", "search-field"],
+  "dependencies": []
+}

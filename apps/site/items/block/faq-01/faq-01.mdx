@@ -1,0 +1,79 @@
+---
+slug: blocks/faq-01
+title: Faq01
+---
+
+## Overview
+
+Faq01 is a question and answer list: the section heading, the questions, and an
+optional contact control under the last answer.
+
+The accordion is the default and the list form is the other half of the answer. A
+reader who has just arrived has not decided what they want to know, so a collapsed
+answer is a question they have not chosen to spend anything on. A reader who has
+scanned the page and wants to compare two answers at once wants them all open, and
+a design system that only ships the accordion makes that reader open four panels by
+hand.
+
+The keyboard model is `Accordion`'s and this Block does not re-derive it. The
+trigger is a real button, the panel is linked to it by the library, Enter or Space
+opens the focused item, and the header announces its expanded state.
+
+## Usage
+
+```tsx
+import { Faq01 } from '@nanisoft/prism-ui/blocks/faq-01'
+
+<Faq01
+  title="Questions we are asked before every capture"
+  questions={[
+    { id: 'replay', question: 'Can a capture be replayed?', answer: 'Yes, for seven days.' },
+  ]}
+  contact={{ label: 'Ask an engineer directly', href: '/contact' }}
+/>
+```
+
+<ComponentDemo slug="faq-01" />
+
+## Guidelines
+
+### When to use
+
+Use Faq01 where a reader arrives with a question and the answer is longer than a
+sentence. A question whose answer is four words belongs in the sentence around it.
+
+Use `format="list"` where the questions are about each other: pricing, scope,
+migration. A reader comparing two answers wants them in the document at once.
+
+### When not to use
+
+Do not use it for a single question. A one-item accordion is a disclosure, and
+`Collapsible` is the Component for that.
+
+Do not use it for documentation. A question list is a set of objections a reader
+has about a purchase, and a reference page is organised by topic rather than by
+what a reader is worried about.
+
+### Best practices
+
+- Order the questions the way they are asked. A list of questions is a set of
+  objections, and the order is the answer to which one a reader has by the third
+  row.
+- Put the question in the `question` string and keep it one sentence. A question
+  with a link in it is a sentence with a hole in it.
+- Compose links and code inside `answer`, which is a node. The question is a
+  string so a heading cannot be built out of an emphasis and an anchor.
+- Use `contact` for a place a human reads. It renders a real `CtaLink`, so it is
+  announced as a link and the browser's own link affordances work.
+- Keep the measure. The list is set at the prose measure, not the page container,
+  because an answer is a paragraph and a paragraph at seventy-two characters is a
+  paragraph.
+
+### Content guidelines
+
+- Write questions as the reader would ask them, in the reader's words. A question
+  rewritten into the product's vocabulary answers a question nobody had.
+- Write answers that stand alone. A reader may open one panel and stop, and an
+  answer that begins "it also depends" has lost its subject.
+- Write the contact label as a sentence about what the reader gets, not about the
+  control. "Ask an engineer directly" is a sentence; "Contact" is a category.

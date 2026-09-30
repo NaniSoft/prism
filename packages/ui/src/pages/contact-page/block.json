@@ -1,0 +1,7 @@
+{
+  "name": "contact-page",
+  "title": "Contact Page - Heading, Declared Form, Offices And The Questions Before Them",
+  "description": "A complete contact screen: the page heading, a form whose fields the caller declares, a band of offices and regions drawn as facts rather than controls, and a closing band for the questions a reader should not have to ask. Every field, label, destination, office line and outcome sentence is passed in as a prop.",
+  "categories": ["marketing"],
+  "dependencies": []
+}

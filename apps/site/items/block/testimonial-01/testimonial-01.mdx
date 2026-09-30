@@ -1,0 +1,87 @@
+---
+slug: blocks/testimonial-01
+title: Testimonial01
+---
+
+## Overview
+
+Testimonial01 is one quote with an attribution, or two side by side.
+
+The attribution is the load-bearing part, and everything else on the Block is
+arranged around it. A quote with no name is a sentence the reader cannot weigh: an
+unattributed sentence on a marketing page is a claim the page makes about itself,
+wearing somebody's voice. A quote with a name and no role is only slightly better,
+because a name is a name.
+
+So `role` and `company` are two optional fields rather than one `byline` string. A
+testimonial whose speaker has a role and no company is ordinary, and one byline
+string would have forced that speaker to put something in the company half.
+
+`companyUrl` renders a real anchor with the company as its accessible name, and
+`avatar.name` is the caller's own fallback text rather than initials this Block
+derived from a name.
+
+## Usage
+
+```tsx
+import { Testimonial01 } from '@nanisoft/prism-ui/blocks/testimonial-01'
+
+<Testimonial01
+  title="Two operators, two different reasons"
+  quotes={[
+    {
+      id: 'capture',
+      quote: 'The replay is the part that sold the team.',
+      name: 'Ines Ravel',
+      role: 'Head of Market Data',
+      company: 'Ardent Clearing',
+      companyUrl: 'https://example.com/ardent-clearing',
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="testimonial-01" />
+
+## Guidelines
+
+### When to use
+
+Use Testimonial01 where a reader is deciding whether to believe the page, and a
+sentence from somebody with a name is the evidence.
+
+Use `format="pair"` where two readers' situations differ, so one quote does not
+speak for a team it is not on. Two is the limit: a third column is a list, and a
+list of quotes is a testimonials page.
+
+### When not to use
+
+Do not use it for a logo wall. A logo says a company bought something; a quote
+says what a person noticed, and the two are not interchangeable.
+
+Do not use it for a rating. A five-star scale is a consumer idiom and this package
+already answers it with `meter`.
+
+### Best practices
+
+- Give every quote a `name`. It is the one field with no default, because a quote
+  with no name is a sentence the reader cannot weigh.
+- Use `role` and `company` independently. A consultant, a regulator and an
+  engineer who has left all have a role and no company, and an empty field is the
+  honest answer where "Independent" is a claim.
+- Pass `companyUrl` where the company has a page of its own. A bare URL under a
+  caption is a link a reader has to read character by character.
+- Pass `avatar.name` as the initials or monogram you want. This Block does not
+  derive them, because taking initials from a name is a claim about the grammar of
+  names in a language this repository has no data for.
+- Match the quote count to the format. `single` takes one and `pair` takes two, and
+  a mismatch is a thrown diagnostic rather than a short row.
+
+### Content guidelines
+
+- Write the quote in the person's words, not the product's. A testimonial that
+  reads like a spec sheet is a spec sheet with a name on it.
+- Write one or two sentences. A quote that runs past four lines is an article, and
+  an article in a card is a card nobody finishes.
+- Do not start every quote with the product's name. Three quotes that all open
+  with it are one quote in three costumes.

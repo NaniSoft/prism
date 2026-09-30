@@ -1,0 +1,8 @@
+{
+  "name": "notification-center-01",
+  "title": "Notification Center 01 - A List Of Notifications With An Unread Count",
+  "description": "A list of notifications where each carries a mark, a title, a body, a moment, a read state and a per item action slot, with the unread count computed from the items and the words for it handed back through a function, because three unread, three new and three since Monday are three sentences. An unread item carries a filled dot that is also a graphic with the caller own name, because a colour is not a state a screen reader can be told about, and read is derived from each item own field and never from the count. Two shapes: a page section, or a bounded panel for a shell.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "list-panel", "status", "button", "cta-link"],
+  "dependencies": ["lucide-react"]
+}

@@ -1,0 +1,129 @@
+---
+slug: blocks/billing-source-01
+title: BillingSource01
+---
+
+## Overview
+
+BillingSource01 is the billing sources a workspace has on file: a name the caller
+supplies, a brand mark slot, a kind, an expiry reading, a default mark, a link,
+and a set of per-source controls, inside a bounded panel with an add control at
+its trailing edge.
+
+The storefront version of this pattern is saved payment methods, and the shape is
+familiar. A shop shows a reader the cards they have on file, each with a brand
+mark, a masked number, an expiry, a default tick and a remove control. What changes
+here is whose money it is and what the controls do. A workspace's billing sources
+are a record a reader checks, and the two controls this Block draws are not "buy
+with this" and "edit this": they are "charge to this one" and "stop charging to
+this one". A reader who has used both will recognise the rows, and the difference
+is that nothing here can be spent.
+
+## The mark is a slot, and that is the whole point of the field
+
+This Block ships no card marks, and it will not, for three reasons that are worth
+reading together.
+
+Prism's icon lane is Lucide. A card network's mark is a licensed asset with brand
+rules governing its size, its clear space, its colour and its use on a third
+party's surface, and restating those rules in a design system's documentation is
+exactly the thing this repository has no business doing. And a set of them shipped
+as a component is a set that is out of date within a year, because the networks
+add and retire programmes and a component package cannot follow them.
+
+So `mark` is your own licensed asset, the frame around it is a size and a clip and
+nothing else, and a source with no mark draws no frame at all rather than a grey
+disc. A grey disc where a logo would be is a claim that the absence is a gap. The
+cost is real: you have four assets to license where a design system that shipped
+them would have handed you four marks it was not entitled to.
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+
+import { BillingSource01 } from '@nanisoft/prism-ui/blocks/billing-source-01'
+
+export function SourcesOnFile() {
+  const [sources, setSources] = useState(onFile)
+
+  return (
+    <BillingSource01
+      eyebrow="Nexus"
+      title="What this workspace is charged to"
+      description="Two sources on file. One of them takes the charges."
+      sources={sources}
+      onSetDefault={(id) => setDefault(id)}
+      setDefaultLabel={(source) => `Charge to ${source.name}`}
+      onRemove={(id) => setSources((was) => was.filter((s) => s.id !== id))}
+      removeLabel={(source) => `Stop charging to ${source.name}`}
+      addLabel="Add a source"
+      onAdd={() => openHostedForm()}
+      empty="This workspace has no billing source on file. Charges cannot be taken until one is added."
+    />
+  )
+}
+```
+
+<ComponentDemo slug="billing-source-01" />
+
+## Guidelines
+
+### When to use
+
+Use it on a page whose subject is the set of ways a workspace can be charged. A
+billing page, a usage page's payment tab, the sources behind a running estate's
+invoices.
+
+Use it when a reader's questions are "which one is in use" and "which one is about
+to expire". Both are answered by scanning, which is why the rows are a bounded
+panel rather than a set of cards.
+
+### When not to use
+
+Do not use it as a checkout. A reader choosing a card to pay with once is a form,
+and a form that lists the sources on file is a `ListPanel` with a `DataToolbar`
+above it.
+
+Do not use it for one source. A single card on file is a fact list, and a panel
+around one row is a frame around a page.
+
+Do not use it where the sources are not the subject. A plan, a price and a renewal
+date is `account-01`, and a rate card is `rate-card-01`.
+
+### Best practices
+
+- Pass `onSetDefault` with `setDefaultLabel`, and `onRemove` with `removeLabel`, or
+  neither of each pair. The Block throws rather than draw a button it cannot name.
+- Mark exactly one source as the default, and pass `defaultLabel` with it. Two
+  defaults throws, naming both sources, because the mark is the only thing on the
+  page saying where the charges fall.
+- Let the set-as-default control be withheld on the default row and put your
+  confirmation in the source's own `actions` slot. A bare click that takes a card
+  off file is not a confirmation.
+- Pass `expiresAt` with `expiresLabel` unless you have already formatted it. The
+  Block prints the value exactly as given, so a raw timestamp lands beside a card a
+  reader recognises.
+- Keep the order yours. A caller who wants the default first moves it first.
+- Pass `addLabel` with `onAdd`, or neither. The Block draws no default sentence for
+  a control it cannot name, and "Add payment method" is a sentence this package is
+  not entitled to write into your billing page.
+
+### Content guidelines
+
+- `name` is how your product names the source, in the words a reader would use. It
+  is a string rather than a node so the control labels can be built from it.
+- `kind` is a short noun phrase: a card, a mandate, an invoice account. The
+  column is scanned, so a kind that wraps costs every other row its alignment.
+- `expiresLabel` is yours and should be localised. "Expires 03/27" and "Läuft am
+  03/27 ab" are two products' sentences, and a Block that composed one would have
+  composed it in its own language.
+- `defaultLabel` is a mark, not a sentence beside a mark. It is what the reader
+  reads in the badge itself, so it should be two words at most.
+- `setDefaultLabel` and `removeLabel` must contain the source's own name. It is the
+  only thing telling one control from the next, and the consequence of pressing the
+  wrong remove control is a card a reader meant to keep no longer being charged to.
+- `empty` distinguishes a workspace nobody has added a source for from a query that
+  failed. Only you know which one is on screen.

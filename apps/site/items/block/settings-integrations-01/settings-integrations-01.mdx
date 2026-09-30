@@ -1,0 +1,123 @@
+---
+slug: blocks/settings-integrations-01
+title: SettingsIntegrations01
+---
+
+## Overview
+
+SettingsIntegrations01 is the systems a workspace connects to: a mark, a name, one
+line about the capability, a state, and either a connect control or a reading of
+how long the connection has been up.
+
+The state that makes it worth shipping is `needs-attention`. An integration that
+is connected and wrong is the common case, not the edge case: the token expired,
+the scope narrowed, the vendor changed its API. A design system offering only
+connected and available gives a consumer exactly one way to draw that, and the one
+way on offer is to draw it as available, which says to the reader that nothing is
+wrong. The reader acts on it, and the failure arrives later in somebody else's
+part of the product with no connection to this page. The mark slot is a slot that
+draws no frame, so a `PackSwatch` keeps its own boundary and its own radius.
+
+## Usage
+
+```tsx
+import { SettingsIntegrations01 } from '@nanisoft/prism-ui/blocks/settings-integrations-01'
+
+<SettingsIntegrations01
+  eyebrow="Connections"
+  title="The systems this workspace talks to"
+  groupBy="category"
+  integrations={[
+    {
+      id: 'historian',
+      name: 'The historian',
+      capability: 'Reads process values from every site, continuously.',
+      state: 'connected',
+      stateLabel: 'Connected as the workspace owner',
+      mark: <PackSwatch pack="mint" label="The mint pack" size="sm" />,
+      connectedSince: Date.UTC(2025, 4, 2),
+      connectedSinceLabel: (value) =>
+        new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(value)),
+      category: 'The estate',
+      href: '/settings/historian',
+      hrefLabel: 'Manage the connection',
+    },
+    {
+      id: 'lms',
+      name: 'The learning record',
+      capability: 'Fills a gap in the archive from before the estate was observed.',
+      state: 'needs-attention',
+      stateLabel: 'The token expired four days ago',
+      category: 'The estate',
+      action: <Button size="sm">Reconnect</Button>,
+    },
+    {
+      id: 'graph',
+      name: 'The access graph',
+      capability: 'Shows which paths a person can actually take.',
+      state: 'available',
+      stateLabel: 'Not connected yet',
+      category: 'Where the work happens',
+    },
+    {
+      id: 'erp',
+      name: 'The maintenance system',
+      capability: 'Purchase orders and work orders, where the estate already keeps them.',
+      state: 'unavailable',
+      stateLabel: 'Not offered in this region',
+      category: 'Where the work happens',
+    },
+  ]}
+  connectLabel={(integration) => `Connect ${integration.name}`}
+  onConnect={(id) => startConnection(id)}
+  empty="This workspace has connected to nothing yet."
+/>
+```
+
+<ComponentDemo slug="settings-integrations-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for a product's own connections, on a settings page or in a plan chooser.
+It reads well at three to fifteen systems.
+
+Use `groupBy="category"` when your systems fall into groups a reader already knows,
+such as the systems that read the estate and the systems that write to it.
+
+### When not to use
+
+Do not use it for a partner or customer list. A mark beside a name is evidence a
+reader can check, and `logo-cloud-01` is the honest shape for one.
+
+Do not use it to render a capability your product has announced and not shipped as
+`available`. `integration-01` carries a `coming-soon` state for that, and the two
+Blocks are not interchangeable: this one is for connections a reader can make.
+
+### Best practices
+
+- Use all four states where they are true. The value of `needs-attention` is that
+  it is available to render.
+- Draw `connectLabel` per integration. A column of four controls all announced as
+  "Connect" is a column a screen reader user cannot act on.
+- Use the `action` slot for the connected, needs-attention and unavailable rows.
+  The Block draws a connect control only on an available row, because that is the
+  only one of the four states where connecting is the action.
+- Pass `stateLabel` on every row. The tone is a colour and the words are the
+  information, and the Block refuses a state with no words.
+- Put your own mark in the slot. A `PackSwatch` in this slot wants `size="sm"`,
+  and a frame around it is what a caller who wants one adds.
+- Name every integration you group. One with no category still renders, under no
+  title, and the count is on the list element as `data-ungrouped`.
+
+### Content guidelines
+
+- `name` is the system's own name, as the system spells it.
+- `capability` is one line about what connecting it gets the reader. A fact they
+  can check by trying it, not a sentence about your product.
+- `stateLabel` is a sentence your readers would say, in your own language. On a
+  `needs-attention` row it is where the reason goes.
+- `hrefLabel` says what the destination is for.
+- `connectLabel` names the system. Two rows whose controls both say "Connect" are
+  two rows a reader cannot tell apart.

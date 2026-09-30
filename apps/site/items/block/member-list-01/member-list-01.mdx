@@ -1,0 +1,101 @@
+---
+slug: blocks/member-list-01
+title: MemberList01
+---
+
+## Overview
+
+MemberList01 is a dense list of people for an application surface, not a
+marketing page: a portrait where there is one, a name, a role, a presence, a
+last-seen reading and a slot for the caller's own row actions.
+
+This is a Block and not `Item` and not `ListPanel`, and the reason is two facts.
+`Item` is the right row for most lists: media, a title, a description, one value
+and trailing controls. What it cannot be is a row that knows a colleague is
+online, because its `meta` is one value and presence and last-seen would have to
+be packed into it. `ListPanel` knows about a region, not about its rows. Composing
+a member list from those two leaves every consumer writing the same two columns
+again.
+
+The presence tones are mapped here and the words beside them are the caller's,
+because a wrong mapping is a claim about a colleague. `online` is `success`, `away`
+is `warning`, and `offline` is `neutral` rather than `destructive`: most people on
+a member list are offline, and a page of red dots says a page of faults, which
+nobody believes and everybody has to look at.
+
+Nothing is formatted. `lastSeen` is a string and Prism prints it exactly as
+passed.
+
+## Usage
+
+```tsx
+import { MemberList01 } from '@nanisoft/prism-ui/blocks/member-list-01'
+
+<MemberList01
+  label="Team members"
+  onSelect={(id) => setOpen(id)}
+  empty="No one has joined this workspace yet."
+  members={[
+    {
+      id: 'p-raman',
+      name: 'Priya Raman',
+      role: 'Pipeline operations',
+      presence: 'online',
+      presenceLabel: 'At a terminal',
+      lastSeen: 'Seen a moment ago',
+      avatar: { name: 'Priya Raman' },
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="member-list-01" />
+
+## Guidelines
+
+### When to use
+
+Use MemberList01 inside an application surface that already owns its chrome: a
+workspace panel, a settings page, a members drawer. It composes `Section` for the
+container and sets its own tighter vertical rhythm, because the rhythm a landing
+page wants and the rhythm a panel wants are not the same thing.
+
+Use it when a reader needs to answer two questions at once: is this person around,
+and when did they last come by. Those are the two columns that make it a members
+list rather than a directory.
+
+### When not to use
+
+Do not use it on a marketing page. A biography grid for the people behind a
+product is `team-01`, and a members list of forty rows on a landing page is a
+directory nobody asked for.
+
+Do not use it for a project roster. A project has a status that is about the work
+rather than about the person, which is `status-ledger-01`.
+
+Do not use `ListPanel` plus `Item` to assemble one. That is the arrangement this
+Block replaces, and it is why the presence and last-seen columns keep being
+re-derived slightly differently in every application.
+
+### Best practices
+
+- Pass `presenceLabel` whenever you pass `presence`. The tone is Prism's and the
+  vocabulary is yours, because three products call the same state "free",
+  "available" and "online".
+- Pass `lastSeen` already read. The honest reading of when somebody was last
+  around is localised, so compose `relative-time` in your own code and pass what
+  it produced.
+- Pass `onSelect` or `href`, never both for one member. A row that is a link and a
+  button at once is not a control any keyboard model can express, and the Block
+  throws rather than picking one.
+- Put row actions in `actions` and remember they are in addition to the row's own
+  destination, never instead of it.
+
+### Content guidelines
+
+- Use the presence words your product already uses. They are the only part of the
+  row a screen reader reads as a state, and they are a statement about a person.
+- Keep the last-seen reading short enough for a 10rem column. It is a column, not a
+  sentence.
+- Say why the list is empty. An empty members list has more than one reason behind
+  it, and the words differ for each.

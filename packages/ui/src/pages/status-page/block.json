@@ -1,0 +1,7 @@
+{
+  "name": "status-page",
+  "title": "Status Page - Estate, Services And Incidents",
+  "description": "A complete service-status screen: the caller's judgement of how the estate as a whole is standing, the services under it with their own states and words, the recent incidents with their updates, and slots for the caller's own ways to follow along. The overall state is never computed from the rows, and the four incident states are a lifecycle rather than a product's vocabulary.",
+  "categories": ["application"],
+  "dependencies": []
+}

@@ -1,0 +1,148 @@
+---
+slug: blocks/verify-email-01
+title: VerifyEmail01
+---
+
+## Overview
+
+VerifyEmail01 is where a person finds out whether a message reached them: what is
+being verified, where the verification has got to, your own resend, and the route out
+for a reader this screen does not help. Every string is passed in as a prop and the
+Block holds no state of its own.
+
+**The five states are five screens and not five messages, and that is the whole
+design.**
+
+| State | What it is | What changes on screen |
+| --- | --- | --- |
+| `checking` | progress | the reader's job is to wait, so a ring is drawn when you named the state and nothing else is offered |
+| `verified` | a destination | the reader's job is to leave, so no resend is drawn |
+| `pending` | a wait | the resend is drawn and takes the neutral tone, because nothing has gone wrong |
+| `failed` | a retry | the resend is drawn, the tone is destructive, and the outcome interrupts |
+| `expired` | a request for a new link | the resend is drawn, the tone is a warning, and the outcome interrupts |
+
+A screen that drew any of these as a sentence in the middle of a form would be asking
+a reader to work out what has happened from a sentence, and a reader who cannot tell
+whether their address is verified will try again. A second attempt on a verification is
+a second attempt on a machine's authorisation, and eventually it is a lockout.
+
+**`neutral` is the tone that asserts least and `pending` is the state that gets it.** A
+reader who has just followed a link is in the middle of an action they took and the
+honest reading of the next two seconds is that nothing has gone wrong. A destructive
+dot on a wait is a claim about the reader's account made by a colour, before any
+evidence exists, and the reader who believes it is the one who goes looking for the
+problem somewhere else. `expired` takes `warning` rather than `destructive` because the
+link died, the address may be perfectly good, and the thing to do about it is ask for
+another one.
+
+**There is no code field on this screen, and the reason is one sentence: the link is the
+proof, and a field invites a reader to type a code they do not have.** A reader who
+arrived without the link has exactly one action available, which is asking for another
+one, and a field in front of them invites them to type the six characters they half
+remember from a text they did not read. Prisms that render a code field on a link-based
+verification are answering a product that sends codes.
+
+## Usage
+
+```tsx
+import { useState } from 'react'
+import { VerifyEmail01 } from '@nanisoft/prism-ui/blocks/verify-email-01'
+
+export function ConfirmAddress({ result }: { result: VerificationResult }) {
+  const [resending, setResending] = useState(false)
+
+  return (
+    <VerifyEmail01
+      eyebrow="Sign up"
+      title="Confirm that address"
+      description="This is where you find out whether the message arrived. Nothing else about your account changes until it does."
+      target={{
+        identifier: result.address,
+        identifierLabel: 'Address on the account',
+        changeLabel: 'Verify a different address',
+        onChange: (identifier) => startOver(identifier),
+      }}
+      status={{
+        state: result.state,
+        stateLabel: result.label,
+        message: result.message,
+      }}
+      resendLabel="Send it again"
+      resentLabel="Sending it now"
+      resending={resending}
+      cooldownLabel="You can ask again in about a minute."
+      onResend={async () => {
+        setResending(true)
+        await resendVerification(result.address)
+        setResending(false)
+      }}
+      help={{
+        message: 'If this address belongs to somebody else, ask whoever sent the invitation to check the address they used.',
+        href: '/support/recovery',
+        label: 'Ask for help with this address',
+      }}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="verify-email-01" />
+
+## Guidelines
+
+### When to use
+
+Use it at the destination of a verification link, and only there. It is a whole section
+because the reader has to be able to read the state without scrolling past anything,
+and because a dialog gives them nowhere to go if the state is not one they expected.
+
+Pass `stateLabel` for every state. The fallback is the machine value, which is honest
+and rarely wanted: a product whose readers meet the word `pending` is a product that
+has not named its own states, and seeing its own key on the screen is a faster way to
+find that out than shipping it.
+
+Pass `identifierLabel` too. The address is on the screen either way, and the label is
+what a reader compares against their own inbox before they press anything.
+
+### When not to use
+
+Do not use it when your product sends a code rather than a link. A reader with a code
+needs a field to put it in, and `OneTimeCode` is the Component for that arrangement.
+
+Do not use it as a general status page. The five states are about one verification, and
+the tone each one takes is a claim about that verification alone.
+
+Do not put a code field beside it as a fallback "just in case". Two proofs on one screen
+is a screen that asks the reader to work out which one their product meant.
+
+### Best practices
+
+- Use `resending` for both facts: that a resend is in flight and that one has been
+  asked for. It is what makes the control swap to `resentLabel` and what turns
+  `cooldownLabel` on, and from where the reader is sitting those are the same event.
+- Pass `cooldownLabel` in your own words and keep it in step with your own rate limit. A
+  Block that guessed a cooldown would be shipping one policy to four products in a
+  place no consumer can read it.
+- Keep `changeLabel` and `onChange` together or neither. The Block throws on half a
+  control.
+- Compose `actions` for whatever your reader does next rather than asking for a named
+  set of controls here. Open another inbox, sign in, contact an administrator: all three
+  are real and all three are your product's.
+- Do not render your own announcement beside `status.message`. The sentence is inside
+  the live region and drawn once, and a second region holding the same words would read
+  the same news twice on the one screen where a reader is waiting for it.
+
+### Content guidelines
+
+- Write each state message as a fact about the verification and the reader's position,
+  not as a feeling. "The message has not been opened from that address" beats "Almost
+  there".
+- Write `checking` in the present tense and in the reader's language, because it is the
+  one state where the words are doing the work of a progress bar.
+- Write `expired` with the lifetime in it. "Links last thirty minutes" is what makes the
+  refusal acceptable, and it is the sentence that stops the reader asking a question.
+- Write `failed` as something that might have happened to the link rather than as
+  something the reader did wrong. A reader who believes they mistyped will leave the
+  screen and ask somebody else instead.
+- Write the help message as the reason this screen is not helping and what else exists.
+  The link label is what following it does, not the sentence above it.

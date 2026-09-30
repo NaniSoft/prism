@@ -1,0 +1,8 @@
+{
+  "name": "bento-01",
+  "title": "Bento 01 - Cells With An Explicit Span",
+  "description": "An asymmetric six-track grid whose cells arrive with an explicit span, so the caller composes the arrangement and the block only lays it out and frames it. Three named spans and three surfaces. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["card", "section"],
+  "dependencies": []
+}

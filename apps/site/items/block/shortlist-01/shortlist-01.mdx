@@ -1,0 +1,115 @@
+---
+slug: blocks/shortlist-01
+title: Shortlist01
+---
+
+## Overview
+
+Shortlist01 is a set of capabilities a reader is considering: a mark slot, a name, a
+one-line reason, an optional price, a move control, a remove control, and a slot
+for the caller's own controls over the whole set. It draws as cards or as rows.
+
+The storefront version of this pattern is a wishlist, and the shape is familiar. A
+shop shows a reader the things they saved to buy later, each with a mark, a name,
+a price, and a control to take it off the list. What changes here is what is on
+the list. Prism's products observe a pipeline, capture a market, watch an estate
+and run agents, so what a reader is weighing up is a capability: an ingest, a
+retention policy, a connector, an agent. Nothing here is for sale, nothing here
+has a basket, and the price is a rating the product publishes rather than a figure
+anybody will be charged.
+
+The difference that matters between the two is not the vocabulary. It is that a
+wishlist is a list of things and a shortlist is a list of decisions. A reader who
+is considering four capabilities is doing something, and a surface that shows them
+four cards and no way to act on any of them has stopped being the thing they came
+for.
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+
+import { Shortlist01 } from '@nanisoft/prism-ui/blocks/shortlist-01'
+
+export function ConsideredCapabilities() {
+  const [items, setItems] = useState(seed)
+
+  return (
+    <Shortlist01
+      eyebrow="Nexus"
+      title="What you are considering"
+      description="Four capabilities. Move one to a quote, or take it off the list."
+      items={items}
+      onMove={(id) => startQuote(id)}
+      moveLabel={(item) => `Take ${item.name} to a quote`}
+      onRemove={(id) => setItems((was) => was.filter((item) => item.id !== id))}
+      removeLabel={(item) => `Stop considering ${item.name}`}
+      actions={<Button onClick={() => compare(items)}>Compare the four</Button>}
+      empty="Nothing is on the list. Everything you have looked at so far has been decided."
+    />
+  )
+}
+```
+
+<ComponentDemo slug="shortlist-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a reader is weighing options rather than reading about one. A shortlist
+is a working list: it exists so that a decision can be made from it, and the
+controls on each item are how the reader prunes it while they think.
+
+Use it for a set the reader chose. A list of capabilities the product recommends is
+`ResourceList01` or a `NoteGrid01`, and putting controls on it would offer the
+reader a freedom the list does not have.
+
+### When not to use
+
+Do not use it for a catalogue. A shortlist with thirty items in it is a page of
+reading, and the two controls on every one of them are thirty controls a reader has
+to step past.
+
+Do not use it for a single thing. One capability with a mark and a paragraph is a
+card, not a shortlist.
+
+Do not use it as a comparison table. Four capabilities with a row each and a column
+per attribute is `pricing-compare-01` or a `DataTable01`, and the reader's job there
+is to compare rather than to prune.
+
+### Best practices
+
+- Pass both `onMove` and `moveLabel`, or neither. The Block throws rather than
+  draw a button it cannot name, and a column of eight controls all announced as
+  "Move" is a column nobody can act on.
+- Pass both `onRemove` and `removeLabel`, or neither, for the same reason. The
+  label function is what tells a reader which item they are on.
+- Keep the array in the order the reader put it in. The Block never sorts, and the
+  order is one person's thinking rather than the store's.
+- Let the Block hold no state. It reports which item and nothing else, so a
+  request that failed leaves the item where the reader left it, which is a control
+  that told the truth.
+- Pass `href` with `hrefLabel` or neither. The destination is a real anchor and the
+  caller's sentence says what activating it does.
+- Use the `actions` slot for anything that acts on the whole set, and leave the two
+  per-item controls off if a reader should not be able to change the list at all.
+- Omit `mark` rather than passing a placeholder. A grey disc where a logo would be
+  says the absence is a gap.
+
+### Content guidelines
+
+- `name` is the thing's name in your product's words, and it is a string rather
+  than a node precisely so the control labels can be built from it.
+- `reason` is one line about why this reader is considering it, in their language.
+  It is never truncated, so three lines of it is a paragraph in a card.
+- `quantityLabel` does not exist here, and neither does a quantity: a shortlist is
+  a set of things, not a measurement. The price is a rating, and the words around
+  it are `Price`'s to format and yours to place.
+- `moveLabel` and `removeLabel` are sentences your readers would say. Both must
+  contain the item's own name, because that name is the only thing distinguishing
+  one control from the next.
+- `empty` distinguishes a reader who has finished deciding from a query that
+  failed. Both are real, and only you know which one is on screen.

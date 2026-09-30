@@ -1,0 +1,93 @@
+---
+slug: blocks/pricing-compare-01
+title: PricingCompare01
+---
+
+## Overview
+
+PricingCompare01 is a feature-by-plan matrix: the plans across the top, the
+features down the side, and one cell per intersection saying what the plan does
+with the feature. A cell is either a yes, a no, or a value the caller wrote.
+
+It is a real `<table>`. A comparison matrix is the one table on a marketing page,
+and a reader using a screen reader navigates it by row and column header: they ask
+for a column and hear the plan, then move down the cells and hear each answer
+against it. A grid of `div`s has no header cells to ask for, so the same reader
+gets forty cells of unlabelled text and has to remember which column they are in.
+
+The included cell is a `Check` beside a visually hidden text node the caller
+supplies, never a bare icon. An icon that is not labelled is invisible to a screen
+reader, and a "yes" that is only a tick is a claim the reader has to infer from a
+shape.
+
+## Usage
+
+```tsx
+import { PricingCompare01 } from '@nanisoft/prism-ui/blocks/pricing-compare-01'
+
+<PricingCompare01
+  title="What each plan carries"
+  plans={[
+    { id: 'solo', name: 'Solo', price: { amount: 0, currency: 'USD' } },
+    { id: 'team', name: 'Team', price: { amount: 2400, currency: 'USD', period: 'a month' } },
+  ]}
+  groups={[
+    {
+      title: 'Capture',
+      features: [
+        { id: 'sources', label: 'Sources', values: [2, 10] },
+        { id: 'sso', label: 'Single sign-on', values: [false, true] },
+      ],
+    },
+  ]}
+  labels={{ included: 'Included', excluded: 'Not included' }}
+/>
+```
+
+<ComponentDemo slug="pricing-compare-01" />
+
+## Guidelines
+
+### When to use
+
+Use PricingCompare01 where a reader is choosing between plans on features rather
+than on a single headline number. It is the block for the second question, the one
+that follows "which plan is that".
+
+Use it beside a shorter plan block rather than instead of it. A matrix of forty
+rows is a reference and a set of three cards is a pitch, and a page that opens with
+the matrix asks the reader to do arithmetic before it has told them anything.
+
+### When not to use
+
+Do not use it for a single plan with a long feature list. That is `Pricing01`, and
+a matrix with one column is a list with extra steps.
+
+Do not use it to make a reader's decision for them. `highlight` tints one column
+and does nothing else, and a Block that marked a winner would be making a claim
+about a market it knows nothing about.
+
+### Best practices
+
+- Keep a `label` to one line. A feature whose name wraps to two lines is a row
+  whose cells are centred against two lines of prose, and a matrix read down a
+  column loses its alignment on the longest row.
+- Give every feature exactly one value per plan. A `values` array that does not
+  match the number of plans is a thrown diagnostic, because a short row renders a
+  plan with no answer.
+- Pass a number as a number. `values: [10]` renders `10`; `values: ['Ten']`
+  renders the word, and the matrix is then mixing two units of measurement.
+- Use one group when the features do not group. An empty `title` is a legitimate
+  group title.
+- Use `note` on a plan for a qualification or for a badge you compose yourself.
+  A highlighted plan with no note renders nothing, which is the honest answer for
+  a plan whose only distinction is that you pointed at it.
+
+### Content guidelines
+
+- Write a `label` as a short noun phrase naming the feature, not the plan.
+- Write `labels.included` and `labels.excluded` in the product's own vocabulary.
+  Both are announced, so they are sentences a reader hears rather than words on a
+  screen.
+- Write a `note` as one sentence. It sits under the feature name in the row header
+  and it is the qualification a reader checks before they trust the answer.

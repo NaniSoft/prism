@@ -1,0 +1,149 @@
+---
+slug: blocks/offering-list-01
+title: OfferingList01
+---
+
+## Overview
+
+OfferingList01 is a set of capabilities as cards or as a real table, with an optional
+search field, a filter slot, a caller-written result line and an empty state.
+
+The storefront version of this pattern is a product listing page: a filter row, a sort
+control, a result count, and a card or a comparison table per item. Every part of the
+layout and every part of the accessibility work transfers unchanged, because a result
+count is a polite live region whichever set it counts and a comparison table is a table
+whichever things it compares. What does not transfer is the thing being listed. The
+rows here are capabilities a product offers: capture sources, agents, connectors,
+tiers. A reader is not choosing between things to buy, so there is no sort by price
+worth defaulting to and no add-to-basket in the card.
+
+## The search is a pair, because the count of rows decides
+
+A static list of twelve capabilities does not need a search field. Twelve rows are
+shorter than a phone screen at the size this Block draws them, so a reader who wants
+one of them either sees it or does not, and scrolling is a shorter act than typing.
+
+Worse than useless, a field over twelve rows is a claim. A search field says the set is
+too large to read, and a reader who believes it and finds twelve rows has been told the
+page is bigger than it is.
+
+A list of two hundred cannot do without one. There the reader genuinely does not know
+whether the thing they want is present.
+
+So `value`, `onValueChange`, `label` and `clearLabel` travel together, the run throws
+when half a pair is passed, and with no handler the Block draws no field and filters
+nothing.
+
+| Passed | Field drawn | Rows filtered |
+| --- | --- | --- |
+| The whole pair | Yes | Yes |
+| `value` alone | No, throws | No |
+| `label` alone | No, throws | No |
+| Nothing | No | No |
+
+## The state is an open string
+
+A product has its own vocabulary for what a capability is doing, and between them the
+products that compose this Block already use more states than any closed set here could
+hold. `in-preview`, `design`, `awaiting-certificate` and `two-of-three-sites` are four
+real states and none of them is Prism's to choose.
+
+A closed set would force every one of those products to map its words onto ours and
+ship a translation nobody asked for. The translation is the part that rots: the week a
+product adds a state, every map is a version behind and the table is confidently wrong
+about where its own capabilities are, with nothing on the page to say so.
+
+So the words cross the seam untouched, and the Block still colours the row, because a
+table of plain text is missing the one thing a reader was scanning for. The colouring
+is a whole-word match against a stated list, and anything the list does not name comes
+out `neutral`, which is the tone that asserts nothing. A state the Block has never heard
+of costs a colour rather than a wrong one.
+
+`Offering01` takes a closed union of four states and this Block takes an open string.
+That is not an inconsistency: one capability in depth can be given a type that says
+which answers exist and a diagnostic when it is given none, and a catalogue of forty
+rows cannot afford to refuse to render a row over a word it has not heard of.
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+
+import { OfferingList01 } from '@nanisoft/prism-ui/blocks/offering-list-01'
+
+export function Capabilities() {
+  const [query, setQuery] = useState('')
+
+  return (
+    <OfferingList01
+      title="What the platform can do"
+      value={query}
+      onValueChange={setQuery}
+      label="Search the capabilities"
+      clearLabel="Clear the search"
+      offerings={rows}
+      summary={(matches) => `${matches} of ${rows.length}`}
+      empty="Nothing here matches that."
+      variant="table"
+      columns={[
+        { id: 'name', header: 'Capability' },
+        { id: 'state', header: 'State' },
+        { id: 'price', header: 'Cost' },
+      ]}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="offering-list-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a reader is choosing between capabilities rather than reading one. Cards
+are the arrangement for browsing, and the table is for a reader who is comparing
+several at once and needs the columns to do the work.
+
+Use `variant="table"` when the reader's question is "which of these fits", and pass the
+columns in the order they would check them. A table with no `name` column throws, and
+so does a column no capability carries.
+
+### When not to use
+
+Do not use it for a set of fewer than about nine rows on a page that is mostly about
+one of them. That is `Offering01`, or a plain list.
+
+Do not use it for a page whose whole subject is one capability. A catalogue of one is a
+catalogue that has to answer "what else is there", and the answer is a link.
+
+Do not pass a `facets` array. The Block has no opinion about your taxonomy, which is
+what the `filters` slot is for, and a filter set the Block drew would be a filter set
+it owned.
+
+### Best practices
+
+- Pass the whole search pair or none of it. Half a pair is a thrown diagnostic rather
+  than a field that looks live and filters nothing.
+- Pass your own facets into `offerings` and let the Block filter them. The set it
+  receives is the set you have already narrowed, which is why the Block never reaches
+  further.
+- Pass an empty `summary` result on the first paint if you pass one at all, so the
+  polite live region is in the document before its first content.
+- Use the table arrangement only when the reader is comparing. A four-column table over
+  twelve cards is harder to read than the cards.
+- Keep `stateLabel` for the rows whose own word is not the sentence a reader should
+  see, and leave it off the rest.
+
+### Content guidelines
+
+- Write `name` as the capability's own name. It is the card title, the row header, and
+  the only field the search matches against.
+- Write the column names in your own vocabulary. They are the only words on the table
+  that are not data, and a reader who cannot name a column has to count from the left.
+- Write `hrefLabel` as what following the link does, not as the capability's name
+  again. A link whose only words are the row's own name tells a reader nothing.
+- Write `empty` as a sentence that tells the reader what to try next. It is the one
+  line in this Block every reader of a failed search is guaranteed to read.

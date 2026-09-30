@@ -1,0 +1,120 @@
+---
+slug: blocks/community-01
+title: Community01
+---
+
+## Overview
+
+Community01 is where a product's community is: a set of channels or spaces, each
+with a name, a description, a member or activity reading, and a way in. It is a
+grid of cards or a list of rows, and both forms are one set of data.
+
+The upstream pattern this is a reading of is a community section, and the
+translation is worth stating first. A pipeline that runs has an on-call rotation,
+a market that is captured has a watchlist, and an estate that is observed has an
+operators channel. Those are the same object: a named place, a sentence about what
+belongs in it, a reading of how many people are in it, and a link. What the
+upstream pattern adds is a wall of member faces, and a wall of faces is a claim
+about who a product's users are, drawn from an avatar a consumer uploaded, in a
+component that has no way to know whether those faces consented to being on a
+marketing page. So the faces are not here, and `description` is a slot for a
+consumer who wants them.
+
+`members` and `online` are numbers, and `membersLabel` and `onlineLabel` are
+functions. That is the whole decision: the counts are measurements and the words
+are sentences, the Block cannot know which sentence a product's readers want, and
+a bare numeral beside a channel name tells a screen reader nothing about what it
+counts.
+
+## Usage
+
+```tsx
+import { Community01 } from '@nanisoft/prism-ui/blocks/community-01'
+import { Bell, LifeBuoy, Radio } from 'lucide-react'
+
+<Community01
+  eyebrow="Where to find us"
+  title="Three places, and they are not the same"
+  description="Names, readings and the words on every link are yours. The Block supplies the frame."
+  variant="cards"
+  spaces={[
+    {
+      id: 'on-call',
+      name: 'The on-call rotation',
+      description: 'A page when a run stops, and a thread afterwards about why it did.',
+      icon: Bell,
+      members: 1204,
+      membersLabel: (count) =>
+        new Intl.NumberFormat().format(count) + ' people carry the rota',
+      online: 12,
+      onlineLabel: (count) => `${count} on call right now`,
+      href: 'https://status.example.com/rota',
+      hrefLabel: 'See who is on call',
+    },
+    {
+      id: 'watchlist',
+      name: 'The watchlist',
+      description: 'The instruments we publish about, and the notes we keep beside them.',
+      icon: Radio,
+      members: 640,
+      membersLabel: (count) => new Intl.NumberFormat().format(count) + ' subscribers',
+      href: 'https://example.com/watchlist',
+      hrefLabel: 'Read the watchlist',
+    },
+    {
+      id: 'operators',
+      name: 'The operators channel',
+      description: 'For the eleven sites, and for the people who are awake at three in the morning.',
+      icon: LifeBuoy,
+      href: 'https://example.com/operators',
+      hrefLabel: 'Ask a question',
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="community-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for the places a reader can go to talk to other readers or to the people
+who build the thing. It reads well at three to eight spaces.
+
+Use `variant="rows"` for a long list or a narrow column, where the two readings
+and the link want to be on one line.
+
+### When not to use
+
+Do not use it for your own team. An estate's staff and a community's members are
+different sets with different reasons to be listed, and `team-01` is the shape for
+the first.
+
+Do not use it for a forum index the platform already draws well. If the platform
+can list the channels with live counts, this Block is a fallback rather than an
+improvement.
+
+### Best practices
+
+- Pass both label functions wherever you pass a count. The Block throws without
+  them, because a bare numeral beside a channel name tells a screen reader nothing
+  about what it counts.
+- Format the count inside your own label function. `Intl.NumberFormat` is the
+  honest route and the Block does not own your locale.
+- Write a different `hrefLabel` per space. Joining, reading, asking and
+  introducing yourself are four different offers.
+- Use `description` as a slot. It takes a sentence, a sentence and a link, or a
+  sentence with a count in it, and all three are real.
+- Use `icon` for a Lucide mark only. A real avatar is application content, and a
+  set of licensed marks held in a design system is a set of marks that will be
+  wrong within a year.
+
+### Content guidelines
+
+- `name` is the space's own name, as the space spells it.
+- `description` says what belongs in the space, in one or two sentences.
+- `membersLabel` is the whole reading, unit and all. Write the sentence your
+  readers would say rather than a count with a noun beside it.
+- `onlineLabel` says it is a moment. A reader who cannot tell a total from a
+  moment has been told nothing.

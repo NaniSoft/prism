@@ -1,0 +1,129 @@
+---
+slug: pages/pricing-page
+title: PricingPage
+---
+
+## Overview
+
+PricingPage is a complete pricing screen. It owns the page heading, an optional
+notice that the prices moved, the row of plans, and the comparison band, and it
+leaves everything under the comparison to the caller in whatever order they want.
+
+| Order | Region | Who owns it |
+| --- | --- | --- |
+| 1 | the page heading, at `h1` | the Page |
+| 2 | the change note, when there is one | the Page |
+| 3 | the row of plans | the Page, from the caller's `plans` |
+| 4 | the comparison band, its heading and its link | the Page |
+| 5 | the matrix | the caller, passed in as `matrix` |
+| 6 | everything below | the caller, passed in as `bands` |
+
+**The order is the decision the page makes, and the order is a claim about how a
+reader decides.** A reader who has not chosen wants the shape of the choice before
+the detail of it. A reader who has been choosing for a week wants the detail, and
+can already see the shape. So the change note sits between the heading and the
+prices rather than below them, and the matrix sits below the row rather than beside
+it.
+
+**The order costs something.** A product whose objections belong above the plans
+cannot reorder this screen. The honest answer is to compose two pages and put the
+seam where the objection was, which is two page rhythms where the author wanted
+one. That is the correct price of an opinionated order; an `order` prop would have
+moved the decision to every call site, which is to say it would have stopped being
+a page.
+
+**The plan row is drawn by the page rather than delegated to `pricing-01`.** That
+Block takes a formatted `price: string` and an optional `badge`, and this page
+needs `Intl` to do the formatting and needs a highlighted plan to carry a required
+word. A page that composed it anyway would have had to re-declare both.
+
+## Usage
+
+```tsx
+import { PricingPage } from '@nanisoft/prism-ui/pages/pricing-page'
+
+<PricingPage
+  title="What it costs"
+  description="One sentence saying what every plan has in common."
+  changeNote={{
+    title: 'The metered run price moved on 1 September.',
+    href: '/changelog/2026-09-01',
+    hrefLabel: 'Read the full note',
+  }}
+  plans={[
+    {
+      id: 'starter',
+      name: 'Starter',
+      price: { amount: 0, currency: 'GBP', period: 'a month' },
+      action: { label: 'Create a workspace', href: '/signup' },
+    },
+    {
+      id: 'team',
+      name: 'Team',
+      featured: true,
+      featuredLabel: 'What most teams choose',
+      price: { amount: 480, currency: 'GBP', compareAt: 600, period: 'a month' },
+      action: { label: 'Start on Team', href: '/signup?plan=team' },
+    },
+  ]}
+  comparison={{ title: 'Every feature, plan by plan' }}
+  compareLink={{ label: 'See the full specification', href: '/plans/specification' }}
+  matrix={<PricingCompare01 plans={matrixPlans} groups={matrixGroups} labels={labels} />}
+/>
+```
+
+<ComponentDemo slug="pricing-page" />
+
+## Guidelines
+
+### When to use
+
+Use PricingPage for a public pricing route whose job is to let a reader compare
+what a product sells and choose one of the plans. It works when the row is the
+argument: the reader arrives knowing what the thing is and wants to know what it
+costs.
+
+Use it with the comparison band omitted. A product with three plans and no
+exhaustive matrix passes no `matrix` and no `comparison`, and the page ends on the
+row.
+
+### When not to use
+
+Do not use it inside an authenticated screen. A plan row on a billing page competes
+with the task that page exists to support, and a reader who is already paying does
+not need to be walked towards a plan.
+
+Do not use it to show usage rates. `RateCard01` is the block for a unit price, a
+tier and an overage, and a pricing screen for a metered product is often both.
+
+Do not use it when the plans are not comparable. A page that forces two unrelated
+things into one row has made a claim about how they relate, which is a fact about
+the product and not about the layout.
+
+### Best practices
+
+- `featured` marks at most one plan. Two highlighted plans throw, and so does a
+  pricing screen with no plans at all, because both are claims the page refuses to
+  make for you.
+- `featuredLabel` is required wherever `featured` is set and forbidden where it is
+  not. A plan marked as the one to choose with no word for it is a highlight with
+  no meaning, and the words are yours: "Most chosen", "Best value" and
+  "Recommended" are three products' sentences.
+- Give the matrix no `title` of its own. The page owns the band heading, and a
+  matrix that draws a second one announces the same section twice.
+- Put the `Faq01` and the closing `Offer01` in `bands`, in that order. The page
+  holds no band of its own below the comparison, so the questions and the offer are
+  content rather than structure.
+- Compose at one level deeper when the page is embedded under a heading the
+  consumer already owns. Pass `headingLevel="h2"` and the whole outline follows.
+
+### Content guidelines
+
+- The page heading says what the reader is deciding, not what the page is. "What it
+  costs" beats "Pricing".
+- A plan's `summary` is one sentence about who the plan is for. A plan name plus a
+  feature list is not a summary.
+- A `note` under a price is a qualification, not a second summary. Billing terms,
+  minimum commitments and the exchange rate a reader should check.
+- The change note says what moved and when. It is not a marketing band, and it
+  carries the link to the full note rather than the whole explanation.

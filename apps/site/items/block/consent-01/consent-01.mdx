@@ -1,0 +1,169 @@
+---
+slug: blocks/consent-01
+title: Consent01
+---
+
+## Overview
+
+Consent01 is a cookie and tracking notice with two peers, a route to the caller's
+own policy, and no memory. It is the only Block in the package where the styling is
+the argument, because the failure it refuses is a styling decision that a design
+system would otherwise ship once and four consumers would inherit.
+
+The obvious way to build this panel is a filled accept beside a `ghost` reject. It
+is what every marketing site already has, and a filled button is what a button is
+for. It is also a dark pattern, and a design system shipping it is worse than a
+product shipping it, because the design system shipped the styling and no consumer
+chose it.
+
+So the reject is drawn at `outline`: the same height, the same padding, the same
+coarse-pointer target and a border a reader can see, beside an accept that is filled.
+The two differ by fill and by nothing else, and the reader is not asked to weigh
+them.
+
+| Control | Weight | Why |
+| --- | --- | --- |
+| Accept | `default`, filled | One of two decisions. |
+| Reject | `outline`, the same size | The other decision, at the same reach. A `ghost` here is the defect this Block exists to prevent. |
+| Settings | `ghost`, smaller | A route rather than a third decision, and the reader who wants neither is the reader who needs it. |
+| Policy | `ghost` link | The one control a reader may never press. |
+
+## Both handlers are required
+
+`onAccept` and `onReject` are both required, so there is no arm of this component in
+which a reader is shown a notice they cannot refuse. That is the same mechanism
+`HeroAction` uses for the same reason: the shape that forbids something says so in
+the type rather than in prose.
+
+An optional `onReject` is how a one-way notice ships. A consumer who has not built a
+refusal path yet leaves the prop off, the Block draws the accept and nothing else,
+and the page is compliant with nobody.
+
+## The Block persists nothing
+
+There is no cookie, no `localStorage`, no `document.cookie` and no state, so a page
+load shows the notice again until the caller stops rendering it. That is the correct
+default for a notice about something still true.
+
+A stored consent decision is a different thing and a deliberate act: a record in the
+consumer's own storage that outlives the notice. Its correctness depends on the
+consumer's jurisdictions, on how long their records are kept, on whether a reader who
+clears their browsing data has to be asked again, and on whether a change to the
+policy invalidates the last decision. Prism has no standing to decide any of those,
+so the decision and its consequences are the consumer's.
+
+## Usage
+
+```tsx
+import { useState } from 'react'
+import { Consent01 } from '@nanisoft/prism-ui/blocks/consent-01'
+
+export function CookieNotice() {
+  const [decision, setDecision] = useState<{ choice: 'accepted' | 'rejected'; at: string } | null>(
+    null,
+  )
+
+  if (decision !== null) return null
+
+  return (
+    <Consent01
+      title="Cookies on this site"
+      body={
+        <>
+          <p>
+            We set two cookies: one remembers that you have seen this notice, and one
+            measures which pages are read so we know what to write next. The second is
+            the only one that leaves your browser, and refusing it turns off exactly
+            that.
+          </p>
+          <p>
+            We do not sell anything to anyone and we do not share it with an ad
+            network. The full list is in the policy.
+          </p>
+        </>
+      }
+      acceptLabel="Accept"
+      rejectLabel="Refuse"
+      settingsLabel="Choose which cookies"
+      onAccept={() => record('accepted')}
+      onReject={() => record('rejected')}
+      onSettings={() => openPreferences()}
+      policyHref="/legal/cookies"
+      policyLabel="Read the cookie policy"
+    />
+  )
+}
+```
+
+<ComponentDemo slug="consent-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where your own counsel and your own jurisdictions say a reader has to be told
+before anything is stored on their device, and where the decision has to be
+recorded.
+
+Render it until the decision exists. A notice that disappears on its own has lied
+about being asked, and a notice that never comes back is a notice the reader has
+already answered somewhere you cannot see.
+
+Use `position="banner"` by default. It is the arrangement a reader can scroll past
+with the page still in front of them.
+
+Pass `position="dialog"` only where a jurisdiction or a layout makes covering the
+content the requirement. Then the cost is yours, and it is the cost named below.
+
+### When not to use
+
+Do not use it as a newsletter sign-up, a trial prompt or anything that is a
+marketing message wearing a notice's clothes. Those are `Newsletter01` and
+`Cta01`, and a reader who cannot tell them apart learns to dismiss the lot.
+
+Do not use it on a page with no storage, no trackers and no processors. A notice
+about nothing is the fastest way to teach a reader that notices are noise.
+
+Do not compose a `dialog` arm and call the result a modal. This Block does not set
+`role="dialog"`, does not make the page inert and does not trap focus, so a reader
+can Tab out of the panel into content behind a scrim that says the page is
+unavailable. If you need the behavioural half, use `Dialog` and put this Block's
+`banner` inside it.
+
+Do not pin it to the viewport with `className`. Prism pins nothing, because a
+position in the reader's window is a position in your layout, and a Block that
+claimed one would be a Block you had to move.
+
+### Best practices
+
+- Store the decision yourself and key it to the version of the policy it was taken
+  against. A record with no policy version cannot answer the question a regulator
+  asks about it, and it is a record in your storage, not a flag in this Block.
+- Decide what a reader who clears their browsing data has to do, and write it down
+  before you ship. Re-asking is annoying and not asking is unlawful in some
+  places, and the Block has no opinion.
+- Keep the body in the same voice as the rest of your product. It is read by a
+  person deciding whether to trust you, and a paragraph of boilerplate under a
+  plain heading is the paragraph that gets skimmed.
+- Link to the policy, and make the label say what the reader gets. The link is
+  required, so the only decision is what the words are.
+- Compose `Button` yourself if you want a different balance between the two. Prism
+  will not be restyled, and the reason the balance is decided here rather than in
+  each product is that four products would each decide it differently.
+- Re-ask when the policy changes. Nothing in this Block expires a record, because
+  nothing in this Block holds one.
+
+### Content guidelines
+
+- Write the heading as the fact, not as the ask. "Cookies on this site" is a fact;
+  "We value your privacy" is a claim a reader is being asked to accept without
+  being told anything.
+- Write the body as what is set and what refusing changes. Two short paragraphs beat
+  a paragraph with a link in the middle, and a reader who cannot tell what refusing
+  does is a reader who accepts.
+- Name the processors, or say there are none. "We share nothing with anyone" is a
+  sentence about your agreements and it is the sentence most worth writing.
+- Write the three labels as three different actions. "Accept", "Refuse" and "Choose
+  which cookies" tell a reader three things; "OK", "Decline" and "Manage" make them
+  work it out.
+- Write the policy label as what the reader gets rather than as the document's name.

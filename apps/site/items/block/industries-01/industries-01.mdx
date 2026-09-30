@@ -1,0 +1,94 @@
+---
+slug: blocks/industries-01
+title: Industries01
+---
+
+## Overview
+
+Industries01 lists the sectors a product serves. Each sector carries a name, a
+one-line problem, an optional mark, and an optional link with the words that say
+what following it does. The list is a grid by default, a list of rows on request,
+or a set of tabs that shows one sector at a time.
+
+The `problem` line is required and it is what makes this a sectors list rather
+than a menu. A tile with only a name is navigation: it answers where a reader can
+go, and the question a reader brings to a page about sectors is whether the product
+recognises their week. That is a different question, and a tile that can only
+answer the first one cannot answer the second.
+
+The grid is the default and the default is the argument. Tabs hide five of six
+answers behind a control, and on a marketing page a hidden answer is an unanswered
+question, so the caller has to opt into hiding. When each sector has a paragraph
+and a link, a grid of six paragraphs is a page nobody scrolls and a set of tabs is
+six claims the reader picks between, which is a real gain and why the tabs variant
+exists.
+
+## Usage
+
+```tsx
+import { FlaskConical, Leaf } from 'lucide-react'
+import { Industries01 } from '@nanisoft/prism-ui/blocks/industries-01'
+
+<Industries01
+  eyebrow="Where it runs"
+  title="Sectors where the paper is the bottleneck"
+  industries={[
+    {
+      id: 'glass',
+      name: 'Glass',
+      icon: FlaskConical,
+      problem: 'A furnace that drifts is a furnace nobody notices until the shift is over.',
+      href: '/industries/glass',
+      hrefLabel: 'How it runs in glass',
+    },
+    {
+      id: 'food',
+      name: 'Food and drink',
+      icon: Leaf,
+      problem: 'A cold chain that was fine yesterday is the claim a regulator asks about today.',
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="industries-01" />
+
+## Guidelines
+
+### When to use
+
+Use Industries01 where a page's subject is who the product is for. It reads best
+with three to six sectors.
+
+Use `variant="list"` on a page that has already narrowed, where a row can carry
+more than the one line.
+
+Use `variant="tabs"` when a reader picks one sector rather than checking membership
+of a set, and when every sector has a paragraph behind it.
+
+### When not to use
+
+Do not use it for a navigation menu. If a tile can carry only a name, the page is
+a menu and the answer is the site header.
+
+Do not use `variant="tabs"` on a landing page whose job is to show breadth. Five
+hidden sectors is five unanswered questions, and a reader who does not find their
+own sector among the visible ones leaves.
+
+### Best practices
+
+- Write the `problem` in the reader's words and in the present tense. It is a
+  sentence about their week, not a sentence about the product.
+- Give every `href` an `hrefLabel` that says what the destination holds. The type
+  requires it, and a link whose text is the sector name reads as a name.
+- Keep the marks to one set with distinct silhouettes, so a reader can tell the
+  tiles apart before reading them.
+- Keep the order stable across pages, because the order is a claim about which
+  sector leads.
+
+### Content guidelines
+
+- A sector name is what the sector calls itself, in two or three words.
+- A problem line is one line, about fifteen words or fewer, and names a situation
+  rather than a feature.
+- A link label says what is on the other side, in three words or fewer.

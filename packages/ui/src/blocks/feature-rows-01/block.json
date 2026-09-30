@@ -1,0 +1,8 @@
+{
+  "name": "feature-rows-01",
+  "title": "Feature Rows 01 - Copy And A Framed Visual, Alternating",
+  "description": "A set of two-column rows, each with a copy column and a framed visual, with the visual alternating sides down the set. The alignment is derived from each row's position rather than passed per row. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section"],
+  "dependencies": []
+}

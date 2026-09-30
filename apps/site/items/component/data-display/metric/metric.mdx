@@ -1,0 +1,88 @@
+---
+slug: components/metric
+title: Metric
+---
+
+## Overview
+
+A Metric is one headline figure: the value, the words that say what it measures
+underneath it, and optionally a unit, a change against the previous reading and a
+line of the caller's own qualifying text.
+
+The decision that shapes it is the order. A Metric reads as a number first and a
+name second, so the label sits under the value rather than above it. The
+label-first arrangement asks a reader to read a heading before they know what the
+heading is about, and the figure is the reason the reader came.
+
+The second decision is that the direction of a delta is derived rather than
+declared. A delta is a number, its sign is the direction, and there is nowhere to
+write a rising mark beside a falling reading.
+
+## Usage
+
+```tsx
+import { Metric } from '@nanisoft/prism-ui/components/metric'
+
+<Metric
+  value="1,284"
+  label="Active workspaces"
+  unit="this week"
+  delta={12.4}
+  deltaFormat={(change) => `${change.toFixed(1)}%`}
+  hint="Against the same week last month"
+/>
+```
+
+## Guidelines
+
+### When to use
+
+Use a Metric for one figure that is the point of its region: a count, a rate, a
+duration, a score. The test is that removing the number would leave nothing worth
+looking at.
+
+Use `delta` when there is a previous reading to compare against, and pass
+`deltaFormat` with it. A Metric cannot know whether your number is a percentage, a
+count of cents or a duration in milliseconds, so it prints the number itself and
+leaves the unit to you.
+
+Use `hint` for whatever qualifies the figure: the period it covers, the source it
+came from, the caveat that matters this week. It is the caller's line, not a
+footnote Prism composed.
+
+### When not to use
+
+Do not use a Metric for a figure the reader is expected to compare across rows.
+A column of metrics puts the labels at different heights, so a table is the
+Component for that and the numbers in it line up.
+
+Do not use one for a bounded measure with a limit. A disk at 95 percent is a
+question about a ceiling, and a Metric has nowhere to put the ceiling. That is a
+Meter.
+
+Do not use one for a task in flight. A Metric is a standing reading, and a
+running thing that will finish is a Progress.
+
+Do not pass a figure Prism should have formatted. A Metric takes a `ReactNode`
+because it cannot print a number whose unit it cannot see, which means the
+formatting is yours to do. That is the cost of the prop, and it is the reason a
+consumer's price and percentage read the way their product reads them.
+
+### Best practices
+
+- Set a string value in the mono face. Prism does it for you, because a figure a
+  consumer formatted itself is a machine-readable reading and the mono stack is
+  what this system annotates one with. A value you compose out of several parts
+  arrives as a node and stays in the interface face.
+- Pass `deltaFormat`. Without it a delta of `0.12` prints as `0.12`, which is
+  honest and rarely what was meant.
+- A delta of zero shows the number with no mark. There is no flat member and no
+  arrow at zero, because a direction mark on a figure that did not move is a claim
+  the data does not make.
+- Keep the label to what the figure is. The reader has the number already and
+  wants the noun, not a sentence.
+- The delta's mark is a character rather than an icon, so assistive technology
+  announces it with the platform's own name for that character in the reader's own
+  language.
+
+<ComponentDemo slug="metric" />

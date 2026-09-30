@@ -1,0 +1,8 @@
+{
+  "name": "about-01",
+  "title": "About 01 - The Statement Band With Principles And Figures",
+  "description": "A present-tense band with a large statement, a paragraph at the reading measure, a grid of principles as cards and an optional row of figures. Every word, figure and principle is a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "card", "metric", "prose", "button", "cta-link"],
+  "dependencies": []
+}

@@ -1,0 +1,179 @@
+---
+slug: blocks/capacity-01
+title: Capacity01
+---
+
+## Overview
+
+Capacity01 is what is available and what is committed: a table of resources, each
+with a committed figure, a limit, a remaining figure and a state, over a summary row
+of estate-wide metrics. The storefront's version of this pattern is a quota meter,
+and the difference is the subject: a reader here is deciding whether to provision
+something, not whether to buy it.
+
+It is a real table because a capacity screen is read down the resource column and
+across the three figures, and the reader's question is nearly always a comparison:
+is this one tighter than that, which of these is at its limit.
+
+## The Block does not compute `remaining`
+
+This is the important sentence. A design system that subtracted one figure from
+another would be asserting an arithmetic fact about an estate it cannot see.
+
+An estate has overcommit, a burst allowance, a soft limit nobody enforces, a quota
+reserved for a team that has not been created yet, a figure that is a rolling
+average rather than an instant, and a limit that changed ten minutes ago while the
+committed figure did not. A Block that added them up would be choosing between those
+relationships without knowing any of them.
+
+So the three numbers are three props and the caller states the relationship. A
+capacity screen whose arithmetic disagrees with the product's is a screen that makes
+a reader distrust every other number on it, and the numbers on this surface are the
+ones people act on.
+
+The cost is named rather than hidden. A caller with a flat rule writes the
+subtraction once in a helper or in three places, and that is a small amount of
+duplicated intent in exchange for a table that cannot be wrong.
+
+## A row with no state asserts nothing
+
+`state` is optional, and that is the honest default rather than an omission. There
+are estates whose capacity is measured and estates where it is not, and rows inside
+one estate that are both. A row whose collector has never reported has no state,
+and a Block that defaulted it would be making the most confident claim on the page
+about the row it knows least about.
+
+The four states are the four answers to "is there room left", and `unknown` is in
+the set because a resource that cannot be measured is a real state. A table that
+drew an absent figure as a zero would be claiming an estate is full.
+
+## Usage
+
+```tsx
+import { Capacity01, type CapacityRow, type CapacityState } from '@nanisoft/prism-ui/blocks/capacity-01'
+
+const STATE_LABEL: Record<CapacityState, string> = {
+  healthy: 'Room to grow',
+  tight: 'Nearly at the limit',
+  exhausted: 'At the limit',
+  unknown: 'The collector has not reported',
+}
+
+const ROWS: CapacityRow[] = [
+  {
+    id: 'collectors',
+    resource: 'Market collector nodes',
+    kind: 'Node pool',
+    committed: 18,
+    limit: 24,
+    remaining: 6,
+    unit: 'nodes',
+    unitLabel: (unit, value) => `${value} ${unit}`,
+    state: 'tight',
+    stateLabel: STATE_LABEL.tight,
+  },
+  {
+    id: 'storage',
+    resource: 'Lakehouse storage',
+    kind: 'Bucket',
+    committed: 41_200,
+    limit: 60_000,
+    remaining: 18_800,
+    unit: 'GB',
+    unitLabel: (unit, value) => `${new Intl.NumberFormat('en-GB').format(value)} ${unit}`,
+    state: 'healthy',
+    stateLabel: STATE_LABEL.healthy,
+  },
+  {
+    id: 'runners',
+    resource: 'Agent runner concurrency',
+    kind: 'Quota',
+    committed: 8,
+    limit: 8,
+    remaining: 0,
+    unit: 'runners',
+    unitLabel: (unit, value) => `${value} ${unit}`,
+    state: 'exhausted',
+    stateLabel: STATE_LABEL.exhausted,
+  },
+  {
+    id: 'events',
+    resource: 'Event ingest',
+    kind: 'Metered quota',
+    unit: 'events per second',
+    state: 'unknown',
+    stateLabel: STATE_LABEL.unknown,
+  },
+]
+
+export function EstateCapacity() {
+  return (
+    <Capacity01
+      eyebrow="Nexus"
+      title="What this estate has left"
+      columns={[
+        { id: 'resource', header: 'Resource' },
+        { id: 'kind', header: 'Kind' },
+        { id: 'committed', header: 'Committed' },
+        { id: 'limit', header: 'Limit' },
+        { id: 'remaining', header: 'Remaining' },
+        { id: 'state', header: 'Standing' },
+      ]}
+      rows={ROWS}
+      summary={[
+        { label: 'Resources at their limit', value: '1', delta: 1 },
+        { label: 'Nodes committed', value: '18', delta: -2 },
+        { label: 'Storage committed', value: '41.2 TB', deltaFormat: (v) => `${v} TB since last week` },
+      ]}
+      empty="Nothing is on this estate yet."
+    />
+  )
+}
+```
+
+<ComponentDemo slug="capacity-01" />
+
+## Guidelines
+
+### When to use
+
+Use Capacity01 where a reader is about to ask for something and needs to know
+whether there is room. That is a quota, an estate, a plan's limits and a fleet, and
+the four are the same frame.
+
+Use it where the reader's real question is "which of these is tightest", because
+that is what the table is for and what a list of meters does not answer.
+
+### When not to use
+
+Do not use it for one resource. A single bar is `Meter`, and a table of one row is
+a table a reader scans past.
+
+Do not use it to ask a reader to change a limit. A capacity screen reports, and a
+control that changes a limit is a different Block with a different claim.
+
+### Best practices
+
+- Pass all three figures, or pass the one you have and leave the others out. An
+  empty cell is honest; a zero is a claim.
+- Pass a `unitLabel` whenever a row carries a `unit`. The run throws without one,
+  because a bare numeral beside a resource name tells a screen reader nothing
+  about what it counts.
+- Pass a `stateLabel` with every `state`, in the words your product uses. "Nearly
+  at the limit" and "at 94 per cent of quota" are the same position and only one of
+  them is yours.
+- Let the state and href columns follow the data. A state column of empty cells is
+  a column a reader has to check.
+- Sort upstream. The Block does not sort, because which resource matters most is a
+  claim about somebody's infrastructure.
+
+### Content guidelines
+
+- Write `resource` as a short noun phrase naming the thing, not the pool it is in.
+- Write `kind` as the product's own word for the bucket, tier or quota.
+- Write `unitLabel` so the number reads as a sentence: "18 nodes", "41,200 GB". Use
+  `Intl.NumberFormat` for the grouping, because the separator is the reader's
+  locale and not this package's.
+- Write `stateLabel` as a claim about the estate, not about the number. "Room to
+  grow" is what a reader acts on; "72 per cent" is a figure they have to interpret.
+- Write the summary labels as what the figure measures, in the product's units.

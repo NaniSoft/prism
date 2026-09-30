@@ -1,0 +1,122 @@
+---
+slug: blocks/permission-matrix-01
+title: PermissionMatrix01
+---
+
+## Overview
+
+PermissionMatrix01 is roles against capabilities: the roles across the top, the
+permissions down the side, and one cell per intersection. It is a real table, so a
+reader using a screen reader can navigate it by column and row header, and on this
+particular table that is not a nicety: it is the one surface where a mistake is the
+most expensive kind of mistake a page can have.
+
+A cell is a `boolean | string`. `true` is granted, `false` is refused, and a string
+is a third answer rather than a spelling of the first two. A permission that
+depends on something the reader has to look up is neither a yes nor a no, and a
+matrix that can only say yes or no forces a product to lie in one of two
+directions. Drawn as granted, the reader goes away believing their role can
+publish and finds out when they press the button. Drawn as refused, it is untrue in
+the direction that looks like a restriction, and a reader told twice that their
+role cannot do something stops asking anyone.
+
+## Usage
+
+```tsx
+import { PermissionMatrix01 } from '@nanisoft/prism-ui/blocks/permission-matrix-01'
+
+<PermissionMatrix01
+  eyebrow="Access"
+  title="What each role can do"
+  description="Read down a column for one role. A question mark means the answer depends on something else, and the cell says what."
+  columns={[
+    { id: 'viewer', header: 'Viewer' },
+    { id: 'editor', header: 'Editor' },
+    { id: 'admin', header: 'Admin' },
+    { id: 'owner', header: 'Owner' },
+  ]}
+  roles={[
+    { id: 'viewer', name: 'Viewer', count: 12, countLabel: (count) => `${count} people` },
+    { id: 'editor', name: 'Editor', description: 'Everything a viewer can do, and the findings.', count: 4, countLabel: (count) => `${count} people` },
+    { id: 'admin', name: 'Admin', count: 2, countLabel: (count) => `${count} people` },
+    { id: 'owner', name: 'Owner' },
+  ]}
+  groups={[
+    {
+      title: 'The findings',
+      permissions: [
+        { id: 'read', label: 'Read a finding', values: [true, true, true, true] },
+        { id: 'assign', label: 'Assign a finding', values: [false, true, true, true] },
+        {
+          id: 'close',
+          label: 'Close a finding',
+          description: 'A closed finding is not deleted, and the audit trail keeps it.',
+          values: [false, 'Where the hold is not open', true, true],
+        },
+      ],
+    },
+    {
+      title: 'The workspace',
+      permissions: [
+        { id: 'members', label: 'Add and remove members', values: [false, false, true, true] },
+        { id: 'billing', label: 'Change the plan', values: [false, false, false, true] },
+      ],
+    },
+  ]}
+  valueLabel={(allowed, role, permission) =>
+    allowed ? `${role} can ${permission.toLowerCase()}` : `${role} cannot ${permission.toLowerCase()}`
+  }
+  legend={{
+    allowed: 'Granted',
+    denied: 'Refused',
+    conditional: 'Depends on something else',
+  }}
+/>
+```
+
+<ComponentDemo slug="permission-matrix-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a reader has to know what a role may do before they act: a plan
+comparison, an access review, a handover document, an admin page.
+
+Use it as a document as much as a control. A matrix nobody edits still saves the
+person who has to answer the question in a channel.
+
+### When not to use
+
+Do not use it for marketing feature comparison where the answer is always yes.
+`pricing-compare-01` is the shape for a plan against a plan, because its cells are
+about buying rather than about permission.
+
+Do not use it to grant anything. Every cell here is words, and a matrix that
+drew controls would be an editor whose accidental click changed somebody's access.
+
+### Best practices
+
+- Pass `columns` and `roles` with matching ids. The Block refuses a column with no
+  role and a role with no column, because either one is a table that cannot be
+  navigated.
+- Use the string arm for a condition. A limit printed as "10" reads as a refusal
+  with a number attached, and a licence printed as true reads as a yes.
+- Keep `values.length` equal to the number of columns. A short row throws rather
+  than rendering a role with no answer.
+- Pass `legend` every time. Three marks with no key is a matrix nobody can read,
+  and the question mark is the one that needs it most.
+- Keep the permission names short. They are the cells a reader navigates to.
+- Put counts in `count` with a `countLabel`. A bare figure in a column heading is
+  a number a reader has to guess the unit of.
+
+### Content guidelines
+
+- `role.name` is the role's own name, in the product's own vocabulary.
+- `permission.label` is a short noun phrase, in the imperative your settings page
+  uses elsewhere.
+- A conditional cell is a phrase, not a number: "Where the hold is not open",
+  "With a licence held".
+- `valueLabel` is a sentence per cell, in your own language. It is what a screen
+  reader announces and what voice control has to match.
+- `legend` is three short marks. They are the key for the whole table.

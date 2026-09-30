@@ -1,0 +1,182 @@
+---
+slug: blocks/directory-01
+title: Directory01
+---
+
+## Overview
+
+Directory01 is a directory of people or things a reader can search, browse and follow: a
+search field, a set of categories, and the members under them, filtered in the browser
+as the reader types.
+
+**This Block filters what it was given and it searches nothing.** It holds no directory,
+it fetches no directory, and there is no prop that points at one. That is a law rather
+than a limitation, and the gate that holds it is
+`packages/ui/scripts/check-block-imports.mjs`, which fails a Block that imports a router
+or a data client or calls a network function.
+
+## Every member's link carries your sentence
+
+This is the rule, and it is worth the third time it is being argued. `community-01`
+argues it for a channel join. `careers-01` argues it for an application. This is the
+same argument for a colleague's record, and repeating it is the point, because a rule
+nobody states three times is a rule one Block happens to follow.
+
+A person's name is a name. The sentence that says following it is a thing you do is
+yours, not Prism's. A directory of forty members whose links all read the member's own
+name is forty links a screen reader user hears as forty names, and a mouse reader cannot
+tell them apart either, because the words are identical.
+
+| The alternative | Why it is worse |
+| --- | --- |
+| A default of "View profile" | One English sentence in every product that installs this Block, inside a design system rather than inside a product's copy, which is where a translation tool is least likely to look. |
+| Derive the label from the name | Produces the name twice, once visible and once announced, with the visible one as the accessible name's tail. |
+| Make the name itself the link | Puts the whole row behind one control and loses the tags. |
+
+So `hrefLabel` is required, the type makes the pair a union, and the run throws without
+it.
+
+## How this differs from `help-01`
+
+The two Blocks share the field, the categories and the filter, and they differ in one
+fact: what a member is. That difference is in the link affordance rather than the
+layout.
+
+| | `help-01` | `directory-01` |
+| --- | --- | --- |
+| A member is | an article, something to read | a person, something to reach |
+| The member's name | the text of a quiet `ghost` link under the title | an identity, with the offer drawn beside it |
+| The link is drawn | small, under the title, `ghost` | at the card's trailing edge, `outline` |
+| What the reader does | opens it and reads it there | sends a message, opens a run, asks a question |
+
+An article is read in place, so its own name is a perfectly good label. A person is
+reached somewhere else, so the offer is a different sentence every time and the reader
+has to be able to find it.
+
+## What is searched
+
+The name, the role, the tags, and a category's own title.
+
+**A token that matches a category's own title carries every member under it**, because
+a category is a place a reader navigates to rather than a result they read. The cost is
+the opposite one and it is real: a token appearing in a category's name is a broad
+match, so a category called Platform matches more than a reader typing platform meant.
+That is a cost you control by naming your categories.
+
+Not searched: `description`, which is a `ReactNode` and matching it would mean walking
+your markup for words, and `href`, because a reader does not remember a colleague by
+URL.
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { Directory01, type Directory01Category } from '@nanisoft/prism-ui/blocks/directory-01'
+
+// Your directory service, rendered into props. The Block never sees the query that
+// produced it.
+const CATEGORIES: Directory01Category[] = [
+  {
+    id: 'observation',
+    title: 'Estate observation',
+    description: 'The people who read the eleven sites.',
+    members: [
+      {
+        id: 'mh',
+        name: 'Margret Haldorsdottir',
+        role: 'Estate observation',
+        href: '/people/mh',
+        hrefLabel: 'Message Margret',
+        tags: [
+          { id: 'rotations', label: 'Rotations' },
+          { id: 'bristol', label: 'Bristol' },
+        ],
+      },
+    ],
+  },
+]
+
+export function Directory() {
+  const [query, setQuery] = useState('')
+
+  return (
+    <Directory01
+      eyebrow="Nexus"
+      title="Who to ask"
+      description="Start typing, or pick a team. Every link is a different offer, and the words on it are yours."
+      value={query}
+      onValueChange={setQuery}
+      label="Search the directory"
+      clearLabel="Clear the search"
+      categories={CATEGORIES}
+      empty="Nobody here matches that. Try a team, a role, or one of the labels on a card."
+      summary={(matches) => (matches === 0 ? null : `${matches} ${matches === 1 ? 'person' : 'people'}`)}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="directory-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for a set a reader will search and then follow: a team directory, a list of
+sites, a supplier list, a room or a desk book. It reads well from four members to about
+two hundred.
+
+Use `variant="rows"` for a long list or a narrow column, where the portrait belongs at
+the leading edge of a line rather than above a name in a grid.
+
+Write a different `hrefLabel` per member where you can. "Message Priya", "Open the
+settlement run" and "See who is on call" are three offers and a directory of twelve
+links all reading the same is a list a reader has to read twice.
+
+### When not to use
+
+Do not use it for your own team on a marketing page. That is `team-01`, which is built
+for a reader browsing rather than searching, and it takes a highlight and a biography
+per person, neither of which belongs in a directory a reader is searching.
+
+Do not use it for documents. That is `help-01`, and the difference is not the layout:
+an article is something to read and a person is something to reach, so their links
+want different words and different weights.
+
+Do not use it for eight people with no search in mind. That is a `ListPanel` and the
+caller's own rows, and a directory with a search field a reader will never type in is a
+field that exists to be ignored.
+
+Do not pass an `hrefLabel` that is the member's name. The run will not stop you, but
+every other member on the page will look the same to a reader scanning the column.
+
+### Best practices
+
+- Pass the whole directory. The filtering is a substring test per member and it costs
+  nothing on a few hundred entries, so there is no reason to hold any of it back.
+- Name your categories after what a reader would call them. A category called Platform
+  Operations is a key nobody types, and it is also a broad match for platform.
+- Keep tags to three or four per member. A card of eight badges is a card a reader
+  cannot read, and the fifth classification belongs in the link label or in your own
+  control beside the card.
+- Compose `relative-time` nowhere here, because a directory is not a list of moments.
+  If your members have a "last active" reading, that is `member-list-01`.
+- Pass an empty summary on the first paint. `search-field` draws the result region only
+  once `resultSummary` is passed, and a region that appears together with its first
+  content is the one case a live region is least reliable about.
+- Wrap the section in your own `search` region if the page really does have one search.
+
+### Content guidelines
+
+- Write the role as what the person does, not as which team owns them. "Settlement
+  engineering" and "Estate observation" are roles; "Platform" is an org unit.
+- Write tags as classifications a reader would filter by: a skill, a place, a rotation.
+  They are searched, so a broad tag is a broad match.
+- Write `hrefLabel` as the offer, not as the destination. "Message Priya" beats
+  "Profile"; "See who is on call tonight" beats "Rota".
+- Write the category description as what is in the group, not as a slogan. Three lines
+  of names tell a reader whether they are in the right place before they click anything.
+- Write `empty` as a way forward. A shorter phrase to try, and a person to ask, are two
+  routes and one is better than a sentence that says nothing matched.

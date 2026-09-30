@@ -1,0 +1,8 @@
+{
+  "name": "backdrop-01",
+  "title": "Backdrop 01 - A Band With A Live Ambient Field Behind It",
+  "description": "A band whose content sits over a running figure, with the cycle chosen from the seven the stylesheet publishes, an intensity that is opacity rather than speed, and a real pause control whose two labels are the caller's. The figure is the caller's and survives being still. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "button"],
+  "dependencies": []
+}

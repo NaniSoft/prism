@@ -1,0 +1,7 @@
+{
+  "name": "about-page",
+  "title": "About Page - Statement, History, People, Engagements And A Way On, In That Order",
+  "description": "A complete about screen composing the statement band, the milestone rail, the team grid, the engagement grid and a closing way on, in the order a reader arrives with the five questions. Every word, date, person and destination is a prop, and the bands after the first are optional without the order changing.",
+  "categories": ["marketing"],
+  "dependencies": []
+}

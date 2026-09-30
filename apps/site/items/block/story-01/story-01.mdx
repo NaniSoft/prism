@@ -1,0 +1,88 @@
+---
+slug: blocks/story-01
+title: Story01
+---
+
+## Overview
+
+Story01 arranges a company's history as a reader walks it. Each milestone carries
+a date, a title, what changed, and an optional figure with its own caption. The
+milestones are one ordered list along a rail with a rule down one side, or across
+the page, and the horizontal form collapses to the vertical one below `md`.
+
+It is a Block and not a component even though there is a `timeline.tsx` in the
+package, because the two are about different subjects. `Timeline` draws a run's
+progress as it happens, with four states, durations scaled against the longest
+step, and one state that moves. This arranges a sequence that has already
+finished, inside a section that has content under its heading. A company history
+has no run state and no durations, and a reader who met a `Timeline` here would be
+told something about the product is live, which is not true.
+
+The date is a string, not a `Date`, because a Block ships no formatting. The
+honest way to render a date in a caller's locale and script is `RelativeTime` or
+the platform's own `Intl`, both of which the caller composes.
+
+## Usage
+
+```tsx
+import { Story01 } from '@nanisoft/prism-ui/blocks/story-01'
+
+<Story01
+  eyebrow="How we got here"
+  title="Four years of watching things run"
+  description="Milestones in the order they happened. The dates are the caller's own, written for its own locale."
+  milestones={[
+    {
+      id: 'first-run',
+      at: '2023',
+      title: 'The first pipeline',
+      body: 'One site, one line, and a run that finished before anyone asked whether it was useful.',
+    },
+    {
+      id: 'capture',
+      at: '2024',
+      title: 'The market is captured',
+      body: 'The same line, across the estate, continuously rather than on request.',
+      mediaLabel: 'Sites under observation, by month',
+    },
+  ]}
+  orient="horizontal"
+/>
+```
+
+<ComponentDemo slug="story-01" />
+
+## Guidelines
+
+### When to use
+
+Use Story01 for a sequence that has already happened: a company history, a product
+line's life, a migration's stages. It reads best with three to six milestones.
+
+Use `orient="horizontal"` when the milestones are short and the page is wide, and
+`media` sparingly. A milestone with a figure beside it wants the vertical rail.
+
+### When not to use
+
+Do not use it for a process that is still running. That is `Timeline`, and it has
+the states and the durations a history has no use for.
+
+Do not use it for a run's progress in a product. A `Timeline` inside a `RunConsole`
+draws where the time went, and this draws where a company has been.
+
+### Best practices
+
+- Pass `at` already written for the reader. `2024`, `Q3 2024` and `Spring 2024` are
+  all correct, and the Block prints what it is given.
+- Compose `RelativeTime` for a `media` figure's own axis, and `Intl` for the date,
+  rather than passing a preformatted string a reader in another locale cannot read.
+- Keep each `body` to about four lines. A milestone that runs longer is a page.
+- Set `orient="horizontal"` only when no milestone has a `media`, because a figure
+  beside a short card leaves the card narrower than the figure.
+
+### Content guidelines
+
+- `title` is what the milestone was called at the time, in a few words.
+- `body` says what changed for the reader, not what the team shipped.
+- `mediaLabel` describes the figure and is written by the same hand as the caption
+  under it in the source material.

@@ -1,0 +1,91 @@
+---
+slug: blocks/about-01
+title: About01
+---
+
+## Overview
+
+About01 is the band that says what a thing is and who it is for. It opens with a
+section title, then a large statement in the present tense, a paragraph under it
+at the reading measure, a grid of principles as cards, and an optional row of
+figures composed onto `Metric`.
+
+The whole of its content is props. The statement, the paragraph, the principles,
+the figures and the actions are all passed in, and the Block ships none of them,
+because an about band that hardcoded its statement would install a paragraph about
+somebody else's product into every consumer's page.
+
+The decision that shapes it is the tense. An about band is present tense and is
+about the product and the reader. A story is past tense and is about a sequence,
+and `Story01` is the Block for that. A section that blurs the two produces a page
+whose middle is decorative, because the one thing a reader looks for in the middle
+of a marketing page is what the product does, and a paragraph about last year is
+not an answer to it.
+
+## Usage
+
+```tsx
+import { About01 } from '@nanisoft/prism-ui/blocks/about-01'
+
+<About01
+  eyebrow="What this is"
+  title="Observation for industrial systems"
+  statement="A pipeline that watches what a plant does, decides what changed, and sends an agent to deal with it."
+  body={<>Two sentences of supporting copy, with a <a href="/why">link</a> in it.</>}
+  figures={[
+    { label: 'Sites observed', value: '1,240' },
+    { label: 'Median time to a decision', value: '18 min', delta: -0.24, hint: 'Against the same period last year' },
+  ]}
+  principles={[
+    { id: 'instrumented', title: 'Show the mechanism', body: 'The figure a reader stops on is the one that would still be true with the motion stopped.' },
+    { id: 'own-work', title: 'Agents do the work', body: 'A finding that nobody acts on is a dashboard, and a dashboard is not a system.' },
+  ]}
+  actions={[
+    { label: 'Read the architecture', href: '/architecture' },
+    { label: 'Talk to us', href: '/contact' },
+  ]}
+/>
+```
+
+<ComponentDemo slug="about-01" />
+
+## Guidelines
+
+### When to use
+
+Use About01 as the section that answers "what is this and is it for me". It reads
+best with three or four principles and with figures only when the band has figures
+that mean something on their own.
+
+Use it once per page. A second about band is a second claim about the same thing.
+
+### When not to use
+
+Do not use it for a history. Past tense and a sequence of dates is `Story01`.
+
+Do not use it for a benefits grid. Every row of a benefits grid is a promise about
+what the reader gets, and this band says what the product is and how it is built.
+A page that has both should use both.
+
+Do not use it for a list of features. `FeatureGrid01` is that, and it is a shorter
+claim than a statement.
+
+### Best practices
+
+- Write the statement so a reader could repeat it to somebody else. If it needs
+  two sentences, it belongs in `body`.
+- Set `layout="statement-centre"` only when the principles are evidence rather
+  than the subject. The section heading stays left aligned either way, because a
+  centred title above a left-aligned grid reads as two unrelated pieces.
+- Pass a `hint` on a figure whose period or source matters. A figure with no hint
+  is a number a reader has to decide how much to trust.
+- Keep each principle body to about twenty words. Longer belongs in the link the
+  action row points at.
+
+### Content guidelines
+
+- The statement is one sentence in the present tense about the product and the
+  reader.
+- A principle title is two or three words in sentence case and names a commitment
+  rather than a feature.
+- A figure label says what is measured, in the reader's words, not the system's.

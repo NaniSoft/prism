@@ -1,0 +1,111 @@
+---
+slug: components/filter-panel
+title: FilterPanel
+---
+
+## Overview
+
+A FilterPanel is a titled panel holding filter controls, with a header that shows
+a caller-supplied summary of what is active and a footer slot for apply and clear.
+It is `FilterPanel`, `FilterPanelHeader` and `FilterPanelFooter`, from the same
+module.
+
+**The panel does not own apply and clear, and that is the whole reason it is a
+Component rather than a form.** The obvious version applies on every change, and
+it is wrong for a reason that has nothing to do with speed: applying on change
+makes a decision about the consumer's data layer. It means a filter cannot be set
+before the next one is, a request goes out per keystroke, the list behind the
+panel is rewritten while the reader is still choosing, and a consumer with a large
+result set has to add debouncing to a Component they installed. The alternative
+applies on a button, and that one has to know when the draft is complete: which
+filters depend on which others, whether a half-chosen range is valid, whether a
+pending change is a change. That is the consumer's fact about their own data. So
+the panel draws the frame, the summary slot and the footer slot, and the consumer
+supplies the two controls and owns every decision behind them.
+
+The cost is stated rather than hidden: a caller who wants the panel to own apply
+writes four lines around it, and a caller who forgets gets filters that do nothing
+at all, which is a state the panel could have prevented and chose not to.
+
+## Usage
+
+```tsx
+import { FilterPanel } from '@nanisoft/prism-ui/components/filter-panel'
+
+<FilterPanel
+  title="Collectors"
+  summary="3 of 4 regions, healthy only"
+  actions={
+    <>
+      <Button size="sm" onClick={apply}>Apply</Button>
+      <Button size="sm" variant="ghost" onClick={clear}>Clear</Button>
+    </>
+  }
+>
+  <fieldset className="flex flex-col gap-2">
+    <legend>Region</legend>
+    {regions.map((region) => (
+      <Checkbox key={region} id={region} checked={draft.includes(region)} onCheckedChange={...} />
+    ))}
+  </fieldset>
+</FilterPanel>
+```
+
+<ComponentDemo slug="filter-panel" />
+
+## Guidelines
+
+### When to use
+
+Use a FilterPanel when a reader narrows a set of records and the set of filters is
+more than one control: a region, a status, a date range, an owner. One select is
+not a panel.
+
+Use it where the filters belong beside the results rather than above them, in a
+sidebar or a column. The panel's footer does not scroll with the controls above
+it, which is what lets a reader set five filters and still reach the button that
+commits them.
+
+### When not to use
+
+Do not use a FilterPanel for a single control. A select with a label beside it is
+a `Field`, and a panel around one control is a frame the reader has to read past
+to reach it.
+
+Do not use it for navigation. A panel of links that changes which page is shown is
+a `nav`, and a filter panel that navigates is a set of links wearing a form's
+chrome.
+
+Do not expect it to apply anything. A `FilterPanel` with no `actions` renders no
+footer, and a filter that never takes effect is a state the panel cannot fix: it
+does not know your data layer, so it does not decide when a draft is finished.
+
+### Best practices
+
+- Keep the draft in your own state and the applied state in another. The panel
+  holds neither, and that is what lets a reader change four filters and change
+  their mind about one without a request going out.
+- Pass the summary as a whole node. "3 filters" is true in one language and false
+  in another, and so is "Showing archived runs", and a panel that assembled the
+  sentence would have assembled it in English.
+- Put the summary in the header rather than the footer. A reader who has scrolled
+  to the bottom of a tall column is looking for the button, and the statement
+  about the state they are in has to be where they already were.
+- Space the controls yourself. The panel adds no gap between them, because the
+  space between two checkbox rows is not the space between a label and its hint,
+  and a caller who cannot tighten one without reaching into the panel's markup has
+  nowhere to put the judgement.
+- Name every control with a `Label`, a `Field` or an `aria-label`. A column of
+  checkboxes with no names is a column of anonymous boxes.
+
+### Accessibility
+
+The panel is a `section` named by its title through `aria-labelledby`, which is the
+same decision `ListPanel` makes for its own frame: a `div` is not a landmark, a
+landmark a screen reader cannot name is one they walk past twice, and a name Prism
+chose for the caller is a claim about somebody else's product. With no title and
+no `label` the region renders anonymous, which is the honest state.
+
+The title element is a `span` and not a heading, because a filter column in a
+sidebar is not the heading of the region it sits in. Pass an element as `title` if
+you do want a heading, and the accessible name follows it.

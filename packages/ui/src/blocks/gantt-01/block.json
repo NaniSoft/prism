@@ -1,0 +1,8 @@
+{
+  "name": "gantt-01",
+  "title": "Gantt 01 - A Time Banded Schedule Of Named Tasks",
+  "description": "A schedule drawn as a left column of task names and a field of bars positioned on a caller-supplied date range, with a scale above and a rule for today. Every bar is placed from the range rather than from the widest bar, so a task that starts before all the others is inside the field rather than clipped by it, and every bar is in its final position at first paint, so reduced motion costs the reader nothing. The same rows are rendered as a hidden table so the numbers are readable without sight of the geometry. The tick labels and the today label are the caller's own words. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["cta-link", "section", "status", "table"],
+  "dependencies": []
+}

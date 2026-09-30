@@ -1,0 +1,8 @@
+{
+  "name": "code-sample-01",
+  "title": "Code Sample 01 - A Titled Snippet With A Sentence And A Control",
+  "description": "A titled code sample: a name, a sentence about what the code shows, the code in the code block Component with its header and gutter, and a slot for the caller's own controls. The title is required, because a sample with no name is a snippet and a snippet is a code block the reader cannot refer to. A section of its own by default, or a band inside a section the caller already owns.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "code-block"],
+  "dependencies": []
+}

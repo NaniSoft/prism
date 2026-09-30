@@ -1,0 +1,7 @@
+{
+  "name": "error-page",
+  "title": "Error Page - Code, Sentence, Retry And Ways Out",
+  "description": "A complete failure screen, and the sibling of the not-found screen: the status code as the page's own h1, one sentence about what happened, the retry drawn first because the request may well succeed again, and the ways out as native links. Every string and every destination is passed in as a prop, and the retry is the caller's own client control.",
+  "categories": ["application"],
+  "dependencies": []
+}

@@ -1,0 +1,111 @@
+---
+slug: pages/error-page
+title: ErrorPage
+---
+
+## Overview
+
+ErrorPage is a complete failure screen, and the sibling of `NotFoundPage`: the code
+as the page's own heading, one sentence about what happened, the retry drawn first,
+and the ways out as native links.
+
+| Order | Region | Why it is there |
+| --- | --- | --- |
+| 1 | the code, at `h1`, in the mono face | the one string the same for every failure of its kind |
+| 2 | the sentence, one step below | the part a reader actually reads |
+| 3 | the retry | a request that may well succeed on a second try |
+| 4 | the ways out | the destinations, so a reader can see where before they follow |
+| 5 | the support reference | the one value a reader can quote to a person |
+| 6 | anything else | a status link, a route, an incident note |
+
+**The two screens fail for opposite reasons, which is why they are two items.** A
+not-found is a request that will never succeed: the address is wrong and no amount
+of asking again produces it, so a retry on a 404 is a lie told by a button. A server
+error is a request that may well succeed on a second try. So on this screen the
+retry is not one control among several, it is the most important thing on the page,
+and it goes first. A design system that treated the two as one item with a flag
+deciding whether to draw the retry would teach a 404 reader to press a button that
+cannot work, and would teach an error reader that the product agrees with them.
+
+**`retry` is a slot, and that is what keeps this screen a server component.** The
+rejected shape was `retry: { label, onRetry }`. A handler is a function, a function
+is a piece of state, and state is a client module, so that shape would put the whole
+failure screen, including every link and the code, on the client because one button
+wanted an `onClick`. Passing the control in as a node inverts it: you write your own
+button in your own client module and the screen stays on the server.
+
+## Usage
+
+```tsx
+import { ErrorPage } from '@nanisoft/prism-ui/pages/error-page'
+
+<ErrorPage
+  code="503"
+  title="The estate is not answering."
+  description="Nothing was lost. The request never reached the collectors."
+  retry={<Button onClick={() => refetch()}>Try again</Button>}
+  linksLabel="Where to next"
+  links={[
+    { label: 'Read the status page', href: '/status' },
+    { label: 'Back to the workspace', href: '/workspace' },
+  ]}
+  reference="REQ-2026-09-30-0417"
+  referenceLabel="Request reference"
+>
+  <p>Anything else the site wants to say here.</p>
+</ErrorPage>
+```
+
+<ComponentDemo slug="error-page" />
+
+## Guidelines
+
+### When to use
+
+Use ErrorPage for a failure a reader may be able to do something about: a request
+that timed out, a service that is down, a write that did not land. It is the body
+of whatever route your framework names for a server error, and of a product's own
+error boundary where one exists.
+
+Use it with no `retry` for a failure retrying cannot fix, such as a payload the
+server will never accept. That is a different screen with the same shape.
+
+### When not to use
+
+Do not use it for a request that failed because the address is not a page here. That
+is `NotFoundPage`, and offering a retry on a 404 teaches a reader to press a button
+that cannot work.
+
+Do not use it for a permission failure the reader might be granted later. That is a
+403, and it needs a way to ask for the permission rather than a way to try again.
+
+Do not use it as a validation message. A form that failed to submit is a form with
+an error, and `form.tsx` owns that.
+
+### Best practices
+
+- Draw the retry above the links. On this screen it is the most important control,
+  and a reader who has to read past three links to find it will find the links
+  instead.
+- Write your retry as your own client component, and hold the in-flight state in it.
+  Prism cannot disable the slot, because the slot is your component, and that state
+  is a fact about your request rather than about a screen.
+- Pass `referenceLabel` whenever you pass a reference. "Reference", "Incident" and
+  "Case" are three words for three products, and a reference a reader has to guess
+  the name of is a reference they cannot quote.
+- Leave `newTab` off every link. A reader who has just followed one link to a
+  failure has to find their way back.
+- Compose at one level deeper when the screen is embedded under a heading the
+  consumer already owns. Pass `headingLevel="h2"` and the outline follows.
+
+### Content guidelines
+
+- The sentence says what happened, not that you are sorry. "The estate is not
+  answering" beats "Sorry, something went wrong", because the second one tells a
+  reader nothing they can act on.
+- Say whether anything was lost. "Nothing was lost, the request never reached the
+  collectors" is the sentence a reader on this screen needs most and the one most
+  often left out.
+- Keep each link label to one or two words and put the most useful destination
+  first, which is the one that tells the reader whether the thing they were doing
+  is still there.

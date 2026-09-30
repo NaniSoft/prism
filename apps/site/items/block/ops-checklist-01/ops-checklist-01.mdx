@@ -1,0 +1,184 @@
+---
+slug: blocks/ops-checklist-01
+title: OpsChecklist01
+---
+
+## Overview
+
+OpsChecklist01 is a runbook: a set of checks a person performs on an estate, each with a
+state, an expected reading, the reading that was taken, and a verdict. Groups of checks,
+the caller's own figures composed as metrics above, and a caller-supplied sentence for a
+runbook with nothing in it.
+
+**It must not decide a verdict, and that is the whole of what this Block is for.**
+
+A design system that computed pass or fail would be making a claim about an estate it
+cannot see, on thresholds it does not have. What counts as a warning is a decision
+about an estate's risk appetite, and four NaniSoft estates have four of them: one calls
+a certificate at 89 days a pass, one calls it a warning, and one has no certificates at
+all. The threshold belongs to the caller who owns the estate, and so does the reading
+that was taken.
+
+So the verdict is a prop, the tones are this system's, and the words are the caller's.
+A Block that inferred a verdict from a comparison between two cells would be a design
+system asserting an infrastructure fact.
+
+The cost of the refusal is real and it is the right one. A caller with three checks
+whose verdicts are all derivable writes three calls, and a caller who wanted the
+arithmetic done for them reaches for their own data layer, which is the only place that
+can see the estate.
+
+## The four verdicts
+
+| Verdict | Tone | Why that tone |
+| --- | --- | --- |
+| `pass` | success | The only verdict that means the estate is as it should be. |
+| `fail` | destructive | The one a reader must not miss. |
+| `warn` | warning | The verdict a reader has to act on without stopping work, which is what the warning tone has always meant here. A fifth state for it would be a colour a reader must learn and a word a maintainer must keep true. |
+| `skipped` | neutral | A check a person could not run is not a check that failed. Drawing it in the tone that means a reader must not miss would train a reader to ignore that tone on the next run. |
+
+The cost of `skipped` being `neutral` is that a runbook with forty skipped checks looks
+calm, and the words beside the dot are the only thing that says otherwise. That is the
+trade this design makes everywhere.
+
+The words are yours. Four estates between them use nine words for these four states, so
+`verdictLabel` is a function and there is no default.
+
+## The two cells
+
+`expected` and `actual` are two cells rather than one, because a runbook is about the
+difference between what should be and what is. A Block that rendered one of them was
+rendering half the check: a column of expected readings tells a reader what the runbook
+believes, a column of actual readings tells them what happened, and neither one alone
+answers whether the estate is well.
+
+**No column name is drawn above either cell.** "Expected" and "Actual" are this
+system's reading of the word, and every estate that reads a runbook aloud says
+something else: "Wanted" and "Found", "Should be" and "Is", "Configured" and "Running".
+So the two are told apart by ink and by position, the expected one always first, and a
+caller who wants the words composes them into the node:
+
+```tsx
+expected={
+  <>
+    <span className="text-muted-foreground block text-xs uppercase">Wanted</span>
+    Three or fewer
+  </>
+}
+```
+
+The cost is the honest one. A caller who does not compose them is left with two columns
+a reader tells apart by shade rather than by word, and the answer for a runbook that
+needs a real header row is `data-table-01`, which is that table with your own cells and
+your own column names.
+
+## Usage
+
+```tsx
+import { OpsChecklist01, type OpsChecklist01Group } from '@nanisoft/prism-ui/blocks/ops-checklist-01'
+
+// The readings and the thresholds are yours. The Block draws them and refuses to
+// compare them.
+const RUNBOOK: OpsChecklist01Group[] = [
+  {
+    id: 'certificates',
+    title: 'Certificates',
+    description: 'Everything the estate terminates TLS with.',
+    checks: [
+      {
+        id: 'expiry',
+        name: 'Certificates under 90 days',
+        expected: 'Three or fewer',
+        actual: 'One',
+        verdict: 'pass',
+        verdictLabel: (verdict) => (verdict === 'pass' ? 'Green' : 'Needs a look'),
+        note: 'One expires in 61 days, on the Rotterdam load balancer.',
+      },
+    ],
+  },
+]
+
+export function Runbook() {
+  return (
+    <OpsChecklist01
+      eyebrow="Nexus"
+      title="Bristol and Rotterdam, this morning"
+      description="Nine checks in three groups. The figures are yours and the verdicts are yours; this Block draws them and nothing else."
+      groups={RUNBOOK}
+      summary={[
+        { label: 'Passing', value: '8' },
+        { label: 'Failing', value: '1' },
+        { label: 'Not run', value: '0' },
+      ]}
+      empty="This estate has no checks written down yet."
+    />
+  )
+}
+```
+
+<ComponentDemo slug="ops-checklist-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a person performs checks on something and records what they found: an
+estate, an account, a workspace, a set of integrations. It reads well from four checks
+to about forty, and above that the groups are the thing a reader navigates rather than
+scrolls.
+
+Write a `verdictLabel` that differs where you can. "Green", "Needs a look" and "Not
+run" say more to an estate than "pass", "warn" and "skipped", and the function is there
+so you can.
+
+Compose the column name into the `expected` and `actual` nodes if your runbook has one.
+That is the difference between two columns a reader tells apart by shade and two columns
+a reader reads.
+
+### When not to use
+
+Do not use it as a live health page. A page whose verdicts change on their own is a
+live surface, and `run-stream-01` is the one this package ships.
+
+Do not expect it to compare anything. If you want the Block to decide pass or fail from
+a threshold, that decision belongs in your own data layer, where the estate is visible
+and the threshold is yours.
+
+Do not use it for a checklist a person ticks off in the page. This Block is a server
+Component and holds no state, so nothing here records that a check was performed.
+Compose your own control in `note` or your own region beside it.
+
+Do not pass a `summary` with a delta in mind. A runbook is a snapshot of one run and
+this Block passes no delta to `metric`, because a change against the previous run is a
+claim about a runbook you may not keep.
+
+### Best practices
+
+- Keep a check name to a short noun phrase. It is a heading a reader scans, and "We
+  should check the certificates" is an instruction, not a name.
+- Put qualifications in `note`, never in the verdict. A note is a sentence, a link or a
+  list, and it is never truncated, because a truncated note is a qualification removed
+  and qualifications are the whole reason a runbook is not a status page.
+- Omit `expected` for a system that does not exist on the estate yet, and omit `actual`
+  for a check nobody has run. Both draw nothing rather than a dash, because a dash
+  reads as nothing left to do.
+- Format the summary values yourself. `Metric` prints a string value in the mono face
+  and a composed node in the interface face, and which one you want is a fact about
+  your figures.
+- Use a `node` for any reading that needs more than a number: a threshold with a unit, a
+  version, a hostname.
+
+### Content guidelines
+
+- Write a check name as the thing being checked, not as the instruction. "Certificates
+  under 90 days" is a check; "Check the certificates" is a task and belongs in a
+  different Block.
+- Write the group title as the part of the estate, not as the activity. "Certificates"
+  and "Storage" are places a reader navigates to; "Certificate checking" is a process.
+- Write the group description as what is in the group. Three lines of systems tell a
+  reader whether they are in the right place before they read anything.
+- Write `verdictLabel` as a word your estate already uses in conversation. The person
+  reading the runbook at three in the morning has used this word before.
+- Write `empty` as a fact about the runbook. "Nothing to check" and "The checks for
+  this estate have not been written" are different sentences and one of them is a
+  claim about somebody's work.

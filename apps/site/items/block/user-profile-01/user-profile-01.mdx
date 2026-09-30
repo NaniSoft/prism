@@ -1,0 +1,128 @@
+---
+slug: blocks/user-profile-01
+title: UserProfile01
+---
+
+## Overview
+
+UserProfile01 is a profile header for one person: a portrait where there is one, the
+name, a role, a biography, a set of facts, a slot for the caller's own controls and a
+slot for the caller's own sections underneath.
+
+**The name is the section heading, and that is the decision the rest of the Block
+follows from.** A page whose only subject is one person is a page a reader reaches by
+following a link and navigates away from by heading, so a name in a `span` is a name
+nobody can come back to. It also settles the order of the reading: the name answers
+the question the reader arrived with, the role answers the next one, and the facts
+answer questions they did not know to ask, which is why the facts are a definition
+list and not more headings.
+
+**The facts compose `FactList` rather than being drawn as a definition list here.**
+The reason is the empty case, quoted from the Component: an empty list renders
+nothing rather than an empty frame, so a caller that has nothing to say does not get a
+bordered box with a title above it. A profile is very often a person with three facts
+and also a person with none, and the second case is not a defect to paper over with a
+placeholder row. It is a person whose whole profile is a name.
+
+## What this is not
+
+| It is not | Why |
+| --- | --- |
+| A Card | A card is a bounded group of related content. A profile is not a group: it has one subject, and a subject in a frame reads as a set of facts about a thing rather than as the thing. |
+| `member-list-01` | A member list is many people and the reader is looking for one, so it is optimised for scanning a column and stopping. A profile is one person and the reader arrived for them, so it is optimised for reading. The reading order is the opposite. |
+| A person-shaped avatar fallback | A silhouette says there is a person here, which is true, and it says it identically about every reader of every product that installs this Block, so a reader who has seen four of them has learned nothing about any of them. The fallback here is the person's own initials. |
+
+The portrait is a slot in the strongest sense: omit `avatar` and nothing at all is
+drawn where it would be. A person the caller has no photograph of is still a person,
+and a grey disc is a claim that the absence is a gap.
+
+## Usage
+
+```tsx
+import { UserProfile01, type UserProfile01Fact } from '@nanisoft/prism-ui/blocks/user-profile-01'
+import { Button } from '@nanisoft/prism-ui/components/button'
+import { RelativeTime } from '@nanisoft/prism-ui/components/relative-time'
+
+const facts: UserProfile01Fact[] = [
+  { id: 'team', label: 'Team', value: 'Estate observation' },
+  { id: 'based', label: 'Based', value: 'Bristol' },
+  { id: 'joined', label: 'Joined', value: <RelativeTime date="2024-02-19" /> },
+]
+
+// The reader came for this person, so the name is the section's own heading.
+<UserProfile01
+  headingLevel="h1"
+  name="Margret Haldorsdottir"
+  role="Estate observation"
+  bio="She reads the eleven sites and the rotations that keep them observed, and she is the person who decides what a fault on an estate means before anybody calls it one."
+  avatar={{ src: '/portraits/mh.png', name: 'Margret Haldorsdottir' }}
+  facts={facts}
+  actions={
+    <Button variant="outline">Message</Button>
+  }
+  tabs={<YourOwnTabsForThisPerson />}
+/>
+```
+
+<ComponentDemo slug="user-profile-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a reader arrived for one specific person: a profile page, a record
+header, a colleague's page inside a product. The name being the section heading means
+the surrounding document should have no heading of its own above it, or should pass
+`headingLevel="h1"` if the profile is the page's subject.
+
+Pass `layout="sidebar"` where the profile is in a rail or on a phone. It stacks
+everything into one column at the reading measure, and the portrait goes above the
+name rather than beside it.
+
+Compose `relative-time` inside a fact value rather than passing a formatted string.
+A date's honest reading is a locale and a granularity, and both are the caller's.
+
+### When not to use
+
+Do not use it for a set of people. That is `team-01` for a marketing page and
+`member-list-01` for an application surface, and both are built for the reader who is
+scanning rather than the reader who has arrived.
+
+Do not use it for a record that is about a thing rather than a person: a pipeline, a
+workspace, an instrument. A profile states one human subject in full and a record
+header for a thing is a different Block, because a thing has facts and a person also
+has a biography.
+
+Do not pass a `tabs` slot and expect this Block to own the tab behaviour. It draws a
+rule and a space. `Tabs` is yours to compose, because which sections exist, which one
+is showing, and what happens when the reader changes it are three decisions about your
+application.
+
+Do not expect it to truncate a biography. It will not, and that is deliberate. A
+caller who wants three lines writes three lines.
+
+### Best practices
+
+- Write the biography as prose and let it run. Nothing here cuts it, and a Block that
+  cut it would be deciding which part of a person's account of their own work
+  matters.
+- Keep fact labels to a short noun phrase. A column of these is read by scanning its
+  left edge, and a term that wraps costs the whole column its alignment.
+- Pass the portrait only when there is one. There is no placeholder, and that is the
+  point.
+- Compose your own `actions`. Follow, message, assign and remove are four products'
+  ideas of what can be done to a colleague, and a Block that drew one of them would
+  be drawing a workflow.
+- Compose `Tabs` in the `tabs` slot rather than passing a list of section names.
+
+### Content guidelines
+
+- The name is the person's own name, as they publish it, and it is the source of the
+  initials. A name you want displayed differently from the one you want abbreviated
+  is your problem, not this Block's.
+- The role is what they do, in your vocabulary. "Estate observation" and "Platform
+  operations" are both roles; "Team" and "About" are not.
+- A fact label names the fact and the value answers it. A label that repeats the
+  value teaches a reader nothing on the second pass.
+- Do not apologise in a biography. A profile is a description of somebody's work, not
+  a message to the reader.

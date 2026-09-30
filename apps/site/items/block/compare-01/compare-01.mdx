@@ -1,0 +1,88 @@
+---
+slug: blocks/compare-01
+title: Compare01
+---
+
+## Overview
+
+Compare01 puts two things side by side in the shape the word "compare" usually
+means: a two-column band with a shared row of labels down the left. The `table`
+form is a real table, and the `stacked` form puts one arm above the other and
+collapses to a single column on a narrow screen.
+
+Prism ships no verdict. There is no winner state, no check on the better column, no
+default highlight and no `featured` arm, because a design system that marks a
+winner is making a claim about a market it knows nothing about. A compare Block is
+the one place a marketing page is allowed to be unfair, and that is exactly why a
+design system has no standing in it.
+
+The label column is named either by each point or by one `labels` array, and the
+props type makes that a union so the two cannot be mixed. A left column named by
+two mechanisms is a column no reader can rely on.
+
+## Usage
+
+```tsx
+import { Compare01 } from '@nanisoft/prism-ui/blocks/compare-01'
+
+<Compare01
+  title="How the two capture modes differ"
+  labels={['Time to first capture', 'Sources per workspace']}
+  left={{
+    name: 'Polling',
+    summary: 'A scheduled sweep, and a row for every minute it covered.',
+    points: [{ value: 'Within one capture cycle' }, { value: 'Two' }],
+  }}
+  right={{
+    name: 'Streaming',
+    summary: 'A standing connection, and a row the moment the tick lands.',
+    points: [{ value: 'As the tick lands' }, { value: 'One' }],
+  }}
+/>
+```
+
+<ComponentDemo slug="compare-01" />
+
+## Guidelines
+
+### When to use
+
+Use Compare01 where a reader is choosing between two things on named attributes,
+and where every attribute has an answer on both sides.
+
+Use `variant="stacked"` where the comparison is read on a phone, or where one arm
+has a figure above it that a narrow column cannot hold beside a table.
+
+### When not to use
+
+Do not use it for a page that is really a pitch. A comparison invites a reader to
+check your claims, and a section that exists to be believed wants cards.
+
+Do not use it for a migration, where the two things are versions of one thing over
+time. That is a timeline, and a timeline reads one column.
+
+Do not use it to declare a winner. There is no prop for it, on purpose.
+
+### Best practices
+
+- Keep a row label to one line. The column is scanned top to bottom and a label
+  that wraps is a row whose two values sit at different heights.
+- Use the shared `labels` array when the two arms are the same shape, which is
+  usually the case. Use per-point labels only when one arm has a row the other has
+  no answer for, because the mixed form is not expressible and that is deliberate.
+- Give both arms the same number of points. A mismatch is a thrown diagnostic
+  rather than a padded column, because a missing cell is a claim about a product.
+- Keep a `value` short. A value that runs to a paragraph is a section under the
+  comparison, not a row of it.
+- Put a check or a cross in a value only if you are willing to defend it. Prism
+  will draw whatever you compose and will not add one of its own.
+
+### Content guidelines
+
+- Write an arm name as a short noun phrase. It is a column heading in one form and
+  a heading in the other.
+- Write a summary as one sentence about what the arm is, not about why it is
+  better. The Block gives you no place to say the second thing and no way to make
+  it stick.
+- Write a row label as the name of the attribute being compared, so it reads
+  correctly beside both values.

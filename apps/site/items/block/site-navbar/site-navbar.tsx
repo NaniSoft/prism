@@ -1,3 +1,5 @@
+'use client'
+
 import { SiteNavbar } from '@nanisoft/prism-ui/blocks/site-navbar'
 
 /**

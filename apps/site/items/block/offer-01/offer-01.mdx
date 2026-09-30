@@ -1,0 +1,84 @@
+---
+slug: blocks/offer-01
+title: Offer01
+---
+
+## Overview
+
+Offer01 is a promotion band: an eyebrow, a headline, a supporting line, a code, one
+action, and a closing note stating the terms.
+
+The terms prop is required, and that is the whole argument. A discount with no
+expiry, no scope and no exclusions is legally and ethically a different offer from
+one with them, and a design system that lets the terms prop be optional is a design
+system that has made that call for its consumers. So the only way to render this
+Block without saying what an offer excludes is not to render it.
+
+A `tone` of `primary` states its own fill and its own ink. That is the rule
+`check-variant-ink` and `toast.tsx` both state, and it is here because the gate
+reads the Component layer only. The measurement that made the rule is in
+`Cta01Action.variant`: `Cta01` defaulted its second action to `outline` on a filled
+`bg-primary` band and shipped a control that measured 1.01:1 in lavender dark.
+
+The headline sits above the band rather than inside it, because `SectionHeading`
+states its own muted ink for the eyebrow and the description, which is correct on
+the page ground and wrong on a filled surface.
+
+## Usage
+
+```tsx
+import { Offer01 } from '@nanisoft/prism-ui/blocks/offer-01'
+
+<Offer01
+  eyebrow="Through March"
+  title="Two months of Observe, at the annual rate"
+  code="OBSERVE12"
+  codeLabel="Redemption code"
+  actions={<CtaLink href="/signup?code=OBSERVE12">Redeem the code</CtaLink>}
+  terms="New workspaces only, on the annual billing period, one per billing entity."
+/>
+```
+
+<ComponentDemo slug="offer-01" />
+
+## Guidelines
+
+### When to use
+
+Use Offer01 where a promotion has a condition attached to it: a discount that
+expires, a trial that converts, a credit for a partner. The band exists so the
+terms travel with the offer rather than three paragraphs below it.
+
+Use `tone="primary"` where the promotion is the reason the page exists, and the
+default tone where it is one section among several.
+
+### When not to use
+
+Do not use it for a permanent price cut. A discount that never expires is a price,
+and a price belongs in `RateCard01` or `Pricing01`.
+
+Do not use it for a newsletter signup. That is a form with an optional incentive,
+and the terms are the wrong shape for consent.
+
+### Best practices
+
+- Pass a `codeLabel` whenever you pass a `code`. The chip announces as six
+  characters otherwise, and a reader who has been told to enter a code has to be
+  told which of the four things on the band is the code.
+- Keep the code a string. A code is copied, compared and typed, and a node lets a
+  caller compose one out of fragments a release before it ships with a space in it.
+- Put the control in `actions` as a slot, not as a label and a destination. A
+  router link, a form and a menu are all controls, and this Block cannot render
+  three of those four if it declares its own `href`.
+- Read the `secondary` and `outline` weights on a `primary` band, never `default`.
+  See `Cta01Action.variant` for the measurement.
+
+### Content guidelines
+
+- Write the headline as what the reader gets, not as a percentage. "Two months of
+  Observe, at the annual rate" survives being read on its own; "Save 17 percent"
+  does not.
+- Write the terms as conditions a reader could check: the expiry, the scope, the
+  exclusions, and what happens to an existing customer. A sentence about the
+  promotion's generosity is not a term.
+- Write the code in the case you want it copied in. Readers retype these.

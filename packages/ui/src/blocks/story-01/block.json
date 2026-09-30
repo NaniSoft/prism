@@ -1,0 +1,8 @@
+{
+  "name": "story-01",
+  "title": "Story 01 - A Milestone Rail In Past Tense",
+  "description": "A milestone history as a vertical rail with a rule down one side, or a horizontal rail that collapses to vertical below md. Dates are passed as already written strings, so the caller keeps its own locale.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section"],
+  "dependencies": []
+}

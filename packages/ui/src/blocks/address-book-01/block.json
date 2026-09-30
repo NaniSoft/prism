@@ -1,0 +1,8 @@
+{
+  "name": "address-book-01",
+  "title": "Address Book 01 - Records, A Search And An Empty State",
+  "description": "A set of address records as cards or rows: a name, an organisation, the postal lines, a telephone link and an email link, each with a caller-supplied label because a link whose accessible name is an address is announced as punctuation, a tag, and a slot for the caller's own row controls. A record with no address is refused at run time, and the Block filters what it was given and fetches nothing, so a consumer composes it with the store it already has. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "badge", "cta-link", "search-field"],
+  "dependencies": []
+}

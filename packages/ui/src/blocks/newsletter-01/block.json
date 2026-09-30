@@ -1,0 +1,8 @@
+{
+  "name": "newsletter-01",
+  "title": "Newsletter 01 - The Band That Takes An Address",
+  "description": "A signup band with a heading, one labelled field, one control, a required line saying what happens to the address, and a live region for the outcome. The submit handler is required and the Block sends nothing, so the address is never handled by a component that was installed to draw a form. No success message is rendered: the outcome is a prop, because a success sentence this package wrote would be inherited verbatim by every consumer. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["button", "field", "input", "live-region", "section"],
+  "dependencies": []
+}

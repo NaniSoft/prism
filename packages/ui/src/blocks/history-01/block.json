@@ -1,0 +1,8 @@
+{
+  "name": "history-01",
+  "title": "History 01 - What A Workspace Has Been Charged For And Consumed",
+  "description": "A real table of what a workspace has been charged for and what it has consumed: a moment, a reference in the mono face as an identifier is machine notation, a kind, an amount composed through the Price component so no symbol is hardcoded, an optional quantity that needs a caller written unit, a state whose tone comes from the semantic roles and whose words are required, and a link. The order is the caller own and the Block never sorts, because a history this Block reordered would be a claim about which charge came first and on a billing surface that claim is a bill.",
+  "categories": ["application"],
+  "registryDependencies": ["cta-link", "metric", "price", "section", "status", "table"],
+  "dependencies": []
+}

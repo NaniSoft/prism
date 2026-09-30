@@ -1,0 +1,8 @@
+{
+  "name": "compare-01",
+  "title": "Compare 01 - Two Things Side By Side, No Verdict",
+  "description": "Two things compared in the shape the word implies: a real table with a shared row of labels down the left, or a stacked form that puts one arm above the other on a narrow screen. Prism ships no winner, no check on the better column and no highlight, because a design system that marks a winner is making a claim about a market.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "table", "card"],
+  "dependencies": []
+}

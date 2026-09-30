@@ -1,0 +1,17 @@
+{
+  "name": "offering-list-01",
+  "title": "Offering List 01 - A Set Of Capabilities As Cards Or A Real Table",
+  "description": "A capability catalogue with an optional search field, a filter slot, a caller-written result line and an empty state, drawn as cards or as a real table with named columns. The search is a pair, so a set of twelve rows does not carry a field that cannot reduce anything, and the state on each row is an open string with the tones mapped by whole-word match.",
+  "categories": ["marketing"],
+  "registryDependencies": [
+    "section",
+    "card",
+    "cta-link",
+    "fact-list",
+    "price",
+    "search-field",
+    "status",
+    "table"
+  ],
+  "dependencies": []
+}

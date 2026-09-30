@@ -1,0 +1,90 @@
+---
+slug: blocks/case-study-01
+title: CaseStudy01
+---
+
+## Overview
+
+CaseStudy01 is one case study in full: a named customer, a sector, the problem,
+what was done, a row of figures, and optionally a quotation, stacked or split.
+
+The results row is the reason this Item exists, and every figure in it is the
+caller's. A case study is the one page on a marketing site where a number is
+legally dangerous. Every other number on a marketing page is decoration a reader
+can discount, and a number under the word "results" is a statement of fact about
+a third party that a publisher is accountable for.
+
+So `results` is a prop, every field of it is a prop, `Metric` is handed the value
+the consumer formatted, and there is not one figure, one percentage and one period
+in this package. A Block that shipped a plausible reduction figure would be a false
+advertising claim that installs itself into every consumer's product, on a page
+nobody in this repository has any standing to publish.
+
+`quoteLabel` is required whenever a quotation is given. It names the `figure` the
+quotation sits in, so a reader is told it is a quotation rather than body copy.
+
+## Usage
+
+```tsx
+import { CaseStudy01 } from '@nanisoft/prism-ui/blocks/case-study-01'
+
+<CaseStudy01
+  customer="Northbank Clearing"
+  sector="Clearing"
+  summary="Nightly reconciliation moved from a spreadsheet to a run that reports its own failures."
+  problem={<><h3>The problem</h3><p>Three teams reconciled by hand.</p></>}
+  results={[
+    { label: 'Reconciliation time', value: '4 min', delta: -0.86, hint: 'Median over 30 days' },
+    { label: 'Unmatched lines', value: '11' },
+  ]}
+  quote={{ quote: 'We found out on a Monday that it had stopped.', name: 'A. Mensah', role: 'Operations' }}
+  quoteLabel="In their words"
+/>
+```
+
+<ComponentDemo slug="case-study-01" />
+
+## Guidelines
+
+### When to use
+
+Use CaseStudy01 for one customer, on its own page, where the reader is deciding
+whether a claim about somebody else is true. It is not a list: `case-studies-01`
+is where an index of them belongs and this is the page one of them opens onto.
+
+Use `layout="split"` when the reader came for the figures, and the default
+stacked arrangement when the account is the point and the numbers support it.
+
+### When not to use
+
+Do not use it for a testimonial with no account behind it. A quotation on its own
+is `testimonial-01`, which needs no figures and therefore makes no factual claim.
+
+Do not use it for a company profile or an about page. Those have no results and
+no third party in them, which is `about-01` and `story-01`.
+
+Do not use it to publish a metric about your own product's behaviour. That is
+`stats-01`, where the figures are about the product rather than about a customer.
+
+### Best practices
+
+- Never let a figure into this Block that the customer has not agreed to in
+  writing. It is the one place in this package where an unused prop is a legal
+  question rather than a style one.
+- Format `value` yourself, in the unit it is in. `delta` is a bare number and
+  `Metric` prints it exactly as passed, so `0.12` reads `0.12` and that is
+  honest.
+- Put the period and the source in `hint`, not in the label. The label is scanned
+  and the caveat is read.
+- Pass `quoteLabel` with any quotation, and make it say what the quotation is.
+  A quotation a screen reader cannot tell from the page's own words is a
+  misattribution waiting to happen.
+
+### Content guidelines
+
+- Write the summary as the account, not as the claim. The figures are the claim and
+  they are below it.
+- Name the customer as they name themselves, and publish nothing about them you
+  would not repeat in a room with them in it.
+- Attribute the quotation to a person who agreed to it, with the role they
+  publish, and never paraphrase a sentence into a quotation.

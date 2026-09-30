@@ -1,0 +1,185 @@
+---
+slug: blocks/help-01
+title: Help01
+---
+
+## Overview
+
+Help01 is a help index: a controlled search field at the top, a set of caller
+supplied categories, and the articles under them, filtered in the browser as the
+reader types.
+
+**This Block filters what it was given and it never searches anything.** It holds no
+index, it fetches no index, and there is no prop that points at one. That is a law
+rather than a limitation, and the gate that holds it is
+`packages/ui/scripts/check-block-imports.mjs`, which fails a Block that imports a
+router or a data client or calls a network function.
+
+A Block that fetched a help index would be a Block every consumer whose help lives
+elsewhere has to rewrite. Four consumers with four stores would each either patch the
+fetch or fork the Block, and the corpus publishes it as a product agnostic section,
+so an agent composing a page from it composes a fetch the consumer never asked for.
+
+## What a consumer composes it with
+
+A static JSON index, filtered in the browser. That is the same shape
+`search-dialog.tsx` already takes, and a consumer that already serves an index for
+the dialog reuses the same bytes.
+
+The difference between the two is the one that matters:
+
+| | `search-dialog` | `help-01` |
+| --- | --- | --- |
+| It is | a dialog over an index | a section inside a page |
+| The index | a URL it fetches on open | a prop the caller passes |
+| Why | a dialog is mounted by a deliberate act, and the index is the same bytes on every page | a section is on every page that carries it, and a fetch on mount is a fetch per page |
+
+A consumer whose help lives in a CMS renders it into props and gets the same
+behaviour with no index at all.
+
+## The three sentences are the caller's
+
+| Prop | Why it is the caller's |
+| --- | --- |
+| `empty` | It is the one line a reader is guaranteed to read, and "No results" is English. |
+| `summary` | It is a function, not a string, because the count is a sentence whose word order belongs to the reader's language. |
+| `hrefLabel` | A link whose only words are an article's own name tells a reader nothing about what activating it does. |
+
+The count line is a function for the same reason `waitlist-01`'s position is: a
+reader reading "12 results" is reading a sentence, and the noun inflects.
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { Help01, type Help01Category } from '@nanisoft/prism-ui/blocks/help-01'
+
+// Usually the output of a build step that already knew about every document, or a
+// CMS response rendered at build time. Either way it is the caller's data and the
+// Block's array.
+const CATEGORIES: Help01Category[] = [
+  {
+    id: 'billing',
+    title: 'Billing',
+    description: 'Invoices, plans, VAT and refunds.',
+    articles: [
+      {
+        id: 'vat',
+        title: 'Adding a VAT number',
+        href: '/help/billing/vat',
+        hrefLabel: 'Read this article',
+        updatedAt: 'Updated 12 August',
+      },
+      {
+        id: 'refund',
+        title: 'Asking for a refund',
+        href: '/help/billing/refunds',
+        hrefLabel: 'Read this article',
+      },
+    ],
+  },
+  {
+    id: 'api',
+    title: 'The API',
+    articles: [
+      {
+        id: 'keys',
+        title: 'Rotating your API keys',
+        href: '/help/api/keys',
+        hrefLabel: 'Read this article',
+        updatedAt: 'Updated 3 September',
+      },
+    ],
+  },
+]
+
+export function HelpCentre() {
+  const [query, setQuery] = useState('')
+
+  return (
+    <Help01
+      eyebrow="Nexus"
+      title="How can we help?"
+      description="Start typing, or pick a group. Everything here is written by the people who built the thing."
+      value={query}
+      onValueChange={setQuery}
+      label="Search the help centre"
+      clearLabel="Clear the search"
+      categories={CATEGORIES}
+      empty="Nothing here matches that. Try a shorter phrase, or write to us and a person will answer."
+      summary={(matches) => (matches === 0 ? null : `${matches} article${matches === 1 ? '' : 's'}`)}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="help-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a reader arrives with a problem and a vocabulary you do not know. That
+is a help centre, a support index, a product's own documentation index.
+
+Pass the whole index. The filtering is a substring test per title and it costs
+nothing on a few hundred entries, so there is no reason to hold any of it back.
+
+Name your categories after what a reader would call them, not after your internal
+teams. A category called Platform Operations is a key nobody types.
+
+Use `summary` to tell a reader how much is left, and to say nothing at all before
+they have typed anything, by returning null for a count you do not want announced.
+
+### When not to use
+
+Do not use it as a page search. That is `search-dialog`, and a page search with a
+field that filters a section beside it is two search regions on one page, which is
+the thing a landmark should be reserved for.
+
+Do not use it for a set of documents that is not a set. Four articles and a contact
+address is a page, not an index.
+
+Do not use it to hide content behind a query. A reader who has to guess the right
+word to see a paragraph is a reader who does not see it, and an index whose whole
+set is hidden until a search is a page with extra steps.
+
+Do not pass an `href` with no `hrefLabel` to see what happens. The run throws.
+
+### Best practices
+
+- Read the summaries you pass, and read the `empty` sentence the most carefully of
+  all. It is the one line a reader with a problem and no answer is guaranteed to
+  read.
+- Pass an empty summary on the first paint. `search-field` draws the result region
+  only once `resultSummary` is passed, and a region that appears together with its
+  first content is the one case a live region is least reliable about.
+- Compose `relative-time` beside `updatedAt` and pass the node, or format the string
+  yourself. Prism formats no date, because a date's honest reading is a Component
+  and a caller's own string may be a quarter rather than a date.
+- Keep category names short. A token that matches a category's own title carries
+  every article under it, so a broad category name is a broad match, and that is
+  the one cost of the rule the Block draws for you.
+- Wrap the section in your own `search` region if the page really does have one
+  search. A landmark on a field turns a screen reader's list of landmarks into a
+  list of text boxes.
+- Validate the whole set at build time rather than trusting the runtime. The Block
+  throws on a link with no words, and a build that runs this is a build that fails
+  before a reader sees the gap.
+
+### Content guidelines
+
+- Write article titles as the question a reader arrives with. "Rotating your API
+  keys" is what somebody types; "Key management" is what the team calls it.
+- Write `hrefLabel` as the action rather than as a repeat of the title. Twelve rows
+  reading "Read this article" is a list with twelve identical controls, and a list
+  where they all differ is a list a reader can scan.
+- Write the category description as what is in the group, not as a slogan. Three
+  lines of topics tell a reader whether they are in the right place before they
+  click anything.
+- Write `empty` as a way forward. Two routes are better than one: a shorter phrase
+  to try, and a person to write to.
+- Do not write the summary as a number. Write the sentence the number goes in, and
+  let the reader's locale order it.

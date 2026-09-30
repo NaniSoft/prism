@@ -1,0 +1,7 @@
+{
+  "name": "pricing-page",
+  "title": "Pricing Page - Heading, Change Note, Plan Row And Comparison, In That Order",
+  "description": "A complete pricing screen: the page heading, an optional notice that the prices moved, a row of plans with at most one highlighted, a comparison band whose matrix the caller composes, and any bands below it in the caller's order. Every string, amount and destination is passed in as a prop.",
+  "categories": ["marketing"],
+  "dependencies": []
+}

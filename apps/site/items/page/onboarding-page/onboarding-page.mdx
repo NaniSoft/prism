@@ -1,0 +1,111 @@
+---
+slug: pages/onboarding-page
+title: OnboardingPage
+---
+
+## Overview
+
+OnboardingPage is a complete setup screen. It composes the checklist with a way to
+ask for help and a closing band, in one of two arrangements, and passes the
+checklist its own steps, its progress figure and its empty sentence.
+
+| Region | Who owns it |
+| --- | --- |
+| the page heading, drawn by the checklist at `h1` | the caller's `title` |
+| the checklist and its progress figure | the Page, from the caller's `steps` |
+| the way out of a setup that is going wrong | the caller, passed in as `help` |
+| the closing band | the caller, passed in as `footer` |
+
+**The distinction from `onboarding-01` is the whole argument for this page.** The
+Block is the checklist. This is the screen. A checklist is a list with a figure
+above it, and a list is a thing a reader arrives at. A screen is a heading, a list,
+and a way out of the situation the list describes, and a reader who is stuck does not
+go looking for the checklist: they arrive at the screen, because the screen is the
+only address they were ever given. So the page composes the checklist with a way to
+ask, and `help` is why it is a page and not a block: a checklist with no escape is a
+dead end a reader has to close the tab to leave, and closing the tab is the worst
+outcome a setup screen can have, because the reader does not come back.
+
+**The `h1` is the checklist's own section heading.** A title the page drew above the
+checklist would be the same words twice on one screen, and it would put a second
+section of vertical padding between the heading and the one list the heading is
+about.
+
+## Usage
+
+```tsx
+import { OnboardingPage } from '@nanisoft/prism-ui/pages/onboarding-page'
+
+<OnboardingPage
+  title="Three things, then your estate is running"
+  description="One or two sentences about what the reader will have when the list is finished."
+  steps={[
+    { id: 'workspace', name: 'Create the workspace', state: 'done', stateLabel: 'Done yesterday' },
+    { id: 'collector', name: 'Connect the first collector', state: 'current', stateLabel: 'You are here' },
+    {
+      id: 'approval',
+      name: 'Approve the permission set',
+      state: 'blocked',
+      stateLabel: 'Waiting on an administrator, since Tuesday',
+    },
+  ]}
+  progressLabel={(done, total) => `${done} of ${total} done`}
+  completion="Nothing else is needed. The first run starts itself."
+  empty="There is nothing to set up yet, so this estate is already running."
+  help={<Help01 {...helpIndex} />}
+  footer={<Newsletter01 {...newsletter} />}
+/>
+```
+
+<ComponentDemo slug="onboarding-page" />
+
+## Guidelines
+
+### When to use
+
+Use OnboardingPage for a first-run screen or a return visit to a setup that is not
+finished. It works when the reader's question is "what is left" or "what is
+blocking me", which are the two questions a setup screen exists to answer.
+
+Use `layout="split"` when the reader has been here before and needs the answer
+rather than the route. Use the default `centred` for a first run, where there is
+one thing to do and nothing competing for the reader.
+
+### When not to use
+
+Do not use it for a task with one step. A list of one is a form, and `provisioning-01`
+or a `FieldMap01` is the block for it.
+
+Do not use it for a wizard that owns the reader's answers as it goes. This screen
+takes a list of states and draws it; a wizard holds the state and moves the reader
+through it, which is a different kind of surface.
+
+Do not compose it without a `help` region for a setup a reader can get stuck in.
+The block alone is legal and is the right answer for a setup of two steps where
+neither can block, but the whole argument for the page is the way out.
+
+### Best practices
+
+- Every step carries a `stateLabel`. `Onboarding01` refuses a step without one, and
+  the reason is that a mark with no sentence beside it is a shape a reader can only
+  see. "Connected your warehouse" and "Waiting on your warehouse" are the same
+  position and different things to do about it.
+- Use `blocked` the moment a step is waiting on somebody else. It is the one state
+  that is a fact about this run rather than a position in the order, and a reader
+  who believes the product is broken stops trusting the product.
+- `progressLabel` is a function, not a string, because the phrase has a plural and
+  every language words it differently. Never compose it in the package.
+- `empty` is required. A setup with no steps is either a product with nothing to set
+  up or a query that returned nothing, and those are opposite claims.
+- Pass `headingLevel="h2"` when the screen is embedded under a heading the consumer
+  already owns.
+
+### Content guidelines
+
+- A step name is a noun phrase a reader would use in conversation. "Connect the
+  first collector", not "Collector connection configuration".
+- A `description` says what this step involves, not what the product is. It is
+  drawn under the name and read by a reader who has arrived at the step.
+- A `stateLabel` is the product's own sentence about the state. It is the fact; the
+  mark beside it is a faster read of the same thing.
+- `completion` says what happens when the last step is done, in one sentence.

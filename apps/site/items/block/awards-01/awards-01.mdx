@@ -1,0 +1,91 @@
+---
+slug: blocks/awards-01
+title: Awards01
+---
+
+## Overview
+
+Awards01 is a list of recognitions: who gave it, what for, and the year it was
+given, as hairline rows or as cards.
+
+This is a separate Item from `logo-cloud-01` because a logo and an award are not
+the same kind of claim. A logo is a mark, and a mark says only who works with us,
+which is a fact about a relationship and one that does not expire. An award is a
+sentence: a body decided something about a piece of work, on a date, and wrote it
+down. The year is the part of the sentence that expires and the part a reader
+checks, so it is a required field here and it is set in the mono face beside the
+organisation rather than inside the body copy.
+
+A missing year throws rather than rendering a gap. An undated award cannot be
+stale, so it never goes out of date and never has to be withdrawn, which is what
+makes it a logo with words attached.
+
+## Usage
+
+```tsx
+import { Awards01 } from '@nanisoft/prism-ui/blocks/awards-01'
+
+<Awards01
+  title="Recognition"
+  layout="list"
+  awards={[
+    {
+      id: 'ardent-2025',
+      body: 'Settlement Reconciliation Platform',
+      organisation: 'Ardent Clearing Awards',
+      year: '2025',
+      category: 'Infrastructure',
+      href: 'https://awards.example/2025',
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="awards-01" />
+
+## Guidelines
+
+### When to use
+
+Use Awards01 when the recognitions are dated records with an awarding body behind
+them, which is what makes them checkable. Between one and eight rows reads well;
+past a dozen a list of recognitions is a page of its own.
+
+Use `layout="cards"` when the work has a name long enough to want a heading of its
+own, and the default list arrangement when the recognitions share one shape and
+the year is the thing a reader is checking.
+
+### When not to use
+
+Do not use it for a band of marks. A logo says who works with us and needs no
+date, so it belongs in `logo-cloud-01`.
+
+Do not use it for a general assurance. "Recognised by leading industry bodies" is
+an undated claim, and it is what `trust-strip-01` is for. Swapping a trust strip
+for this Block is an upgrade from an assurance to a record, which is an editorial
+and legal decision.
+
+Do not use it for a certification or a standard. That is `compliance-01`, which
+carries a review date and an evidence link rather than a year and an awarding
+body.
+
+### Best practices
+
+- Never fill a year in yourself. If the awarding body has not published a date,
+  the recognition is not one you can publish, and this Block throws rather than
+  guess.
+- Write the work name as the awarding body spells it. The name is read aloud as
+  the row's content and a different spelling reads as a correction of their
+  record.
+- Pass `href` only where the public record is a URL you have checked. A row with
+  no `href` is read rather than followed, which is correct.
+- Order the rows yourself. Most readers want recency, but what a consumer is
+  proudest of is its decision.
+
+### Content guidelines
+
+- Keep the organisation to its own name for itself. A body names its awards; the
+  consumer does not rename them.
+- Use the body's own category words where they exist. A category is a label a
+  reader scans past, and a consumer's invented vocabulary makes the label a
+  second claim.

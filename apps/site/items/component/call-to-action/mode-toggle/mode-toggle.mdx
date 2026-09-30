@@ -1,0 +1,114 @@
+---
+slug: components/mode-toggle
+title: ModeToggle
+---
+
+## Overview
+
+A ModeToggle is the control that moves the reader between the light and the dark
+mode, using Prism's own provider. It renders one button with the icon for the mode
+you are about to get.
+
+**This is the one Component in the library that needs `PrismProvider` above it,
+and the reason is that it is the only one that writes the theme rather than
+reading it.** Every other Component reaches its colours through the cascade: the
+pack is an attribute on an ancestor and the mode is a class, so a Component that
+draws a `bg-primary` has drawn the right thing in every pack without knowing which
+pack it is in. Moving between the modes means writing `.dark` on the document
+element, and the document element is not a thing a Component may reach for. The
+provider is that permission. Mounted without one, the hook throws, which is
+deliberate: a control that looks like it switches the mode and does nothing is
+worse than a page that says the provider is missing.
+
+**It renders one button and not a group, because a two-button group where one
+option is always selected is a segmented control doing a switch's job.** It would
+take two tab stops where the action needs one, it announces a radio group and so
+changes what the arrow keys do inside it, and a `ToggleGroup` already implements
+that keyboard model properly for a set of labelled members.
+
+**The icon is the destination and the name is the destination, so the two can never
+contradict each other.** A page in light mode shows a moon, because pressing it
+makes the page dark. Showing the current mode instead puts a sun on a light page,
+which reads as a control that is already on. The icon is swapped and not animated
+between: the Motion law refuses a transition whose only purpose is decoration, and
+a sun morphing into a moon decorates a control that is about to re-render anyway.
+
+**A reader who never mounts this is not left without the mode.** The mode on the
+page comes from the two document attributes, and the blocking script in the head
+resolves them before first paint from a stored value or from what the server
+rendered. That path is declarative, it is SSR-safe, and it works with no
+JavaScript at all. A consumer who does not want a client Component in their
+layout can leave this one out and write a plain button of their own that calls
+`setMode` from the provider's hook.
+
+## Usage
+
+```tsx
+import { ModeToggle } from '@nanisoft/prism-ui/components/mode-toggle'
+import { PrismProvider } from '@nanisoft/prism-ui/provider'
+
+<PrismProvider>
+  <ModeToggle label="Switch to dark mode" />
+</PrismProvider>
+```
+
+<ComponentDemo slug="mode-toggle" />
+
+## Guidelines
+
+### When to use
+
+Use a ModeToggle wherever a reader is offered the choice of mode: a site header, a
+settings page, the top of a documentation page. It is the shortest honest way to
+offer the choice when you already have a `PrismProvider` in the tree.
+
+Write `label` as the mode the button moves to. "Switch to dark mode" and not "Dark
+mode", because the control performs an action rather than reporting a state, and
+three of the four products in this family phrase it the other way round, which is
+a caller's sentence and not a Component's.
+
+### When not to use
+
+Do not use a ModeToggle without a `PrismProvider` above it. The hook throws
+outside one, on purpose.
+
+Do not use a pair of buttons, one per mode. That is `ToggleGroup`, and it takes two
+tab stops for one action and changes what the arrow keys do inside the row above
+your content.
+
+Do not use a `Switch` for the mode. A switch says "this setting is on", and a mode
+is not a setting: it is which of two renderings the page is using right now.
+
+Do not build a pack chooser out of this. It moves between modes, not packs. A pack
+is a `PackSwatch` beside a `ProductSwitcher`, and a control that changes both at
+once is a control with two jobs.
+
+### Best practices
+
+- Mount one provider as high as the controls that need it and no higher. A
+  provider in the root layout wraps every page, and every provider is context, so a
+  page that renders no control still ships it.
+- Keep the name in step with the icon by writing it as the destination. The
+  Component reads `mode` and shows the icon for the other mode, so a name written
+  as the current state is the one thing that can make the two disagree.
+- Use one size per region of the page. `sm` in a dense header, `md` in a settings
+  row; the two heights are all the Component takes, because a third is a control
+  this narrow on purpose.
+- Do not set `data-pack` or `.dark` yourself alongside this. The provider is the
+  only writer of the two document attributes, and a second writer turns a record of
+  the active theme into a race.
+
+### Accessibility
+
+The control is a single native `<button>`, so it is one tab stop, it takes Space
+and Enter, and its focus ring is `Button`'s at full strength. `Button` also grows
+the target to 44px on a coarse pointer, which is what a header control read by
+finger needs.
+
+There is no `aria-pressed`, and that is a decision with a cost. A pressed state
+describes the current mode and the name describes the mode a press produces, so a
+pressed control named for its destination announces the opposite of what it is
+about. Since this Component takes one name rather than one per mode, the honest
+reading of what is left is a button that performs an action. The cost is that a
+reader using a screen reader cannot ask the control what the page is in; they read
+the mode from the page.

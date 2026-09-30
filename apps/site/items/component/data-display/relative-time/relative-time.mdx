@@ -1,0 +1,92 @@
+---
+slug: components/relative-time
+title: RelativeTime
+---
+
+## Overview
+
+A RelativeTime renders a moment as an absolute reading and leaves the relative
+sentence to the caller. It exists because of what it refuses to ship.
+
+A phrase such as "2 hours ago" is not a format and it is not a number with a
+suffix. It is English, it has a plural, it changes shape past a day, and every
+language in the world words it differently. A design system that shipped one in
+English would have put a sentence into every consumer's product that the consumer
+could not translate, could not inflect and could not reorder, because the string
+would be inside a package rather than inside their own code.
+
+So this Component formats what `Intl` already localises, which is the absolute
+reading, and hands the sentence back.
+
+## Usage
+
+```tsx
+import { RelativeTime } from '@nanisoft/prism-ui/components/relative-time'
+
+<RelativeTime
+  date={Date.now() - 7_200_000}
+  locale="en-GB"
+  relative="2 hours ago"
+  timeStyle="short"
+/>
+
+<RelativeTime
+  date="2026-03-01T09:14:00Z"
+  renderRelative={(at) => new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(-2, 'day')}
+/>
+```
+
+## Guidelines
+
+### When to use
+
+Use a RelativeTime wherever a product says when something happened, and where the
+reader wants both readings: the exact moment and the sense of how long ago it
+was. An audit row, a changelog entry, a "last seen" line, a comment timestamp.
+
+Pass `relative` with a node when the sentence is fixed, and `renderRelative` when
+it is computed from the moment, such as when you already have a
+`Intl.RelativeTimeFormat` in your product.
+
+Pass `timeStyle` when the reader needs the clock. Leave it and the reading is a
+date, which is usually what a date-only column wants.
+
+Pass `locale` on a page that serves more than one language. The absolute reading
+is localised by the platform, and so is any relative phrase the caller builds
+themselves.
+
+### When not to use
+
+Do not use it for a duration. "Ran for 4 minutes" is a measurement and a Meter or
+a plain figure is the Component for it. A RelativeTime says when, not how long.
+
+Do not use it for a live countdown. Nothing here ticks: the moment is normalised
+once, on the server, and the clock never moves. A counting figure needs a client
+Component and a clock, and it is a different Item.
+
+Do not pass a number you are not sure is milliseconds. A bare number is epoch
+milliseconds and nothing else, so seconds render as January 1970 and the reader
+concludes the library is broken.
+
+Do not use it to carry the only meaning of a row. A relative phrase on its own
+ages badly, because "2 hours ago" in a table read next week is a claim about a
+moment the reader cannot see. The absolute reading is the one that stays true.
+
+### Best practices
+
+- Give the `<time>` element the absolute reading and nothing else. The root is a
+  plain `<span>` around both, so a crawler or a reader that reads the machine
+  value never takes the caller's sentence for a timestamp.
+- Pass milliseconds, or a `Date`, or a string the platform parses. A string is
+  handed over untouched, so an ISO 8601 date-time, a date-only key and a locale's
+  own written date all work.
+- An unreadable value throws and names the prop, rather than rendering nothing.
+  A reading that has silently disappeared is a reading nobody knows to look for.
+- Let `dateStyle` and `timeStyle` be omitted rather than passing a magic value to
+  turn the clock off. There is no way to remove a defaulted `timeStyle`, which is
+  why there is no default.
+- Keep the relative phrase in the same visual weight as the sentence around it, or
+  in the muted tone as the Component does. A phrase set louder than the absolute
+  reading is a claim that recency is what matters here.
+
+<ComponentDemo slug="relative-time" />

@@ -1,0 +1,8 @@
+{
+  "name": "settings-security-01",
+  "title": "Settings Security 01 - Methods, Password, Sessions And A Second Factor",
+  "description": "The security surface of a workspace: the ways in, a change-password form whose reveal control is on the new entry rather than the one a reader is proving they know, a sessions list where revocation is offered on the reader's own session, and a second factor with three states rather than two.",
+  "categories": ["application"],
+  "registryDependencies": ["button", "card", "field", "input", "password-field", "section", "status", "switch"],
+  "dependencies": []
+}

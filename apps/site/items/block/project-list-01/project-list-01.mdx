@@ -1,0 +1,93 @@
+---
+slug: blocks/project-list-01
+title: ProjectList01
+---
+
+## Overview
+
+ProjectList01 is a list of projects with a toolbar, a filter column, a footer slot
+and an empty state the caller writes. It draws as a stack of rows or as a real
+table, and the two forms answer different questions: rows is for a short list where
+the summary is the point, table is for a long one where the reader is comparing a
+value in one row against the same value in another.
+
+This is the many-projects counterpart to `Project01`, and the two take the same
+field names on purpose. A consumer with a project model has one model: the same
+`name`, `state`, `owner`, `progress`, `updated` and `tags` feed a detail header and
+a list row, and the two Blocks cannot drift apart because there is nothing to
+drift.
+
+It is a server Component, and the toolbar is a slot rather than a set of named
+controls so the client boundary stays the caller's: a caller whose toolbar needs
+state renders a client component into the slot.
+
+## Usage
+
+```tsx
+import { ProjectList01, type ProjectListProject } from '@nanisoft/prism-ui/blocks/project-list-01'
+
+<ProjectList01
+  eyebrow="The estate"
+  title="Everything we are running"
+  description="Ordered by the query your team already uses. This Block does not sort, because the order is a claim about which project matters this week."
+  projects={PROJECTS}
+  toolbar={<DataToolbar search={<SearchField />} actions={<Button size="sm">New project</Button>} />}
+  filters={<FilterPanel title="Narrow it down">{FILTERS}</FilterPanel>}
+  footer={<Pagination />}
+  empty="No project matches those three filters. Clear one and try again."
+/>
+```
+
+<ComponentDemo slug="project-list-01" />
+
+## Guidelines
+
+### When to use
+
+Use `rows` for up to about eight projects where the sentence under each name is
+what the reader is scanning for. There is no header row to announce and no columns
+to align, which is what a scanned list wants.
+
+Use `table` past that, and the moment the reader starts comparing a value in one row
+against the same value in another. That is when the content is records with columns
+rather than a list of things, and a screen reader needs a column header to know
+which of six values it has landed on. Declare `columns`, in the order they should be
+read, and `name` has to be among them: it is the row header.
+
+### When not to use
+
+Do not use it for one project. `Project01` is the one project in full, and it takes
+the same field names.
+
+Do not use it for a list of things that are not projects. A list of issues is a
+`DataTable01` and a list of runs is a `RunConsole01`, and both are Blocks that take
+their own fields.
+
+Do not declare a column no project in the list carries. The run refuses it, because
+a column of empty cells is a column every reader scans twice.
+
+### Best practices
+
+- Order `projects` in the order the reader should meet them and let your query
+  decide it. This Block has no `sort` and adding one would be a second derivation
+  you have to keep in step with your own data.
+- Pass a `stateLabel` for every project. Every project carries a state, so every
+  project owes words for it, and a dot with no sentence beside it is the one
+  arrangement the whole package refuses.
+- Put the filter column in `filters` and the search, the sort and the create button
+  in `toolbar`. A filter column is a column; a popover trigger is not.
+- Write `empty` for the state your reader is in. "No projects yet" and "nothing
+  matches those filters" are opposite claims and only one of them is true at a time.
+- Keep `updatedLabel` a real sentence. A date with nothing beside it says when
+  something happened and not whether it is stale.
+
+### Content guidelines
+
+- `state` is your own vocabulary, so a projects index gathered from more than one
+  source can be drawn without a translation layer. A state this Block has not been
+  taught gets the supporting ink, and the words beside it are what carry the column.
+- `summary` is one sentence about that project, not about the programme.
+- `tags` are the caller's own chips. They are drawn read-only, which is right for a
+  project a reader is not choosing.
+- `hrefLabel` says what following the link does. A link whose only words are a
+  project name tells a reader nothing.

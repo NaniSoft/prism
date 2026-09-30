@@ -1,0 +1,8 @@
+{
+  "name": "quick-view-01",
+  "title": "Quick View 01 - A Summary Panel A Reader Opens Without Leaving The Page",
+  "description": "A summary in a Dialog the caller controls: a title at the caller's heading level, a short body, a keyed specification list, an optional mark and up to two actions. It composes Dialog rather than re-deriving the focus trap, the escape key, the outside press and the overlay, and its required closeLabel is the one prop the pattern costs. Everything it shows must also be reachable on the page it sits on.",
+  "categories": ["marketing"],
+  "registryDependencies": ["dialog", "fact-list"],
+  "dependencies": []
+}

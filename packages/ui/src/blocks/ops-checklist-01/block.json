@@ -1,0 +1,8 @@
+{
+  "name": "ops-checklist-01",
+  "title": "Ops Checklist 01 - A Runbook With Expected Readings, Actual Readings And Verdicts",
+  "description": "A runbook for an estate: groups of checks, each with a name, the reading that should be there, the reading that was taken, a verdict in one of four tones and an optional note, with the caller's figures composed as metrics above. The Block does not decide a verdict, because a design system that computed pass or fail would be asserting an infrastructure fact about an estate it cannot see, on thresholds it does not have. The verdict words are required, because a coloured dot with no sentence beside it is invisible. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "metric", "status"],
+  "dependencies": []
+}

@@ -1,0 +1,136 @@
+---
+slug: blocks/newsletter-01
+title: Newsletter01
+---
+
+## Overview
+
+Newsletter01 is the band that takes an address: a heading, one labelled field, one
+control, the line that says what happens to the address, and a region that announces
+the outcome. Every string is passed in as a prop, and the Block ships no sentence of
+its own anywhere on the page.
+
+**The decision that shapes it is the one thing it refuses to do: render a success
+message.** A form that owns its own success sentence puts that sentence into every
+product that installs the Block, the corpus publishes it as this design system's
+own voice, and it is the one line on the page most certainly to be wrong. The
+outcomes a real subscription request has are a subscription, a duplicate, a soft
+bounce, a hard bounce, a rate limit and a consent withdrawal, and one sentence
+cannot be true of all six. So `status` is a prop with a caller-written message, the
+Block holds no `sent` flag and no `error` flag, and a consumer who installs it owns
+the promise it makes.
+
+That leaves two props required rather than optional, and both are load-bearing.
+
+| Prop | Why it cannot be optional |
+| --- | --- |
+| `onSubmit` | A Block that collects an address and then does nothing with it is a form that takes a personal datum and discards it silently. |
+| `consent` | A newsletter form that can ship without saying what happens to the address lets a consumer make a legal claim they did not write. |
+
+## Usage
+
+```tsx
+import { useState } from 'react'
+import { Newsletter01 } from '@nanisoft/prism-ui/blocks/newsletter-01'
+
+export function SignupBand() {
+  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [message, setMessage] = useState<React.ReactNode>(null)
+
+  async function subscribe(email: { email: string }) {
+    setState('sending')
+    const result = await subscribeAddress(email.email)
+    // The four sentences below are this product's, not Prism's, and the sixth
+    // outcome a real list has is the one nobody writes: a soft bounce.
+    if (result.confirmed) {
+      setState('sent')
+      setMessage('Check your inbox to confirm the address.')
+    } else if (result.duplicate) {
+      setState('sent')
+      setMessage('That address was already on the list.')
+    } else {
+      setState('error')
+      setMessage('We could not reach the list. Try again in a minute.')
+    }
+  }
+
+  return (
+    <Newsletter01
+      eyebrow="Product notes"
+      title="What changed this month"
+      description="One note a month, written by the people who built it."
+      label="Email address"
+      consent="One email a month. Every one has an unsubscribe link in the footer."
+      submitLabel="Subscribe"
+      status={{ state, message }}
+      onSubmit={subscribe}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="newsletter-01" />
+
+## Guidelines
+
+### When to use
+
+Use it at the foot of a page or inside a long article, where the reader has just
+been given something worth following up on. It is a band, not a modal, and not a
+field inside a form that already exists.
+
+Use `layout="inline"` where the section says little and the page is wide. Use the
+default stacked layout everywhere the address is long or the page is already narrow,
+and prefer it whenever you are not sure.
+
+Pass a `status` from the first paint, with your own in-progress sentence, if the
+transport takes more than a moment. `LiveRegion` renders nothing when it has no
+message, so a region that appears together with its first sentence is the one case
+a screen reader is least reliable about.
+
+### When not to use
+
+Do not use it as a signup gate. A form a reader has to get past before they can read
+the page is a different decision with different legal consequences, and it belongs in
+whatever surface the rest of the product already uses for that.
+
+Do not use it to collect anything but an address. A name, a company and a role turn
+it into a lead capture form, and the `consent` line above is written for a list a
+reader subscribes to rather than for a record a sales team works.
+
+Do not use it twice on one page. Two identical forms compete, and the second is the
+one a reader assumes is broken.
+
+Do not reach for it to replace a footer link. A reader who wants the archive is
+looking for a link, not a field.
+
+### Best practices
+
+- Make the handler do the work and report the outcome. `onSubmit` receives the
+  address and the Block does nothing else with it, so a consumer that quietly
+  returns a promise and never sets a state has shipped a form that looks like it
+  worked.
+- Distinguish the duplicate from the confirmation in your own words. They are two
+  different facts and a reader who subscribed twice deserves to be told which one
+  happened.
+- Keep the consent line to what a reader can act on: the frequency, the sender, the
+  way out. It is wired to the field as its description, so it is read at the moment
+  the reader focuses the address.
+- Never make `status` optional in your own wrapper. The type is what stops a
+  success sentence appearing where you did not write one, and a wrapper that
+  defaults `message` to a string has undone the only decision this Block makes.
+- Do not validate the address inside the Block. It ships no rules, so a field that
+  needs one wants your own `onChange`, your own state and your own error line.
+
+### Content guidelines
+
+- Write the title as what arrives, not as an invitation: "What changed this month"
+  beats "Keep in touch". The field is the ask and the heading is the reason.
+- Write the consent line as three facts a reader can check, in their order of
+  importance: how often, from whom, and how to stop.
+- Write each outcome as a fact about what happened, not as a feeling about it.
+  "Check your inbox to confirm the address" tells the reader what to do next;
+  "Thanks for subscribing" does not.
+- Do not use the word "success" anywhere in these sentences. It describes the
+  request rather than the reader's position, and the reader does not know yet
+  whether they are on the list.

@@ -1,0 +1,138 @@
+---
+slug: components/code-block
+title: CodeBlock
+---
+
+## Overview
+
+A CodeBlock is a snippet of source on a tinted mono surface, with a header for
+the words that say what it is: a filename, a language, and whatever controls the
+caller brought. `Code` is the same idea inline, for a symbol inside a sentence.
+
+Prism ships a code surface and no syntax highlighter, and that is the decision
+worth stating. A highlighter is not a presentation detail, it is a dependency
+that arrives with its own answer to the question of what a token means, and it
+answers it in a vocabulary of its own: a theme file of class names that has to be
+reconciled against six packs and two modes. The reconciliation is where a
+highlighter stops being a convenience. The moment one is in the product there are
+two files that have to be kept in step, and a pack that moves a step leaves the
+second one behind, and the result is a code surface in the wrong hue that every
+colour gate in this repository still reports as correct.
+
+The cost of that decision is real and worth naming. A long snippet is a wall of
+one colour, and a reader scanning for a name has no colour to catch it. What
+Prism gives them instead is the table of contents: the line numbers and the
+filename.
+
+## Usage
+
+```tsx
+import { CodeBlock, Code } from '@nanisoft/prism-ui/components/code-block'
+
+<CodeBlock
+  label="The tone a series is drawn in"
+  filename="chart.tsx"
+  language="tsx"
+  lineNumbers
+  code={snippet}
+/>
+
+<p>
+  Pass a <Code>--strict</Code> flag to <Code>tsc</Code> to fail the build on an
+  implicit any.
+</p>
+```
+
+<ComponentDemo slug="code-block" />
+
+## Guidelines
+
+### When to use
+
+Use a CodeBlock for source a reader may want to copy: a command, a config file, a
+function, a diff of a snippet, a schema. Turn on `lineNumbers` when the reader is
+likely to refer to a line by number, such as a snippet in a bug report or a
+support article.
+
+Use `Code` for an inline symbol: a flag, a component name, a file, a prop, a
+command. It renders a native `<code>`, so a screen reader identifies it as source
+rather than as text to read through.
+
+### When not to use
+
+Do not use a CodeBlock for a value that is a number with a unit, a price, a date
+or a name. Inline prose in a tinted mono box reads as machine output, and that is
+a claim about the kind of thing it is.
+
+Do not use `Code` for a key the reader presses. That is `Kbd`, and the two differ
+in more than their padding: one is a name in a machine's alphabet and the other
+is something a person does to the keyboard.
+
+Do not expect highlighting. Prism ships none, and a caller who wants it composes
+it themselves in the `actions` slot or around the item.
+
+Do not use the `actions` slot for a control that does not act on the snippet. The
+slot exists for the caller's own controls, and the only thing Prism will not do
+is name one for them.
+
+### Best practices
+
+- **Bring your own control, and name it yourself.** `actions` takes a
+  `ReactNode`, so a copy button is the caller's control with the caller's
+  accessible name. Prism shipping a copy button would mean shipping the word
+  "Copy" into every consumer's product, which is copy a consumer cannot
+  localise.
+- **Pass `label` whenever you pass `actions`.** The type makes the two a pair: a
+  copy control beside an unnamed figure is a button that acts on something a
+  reader cannot identify.
+- **Pass `filename` or `language`, and pass both when both are true.** They share
+  the mono face in the header because they share a kind: a filename and a
+  language tag are both names in an alphabet a machine reads.
+- **Turn on `lineNumbers` for a snippet someone will refer to by line.** The
+  numbers are a gutter outside the `<pre>` and they are not in the clipboard, so a
+  copy stays clean. The cost is that source does not reflow: the body scrolls
+  horizontally rather than wrapping, because a wrapping body puts the numbers a
+  line out of step.
+- **Set the language in whatever form your own docs use.** The component draws
+  what it was given and never looks it up. `ts`, `tsx`, `typescript` and
+  `TypeScript` are all defensible in different code bases.
+
+### Accessibility
+
+The figure is a `<figure>` with the name `label` gives it, and the body is a
+`<pre>` inside a `<code>`, which is the element pair that tells a browser the
+whitespace is significant and tells assistive technology the content is source
+rather than prose.
+
+The line-number gutter is `aria-hidden`. A reader who has navigated to a snippet
+is reading the source, and hearing the ordinal of every line in front of it is a
+list of numbers in the way of the thing they asked for. The gutter is a
+reference, and it is deliberately not what a copy carries.
+
+Nothing about the code is announced twice. There is no hidden copy of the text, so
+a screen reader reads the `<code>` once and that is the whole of it.
+
+### What this is not
+
+There is no syntax highlighting, no line highlighting, no diff rendering, no
+search inside the snippet, no soft wrap toggle, and no copy button. Each of those
+is a Component a caller composes around the item or brings through `actions`, and
+the reason is the one in the Overview: a highlighter is a second source of truth
+for what a token means, and Prism's law is that a value is authored once.
+
+The component also spreads no other prop, which is not the usual arrangement
+here. `Kbd` and `Separator` spread a native element's props because there is no
+other route to them. A `<pre>` is different: a code surface is the one place a
+caller might reasonably reach for `dangerouslySetInnerHTML`, because highlighting
+is usually done that way. A spread would hand them the attribute that bypasses
+every claim on the page in one prop, so the surface is `code`, `language`,
+`filename`, `lineNumbers`, `actions`, `label` and `className`.
+
+### Content guidelines
+
+- Write `code` exactly as it is in the file. A snippet that has been reformatted
+  to read well is a snippet nobody can paste.
+- Keep a snippet to the smallest thing that still demonstrates the point. A
+  twenty line example is read, a two hundred line one is skipped.
+- Name the file the way the repository does, including its extension. A filename
+  is how a reader finds the thing again.

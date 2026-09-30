@@ -1,0 +1,8 @@
+{
+  "name": "industries-01",
+  "title": "Industries 01 - Sectors As A Grid, List Or Tabs",
+  "description": "The sectors a product serves, each a name, a one-line problem and a link into the work, as a grid of tiles, a list of rows or a set of tabs. The grid is the default because hiding answers behind a control is opt-in.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "card", "tabs", "cta-link"],
+  "dependencies": ["lucide-react"]
+}

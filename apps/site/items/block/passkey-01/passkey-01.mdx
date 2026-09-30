@@ -1,0 +1,205 @@
+---
+slug: blocks/passkey-01
+title: Passkey01
+---
+
+## Overview
+
+Passkey01 is the caller's registered authenticators as a list of names, moments and
+transports, a register control whose callback is where the browser's own ceremony runs,
+and a remove control on every row. Every string is passed in as a prop, and the Block
+ships no sentence of its own anywhere on the page.
+
+The storefront's version of this pattern is a security settings page: a list of the ways
+in, a control to add another, and a control beside each row to take one away, whose
+purpose is to let a shopper see which second factor is protecting their card. The
+composition here is that page, unchanged. What the list is made of is different, and
+that difference is the whole of this Block's argument.
+
+## It opens no credential store, it calls no WebAuthn API, and it owns no ceremony
+
+Those three sentences are the Block. A passkey is a private key the platform holds and
+this repository never sees, bound to an origin and to a relying party, and it is
+created or used inside a ceremony the browser runs: a prompt in the platform's own
+chrome, outside this page, with the reader's biometric or their device passphrase behind
+it.
+
+A Block that reached for that would be choosing three things for every consumer that
+installed it, and all three are decisions about a reader's security rather than about
+how a list is drawn:
+
+| Chosen by the Block | Consequence |
+| --- | --- |
+| The origin | A credential is bound to the origin that created it, and one created against the wrong origin is unusable on the site that needs it. |
+| The user-verification flag | The difference between a ceremony that asks for a fingerprint and one that only proves the presence of a device. A product whose risk assessment says the weaker flag is right must be able to say so. |
+| The relying party identifier | A durable name for this deployment, and a product that deploys in two regions has two of them. |
+
+So `onRegister` is where the ceremony runs, and this file holds the list, the labels and
+the states and nothing else. What the reader sees is identical either way. What your
+server accepts afterwards is entirely yours, and a reader who registered a passkey the
+wrong way finds out at the next sign-in.
+
+There is no credential vocabulary in the type either: no `credentialId`, no public key,
+no sign count. A type with those would have implied that the Block can read a
+credential, and a design system is not a place to reach for one.
+
+## The remove control is on every row, including the reader's own
+
+Withholding the dangerous control from the row the reader is sitting on is the instinct,
+and the instinct is wrong for a reason that has nothing to do with the interface. A
+reader who wants to remove the credential they are using is a reader who will find
+another way, and what they find is a credential they cannot see on a device they are
+not holding. So the control is drawn on every row.
+
+What the Block does not do is confirm, because a bare click that destroys a credential is
+not a confirmation. A product that wants one composes its own dialog and calls
+`onRemove` from there, or passes its own control. And `removeLabel` is a function for
+two reasons: a column of controls all announced as "remove" is a column a screen reader
+user cannot act on, and removing the credential on a phone and removing the one on a
+laptop are different consequences.
+
+## The transport is your string, because this phone and this laptop are sentences
+
+"hybrid" and "nfc" and "internal" are tokens a caller can pass and this package will not
+expand into words of its own. So `transport` is whatever your platform reported, drawn
+exactly as passed, and `transportLabel` is there for the caller who holds a token and
+wants your product's sentence for it. Pass nothing and the row simply has no third fact.
+
+The two moments are the same arrangement: `created` and `lastUsed` are drawn exactly as
+passed, and `dateLabel` is a function for the caller who holds a real timestamp and
+wants a localised reading. One function for both moments, because a row that says "three
+days ago" beside a raw ISO string reads as two different systems.
+
+`lastUsed` is the moment a reader actually came for. A credential that has never been
+used is the row that explains why a sign-in failed on a device the reader expected to
+work, and drawing nothing beside it leaves the most useful fact on the screen unstated.
+
+## The honest failure is your sentence
+
+A ceremony can fail because the reader dismissed the platform's prompt, because the
+reader has no authenticator at all, because the platform refused to create a
+credential, because your relying party identifier is not permitted on this origin,
+because the origin is not a secure context, because the device is out of room, because
+a third party on the device answered instead of them, or because your server refused the
+public key after the platform had already created it. Nine outcomes, and the difference
+between a reader who cancelled and a reader whose platform is not permitted is the
+difference between "try again" and a support ticket.
+
+So `status` is a prop, there is no `registered` flag and no `removed` flag in the file,
+and what the Block does about an outcome is the two rendering decisions: the register
+control is disabled while you say the ceremony is running, because a second press
+starts a second prompt the reader did not ask for, and the outcome is drawn in a live
+region, `assertive` for the refusal, because a ceremony that fails silently looks to a
+reader exactly like a ceremony that is still thinking.
+
+## What the Block refuses
+
+| Refused | Why |
+| --- | --- |
+| A row with no `name` | A date and some controls with nothing to say which credential they belong to, on the one screen whose purpose is telling a reader apart from their own devices. |
+| `onRegister` with no `registerLabel` | A nameless button that then opens a system dialog, so a reader who presses it has been told the wrong thing about where they are. |
+| `onRemove` with no `removeLabel` | Every control announced by the same word, and a reader told which credential to destroy by nothing. |
+| A `dateLabel` with no moment, or a `transportLabel` with no transport | A function composed and then discarded. |
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { Passkey01, type Passkey01Status } from '@nanisoft/prism-ui/blocks/passkey-01'
+
+export function AuthenticatorList() {
+  const [status, setStatus] = useState<Passkey01Status>()
+
+  return (
+    <Passkey01
+      eyebrow="Nexus"
+      title="What can sign in as you"
+      description="Each one is a credential your machine holds. Removing one means that device stops being able to act for you."
+      authenticators={listOfAuthenticators}
+      onRegister={async () => {
+        setStatus({ state: 'registering', message: 'The platform is asking for a fingerprint or a face.' })
+        // Your ceremony, your three choices: the origin, the verification flag and
+        // the relying party identifier. Nothing in this package chose any of them.
+        await navigator.credentials.create({ publicKey: yourOptions })
+        setStatus({ state: 'idle', message: 'Registered.' })
+      }}
+      registerLabel="Register a passkey on this device"
+      registering={status?.state === 'registering'}
+      onRemove={(id) => confirmThenRemove(id)}
+      removeLabel={(one) => `Remove the credential called ${one.name}`}
+      status={status}
+      empty="No credentials registered on this account yet."
+    />
+  )
+}
+```
+
+<ComponentDemo slug="passkey-01" />
+
+## Guidelines
+
+### When to use
+
+Use it as a whole account security section, or as the passkey half of one beside your own
+sign-in-method list. It is the only place in this package where a reader goes looking
+for the credential that is protecting them.
+
+Name every authenticator as the reader named it. A passkey is only identifiable by the
+person who registered it, and "the phone in my coat pocket" is a name where "Pixel 8" is
+a device. A caller whose only record is a product name passes that, and the cost of
+doing so is that two rows in a reader's list will be indistinguishable.
+
+Pass `lastUsed` wherever you have it. It is the moment a reader came for and the one
+that explains a sign-in that failed on a device they expected to work.
+
+### When not to use
+
+Do not use it to sign a reader in. Registering a credential and using one are different
+moments, and a screen that does both is a screen with two ceremonies in it and no way to
+recover from the one that failed.
+
+Do not use it where the authenticators have no names. A list of ids is a list a reader
+cannot act on, and acting is the only reason the list is here.
+
+Do not expect it to fetch anything. `authenticators` is a projection of what you already
+know, and a Block that fetched it would be a Block that ships a transport.
+
+Do not use it to draw a credential's public key or id. The Block has no vocabulary for
+either, on purpose, and a consumer that needs one is reaching for a component that does
+not exist here.
+
+### Best practices
+
+- Pass `removeLabel` as a function that names the authenticator. Two controls announced
+  identically is a list a screen reader user cannot act on, and the honest sentence
+  names the device.
+- Confirm before you remove. The Block does not, deliberately, and a bare click that
+  destroys a credential is not a confirmation. Compose your own dialog and call
+  `onRemove` from there.
+- Pass `registering` from the ceremony's own promise and `status` from its result. The
+  first is the control and the second is the outcome, and on this screen the request in
+  flight might be either.
+- Pass a `status` whose state you change, because a reader who pressed register and
+  heard nothing will press it again and start a second prompt.
+- Pass `className` for grid placement only. The list is a list, and a card the reader
+  has to scroll to reach the fourth row of is a list they will not check.
+
+### Content guidelines
+
+- Write the title as what the list is. "What can sign in as you" tells a reader what
+  they are looking at; "Security" names a settings page they have to trust.
+- Write the description as the consequence of removing one. A reader deciding whether to
+  destroy a credential needs to know what that device will no longer be able to do.
+- Write each name as the reader's own words for the device, and use a sentence where
+  one exists. "The laptop on my desk" beats "MacBook Pro", and it beats both when there
+  are two of them.
+- Write `registerLabel` as a sentence that says where the prompt will appear. "Register
+  a passkey on this device" tells a reader that the next thing is a system dialog;
+  "Add" does not, and a reader surprised by a platform prompt does not come back.
+- Write `removeLabel` as the action plus the thing. "Remove the credential called the
+  laptop on my desk" is a sentence a reader can check against the row they meant.
+- Write `empty` as a fact about the account. "No credentials registered on this account
+  yet" and "we could not read the list" are different sentences, and the second one is
+  the one a reader with two credentials needs to be shown.

@@ -1,0 +1,123 @@
+---
+slug: blocks/milestone-timeline-01
+title: MilestoneTimeline01
+---
+
+## Overview
+
+MilestoneTimeline01 is a dated sequence of what a system reached: when, what, and
+how far along it was. It is a rail with a rule down one side, a state mark per
+milestone, and a fill for the milestones that were work rather than a moment.
+
+There are two sibling items and the three differ by tense and by whether the
+sequence is still running. `timeline.tsx` is a Component, not a Block, and shows
+where a **run** has got to **as it happens**: it is fed events, it has four run
+states, it scales durations against the longest step in the run, and one of its
+states moves. `story-01` arranges a company's **past** in the **past tense**, with
+no state on any entry because a history has nothing to be current about. This one
+is the middle case: it has a future, so it has an `upcoming`, and it has a
+position, so exactly one milestone may be `current` and that one is named.
+
+The fill is composed `Progress` rather than a hand-drawn bar, and that is the
+decision worth reading first. Three states in a row is what `steps.tsx` already
+owns, and a Block that re-drew the rule would be a second implementation of a
+Component whose accessibility was already worked out. A hand-drawn filled bar is a
+div with a width on it, and a div with a width is a picture of a value that no
+screen reader, no crawler and no print stylesheet can read.
+
+## Usage
+
+```tsx
+import { MilestoneTimeline01 } from '@nanisoft/prism-ui/blocks/milestone-timeline-01'
+
+<MilestoneTimeline01
+  eyebrow="Where it is"
+  title="What the estate has reached"
+  description="Dated milestones, in your own locale. The state on each is yours to say."
+  nowLabel="Where the estate is today"
+  progressLabel={(value) => `${value} per cent of the eleven sites brought under observation`}
+  milestones={[
+    {
+      id: 'first-line',
+      at: '2023',
+      title: 'One site, one line',
+      body: 'A single collection site, a single run, and a claim narrow enough to be wrong about.',
+    },
+    {
+      id: 'capture',
+      at: '2024',
+      title: 'The market is captured',
+      body: 'The same line across the estate, continuously rather than on request.',
+      progress: 100,
+    },
+    {
+      id: 'agents',
+      at: '2026',
+      title: 'Agents take the findings',
+      body: 'A finding arrives, an agent takes it, and a person is woken only for the decision that is not the agent’s to make.',
+      state: 'current',
+      progress: 40,
+      href: '/estate/agents',
+      hrefLabel: 'Read what an agent is allowed to do',
+    },
+    {
+      id: 'estate',
+      at: 'Not dated',
+      title: 'The whole estate under one graph',
+      body: 'One plant running well says nothing about the eleven that are not.',
+      state: 'upcoming',
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="milestone-timeline-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for a system that has got somewhere and has not got everywhere, where the
+reader needs to see both halves at once. A migration, a rollout, a coverage
+programme.
+
+Use `progress` on the milestones that were work. A milestone that was a moment
+carries a date and a title and nothing else.
+
+### When not to use
+
+Do not use it for a run. A run has durations, four states of its own and one state
+that moves, and that is `Timeline`.
+
+Do not use it for a company history. A history is in the past tense, has no state
+on any entry, and usually carries a figure beside some of them. That is
+`story-01`.
+
+Do not use it for a process. A process is `ProcessRail01` or `ProcessFlow01`, and
+neither has a date or a fill.
+
+### Best practices
+
+- Set `state` on every milestone whose state the sequence does not already imply.
+  A milestone with no state draws a bare tick, which is honest, but a sequence
+  where nothing has a state has told the reader nothing.
+- Set exactly one `current`. Two currents is a sequence with two answers to where
+  the system is, and no current is a sequence a reader cannot act on.
+- Pass `progressLabel` on every milestone that carries a `progress`. The bar
+  announces a number, and a number with no unit is a claim the reader has to
+  guess.
+- Pass `at` already written for your reader, in your own locale. Compose
+  `RelativeTime` when you want a localised absolute reading with relative words
+  handed back.
+- Keep bodies to about four lines. A milestone that runs longer is a page.
+
+### Content guidelines
+
+- `title` is what the milestone is called, in a few words.
+- `body` says what the milestone changed for a reader who has arrived at it.
+- `at` is yours even when the milestone has not happened. An `upcoming` milestone
+  has no date, and an empty cell is a hole in a document about dates, so write the
+  words your readers would use for one.
+- `nowLabel` is the phrase your team uses for where the system is today. It is
+  the only state on the rail that carries words, so it is the one worth writing.
+- `progressLabel` names the thing the bar is a percentage of, not just the number.

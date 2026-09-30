@@ -1,0 +1,8 @@
+{
+  "name": "project-list-01",
+  "title": "Project List 01 - A List Of Projects, As Rows Or A Table",
+  "description": "A list of projects with a toolbar, a filter column and a caller-written empty state, drawn either as scanned rows or as a real table with row and column headers. The two forms answer different questions and take the same field names as the project detail Block, so a consumer with a project model has one model. Server Component, and the toolbar is a slot so the client boundary stays the caller's.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "table", "status", "progress", "relative-time", "tag-group", "cta-link", "avatar"],
+  "dependencies": []
+}

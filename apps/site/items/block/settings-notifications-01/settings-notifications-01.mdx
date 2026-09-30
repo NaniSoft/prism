@@ -1,0 +1,116 @@
+---
+slug: blocks/settings-notifications-01
+title: SettingsNotifications01
+---
+
+## Overview
+
+SettingsNotifications01 is per-channel notification preferences: a channel, a line
+about it, a switch per event, and a note where the product has a standing
+requirement of its own.
+
+The load-bearing decision is `required`. A preference surface where every control
+is optional is a surface that will let a reader turn off something the product
+cannot work without, and the failure arrives days later in a different part of the
+product with nothing on this page to point at. So a required set has to exist. It
+is a prop rather than a fixed list because this package does not know what any
+product cannot work without, and a list it did ship would be deciding that for
+every consumer. A required event renders read-only rather than disabled, so a
+keyboard reader still meets the control instead of a hole where one used to be.
+
+## Usage
+
+```tsx
+import { SettingsNotifications01 } from '@nanisoft/prism-ui/blocks/settings-notifications-01'
+
+<SettingsNotifications01
+  eyebrow="Notifications"
+  title="What this workspace tells you about"
+  channels={[
+    {
+      id: 'email',
+      name: 'Email',
+      description: 'Goes to the four addresses on the members list.',
+      events: [
+        {
+          id: 'password-changed',
+          label: 'A password was changed',
+          description: 'Sent so that a change somebody else made is noticed.',
+          on: true,
+          required: true,
+          requiredLabel: 'Always on',
+        },
+        {
+          id: 'weekly',
+          label: 'The weekly round-up',
+          description: 'One message a week, on a Tuesday.',
+          on: false,
+        },
+        {
+          id: 'invitations',
+          label: 'An invitation was accepted',
+          on: true,
+        },
+      ],
+    },
+  ]}
+  disabledLabel="A password change alert cannot be turned off, because an account nobody hears about is an account nobody recovers."
+  updateLabel={(channel, event, on) =>
+    on ? `Send ${event.label.toLowerCase()} by ${channel.name.toLowerCase()}` : `Stop sending ${event.label.toLowerCase()} by ${channel.name.toLowerCase()}`
+  }
+  onToggle={(channelId, eventId, on) => savePreference(channelId, eventId, on)}
+  empty="This workspace has no channels yet."
+/>
+```
+
+<ComponentDemo slug="settings-notifications-01" />
+
+## Guidelines
+
+### When to use
+
+Use it wherever a product asks a reader what they want to hear about and the
+answer is per event rather than per account. A preferences page built from
+switches and one save button is `settings-panel-01` instead.
+
+Use it for the whole set on one surface. Splitting a preference list across
+pages is a decision about the product, and the honest reason for it is usually
+that the list grew rather than that the reader asked for the split.
+
+### When not to use
+
+Do not use it for a marketing subscription list. A reader who came to subscribe to
+a newsletter wants one control and a consent sentence, and that is
+`newsletter-01`.
+
+Do not use it for account-level settings that happen to be booleans. A setting
+that is part of a saved form is a checkbox with a save control, and a switch that
+takes effect immediately changes what a reader has to do.
+
+### Best practices
+
+- Mark the events your product cannot work without with `required`, and pass both
+  `requiredLabel` and `disabledLabel`. The Block refuses a required event with no
+  mark and a required set with no note.
+- Write `updateLabel` so the sentence contains the event's own `label`. That label
+  is the visible text of the control, and it has to be inside the accessible name
+  for a reader using voice control to act on the words they can see.
+- Pass `onToggle` and `updateLabel` together. The Block refuses either without the
+  other, because a nameless control and a sentence for a control that is not there
+  are both a caller's mistake.
+- Keep `event.on` as the truth from your product. The switch is controlled from it
+  and nothing moves until the product answers, which is what makes a failed change
+  visible.
+- Expect the switch not to move instantly. A reader who presses and sees nothing
+  will press again, so give the pending state a cue of your own.
+
+### Content guidelines
+
+- `channel.name` is a heading, so it is a short noun: Email, In the app, Push, Webhook.
+- `event.label` is a short noun phrase on a row beside a switch.
+- `requiredLabel` is a mark, not a sentence. It is two or three words.
+- `disabledLabel` is the product's standing reason for the whole required set, so
+  it is drawn once and referenced by every read-only control on the page.
+- `updateLabel` is a sentence your readers would say, in your own language.
+- `empty` is one sentence. Which of the two honest answers it is depends on
+  whether the product has no channels or failed to load them.

@@ -173,8 +173,80 @@ const fail = (invariant, message) => failures.push(`[${invariant}] ${message}`)
 
 const catalogue = buildCatalog()
 const byName = new Map(catalogue.map((entry) => [entry.name, entry]))
-/** Every public runtime export the checked catalogue promises (gap 7). */
+
+/**
+ * Every public runtime export `@nanisoft/prism-ui` publishes, read from the
+ * package's own `exports` map rather than from the catalogue alone.
+ *
+ * **The catalogue was the whole population and it was short by a subpath.** This
+ * set was `catalogue.flatMap((entry) => entry.exports)`, which names the
+ * Components, Blocks and Pages and nothing else, so the three exports the
+ * `./provider` subpath publishes were invisible to it: `PrismProvider`,
+ * `usePrismTheme` and `PrismThemeScript`. A Demo that mounted the provider, which
+ * is the only way to preview a Component that needs one, was reported as importing
+ * something that is not public. It is public, and the report was wrong.
+ *
+ * The fix reads the manifest and the emitted declarations rather than adding the
+ * three names, because a hand-list here is exactly the second list this
+ * repository's own conventions warn about: it would be correct until the next
+ * subpath or the next export, and nothing would say so. `PUBLIC_EXPORTS` is
+ * derived, so a new subpath is covered the moment the manifest declares it.
+ *
+ * Type-only exports are excluded, for the reason the surface gate gives: a `type`
+ * is not a runtime export and a Demo importing one is importing something that
+ * does not exist at run time.
+ */
 const publicExports = new Set(catalogue.flatMap((entry) => entry.exports))
+for (const name of await providerRuntimeExports()) publicExports.add(name)
+
+/**
+ * The runtime exports on the manifest's non-Item subpaths, read from the emitted
+ * declarations each one resolves to.
+ *
+ * `./components/*`, `./blocks/*` and `./pages/*` are the Items the catalogue
+ * already names, so they are not read again; what is missing is everything the
+ * manifest publishes beside them, which today is the provider and the theming
+ * vocabulary. A subpath whose declarations cannot be read is reported rather than
+ * skipped, because a set that quietly loses a subpath is the same silent gap this
+ * whole mechanism exists to close.
+ */
+async function providerRuntimeExports() {
+  const manifestPath = path.join(REPO_ROOT, 'packages', 'ui', 'package.json')
+  const manifest = JSON.parse((await readFile(manifestPath, 'utf8')).replace(/^\uFEFF/, ''))
+  const names = []
+
+  for (const [subpath, target] of Object.entries(manifest.exports)) {
+    if (typeof target === 'string') continue
+    if (subpath.includes('*')) continue
+    const declaration = target.types ?? target.default
+    if (typeof declaration !== 'string' || !declaration.endsWith('.d.ts')) continue
+    const file = path.join(REPO_ROOT, 'packages', 'ui', declaration)
+    let source
+    try {
+      source = await readFile(file, 'utf8')
+    } catch (cause) {
+      fail(
+        'cross-refs',
+        `the "${subpath}" subpath of @nanisoft/prism-ui publishes ${declaration}, which this check could not ` +
+          `read, so its runtime exports are not in the set a Demo is measured against. ${cause.message}`,
+      )
+      continue
+    }
+    for (const match of source.matchAll(
+      /export\s+(?:declare\s+)?(?:function|const|class|let|var)\s+([A-Za-z0-9_$]+)/g,
+    )) {
+      const name = match[1]
+      if (name !== undefined) names.push(name)
+    }
+    for (const match of source.matchAll(/export\s*\{([^}]*)\}/g)) {
+      for (const part of (match[1] ?? '').split(',')) {
+        const name = part.trim().split(/\s+as\s+/).pop()?.trim()
+        if (name && name !== 'default' && !/^type\s/.test(part.trim())) names.push(name)
+      }
+    }
+  }
+  return names
+}
 
 /* --- 1 + 7: build-fresh emits, byte compare ----------------------------- */
 

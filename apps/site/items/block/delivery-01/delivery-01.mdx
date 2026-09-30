@@ -1,0 +1,144 @@
+---
+slug: blocks/delivery-01
+title: Delivery01
+---
+
+## Overview
+
+Delivery01 is a thing moving through stages: what it is, where it stands, which
+stage it has reached, and an expected reading, over a rail composed from the steps
+Component. The storefront's version of this pattern is a shipment screen, and the
+pattern is the same. Someone is waiting, and the four facts they need are what,
+where, how far and when. What is not the same is what a Block can say about any of
+them, which is why every string here is the caller's.
+
+The rail is `Steps` and the state is `Status`, and neither was redrawn. What that
+buys is the arrangement `Steps` already settles: that the states differ by shape
+before they differ by colour, that exactly one stage carries `aria-current`, and
+that the rule between the stages is filled up to the reader's position and empty
+after it.
+
+## A stage that has not happened carries a name, a date and nothing else
+
+A shipment screen that shows a delivery time as though it had happened is a screen
+lying to a reader who is waiting, and the lie is worse here than in a shop. A
+reader waiting for a parcel is disappointed; a reader waiting for a configuration
+is deciding whether to roll back.
+
+So an `upcoming` stage has a name, a date and a `stateLabel`, and that is the whole
+of it. There is no tick, no filled rule reaching past the reader's position, and no
+delivery time in the ink of a fact. The date on an upcoming stage is drawn in the
+muted ink beside the caller's words, and the two together are the only thing this
+Block says about a stage that has not happened.
+
+## Why the words travel as strings
+
+This Block is a server Component and `Progress` is a client one, and a function
+cannot cross that seam. `Progress` publishes `valueText` for exactly this case: the
+sentence is computed here, on the server, where the caller's function is still a
+function, and it travels down as a string.
+
+The same argument is why `stateLabel`, `expectedLabel` and `dateLabel` are
+functions. They are called here too, and what a reader hears is the caller's own
+sentence in their own language, while the absolute reading beside it is the
+platform's.
+
+## Usage
+
+```tsx
+import { Button } from '@nanisoft/prism-ui/components/button'
+import { Delivery01, type DeliveryState } from '@nanisoft/prism-ui/blocks/delivery-01'
+
+const STATE_LABEL: Record<DeliveryState, string> = {
+  queued: 'Waiting for a runner',
+  'in-transit': 'Rolling out to 18 of 24 nodes',
+  held: 'Held on a missing credential',
+  delivered: 'Live on every node',
+  failed: 'Rolled back on 3 nodes',
+}
+
+export function ReleaseStatus() {
+  return (
+    <Delivery01
+      eyebrow="Nexus"
+      title="Warehouse migration, phase two"
+      item={{
+        name: 'The dual-write cutover',
+        detail: 'Nexus production estate, 24 nodes, eu-west-2.',
+        href: '/runs/cutover-2291',
+        hrefLabel: 'Open the run record',
+      }}
+      state="in-transit"
+      stateLabel={(state) => STATE_LABEL[state]}
+      expectedAt={Date.parse('2026-10-02T09:00:00Z')}
+      expectedLabel={(value) =>
+        new Intl.RelativeTimeFormat('en-GB', { numeric: 'auto' }).format(
+          Math.round((value - Date.now()) / 3600000),
+          'hour',
+        )
+      }
+      progress={72}
+      progressLabel={(value) => `${value} per cent of the estate is on the new tables`}
+      stages={[
+        { id: 'shape', name: 'Shape', state: 'done', stateLabel: 'Signed off', at: Date.parse('2026-09-24T00:00:00Z') },
+        { id: 'schema', name: 'Schema', state: 'done', stateLabel: 'Live', at: Date.parse('2026-09-27T00:00:00Z') },
+        { id: 'backfill', name: 'Backfill', state: 'done', stateLabel: 'Finished on Tuesday', detail: '418,204 rows rewritten.' },
+        { id: 'dual-write', name: 'Dual write', state: 'current', stateLabel: 'Running since 06:00', detail: '18 of 24 nodes are writing to both tables.' },
+        { id: 'retire', name: 'Retire the old tables', state: 'upcoming', stateLabel: 'Waiting on the backfill', at: Date.parse('2026-10-02T09:00:00Z') },
+      ]}
+      actions={<Button variant="outline">Pause the rollout</Button>}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="delivery-01" />
+
+## Guidelines
+
+### When to use
+
+Use Delivery01 where one thing is on its way somewhere and a reader is waiting for
+it. That is a release, a migration, a configuration push, a fleet rollout and a
+parcel, and the frame is the same in all five.
+
+Use it where the reader's question is "where is it", not "how do these compare".
+A reader with four deliveries in flight wants four of these or a list, not one
+delivery with four rows.
+
+### When not to use
+
+Do not use it for something that is not moving. A project that is planned, running
+and archived is `Project01`, and a stage that is held is a fact about the project
+rather than about a position in a sequence.
+
+Do not use it for a dated sequence with no current state. A changelog and a
+milestone list are documents about the past, and this Block is a surface about
+something in progress.
+
+### Best practices
+
+- Give every stage a `stateLabel`. The run throws without one, and the fallback
+  would be a shape a reader can only see.
+- Pass `expectedAt` and `expectedLabel` together or not at all. A date with no
+  sentence beside it is a date a reader has to interpret.
+- Write the `dateLabel` as the role the moment plays, given the order of the rail.
+  The function is given the moment and not the role, so the order is what carries
+  it.
+- Leave `progress` off a thing the product reports by stage. A bar at zero is a
+  claim that nothing has happened.
+- Compose the controls into `actions`. A thing that can be paused and a thing that
+  can be re-run share this frame and nothing else.
+
+### Content guidelines
+
+- Write a stage `name` as the stage, in three words or fewer. The rail is scanned
+  and a stage that wraps is a rail that has lost its shape.
+- Write an `upcoming` stage's `stateLabel` as a fact about why it has not happened.
+  "Waiting on the backfill" tells a reader what to do; "Not started" tells them
+  what they already knew.
+- Write `expectedLabel` as a relative reading in the reader's own language. A
+  reader waiting for a thing has the least patience for a sentence in the wrong
+  locale.
+- Never describe an upcoming stage as though it had happened. That is the one
+  thing this Block will not draw and the one thing a waiting reader will notice.

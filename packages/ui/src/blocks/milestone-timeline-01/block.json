@@ -1,0 +1,8 @@
+{
+  "name": "milestone-timeline-01",
+  "title": "Milestone Timeline 01 - Reached And Not Yet",
+  "description": "A dated sequence of what a system has reached, on a rail with a rule down one side, a state mark per milestone and a composed Progress fill for the milestones that were work rather than a moment. Distinct from Timeline, which shows a live run, and from Story01, which arranges a company's past. Every string and every number is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "progress", "status", "cta-link"],
+  "dependencies": []
+}

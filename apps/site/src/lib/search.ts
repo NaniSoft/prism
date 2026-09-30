@@ -1,4 +1,4 @@
-import { createSearchAPI, type AdvancedIndex, type Index } from 'fumadocs-core/search/server'
+import type { AdvancedIndex, Index } from 'fumadocs-core/search/server'
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure'
 
 import { isSearchedRoute } from './sections'
@@ -75,7 +75,7 @@ export function buildSearchIndexes(): AdvancedIndex[] {
 }
 
 /**
- * One document per page, for simple mode.
+ * One document per page, and the index the bar's dialog is handed.
  *
  * **The index is in simple mode, and the budget is why.** Advanced mode explodes
  * each page into one searchable document per heading and per content block, so
@@ -88,8 +88,8 @@ export function buildSearchIndexes(): AdvancedIndex[] {
  *
  * The ceiling has not moved, deliberately. It is the number a reader's browser
  * downloads, and a threshold that moves with the content stops being a ceiling.
- * What changed is how much index the same content needs, which is the half of the
- * decision that is ours to make.
+ * What changed is how much index the same content needs, which is the half of
+ * the decision that is ours to make.
  *
  * The cost is real and worth stating: a result is the page, not the heading
  * inside it, so a reader searching for a prop name is taken to the Item's page
@@ -98,6 +98,11 @@ export function buildSearchIndexes(): AdvancedIndex[] {
  * thing being looked for. The gate still asserts both halves: the index stays
  * inside its ceiling, and it holds every published page the manifest does not
  * exclude.
+ *
+ * **This is serialised as itself.** `app/api/search/route.ts` used to hand these
+ * documents to a serialised search engine, and the bar's dialog could not read
+ * the result; the array is the contract `SearchDialog` declares, and this site
+ * emits it the way the four consumer sites do.
  */
 export function buildSimpleIndexes(): Index[] {
   return source
@@ -128,5 +133,3 @@ function pageContent(page: { data: unknown }): string {
     ...value.contents.map((block) => block.content),
   ].join('\n')
 }
-
-export const searchAPI = createSearchAPI('simple', { indexes: buildSimpleIndexes() })

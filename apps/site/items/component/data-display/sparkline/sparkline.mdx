@@ -1,0 +1,87 @@
+---
+slug: components/sparkline
+title: Sparkline
+---
+
+## Overview
+
+A Sparkline is a series drawn small enough to sit in a cell: a line, no axes, no
+labels and no legend. It exists for the row where a number and its shape both
+matter and there is no room for a chart.
+
+The decision that shapes it is that the drawing is decorative and the numbers are
+not. Ninety-six pixels of line with no axis is a shape, and a shape a reader
+cannot query is the failure a chart exists to prevent, so the same array is also
+rendered as a table in a visually hidden wrapper.
+
+The second decision is that two inputs throw rather than draw. An empty series is
+a frame with no claim in it, and a series whose readings are all equal is a
+straight stroke with no information in it. A reader cannot tell a flat line from a
+broken chart.
+
+## Usage
+
+```tsx
+import { Sparkline } from '@nanisoft/prism-ui/components/sparkline'
+
+<Sparkline label="Requests per hour" values={[12, 18, 14, 22, 19, 31]} tone="chart-1" />
+
+<Sparkline
+  label="Error rate, last 30 builds"
+  values={[0.4, 0.2, 0.9, 1.4, 0.3, 0.2]}
+  tone="chart-5"
+  emphasizeLast
+/>
+```
+
+## Guidelines
+
+### When to use
+
+Use a Sparkline beside a number in a table row, a list item or a summary card,
+where the number is the reading and the shape is the context. A week's requests,
+a build's error rate, a queue's depth, a run's duration.
+
+Pass raw counts. The Component scales them against the largest reading in the
+series, because a caller that pre-normalises has two chances to get the axis wrong
+and a mislabelled axis is a lie with a typeface on it.
+
+Pass `emphasizeLast` when the last reading is the one the reader came for and the
+shape behind it is context. Leave it off otherwise, because a dot on the end of a
+line is a claim that the end is special.
+
+### When not to use
+
+Do not use a Sparkline where a reader has to compare values. The numbers are in a
+hidden table, which means finding one is a deliberate act rather than a glance.
+That is `ChartFrame`, with a visible table, a legend and an axis.
+
+Do not use one with a series that is flat. That is not a sparkline, it is a
+straight line with no information in it, and the Component throws rather than draw
+it because a reader cannot tell the two apart.
+
+Do not use one for a second series. A sparkline has one line and no legend, and
+adding a second means adding the legend and the colours that go with it, which is
+`ChartFrame`.
+
+Do not use it in a cell that has to resize with its column. The box is in pixels
+on purpose, so that a column of rows lines up.
+
+### Best practices
+
+- Give every Sparkline a `label`. It is the figure's name, the caption on its
+  table and the only thing a screen reader reads before the numbers. Two
+  sparklines in a column of numbers are two pictures a reader cannot tell apart.
+- Take the tone from `chart-1` through `chart-5` and never from a raw colour. A
+  series colour is a claim about what a thing is, and the caller makes it.
+- Expect a narrow range to look dramatic. The line is scaled to the series' own
+  range with no floor at zero, which is what lets a series between 900 and 1,000
+  show its shape. The price is that a two percent move looks like a cliff, and the
+  answer is the table, which carries the numbers at the precision you gave them.
+- The hidden table is generated from the same `values` array, so it cannot fall
+  behind the line. It has no column headings, because this Item has no word for a
+  position that is true in your domain.
+- `width` and `height` are pixels. 96 by 24 is a mark beside a number, not a plot,
+  and a box tall enough to read an axis is `ChartFrame`.
+
+<ComponentDemo slug="sparkline" />

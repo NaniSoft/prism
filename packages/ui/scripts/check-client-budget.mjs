@@ -103,8 +103,43 @@ const WORK_PARENT = path.join(PKG, '.turbo')
  * flatter their own half. The per-surface breakdown prints for exactly this
  * reason: so the trade-off the one number makes stays visible rather than being
  * discovered by whoever hits it.
+ *
+ * ### 208 to 260, 2026-09, and what this move is
+ *
+ * The roster went from 106 Items to 236 over the 2026-09 expansion and the
+ * all-client bundle went from 156.6 KB to 250.4 KB over 172 client entry points.
+ * The previous two moves repaired a ceiling that was measuring the wrong set of
+ * files, so the honest response then was to state the truth about the past.
+ * **This one is different and the difference is worth being blunt about: the weight
+ * is new weight, not weight that was always shipping.**
+ *
+ * Thirty new Blocks arrived and most of them are the composition of Components
+ * the bundle already carried, so the growth is much smaller than the roster
+ * growth, and that is the one fact that makes a single aggregate figure a
+ * tolerable thing to hold. 95 Items added 64 KB; the next 35 Items added 30 KB,
+ * which is the shape the first hundred predicted and the reason the estimate held
+ * rather than the reason the ceiling was safe. 260 leaves 9.6 KB, about four
+ * percent, and the ten Pages that finished the roster are compositions of Blocks
+ * already measured, so a Page is close to free and the four percent is not
+ * expected to be spent on Pages.
+ *
+ * 260 rather than 225 is the same reasoning as 208 rather than 176, and the same
+ * mistake the gate has already made once. A ceiling set at the measured number
+ * plus nothing is a pin: it fails on the next ordinary addition and teaches
+ * everyone to answer by rerunning it with a bigger figure, which is how a gate
+ * stops being a decision point. The instrument that actually catches a runaway is
+ * the per-item `BUDGETS` table above, and this expansion added rows for the
+ * client Blocks and both live surfaces and left the rest of the growth visible in
+ * the printed per-item comparison. Pages are deliberately absent from that table,
+ * because a Page is a composition of Blocks already in it and budgeting the Page
+ * would count the same bytes twice. So the aggregate gets room to absorb the rest
+ * of the roster landing in pieces, and the per-item rows are where a reader looks
+ * to see whether a specific Component grew.
+ *
+ * The next reader should treat the printed figure as the fact and 260 as the
+ * intention, exactly as the two previous comments asked.
  */
-const CEILING = 208 * 1024
+const CEILING = 260 * 1024
 
 /**
  * Ticket 19 section 5, in KB: the Components, and their per-item budgets.
@@ -124,6 +159,23 @@ const CEILING = 208 * 1024
 const BUDGETS = {
   accordion: 4,
   'alert-dialog': 6,
+  /**
+   * Six of the 2026-09 roster expansion, and each is the client's own weight
+   * rather than a restatement of a dependency already budgeted.
+   *
+   * `lightbox` is the outlier at 25.5 KB and most of that is `dialog`, which
+   * carries the Base UI modal stack. It is budgeted as 26 because a row that
+   * excludes a dependency can grow by pulling one in, and a lightbox that grew
+   * by composing a second modal would not show up anywhere else. The five small
+   * ones are held near their measured size with about a kilobyte of headroom,
+   * which is enough to grow an icon and not enough to grow an engine.
+   */
+  announcement: 3,
+  dropzone: 3,
+  lightbox: 26,
+  'mini-calendar': 4,
+  'mode-toggle': 3,
+  'password-field': 3,
   avatar: 3,
   calendar: 14,
   carousel: 12,
@@ -159,6 +211,17 @@ const BUDGETS = {
    * measured size is a wish and reads as one.
    */
   'run-stream': 10,
+  /**
+   * The second live surface, measured at 10.2 KB and budgeted a kilobyte above
+   * that rather than at the figure `run-stream` holds. The difference is the
+   * shape of a row: a run event carries one caller string and a ledger row
+   * carries five, and the merge that keeps one row per `id` when a call is seen
+   * twice is code the event log does not have. The same `LiveRegion` and
+   * `ScrollArea` sit behind it and `Button`'s recipe is about 0.6 KB of the
+   * total already counted in the deduplicated bundle, so the all-client figure
+   * moves by the surface's own weight and not by that.
+   */
+  'tool-ledger': 11,
   'date-picker': 14,
   dialog: 9,
   'dropdown-menu': 9,

@@ -1,0 +1,7 @@
+{
+  "name": "legal-page",
+  "title": "Legal Page - The Table Of Documents And The Selected One At The Reading Measure",
+  "description": "A complete legal screen: the page heading with the date the document last changed, a named table of the documents with the selected one marked by aria-current rather than by colour alone, and the selected document as a caller authored node at the reading measure. The page does not own the text and does not parse it. Every string is a prop.",
+  "categories": ["marketing"],
+  "dependencies": []
+}

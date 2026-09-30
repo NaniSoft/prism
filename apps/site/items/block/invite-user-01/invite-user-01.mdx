@@ -1,0 +1,141 @@
+---
+slug: blocks/invite-user-01
+title: InviteUser01
+---
+
+## Overview
+
+InviteUser01 is an invitation: an address, a role you name, a note you write, one
+control and an announced status region, beside a bounded list of the invitations
+already sent. Every string is passed in as a prop.
+
+**The pending list is a second group and not a second form, and the reason is a support
+ticket.** A reader who has just sent an invitation and cannot see it will send
+another. A second invitation is not a harmless duplicate: it is a second message, a
+second row in your own audit trail, and a second thing for the person receiving it to
+work out. So the invitations already sent are drawn, named, and given their own
+heading rather than being summarised in a sentence under the control, and a list that
+shrank silently is a list a reader stops trusting.
+
+**A stale invitation is dimmed and not removed.** The only signal is your own
+`expiresLabel`, because the Block holds no clock and a design system that guessed
+would be guessing about your deadline. The reason for keeping the row is that a reader
+who sent an invitation and finds it gone learns nothing at all: the absence is
+indistinguishable from a fault and from a product that quietly discards invitations.
+
+**`options` is a `readonly` array, and that is the fix for a compile error rather than a
+preference.** A caller writes its roles as `const ROLES = [...] as const` because it
+keeps the list beside its own type definitions, and a mutable prop type rejects that
+fixture with an error about `readonly` whose message names nothing about the caller.
+Two Blocks in this package shipped that class of error before the list was written as
+readonly.
+
+**The select starts on your first option when no value is passed, and the Block does not
+reorder your list to pick a safer one.** Reordering somebody's roles would be a claim
+about their permission model, and the alternative, requiring `value`, would put a prop
+on the type that most callers do not have and would want anyway. A product whose least
+privileged role is not first passes it first.
+
+## Usage
+
+```tsx
+import { useState } from 'react'
+import { InviteUser01 } from '@nanisoft/prism-ui/blocks/invite-user-01'
+
+const ROLES = [
+  { id: 'reader', label: 'Reader' },
+  { id: 'operator', label: 'Operator' },
+  { id: 'maintainer', label: 'Maintainer' },
+] as const
+
+export function InviteSomeone({ invitations }: { invitations: Invitation[] }) {
+  const [sent, setSent] = useState<Invitation[]>(invitations)
+
+  return (
+    <InviteUser01
+      eyebrow="Nexus Estate"
+      title="Let somebody else in"
+      description="An invitation grants what the role below allows, and nothing else."
+      identifier={{ label: 'Their email address' }}
+      role={{ label: 'What they will be able to do', options: ROLES }}
+      message={{ label: 'A note with the invitation', counter: true, maxLength: 240 }}
+      submitLabel="Send the invitation"
+      status={{ state: 'sent', message: 'Sent. They will see the note when they open it.' }}
+      onSubmit={async (value) => {
+        const created = await sendInvitation(value)
+        setSent((was) => [...was, created])
+      }}
+      pending={{
+        title: 'Invitations you have sent',
+        empty: 'Nobody has been invited yet.',
+        items: sent.map((one) => ({
+          id: one.id,
+          identifier: one.address,
+          sentLabel: one.sentAt,
+          expiresLabel: one.expired ? 'Ran out' : undefined,
+          revokeLabel: 'Call it back',
+          onRevoke: () => revokeInvitation(one.id),
+        })),
+      }}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="invite-user-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where somebody who already has access is letting somebody else have it. The
+form and the list belong on the same screen, because the list is what stops a second
+invitation being sent.
+
+Pass `pending` whenever you send invitations at all, even when the list is empty. The
+empty sentence is the answer to "did it work", and a reader who cannot see the group
+will send another.
+
+Pass `counter` with `maxLength` together, or neither. The type requires the pair,
+because a count with no limit beside it is a number with nothing to act against.
+
+### When not to use
+
+Do not use it to grant a role without sending anything. A permission matrix with an
+inline control is `SettingsMembers01` or `PermissionMatrix01`, and both of those let
+a reader change what somebody can do while they are already in the workspace.
+
+Do not use it as a lead capture form. The note field and the counter make sense for a
+note a colleague reads and do not make sense for a message a sales team works.
+
+Do not build a second form for resending. The revoke control per row and the caller's
+own transport are enough, and a second form is how a reader ends up with two records
+for one intention.
+
+### Best practices
+
+- Pass `revokeLabel` and `onRevoke` together or neither. The Block throws on half a
+  control rather than drawing a button that does nothing.
+- Pass `expiresLabel` for an invitation that has gone stale and nothing for one that has
+  not. Its presence is the whole signal, and the row is dimmed because of it.
+- Pass `identifier.error` for anything your server said about the address, and let the
+  status region carry what happened to the request as a whole.
+- Keep your role list in one place and hand the same array to this Block and to your own
+  permission checks. Two lists is two answers to "what can a maintainer do".
+- Do not sort the items. Which invitations a reader should see first is a claim about
+  your workspace, so the Block leaves the order alone.
+- Do not render a second announcement beside `status.message`. The sentence is inside
+  the live region and drawn once.
+
+### Content guidelines
+
+- Write the role descriptions as what the role can do, in the present tense, and keep
+  them short enough to sit under a native select on a phone.
+- Write the note field's label as what the reader will read, not as a section title.
+  "A note with the invitation" beats "Personal message".
+- Write `empty` as a fact about the workspace rather than as a reassurance. "Nobody has
+  been invited yet" is an answer; "Your team is growing" is not.
+- Write `expiresLabel` as what happened and when, and keep it short enough to sit beside
+  an address on one line.
+- Write `revokeLabel` as a sentence about what pressing it does to the other person, not
+  as a noun phrase. "Call it back" is speakable; "Revoke" is not.

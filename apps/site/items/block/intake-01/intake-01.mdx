@@ -1,0 +1,149 @@
+---
+slug: blocks/intake-01
+title: Intake01
+---
+
+## Overview
+
+Intake01 is a stream of arriving work fed by the consumer: a source, a subject, a
+moment, a state, and up to two controls whose labels the caller writes.
+
+**This is a Block and not a `live` surface, and the difference is the whole of what it
+is.** A Block is rendered once and re-rendered when the consumer's framework decides. A
+live surface's content changes on its own over a subscription the surface owns. An
+intake list a consumer feeds by re-rendering with a new array is a Block, and one that
+has to update by itself is a live surface, and the existing `run-stream-01` is that.
+
+So this module holds no socket, no poll, no interval and no timer, and there is no prop
+that starts one.
+
+## What a consumer who wants a live list does
+
+Three routes, in the order they are worth taking:
+
+1. Compose the new `announcement` bar above your own region, and re-render this one
+   from your own state. The bar is a page level message, the list is yours to update,
+   and nothing in either has to pretend to be a subscription.
+2. Compose your own region beside this Block, for the case where the list itself has to
+   grow on its own. `live-region` announces what arrives in it and `scroll-area` gives
+   it a named scroll region, and both are Components rather than a kind.
+3. Ask upstream for a live intake surface. The roster records the request rather than
+   this Block pretending to be the thing.
+
+## What the Block refuses
+
+| Refused | Why |
+| --- | --- |
+| A state with no `stateLabel` | The tone is a colour and the words are the information. A dot with no sentence is invisible to a reader who cannot separate the tones and unreadable to a screen reader whatever they are. |
+| An `href` with no `hrefLabel` | A link whose only words are the item's subject tells a reader nothing about what activating it does. |
+| An `hrefLabel` with no `href` | A sentence about following something with nothing to follow. |
+| `onAccept` with no `acceptLabel` | A button announced as a button, and two identical unnamed buttons on a row is a row a keyboard reader cannot act on. |
+
+## The four states
+
+| State | Tone | Why that tone |
+| --- | --- | --- |
+| `new` | the cool role that means not an alarm | An item that has just arrived is a fact about age, not a problem. |
+| `queued` | muted | Most of a queue is queued, and a column of anything louder is a column of things the reader is meant to look at. |
+| `accepted` | success | The only state that means the reader did the thing. |
+| `rejected` | destructive | The one a reader must be able to find. |
+
+The words are yours. "Arrived", "Waiting", "Taken" and "Turned down" are four products'
+vocabularies for the same four states.
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { Intake01, type Intake01Item } from '@nanisoft/prism-ui/blocks/intake-01'
+import { RelativeTime } from '@nanisoft/prism-ui/components/relative-time'
+
+export function Intake() {
+  // Your own state, your own transport. Prism holds no socket and starts no poll:
+  // you re-render this with a new array when your store changes.
+  const [items, setItems] = useState<Intake01Item[]>([])
+
+  return (
+    <Intake01
+      eyebrow="Nexus"
+      title="Arriving now"
+      description="Everything the feeds have sent since you last looked. Taking and refusing are both yours to wire."
+      items={items}
+      onAccept={(id) => setItems((current) => current.filter((item) => item.id !== id))}
+      acceptLabel={(item) => `Take ${item.subject.toLowerCase()}`}
+      onReject={(id) => setItems((current) => current.filter((item) => item.id !== id))}
+      rejectLabel={() => 'Turn down'}
+      limit={12}
+      summary={(count) => (count === 0 ? null : `${count} waiting`)}
+      empty="Nothing has arrived since you last looked. The feeds check every thirty seconds."
+    />
+  )
+}
+```
+
+<ComponentDemo slug="intake-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where work arrives from somewhere else and a person decides: an application
+queue, a set of captured leads, a run of arriving agent work. It reads well from one
+item to about twenty, and `limit` is the cap above that.
+
+Set `limit`. A stream with no cap is a page whose height is decided by how busy the
+feeds are, and the reader who arrived to take three items should not scroll past four
+hundred.
+
+Write a different `acceptLabel` per item where you can. "Take this", "Accept Priya's
+request" and "Claim for Bristol" are three actions and the function is there so the
+caller can say which one they mean.
+
+### When not to use
+
+Do not use it for a list the reader filters rather than works. That is `inbox-01`, and
+its columns are the caller's to name.
+
+Do not use it for a log. A log is a record of what happened and this is a list of what
+is waiting, which is why nothing here removes a row when a handler is called.
+
+Do not expect it to update by itself. It holds no socket, no poll and no timer, and a
+Block that fetched or subscribed would be a Block every consumer whose work arrives
+some other way has to rewrite. Compose your own region, or ask upstream for a live
+intake surface.
+
+Do not pass `limit={0}` expecting a loading state. It draws the empty sentence, which
+is your sentence about an empty list and not about a list that has not loaded.
+
+### Best practices
+
+- Compose `relative-time` in `detail` if you want a relative phrase beside the
+  absolute one. The `at` prop is the machine value and the Block draws the platform's
+  absolute reading; the sentence is yours.
+- Set the source to a machine's own name for where it put something. A source a reader
+  is meant to read as a word belongs in `detail`.
+- Keep the subject to what a person would say. It is the row's heading, so it is what
+  a reader navigating by heading lands on.
+- Do not remove a row inside your handler and expect the Block to know. Passing a
+  shorter array is one line in your own code and it is the only thing that removes a
+  row.
+- Both controls or neither. A row with a take and no refuse is a workflow that cannot
+  be declined, and if that is real then it is real, but it should be a decision you
+  made rather than one this Block defaulted you into.
+
+### Content guidelines
+
+- Write the subject as the work, not as the system that sent it. "Priya's access
+  request" is a thing; "access request, form 3" is a record number.
+- Write `stateLabel` as the caller's own word for the state, not as this Block's. A
+  product that says "Arrived" and one that says "Fresh" are both correct.
+- Write `acceptLabel` and `rejectLabel` as two different offers. "Take" and "Turn
+  down" are peers; "Take" and "Cancel" are not, because cancelling something the
+  reader never took is a different claim.
+- Write `empty` as a fact about the stream. "Nothing since you last looked" and
+  "Nothing is waiting" are different sentences and one of them is a claim about a
+  feed that may be broken.
+- Do not put a relative time in the subject. The Block draws the moment in the
+  platform's locale and the subject is a name.

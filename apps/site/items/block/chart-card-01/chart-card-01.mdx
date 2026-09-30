@@ -1,0 +1,125 @@
+---
+slug: blocks/chart-card-01
+title: ChartCard01
+---
+
+## Overview
+
+ChartCard01 is a titled panel holding one figure, the key for it, the controls that
+act on it, and the figures the card states about it. It is the panel
+`chart-group-01` composes, and it is usable on its own inside a caller's own grid.
+
+It is a `Card` and not a `Section`, because a `Section` owns the container and the
+72rem measure, and a panel that owns a container cannot be a grid item in somebody
+else's.
+
+## The figure is a slot
+
+A Block that named a chart type would be choosing the caller's data shape, and a chart
+is the one thing on an operate screen a consumer most often replaces once they know
+what they are measuring.
+
+The mark is the claim the chart makes about the data. A bar chart of weekly signups
+invites a comparison of lengths that only means something when the value starts at
+zero, so the mark a caller never thought about is the mark that makes the chart wrong.
+`chart` holds the decisions it does own: the mark it was given, the axis derived from
+the data, and the table.
+
+The `legend` is a slot for the same family of reasons. `chart` exports `ChartLegend`
+as its own Item because a legend is a layout decision the surrounding design usually
+has an opinion about. A caller who wants it here passes `legend={false}` to `chart` and
+renders the same `series` array, which is the only reason the swatch and the mark
+cannot disagree.
+
+## What this Block does not check
+
+Whatever the figure is, it must also be readable as numbers. A chart is a picture whose
+entire content is a position, and a position is the one thing a screen reader, a
+crawler and a print stylesheet cannot read.
+
+`chart` states that rule in full and keeps the numbers in the document. It holds for
+the caller's figure too, and this Block does not check it: a `figure` slot is a slot
+and a Block cannot see inside it. The duty passes to the caller, and this page says so
+rather than pretending the Block verified it.
+
+## Usage
+
+```tsx
+import { ChartCard01 } from '@nanisoft/prism-ui/blocks/chart-card-01'
+import { Chart, ChartLegend } from '@nanisoft/prism-ui/components/chart'
+
+const SERIES = [
+  { name: 'eu-west', values: [120, 132, 141, 128, 150], tone: 'chart-1' as const },
+  { name: 'us-east', values: [90, 88, 96, 104, 99], tone: 'chart-2' as const },
+]
+
+export function RequestsCard() {
+  return (
+    <ChartCard01
+      title="Requests"
+      description="Per day, by region."
+      figure={
+        <Chart
+          variant="bar"
+          label="Requests per day by region"
+          labels={['Mon', 'Tue', 'Wed', 'Thu', 'Fri']}
+          series={SERIES}
+          legend={false}
+        />
+      }
+      legend={<ChartLegend series={SERIES} />}
+      reading={[{ label: 'Peak day', value: '150', delta: 6, deltaFormat: (v) => `${v}` }]}
+      footer="The dip on Wednesday is the maintenance window."
+    />
+  )
+}
+```
+
+<ComponentDemo slug="chart-card-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where one figure answers one question and the answer needs a name, a unit and
+a place to put the numbers that are not in the picture. A tile in a dashboard, a panel
+in a detail view, one entry in `chart-group-01`.
+
+Compose `chart` for the figure and give it a `label`. A figure with no name is not
+announced and two figures in a row are two figures a reader cannot tell apart.
+
+### When not to use
+
+Do not use it for a figure you cannot read as numbers. That is the one rule the slot
+cannot enforce for you, and the failure is a picture nobody can query.
+
+Do not use it for a list of values the reader compares across rows. A table has column
+semantics and a card does not, so put the values in `data-table-01` and the figure
+beside it.
+
+Do not use it for a layout that needs the container. Compose `Section` and
+`SectionHeading` yourself, as `chart-group-01` does.
+
+### Best practices
+
+- Put the controls in `actions` and the qualification in `footer`. A range picker
+  changes what the figure is showing, so it belongs beside the figure; the line that
+  explains the dip belongs under it.
+- Pass `deltaFormat` for a reading measured in a unit. Without it `metric` prints the
+  bare number, which is honest and almost never what was wanted.
+- Give the card `headingLevel` of the heading that introduces it, and the card derives
+  its own title one step below. A card embedded one level deeper then carries its
+  outline with it.
+- Keep the readings to three. Four in a `third` card is about 5rem each, which holds a
+  short figure and nothing else.
+- Use `span` only when you are placing the card in your own six-track grid. Inside
+  `chart-group-01` each card fills its track and the width is the grid's decision.
+
+### Content guidelines
+
+- A title names what is plotted: "Requests", "Latency", "Signups".
+- A description says the unit and the axis the figure cannot show: "Per day, by
+  region", "Thousands of pounds".
+- A reading label is a noun phrase: "Peak day", "Median latency".
+- A footer is the sentence the figure cannot say for itself: why there is a dip, what
+  period it covers, what is excluded.

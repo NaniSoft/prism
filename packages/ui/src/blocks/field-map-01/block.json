@@ -1,0 +1,8 @@
+{
+  "name": "field-map-01",
+  "title": "Field Map 01 - A Source To Target Field Mapping",
+  "description": "A mapping table for a pipeline or an estate: what a field is called at the source, what it becomes at the target, whether it is required, what type it is and what transformation it needs. A real table with row and column headers, four states drawn from the semantic tones with the caller's own words, and the caller's sentence in place of an empty cell. Every string is passed in as a prop.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "table", "status"],
+  "dependencies": []
+}

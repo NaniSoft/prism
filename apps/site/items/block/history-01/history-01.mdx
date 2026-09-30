@@ -1,0 +1,117 @@
+---
+slug: blocks/history-01
+title: History01
+---
+
+## Overview
+
+History01 is the record of what a workspace has been charged for and what it has
+consumed: a period, a reference, a kind, an amount, a state and a link, drawn as a
+real table, optionally under a summary of the period and above the caller's own
+toolbar.
+
+The storefront version of this pattern is an order history, and the shape is
+familiar. A shop shows a shopper what they bought, when, how much and whether it
+settled. What changes here is what the rows are. A workspace is charged for the
+runs it triggered, the capture volume it stored and the agent minutes it burned,
+and the same record read from the other side is what it has consumed. There is no
+shop and no basket anywhere in this Block. A reader who has used both will
+recognise the rectangle and none of the vocabulary, which is the point: the
+columns, the kinds, the quantities and the state words are all yours.
+
+## Usage
+
+```tsx
+import { History01 } from '@nanisoft/prism-ui/blocks/history-01'
+
+<History01
+  eyebrow="Nexus"
+  title="What this workspace has been charged for"
+  description="Two months of runs, capture and agent time. The order is your ledger's order, because this Block never sorts."
+  columns={[
+    { id: 'at', header: 'When' },
+    { id: 'reference', header: 'Reference' },
+    { id: 'kind', header: 'What for' },
+    { id: 'quantity', header: 'How much' },
+    { id: 'amount', header: 'Charged' },
+    { id: 'state', header: 'Where it stands' },
+  ]}
+  entries={ledger.map((line) => ({
+    id: line.id,
+    at: line.period,
+    reference: line.reference,
+    kind: line.kind,
+    amount: { amount: line.minorUnits, currency: 'GBP' },
+    quantity: line.units,
+    state: line.state,
+    stateLabel: STATE_WORDS[line.state],
+  }))}
+  summary={[
+    { label: 'Charged this period', value: 'GBP 1,204.60' },
+    { label: 'Runs metered', value: '12,040' },
+  ]}
+  toolbar={<DataToolbar view={<Button size="sm">Export the period</Button>} />}
+  empty="Nothing was charged in this period."
+/>
+```
+
+<ComponentDemo slug="history-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a reader's first question is what a workspace owes or what it has
+spent, and the answer is a list of records rather than a single figure. A
+workspace's billing history, a capture estate's consumption ledger, an agent
+service's minutes.
+
+Use it when the reader is comparing across rows: which month cost the most, which
+reference keeps appearing, how much of it was a run and how much was storage. That
+is a table, and a table is what this is.
+
+### When not to use
+
+Do not use it for one headline figure. A current balance with a renewal date is
+`account-01`, and a list of one is a sentence that wanted to be a table.
+
+Do not use it for a set of charges the reader cannot act on and does not need to
+compare. A receipt printed once and read once is prose, and prose does not need
+column semantics.
+
+Do not use it as a live feed. A history that grows while it is on screen is a
+`live` item, and this is a Block, which is rendered from props and re-rendered
+when the caller says so.
+
+### Best practices
+
+- Declare the `reference` column and put it early. It is the row header every
+  other cell is read under, and the run fails without it.
+- Pass `stateLabel` on every line. `state` is required, so a line with no words
+  for it fails the run rather than shipping a coloured dot with nothing beside it.
+- Pass `quantityLabel` whenever any line carries a quantity. A bare number beside
+  a price is a number nobody can act on.
+- Sort before you pass. The Block draws the array it is given in the order it is
+  given it, and on this surface that is a decision about a financial record.
+- Pass `href` with `hrefLabel` or neither. A link whose only words are the
+  reference tells a reader nothing about what following it does.
+- Format the amount through `Price` rather than passing a formatted string. The
+  currency code, the precision and the locale are all the platform's to decide.
+- Give `summary` a `delta` only when you have a formatted reading. A delta with no
+  formatter prints the bare number, which is `Metric`'s stated cost.
+
+### Content guidelines
+
+- `reference` is the system's identifier, not a phrase. It is set in the mono face
+  because an identifier is machine notation, the same rule `SectionHeading` states
+  for its own `index` prop. A hand-written sentence belongs in `kind`.
+- `kind` is a short noun phrase naming the band of usage: a run, a capture, a
+  subscription. The column is scanned down its left edge, so a kind that wraps
+  costs every other row its alignment.
+- `quantityLabel` is yours, and it should name the unit. "1,204 runs" and "1.2 TB
+  captured" are two different facts and a Block that chose between them would be
+  choosing which product the table is for.
+- `stateLabel` is a sentence your finance team would use, in your language. It is
+  required, and the union's own name is never printed in its place.
+- `empty` distinguishes a quiet period from a broken query. Both are real, and
+  only you know which one the reader is looking at.
