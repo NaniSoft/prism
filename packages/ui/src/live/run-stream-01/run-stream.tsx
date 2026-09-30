@@ -110,10 +110,10 @@ const ROLE_INK: Record<RunEventRole, string> = {
 
 /** The tick each role draws, so the four are told apart without relying on colour. */
 const ROLE_MARK: Record<RunEventRole, string> = {
-  agent: 'Ã¢â€”Â',
-  tool: 'Ã¢â€“Â¸',
-  system: 'Ã‚Â·',
-  error: 'Ãƒâ€”',
+  agent: '●',
+  tool: '▸',
+  system: '·',
+  error: '×',
 }
 
 const STATUS_INK: Record<RunStatus, string> = {
