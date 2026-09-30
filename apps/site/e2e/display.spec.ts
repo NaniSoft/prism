@@ -47,7 +47,7 @@ test.beforeEach(async ({ page }, testInfo) => {
   const { mode } = project(testInfo)
   await page.addInitScript((value) => {
     try {
-      window.localStorage.setItem('ds-theme', JSON.stringify({ id: 'default', mode: value }))
+      window.localStorage.setItem('prism-theme', JSON.stringify({ pack: 'default', mode: value }))
     } catch {
       // A blocked localStorage leaves the default light theme; the assertions are
       // about the cascade, which does not depend on the Mode.
@@ -69,13 +69,25 @@ test('the mobile menu is the mirror of it, and never both', async ({ page }, tes
   await page.goto('/', { waitUntil: 'networkidle' })
   const [nav, menu] = await page.evaluate(() => {
     const navElement = document.querySelector('nav[aria-label="Main"]')
-    const menuElement = document.querySelector('header div[class~="lg:hidden"]')
+    /*
+     * The trigger is named by its slot rather than by the class that hides it.
+     * The old bar wrapped the disclosure in a `div` carrying `lg:hidden` and this
+     * query found it; the bar that replaced it is `SiteNavbar`, whose trigger is the
+     * control itself and whose panel is a Sheet portalled outside the bar entirely.
+     * A selector written against a utility class would keep passing while the
+     * element it named stopped existing, which is the shape of a lane that stops
+     * testing anything.
+     */
+    const menuElement = document.querySelector('[data-slot="site-navbar-mobile-trigger"]')
     return [
       navElement ? getComputedStyle(navElement).display : '(absent)',
       menuElement ? getComputedStyle(menuElement).display : '(absent)',
     ]
   })
-  expect(menu, `the mobile menu at ${width}px`).toBe(width >= AT.lg ? 'none' : 'block')
+  // Compared as a boolean rather than against a display value, because the trigger
+  // is a flex row of an icon and a sheet trigger is not obliged to compute to
+  // `block`. What this lane is about is which of the two affordances is on screen.
+  expect(menu === 'none', `the mobile menu at ${width}px`).toBe(width < AT.lg)
   // The two are one decision read twice, so they cannot both be on screen.
   expect(nav === 'none').toBe(menu !== 'none')
 })

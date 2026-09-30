@@ -39,7 +39,7 @@ test.beforeEach(async ({ page }, testInfo) => {
   const mode = (testInfo.project.metadata as { mode?: string }).mode ?? 'light'
   await page.addInitScript((value) => {
     try {
-      window.localStorage.setItem('ds-theme', JSON.stringify({ id: 'default', mode: value }))
+      window.localStorage.setItem('prism-theme', JSON.stringify({ pack: 'default', mode: value }))
     } catch {
       // A blocked localStorage leaves the default light theme; the shot is
       // still deterministic.

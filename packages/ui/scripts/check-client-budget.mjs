@@ -174,6 +174,7 @@ const BUDGETS = {
   'radio-group': 4,
   resizable: 8,
   'scroll-area': 6,
+  'search-dialog': 3,
   select: 12,
   sheet: 8,
   sidebar: 12,

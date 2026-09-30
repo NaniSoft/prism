@@ -1,0 +1,166 @@
+---
+slug: blocks/site-navbar
+title: SiteNavbar
+---
+
+## Overview
+
+SiteNavbar is the bar at the top of a product site, with the controls a reader needs
+on every page of it: a brand lockup, the site's own navigation, a menu of the
+family's sites, search over a static index, a colour chooser, a light and dark
+control, and a panel that carries the navigation below the width the row stops
+fitting.
+
+It is `SiteHeader` plus the four controls that were missing from it, and it exists
+because all five NaniSoft sites had the same bar and every one of them had written
+the missing four separately. Prism's own site had search and a colour chooser and no
+way to reach its four siblings. Each of the four had a row of five product marks
+where a menu belongs, and no search, no mode control, and no navigation at all below
+the width its own row stopped fitting. Five bars, one design language, and no two of
+them the same bar.
+
+It is a Block rather than a Component because it is a region of a page: it composes a
+`ProductMark`, a navigation region and a set of controls, and it owns the bar they
+sit in.
+
+**Every string is a prop and the Block ships none.** There is no site name, no
+default navigation, no "Search", no list of packs and no list of sites. A bar that
+hardcoded any of them would hand every consumer a claim about a product that is not
+theirs, which is the defect this Block exists to remove. The one piece of copy it
+derives is a pack's own name from its own identifier, and only when the caller names
+none.
+
+## Usage
+
+```tsx
+import { SiteNavbar } from '@nanisoft/prism-ui/blocks/site-navbar'
+
+<SiteNavbar
+  product={{ id: 'nexus', name: 'Nexus', pack: 'lavender' }}
+  defaultPack="lavender"
+  defaultMode="dark"
+  navLabel="Site"
+  mobileLabels={{ open: 'Open menu', close: 'Close menu' }}
+  nav={[
+    { label: 'Docs', href: '/docs' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'About', href: '/about', current: true },
+  ]}
+  sitesLabel="The family"
+  currentSiteId="nexus"
+  sites={[
+    { id: 'www', name: 'NaniSoft', pack: 'sky', href: 'https://www.nanisoft.com' },
+    { id: 'nexus', name: 'Nexus', pack: 'lavender', href: 'https://nexus.nanisoft.com' },
+  ]}
+  search={{
+    indexUrl: '/api/search',
+    label: 'Search documentation',
+    messages: {
+      close: 'Close search',
+      loading: 'Loading the search index.',
+      failed: 'The search index could not be loaded.',
+      empty: 'No matches.',
+      one: 'result.',
+      other: 'results.',
+    },
+  }}
+  mode={{ lightLabel: 'Switch to dark mode', darkLabel: 'Switch to light mode' }}
+/>
+```
+
+<ComponentDemo slug="site-navbar" />
+
+## Guidelines
+
+### When to use
+
+Use SiteNavbar as the chrome around a whole public site. One bar per site, above the
+main region, on the landing page and on every documentation and blog page alike. A
+bar that changes between sections of one site is two sites' worth of chrome.
+
+Use it wherever a reader can leave the page they are on. A site that publishes a
+landing, documentation and a blog and has no persistent way between them is three
+sites wearing one domain.
+
+### When not to use
+
+Do not use it inside an application screen. `AppShell01` is that: a rail, a top bar
+and a mobile sheet, for signed-in state rather than for a public site.
+
+Do not use it for in-page navigation. That is a `Tabs` or a `Breadcrumb`.
+
+Do not reach for `SiteHeader` expecting the controls. `SiteHeader` is the bar with a
+lockup, a switcher and a slot, and it is still the right answer for a site that owns
+none of the four and would rather compose its own.
+
+### Best practices
+
+- Pass `defaultPack` and `defaultMode` from the same constants the document element
+  is rendered from. The control and the page then cannot disagree about what a
+  reader who has never chosen sees.
+- Mark the current page with `current` on the one link whose destination is the
+  current route, which is what a site composing the bar per page can do. A site that
+  renders the bar once in a root layout is handed no pathname and passes
+  `currentPath` instead. They are alternatives, not layers.
+- Name every landmark. `navLabel`, `sitesLabel`, `mode.lightLabel`, `mode.darkLabel`
+  and `mobileLabels` are all words a reader hears, and a bar with two navigation
+  regions of one name is a bar a reader navigating by landmark cannot tell apart.
+- Pass `search` as a URL, never as an index. The index is the largest asset on a
+  documentation site, and a value passed as a prop is serialized into the document
+  of every route that renders the bar.
+- Omit `theme` on a product site. A site's ground is a property of the site, and a
+  reader who repaints it is on a page that no longer describes the site. The chooser
+  belongs on a site whose subject is its own palettes.
+- Pass `actions` for what the product owns: an account menu, a sign-in link, a
+  playground. They render after the controls this bar composes, at the right-hand
+  end.
+- Leave `sticky` on unless the page does not scroll. The bar is how a reader leaves
+  the page they are on, and it takes that with it on exactly the long pages where it
+  is needed.
+
+### Content guidelines
+
+- Keep a nav label to one word. It is a bar.
+- Use each site's own name in the lockup, in the case it uses everywhere else.
+- Order the nav by how often a reader goes there, not alphabetically.
+- Order `sites` so the site the reader is on is where the family's reading order puts
+  it, not always first. A set that is always ordered around the current site reads as
+  a different set on every page.
+
+## Notes
+
+### The one client boundary
+
+The lockup and the navigation are server Components and ship no JavaScript. The
+controls are a single client island, because a control's state is a reader's state,
+and the theme provider is mounted around those controls rather than in the site's
+root layout so a page that renders none of them does not ship it.
+
+That is what makes the whole set of `search`, `sites`, `theme`, `mode` and `nav`
+optional: a site that passes none of them renders the entire bar on the server and
+ships none, which is the arrangement a static site wants.
+
+### The search index is a URL
+
+`search.indexUrl` is fetched on the first search and not before, and the dialog
+itself is loaded on the first activation. A site serves a JSON array of
+`{ id, title, url, description?, content?, breadcrumbs? }` from that route, and a
+static export can: a route handler with `revalidate = false` is emitted as a file.
+
+The ranking is a scorer rather than an inverted index, and that is a deliberate
+trade rather than an oversight. There is no stemming and no typo tolerance; every
+query token has to be a substring of one of an entry's fields, which is why a
+two-word query narrows rather than widens. The alternative is a large search
+dependency in a package whose entire value is that it depends on a design system and
+a token pipeline and nothing else, and whose ranking no consumer could then restyle
+or audit against this package's gates.
+
+### The colour chooser reads no token at runtime
+
+Each swatch is a `data-pack` boundary carrying `bg-primary`, not a literal colour read
+from the token build. A token resolved at runtime does not follow the cascade, so the
+dot holding a pack's colour would be right in one mode and stale in the other. The
+boundary is safe on this shape and only this shape: a pack repoints its own corner
+radius as well as its colour, so a boundary on anything not fully rounded would
+quietly restyle that element's corners. A disc is fully rounded, so the radius axis
+is a no-op.

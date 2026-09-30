@@ -1141,6 +1141,28 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'SearchDialog',
+    slug: 'search-dialog',
+    kind: 'component',
+    category: 'Forms and inputs',
+    description:
+      'A search dialog over a static JSON index fetched on the first query and ranked in the browser, where every query token has to match somewhere.',
+    source: 'src/components/ui/search-dialog.tsx',
+    exports: ['SearchDialog'],
+    status: 'stable',
+  },
+  {
+    name: 'SiteNavbar',
+    slug: 'site-navbar',
+    kind: 'block',
+    category: null,
+    description:
+      'The bar at the top of a product site, with the controls a reader needs on every page: a brand lockup, the site navigation, a menu of the family\'s sites, search over a static index, a colour chooser, a light and dark control and a panel for narrow viewports.',
+    source: 'src/blocks/site-navbar/index.tsx',
+    exports: ['SiteNavbar'],
+    status: 'stable',
+  },
+  {
     name: 'SiteFooter',
     slug: 'site-footer',
     kind: 'block',

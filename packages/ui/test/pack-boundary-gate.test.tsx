@@ -19,6 +19,7 @@ import { describe, expect, it } from 'vitest'
  * inputs instead, so a case fails because of the one thing it changed.
  */
 const REPO = path.resolve(import.meta.dirname, '..', '..', '..')
+const PKG = path.join(REPO, 'packages', 'ui')
 const GATE = path.join(REPO, 'packages', 'ui', 'scripts', 'check-pack-boundary.mjs')
 const PROBE = path.join(REPO, 'apps', 'site', 'src', 'components', '__probe_boundary.tsx')
 
@@ -95,12 +96,28 @@ describe('the pack-boundary gate', () => {
     // scan reads prose and a prose mention of `data-pack` is a description, not a
     // boundary. Masking keeps the line count intact, so a finding still points at
     // a line a reader can edit.
-    const switcher = readFileSync(
-      path.join(REPO, 'apps', 'site', 'src', 'components', 'theme-switcher.tsx'),
+    //
+    // The fixture is `theme-menu.tsx`, which is a stronger one than the file it
+    // replaced. That file mentioned `data-pack` only in prose and painted its
+    // swatches from a literal, so the comment was the only thing in it the gate
+    // could have been fooled by. This one mentions the selector in prose AND
+    // carries real `data-pack` boundaries in markup, on the one shape the law
+    // exempts, so a run over it has to find nothing at all: the prose is not a
+    // boundary and the markup is a legal one.
+    const menu = readFileSync(
+      path.join(PKG, 'src', 'blocks', 'site-navbar', 'theme-menu.tsx'),
       'utf8',
     )
-    expect(switcher).toMatch(/data-pack/)
-    expect(switcher).toMatch(/\* The token build emits attribute-agnostic/)
+    expect(menu).toMatch(/data-pack/)
+    expect(menu).toMatch(/a pack boundary rather than a literal colour/)
+    // Every boundary in it lands on a fully rounded swatch, so the radius axis the
+    // pack repoints is a no-op and the gate has nothing to report.
+    for (const [, classes] of menu.matchAll(/data-pack=\{[^}]+\}[\s\S]{0,160}?className="([^"]*)"/g)) {
+      expect(classes, 'a pack boundary on a shape the pack can move').toContain('rounded-full')
+    }
+    expect(menu, 'the fixture carries no boundary at all, so it proves nothing').toMatch(
+      /data-pack=\{active\.id\}/,
+    )
 
     // The same attribute as markup, on an element whose radius the pack moves.
     withProbe(

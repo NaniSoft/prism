@@ -65,7 +65,8 @@ type Measured = {
   clientWidth: number
   scrollWidth: number
   navDisplay: string
-  menuDisplay: string
+  /** Whether the control that opens the panel below the row is on screen. */
+  menuOnScreen: boolean
   /** Every header control that is not fully inside the viewport, by its label. */
   offscreen: string[]
 }
@@ -73,7 +74,14 @@ type Measured = {
 async function measure(page: Page): Promise<Measured> {
   return page.evaluate(() => {
     const nav = document.querySelector('nav[aria-label="Main"]')
-    const menu = document.querySelector('header div[class~="lg:hidden"]')
+    /*
+     * The mobile trigger, named by its slot rather than by the class that hides it.
+     * The old bar wrapped its disclosure in a `div` carrying `lg:hidden` and this
+     * query found that; `SiteNavbar`'s trigger is the control itself. A selector
+     * written against a utility class would keep passing while the element it named
+     * stopped existing.
+     */
+    const menu = document.querySelector('[data-slot="site-navbar-mobile-trigger"]')
     const limit = document.documentElement.clientWidth
     const offscreen: string[] = []
     for (const element of Array.from(document.querySelectorAll('header a, header button'))) {
@@ -89,7 +97,7 @@ async function measure(page: Page): Promise<Measured> {
       clientWidth: limit,
       scrollWidth: document.documentElement.scrollWidth,
       navDisplay: nav ? getComputedStyle(nav).display : '(absent)',
-      menuDisplay: menu ? getComputedStyle(menu).display : '(absent)',
+      menuOnScreen: menu ? getComputedStyle(menu).display !== 'none' : false,
       offscreen,
     }
   })
@@ -99,7 +107,7 @@ test.beforeEach(async ({ page }, testInfo) => {
   const { mode } = project(testInfo)
   await page.addInitScript((value) => {
     try {
-      window.localStorage.setItem('ds-theme', JSON.stringify({ id: 'default', mode: value }))
+      window.localStorage.setItem('prism-theme', JSON.stringify({ pack: 'default', mode: value }))
     } catch {
       // A blocked localStorage leaves the default light theme; every assertion
       // here is about width, and width does not depend on the Mode.
@@ -122,35 +130,40 @@ for (const route of ROUTES) {
       )
       expect(measured.offscreen, `${where}: a header control is off screen`).toEqual([])
 
-      // The row is the `lg` affordance and the disclosure is its mirror, so the two
+      // The row is the `lg` affordance and the panel is its mirror, so the two
       // assertions are one decision read twice.
       const fullRow = width >= AT.lg
       expect(measured.navDisplay, `${where}: the navigation row`).toBe(fullRow ? 'flex' : 'none')
-      expect(measured.menuDisplay, `${where}: the mobile menu`).toBe(fullRow ? 'none' : 'block')
+      expect(measured.menuOnScreen, `${where}: the mobile menu`).toBe(!fullRow)
     }
   })
 }
 
-test('the disclosure carries every Section below lg, so the row moving cost no route', async ({
+test('the panel carries every Section below lg, so the row moving cost no route', async ({
   page,
 }) => {
   for (const width of [AT.sm, AT.md]) {
     await page.setViewportSize({ width, height: 900 })
     await page.goto('/', { waitUntil: 'networkidle' })
-    await page.locator('header div[class~="lg:hidden"] > button').click()
+    await page.locator('[data-slot="site-navbar-mobile-trigger"]').click()
+    /*
+     * Read from the sheet rather than from the bar. The panel is a `Sheet`, which
+     * portals to the end of the document, so a selector scoped to `header` would
+     * find nothing and this lane would pass on an empty list rather than fail on a
+     * missing route.
+     */
     const links = await page
-      .locator('header div[class~="lg:hidden"] nav[aria-label="Main"] a')
+      .locator('[data-slot="sheet-content"] nav[aria-label="Main"] a')
       .evaluateAll((elements) => elements.map((element) => (element.textContent ?? '').trim()))
-    // The count is the manifest's, read from the same module the disclosure
-    // renders from, rather than a number typed here. It was `7`, and the manifest
-    // grew to nine when Patterns and Live joined it, so this assertion had been
-    // asserting a roster the site stopped publishing: it would have failed the
-    // next time anyone ran this lane, which is the best possible outcome, and
-    // would have been a false failure about a regression that never happened. A
-    // Section that cannot reach a reader is the harm this lane exists for, so the
-    // assertion has to be about the roster rather than about the roster as it was
-    // once.
-    expect(links, `the disclosure at ${width}px`).toEqual(TOP_NAV.map((item) => item.label))
+    // The count is the manifest's, read from the same module the panel renders
+    // from, rather than a number typed here. It was `7`, and the manifest grew to
+    // nine when Patterns and Live joined it, so this assertion had been asserting a
+    // roster the site stopped publishing: it would have failed the next time anyone
+    // ran this lane, which is the best possible outcome, and would have been a
+    // false failure about a regression that never happened. A Section that cannot
+    // reach a reader is the harm this lane exists for, so the assertion has to be
+    // about the roster rather than about the roster as it was once.
+    expect(links, `the panel at ${width}px`).toEqual(TOP_NAV.map((item) => item.label))
     // The horizontal row is rendered but not on screen, so a reader is never
     // looking at two lists of Sections at once.
     expect(await page.locator('header nav[aria-label="Main"]').first().isVisible()).toBe(false)

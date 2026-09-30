@@ -1,0 +1,13 @@
+{
+  "name": "site-navbar",
+  "title": "Site Navbar - Brand, Navigation, Sites, Search and Theme Controls",
+  "description": "The bar at the top of a product site, with the controls a reader needs on every page: a brand lockup, the site's own navigation, a menu of the family's sites, search over a static index, a colour chooser, a light and dark control and a panel for narrow viewports. All copy is passed in as props.",
+  "categories": ["chrome"],
+  "registryDependencies": [
+    "product-mark",
+    "dropdown-menu",
+    "sheet",
+    "search-dialog"
+  ],
+  "dependencies": []
+}

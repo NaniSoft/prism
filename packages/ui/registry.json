@@ -1208,6 +1208,30 @@
       ]
     },
     {
+      "name": "search-dialog",
+      "title": "Search-dialog",
+      "description": "Shared search-dialog primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "did not match",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/search-dialog.tsx",
+          "type": "registry:component",
+          "target": "components/ui/search-dialog.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "section",
       "title": "Section",
       "description": "Shared section primitive. Installed automatically as a dependency of any block that uses it.",
@@ -2425,6 +2449,78 @@
           "path": "src/blocks/site-header/site-header.tsx",
           "type": "registry:component",
           "target": "components/blocks/site-header/site-header.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "site-navbar",
+      "title": "Site Navbar - Brand, Navigation, Sites, Search and Theme Controls",
+      "description": "The bar at the top of a product site, with the controls a reader needs on every page: a brand lockup, the site's own navigation, a menu of the family's sites, search over a static index, a colour chooser, a light and dark control and a panel for narrow viewports. All copy is passed in as props.",
+      "type": "registry:block",
+      "categories": [
+        "chrome"
+      ],
+      "registryDependencies": [
+        "product-mark",
+        "dropdown-menu",
+        "sheet",
+        "search-dialog"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/site-navbar/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/site-navbar/index.tsx"
+        },
+        {
+          "path": "src/blocks/site-navbar/mobile-nav.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/site-navbar/mobile-nav.tsx"
+        },
+        {
+          "path": "src/blocks/site-navbar/mode-toggle.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/site-navbar/mode-toggle.tsx"
+        },
+        {
+          "path": "src/blocks/site-navbar/navbar-controls.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/site-navbar/navbar-controls.tsx"
+        },
+        {
+          "path": "src/blocks/site-navbar/search-entry.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/site-navbar/search-entry.tsx"
+        },
+        {
+          "path": "src/blocks/site-navbar/site-navbar.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/site-navbar/site-navbar.tsx"
+        },
+        {
+          "path": "src/blocks/site-navbar/sites-menu.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/site-navbar/sites-menu.tsx"
+        },
+        {
+          "path": "src/blocks/site-navbar/theme-menu.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/site-navbar/theme-menu.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",

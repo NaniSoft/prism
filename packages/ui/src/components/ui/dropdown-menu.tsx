@@ -52,6 +52,24 @@ export interface DropdownMenuContentProps extends ComponentProps<'div'> {
  * crosses the package seam (ticket 07 section 6).
  */
 export interface DropdownMenuItemProps extends ComponentProps<'div'> {
+  /**
+   * The element the item is rendered as.
+   *
+   * Declared here rather than re-exported from Base UI so no upstream type crosses
+   * the package seam (ticket 07 section 6), and narrowed to the element form of
+   * the two Base UI accepts. The narrowing is stated because it is a narrowing:
+   * Base UI also takes a function of the props and the component's state, and that
+   * form is not forwarded, because typing it means naming Base UI's own prop and
+   * event types in a declaration a consumer reads. The element form is the one a
+   * menu of links needs, since the attributes that make a row a destination are
+   * the attributes of the anchor itself.
+   *
+   * It is here because a menu item is not always a command: an item that navigates
+   * has to BE the link, because a link nested inside a focusable item is two tab
+   * stops for one row, and a reader who middle-clicks a row that only looks like a
+   * link gets nothing.
+   */
+  render?: React.ReactElement
   /** Whether the item aligns with the labels above it. @defaultValue false */
   inset?: boolean
   /** Whether the item reads as a destructive action. @defaultValue default */

@@ -1,0 +1,133 @@
+---
+slug: components/search-dialog
+title: SearchDialog
+---
+
+## Overview
+
+A SearchDialog searches a static JSON index from the browser. The index is fetched
+once, on the first query, and the ranking is computed where the reader is typing, so
+a documentation site gets search with no server, no request per keystroke and no
+runtime to keep running between them.
+
+`SiteNavbar` composes it behind an icon trigger with a Command-K shortcut, and a
+consumer that wants a different trigger or a different ranking renders this
+directly.
+
+## Usage
+
+```tsx
+import { SearchDialog } from '@nanisoft/prism-ui/components/search-dialog'
+
+<SearchDialog
+  indexUrl="/api/search"
+  label="Search documentation"
+  hint="Type to search every page."
+  messages={{
+    close: 'Close search',
+    loading: 'Loading the search index.',
+    failed: 'The search index could not be loaded.',
+    empty: 'No matches.',
+    one: 'result.',
+    other: 'results.',
+  }}
+  onClose={() => setOpen(false)}
+/>
+```
+
+<ComponentDemo slug="search-dialog" />
+
+## The index
+
+The index is a JSON array served from a static route, and its shape is the contract
+between a build step you own and a dialog you do not:
+
+```ts
+type SearchIndexEntry = {
+  id: string
+  title: string
+  url: string
+  description?: string
+  content?: string
+  breadcrumbs?: string[]
+}
+```
+
+A static export can serve it: a route handler with `revalidate = false` is emitted as
+a file, so there is no server to run and no request to make beyond the first search.
+
+Serve it from a URL rather than passing it as a prop. The index is the largest single
+asset on a documentation site, it is the same bytes on every page, and a value passed
+as a prop is serialized into the document of every route that renders the dialog.
+
+## Guidelines
+
+### When to use
+
+Use it where a reader arrives with a question rather than a destination: a
+documentation set, a blog with more than a screen of posts, any site whose routes are
+named rather than numbered.
+
+Use `SiteNavbar`'s `search` prop rather than this directly when the dialog belongs in
+a site bar, because the bar also owns the keyboard shortcut and the lazy load.
+
+### When not to use
+
+Do not use it over an index that has to be built by hand. This searches what you give
+it; a site with no index has nothing to search and a search box that always says no
+matches is worse than no search box.
+
+Do not use it to search a logged-in surface or anything a reader is not entitled to
+read. The whole index is downloaded, so every entry in it is readable by anyone who
+can read the page. That is the right arrangement for published documentation and the
+wrong one for anything else.
+
+### Best practices
+
+- Keep the index and the routes in step from one source. A page that is published and
+  not indexed is a route a reader can reach and not find, and a page that is indexed
+  and not published is a result that goes nowhere.
+- Include each page's body in `content` and its standfirst in `description`. The
+  weights are per field, so a match in a body is worth a quarter of a match in a
+  title, and an index of titles alone finds titles.
+- Pass `breadcrumbs` for a site with a hierarchy. It is what tells a reader which
+  Section a result came from when two pages share a name.
+- Render it only after a reader asks for it. The dialog is the largest interactive
+  surface in the package and nothing about a page needs it until someone searches.
+
+### Content guidelines
+
+- `label` is the name of the thing being searched, not the name of the control.
+  "Search documentation" tells a reader what the results will be; "Search" tells
+  them what the button does.
+- `hint` is for before the first keystroke, and it is the only place to say what is
+  in the index. It is not a status and it does not replace `empty`.
+- Write the two result labels as a pair. English inflects the noun with the number,
+  and a language that does not is the reason they are two strings rather than one.
+
+## Notes
+
+### The ranking is a scorer, not a search engine
+
+There is no stemming, no fuzzy matching and no typo tolerance. A query token matches
+a document when the token is a substring of one of its fields, and every token has to
+match somewhere, so a two-word query narrows rather than widens.
+
+That is a deliberate trade. The alternative is a search dependency in a package whose
+entire value is that it depends on a design system and a token pipeline and nothing
+else, and whose ranking no consumer could then restyle, replace or audit against this
+package's gates. The scorer is thirty lines and its behaviour is the sentence above.
+A consumer whose content needs typo tolerance passes its own control.
+
+### The count is announced, and it is the one fixed word order
+
+A live region announces the number and then the noun, in that order, which is the word
+order of the language this package's own site is written in. A site whose language
+puts the noun first renders its own dialog rather than inheriting this one, and the
+ranking it would need is this file's `rank`.
+
+### Nothing is read at runtime except the index
+
+The colours are the cascade's. There is no `getComputedStyle` and no token read, so
+the dialog looks the same in both modes and under every pack without knowing which
+one is active.

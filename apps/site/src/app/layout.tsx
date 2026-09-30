@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-import { ThemeSwitcher } from '@/components/theme-switcher'
-import { SearchEntry } from '@/components/search-entry'
-import { MobileMenu, SiteNav } from '@/components/site-nav'
+import { PrismThemeScript } from '@nanisoft/prism-ui/provider'
+import { themeAttributes } from '@nanisoft/prism-ui/theming'
+
+import { SiteBar } from '@/components/site-bar'
 import { inter } from '@/lib/fonts'
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site'
+import { DEFAULT_MODE, DEFAULT_PACK } from '@/lib/bar'
 
 // Order matters, and the reason is a library utility this site's own build also
 // emits, which is the collision the import order cannot fix on its own.
@@ -111,32 +113,35 @@ const STRUCTURED_DATA = {
 }
 
 /**
- * Applies the stored theme before first paint. Without this the page renders with
- * the default theme and then snaps to the user's choice, which is a visible flash
- * on every navigation.
+ * The document's own theme attributes, from the same constants the bar's controls
+ * are given.
+ *
+ * `themeAttributes` expresses the two axes the way every other NaniSoft site
+ * expresses them: `data-pack` for the palette and `.dark` for the mode, with
+ * `default` written as the absence of the attribute rather than as its own value.
+ * This site used to carry an inline script of its own, reading a `ds-theme` key it
+ * wrote itself, and there were then two theme contracts across five sites and a
+ * reader's dark-mode choice stopped at the boundary between them. One contract is
+ * the whole of the fix, and it is the design system's own rather than a fifth one.
  */
-const THEME_SCRIPT = `
-(function () {
-  try {
-    var raw = localStorage.getItem('ds-theme');
-    if (!raw) return;
-    var s = JSON.parse(raw);
-    if (s.id && s.id !== 'default') document.documentElement.dataset.pack = s.id;
-    if (s.mode === 'dark') document.documentElement.classList.add('dark');
-  } catch (e) {}
-})();
-`
+const THEME_ATTRIBUTES = themeAttributes({ pack: DEFAULT_PACK, mode: DEFAULT_MODE })
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" {...THEME_ATTRIBUTES} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        {/*
+          The stored theme, applied before first paint. Without this the page
+          renders in the default and then snaps to the reader's choice, which is a
+          visible flash on every navigation, and the flash is worse on the pages
+          that are mostly one large surface.
+        */}
+        <PrismThemeScript defaultPack={DEFAULT_PACK} defaultMode={DEFAULT_MODE} />
         {/*
           The structured data, as a script rather than as a component in the body.
           A crawler reads it out of the document head or the body indifferently,
-          so the placement is a convention rather than a requirement; what it is
-          not is optional. A JSON-LD block rendered through a component would
+          so the placement is a convention rather than a requirement; what it is not
+          is optional. A JSON-LD block rendered through a component would
           arrive with hydration rather than with the bytes, and a crawler that
           does not execute scripts would read a page with no structured data on
           it and no error to explain why.
@@ -213,86 +218,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
-        <header className="border-border/80 bg-background/80 sticky top-0 z-20 border-b backdrop-blur">
-          {/*
-            One line at every width, and the row is the reason the numbers in
-            `e2e/README.md` are re-measured rather than inherited.
+        {/*
+          The bar, and the reason it is one component rather than five written here.
 
-            The row carries the wordmark, every Section in the manifest and three
-            controls, and the manifest grew from seven Sections to nine when
-            Patterns and Live joined it. At the spacing this row used before, nine
-            Section labels need about 1130 pixels of viewport, so the wordmark,
-            which is the only elastic element in the row, folded to two lines
-            across the whole of the `lg` band rather than across the 61 pixels at
-            the bottom of it that `e2e/README.md` records.
+          The header this replaced put the wordmark, the Section row, search, a colour
+          chooser and a menu panel in this file, and reached four sites that do not
+          exist from here. The other four NaniSoft sites had a bar too, each of them
+          its own, and between the five of them there was no way to reach a sibling
+          site, no search outside this one, and no light and dark control outside
+          this one either.
 
-            Two changes close most of that without moving a label or dropping a
-            Section: the row's own gap goes from `gap-4` to `gap-2`, and each
-            Section link's padding goes from `px-3` to `px-2` with the gap between
-            them at zero. Neither is a token change and neither is visible as a
-            token change. The rest of it is `SearchEntry`, which was 55 pixels of
-            the word "Search" and is now an icon with an accessible name, and the
-            reasoning for that trade is in that file. The measurements are in
-            `site-nav.tsx` and in `e2e/README.md`, and `e2e/header-fit.spec.ts`
-            re-derives the claim at every width on every run rather than trusting
-            them.
+          `SiteNavbar` is the design system's answer to all of that, and this site
+          consumes it from the package it documents, which is the arrangement the
+          rest of this page is built for: every token, flag and table on these pages
+          is read from the package build rather than retyped, and the bar is the same
+          claim. The measurements behind its row are in the Block, and
+          `e2e/header-fit.spec.ts` re-derives them at every width on every run rather
+          than trusting them.
 
-            `max-w-page` rather than a literal, because the container width is an
-            authored token and `Section` already resolves against it.
-          */}
-          <div className="mx-auto flex h-14 w-full max-w-page items-center gap-2 px-6">
-            {/*
-              The wordmark carries the same focus treatment as every other header
-              control, for the same reason: it is a plain link, so nothing in the
-              tree would give it a ring and the browser default would be the only
-              indicator. See the skip link's comment above for why the ring is at
-              full strength rather than `ring/50`.
-
-              **It reads `Prism`, and it reads it from `SITE_NAME` rather than as
-              a literal.** It read "Design System" until this change, which is the
-              name of the category the package is in rather than the name of the
-              thing: a reader arriving at `prism.nanisoft.com` was greeted by a
-              word that describes every documentation site on the internet, which
-              is most of why the landing page read as a template even after the
-              rest of it was recomposed. It is now the same constant the page
-              title, the share card, the structured data and the sitemap are built
-              from, so the four surfaces that name this site cannot name it four
-              ways.
-
-              The change also gave the row about 50 pixels back at every width,
-              because "Prism" is one short word where "Design System" was two and
-              wrapped. `e2e/header-fit.spec.ts` re-measures the row at 390, 640,
-              768, 1024 and 1440 in both Modes and is the lane that holds it.
-
-              It is deliberately not `whitespace-nowrap`. The wordmark is the one
-              elastic element in the row, and it is still the element that yields
-              rather than pushing the mode toggle off the right edge of the
-              viewport, which is the harm `e2e/header-fit.spec.ts` exists to
-              catch.
-            */}
-            <Link
-              href="/"
-              className="focus-visible:border-ring focus-visible:ring-ring rounded-sm text-sm font-semibold tracking-tight focus-visible:ring-[3px] focus-visible:outline-none"
-            >
-              {SITE_NAME}
-            </Link>
-            <SiteNav />
-            {/*
-              `ml-auto` keeps the controls hard right while the nav sits beside the
-              wordmark. Below `lg` the nav is display:none and the mobile menu
-              carries the Sections instead, so the controls still land against the
-              edge without the header needing a second breakpoint of its own. `lg`
-              is the same threshold the row and the documentation sidebar switch
-              at, and the reasoning for it, with the measurement behind it, is in
-              `SiteNav`.
-            */}
-            <div className="ml-auto flex items-center gap-2">
-              <SearchEntry />
-              <ThemeSwitcher />
-              <MobileMenu />
-            </div>
-          </div>
-        </header>
+          The bar is a client boundary here and not on the four consumer sites, for
+          the reason stated in `components/site-bar.tsx`: a root layout is not told
+          which route it renders, so the current Section cannot be marked from the
+          server.
+        */}
+        <SiteBar />
         {/*
           The skip link's target, and the reason for the two attributes on it.
 
