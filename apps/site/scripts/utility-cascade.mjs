@@ -34,9 +34,12 @@
  *
  *   2. At each of the three widths the site is held to, on every class list the
  *      site writes down, a property that some media-scoped rule also declares is
- *      decided by a media-scoped rule. Where it is not, the finding names the
- *      width, the bare rule that took the win, and the variant that lost, because
- *      that is the line to add to the layer.
+ *      decided by the media-scoped rule that applies from the latest threshold.
+ *      Where it is not, the finding names the width, the rule that took the win,
+ *      and the rule that lost, because that is the line to add to the layer. It
+ *      fires in two shapes and reports them as two groups: a bare rule winning
+ *      over a variant (`variant-lost`), and a variant at a narrower breakpoint
+ *      winning over one at a wider breakpoint (`variant-order`).
  *
  * The widths are the visual lane's, not a range, because the cascade is evaluated
  * at the widths the site is screenshotted at rather than continuously. A defect
@@ -111,6 +114,21 @@ function minWidthOf(condition) {
   if (!match) return null
   const value = Number(match[1])
   return match[2] === 'rem' ? value * 16 : value
+}
+
+/**
+ * The width at which a rule starts to apply, which is the highest threshold any
+ * of its conditions names.
+ *
+ * A rule nested in two media queries has to satisfy both, so the later of the two
+ * is the width it begins at, and reading only the first would say a rule starts
+ * applying before it can. Null when no condition names a width, which is a rule
+ * with no width condition at all: a bare rule, or one wrapped in a condition this
+ * parser does not treat as a variant.
+ */
+function thresholdOf(rule) {
+  const widths = rule.media.map(minWidthOf).filter((value) => value !== null)
+  return widths.length === 0 ? null : Math.max(...widths)
 }
 
 /**
@@ -360,7 +378,26 @@ export function findUtilityCascadeFindings({ css, classLists, widths = WIDTHS })
   }
 
   /* Assertion 2: at each width, a property a media-scoped rule declares is
-     decided by a media-scoped rule. */
+     decided by the media-scoped rule that starts applying latest.
+
+     Two shapes fail, and they are separate findings because the fix is the same
+     one line and the reasons are not the same:
+
+       - a bare rule wins, which is the shape the first five restatements exist
+         for: the library repeats the utility bare and its copy lands later in
+         the one shared `utilities` layer, so position decides and a variant in
+         the first build loses to a base class in the second.
+       - a variant at a narrower breakpoint wins over a variant at a wider one,
+         which is the same defect one step along and the first five restatements
+         could never have caught, because both sides are media-scoped and the
+         original assertion only asked whether the winner had a media query.
+
+     The second shape is the library's own `sm:` and `lg:` grid utilities landing
+     after the site's `lg:` ones, and it is invisible to the first assertion by
+     construction: both contenders satisfy it. It is worth its own group because
+     a reader who sees only `variant-lost` has been told the site's variants are
+     outranked by base classes, which was not what happened.
+  */
   const seen = new Map()
   for (const width of widths) {
     for (const tokens of lists) {
@@ -381,44 +418,75 @@ export function findUtilityCascadeFindings({ css, classLists, widths = WIDTHS })
           }
         }
         const winner = contenders.reduce((top, entry) => (beats(rank(entry), rank(top)) ? entry : top))
-        if (winner.rule.media.length > 0) continue
-        // The bare rule won. A media-scoped rule for the same property that it
-        // outranks is the variant that lost, and naming it is the whole finding.
-        const displaced = contenders.filter(
-          (entry) => entry.rule.media.length > 0 && beats(rank(winner), rank(entry)),
-        )
+        const displaced = contenders.filter((entry) => beats(rank(winner), rank(entry)))
         if (displaced.length === 0) continue
+
         // One finding per distinct collision rather than per element, because the
         // fix is one line and two asides carrying the same pair are the same
         // mistake written twice. The class lists are all listed, so the number of
         // elements a single finding covers is visible rather than implied.
-        const key = `${property}:${winner.rule.selector}:${displaced
-          .map((entry) => entry.rule.selector)
-          .sort()
-          .join(',')}`
-        const existing = seen.get(key)
-        if (existing) {
-          if (!existing.lists.includes(tokens.join(' '))) existing.lists.push(tokens.join(' '))
+        const record = (group, reason) => {
+          const key = `${group}:${property}:${winner.rule.selector}:${reason}`
+          const existing = seen.get(key)
+          if (existing) {
+            if (!existing.lists.includes(tokens.join(' '))) existing.lists.push(tokens.join(' '))
+            return
+          }
+          seen.set(key, {
+            group,
+            lists: [tokens.join(' ')],
+            width,
+            property,
+            winner,
+            displaced: displaced
+              .map((entry) => `${entry.rule.selector} (${entry.declaration.value})`)
+              .sort(),
+            reason,
+          })
+        }
+
+        if (winner.rule.media.length === 0) {
+          // The bare rule won. A media-scoped rule for the same property that it
+          // outranks is the variant that lost, and naming it is the whole finding.
+          const variants = displaced.filter((entry) => entry.rule.media.length > 0)
+          if (variants.length === 0) continue
+          record(
+            'variant-lost',
+            variants.map((entry) => entry.rule.selector).sort().join(','),
+          )
           continue
         }
-        seen.set(key, {
-          lists: [tokens.join(' ')],
-          width,
-          property,
-          winner,
-          displaced: displaced.map((entry) => `${entry.rule.selector} (${entry.declaration.value})`).sort(),
-        })
+
+        // The winner is a variant. The defect is a variant that starts applying
+        // later losing to the one that starts applying earlier, which is what
+        // position inside one shared layer decides once the two builds are
+        // concatenated.
+        const at = thresholdOf(winner.rule)
+        const wider = displaced.filter(
+          (entry) => entry.rule.media.length > 0 && (thresholdOf(entry.rule) ?? 0) > (at ?? 0),
+        )
+        if (wider.length === 0) continue
+        record(
+          'variant-order',
+          wider.map((entry) => entry.rule.selector).sort().join(','),
+        )
       }
     }
   }
 
   for (const [, entry] of seen) {
+    const displaced = entry.displaced.join(' and ')
+    const verdict =
+      entry.group === 'variant-lost'
+        ? `the unconditional ${entry.winner.rule.selector} (${entry.winner.declaration.value}), which outranks ${displaced}`
+        : `${entry.winner.rule.selector} (${entry.winner.declaration.value}), which applies from ${
+            thresholdOf(entry.winner.rule) ?? 0
+          }px and outranks ${displaced}`
     findings.push({
-      group: 'variant-lost',
+      group: entry.group,
       message:
-        `at ${entry.width}px, ${entry.lists.length} class list(s) take ${entry.property} from the ` +
-        `unconditional ${entry.winner.rule.selector} (${entry.winner.declaration.value}), which outranks ` +
-        `${entry.displaced.join(' and ')}. Restate it in @layer ${SITE_VARIANT_LAYER}: ` +
+        `at ${entry.width}px, ${entry.lists.length} class list(s) take ${entry.property} from ${verdict}. ` +
+        `Restate it in @layer ${SITE_VARIANT_LAYER}: ` +
         entry.lists.map((list) => `"${list}"`).join(', '),
     })
   }

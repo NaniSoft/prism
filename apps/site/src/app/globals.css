@@ -211,6 +211,10 @@
  * re-derives that list from the built stylesheet, so this layer cannot fall behind
  * it silently.
  *
+ * It has since found a sixth, and it is a shape the five above could not have
+ * found: both sides of that collision are media-scoped. See the rule at the
+ * bottom of this layer.
+ *
  * WHY A LAYER AND NOT A BIGGER SELECTOR
  *
  * `site-variants` is declared above `utilities`, so these five rules outrank the
@@ -238,8 +242,7 @@
  * than referenced. Each is the value this build already emits for the same
  * utility, so no element's rendering changes except the seven the collision
  * broke, and the gate compares the two so a divergence is a finding.
- */
-@layer site-variants {
+ */@layer site-variants {
   @media (width >= theme(--breakpoint-sm)) {
     .sm\:gap-16 {
       gap: var(--spacing-16);
@@ -261,6 +264,27 @@
 
     .lg\:flex {
       display: flex;
+    }
+
+    /*
+     * The sixth, and the first one that is not a bare-utility collision.
+     *
+     * The five above lose to a base class the library repeats. This one loses to
+     * a variant: the library's own build emits `sm:grid-cols-2` and
+     * `sm:grid-cols-3` for its grids, and that block lands after this build's
+     * `lg:grid-cols-6` in the one shared `utilities` layer. Both are
+     * media-scoped, so a media query adds no specificity to either and the later
+     * one wins: the landing page's pack band asked for six columns from `lg` and
+     * rendered three at every width above 640.
+     *
+     * It is here for the same reason the other five are and by the same
+     * mechanism, and `check-utility-cascade.mjs` now reports this shape as its
+     * own finding rather than only the bare-rule one, because the original
+     * assertion asked whether the winning rule had a media query and this
+     * collision has one on both sides.
+     */
+    .lg\:grid-cols-6 {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
     }
   }
 }

@@ -1,5 +1,7 @@
 import { expect, test, type Page, type TestInfo } from '@playwright/test'
 
+import { TOP_NAV } from '../src/lib/nav'
+
 /**
  * Does the header fit, and is the right affordance on screen.
  *
@@ -22,14 +24,15 @@ import { expect, test, type Page, type TestInfo } from '@playwright/test'
  * The claim is per width, per Mode and per route, and it has three parts:
  *
  * 1. The document never scrolls sideways. That is the reader's symptom and it is
- *    the one that produced the 1013 pixel baselines.
+ *    the one that produced both the 1013 pixel baselines and the 1081 pixel row
+ *    the manifest's ninth Section produced.
  * 2. Every control in the header is inside the viewport, which is the specific
  *    harm: the mode toggle at 768 was the control that fell off the right edge,
  *    and a control a pointer cannot reach is worse than a wide page.
  * 3. The affordance is the one that width is designed for, and it is a peer of the
  *    other one rather than a subset of it: below `lg` the disclosure opens onto
- *    all seven Sections, so moving the row to `lg` moved nothing out of a reader's
- *    reach at the width it moved at.
+ *    every Section the manifest declares, so moving the row to `lg` moved nothing
+ *    out of a reader's reach at the width it moved at.
  */
 
 /** The width and Mode this project runs at, from the config's own metadata. */
@@ -138,7 +141,16 @@ test('the disclosure carries every Section below lg, so the row moving cost no r
     const links = await page
       .locator('header div[class~="lg:hidden"] nav[aria-label="Main"] a')
       .evaluateAll((elements) => elements.map((element) => (element.textContent ?? '').trim()))
-    expect(links.length, `the disclosure at ${width}px`).toBe(7)
+    // The count is the manifest's, read from the same module the disclosure
+    // renders from, rather than a number typed here. It was `7`, and the manifest
+    // grew to nine when Patterns and Live joined it, so this assertion had been
+    // asserting a roster the site stopped publishing: it would have failed the
+    // next time anyone ran this lane, which is the best possible outcome, and
+    // would have been a false failure about a regression that never happened. A
+    // Section that cannot reach a reader is the harm this lane exists for, so the
+    // assertion has to be about the roster rather than about the roster as it was
+    // once.
+    expect(links, `the disclosure at ${width}px`).toEqual(TOP_NAV.map((item) => item.label))
     // The horizontal row is rendered but not on screen, so a reader is never
     // looking at two lists of Sections at once.
     expect(await page.locator('header nav[aria-label="Main"]').first().isVisible()).toBe(false)

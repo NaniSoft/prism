@@ -26,8 +26,8 @@ deciding whether to keep listening has nothing to weigh.
 import { LogoStrip01 } from '@nanisoft/prism-ui/blocks/logo-strip-01'
 
 <LogoStrip01
-  label="Data sources"
-  items={['Fyers v3', 'yfinance', 'nselib / nse-xbrl', 'NSE filings']}
+  label="Source kinds"
+  items={['Broker statements', 'Exchange filings', 'Vendor APIs', 'Archived exports']}
 />
 ```
 
@@ -65,6 +65,11 @@ phone and stops being a band; a longer set belongs in a `StackGrid01`.
   word is yours because a Block that ships no copy ships no reader-facing copy.
 - Keep every item to one or two words. The strip is scanned, not read.
 - Place it once per page, between the hero and the first section.
+- Frame the items in the label, and do not name real organisations in them. A row
+  of names is read as a list of who is involved, so a strip carrying four real
+  company names hands every reader who sees the page, including a competitor, a
+  claim about them. Describe the kinds of thing instead, and let the consumer put
+  their own names in.
 
 ### Content guidelines
 

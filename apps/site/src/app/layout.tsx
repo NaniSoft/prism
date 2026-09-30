@@ -5,6 +5,7 @@ import { ThemeSwitcher } from '@/components/theme-switcher'
 import { SearchEntry } from '@/components/search-entry'
 import { MobileMenu, SiteNav } from '@/components/site-nav'
 import { inter } from '@/lib/fonts'
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site'
 
 // Order matters, and the reason is a library utility this site's own build also
 // emits, which is the collision the import order cannot fix on its own.
@@ -26,8 +27,87 @@ import './globals.css'
 import '@nanisoft/prism-ui/styles.css'
 
 export const metadata: Metadata = {
-  title: 'Design System',
-  description: 'Token-driven component and block catalog.',
+  /*
+   * The origin every relative URL in the metadata below resolves against.
+   *
+   * `metadataBase` is what turns `openGraph.url`, `alternates.canonical` and the
+   * sitemap's absolute entries into absolute URLs, and a relative one is the
+   * difference between a share card that renders and one that does not. It is
+   * named from the Worker's custom domain rather than derived from a request,
+   * because the site is a static export: there is no request at build time to
+   * read a host from, and a build that guessed would publish one deployment's
+   * hostname into every other deployment's pages.
+   */
+  metadataBase: SITE_URL,
+  /*
+   * A title template rather than a bare default, because every page after the
+   * landing one carries its own title and a reader's tab, a search result and a
+   * share card all need to say which site they are on. The landing page keeps
+   * the default because it is the page the name belongs to.
+   */
+  title: {
+    default: `${SITE_NAME}, the NaniSoft design system`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  /*
+   * Index everything and follow nothing undecided. The one surface that is not
+   * indexed is the mirrored Markdown, and it says so itself: each mirror is
+   * served with its own directive by the Worker rather than by a rule here,
+   * because whether a mirror is indexed is a property of the mirror.
+   */
+  robots: { index: true, follow: true },
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    url: '/',
+    siteName: SITE_NAME,
+    title: `${SITE_NAME}, the NaniSoft design system`,
+    description: SITE_DESCRIPTION,
+    locale: 'en',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${SITE_NAME}, the NaniSoft design system`,
+    description: SITE_DESCRIPTION,
+  },
+}
+
+/**
+ * The organisation and the site, as one JSON-LD document.
+ *
+ * Two nodes and no more. `WebSite` is what a search engine reads to know the
+ * canonical name and the root of the site, and `Organization` is what it reads
+ * to know who publishes it. Nothing here claims a rating, a price, a review
+ * count or a date: the documentation is the evidence for what this system does,
+ * and a structured-data field asserting something the site does not state would
+ * be a claim the page cannot support. The URL and the name are the two facts the
+ * site states everywhere else, so they are the two that are here.
+ *
+ * It is rendered from the same constants the metadata above uses, so the card,
+ * the tab and the structured data cannot name three different sites.
+ */
+const STRUCTURED_DATA = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${SITE_URL.href}#organization`,
+      name: 'NaniSoft',
+      url: 'https://nanisoft.com',
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE_URL.href}#website`,
+      name: SITE_NAME,
+      alternateName: 'NaniSoft design system',
+      description: SITE_DESCRIPTION,
+      url: SITE_URL.href,
+      publisher: { '@id': `${SITE_URL.href}#organization` },
+      inLanguage: 'en',
+    },
+  ],
 }
 
 /**
@@ -52,8 +132,36 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        {/*
+          The structured data, as a script rather than as a component in the body.
+          A crawler reads it out of the document head or the body indifferently,
+          so the placement is a convention rather than a requirement; what it is
+          not is optional. A JSON-LD block rendered through a component would
+          arrive with hydration rather than with the bytes, and a crawler that
+          does not execute scripts would read a page with no structured data on
+          it and no error to explain why.
+        */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
+        />
       </head>
-      <body className={`${inter.variable} min-h-screen antialiased`}>
+      {/*
+        The body is a flex column with `min-h-dvh` rather than `min-h-screen`,
+        for the footer's `mt-auto` to mean anything: a footer pushed to the bottom
+        of a short page instead of sitting directly under a short article. `dvh`
+        rather than `svh` because this is a minimum, not a fixed height, so the
+        mobile address bar shrinking the viewport moves the footer up rather than
+        hiding it, which is the symptom `h-screen` causes.
+
+        `flex-col` rather than `flex`, and `main` takes no flex role of its own: a
+        stretched `main` with no content is the one case where a footer would ride
+        up into the header, and the skip link's target is a block that fills what
+        is left by default.
+      */}
+      <body
+        className={`${inter.variable} flex min-h-dvh flex-col antialiased`}
+      >
         {/*
           Skip link, first in the document on purpose.
 
@@ -106,19 +214,67 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
         <header className="border-border/80 bg-background/80 sticky top-0 z-20 border-b backdrop-blur">
-          <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-4 px-6">
+          {/*
+            One line at every width, and the row is the reason the numbers in
+            `e2e/README.md` are re-measured rather than inherited.
+
+            The row carries the wordmark, every Section in the manifest and three
+            controls, and the manifest grew from seven Sections to nine when
+            Patterns and Live joined it. At the spacing this row used before, nine
+            Section labels need about 1130 pixels of viewport, so the wordmark,
+            which is the only elastic element in the row, folded to two lines
+            across the whole of the `lg` band rather than across the 61 pixels at
+            the bottom of it that `e2e/README.md` records.
+
+            Two changes close most of that without moving a label or dropping a
+            Section: the row's own gap goes from `gap-4` to `gap-2`, and each
+            Section link's padding goes from `px-3` to `px-2` with the gap between
+            them at zero. Neither is a token change and neither is visible as a
+            token change. The rest of it is `SearchEntry`, which was 55 pixels of
+            the word "Search" and is now an icon with an accessible name, and the
+            reasoning for that trade is in that file. The measurements are in
+            `site-nav.tsx` and in `e2e/README.md`, and `e2e/header-fit.spec.ts`
+            re-derives the claim at every width on every run rather than trusting
+            them.
+
+            `max-w-page` rather than a literal, because the container width is an
+            authored token and `Section` already resolves against it.
+          */}
+          <div className="mx-auto flex h-14 w-full max-w-page items-center gap-2 px-6">
             {/*
               The wordmark carries the same focus treatment as every other header
               control, for the same reason: it is a plain link, so nothing in the
               tree would give it a ring and the browser default would be the only
               indicator. See the skip link's comment above for why the ring is at
               full strength rather than `ring/50`.
+
+              **It reads `Prism`, and it reads it from `SITE_NAME` rather than as
+              a literal.** It read "Design System" until this change, which is the
+              name of the category the package is in rather than the name of the
+              thing: a reader arriving at `prism.nanisoft.com` was greeted by a
+              word that describes every documentation site on the internet, which
+              is most of why the landing page read as a template even after the
+              rest of it was recomposed. It is now the same constant the page
+              title, the share card, the structured data and the sitemap are built
+              from, so the four surfaces that name this site cannot name it four
+              ways.
+
+              The change also gave the row about 50 pixels back at every width,
+              because "Prism" is one short word where "Design System" was two and
+              wrapped. `e2e/header-fit.spec.ts` re-measures the row at 390, 640,
+              768, 1024 and 1440 in both Modes and is the lane that holds it.
+
+              It is deliberately not `whitespace-nowrap`. The wordmark is the one
+              elastic element in the row, and it is still the element that yields
+              rather than pushing the mode toggle off the right edge of the
+              viewport, which is the harm `e2e/header-fit.spec.ts` exists to
+              catch.
             */}
             <Link
               href="/"
               className="focus-visible:border-ring focus-visible:ring-ring rounded-sm text-sm font-semibold tracking-tight focus-visible:ring-[3px] focus-visible:outline-none"
             >
-              Design System
+              {SITE_NAME}
             </Link>
             <SiteNav />
             {/*
@@ -170,30 +326,47 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           and no repository URL anywhere in the project, so a copyright line, a
           social row or a newsletter form would all be invention. So the footer
           answers the only question a reader has at the end of a page that this
-          site never answers anywhere else — is what I just read generated from
-          the token source of truth, or retyped by hand? — and nothing else.
-          Neither paragraph restates the route list or the per-block install
-          command, because the header and the catalog already carry them.
+          site never answers anywhere else, which is whether what they just read
+          is generated from the token source of truth or retyped by hand, and
+          nothing else.
 
-          Container and vertical rhythm come from `Section` in the registry, so
-          the page keeps one rhythm top to bottom; the columns carry no `max-w-*`
-          because `max-w-6xl` already caps them. The band is kept quieter than
-          the header by a hairline `border-t` and `text-muted-foreground`, with
-          no accent, no hover chrome and no motion: the header has to be found,
-          this only has to mark the end.
+          **No link row, deliberately.** Every Section is in the header row and in
+          the sidebar, and every published package is linked from the Changelogs
+          index, which is the page that owns that list and the one a reader looking
+          for it will reach. A footer repeating any of them puts the same
+          destination twice on one screen, which is the duplication the header's
+          own comment about the landing page exists to avoid. What is left is two
+          labelled facts, so each paragraph is a small heading over its sentence:
+          an unlabelled pair of paragraphs of similar length reads as filler, and
+          these two are not the same claim.
+
+          The band is kept quieter than the header by a hairline `border-t` and
+          `text-muted-foreground`, with no accent and no motion: the header has to
+          be found, this only has to mark the end. `mt-auto` is what makes it the
+          end of a short page rather than the end of a tall one, and the body is a
+          flex column for that one reason.
         */}
-        <footer className="border-border border-t">
-          <div className="mx-auto grid w-full max-w-6xl gap-6 px-6 py-16 sm:grid-cols-2 sm:gap-16 sm:py-24">
-            <p className="text-muted-foreground text-sm text-pretty">
-              Prism is NaniSoft&apos;s design system: a DTCG token pipeline, a published React
-              library you compose without writing CSS, and this documentation site.
-            </p>
-            <p className="text-muted-foreground text-sm text-pretty">
-              The site is built with the system it documents. Every token, flag and API table
-              on these pages is read from the package build rather than retyped, and the
-              catalogue is the one list behind the navigation, the corpus and the agent
-              surface.
-            </p>
+        <footer className="border-border mt-auto border-t">
+          <div className="text-muted-foreground mx-auto grid w-full max-w-page gap-8 px-6 py-12 sm:grid-cols-2 sm:gap-16">
+            <div className="flex flex-col gap-2">
+              <h2 className="text-foreground text-sm font-semibold tracking-tight">
+                What this is
+              </h2>
+              <p className="text-pretty text-sm">
+                Prism is NaniSoft&apos;s design system: a DTCG token pipeline, a published React
+                library you compose without writing CSS, and this documentation site.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <h2 className="text-foreground text-sm font-semibold tracking-tight">
+                How this site is built
+              </h2>
+              <p className="text-pretty text-sm">
+                With the system it documents. Every token, flag and API table on these pages is
+                read from the package build rather than retyped, and the catalogue is the one
+                list behind the navigation, the corpus and the agent surface.
+              </p>
+            </div>
           </div>
         </footer>
       </body>

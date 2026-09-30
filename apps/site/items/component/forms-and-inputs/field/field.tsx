@@ -14,7 +14,7 @@ export default function FieldDemo() {
     <FieldGroup className="max-w-measure-narrow">
       <Field>
         <FieldLabel htmlFor="field-display-name">Display name</FieldLabel>
-        <Input id="field-display-name" defaultValue="Ada Lovelace" />
+        <Input id="field-display-name" defaultValue="Priya Raman" />
         <FieldDescription>Shown on your profile and in mentions.</FieldDescription>
       </Field>
       <Field>

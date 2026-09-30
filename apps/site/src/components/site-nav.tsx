@@ -11,33 +11,39 @@ import { TOP_NAV } from '@/lib/nav'
  * Horizontal navigation for `lg` and up.
  *
  * **`lg` is where the row fits, and that is measured rather than assumed.** The
- * row is one rigid line and nothing in it can yield: the wordmark is 97 pixels,
- * the seven Section links are 635 because a Section name is a defined term and
- * cannot be abbreviated to fit, and the three controls are 273. That is 1005 of
- * content plus two 16 pixel gaps and the 48 pixel container gutter, so the row
- * needs 1085 pixels of viewport to sit on one line at its designed size. `md` is
- * 768, and the row has never fitted there: it measured 1013 against a 768 pixel
- * viewport, the document scrolled 245 pixels sideways and the mode toggle sat off
- * screen. `lg` is 1024, it is the widest threshold the design system authors
- * (`xl` and `2xl` are closed in the emitted theme, so a larger one cannot be
- * written without inventing a token), and it is the threshold the documentation
- * sidebar already switches at, so the row and the sidebar now arrive together
- * rather than the row appearing 256 pixels before the navigation a reader at that
- * width most wants.
+ * row is one rigid line. The manifest's Section list has grown from seven to
+ * nine since this threshold was chosen: Patterns and Live joined Overview,
+ * Foundation, Content, Components, Blocks, Pages and Changelogs. At the spacing
+ * below, the nine labels measure 671 pixels and the three controls 218, and the
+ * only element in the row that can yield is the wordmark, which folds to two lines
+ * and is still 49 pixels wide. So the row needs about 1000 pixels of viewport at
+ * `lg`, `md` at 768 was never a candidate, and `lg` at 1024 is the narrowest
+ * authored threshold that fits it. `xl` and `2xl` are closed in the emitted
+ * theme, so a larger threshold cannot be written without inventing a token, and
+ * `lg` is also the threshold the documentation sidebar switches at, so the row
+ * and the sidebar arrive together.
+ *
+ * **The link padding is `px-2` and the gap is zero, and both are load bearing.**
+ * At the `px-3` and `gap-1` this row used when it carried seven Sections, nine
+ * labels measure 725 pixels against the 687 they measure now, and with the
+ * controls and the gutters that is the difference between a row that overflows
+ * the `lg` band at every width and one that fits it with room to spare. The link
+ * text, the order, the labels and the destinations are unchanged; a zero gap is
+ * invisible between two links whose own padding already separates them, and it is
+ * only visible where a reader is looking for a boundary between two items, which
+ * the `bg-accent` on the current one already draws.
  *
  * The mobile menu below is therefore not the small-width fallback any more, it
  * is the primary way to reach a Section from 640 to 1023, which is why it carries
- * all seven and why its links are the 44 pixel targets the coarse-pointer floor
+ * all nine and why its links are the 44 pixel targets the coarse-pointer floor
  * asks for.
  *
- * **The known limit, at the bottom of the band.** From 1024 to 1085 the row is up
- * to 61 pixels short of its natural width, and the wordmark is the only elastic
- * element in it, so it takes two lines there rather than pushing the document
- * sideways. Those widths rendered that way before the row moved and render that
- * way now, because the row was already on screen at `md`. Closing the band would
- * take either a threshold this repository does not author or a re-spacing of the
- * row, and the second is a design change wearing a responsive fix's clothes. The
- * measurements are in `e2e/README.md` rather than only here.
+ * **The wordmark is left elastic on purpose.** It is the one element in the row
+ * that can take two lines, and it takes them rather than pushing the document
+ * sideways. `whitespace-nowrap` on it would move the overflow from a folded
+ * wordmark to a horizontally scrolling document with the mode toggle off screen,
+ * which is the harm `e2e/header-fit.spec.ts` exists to catch, so it is left
+ * wrappable and the measurements are in `e2e/README.md` rather than only here.
  *
  * The active item is marked with `aria-current` rather than colour alone, so the
  * current page is not communicated by hue that a theme switch can change out from
@@ -58,7 +64,7 @@ export function SiteNav() {
     'focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px] focus-visible:outline-none'
 
   return (
-    <nav aria-label="Main" className="hidden items-center gap-1 lg:flex">
+    <nav aria-label="Main" className="hidden items-center lg:flex">
       {TOP_NAV.map((item) => {
         const current = pathname === item.href
         return (
@@ -68,8 +74,8 @@ export function SiteNav() {
             aria-current={current ? 'page' : undefined}
             className={
               current
-                ? `bg-accent text-accent-foreground rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${ring}`
-                : `text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${ring}`
+                ? `bg-accent text-accent-foreground rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${ring}`
+                : `text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${ring}`
             }
           >
             {item.label}
@@ -84,10 +90,12 @@ export function SiteNav() {
  * Navigation for viewports below `lg`, where the horizontal row has no room.
  *
  * It stopped being the fallback for a phone the day the row moved to `lg`. From
- * 640 to 1023 this is how a reader reaches a Section, which is the whole of the
- * range a tablet in landscape and a small laptop sit in, so the panel carries all
- * seven Sections rather than the handful that would fit, and nothing a reader
- * could reach at 1023 is out of reach at 640.
+ * 640 to 1023 this is how a reader reaches a Section, which is the whole of
+ * the range a tablet in landscape and a small laptop sit in, so the panel carries
+ * every Section the manifest declares rather than the handful that would fit, and
+ * nothing a reader could reach at 1023 is out of reach at 640. The list is
+ * `TOP_NAV`, so it cannot be short of a Section the header row carries: the two
+ * render the same array and a Section added to one is in the other.
  *
  * The panel is a disclosure rather than a route change: it closes on navigation,
  * on Escape and on a pointer-down outside itself, and every close hands focus back
@@ -197,7 +205,7 @@ export function MobileMenu() {
           id={panelId}
           className="border-border bg-popover absolute inset-x-0 top-full z-30 border-b p-2 shadow-lg"
         >
-          <nav aria-label="Main" className="mx-auto flex w-full max-w-6xl flex-col gap-1 px-4">
+          <nav aria-label="Main" className="mx-auto flex w-full max-w-page flex-col gap-1 px-4">
             {TOP_NAV.map((item) => {
               const current = pathname === item.href
               return (

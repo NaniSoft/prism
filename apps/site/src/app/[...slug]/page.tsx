@@ -7,9 +7,12 @@ import { ApiTable } from '@/components/api-table'
 import { CatalogueIndex } from '@/components/catalogue-index'
 import { DocsShell } from '@/components/docs-shell'
 import { ItemHeader } from '@/components/item-header'
+import { JsonLd } from '@/components/json-ld'
 import { getMDXComponents } from '@/components/mdx'
 import type { CataloguePageData } from '@/lib/catalogue'
+import { kindLabel } from '@/lib/kinds'
 import { flattenNav, projectNav } from '@/lib/nav'
+import { SITE_NAME, SITE_URL } from '@/lib/site'
 import { source } from '@/lib/source'
 
 export function generateStaticParams() {
@@ -18,6 +21,28 @@ export function generateStaticParams() {
 
 export const dynamicParams = false
 
+/**
+ * What a page says about itself to a search engine.
+ *
+ * **The description is the page's own lede rather than a summary written here.**
+ * Every prose page and every Item already carries one in its frontmatter, and a
+ * second sentence written here would be the one a reader sees in a result and
+ * the one nobody edits when the page changes. Falling back to the site's
+ * description rather than to nothing is deliberate: a page with no description
+ * gets a search engine's invented one, and this is at least true.
+ *
+ * **The canonical is the route the tree produced, absolute.** Under a static
+ * export every page is served from the same origin, so the only canonical that
+ * carries information is the one that names the path: without it a reader who
+ * arrives at `/components/button?category=feedback` and one who arrives at
+ * `/components/button` are two URLs for one page, and the filter's query
+ * parameter is a view of the catalogue rather than a page of its own.
+ *
+ * `openGraph` repeats the same three values rather than inheriting them. The root
+ * layout sets them for the landing page, and metadata does not merge deeply enough
+ * to carry an `openGraph` object down to every page without restating it at each
+ * one, which is what a share card of a documentation page is made of.
+ */
 export async function generateMetadata({
   params,
 }: {
@@ -25,7 +50,19 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params
   const page = source.getPage(slug)
-  return page ? { title: (page.data.title as string | undefined) ?? undefined } : {}
+  if (!page) return {}
+
+  const title = (page.data.title as string | undefined) ?? undefined
+  const description = (page.data.description as string | undefined) ?? undefined
+  const url = new URL(page.url, SITE_URL).href
+
+  return {
+    title,
+    description,
+    alternates: { canonical: page.url },
+    openGraph: { type: 'article', url, siteName: SITE_NAME, title, description },
+    twitter: { card: 'summary_large_image', title, description },
+  }
 }
 
 type ProseBody = (props: { components?: Record<string, unknown> }) => ReactNode
@@ -81,10 +118,32 @@ export default async function Page({ params }: { params: Promise<{ slug: string[
   // document that holds its prose are one thing.
   if (data.kind !== undefined && data.slug !== undefined) {
     const ItemBody = data.body
+    const name = data.name ?? data.title ?? data.slug
     return (
       <DocsShell sections={sections} currentUrl={page.url} flat={flat} toc={data.toc}>
+        {/*
+          The item as a technical article, which is what it is: a document about
+          a component, with a name, a summary and a place in the site. Every
+          value is the catalogue's own word or the route the tree produced, so
+          nothing here can drift from the page it describes. There is no date and
+          no author beyond the organisation, because the site publishes neither
+          and a structured-data field asserting one would be a claim the page
+          cannot support.
+        */}
+        <JsonLd
+          data={{
+            '@context': 'https://schema.org',
+            '@type': 'TechArticle',
+            headline: name,
+            description: data.description ?? undefined,
+            url: new URL(page.url, SITE_URL).href,
+            articleSection: data.category ?? kindLabel(data.kind),
+            isPartOf: { '@id': `${SITE_URL.href}#website` },
+            publisher: { '@id': `${SITE_URL.href}#organization` },
+          }}
+        />
         <ItemHeader
-          name={data.name ?? data.title ?? data.slug}
+          name={name}
           description={data.description ?? ''}
           kind={data.kind}
           category={data.category ?? null}
@@ -97,8 +156,8 @@ export default async function Page({ params }: { params: Promise<{ slug: string[
           </div>
         ) : null}
 
-        <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold tracking-tight">API reference</h2>
+        <section className="flex flex-col gap-4">
+          <h2 className="text-xl font-semibold tracking-tight">API reference</h2>
           <ApiTable slug={data.slug} />
         </section>
       </DocsShell>
@@ -116,12 +175,21 @@ export default async function Page({ params }: { params: Promise<{ slug: string[
         name: the heading is already in the body, and printing a second one
         above it is the same heading twice. Nothing is dropped from the file
         either way, which is the property the Section is for.
+
+        The header matches `ItemHeader`'s exactly, and it is the same markup for a
+        reason: a reader moving between a prose page and an Item page was
+        previously looking at two different title treatments, and the difference
+        told them nothing except that the pages came from different folders.
       */}
       {data.selfTitled ? null : (
-        <header className="flex flex-col gap-3">
-          <h1 className="text-3xl font-semibold tracking-tight">{data.title}</h1>
+        <header className="border-border flex flex-col gap-3 border-b pb-8">
+          <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+            {data.title}
+          </h1>
           {data.description ? (
-            <p className="text-muted-foreground max-w-2xl text-lg text-pretty">{data.description}</p>
+            <p className="text-muted-foreground max-w-measure text-lg text-pretty">
+              {data.description}
+            </p>
           ) : null}
         </header>
       )}
