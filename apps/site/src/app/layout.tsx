@@ -248,16 +248,33 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               indicator. See the skip link's comment above for why the ring is at
               full strength rather than `ring/50`.
 
+              **It reads `Prism`, and it reads it from `SITE_NAME` rather than as
+              a literal.** It read "Design System" until this change, which is the
+              name of the category the package is in rather than the name of the
+              thing: a reader arriving at `prism.nanisoft.com` was greeted by a
+              word that describes every documentation site on the internet, which
+              is most of why the landing page read as a template even after the
+              rest of it was recomposed. It is now the same constant the page
+              title, the share card, the structured data and the sitemap are built
+              from, so the four surfaces that name this site cannot name it four
+              ways.
+
+              The change also gave the row about 50 pixels back at every width,
+              because "Prism" is one short word where "Design System" was two and
+              wrapped. `e2e/header-fit.spec.ts` re-measures the row at 390, 640,
+              768, 1024 and 1440 in both Modes and is the lane that holds it.
+
               It is deliberately not `whitespace-nowrap`. The wordmark is the one
-              elastic element in the row, and it yields its second line instead of
-              pushing the mode toggle off the right edge of the viewport, which is
-              the harm `e2e/header-fit.spec.ts` exists to catch.
+              elastic element in the row, and it is still the element that yields
+              rather than pushing the mode toggle off the right edge of the
+              viewport, which is the harm `e2e/header-fit.spec.ts` exists to
+              catch.
             */}
             <Link
               href="/"
               className="focus-visible:border-ring focus-visible:ring-ring rounded-sm text-sm font-semibold tracking-tight focus-visible:ring-[3px] focus-visible:outline-none"
             >
-              Design System
+              {SITE_NAME}
             </Link>
             <SiteNav />
             {/*

@@ -86,6 +86,15 @@ threshold, so the search trigger also lost its word: an icon with the
 shape and size as the two controls beside it. `SearchEntry` records why that
 trade was taken and what was rejected instead.
 
+**The wordmark has since been shortened to "Prism", which returned about 50
+pixels to the row at every width** because one short word does not wrap where
+two did. That is a happy accident of the change rather than a reason for it: the
+wordmark read "Design System" until it was renamed, which is the name of the
+category the package is in rather than the name of the thing, and it is now the
+same `SITE_NAME` constant the page title, the share card, the structured data and
+the sitemap are built from. `layout.tsx` records it. The numbers above are the
+worst case for the row and were measured before the rename, so they still hold.
+
 **The wordmark is left elastic on purpose.** It is the one element in the row
 that can yield, and it takes two lines rather than pushing the document sideways.
 `whitespace-nowrap` on it would move the overflow rather than remove it, which is
@@ -118,6 +127,25 @@ pnpm --filter @nanisoft/site run visual
 Regenerate a baseline after an intended change with
 `pnpm --filter @nanisoft/site run visual -- --update-snapshots`, then review the
 PNG diff before committing it.
+
+**Use `--update-snapshots=all` when a change is smaller than the tolerance, and
+know that it happened.** Playwright writes a snapshot only where the comparison
+*failed*, so a change the tolerance declares matching is not re-cut, and the
+committed baseline keeps the old pixels while the lane reports green. That is not
+hypothetical: renaming the wordmark from "Design System" to "Prism" rewrote about
+700 pixels of a 1440x2900 full-page shot, which is 0.02% against a
+`maxDiffPixelRatio` of 0.01, so `--update-snapshots` left all forty-nine baselines
+untouched and the run reported 114 passing. `--update-snapshots=all` re-cuts
+unconditionally and is the right flag for a change you already know is intended
+and too small for the comparison to see.
+
+The general form, because it is what makes this lane's promotion rule worth
+anything: **this lane cannot see a change to the header, on any route, at any
+width.** Every screenshot is `fullPage`, so a 56 pixel band is a rounding error
+against a page three thousand pixels tall. `display.spec.ts` and
+`header-fit.spec.ts` are the lanes that hold the header, and they read computed
+values and measurements rather than pixels for exactly that reason. Read them as
+the header's gate and this one as the body's.
 
 ## If the browsers cannot be installed
 
