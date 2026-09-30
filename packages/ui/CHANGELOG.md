@@ -1,5 +1,27 @@
 # @nanisoft/prism-ui
 
+## 0.12.0
+
+### Minor Changes
+
+- 26a6fdc: Export the `Stat` and `Stats01Props` types from `stats-01`
+  
+  A caller that builds the `stats` array could not name the type it was building,
+  so it had to infer it or annotate the array as `any`, and a rename of a field on
+  `Stat` then stopped being a compile error at every call site. Both types are
+  now exported from the subpath, alongside the Block.
+
+### Patch Changes
+
+- 9f3dd2a: Align `FeatureGrid01` and `Pricing01` section headings left
+  
+  Both Blocks rendered a centred heading over a grid of cards, and `SectionHeading`
+  states that `left` is right for a section with content under it. Every other Block
+  that opens with a heading already aligned left, so a page composed from Blocks put
+  these two headings out of step with the rest of the page. No prop changed, so no
+  call site does; a consumer relying on the centred heading was overriding a default
+  rather than setting a value.
+
 ## 0.11.0
 
 ### Minor Changes
