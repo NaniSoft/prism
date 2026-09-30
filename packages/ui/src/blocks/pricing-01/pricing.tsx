@@ -44,6 +44,13 @@ export type Pricing01Props = {
  * plan". A shared library has no plans to sell, so those strings described a
  * business that does not exist here, and every consumer who installed the block
  * inherited them.
+ *
+ * The section heading is aligned left, for the reason `FeatureGrid01` now records
+ * in full and `test/section-heading-align.test.tsx` holds: three cards sit under
+ * it, and a centred title above a left-aligned grid reads as two unrelated pieces.
+ * `Pricing01` and `FeatureGrid01` were the only two Blocks that left the heading
+ * centred over content, and neither had a stated reason for it, so both were
+ * taking the default rather than making a decision.
  */
 export function Pricing01({
   eyebrow,
@@ -60,6 +67,7 @@ export function Pricing01({
       {title ? (
         <SectionHeading
           as={headingLevel}
+          align="left"
           eyebrow={eyebrow}
           title={title}
           description={description}

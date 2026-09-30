@@ -78,6 +78,33 @@ export type FeatureGrid01Props = FeatureGrid01CommonProps &
  * The `icon` variant renders a tile per feature and requires an icon per feature.
  * The `bare` variant renders no tile and requires no icon, and the type says so
  * rather than the renderer finding out.
+ *
+ * **The section heading is aligned left, and that is this Block joining the other
+ * eight rather than inventing an answer.** `SectionHeading` states its own rule:
+ * `center` is right for a band that is only a heading, and `left` is right for a
+ * section with content under it, because a centred title above a left-aligned
+ * grid reads as two unrelated pieces. A grid of cards is content under its
+ * heading, so the rule says left. `NoteGrid01`, `StackGrid01`, `StatusLedger01`,
+ * `ProductGrid01`, `LogoStrip01`, `Stats01`, `ProcessRail01` and `ProcessFlow01`
+ * all pass `align="left"` for that reason, and this one did not, so it was one of
+ * only two Blocks in the package that centred a heading over content.
+ *
+ * The cost was not visible in this repository, which previews one Block at a time
+ * and so never put a centred title next to a left-aligned one. It was visible in
+ * the consumer: the Nexus landing is composed from seven of these Blocks and put
+ * two centred section titles among five left ones, and the page's own rhythm read
+ * as an accident rather than as a decision. A page's composition is the consumer's,
+ * but a Block that is the only one of its kind answering a shared question is not a
+ * composition the consumer can correct without restyling a catalogue item, which
+ * the no-override-path rule does not allow.
+ *
+ * `Hero01` is the deliberate exception and keeps its own `align`, and `Cta01` draws
+ * no section heading at all: a centred hero is a band that is only a heading, the
+ * two-column form puts its figure beside the copy rather than under it, and the
+ * closing band is a title and two actions on a filled panel with nothing underneath.
+ * `test/section-heading-align.test.tsx` holds the whole list, which is the
+ * assertion, so a Block that opens with a heading and content under it cannot be
+ * added answering this question a second way.
  */
 export function FeatureGrid01(props: FeatureGrid01Props) {
   const { eyebrow, title, description, numbered = false, headingLevel = 'h2' } = props
@@ -96,6 +123,7 @@ export function FeatureGrid01(props: FeatureGrid01Props) {
       {title ? (
         <SectionHeading
           as={headingLevel}
+          align="left"
           eyebrow={eyebrow}
           title={title}
           description={description}
