@@ -1,5 +1,175 @@
 # @nanisoft/prism-ui
 
+## 0.14.0
+
+### Minor Changes
+
+- 4e40c8f: Nine Components, and the naming law that the next thousand will follow
+  
+  Closes the gap in Component coverage: a `Pill` beside `tag-group`, a `Drawer`
+  that is a Sheet with a gesture rather than an overlay, an `ImageZoom` that is a
+  `Lightbox` with the dialog taken out, a `VideoPlayer` that owns no engine, an
+  `EmojiPicker` that ships no emoji table, a `RepoStars` whose mark is a slot
+  because a host logo is a licensed asset, a `ChoiceCard` built on real radios
+  rather than ARIA, a `BillingSource` that has no `mask` prop on purpose, and a
+  `PackSwitcher` that makes Prism's pack axis switchable at runtime, which nothing
+  did before.
+  
+  Four of the nine ship no JavaScript at all. That is the number worth reading
+  against the roster: nine catalogue Items cost 19.3 KB of the deduplicated client
+  bundle rather than the sum of their rows, and `VideoPlayer` in particular is a
+  server Component that a page can carry a dozen of for free.
+  
+  `DESIGN.md` gains the naming law this roster needed earlier: a slug says what a
+  Component does, and the only number it may carry is a variant ordinal on a name
+  that is already true. `button-47` tells a reader nothing; `split-button` tells
+  them what it is and what happens if it changes. Five upstream-shaped items are
+  refused by that law and each refusal is recorded with its reason rather than left
+  to be rediscovered.
+  
+  The client ceiling moves from 260 KB to 280 KB, measured at 269.7 KB over 177
+  entry points, and the gate's header says plainly that this is the third kind of
+  number it has printed: not a correction of a bad measurement, and not a forecast
+  of weight that had not landed, but a report on weight that is here. It also names
+  the pattern, because five moves in a row triggered by the same event is the
+  finding: a ceiling that moves once per batch of work is recording a history rather
+  than measuring a policy.
+  
+  `Progress`, `dayKey` and the `live` subpath fix from the previous release are
+  unchanged. No consumer import breaks; every name here is an addition, and the
+  four `*Variant` to `*Form` renames from that release are still additive because
+  nothing imported the old names.
+- 829ae83: Take the catalogue from 106 Items to 236
+  
+  Adds 130 Items in Prism's own vocabulary: 23 foundation Components, 96 Blocks, 10
+  Pages and one live surface. Every name is an addition, so no consumer import
+  breaks, and every Item follows the rules the package already held rather than
+  relaxing them: no shipped copy, no fetching, no raw colour, and motion by token.
+  
+  The shapes that were not upstream's are the ones worth naming, because each is a
+  translation rather than a copy. Upstream's storefront comparison is
+  `offering-categories-01` and its spec sheet is `spec-table-01`, because what a
+  buyer compares in a pipeline product is a connector's declared bounds rather than
+  a plan's feature list. `tool-ledger-01` is the second live surface and takes a
+  `subscribe` function the consumer supplies, so Prism still owns no socket.
+  `directory-01`, `project-dashboard-01`, `ops-checklist-01` and `handoff-01` were
+  added because a Block already in the roster reached for something absent.
+  
+  Two names move because nothing had imported them. `CalendarBlock01` is now
+  `Calendar01`, and the deferred `input-otp` resolved to the published
+  `one-time-code`. Four `*Variant` types are now `*Form`, since the surface gate
+  rejects an exported union under a name that reads as a styling axis.
+  
+  `Progress` gains a string `valueText` prop for the server Block that cannot carry
+  a callback across the boundary, `dayKey` is exported from `lib/utils` for the
+  Blocks that share a date key, and the emitted `live` subpath now resolves its
+  relative specifiers, which it did not.
+  
+  The client bundle is 250.4 KB against a ceiling moved from 208 KB to 260 KB. The
+  move is a forecast about weight that had not landed, and the gate's own comment
+  records why it differs from the two earlier corrections. `docs/history/roster-expansion.md`
+  holds the decisions, and `DESIGN.md` records that the v1.1 deferred tail has
+  shipped.
+- 4e40c8f: Thirty-four Components, and the audit that refused the other thousand
+  
+  Component coverage of the upstream catalogue is complete. 1,026 variants were
+  audited against the naming law and 34 shipped: 392 were a cross-product of tone,
+  size, shape, icon or state that a shipped Component already expresses as props, and
+  the rest were motion refused by a law that predates this work.
+  
+  The zeroes are the result. `form` (85) and `select` (51) produced nothing, because
+  a contact form and a settings form differ only in the data a consumer passes.
+  `table` (38), `avatar` (34), `skeleton` (30), `dropdown-menu` (30) and `sheet`
+  (30) produced nothing for the same reason, and `skeleton` at 30 is six groups of
+  five, each one a different arrangement of the same placeholder rectangles.
+  
+  New: `reorderable-list`, `checklist`, `form-dialog`, `form-wizard`, `stateful-table`,
+  `nested-tabs`, `mega-menu`, `task-progress`, `split-button`, `stepper`,
+  `overflow-actions`, `selection-toolbar`, `money-field`, `intensity-grid`,
+  `proportion-list`, `cohort-grid`, `multi-combobox`, `creatable-combobox`,
+  `range-field`, `platform-modifier-key`, `image-list-field`, `repeatable-rows`,
+  `text-format-toolbar`, `prompt-composer`, `lifecycle-button`, and the nine from the
+  category sweep: `pack-switcher`, `pill`, `billing-source`, `drawer`, `image-zoom`,
+  `video-player`, `emoji-picker`, `repo-stars`, `choice-card`.
+  
+  Five of the new ones exist because two Components disagree and the disagreement
+  is the defect: `split-button` joins a trigger and a menu trigger into one shape,
+  `stepper` clamps two controls at one bound, `overflow-actions` moves actions into
+  a menu when the row runs out, `selection-toolbar` and `text-format-toolbar` take
+  opposite positions on whether focus may move, and `nested-tabs` orders two tab
+  axes that look identical. A boolean cannot express a conflict.
+  
+  **`form-dialog` is the largest single job found, at 22 upstream variants** across
+  `dialog`, `alert-dialog` and `popover`. All three ship a container and none owns
+  what happens between the reader pressing submit and being able to act on the
+  answer.
+  
+  **`pack-switcher` makes the pack axis switchable at runtime**, which is the piece
+  a DTCG system was missing. `video-player` owns no player engine and ships no
+  JavaScript. `money-field` holds a number for the caller and a locale-formatted
+  string for the reader at the same time, and the round trip is the Component.
+  
+  Four defects the audit found in work already merged are fixed in this release, and
+  each was found by a job that did not exist to find it: `button` never had a
+  loading state and two documents claimed it did; `cohort-grid` documented a scale
+  knob that cannot be moved because a retention row's first column is a hundred by
+  definition; `check-item-docs` could not see a generic Component, so a module with
+  a full JSDoc block read as declaring no Item rather than as undocumented; and a
+  byte order mark on an MDX makes its frontmatter parse as empty with no gate
+  noticing, which is what `scripts/check-encoding.mjs` now exists to prevent.
+  
+  The catalogue is 270 Items and the client bundle is 286.2 KB, inside the 300 KB
+  ceiling without moving it, because nine of the thirteen newest compose Components
+  the bundle already carries. 34 Components across two passes cost 47.6 KB of
+  aggregate where the sum of their individual measurements is several times that.
+  
+  No consumer import breaks. Every name added is an addition.
+- 4e40c8f: The component sweep: 21 Components from 555 audited upstream variants
+  
+  The naming law in DESIGN.md says a slug describes the job and a variant that
+  differs from its siblings only by a prop is a call site. Applied strictly to 555
+  upstream variants, 21 survived: 340 were a cross-product of tone, size, icon and
+  state that existing Components already express as props, and 122 were motion
+  refused by a law that predates this work rather than by a new one. The two zeroes
+  are the finding: `form` at 85 and `select` at 51 produced nothing, because a
+  contact form and a settings form differ only in the data a consumer passes.
+  
+  New: `pack-switcher`, which makes the pack axis switchable at runtime and is the
+  piece a DTCG system was missing; `pill`, `drawer`, `image-zoom`, `video-player`,
+  `emoji-picker`, `repo-stars`, `choice-card`, `billing-source`; `intensity-grid`,
+  `proportion-list`, `cohort-grid`; `multi-combobox`, `creatable-combobox`,
+  `range-field`, `platform-modifier-key`; `image-list-field`, `repeatable-rows`,
+  `text-format-toolbar`, `prompt-composer`, `lifecycle-button`.
+  
+  Four ship no JavaScript. The catalogue is 257 Items and the client bundle is 278.5
+  KB.
+  
+  **Three defects the audit found in work already merged.** `button` never had a
+  loading state and the catalogue and its MDX both said it did; the claim is
+  corrected and `lifecycle-button` is now where an outcome after a press lives.
+  `cohort-grid` documented `max` as the way to narrow its scale, which is impossible
+  because a retention row's first column is a hundred by definition, so the knob is
+  `min` and the limit is now stated. And `check-item-docs` could not see a generic
+  Component, so a module with a full JSDoc block was reported as declaring no Item
+  rather than as undocumented; the pattern is widened, which widens the law's reach
+  rather than relaxing it.
+  
+  **`scripts/check-encoding.mjs` is new.** A byte order mark on an MDX makes its
+  frontmatter parse as empty, and no existing gate noticed: the file had a JSDoc
+  module, a Demo beside it, all-props strings, and a clean catalogue join. It
+  surfaced as seventeen unrelated failures in two files. The class has now bitten
+  this repository twice. The gate reports and does not repair, and it is proven to
+  fire.
+  
+  **The client ceiling moves to 300 KB.** It has now moved six times and every move
+  was triggered by a batch of new Items, which the gate's header records as the
+  finding rather than hiding. A roster-derived ceiling was rejected because a
+  ceiling that scales with the catalogue is the same as no ceiling. Deciding one
+  fixed number on what a consumer can actually load is a product judgement about
+  the four downstream repositories and is the one open decision here.
+  
+  No consumer import breaks. Every name added is an addition.
+
 ## 0.13.0
 
 ### Minor Changes
