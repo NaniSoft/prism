@@ -1,0 +1,168 @@
+---
+slug: components/pack-switcher
+title: PackSwitcher
+---
+
+## Overview
+
+A PackSwitcher is the control that changes which pack the page is drawn in, over a
+list the caller supplies. It renders one radio per pack, marks the active one, and
+reports the reader's choice through a callback. It is the pack axis's counterpart
+to `ModeToggle`, which does the same for the mode.
+
+**It is the answer `PackSwatch` names in its own documentation.** That Component
+says a caller who wants a pack chooser has to build the chooser around six images
+rather than getting one, and that the answer is upstream, in a Component that owns
+the switching. The gap was worth closing because the mark, the current marking, the
+keyboard model and the change to the page are four separate things, and a consumer
+composing them by hand has four chances to ship a control that looks like it
+changes the pack and does not.
+
+**It does not own applying the pack, and that is the whole of its prop surface.**
+Applying a pack is a consumer's decision, because the three honest ways to do it
+are three consumer's decisions: the provider's `setPack`, which writes the two
+document attributes and persists the choice; a `data-pack` attribute on one
+subtree, which themes a preview and nothing else; and a value in a URL or a form,
+which is what a shared link and a checkout both need. A Component that took the
+provider's hook would own all three by deciding which one it is, and a Component
+that wrote the attribute itself would be a second writer of the two attributes,
+which turns a record of the active pack into a race. So it reports and the caller
+applies. The cost is three lines of wiring on every call site, and the gain is that
+one shape works in all three cases.
+
+**The list is the caller's and there is no default.** Prism ships six packs and has
+no display name for any of them, because `default` is a pack id whose name in a
+product might be "Standard", "Neutral" or "As shipped", and a Component that
+decided would be wrong in at least two of those. Every call site writes its own
+list, in its own language.
+
+**The set is a radio group, because one of them is always the pack the page is in.**
+Choosing either of any two packs leaves the same state as choosing the other, which
+is the definition of a single-choice set. A row of toggle buttons would take one tab
+stop per pack and announce a group of toggles; a list of links would navigate, which
+is the wrong consequence for a preference.
+
+## Usage
+
+```tsx
+'use client'
+
+import { PackSwitcher } from '@nanisoft/prism-ui/components/pack-switcher'
+import { PrismProvider, usePrismTheme } from '@nanisoft/prism-ui/provider'
+
+const packs = [
+  { id: 'default', name: 'Standard', description: 'Neutral, as shipped.' },
+  { id: 'lavender', name: 'Lavender', description: 'Soft violet.' },
+  { id: 'sky', name: 'Sky', description: 'Crisp blue, smallest radius.' },
+] satisfies PackSwitcherPack[]
+
+function Appearance() {
+  const { pack, setPack } = usePrismTheme()
+
+  return (
+    <PackSwitcher
+      packs={packs}
+      activePack={pack}
+      onChange={setPack}
+      label="Appearance"
+    />
+  )
+}
+```
+
+<ComponentDemo slug="pack-switcher" />
+
+## Guidelines
+
+### When to use
+
+Use a PackSwitcher wherever a reader is offered the choice of pack: a settings
+page, the top of a documentation page, a site header on a product that wants its
+appearance to be the reader's.
+
+Pass a `description` on each pack when the chooser is a settings row and a reader
+is choosing rather than confirming. A header that only confirms which pack is
+active passes none, and gets a row of chips instead.
+
+Pair it with `ModeToggle` rather than replacing it. A pack is one axis and the mode
+is the other, and a control that changed both at once is a control with two jobs
+and a state a reader cannot describe afterwards.
+
+### When not to use
+
+Do not use a PackSwitcher to preview a pack in a gallery or a documentation table.
+`PackSwatch` is the Component for showing a pack, and a legend of six images is
+not a question.
+
+Do not use it to theme part of a page. That is a `data-pack` attribute on the
+element, which is declarative, SSR-safe and needs no JavaScript at all. A
+switcher in a product whose active pack is a per-tenant fact is a control for a
+setting the reader does not have.
+
+Do not mount it without a way to apply the answer. `onChange` is required for that
+reason, and a caller who passes a handler that writes to nothing has built a
+control that repaints nothing. `ProductSwitcher` is the Component for moving
+between products, and a control that both switched the pack and navigated would be
+a control with two consequences.
+
+### Best practices
+
+- Let the provider do the work where the provider is the answer. `onChange={setPack}`
+  is the whole wiring, and the provider persists the choice and writes both
+  document attributes, so there is one writer and one record.
+- Keep the six-pack list in one place in the consumer's code. Every call site that
+  writes its own list is a place where two lists can disagree about a name.
+- Write the group's `label` as what the choice is, in the consumer's words:
+  "Appearance", "Palette", "Brand colour". A caller whose product does not use the
+  word pack announces the wrong word in every language but the one it was written
+  in.
+- Leave `activePack` as the pack the page is actually in. A switcher that selects a
+  pack the page is not in is a control that has repainted the page the reader did
+  not ask for.
+- Leave `showModes` on where there is room. A pack's light and dark values are not
+  one palette with the brightness turned down, and a reader choosing on the
+  evidence of one mode is choosing half.
+- Do not sort the list. Which pack comes first is a claim about what the product
+  is, and it is the consumer's claim to make.
+
+### Accessibility
+
+The set is a real radio group, so it is one Tab stop for the whole row and the
+arrow keys move between the packs inside it. Each option carries `aria-checked` from
+the underlying radio, and the fill repeats it rather than replacing it: the
+attribute is the fact and the colour is the reminder, so a reader who cannot
+separate `primary` from `background` and a reader using a screen reader are told the
+same thing.
+
+The option is the target, not a small circle inside it. A six-pack row is a control
+a reader aims at without reading, a reader using voice control can name, and a
+finger can hit without landing on a fourteen-pixel target.
+
+Every option draws its indicator at full strength, and the group's name is the
+`label` the caller passed. The `PackSwatch` inside each option is hidden from
+assistive technology, because the option is named by the words beside it and an
+option announced as "Lavender image, Lavender, radio button, selected, 2 of 6" says
+the word twice.
+
+There is no transition between packs. The change is a repaint of every token on the
+page, which is the consequence the reader asked for, and a cross-fade between two
+palettes would be movement nobody asked for and could not act on. The hover and
+selection feedback is the same token-driven feedback the rest of the package uses.
+
+### What this is not
+
+There is no `render` prop, no portal, no popover and no dropdown. A chooser of six
+packs is a row, and a menu would hide the reader's current pack behind a control
+they have to open before they can see what they are choosing between. A consumer
+with more packs than fit on a line wants a settings page, not a different
+Component.
+
+There is no uncontrolled form, so `defaultValue` is not offered. A switcher that
+rendered a pack nobody chose because a form said so is a switcher that has repainted
+the page on its own.
+
+It is a client Component because the callback is one, and the directive is
+unconditional so a consumer composing a server page finds the boundary in one place
+they can see. The cost is that a consumer who resolves the active pack on the server
+and passes a handler that does nothing still puts this module in their client
+bundle, where a static row of six images would have shipped no JavaScript at all.

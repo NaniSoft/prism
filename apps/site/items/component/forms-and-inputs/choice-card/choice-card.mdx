@@ -1,0 +1,203 @@
+---
+slug: components/choice-card
+title: ChoiceCard
+---
+
+## Overview
+
+A ChoiceCard is a set of choices where each one is a card, and the reader takes
+exactly one. A plan, a region, a billing cadence: the cases where a radio row is
+technically enough and practically too small, because the choice needs a name, a
+line of supporting text and a target a finger can hit.
+
+The decision that shapes it is that **it is a fieldset of real radio inputs, not a
+group of ARIA radios.** A radio group has one Tab stop, arrow keys that move and
+choose, a checked state the platform owns, form participation, constraint
+validation, and a place in every browser's accessibility tree. All of that is
+already solved. The ARIA route, which is what `RadioGroup` and `BillingSources`
+take, buys total control of the appearance and pays for it with a hidden input to
+submit, a roving tab stop to maintain, and a keyboard model a reader has to test
+rather than one the platform ships. This Component's whole subject is the
+appearance, and a card is a `<label>` around a radio, which is a native element.
+
+The second decision is that **the card is the label, so the whole card is the
+target.** A 16 pixel circle beside a sentence the reader also wants to press is a
+target a finger misses at the size a plan card is drawn. So the label wraps the
+radio, the radio's accessible name comes from the label element natively with no
+generated id, and the description is inside the label too, which makes it part of
+the name.
+
+The third is that **the group's name is a required prop**, drawn as the legend
+and announced as the group's name. A group of plans with no name is announced as
+an unnamed group, and a reader learns nothing about what the question was.
+
+## Usage
+
+```tsx
+import { ChoiceCard } from '@nanisoft/prism-ui/components/choice-card'
+
+// Uncontrolled, in a form. The browser holds the selection, the arrow keys move
+// it, and the value is posted on submit, with no JavaScript at any point.
+<form action="/subscribe" method="post">
+  <ChoiceCard
+    label="Billing cadence"
+    name="cadence"
+    defaultValue="monthly"
+    options={[
+      { value: 'monthly', label: 'Monthly', description: 'Cancel whenever you like.' },
+      { value: 'yearly', label: 'Yearly', description: 'Two months free.' },
+    ]}
+  />
+  <button type="submit">Subscribe</button>
+</form>
+
+// Controlled, from a module that is already in the client graph.
+<ChoiceCard
+  label="Region"
+  name="region"
+  value={region}
+  onChange={(event) => setRegion(event.target.value)}
+  columns={3}
+  required
+  options={[
+    { value: 'eu', label: 'European Union', description: 'Frankfurt and Dublin.' },
+    { value: 'uk', label: 'United Kingdom', description: 'London.' },
+    { value: 'us', label: 'United States', description: 'Northern Virginia.' },
+  ]}
+/>
+```
+
+<ComponentDemo slug="choice-card" />
+
+## Guidelines
+
+### When to use
+
+Use a ChoiceCard for two to four choices that each need more room than a radio row
+gives: a plan, a tier, a region, a cadence, a deployment target. Two cards on a
+row is the ordinary arrangement, three is available, and a single column is the
+default for a stack of regions.
+
+Pass a `label` for the group, a `value` for each choice, and a `label` for each
+choice. Pass a `description` for the line that makes a choice worth comparing,
+which is the second half of the radio's accessible name and the reason a reader
+does not have to open anything to find out what they are choosing.
+
+Use `columns` to say how many sit on a row, and remember it is a claim about the
+content rather than the layout: a plan is usually a row and a region is usually a
+stack.
+
+### When not to use
+
+Do not use it for short labels. Three options of one word each are a
+`RadioGroup`, and a card per word is a page of borders around nothing. The test is
+whether the choice needs supporting text: if it does not, it is a radio row.
+
+Do not use it for more than about five choices. Past that the cards stop being
+scannable and a `Select` is the honest answer, because a select says "there are
+many of these" where a group of cards says "these are the ones".
+
+Do not use it for independent choices. A reader who can take two of them is not
+choosing one, so the set is a `Checkbox` group or a `TagGroup` and this
+Component's single-selection model is the wrong claim.
+
+Do not put an interactive element inside a choice. A link in the description, a
+copy button beside a price, a tooltip trigger on the name: all of them select the
+radio when the reader presses them, because a label forwards the click to what it
+wraps. Put that element outside the card.
+
+Do not use it for an action. A card that does something is a `Button`, and a card
+that is chosen is this.
+
+### Best practices
+
+- **Pass the group's name, every time.** It is the legend, it is the announced
+  name, and there is no default anywhere in this module. "Plan", "Region",
+  "Billing cadence" are all the same control and Prism chooses none of them.
+- **Give each value a `name` prop for the form and a `label` on the option, and do
+  not confuse the two.** `name` is the key the value arrives at on the server;
+  `options[].label` is what a reader reads and hears.
+- **Keep descriptions to one line.** They are part of the radio's accessible name,
+  not a description reached separately, so a paragraph of supporting text is a
+  paragraph the reader hears on every arrow-key move past the card. This is the
+  same rule the package states about a `CardDescription`.
+- **Set `defaultValue` for a form and `value` with `onChange` for state.** The
+  first needs no JavaScript at all and posts on submit. The second is a controlled
+  group, and it needs a module that is already in the client graph; a controlled
+  `value` with no `onChange` is a read-only group, and the browser's own warning
+  is the honest report of it.
+- **Use `disabled` on an option for facts only you have.** An option the reader
+  cannot take is a fact about your catalogue, and the option stays in the tree
+  and is announced as unavailable, because a card that silently vanished is a card
+  a reader will believe has been withdrawn.
+- **Use the group `disabled` for a whole read-only view.** It is put on each
+  input rather than on the fieldset, so a card dims when the radio inside it is
+  disabled, which is one mechanism rather than two.
+- **Expect no hover on a selected card.** The selected state is the border and the
+  dot and not the fill, because a fill a hover can take over is a fill whose
+  meaning changes under the pointer. The cost is that a selected card is quieter
+  than a filled one, so add your own `Tag` or `Badge` beside the choice if you
+  want it louder, which is a claim about your product and therefore yours.
+- **There is no `target` and no `rel` here**, because both belong to an anchor and
+  this is a fieldset. There is also no `onSubmit`: the group submits through the
+  form you wrote.
+
+### Accessibility
+
+**The set is a fieldset whose legend is its name, and it also carries
+`role="radiogroup"`.** The fieldset is what groups the radios and what names
+them. The explicit role is an addition rather than a replacement: an element with
+an explicit role is named by `aria-labelledby` rather than by its legend, so the
+legend is given an id and pointed at, and what is bought is that a screen reader
+announces a radio group rather than a grouping, which is the difference between a
+reader knowing this is one question and a reader having to infer it from six
+radios.
+
+**Each card is a label wrapping a real radio, and a screen reader announces the
+label, the description, the role and the position.** "Team. Twelve agents, billed
+yearly. Radio button, 2 of 3." The description is inside the label, so it is part
+of the name rather than a separate description, and the rejected alternative is
+`aria-describedby` pointing at text outside the label. That would give a shorter
+name and cost two things: an id to generate and to wire, and the whole-card hit
+area, because everything outside the label stops selecting. Given that the hit
+area is the reason this Component exists, the name carries the description.
+
+**The radio is present, not simulated.** It submits with the form under `name`,
+it is required when the group is `required`, it is skipped by the arrow keys when
+it is disabled, and the browser's own validation message is the one a reader
+hears, in the reader's own language.
+
+**The focus ring is drawn on the card, not on the radio.** The radio is
+`sr-only` rather than hidden, so there is no outline to suppress on either element
+and the browser's own indicator is not competing with this one. The ring bounds the
+thing the reader is choosing rather than a small circle inside it.
+
+**The selected state is a border and a dot, and both are consequences of the real
+checked state.** The card takes the primary border when its radio is checked and
+the dot fills, so a reader who cannot see the fill is told the same thing as a
+reader who can.
+
+**It is a server Component, and it takes a function prop anyway, which is a
+deliberate departure from the rule the rest of this package follows.** The rule
+exists because a Component that *calls* a function prop during render, or that
+holds state the callback drives, has to be in the client graph: a server component
+cannot hand a function down. This Component never calls `onChange`. It forwards it
+to an `<input>`, where it is an ordinary DOM handler the framework attaches at
+hydration, and this module's own output is a pure function of its props with no
+hook, no state and no effect. `Metric` and `SearchField` are the precedents in
+this package. The cost is real and is why it is stated: a consumer who passes
+`onChange` from a server file gets a build error in every framework that draws
+that line, and that error is correct. A consumer who wants the value in their own
+state is already in a client module, and a consumer who does not is in a server
+one and gets a working radio group that ships no JavaScript at all.
+
+**It is distinct from `RadioGroup` and from `Card`, and both differences are about
+the same thing.** `RadioGroup` is the compact form: a small circle beside a short
+label, one row, a form field. `Card` is a surface with a title, a description,
+content and a footer, and it is not a control at all: no role, not focusable,
+submits nothing. This is the third thing, the one where the control and the
+surface are the same box. A `Card` cannot become a choice without a role and a
+checked state; a `RadioGroup` cannot become a choice card without a label around
+each row and the row-sized target that brings. Composing them does not help: a
+`Card` wrapped around a radio row is a card with a small target inside it, which
+is the arrangement this Component exists to replace.

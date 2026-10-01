@@ -160,6 +160,149 @@ Live: `tool-ledger-01`
 `onboarding-page`, `pricing-page` and `error-page` are the three Pages
 DESIGN.md records as deferred to v1.1.
 
+### Wave F, the component sweep, and what strictness cost
+
+The first four decisions were re-opened once and the reopening is recorded here
+because the answer is not the one anybody would guess. The request was to reach
+full coverage of the upstream catalogue rather than one Item per category, and
+the strict application of the naming law is what made that affordable rather than
+what made it small.
+
+**555 upstream variants were audited. 21 shipped. 97.2% were refused**, and the
+refusals fall into three groups that are worth separating because only one of them
+is the naming law:
+
+| Group | Variants | Why they are refused |
+| --- | --- | --- |
+| Prop combinations | about 340 | The whole family is a cross-product of tone, size, icon, rounded, disabled, loading and label, and every one of those is a prop the existing Component already takes. A registry entry per cell is a catalogue of call sites. |
+| Motion and ambient effects | about 122 | A pre-existing Motion law, not a new one: no keyframes, no continuous loops, no entrance effects. Fifty of these are the `button` family's glow, shimmer, aurora, marquee, typewriter and morph groups, and `marquee` was already recorded as refused before this work began. |
+| Genuine jobs | 21 | A value shape a prop cannot carry, a state machine with its own accessibility contract, or a composite surface with a keyboard model of its own. |
+
+The families audited, and what each yielded:
+
+| Family | Upstream | Shipped |
+| --- | --- | --- |
+| button | 126 | 1 |
+| chart | 85 | 3 |
+| form | 85 | 0 |
+| field | 43 | 3 |
+| file-upload | 45 | 1 |
+| combobox | 42 | 2 |
+| select | 51 | 0 |
+| kbd | 39 | 1 |
+| input-group | 39 | 2 |
+
+**The two zeroes are the finding.** `form` at 85 and `select` at 51 are the two
+largest families audited and neither produced a Component, because "a contact
+form" and "a settings form" differ only in the data a consumer passes, and the
+whole of `select` is a trigger prop surface plus twelve samples of one option-row
+slot. Shipping either as Items would have been the exact failure the naming law
+exists to prevent, and it would have been invisible in review because a rendered
+form looks complete.
+
+Three things the audit corrected in work already merged, which is the other reason
+it is written down here:
+
+- **`button` never had a loading state.** The catalogue description and
+  `button.mdx` both claimed it did, for as long as both existed. The claim was
+  wrong and the documentation is now corrected, and `lifecycle-button` is where
+  an outcome after a press now lives. The error was found by an agent asked to
+  build a Component next to `button`, which is not a way anyone planned to find it.
+- **`cohort-grid`'s scale cannot be narrowed from the top.** Its JSDoc said `max`
+  was the answer to a grid going pale, and `max` cannot be set below a hundred
+  because a retention row's first column is a hundred by definition. The knob is
+  `min`, and the limit is now stated rather than discovered by a Demo that threw.
+- **`check-item-docs` could not see a generic Component.** A `function X<T>`
+  declaration matched nothing, so the gate reported the module as declaring no Item
+  rather than as undocumented, and the Component that wanted a type parameter most
+  was pushed into dropping it. The pattern is widened, which is a widening rather
+  than a relaxation: a generic declaration is as exported as a plain one.
+
+**The estimate that follows, and how far to trust it.** At a 2.2% survival rate
+across 555 audited variants, full coverage of the 2,151 upstream Components
+projects to roughly 50 Items rather than 2,000. That is an extrapolation from
+26% of the catalogue and it is not a promise: the families audited are the largest
+and the most prop-heavy, and a smaller family could behave differently. What is
+not an extrapolation is that the surviving work is real work, and that the
+refusals above are the larger half of the answer.
+
+### Wave G, the second audit, and the answer to the estimate
+
+The estimate above was wrong in the safe direction, and the reason is worth
+recording because it was not obvious in advance: **coverage of the whole upstream
+component catalogue completed at 1,026 audited variants and 34 Components.** The
+2.2% rate did not hold. It rose, because the second half of the catalogue is
+mostly *primitive* families where the density is tone, size and shape rather than
+composition.
+
+| Family | Upstream | Shipped |
+| --- | --- | --- |
+| sonner | 35 | 1 |
+| table, avatar, skeleton, dropdown-menu, sheet | 154 | 0 |
+| slider | 29 | 0 |
+| button-group | 39 | 4 |
+| list-panel | 66 | 2 |
+| alert-dialog, dialog, popover | 71 | 1 |
+| stepper | 26 | 1 |
+| input | 24 | 1 |
+| navigation-menu | 20 | 1 |
+| data-table | 16 | 1 |
+| tabs | 11 | 1 |
+| accordion, badge, empty-state, command, progress, pagination, switch, separator, calendar, autocomplete, textarea, checkbox, context-menu, collapsible, theme-toggle | 224 | 0 |
+
+**The five zeroes in the first four rows are the finding of the second pass.**
+`table` at 38, `avatar` at 34, `skeleton` at 30, `dropdown-menu` at 30 and `sheet`
+at 30 produced nothing, and in each case the entire family is a cross-product of
+the props a shipped Component already takes. `skeleton` at 30 is six groups of
+five, each one a different arrangement of the same placeholder rectangles.
+`avatar` at 34 is shape times size times presence times fallback times badge.
+
+One family produced the single largest job found anywhere: **`form-dialog`, at 22
+upstream variants spread across `dialog`, `alert-dialog` and `popover`.** All
+three hosts ship a container and none of them owns what happens between the reader
+pressing submit and being able to act on the answer, so every consumer re-derived
+the same four-position state machine and its focus contract.
+
+**A category that did not exist.** `mega-menu` was specified under Navigation,
+which is not one of the seven closed Categories in `CONTEXT.md`. `navigation-menu`,
+`menubar`, `context-menu` and `dropdown-menu` are all `Layout` in the catalogue,
+so `mega-menu` is filed there. The refusal is recorded because a Category is a
+closed set and an eighth one is not something an Item may introduce.
+
+**The client ceiling stopped moving on its own terms.** Thirteen Components landed
+in the second pass and the aggregate went from 278.5 KB to 286.2 KB, which the
+300 KB ceiling held without being moved. It held because nine of the thirteen
+compose Components the bundle already carries rather than drawing new ones, so the
+composition-heavy Items the audit favours are also the cheap ones. That is the
+argument for the deduplicated figure over a per-Item sum, and it is now measured
+rather than asserted: 34 Components across two passes cost 47.6 KB of aggregate,
+where the sum of their individual measurements is several times that.
+
+**What the second pass cost, recorded as the gate's own header asks.** Three rows
+in the per-item table are almost entirely a dependency already in the bundle, at
+46 to 48 KB each, and `task-progress` is classified `server` because it composes
+`progress` relatively and so misses the gate's client-adjacency test. That last one
+is a measurement artefact rather than a judgement, and the aggregate is the number
+that catches it.
+
+### The client ceiling moved twice more, and the pattern is now the finding
+
+The all-client bundle went from 250.4 KB at 236 Items to 278.5 KB at 257, and the
+ceiling moved 260 to 280 to 300. The gate's own header records the argument for
+each move and, more usefully, the shape across all six: **90, 92, 116, 208, 260,
+280, 300, every one triggered by a batch of new Items.** The comment written at the
+280 move predicted that the next batch would breach it, and it did, to within
+1.5 KB.
+
+A ceiling that has to move once per batch is not measuring a policy, it is counting
+the catalogue, and a roster-derived ceiling was considered and rejected because a
+ceiling that scales with the catalogue lets the bundle grow to whatever the
+catalogue happens to be, which is the same as no ceiling. The honest remaining
+option is one fixed number decided on the evidence of what a consumer can load,
+which is a product judgement about four downstream repositories and not a
+measurement this repository can make. It is the one open decision this effort did
+not take.
+
 ## The client budget moved, and the reason
 
 `check-client-budget.mjs` holds one hard number: the deduplicated all-client

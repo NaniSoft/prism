@@ -1,0 +1,122 @@
+---
+slug: components/repeatable-rows
+title: RepeatableRows
+---
+
+## Overview
+
+RepeatableRows edits a variable-length set of row objects: add one, take one away,
+and keep every label, every accessible name and the reader's focus pointing at the
+right row. It is a Client Component and it takes a render prop rather than a slot.
+
+A row is a record, not a value. A list of strings is a `TagGroup`; a list of things
+with no fields is a `ListPanel` of `Item` rows. What this is for is a set of records
+the reader edits one at a time, where each record needs a stable identity its own
+type does not carry. The Component mints that identity against the row object's own
+identity, so a middle row can leave without the rows around it losing their
+controls, and the caller never has to add a `key` field to a type they do not own.
+
+Two facts move on a removal, and they must move separately. The generated
+`fieldId` follows the row, so every `htmlFor` pointing at a control keeps pointing
+at its own control however many rows are removed above it. The position label
+follows the position, so the rows below a removal renumber instead of leaving a
+hole where a number used to be, and the row's region is named by that same visible
+label rather than by a second string.
+
+Adding puts the reader in the new row's first cell. Removing puts them on the
+neighbouring row's remove control, or on the add control when the set empties,
+because the button they pressed is about to stop existing.
+
+## Usage
+
+```tsx
+import { RepeatableRows } from '@nanisoft/prism-ui/components/repeatable-rows'
+
+type Stop = { id: string; place: string }
+
+<RepeatableRows
+  label="Stops on this run"
+  rows={stops}
+  onAdd={() => setStops((current) => [...current, { id: next(), place: '' }])}
+  onRemove={(row) => setStops((current) => current.filter((stop) => stop !== row))}
+  addLabel="Add stop"
+  rowLabel={(index) => `Stop ${index + 1}`}
+  removeLabel={(index) => `Remove stop ${index + 1}`}
+>
+  {(stop, { fieldId }) => (
+    <>
+      <label htmlFor={fieldId}>Where</label>
+      <input
+        id={fieldId}
+        value={stop.place}
+        onChange={(event) => setStops(setPlace(stop.id, event.target.value))}
+      />
+    </>
+  )}
+</RepeatableRows>
+```
+
+<ComponentDemo slug="repeatable-rows" />
+
+## Guidelines
+
+### When to use
+
+Use RepeatableRows for a form field that holds a list of records: stops on a run,
+recipients on a message, line items on an order, scheduled windows on a job,
+matching rules on a search.
+
+Use a render prop's `fieldId` for the first control in each row. That is what keeps
+a label's `for` pointing at the right control after a removal, and it is the reason
+this is a Component rather than a loop a caller writes.
+
+Keep the row objects stable across renders. Hold them in state and update them in
+place. The Component keys against the object's identity, so a caller who rebuilds
+the rows with a spread on every render pays a remount on every keystroke.
+
+### When not to use
+
+Do not use it for a set of tags, chips or filters. Those are values a reader
+chooses between rather than records they edit, and a `TagGroup` already draws them
+with the keyboard model they need.
+
+Do not use it for a list that is not editable. A list of rows with no add and no
+remove is a `ListPanel` of `Item` rows, and a table of records is a `Table`.
+
+Do not use it to collect a variable number of the same field into one control. A
+set of tags entered as a list is a `TagGroup`, and a set of email addresses is a
+creatable combobox.
+
+Do not use it for rows that reorder by drag. The Component does not draw a drag
+affordance, and a reordering surface with no announcement of the new position is a
+surface whose position the reader has to verify by hand.
+
+### Best practices
+
+- Pass `rowLabel` from the index, never from the row's own fields. A sentence
+  written from the row's contents goes stale the moment the rows move, which is
+  exactly when a reader is reading it.
+- Use the same string for the visible position and the region's accessible name,
+  which `rowLabel` does for you. Two strings is two things to keep in step.
+- Pass `fieldId` to your label's `htmlFor` and to any `aria-describedby` in the
+  row. Do not mint your own ids per row; that is the arrangement the Component
+  exists to hold still.
+- On add, create the row synchronously if you can. If the row arrives a moment
+  later, focus waits for it rather than landing on the row that was last.
+- Give every row a first focusable control. The Component puts the reader in the
+  first cell it finds, and falls back to the row itself, which announces the row's
+  name and nothing about what is in it.
+- Omit `label` when the set is the only one on the page, for the reason the rest of
+  this package omits names: an anonymous region is honestly absent from the
+  landmark list.
+
+### Content guidelines
+
+- Write `addLabel` as the action and the thing: "Add stop", "Add recipient".
+- Write `rowLabel` as the noun with its ordinal, or as the bare ordinal when the
+  set is self-evidently numbered.
+- Write `removeLabel` as the action and the position, the way a reader counts:
+  "Remove stop 2".
+- Keep the position label short. It is drawn at the leading edge of every row and a
+  long one pushes the row's own cells along.
+- Write `label` as the set's noun in the plural: "Stops on this run", "Recipients".

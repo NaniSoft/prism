@@ -478,6 +478,49 @@ to transparent, is always `aria-hidden`, and is never applied to text.
 The taxonomy is Component, Block and Page, and nothing else. This section states
 the contract; the catalogue is the one list of the items that ship.
 
+### A name is a description of the job, never a position in a series
+
+**A Component slug says what the Component does, and the only number a slug may
+carry is a variant ordinal on a name that is already true.** `hero-01` and
+`hero-02` are both heroes, so the number carries no information a reader could
+have predicted from the name. `in-place-zoom` and `whole-screen-zoom` each say
+something, and the difference between them is the difference between two things a
+consumer chooses between on purpose. This is the law that keeps the catalogue
+navigable at any size, and it is worth stating as a law rather than a convention
+because the failure is invisible at a hundred Items and expensive at two
+thousand: a numbered series is a list nobody can search, because the number is the
+only thing that distinguishes the entries and the number is not a property of the
+thing.
+
+**The test for a new Component is whether its name survives being wrong about the
+implementation.** If a name is `button-47`, it is only wrong if the button changes.
+If a name is `split-button`, it is wrong the moment the split moves, which is
+never, because the split is what it is. The cost of the descriptive name is that
+it is a longer slug and that renaming one later is a breaking change to a
+published name, which is the same cost DESIGN.md already accepts for `site-footer`
+and `docs-shell`. The benefit is that a consumer who has never seen the catalogue
+can guess the name, and a guess that works is worth more than forty characters.
+
+**A variant that is only a prop combination is not a Component.** If a member of a
+family differs from its siblings only by a prop every one of them already takes,
+it is a call site, and publishing it would make the catalogue a second list of
+call sites. The nine Components added in the 2026-09 sweep are the boundary drawn
+in practice: `pill` ships beside `tag-group` because a capsule is a different
+shape with a different radius under a pack boundary, while a tag with a tone set
+is a `tag-group` with one prop changed. **The cost of this rule is that some things
+upstream treats as separate items will not exist here as separate items**, and the
+reason each one is refused is recorded rather than left to be rediscovered.
+
+Five were refused in the sweep, each for a stated reason and none of them quietly:
+
+| Refused | Prism's answer | The reason |
+| --- | --- | --- |
+| A promotional band | `announcement`, or a Block | A notice that carries a status is an `announcement`, and a band that carries a promotion is a section, and a section is a Block by the definition above. A Component for it would be a Block wearing a Component's name. |
+| A second way to stack avatars | `avatar-group` | Stacking and grouping are the same arrangement read at two widths. Two Items for one arrangement is a second list. |
+| A short code sample | `code-block` | A snippet is a code block with less of it, and `code-block` already takes the caller's own text. |
+| A scrolling strip of tab labels | `tabs` | One upstream entry against a hundred and six for the thing it is a sub-case of. The strip has no behaviour `tabs` does not already have. |
+| A plain list | `list-panel`, `item` | A titled panel with a toolbar and a body, a row, and a definition list already exist and cover the three shapes a plain list turns out to be. |
+
 ### The composition layers
 
 - **A Component** is a focused, accessible, product-agnostic export with one

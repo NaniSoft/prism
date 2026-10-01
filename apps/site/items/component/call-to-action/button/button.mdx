@@ -58,9 +58,13 @@ for the action that cannot.
   the supporting actions.
 - For a destructive action, put the consequence in the confirmation, not in the
   button label. The label names the thing, not the warning.
-- A loading or disabled Button should explain why it is unavailable through
-  adjacent text or a tooltip. A disabled control with no reason in reach is a
-  dead end.
+- A disabled Button should explain why it is unavailable through adjacent text or a
+  tooltip. A disabled control with no reason in reach is a dead end.
+- A Button that has been pressed and is waiting has no state to draw here, because
+  `Button` has no loading prop and never did. Compose `LifecycleButton` when the
+  action has an outcome, because an action that fails needs four words rather than
+  the two a disabled control has, and a caller who reaches for a `Spinner` beside a
+  `Button` has to build all four by hand.
 - The coarse-pointer media query grows the target to 44px on touch input
   automatically. Do not add a second size rule for touch.
 

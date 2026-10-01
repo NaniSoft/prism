@@ -1,0 +1,104 @@
+---
+slug: components/stepper
+title: Stepper
+---
+
+## Overview
+
+A Stepper is an increment and a decrement joined as one control, both of them
+holding the same range. It is a Client Component.
+
+Two things make it a Component rather than two buttons. The first is that both
+controls have to agree about the bounds: one clamps and one does not, or both clamp
+against different bounds, or the increment is drawn as available one render after the
+value reached the maximum. The bounds here are two props read once by both controls
+and by the handler that computes the next value, so there is no second place for a
+bound to be written.
+
+The second is the boundary state. A control at its limit draws itself unavailable
+rather than quietly doing nothing. A press that fails silently is the worst outcome
+available to a control: the reader pressed something, the page did not change, and
+nothing said why.
+
+It composes `ButtonGroup` for the frame and `Button` for each half, and redraws
+neither.
+
+## Usage
+
+```tsx
+import { Stepper } from '@nanisoft/prism-ui/components/stepper'
+
+const [seats, setSeats] = useState(2)
+
+<Stepper
+  value={seats}
+  onValueChange={setSeats}
+  label="Seats on the plan"
+  labels={{
+    increment: 'Increase the number of seats',
+    decrement: 'Decrease the number of seats',
+  }}
+  min={1}
+  max={20}
+/>
+```
+
+<ComponentDemo slug="stepper" />
+
+## Guidelines
+
+### When to use
+
+Use a Stepper for a value the reader chooses among a small number of neighbours: a
+quantity in a cart line, a count in a table cell, a number of copies, a seat count
+where nobody types the figure.
+
+Use it when the figure matters and the neighbours are obvious. Three presses to move
+from 8 to 5 is a good affordance for a quantity and a bad one for a number the reader
+has to land exactly.
+
+Do not use it when the reader needs to see the digits. This Component does not draw
+the value it is changing, because a number without a unit is a guess, so a caller who
+wants the figure on screen draws it beside the pair.
+
+### When not to use
+
+Do not use it for a typed scalar. `NumberField` is the field: it holds the value in an
+input, the reader can write it, and its two steppers are a secondary route to a number
+they are not the only way to reach.
+
+Do not use it for a large range. A value that is four thousand away from where it
+belongs is a text field with a number field's validation.
+
+Do not use it where the unit is not a count. A stepper over a price or a currency
+amount invents a granularity the caller did not say the price has; that is
+`MoneyField` or a `NumberField` with a `step`.
+
+Do not expect it to snap to the step grid. A value that is already off the grid moves
+by one step from where it is, and a caller who needs the grid enforced validates it in
+their own submit handler.
+
+### Best practices
+
+- Own the value. The Stepper holds no value of its own, because a value held inside a
+  control and a value held by the caller are two numbers that disagree the moment a
+  second control reads the same one.
+- Pass `min` and `max`. Without them there is no boundary for the pair to report, and
+  the boundary state is most of what this Component is.
+- Write the two `labels` as the whole action, in the reader's language. "Increase the
+  number of seats", not "More". Prism would get "increase" right for a quantity and
+  wrong for at least one of every four products that install it.
+- Expect a control at its limit to leave the tab order. That is the native disabled
+  state, chosen because `ButtonGroup` draws the joined shape by squaring each child's
+  corners, so there is no place between the group and a control to put a wrapper that
+  could dim it without breaking the join.
+- Use `readOnly` rather than `disabled` for a value nobody may change, so the reason is
+  the caller's own rather than a permanent exclusion.
+- Use `className` for width and placement only.
+
+### Content guidelines
+
+- Write `label` for the pair. "Seats on the plan", not "Quantity", because a screen
+  reader announces the group before either of its controls.
+- Write `increment` and `decrement` with the unit in them: "Add five printed copies"
+  when `step` is five, and "Increase the monthly budget" rather than "Increase".

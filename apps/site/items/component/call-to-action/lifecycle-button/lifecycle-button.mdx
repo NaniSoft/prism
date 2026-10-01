@@ -1,0 +1,148 @@
+---
+slug: components/lifecycle-button
+title: LifecycleButton
+---
+
+## Overview
+
+A LifecycleButton is a button whose label, mark and meter follow an asynchronous
+outcome: idle, in flight, succeeded or failed, with a retry beside it after a
+failure. It is a Client Component.
+
+It is a state machine and not a loading flag, and the reason is that four states do
+not fit in two answers. A boolean cannot say that a request failed, and it cannot
+say how far through a request is. A caller holding a `loading` flag plus a string
+encodes four positions across two props that do not know about each other, and
+redraws every combination. The state here is one union, so adding a position later
+is a compile error at every place that switches over it.
+
+Note what `Button` has: a `variant`, a `size`, and the standard native button
+props. There is no `loading` prop and no loading state, so what a caller writes
+today is three controls: a `Button` whose label swaps while a request runs, a
+second `Button` that appears when it fails, and a `Progress` beside the first.
+
+The in-flight position carries a real fraction. Pass `progress` between zero and
+one when you know the ratio, along with `progressText` saying the position in the
+reader's words, and the bar reports it. Omit both and the same component is drawn
+and announced as indeterminate, which is the truth about work of unknown length.
+Pass a fraction without the text and the Component throws rather than announcing
+"0.42".
+
+The outcome is announced through a live region, polite for a success and assertive
+for a failure. The reason line beneath the control is deliberately not an alert, so
+the failure is announced once rather than twice.
+
+The retry is a second control rather than a state of the first, because pressing
+the control again after a failure claims that the same request is worth making
+again, and a reader who wants to send something different should not have to
+discover that by pressing it twice.
+
+## Usage
+
+```tsx
+import {
+  LifecycleButton,
+  type LifecycleButtonState,
+} from '@nanisoft/prism-ui/components/lifecycle-button'
+
+const [state, setState] = useState<LifecycleButtonState>({ phase: 'idle' })
+
+<LifecycleButton
+  state={state}
+  onActivate={publish}
+  idleLabel="Publish the summary"
+  inFlightLabel="Publishing"
+  succeededLabel="Published"
+  failedLabel="Not published"
+  retryLabel="Publish again"
+  variant="default"
+/>
+
+<LifecycleButton
+  state={{ phase: 'in-flight', progress: 3 / 8, progressText: '3 of 8 steps' }}
+  onActivate={publish}
+  idleLabel="Publish"
+  inFlightLabel="Publishing"
+  succeededLabel="Published"
+  failedLabel="Not published"
+  retryLabel="Publish again"
+/>
+```
+
+<ComponentDemo slug="lifecycle-button" />
+
+## Guidelines
+
+### When to use
+
+Use a LifecycleButton for a control whose outcome the reader will want to know
+without having to look for it: a save, a publish, a run, an export, an approval.
+
+Pass `progress` when you have a number. A byte count, a row count, a completed-step
+count and a percentage all give you a real fraction, and a bar that reports a
+position beats a ring that reports anxiety. Omit it when you have nothing to
+measure, and say so in the label if the wait is long enough to worry about.
+
+Pass `progressText` whenever you pass `progress`. A fraction between zero and one is
+announced as a decimal otherwise, and "0.42" is a measurement of nothing a reader
+can act on.
+
+Pass `reason` on the failed position. It is the only place a reader learns what went
+wrong, it is announced, and it is drawn under the control rather than in place of
+it.
+
+### When not to use
+
+Do not use it for an action whose result the reader will see as a page change, such
+as a submit that navigates or a link. There is no in-flight position on a page that
+is being replaced, and a control that reports a fraction during a navigation is a
+control reporting on something that has already happened.
+
+Do not use it for work that cannot fail, or cannot be retried. A `Button` with a
+`Spinner` beside it is the whole answer, and a lifecycle with a failed position
+nobody will ever reach is four states where one would do.
+
+Do not use it to swap a control's colour. A destructive action that turns into a
+confirmation is a `Dialog`, and the confirmation is where the consequence belongs.
+
+Do not expect a permanently announced outcome. The live region is created at the
+outcome rather than held empty, because a region sitting on the page permanently
+announces unrelated changes of its ancestors. A live region created with its content
+is announced by most screen readers and not all of them; if you need the guarantee
+on every transition, keep a `LiveRegion` of your own beside this control and pass
+the outcome into it.
+
+### Best practices
+
+- Own the state and move it from your transport's events. Prism draws the label,
+  the mark, the meter and the retry that a position implies, and never moves the
+  position itself.
+- Expect `onActivate` to fire only from `idle`. Presses while the work is running
+  and after a failure are refused, which is what stops a reader queuing a second
+  request without knowing whether the first had finished.
+- Keep the visible words in the product's language. Every string on this Component
+  is a prop, including the retry, and there is no default for any of them.
+- Set `disabled` for a reason of your own rather than a reason the lifecycle
+  already shows. The control keeps its place in the tab order and announces itself
+  as unavailable, so the reason has to be in reach somewhere.
+- Put the reason somewhere the reader will see it after the row scrolls. It is
+  drawn under the control, and a control at the top of a long list is not in view
+  when the failure lands.
+- Use `className` for width and placement only. It cannot change a Prism-owned
+  visual property.
+
+### Content guidelines
+
+- Write `idleLabel` as the action: "Publish the summary", "Write the run log".
+- Write `inFlightLabel` as the action in progress, in the present continuous: "Publishing", "Writing".
+- Write `succeededLabel` as the outcome, not as a confirmation: "Published",
+  "Enqueued". It appears on a control the reader already pressed, so a word like
+  "Done" adds nothing and "Saved" claims something only you know.
+- Write `failedLabel` as the control saying the opposite of what it promised:
+  "Not published". Put "Try again" on the retry beside it, not here.
+- Write `retryLabel` as the same action again, with the cost in it where there is
+  one: "Publish again", "Try again, shorter".
+- Write `reason` with the cause and the way past it, because it is announced and
+  read aloud: "The estate has no readings after 14 March. Nothing was written."
+- Write `progressText` as a position a reader can act on: "3 of 8 steps", "Uploading,
+  42 percent".

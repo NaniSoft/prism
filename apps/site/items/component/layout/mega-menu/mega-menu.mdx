@@ -1,0 +1,243 @@
+---
+slug: components/mega-menu
+title: MegaMenu
+---
+
+## Overview
+
+A MegaMenu is a multi-column disclosure whose panel is a second navigation axis, with
+its own focus order inside the header's. It is a Client Component.
+
+**`NavigationMenu` is a disclosure of links. This is a disclosure whose contents are
+themselves a set of views, and the difference is a focus order rather than a drawing.**
+`NavigationMenu` opens a panel and the panel is links: Tab moves from the trigger into
+a flat list and out of it, and there is nothing inside to navigate. Here the panel
+opens onto a tab axis, so a reader who has tabbed off the trigger is on a second list
+with its own roving tab stop, and from there into the links of whichever view is
+showing. That is three levels of navigation inside one disclosure, and it is why this
+Component exists rather than a caller composing `NavigationMenu` and dropping a `Tabs`
+into its content: a hand-placed `Tabs` inside a `NavigationMenuContent` works until the
+reader tabs, at which point two arrow-key models are live in one panel and the reader
+cannot tell which one their key press is about.
+
+**The composition is deliberate and it is the argument.** `NavigationMenu` supplies the
+disclosure: the trigger, the open state, the portal, the viewport that absorbs the
+width change between views, the Escape that closes and returns focus, and the outside
+press. `Tabs` supplies the inner axis: the roving tab stop, the arrow keys,
+`aria-selected` on the trigger and the panel relationship. Neither is reimplemented
+here, for the reason every composition in this package is one: two implementations of
+a focus model disagree within a release and a consumer cannot tell which they
+installed. What this Component owns is the third thing, and the third thing is the
+Component: the panel's focus order, which is the ordering of the two axes relative to
+each other and to the trigger.
+
+**The inner view is the caller's, one per group, and that is what keeps the two axes
+from colliding.** A reader who has the second view of the Developers panel open
+expects it to still be open when they come back to it, and a Component with one shared
+value would give them whichever view happened to be last. So `panel` is a function of
+the group and the caller's map of group to view is the truth. What this Component adds
+is the part the caller cannot: it asks for the group it needs at the moment the panel
+is drawn, and it never resets a value the reader chose. The cost is on the prop, and it
+is the same cost the whole composition has: a caller who has set the same value in two
+groups has a reader who lands on the same index in each, which is right when the panels
+are parallel and wrong when they are not.
+
+**The inner axis is named, and the name is per group.** The outer list is a `<nav>`
+named by `label`, and the inner axis is a second navigation region a reader has to be
+told about separately: "Pricing, tab list" is a different sentence from "Primary, tab
+list", and a reader who has tabbed off the header's triggers and onto a panel's tabs
+has to know which one their arrow keys are about.
+
+**A group with one view draws it and no axis, and that is the honest drawing.** One
+view is a disclosure whose content is a set of links, which is what `NavigationMenu`
+already is, and a one-tab axis is a tab stop that goes nowhere. So the tab list is
+drawn only when there is more than one view to choose between. The cost is that the
+panel's markup differs between the two shapes, and a caller styling across both has to
+account for a missing tab list.
+
+**`NavigationMenuLink` is composed for every destination and it is the only
+interactive leaf inside the panel.** That is `NavigationMenu`'s rule and it is
+load-bearing: a link carries an address, so the browser can open it in a new tab, copy
+it, and a crawler can follow it. A mega-menu whose panel holds buttons is a header
+whose links cannot be shared, and the second navigation axis makes that more tempting
+rather than less, because a tab axis looks like a set of controls. So every leaf here
+is a native anchor and there is no command part to reach for by mistake.
+
+## Usage
+
+```tsx
+import {
+  MegaMenu,
+  type MegaMenuGroup,
+  type MegaMenuLink,
+} from '@nanisoft/prism-ui/components/mega-menu'
+
+const [open, setOpen] = useState<string | null>(null)
+const [panels, setPanels] = useState<Record<string, string>>({
+  developers: 'api',
+  pricing: 'plans',
+})
+
+const link = (href: string, label: string, description: string): MegaMenuLink => ({
+  href,
+  label,
+  description,
+})
+
+const groups: MegaMenuGroup[] = [
+  {
+    value: 'product',
+    label: 'Product',
+    panels: [
+      {
+        value: 'overview',
+        label: 'Overview',
+        columns: [
+          { label: 'Observe', links: [link('/estate', 'Estate', 'Every site you watch')] },
+          { label: 'Operate', links: [link('/runs', 'Runs', 'Agents and their work')] },
+        ],
+      },
+    ],
+  },
+  {
+    value: 'developers',
+    label: 'Developers',
+    panels: [
+      {
+        value: 'start',
+        label: 'Start',
+        columns: [
+          {
+            label: 'First steps',
+            links: [link('/docs/install', 'Install the package', 'One command')],
+          },
+        ],
+      },
+      {
+        value: 'api',
+        label: 'API',
+        columns: [
+          {
+            label: 'Reading',
+            links: [link('/docs/api/readings', 'Readings', 'List and filter')],
+          },
+        ],
+      },
+    ],
+  },
+]
+
+<MegaMenu
+  label="Primary"
+  groups={groups}
+  value={open}
+  onValueChange={setOpen}
+  panelLabel={(group) => PANEL_NAMES[group] ?? group}
+  panel={(group) => panels[group] ?? ''}
+  onPanelChange={(group, next) => setPanels((c) => ({ ...c, [group]: next }))}
+/>
+```
+
+<ComponentDemo slug="mega-menu" />
+
+## Guidelines
+
+### When to use
+
+Use a MegaMenu where a header has to hold more addresses than fit on a line and the
+addresses group into views. Enterprise and developer products are the case: a header
+whose product area is four columns of links under a tab strip of views is the shape
+those products actually have, and drawing it as forty top-level items does not scale.
+
+Use a group with one view for a plain column list. That is a disclosure, and this
+Component draws it without an axis.
+
+Do not use it below about 1024 pixels of viewport. A four-column panel with a tab
+strip is a panel that assumes a pointer and a wide screen, and the mobile answer is a
+drawer with the same links in a different arrangement.
+
+### When not to use
+
+Do not use it for a header of six or seven top-level links. That is `NavigationMenu`,
+and adding a second axis to a bar that fits on one line is a control for a problem the
+reader does not have.
+
+Do not use it where the panel is a form. A `Popover` or a `Dialog` is a form, and a
+form inside a disclosure loses its answers to the outside press.
+
+Do not use it to hold application commands. A header of commands is a `Menubar`, and a
+link that does not go anywhere is a control a reader cannot share or copy.
+
+Do not use it for two levels of nesting. A mega-menu with a second mega-menu inside it
+is three axes of arrow-key models in one panel, which is past what the focus order can
+carry.
+
+### Best practices
+
+- Mark the current page on every link that is it. `active` is a prop on each link and
+  is rendered as `aria-current="page"`, and a mega-menu is the panel a reader is most
+  likely to already be inside.
+- Put two to five links in a column. Four columns of two reads as a map; two columns
+  of nine reads as an index with no shape.
+- Name every column. An unlabelled column of links is a list a reader scans twice, once
+  to work out what it is and once to find the link.
+- Give each panel at least two views or none. One view is a disclosure and should draw
+  no axis.
+- Hold one view per group yourself, keyed by the group's value, so a reader who comes
+  back to a panel finds it where they left it.
+- Pass `label` as the region: "Primary", "Product", "Footer". A `<nav>` with no name
+  is a landmark announced only as "navigation".
+- Use `className` for width and placement only. It cannot change a Prism-owned visual
+  property.
+
+### Accessibility
+
+The outer list is `NavigationMenu`'s, which is one Tab stop for the triggers, Escape
+closing the open group and returning focus to the trigger that opened it, and an
+outside press closing it. That model is unchanged here and is the reason a reader who
+does not want the panel can get out of it in one keypress.
+
+The inner axis is a second Tab stop inside the open panel, and the two are consecutive:
+Tab from the trigger lands on the panel's tab list, Tab again moves into the links of
+the view showing. A reader tabbing a header therefore stops inside an open panel, which
+is correct and is worth knowing about when a page has four disclosures open at once in
+different states.
+
+The inner axis is named through `aria-label` on its `TabsList`, and the name is per
+group, so a reader who has arrived at it is told which disclosure's view they are
+choosing rather than being told "tab list" a second time.
+
+The links are native anchors carrying `NavigationMenuLink`'s `active` as
+`aria-current="page"`, so where the reader is survives a theme change and does not
+depend on a colour they may not distinguish.
+
+The panel's own scroll region is the caller's, not this Component's. A panel that
+overflows needs a named scroll region, which is `ScrollArea`'s rule, and this
+Component does not add one because it does not know the panel's height on any screen
+the reader has.
+
+## Motion
+
+The disclosure's open and close is `NavigationMenu`'s and is unchanged. The inner axis
+is `Tabs`, whose panel change is a cross-fade on the panel content and a fill on the
+trigger, both on `duration-fast`. Neither axis animates the other: changing the view
+does not move the disclosure, and opening the disclosure does not move the view, and
+that is the same rule the composition is built on.
+
+## Content guidelines
+
+- Write `label` as the region: "Primary", "Product".
+- Write each group's `label` as one word where you can. It sits in a bar with its
+  neighbours and a two-word label is what pushes the row onto two lines.
+- Write each view's `label` as a noun: "Start", "API", "Reference", "Usage".
+- Write each column's `label` as the group's noun in the plural: "Guides", "Reference",
+  "Reading", "Writing". Two columns whose names are near each other are two columns a
+  reader cannot tell apart.
+- Write each link's `description` as the destination rather than as a synonym of the
+  label: "List and filter", "Post a batch". A description that restates the label is
+  a second copy of the word beside it.
+- Write `panelLabel` as the disclosure's own noun: "Developers". It is spoken on every
+  arrival at the inner axis.
+- Leave `closeOnClick` off unless the link is a command. Closing on every click means a
+  reader who clicks to find out where something is loses the panel they were comparing
+  in.

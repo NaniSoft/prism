@@ -1,0 +1,121 @@
+---
+slug: components/image-list-field
+title: ImageListField
+---
+
+## Overview
+
+An ImageListField is an ordered list of image references with a cap, a remove
+control on every row, and an add affordance that stops offering another image
+before the reader has chosen one. It is a Client Component.
+
+The value is an array of references rather than of files. A `File` object is a
+browser fact that does not survive a reload and says nothing about where the bytes
+are, so what a form field actually holds is a handle: an id the caller's own store
+recognises and a name a reader recognises. Each entry carries an `id`, a `name` and
+an optional `preview`, and the preview is a node rather than a URL so a stored
+image, a signed path and a blob all render the same way.
+
+The cap is enforced at the add affordance and nowhere else. When the list reaches
+`cap`, the add control stays where it is, keeps its place in the tab order and
+announces itself as unavailable. A cap enforced anywhere else produces one of two
+lies: a value holding six images drawn as four, or six rows where two are drawn in
+a way that says they are not welcome.
+
+Removing a row moves the reader's focus to a neighbour: the row that moved up into
+the removed row's place, or the one above it when the removed row was last. When
+the last image goes, focus lands on the add control, because that is the only
+operable thing left in the field.
+
+An image list and a gallery upload are this one job. Both are an ordered list of
+image references, both cap, both remove, and they differ in whether the frame
+around the images is decorative. A caller who wants a gallery frames the list
+themselves, which is layout and therefore already theirs.
+
+## Usage
+
+```tsx
+import {
+  ImageListField,
+  type ImageListFieldImage,
+} from '@nanisoft/prism-ui/components/image-list-field'
+
+const [images, setImages] = useState<ImageListFieldImage[]>([])
+
+<ImageListField
+  label="Photographs"
+  images={images}
+  cap={6}
+  addLabel="Add photograph"
+  onAdd={() => picker.current?.click()}
+  onRemove={(id) => setImages((current) => current.filter((image) => image.id !== id))}
+  removeLabel={(name) => `Remove ${name}`}
+  empty="No photographs yet."
+  capLabel="Six is the most a listing takes. Remove one to swap it."
+/>
+```
+
+<ComponentDemo slug="image-list-field" />
+
+## Guidelines
+
+### When to use
+
+Use an ImageListField wherever a form holds a bounded set of images the reader
+still chooses between: a listing, a property, a batch, a record with a gallery
+that has a maximum.
+
+Use `FileUpload` instead where the images are already sent. A `FileUpload` is the
+receipt half of an upload: it renders whatever array it is handed, with no ceiling
+and no way in, because a limit on what may be sent belongs to the control that
+sends.
+
+Compose a `Dropzone` beside the field when a reader should be able to drop files
+onto the page, and point its `onFiles` at the same state the field reads. Prism
+draws the button that asks and the caller opens the picker, because what an image
+is on a caller's side is a fact this package cannot know.
+
+### When not to use
+
+Do not use it for files that are not images, and do not use it for a set with no
+ceiling. A list of documents with no maximum is a `FileUpload`.
+
+Do not use it for a single image slot with an optional picture. That is a `Field`
+with an `Input` of type `file` and a preview beside it, and a list of one is a
+list of one.
+
+Do not use it as the way in on its own. The add control is a button, not a picker:
+without an `onAdd` that opens something, the affordance does nothing.
+
+### Best practices
+
+- Pass `cap` as a number and treat it as a rule about your product, not as a
+  rendering limit. A cap the Component does not know about is a cap it cannot
+  enforce.
+- Give every image an `id` you own, not its file name. A reader can add the same
+  photograph twice, and two rows with the same name are two rows nobody can tell
+  apart.
+- Pass `preview` as your own node. An `img` with your own `alt`, a placeholder
+  mark, or a component that resolves the handle through your own transport. Do not
+  pass a URL and expect this package to fetch it.
+- Pass `capLabel` when the cap is reachable. A dimmed add control answers "can I
+  not" and not "why not", and the affordance points at this label while it is
+  shown so the reason is announced with the control.
+- Pass `empty` always, even when the value is empty only for a moment. It is the
+  label a reader sees in the gap, and an empty string draws nothing at all, which
+  is the arrangement to choose when the absence should be invisible.
+- Omit `label` when the field is the only list on the page. An anonymous list is
+  honestly absent from a screen reader's landmark list, which is better than being
+  named something wrong.
+
+### Content guidelines
+
+- Write `addLabel` as the action and the thing: "Add photograph", "Add another
+  floor plan".
+- Write `removeLabel` as the action and the image: "Remove north-elevation.png".
+  Never "Remove", which announces identically on every row.
+- Write `empty` as a fact about the field, not as an instruction: "No photographs
+  yet." rather than "Add one".
+- Write `capLabel` with the limit and the way past it: "Six is the most a listing
+  takes. Remove one to swap it."
+- Write `label` as the field's noun: "Photographs", "Site plans".

@@ -1,0 +1,111 @@
+---
+slug: components/selection-toolbar
+title: SelectionToolbar
+---
+
+## Overview
+
+A SelectionToolbar is a toolbar that exists because something is selected, and acts
+on it. It is a Client Component.
+
+It acts on a selection of rows or items. It is not `TextFormatToolbar`, and the
+difference is not the content of the commands: it is what each of the two does about
+focus.
+
+## How it differs from TextFormatToolbar
+
+A text format toolbar **must** refuse to move focus on a press. Focus leaving a
+`contenteditable` collapses its selection in several engines, so the command would act
+on nothing, and Prism therefore takes a `getEditor` and hands focus back after every
+command.
+
+A selection toolbar over rows **must let** focus move. A keyboard reader has to Tab
+back to the list to change what is selected, and a row's checkbox has to be able to
+receive focus to be unchecked. Blocking either would make the selection impossible to
+change from the keyboard.
+
+One Component could not do both, and a `preserveFocus` boolean over the two would be a
+prop whose two answers are "this is the Component for a caret" and "this is the
+Component for a set of rows". So the roles are the same, the arrow-key model is the
+same, and the focus contract is the Component.
+
+Neither Component reads the selection. Prism never calls `window.getSelection` and
+never asks what is selected, because the rows may be a table, a grid, a card list or
+something behind a consumer's own state, and the DOM selection a browser would report
+is either absent or a fiction. So the caller owns whether a command can run, what
+running it does, and what happens to the selection afterwards.
+
+## Usage
+
+```tsx
+import { SelectionToolbar } from '@nanisoft/prism-ui/components/selection-toolbar'
+
+<SelectionToolbar
+  label={selected.length === 0 ? null : `${selected.length} selected`}
+  commands={[
+    { id: 'archive', label: 'Archive the selected invoices', onRun: archive },
+    { id: 'mail', label: 'Email the selected invoices', onRun: email, disabled: true },
+  ]}
+  dismissLabel="Clear the selection"
+  onDismiss={() => setSelected([])}
+/>
+```
+
+<ComponentDemo slug="selection-toolbar" />
+
+## Guidelines
+
+### When to use
+
+Use it whenever a reader has selected a set of things and the actions on that set
+belong above the list rather than in every row: a table of invoices, a grid of assets,
+a list of projects. Drawing the actions in every row makes a row wider than the cell
+it sits in and asks the reader to find them again for each of forty rows.
+
+Pass `label` with the count in the reader's language, and pass `null` when nothing is
+selected. Passing no label is what makes the toolbar go away.
+
+Use `onDismiss` for the reader's way back. A selection that cannot be ended without
+walking back to the checkboxes leaves a reader who selected the wrong eleven rows with
+no way out.
+
+### When not to use
+
+Do not use it for a text selection inside an editor. That is `TextFormatToolbar`, which
+refuses to move focus on a press for the reason above, and which hands focus back to
+the element it came from.
+
+Do not use it when the selection is one thing rather than several. A single row's menu
+is `DropdownMenu`, and a single row's actions belong on the row.
+
+Do not use it for the actions on the table as a whole, such as a filter or a column
+picker. That is a `DataToolbar`, and it belongs above the selection.
+
+Do not keep one mounted permanently and hide it with a prop. A toolbar for nothing is a
+row of controls that do nothing, and a caller that mounts one on every page pays for it
+on every page that never selects anything. Return no label instead.
+
+### Best practices
+
+- Compose the whole count sentence yourself, including the plural. English puts the
+  noun in the middle and Polish puts it in the genative and adds three forms, and no
+  Component here may know any of that.
+- Give every command a `disabled` state rather than removing it. A command that
+  vanishes leaves a keyboard reader with a gap and no announcement, so an unavailable
+  command keeps its place in the row and in the arrow-key walk and carries
+  `aria-disabled`.
+- Keep the command `id`s stable and independent of their labels, because the id is the
+  React key and a label is localised.
+- Expect the toolbar to be one tab stop, with the arrow keys walking the commands and
+  Home and End reaching the ends.
+- Use `className` for width and placement only.
+
+### Content guidelines
+
+- Write `label` as what is selected and how much of it: "3 invoices selected",
+  "Drei Rechnungen ausgewählt". It is read at the leading end of the row and is the
+  only thing in the row that says what the commands act on.
+- Write each command's `label` as the whole action on the selection: "Archive the
+  selected invoices", not "Archive". A command is announced alone.
+- Write `dismissLabel` as ending the selection rather than the page: "Clear the
+  selection", "Auswahl aufheben".

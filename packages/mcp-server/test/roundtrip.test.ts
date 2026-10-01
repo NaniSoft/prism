@@ -39,7 +39,9 @@ describe('protocol round-trips over InMemoryTransport', () => {
       expect(body).toContain('## Components')
       expect(body).toContain('## Blocks')
       expect(body).toContain('## Pages')
-      expect(body).toContain('- **Button** - The action control for commands, links and loading states. _(Call to action)_')
+      expect(body).toContain(
+    '- **Button** - The action control for commands and links, with no loading state: what happens after a press belongs to LifecycleButton. _(Call to action)_',
+  )
     })
   })
 

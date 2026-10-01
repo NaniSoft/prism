@@ -1,0 +1,239 @@
+---
+slug: components/video-player
+title: VideoPlayer
+---
+
+## Overview
+
+A VideoPlayer is a framed `<video>` element with the caller's source, poster,
+caption tracks, own controls and transcript. It is one export, `VideoPlayer`, plus
+the `VideoPlayerTrack` type a caller builds its track list from, and it draws
+four things in the order a reader meets them: a frame that holds a ratio, the
+video inside it, a box for the caller's own controls, and a box for the
+caller's own transcript.
+
+Three props are required and cannot be defaulted: `src`, `captions` and `label`.
+Everything else has a decision behind it. `poster` and `controlsList` are the
+caller's, `ratio` is `16 / 9`, `showControls` is `true`, `preload` is
+`'metadata'`, `playsInline` is `true`, and `controls` and `transcript` are drawn
+only when passed.
+
+**It owns no player engine, and that is the decision rather than a limitation it
+could not afford.** There is no media library in this package and no embed SDK,
+and the reason is that a player engine is not a Component. A player is a decode
+pipeline, a buffering policy, an adaptive-bitrate ladder, a DRM boundary and a set
+of vendor fallbacks, and every one of those is a product's decision about its own
+content and its own reach. Shipping one would put a JavaScript runtime in the
+bundle of every consumer who wanted a framed `<video>`, and it would put it there
+whether or not that consumer ever played anything, which is the cost the
+client-JavaScript budget in DESIGN.md exists to refuse. So this Component is a
+styled `<video>` with a frame, a caption track list and two slots, and the engine
+is the one every browser already has.
+
+**A styled element with two slots, rather than a slot-only container, and the
+reason is who owns the semantics.** A container with a `children` slot would be
+smaller and would ship nothing at all: no track list, no poster, no ratio, no
+`controls` decision, no `playsInline` default. Every one of those would then be
+assembled by the consumer, and every one of them is a place where a video silently
+becomes inaccessible: a `<track>` with no `label` is a track a screen reader
+announces as an unnamed entry, a `<video>` with no `playsInline` throws a phone
+reader out of the document, and a `<video controls>` is the one control surface in
+this Component's story that is already correct. What this Component owns is the
+part that must not be optional.
+
+**The honest cost is that Prism cannot help with a custom control bar.** The
+`controls` slot is where a caller's own controls go and it is a plain box: this
+Component holds no reference to the media element, exposes no imperative handle,
+and offers no state, so a caller who wants a play button of their own has to reach
+for the element themselves with a `useRef` and the platform's own `play()`,
+`pause()`, `currentTime` and `volume`. That is the deal, and it is a deal with a
+real bill: every control a caller builds is a control they must make keyboard
+operable, announce, localise, test and keep in step with the media element's own
+state, and Prism will not catch them when they get it wrong. The answer for a
+consumer who wants both is that the platform's controls are on by default for
+exactly this reason, and that a custom bar is a request upstream rather than
+something to assemble from a ref beside this Component.
+
+**Autoplay is refused rather than left out by accident.** There is no `autoPlay`
+prop, no `loop` and no `muted`. A video that starts on its own with sound is an
+accessibility failure and one no consumer should have to opt out of, and a video
+that starts silently is a claim about the content that only the consumer's file can
+support. A caller who has an autoplaying loop wants a plain `<video>` in a
+`className` of their own.
+
+## Usage
+
+```tsx
+import { VideoPlayer, type VideoPlayerTrack } from '@nanisoft/prism-ui/components/video-player'
+
+const captions: VideoPlayerTrack[] = [
+  {
+    src: '/captions/walkthrough.en.vtt',
+    srcLang: 'en',
+    label: 'English',
+    kind: 'captions',
+    default: true,
+  },
+  {
+    src: '/captions/walkthrough.en-described.vtt',
+    srcLang: 'en',
+    label: 'English, audio description',
+    kind: 'descriptions',
+  },
+]
+
+<VideoPlayer
+  src="/media/collector-walkthrough.mp4"
+  captions={captions}
+  label="A walkthrough of the collector, four minutes"
+  poster="/media/collector-walkthrough-poster.png"
+  transcript={<WalkthroughTranscript />}
+/>
+```
+
+<ComponentDemo slug="video-player" />
+
+## Guidelines
+
+### When to use
+
+Use a VideoPlayer where a B2B page shows a person doing something: a recorded
+walkthrough of a setup, a screen recording of a flow, a recorded stand-up or a
+conference talk inside a release note, a demo of an integration beside the
+documentation for it. The reader came for the picture and the words, and the
+element that plays it is the one every browser already knows.
+
+Pass a caption list on every video, including the silent ones. `captions={[]}` is
+an answer rather than an omission: it says the video carries no dialogue and
+nothing that needs transcribing, which is true of a screen recording of a cursor
+and not true of a recorded stand-up. Making the prop required means the question
+is asked at build time, and an optional prop is a question nobody asks.
+
+Use the caller's own poster where a video sits above the fold, because a video
+that has not loaded draws nothing at all and a page of twelve video frames is a
+page of twelve holes.
+
+### When not to use
+
+Do not use a VideoPlayer to replace a figure. A diagram with three labelled parts
+is `Diagram`, a chart built from data is `Chart`, and a sequence of states is
+`Timeline`. A video of a diagram is a worse diagram.
+
+Do not use it to get a custom control bar. The platform's controls are on by
+default precisely because they are already keyboard operable, correctly announced
+and already translated into the reader's own language, and the honest accounting
+of a video player written from scratch is that its controls are the part that
+ships the bugs.
+
+Do not file an audio description track as captions. A browser renders both in the
+same menu and cannot tell them apart, so a description filed as a caption is read
+out over the dialogue.
+
+Do not look for an autoplay prop. There is none, and a caller who has an
+autoplaying loop wants a plain `<video>` in a `className` of their own rather than
+a design system asserting that sound is optional.
+
+### Best practices
+
+- Treat `captions` as required and `[]` as an answer. It is the one prop here whose
+  absence would be a WCAG 1.2.2 failure for most of the videos a B2B product
+  ships, and a Component that made it optional would be making that decision
+  quietly on the consumer's behalf.
+- Use `captions` and `descriptions` only. `subtitles` is a translation of dialogue
+  that already exists as captions, and a file per language is the correct shape for
+  that rather than two tracks claiming the same dialogue. `chapters` is a menu this
+  Component does not read, and `metadata` is not rendered by any browser at all, so
+  offering either would be a prop that quietly does nothing.
+- Name each track for what it is rather than for its language alone. "English" and
+  "English (UK)" and "English, audio description" are three different things to a
+  reader and only the consumer knows which one the file is. Prism writing a default
+  would put an English word into the platform's own menu of a product that may not
+  use English.
+- Turn on at most one `default` track, and choose it by the language the reader
+  reads rather than by the language the product is written in. A video whose every
+  track leaves it off plays with no captions on, which is the default this Component
+  exists to make a decision about rather than inherit.
+- Pass the file's own ratio when the upload knows it. An undrawable ratio falls back
+  to `16 / 9` the same way it does everywhere else in this package and the value
+  actually in force is reported on the element as `data-ratio`, so a substituted
+  ratio is legible in the markup rather than only in the screenshot.
+- Leave `playsInline` on unless the video really is better full screen. The
+  platform default on a phone is to take the whole screen, and a reader who taps a
+  diagram in a document and is thrown into a full-screen player has lost the
+  document.
+- Choose `preload` by how many videos the page carries. `metadata` is the default
+  and is right for one video a reader came for; `none` is right for a page of
+  twelve, and `auto` is for a single video that is the point of the page.
+- Withhold from the platform's bar with `controlsList`, in the platform's own
+  tokens, and reach for `showControls={false}` only alongside controls of your own.
+  Prism has no opinion on which tokens a product should withhold, and passing a
+  token a browser does not implement is harmless because the browser ignores it.
+- Compose beside the frame rather than around it. A control that wants the media
+  element needs the element, and this Component will not hand it over: see the
+  honest cost in the Overview, and the Demo above for what the wiring costs.
+- Pass the transcript as markup rather than as a string. A transcript is headings,
+  timestamps, speaker names and paragraphs, and a flat string would force all of
+  that into one block with no structure a reader can navigate.
+- Keep `className` to layout. Changing a Prism-owned visual property from here is
+  prohibited, and the two slots are the supported way to change what sits beside
+  the frame.
+
+### Accessibility
+
+A `<video>` has no name of its own. Its poster is announced as an image, its
+caption track labels are only reachable by opening the browser's own track menu,
+and a video that is not playing announces almost nothing at all. So `label` is the
+caller's and it is required, because the alternative is Prism inventing one and
+publishing it as part of this Component's interface.
+
+Every `<track>` is a child of the `<video>` element and not a sibling of it, which
+is the specification rather than a style choice: a `<track>` outside a `<video>`
+is inert, so a caption list assembled one element up is a caption list the browser
+never reads and the reader never hears. Each one carries the caller's `label`, so
+the browser's own menu lists them by name rather than as unnamed entries.
+
+The frame holds a ratio before the video loads, so the page does not jump when it
+arrives, and the letterboxing the frame draws is `object-contain`, so the whole
+picture is inside it rather than cropped by it.
+
+The platform's control bar is the control surface Prism can be confident about:
+operable by keyboard, announced correctly, and already translated by the reader's
+own platform. Everything else on this surface is the caller's, which is why the
+transcript slot exists: a description track is only reachable through a menu, and a
+transcript is the only form of a description a reader can skim, search, translate
+or read with a screen reader that will not read the description track aloud.
+
+### Motion
+
+Nothing here is animated. The frame is a box with a border, the poster is the
+browser's own cross-fade to the first frame, and the control bar is the platform's.
+There is no fade on mount, no play-button pulse and no loading shimmer, because
+DESIGN.md's first motion law is that motion is state feedback and a video surface
+has no state of its own to report.
+
+### What this is not
+
+There is no engine, no adaptive bitrate ladder, no buffering policy, no chapter
+menu, no quality menu, no playback speed, no picture in picture, no full-screen
+API, no volume state, no `autoPlay`, no `loop`, no `muted` and no error or loading
+state of its own.
+
+There is no custom control bar and no handle to the element. Everything a caller
+draws in the `controls` slot is the caller to make keyboard operable, announce,
+localise, test and keep in step with the element's own state.
+
+It is a server Component, and that is a consequence rather than an accident: it
+holds no state, reads no context, attaches no handler and takes no function prop,
+so a page with a dozen videos costs no JavaScript from this package at all.
+Everything that needs a runtime is the caller's.
+
+### Content guidelines
+
+- Write `label` as what the video is and how long it runs, because a screen reader
+  announcing a bare "video" tells the reader nothing about the four minutes they
+  are about to spend.
+- Write each track label as the language plus what the track adds, in the words
+  the reader's own track menu will show them.
+- Write the transcript with a heading per section and a timestamp per line, so a
+  reader can find the moment they were told about rather than reading through to
+  it.

@@ -1,0 +1,164 @@
+---
+slug: components/checklist
+title: Checklist
+---
+
+## Overview
+
+A Checklist is a set of tasks that complete, uncomplete, and can be added to while
+the reader works through them. It is a Client Component.
+
+**The value is a completion state machine and an add affordance, and neither is a
+prop of anything else in this package.** A `Table` renders rows and has no opinion
+about what a row is. A `ListPanel` of `Item` rows is a titled, bounded, scrollable
+panel, which is what a long read-only list wants and not what a queue wants. A
+`Checkbox` is a control and not a set. This is the three of them composed into the
+one thing they were each missing: a set whose rows are completable and whose length
+the reader can change.
+
+**It is not `todo-01`, and the difference is the definition of the word.** `todo-01`
+is a Block: a pre-composed, product-agnostic section that takes its content as props,
+draws its own heading, its own progress bar and its own empty state, and is installed
+whole. A Checklist is a Component with one job, so it draws the set and the
+completion control and refuses to draw the heading, the meter or the empty state.
+Those three are the Block's. A consumer who wants the whole arrangement composes
+`todo-01` where the read-only view belongs and puts a Checklist inside their own
+section where the editing one goes. The cost is that a caller who expected a section
+gets a set, and writes three lines to get the rest.
+
+**Completion is a machine with two moves, and the Component refuses to hold it.** A
+boolean cannot say which way a task is moving, and the two ways are not symmetric to
+a reader: uncompleting undoes work they did and completing confirms it, and one
+sentence for both tells them the list cannot be trusted. So `onToggle` takes the task
+and the state it is moving to, and the Component moves nothing. What that costs is
+the price of a controlled set: your array is the only truth, and a caller who forgets
+to apply the change sees a checkbox that visibly refuses to tick, which is a better
+failure than a Component that half-owns its own state.
+
+**A completed task stays where it is and is struck through.** Moving a completed row
+to the bottom makes the queue shorter as it is worked through, which is a claim about
+progress that is false: three finished and seven to go is still ten tasks, and a
+list whose length is the measure of what is left lies the moment one row is
+uncompleted. The strike is on the title only, so the description stays legible to a
+reader checking what they finished.
+
+## Usage
+
+```tsx
+import {
+  Checklist,
+  type ChecklistTask,
+} from '@nanisoft/prism-ui/components/checklist'
+
+const [tasks, setTasks] = useState(INITIAL)
+
+<Checklist
+  label="Pre-release work"
+  tasks={tasks}
+  onToggle={(task, done) =>
+    setTasks((current) =>
+      current.map((candidate) =>
+        candidate.id === task.id ? { ...candidate, done } : candidate,
+      ),
+    )
+  }
+  onAdd={(title) =>
+    setTasks((current) => [...current, { id: next(), title }])
+  }
+  addLabel="Add a task"
+  addPlaceholder="What needs doing?"
+  addFieldLabel="New task title"
+  priorityLabel={(priority) => PRIORITY[priority]}
+  completedLabel={(task, done, total) => `${task.title} done. ${done} of ${total} complete.`}
+  uncompletedLabel={(task, done, total) => `${task.title} is back on the list. ${done} of ${total} complete.`}
+  addedLabel={(title, total) => `${title} added. ${total} tasks on the list.`}
+  emptyLabel="Type what the task is before adding it."
+/>
+```
+
+<ComponentDemo slug="checklist" />
+
+## Guidelines
+
+### When to use
+
+Use a Checklist for a queue a reader works through: a pre-release list, a handover, a
+set of checks somebody ticks as they go. It is the right Component where the reader
+completes things one at a time and the order they are done in does not matter.
+
+Use it where a task carries a due date. The due value is handed to `RelativeTime`, so
+the absolute reading is the platform's in the reader's own locale and the relative
+half is yours.
+
+### When not to use
+
+Do not use it for a read-only list of tasks. That is `todo-01`, which draws the
+heading, the progress and the empty state as well, and none of which belongs in a
+Component with one job.
+
+Do not use it for a set of tags, filters or chips. A reader choosing between values
+is not working through a queue, and `TagGroup` draws them with the keyboard model
+they need.
+
+Do not use it where a task is a record with several fields the reader edits, such as a
+line item with a quantity and a unit price. That is `RepeatableRows`, and a Checklist
+row has a title, a description, a priority, a due date and a mark, and no more.
+
+Do not use it for a progress indicator over work someone else is doing. That is
+`Progress`, which reports a position rather than offering a control.
+
+### Best practices
+
+- Hold the tasks in state and keep the objects stable across renders. The Component
+  keys each task by its identity, and a task identified by its position loses its
+  element the moment one above it completes.
+- Give every task an `id` you own, not the title and not the index.
+- Pass `priorityLabel` for all three values even if the list currently uses one, so
+  the list gaining its first urgent task is not a second edit.
+- Return the bare count from `completedLabel` and `uncompletedLabel`. A sentence with
+  no count tells a reader the list changed and nothing about where they are in it.
+- Pass `emptyLabel`. An add control pressed with an empty field that does nothing is a
+  control a reader takes to be broken.
+- Omit `label` when the set is the only one on the page, for the reason the rest of
+  this package omits names: an anonymous region is honestly absent from the landmark
+  list rather than announced as something it is not.
+- Use `className` for width and placement only. It cannot change a Prism-owned visual
+  property.
+
+### Accessibility
+
+The set is an `ol`, so a screen reader announces each row's position and the count
+behind it, and the region around it is a named `group`.
+
+Each task's completion control takes its accessible name from the task's own title
+when the title is a string, so a reader who tabs through the queue hears each task
+once rather than hearing a label and then the task. A task whose title is a node
+rather than a string has no such name and needs one composed inside the title.
+
+Three transitions can happen and all three are close to invisible: a completion, an
+uncompletion and an addition. Each is announced through a live region, and each
+announcement carries the running count. The region is `polite` rather than assertive,
+which is a deliberate difference from `ReorderableList`: a reader working through a
+queue is waiting for the next task rather than for an answer to a question they
+asked, so the announcement takes its turn instead of cutting across whatever they
+were reading.
+
+The add affordance is a real `<form>` with a real submit button, so `Enter` works and
+a reader with a switch device gets a genuine control. The field's accessible name is
+`addFieldLabel` and the placeholder is `aria-hidden` at the call site, because the
+name is the control's and the placeholder is an example that disappears on the first
+keystroke.
+
+### Content guidelines
+
+- Write `addLabel` as the action and the thing: "Add a task", "Add a check".
+- Write `addFieldLabel` as the field's name rather than as an instruction: "New task
+  title", not "Type the task here".
+- Write `priorityLabel` as the product's own tier names, including for `none`, which
+  is a value the type admits even if your list never passes it.
+- Write `completedLabel` and `uncompletedLabel` with different verbs. One sentence
+  for both directions tells a reader the list cannot be trusted.
+- Write `addedLabel` as the outcome and the new total, because at the moment of the
+  announcement the task does not exist yet as a record.
+- Keep descriptions to one line. A task row that wraps to three lines is a queue a
+  reader loses their place in.

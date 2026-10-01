@@ -1,0 +1,238 @@
+---
+slug: components/image-zoom
+title: ImageZoom
+---
+
+## Overview
+
+An ImageZoom magnifies an image the reader is already looking at, where it sits.
+It is one export, `ImageZoom`, and it draws four things in the order a reader
+meets them: the image inside a frame that scrolls once the image outgrows the
+frame, three controls that magnify, reduce and fit, a polite announcement of the
+magnification in force, and a `controls` slot for everything else a reader might
+want beside a magnifier.
+
+The four required props are `src`, `alt`, `label` and `scale`, and the three
+required names are `zoomInLabel`, `zoomOutLabel` and `resetLabel`. The range is
+three numbers with defaults: `minScale` is `1`, `maxScale` is `4` and `step` is
+`0.5`.
+
+**It is the `Lightbox` with the dialog taken out, and that subtraction is the
+whole Component.** A `Lightbox` opens a portal, traps focus, locks page scroll,
+swallows the Escape key and hands the reader a different place in the document to
+come back from. All five of those are the right price for an image the page has
+not shown the reader at all, where the enlargement is the only way to see it.
+They are the wrong price for an image the reader is already looking at: paying a
+focus trap to make a picture on the page bigger costs the reader their scroll
+position, their place in the document and their focus context, and a reader who
+has magnified an inline diagram and then closed the dialog lands somewhere they
+have to find again. So there is no portal, no overlay, no trap, no Escape key
+and no dismiss here. The page does not move and nothing is taken away from it.
+**Use a `Lightbox` when the enlargement is the only route to the image; use an
+ImageZoom when the image is already on the page and only its size is in the way.**
+
+**Prism draws the three controls and asks for their names, rather than taking the
+controls as a slot.** A slot would move the one guarantee that makes a magnifier
+usable to the caller: that the controls exist, that they are real buttons in the
+tab order, that they are disabled at the ends of the range, and that a reader
+whose control has just been disabled is moved to one that still works. That last
+one is not obvious and `Carousel` had to write a `useEffect` to get it right,
+because a disabled button leaves the tab order without giving up focus: a reader
+who presses magnify at the ceiling is left focused on a control that can no
+longer answer Enter, Space or anything else, stranded inside the figure with no
+working control under their fingers. This Component does that move itself. **The
+cost is that a caller who wants their own magnification controls cannot suppress
+these three**, and the answer is that this is the wrong Component for a caller
+who wants that.
+
+The magnification is a transform rather than a size, and panning is a scroll
+rather than a gesture. Both are stated under Motion and Panning below, and the
+first of them carries a price this Component names rather than hides: the frame
+reaches its final scroll extent before the pixels arrive.
+
+## Usage
+
+```tsx
+import { ImageZoom } from '@nanisoft/prism-ui/components/image-zoom'
+
+<ImageZoom
+  src={topology.src}
+  alt="Four sources feeding one pipeline, with the webhook source marked as retrying"
+  label="Collector topology, west region"
+  scale={(percent) => `${percent} percent`}
+  minScale={1}
+  maxScale={6}
+  step={0.5}
+  zoomInLabel="Magnify the diagram"
+  zoomOutLabel="Reduce the diagram"
+  resetLabel="Fit the diagram to its frame"
+/>
+```
+
+<ComponentDemo slug="image-zoom" />
+
+## Guidelines
+
+### When to use
+
+Use an ImageZoom for a figure that is on the page and is legible in outline but
+not in detail: a diagram at thumbnail width, a chart exported as a picture, a
+screenshot of a console, a photograph of a receipt, a logo lockup with a wordmark
+in it. The reader has the page in front of them and wants to look closer without
+leaving it.
+
+Use it where the page continues. An inline diagram a reader has magnified and
+scrolled is still in the paragraph that introduced it, with the paragraph above
+it and the one below it where they left them.
+
+Use `controls` for everything beside the magnifier that is not magnification, and
+hand off to a `Lightbox` when the reader wants the whole page rather than this
+figure larger:
+
+```tsx
+<ImageZoom
+  src={topology.src}
+  alt={topology.alt}
+  label="Collector topology, west region"
+  scale={(percent) => `${percent} percent`}
+  zoomInLabel="Magnify the diagram"
+  zoomOutLabel="Reduce the diagram"
+  resetLabel="Fit the diagram to its frame"
+  controls={<Button variant="outline">Show the whole page</Button>}
+/>
+```
+
+### When not to use
+
+Do not use it as the only route to the image's detail. A reader with a keyboard,
+a screen reader, or a browser that never loads the picture must still be able to
+reach the information. A magnified picture is an aid, not a document.
+
+Do not use it for an image the reader can already read where it sits. The controls
+cost a row of chrome and a live region for a picture nobody will magnify.
+
+Do not use it to enlarge an image the page has not shown yet. If the image is not
+in the flow, an overlay is the right shape, and that is `Lightbox`.
+
+### Best practices
+
+- Write `alt` for the image, not for the magnification. It is the description the
+  reader gets before, during and after, because magnifying changes no semantics:
+  the element is still an `img` with that `alt`.
+- Write `scale` as a sentence, not a number. It receives a percentage rather than
+  the multiplier the Component stores, because a percentage is the form a reader
+  reads, and the words around it are the caller's.
+- Name each of the three controls for the action it performs, in the caller's own
+  words. The two steppers are two different actions and deserve two names rather
+  than one word and a state, and the fit control is the one a reader cannot guess
+  at, so it wants the clearest of the three.
+- Choose a range the picture can survive. `maxScale` past the file's own pixels
+  magnifies interpolation rather than detail, and a reader who asks for 800
+  percent and gets a blur has been told a lie by the control.
+- Expect the range to be substituted when it cannot be drawn. A `minScale` that is
+  not a positive number, a `maxScale` that is not above it and a `step` of zero
+  are all replaced with values that can hold, and the value actually in force is
+  written on the frame as `data-scale`, which is the same thing `AspectRatio`
+  does with `data-ratio` so a substituted value is legible in the markup rather
+  than only in the screenshot.
+- Expect two controls at the fitted size and three above it. The fit control is
+  drawn only while the image is magnified, because a reader who has moved away
+  from the fitted size needs one press back to it, and it is absent rather than
+  disabled at the floor for the reason `Carousel` omits controls that move
+  nowhere. A button that does nothing is a claim that there is somewhere to go.
+- Read `onScaleChange` as a notification, not as a controlled prop. The
+  magnification is held here and not lifted, so a reader who magnified a diagram,
+  went away and came back finds it as they left it rather than as they found it.
+  What a caller usually wants the number for is layout, and a notification is
+  enough for that.
+- Keep `className` to layout. Changing a Prism-owned visual property from here is
+  prohibited, and the `controls` slot is the supported way to change what sits
+  beside the image.
+
+### Accessibility
+
+The three controls are real buttons, so Tab reaches them and Enter and Space
+press them, and each draws its focus ring at full strength. The icons are
+`aria-hidden`, because a button named "Magnify the diagram" that also announces a
+magnifier is announced twice for no gain.
+
+A control that has just been disabled does not keep the reader's focus. This
+Component moves focus to the sibling that is still live, and only when the
+control that just went is one of its own two steppers, because a disabled button
+leaves the tab order without giving up focus: a reader who magnifies to the
+ceiling would otherwise be left focused on a control that can no longer answer
+anything, stranded inside the figure with no working control under their fingers.
+
+The current magnification is in an `aria-live="polite"` region, in the caller's own
+words. It is polite rather than assertive because the reader caused the change by
+pressing a control and does not need to be interrupted by it. The number matters
+more than the picture: a reader who cannot tell whether they are at 150 or 400
+percent cannot tell whether the detail they are looking for is off the frame or
+not there.
+
+The root is `role="group"` with the caller's `label`, not a landmark. A group is
+announced where it is met and never appears in a landmark list, so a page with six
+figures does not put six new entries in a reader's list of regions to walk. It is
+also the only thing that tells a screen reader which of two sets of three
+look-alike controls the reader has reached.
+
+### Motion
+
+The scale transition is `motion-safe:transition-transform` on `duration-base` with
+`ease-out`, and it is the only motion on the surface. Magnifying a picture is
+spatial movement of a whole surface, which DESIGN.md says to guard rather than
+shorten, so a reader who has asked for reduced motion gets the new size
+immediately and loses nothing but the travel between the two.
+
+The transition is on `transform` and on nothing else. An animated `width` or
+`height` is a layout animation on the main thread, which is the defect the
+compositor rule in the ambient layer exists to prevent, and a magnified diagram
+is large enough for that to be visible.
+
+**The scale reaches its final value before the pixels do, and that is the price of
+using a transform.** A transform does not change layout, so the frame scroll
+extent is already at its full size on the first frame of the transition and the
+scrollbar arrives while the image is still travelling. The alternative is to
+animate the image's own size, which is a main-thread layout animation on the
+largest element on the page, and a scrollbar that moves a fraction early is a
+cheaper defect than a stuttering diagram.
+
+### Panning
+
+Panning is a scroll, not a gesture. Once the image is larger than its frame the
+frame scrolls, and the reader pans with the keys they already use: the arrow
+keys, the space bar, Home and End, and a trackpad or a finger. There is no drag
+to pan, no pinch and no double tap, because each of those is a bespoke pointer
+model a reader has to discover and a scrollable frame is a thing every reader
+already knows.
+
+The frame is a block rather than a centred row, because a centred child larger
+than its scroll container has a left edge that cannot be scrolled back to in more
+than one browser, and a magnified image is routinely larger than its frame. It
+also contains overscroll, so a reader who has reached the edge of the picture does
+not drag the page behind it on the way.
+
+### What this is not
+
+There is no drag to pan, no pinch, no double tap, no rotation, no download, no
+full-screen API and no comparison against the un-magnified image.
+
+There is no way to replace the three controls. `controls` is drawn after them and
+holds what a caller wants beside a magnifier, so a caller who wants their own
+magnification controls has to compose them elsewhere, and the answer to that is
+that this is the wrong Component for a caller who wants it.
+
+It is a client Component, because it holds a magnification and answers presses,
+and it is a small one: three buttons, a live region and a transform, with no
+gesture library and no animation runtime behind them.
+
+### Content guidelines
+
+- Write `alt` as a description of what the image says, not of what it is. "Four
+  sources feeding one pipeline, with the webhook source marked as retrying" is an
+  alt. "Diagram" is a filename.
+- Write `label` for the group as what this particular figure is, so a reader
+  passing a page of six knows which controls they have reached.
+- Write `scale` so it reads as a measurement rather than a status: "150 percent"
+  is a position on a scale, and a reader can reason about how much further is
+  left.

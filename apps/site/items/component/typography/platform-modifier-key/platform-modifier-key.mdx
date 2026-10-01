@@ -1,0 +1,107 @@
+---
+slug: components/platform-modifier-key
+title: PlatformModifierKey
+---
+
+## Overview
+
+A Platform modifier key draws the modifier glyphs of a keyboard chord, resolved for
+the reader's own platform.
+
+It is filed under Typography rather than Forms and inputs, and that is a judgement
+worth stating: its whole job is choosing the right character for a platform's
+modifier. It has no editable state, no validation, no value and nothing to submit, so
+it is not a form control. Its output is a run of glyphs in a type treatment, beside
+`Kbd` and `Mark`.
+
+**This is behaviour, not a label, and that is why it is a Client Component.** The
+platform is a fact about the machine and not about the document, so the glyph cannot
+be chosen at the call site and passed down as a string. A caller who resolved it would
+have to read the platform in every surface that shows a shortcut, which is four
+repositories holding four copies of a detector that will drift. You hand over a chord
+as the platform reports it and this Component owns the one lookup.
+
+**And it is not `Kbd` with a different string.** `Kbd` answers one question: draw
+this key. Its caller already knows which key, and the string it prints is the key.
+The differences that matter here are that the glyph is chosen at runtime rather than
+supplied, that `labels` is a complete record of the four modifier names rather than
+the text of one element, that the modifiers are ordered, deduplicated and resolved,
+and that the frame before the platform is known is drawn deliberately rather than left
+to chance.
+
+**Prism holds no glyph and no word.** A command glyph has no English name: the command
+key is a symbol on one platform and two letters on another, and the letters are
+localised like any other word. So a product that ships in German writes four German
+words, a product that ships only on macOS writes four symbols, and a product that
+ships on both writes the symbol for the Mac and the word for everywhere else.
+
+## Usage
+
+```tsx
+import { PlatformModifierKey } from '@nanisoft/prism-ui/components/platform-modifier-key'
+
+const labels = { ctrl: '⌃', alt: '⌥', meta: '⌘', shift: '⇧' }
+
+<p>
+  Open the command menu{' '}
+  <PlatformModifierKey chord={{ key: 'k', modifiers: ['mod'] }} labels={labels} />
+</p>
+```
+
+<ComponentDemo slug="platform-modifier-key" />
+
+## Guidelines
+
+### When to use
+
+Use it for any chord a reader has to press: a menu row's shortcut column, an empty
+state's hint, an onboarding step, a tooltip on a control that has one.
+
+Use `mod` rather than naming `ctrl` or `meta` when your documentation says "the
+command key". That is the case the Component exists for, and it is the case a `Kbd`
+pair gets wrong on half the readers.
+
+### When not to use
+
+Do not use it for a key you already know the name of on every platform. A single `K`
+with no modifier is `Kbd`, and routing it through here adds a hydration for a chord
+that needed none.
+
+Do not use it to document a chord your product does not implement. This draws what
+you pass; it cannot check that the chord does anything.
+
+Do not use it as a button label. A control that can be clicked shows a verb; a
+keyboard shortcut is an alternative, not the action.
+
+### Best practices
+
+- Pass `key` as it should appear. A single character is drawn in upper case, because
+  every convention for writing a shortcut writes a letter that way and `⌘k` reads as
+  a typo. Anything longer is left exactly as passed, because the capitalisation of a
+  word such as the name of a function key is your choice.
+- Pass `labels` complete, for all four keys, even if one chord uses one. A caller who
+  shows a single shortcut and writes four names pays less than four call sites that
+  each remember to localise one of them.
+- Order does not matter in `modifiers`. The Component prints them in one canonical
+  order, the one the macOS and Windows conventions agree on, so a shortcut never
+  changes position between two menus.
+- Expect one frame with the `mod` slot blank. A server render cannot read the platform
+  and hydration cannot run before the first paint, so that slot is drawn as an empty
+  key box: the authored box with nothing in it, holding the row's shape rather than
+  showing a glyph that might be wrong. Everything else in the chord, including the
+  key itself, is correct in that frame. On a host whose labels are words rather than
+  symbols the row still widens once by that word's width, so a layout that cannot
+  tolerate it should render the shortcut client-side or hold the width open beside it.
+- The whole chord is announced as its glyphs, in order, which is how a shortcut is read
+  in every tool that documents one. If your glyphs do not survive being read aloud,
+  which is the usual objection to a command symbol, put words in `labels` for that
+  platform. That is the map's whole job.
+
+### Content guidelines
+
+- Match the glyphs to the platform you actually ship on. Writing "Ctrl" for a Mac
+  product is a claim about your reader's keyboard.
+- Localise the word labels. They are ordinary words and they reach a German reader in
+  English if you do not.
+- Keep the chord inside a sentence that already states the action, so the keys are
+  never the only instruction.

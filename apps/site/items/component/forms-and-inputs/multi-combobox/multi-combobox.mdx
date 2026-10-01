@@ -1,0 +1,109 @@
+---
+slug: components/multi-combobox
+title: MultiCombobox
+---
+
+## Overview
+
+A Multi combobox searches one list and toggles as many of its options as the reader
+wants, with the chosen ones visible as chips inside the trigger.
+
+It is not a `Combobox` with a flag on it. In a `Combobox`, Enter ends the interaction
+and the list closes, because the answer is one value and it is finished. Here the
+answer is a set that keeps growing after every commit, so **Enter and Space toggle
+and the list stays open.** Escape, a blur and Tab are the ways out. Turning a
+single-select field into this one is not a boolean; the state machine is different.
+
+Four optional props carry what would otherwise be four Components: `selectAll`,
+`clearAll`, `max` and `showCount`. Each is a decision about one field's behaviour
+rather than a different shape of field, so each is a call site.
+
+## Usage
+
+```tsx
+import { MultiCombobox } from '@nanisoft/prism-ui/components/multi-combobox'
+import type { ComboboxItem } from '@nanisoft/prism-ui/components/combobox'
+
+const regions: ComboboxItem[] = [
+  { value: 'pt', label: 'Portugal', hint: 'Lisbon', keywords: ['lisboa'] },
+  { value: 'br', label: 'Brazil', hint: 'Brasilia' },
+  { value: 'zw', label: 'Zimbabwe', disabled: true },
+]
+
+<MultiCombobox
+  label="Mirror regions"
+  placeholder="Search regions"
+  name="regions"
+  items={regions}
+  value={regions}
+  onValueChange={setRegions}
+  removeLabel={(name) => `Remove ${name}`}
+  showCount
+  max={4}
+  selectAll={(matching) => `Select all ${matching} matches`}
+  clearAll={(chosen) => `Clear all ${chosen}`}
+  empty={{ message: (query) => `No region matches ${query}` }}
+/>
+```
+
+<ComponentDemo slug="multi-combobox" />
+
+## Guidelines
+
+### When to use
+
+Use it wherever the answer is a set a reader picks members from: the regions a
+record is replicated to, the columns a table shows, the labels a document carries,
+the recipients a message goes to. It is the field for a set that is too long to show
+at once and too varied to be a fixed list of checkboxes.
+
+Use `max` when the product has a real ceiling. A ceiling the reader cannot see is a
+wall they hit with no explanation.
+
+### When not to use
+
+Do not use it for a single value. `Combobox` closes on a choice and one value is what
+a single-value field is for; using this one makes the reader press Escape or click
+away to finish.
+
+Do not use it for a short fixed set. Five options are a `RadioGroup` when only one may
+be chosen and a group of `Checkbox` rows when any number may be. Typing is work, and a
+field that asks for it when a reader could simply point is a field that has made
+searching a tax on choosing.
+
+Do not use it for free text. `Input` is the control for a value with no list behind
+it.
+
+Do not reach for it to allow a value that is not in the list. That is
+`CreatableCombobox`, and the difference is a second editable control inside the
+popover rather than a prop.
+
+### Best practices
+
+- The value is an array and `onValueChange` receives the whole array on every edit.
+  Order is the order things were chosen, and a removal closes the gap rather than
+  re-sorting, so a chip row never reorders under the pointer.
+- Add `name` and the form receives one hidden input per chosen value, all under that
+  name. Joining them into a single string is the caller's decision, because a form
+  has no way to submit an array.
+- Pair it with a `Label` above it and pass the same `id`. `label` is the accessible
+  name and the placeholder is not.
+- The chosen values are announced through the field's description rather than
+  through the query, so a screen reader focused on the search field hears every
+  chosen label after the value it typed. `showCount` is drawn and deliberately not
+  announced, because a bare figure has no noun.
+- The options are the same `ComboboxItem` shape a `Combobox` takes, imported rather
+  than restated, so `keywords` and `hint` mean the same thing in both fields.
+- Space cannot type a space into the query. That is the price of speaking for the
+  Space key, and it buys a control that can be driven from the keyboard alone.
+- The list is anchored to the field rather than portalled, so put the field near the
+  top of any scroll container it lives in.
+
+### Content guidelines
+
+- Write option labels the way a reader would say them, in sentence case.
+- Make `value` a machine value from your own data, never the label.
+- Write the remove control's name as an instruction that names the thing, such as
+  "Remove Portugal". It is required: a multi combobox that cannot deselect is not a
+  multi combobox, so the control is always drawn and always needs a name.
+- Write the empty message as an answer, not as an apology.

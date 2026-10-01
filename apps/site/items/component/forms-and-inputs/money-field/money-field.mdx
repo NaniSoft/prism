@@ -1,0 +1,132 @@
+---
+slug: components/money-field
+title: MoneyField
+---
+
+## Overview
+
+A MoneyField holds a currency amount as a number and shows it as the reader's market
+writes it. It is a Client Component.
+
+The number the caller holds and the string the reader sees are different kinds of
+thing, and the round trip between them is the whole Component. The caller passes a
+`number` and gets a `number` back; the field draws the platform's own rendering of
+that number in the caller's locale and the caller's currency; and every character the
+reader adds is parsed back into one. A field that handed the caller a string would
+push the parsing into every consumer, and a field that printed a hardcoded
+`$1,234.56` would be making three claims about every product that installed it.
+
+## The currency symbol is an input, not an output
+
+It sits in the field's own frame, drawn by `InputGroupAddon`, read out of
+`Intl.NumberFormat` rather than written anywhere in the Component, and hidden from the
+accessibility tree. A screen reader reads the digits, and the currency belongs in the
+field's accessible name, which is your word.
+
+It is also not part of the value. The number a caller holds is `1234.56` whatever the
+reader sees on screen, and a symbol that leaked into the parse would make the same
+amount parse two ways depending on whether the reader typed it.
+
+Nothing about a currency is a literal here. The symbol, the grouping and the decimal
+separators, and the number of fraction digits all come out of the platform for the
+locale and the code you passed. `de-DE` with `EUR` and `en-US` with `USD` differ in all
+four.
+
+## A partially typed amount is a legitimate state
+
+`12.`, `-` and `.5` are all things a person is in the middle of typing, and `12,` and
+`,5` are the same three in a locale that separates with a comma. So the parser is not
+asked whether the text is a valid amount, only whether it currently means one. It
+reports `12` for `12.`, nothing for a lone sign and for a lone separator, and `0.5`
+for `.5`.
+
+The text is never rewritten while the field has focus, because a field that re-formats
+under the reader moves the caret and eats the character being typed. That is what
+makes these states survivable at all.
+
+The two values disagree for the whole of a mid-edit, and the Component resolves it in
+one direction: your number is always the parse of the text, and the text is never
+rewritten until the reader leaves. If you also render the amount somewhere else on the
+page you will see the parsed value and not the keystrokes, and that is deliberate.
+
+## Usage
+
+```tsx
+import { MoneyField } from '@nanisoft/prism-ui/components/money-field'
+
+const [amount, setAmount] = useState<number | null>(1234.56)
+
+<MoneyField
+  id="amount"
+  aria-label="Amount in US dollars"
+  locale="en-US"
+  currency="USD"
+  value={amount}
+  onValueChange={setAmount}
+/>
+```
+
+<ComponentDemo slug="money-field" />
+
+## Guidelines
+
+### When to use
+
+Use it wherever a reader enters money: an invoice total, a budget, a price override, a
+refund amount. It is the Component for a figure whose unit is a currency.
+
+Pass `locale` on a page that serves more than one language. It is required, because a
+locale is a claim about your market and this Component will not guess one.
+
+Pass the currency as an ISO 4217 code rather than a symbol. The symbol is read back out
+of the platform, so no two products can disagree about it, and a code is the one
+currency name your data already holds.
+
+### When not to use
+
+Do not use it for a figure that is not money. A token count, a quota and a duration are
+numbers with units, and a currency symbol on any of them is a claim about what they are.
+
+Do not use it to collect an amount the reader does not type: the plan they chose or the
+invoice they paid. That is `Price`, which prints rather than parses.
+
+Do not rely on the form submission. There is deliberately no `name`: what a form would
+submit from here is the reader's text with this locale's punctuation in it. Write a
+hidden input holding `value` if you need a numeric submit.
+
+Do not expect a pasted amount from another market to be read as that market wrote it.
+`1,234.56` pasted into a `de-DE` field is `1.23456` here, because `,` is this locale's
+decimal separator. No Component can do better from a string with no locale in it, so
+pass the number in and let the field format it.
+
+### Best practices
+
+- Treat `null` as empty rather than as zero. It is reported on every keystroke, and it
+  is reported for a text that currently means no amount, which includes a partially
+  typed one.
+- Expect the text to be rewritten on blur, and expect text that is not an amount to be
+  refused. A reader who typed something this locale cannot write loses what they typed
+  rather than being told it was wrong; that refusal is what keeps an amount field from
+  ever holding something that is not an amount. Use a `FieldError` beside a `value` of
+  `null` when you would rather explain it.
+- Expect a field nobody touched to report nothing on blur. Tabbing through an amount
+  without editing it is not a field resolving, and the value you hold stays the value
+  you held.
+- Treat `required` as announced rather than enforced. It is `aria-required`, because
+  the browser's own refusal to submit comes with a message in English. Enforce it in
+  your own submit handler, where it can be said in your language.
+- Expect grouping characters to be dropped rather than accepted. They are cosmetic, and
+  dropping one leaves the same digits, which is exactly the amount the reader meant.
+- Use `describedBy` for the sentence about the field, such as "We will take this from
+  the workspace balance", and keep the visible label on a `Label`.
+- Override `inputMode` only if your market really types amounts some other way. The
+  default is a `decimal` keyboard, because a `numeric` keyboard on a phone has no
+  decimal point at all.
+- Use `className` for width and placement only.
+
+### Content guidelines
+
+- Write `aria-label` with the currency in it, because the symbol is hidden from the
+  accessibility tree: "Amount in US dollars", not "Amount". The visible `Label` and the
+  announced name should say the same thing, since a field that looks localised and
+  announces English is the state this Component exists to end.

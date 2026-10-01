@@ -208,25 +208,49 @@ function maskComments(source) {
 /**
  * Every function declaration a module exports, with the index of its `export`.
  *
- * Three spellings, because this package uses all three and the declaration
- * emitter accepts all three: `export function X`, `export default function X`, and
- * a plain `function X` closed by an `export { ... X ... }` statement at the foot
- * of the module, which is what every Component here does. Missing the third would
- * report thirty-four Components as having no declaration, which is a gate that
- * fires on everything and is therefore indistinguishable from one that works.
+ * Four spellings, because this package uses all four and the declaration
+ * emitter accepts all four: `export function X`, `export default function X`, a
+ * plain `function X` closed by an `export { ... X ... }` statement at the foot of
+ * the module, which is what every Component here does, and a generic one of those
+ * three written `function X<T>`. Missing the third would report thirty-four
+ * Components as having no declaration, which is a gate that fires on everything
+ * and is therefore indistinguishable from one that works.
+ *
+ * **The fourth was missing until 2026-09 and it cost a real API, which is the
+ * reason it is written down rather than left as a pattern.** `RepeatableRows` is a
+ * Component over a list of row objects, so its natural signature is generic in the
+ * row type, and `function RepeatableRows<TRow extends object>(...)` matched
+ * nothing here: the pattern wanted an open parenthesis straight after the name. The
+ * gate did not fail, which is the dangerous part. It reported the module as
+ * declaring no Item at all, so a Component with a JSDoc block and a full MDX page
+ * was invisible to the one gate whose job is to say a Component is undocumented.
+ * The fix the subagent reached for instead was to drop the type parameter and
+ * instantiate the interface inside the body, which works and which costs the caller
+ * inference on the render prop's row. That is the trade this pattern is here to
+ * prevent, so the pattern is widened rather than the Component narrowed.
+ *
+ * The widening is a widening and not a relaxation. The gate's law is that an
+ * exported declaration without a JSDoc block has no corpus entry, and a generic
+ * declaration is as much an exported declaration as a plain one; the gate could
+ * see the plain one and not the generic one, so it was enforcing the law over a
+ * subset of the tree. The cost is that the pattern now also matches a type
+ * parameter list on a helper that is not an Item, and such a helper would be
+ * reported as a declaration with no JSDoc, which is a false finding rather than a
+ * missed one. A false finding is the cheaper of the two to live with, and the
+ * header comment above is what a reader needs to see to understand why.
  */
 function itemFunctions(source) {
   const found = []
   const exported = new Set()
   for (const statement of source.matchAll(/export\s*\{([^}]*)\}/g)) {
-    for (const raw of (statement[1] ?? '').split(',')) {
+    for (const raw of (statement[1] ?? '').split(',') ) {
       const name = raw.trim().split(/\s+as\s+/)[0]?.trim()
       if (name) exported.add(name)
     }
   }
 
   for (const match of source.matchAll(
-    /(export\s+(?:default\s+)?|)(function\s+)([A-Za-z0-9_$]+)\s*\(/g,
+    /(export\s+(?:default\s+)?|)(function\s+)([A-Za-z0-9_$]+)(?:\s*<[^>()]*>)?\s*\(/g,
   )) {
     const isExported = match[1] !== '' || exported.has(match[3] ?? '')
     if (!isExported) continue

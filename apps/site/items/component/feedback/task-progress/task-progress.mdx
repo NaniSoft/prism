@@ -1,0 +1,107 @@
+---
+slug: components/task-progress
+title: TaskProgress
+---
+
+## Overview
+
+A TaskProgress is one line that follows a pending task from start to resolution, and
+announces the outcome. It is a server Component.
+
+The determinate fill is legal motion and the reason is that it is bound to a real
+state transition. The bar is `Progress`, which eases its width on the base duration;
+there is no keyframe, no loop and no cycle anywhere in this Component, because a bar
+that is moving because a number changed is state feedback under the first of the two
+motion laws in this system and nothing else. A task with no number is drawn and
+announced as indeterminate, and the Component refuses to fill a bar it has no number
+for: the refusal is a thrown diagnostic rather than a silently invented position.
+
+## How it differs from LifecycleButton
+
+`LifecycleButton` is the control a reader presses to begin a save, a publish or an
+export. It carries the label, the mark, the meter, the failure and the retry, because
+all of those belong to a control somebody is looking at.
+
+This is the other half: a task the caller started somewhere else, or on a schedule, or
+on another device, whose position the reader has to be able to find without hunting for
+the control that began it.
+
+The difference is not that one has a bar and the other does not. Both draw a bar. The
+difference is that this Component has no `onActivate`, no retry and no idle label,
+because a line is not something a reader presses, and a control that pressed nothing is
+a control that lies. A caller who wants both in one place composes the two.
+
+## Usage
+
+```tsx
+import { TaskProgress, type TaskProgressPhase } from '@nanisoft/prism-ui/components/task-progress'
+
+const [phase, setPhase] = useState<TaskProgressPhase>({ phase: 'idle' })
+
+<TaskProgress phase={phase} label="Exporting the estate report" />
+
+<TaskProgress
+  phase={{ phase: 'running', progress: 3 / 8, progressText: '3 of 8 machines rebuilt' }}
+  label="Rebuilding the estate index"
+/>
+```
+
+<ComponentDemo slug="task-progress" />
+
+## Guidelines
+
+### When to use
+
+Use it for work the reader did not start with the control in front of them: a task
+queued from somewhere else, a background job, a long operation whose progress the
+caller already knows. Its job is to be findable without hunting, and to say what
+happened when it stopped.
+
+Pass `progress` when you have a number. A byte count, a row count, a completed-step
+count and a percentage all give a real fraction. Omit it when you have nothing to
+measure, and say so in the label if the wait is long enough to worry about.
+
+Pass `progressText` whenever you pass `progress`. A fraction between zero and one is
+announced as a decimal otherwise, and "0.42" is a measurement of nothing a reader can
+act on. Passing the fraction without the text is a thrown diagnostic.
+
+### When not to use
+
+Do not use it for the control that starts the work. That is `LifecycleButton`, which is
+a button, refuses a second press while the work runs, and offers the retry after a
+failure. This Component presses nothing.
+
+Do not use it for an operation whose result the reader sees as a page change. There is
+no progress to follow on a page that is being replaced.
+
+Do not use it for a task of unknown length that nobody is waiting on. An indeterminate
+bar with no label is a decoration, and this system has no decorative motion.
+
+Do not expect the bar to reach the end and stay. It belongs to the running position
+and leaves with it, because a bar at one hundred percent is a measurement of nothing.
+
+### Best practices
+
+- Own the phase and move it from your transport's events. Prism draws the line, the
+  mark, the bar and the announcement a position implies, and calls nothing.
+- Keep the outcome and the reason in the reader's language, and keep them in the union
+  rather than in an optional prop, so a settled position cannot be rendered with
+  nothing to say.
+- Expect `outcome` and `reason` to be announced as well as drawn, polite for a success
+  and assertive for a failure. The reason line beneath is deliberately not an alert,
+  so a failure is announced once rather than twice.
+- Reserve the space if the jump matters. The idle position draws nothing, so a line
+  that appears moves whatever was above it.
+- Use `className` for width and placement only.
+
+### Content guidelines
+
+- Write `label` as the task, in the reader's language: "Exporting the estate report",
+  "Export des Anlagenberichts". It is drawn at every position and read at the
+  outcome, so it is the one string that has to hold up in both.
+- Write `outcome` as what is now true: "All eight machines are current", "12 invoices
+  written". It is read aloud to somebody who cannot see the line.
+- Write `reason` with the cause and the way past it, because it is read aloud too:
+  "The estate has no readings after 14 March. Nothing was written."
+- Write `progressText` as a position a reader can act on: "3 of 8 steps", "Uploading,
+  42 percent".

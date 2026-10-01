@@ -26,7 +26,7 @@ pnpm install
 pnpm dev            # docs site
 pnpm build          # turbo build; packages emit dist/, the site exports out/
 pnpm test           # Vitest
-pnpm check          # contrast, emitted-contract, motion, surface, layout, dash, corpus drift, content joins
+pnpm check          # contrast, emitted-contract, motion, surface, layout, dash, encoding, corpus drift, content joins
 pnpm lint           # oxlint
 pnpm typecheck
 pnpm changeset      # declare a release before merging

@@ -1,0 +1,98 @@
+---
+slug: components/split-button
+title: SplitButton
+---
+
+## Overview
+
+A SplitButton is one dominant action and a menu, joined as a single shape. It is a
+Client Component.
+
+The split is a boundary, and a boundary has a focus contract of its own. The dominant
+action is one tab stop and the menu trigger is another, so the reader reaches the
+control twice and knows both times that they are still inside one thing. The two
+halves are drawn as one shape rather than as two controls that happen to be near each
+other.
+
+It composes `ButtonGroup` and `DropdownMenu` and redraws neither. The joined frame,
+the single focus ring drawn around the pair and the collapsed inner borders are
+`ButtonGroup`'s. The menu, its typeahead, its arrow keys and its Escape handling are
+`DropdownMenu`'s. The only things this Component decides are the three names, the
+three fills and the two callbacks.
+
+## Usage
+
+```tsx
+import { SplitButton, type SplitButtonAction } from '@nanisoft/prism-ui/components/split-button'
+
+const actions: readonly SplitButtonAction[] = [
+  { id: 'draft', label: 'Save as a draft' },
+  { id: 'copy', label: 'Send a copy to the team' },
+  { id: 'discard', label: 'Discard the draft', tone: 'danger' },
+]
+
+<SplitButton
+  label="Publish the summary"
+  primaryLabel="Publish"
+  menuLabel="Other ways to publish the summary"
+  actions={actions}
+  onPrimaryAction={publish}
+  onSecondaryAction={(id) => dispatch(id)}
+  variant="outline"
+/>
+```
+
+<ComponentDemo slug="split-button" />
+
+## Guidelines
+
+### When to use
+
+Use a SplitButton when one action dominates and the other ways of doing the same
+thing are real but secondary: publish and also publish as a draft, save and also
+save a copy, export and also export a template.
+
+Keep the dominant action on the surface. Hiding it in the menu and giving the reader
+a menu of five equally weighted commands is a `DropdownMenu`, and the reader has to
+choose rather than act.
+
+Pass `label` for the pair even when the two words are obvious. A reader tabbing into
+one of three split buttons on a page hears two buttons and no way to tell them apart.
+
+### When not to use
+
+Do not use it when there is no dominant action. Two peer commands are a
+`ButtonGroup`, or two buttons.
+
+Do not use it for navigation. A trigger that opens a menu of destinations is a
+`DropdownMenu` of links, and a menu item that navigates has to be the link itself.
+
+Do not reach for it to reduce the number of controls on a page. A split button with
+six commands is a menu with one command promoted, and the promotion is a claim about
+importance that is only true some of the time.
+
+Do not compose it with `LifecycleButton` for the dominant half. This Component takes
+a callback and holds no request, so the control cannot refuse a second press; use
+`LifecycleButton` and put the menu beside it, or use this one for an action that is
+safe to press twice.
+
+### Best practices
+
+- Write `menuLabel` as what is in the menu, not as the trigger's shape. "Other ways
+  to publish", "Remaining actions". It is announced on a control the reader reached
+  towards without being told it was there.
+- Write `label` for the pair. "Publish the summary", not "Actions".
+- Keep `id` stable across renders and independent of the label. It is the React key
+  and what `onSecondaryAction` reports.
+- Expect `onSecondaryAction` to carry an id rather than a label, so the caller's
+  handler is one dispatch over its own data.
+- Use `className` for width and placement only. It cannot change a Prism-owned visual
+  property.
+
+### Content guidelines
+
+- Write `primaryLabel` as the action itself: "Publish", "Save", "Export".
+- Write each action's `label` as the whole thing, because a menu row is read alone:
+  "Send a copy to the team", not "Copy".
+- Mark the command that cannot be undone with `tone: 'destructive'`, and keep it
+  last. The menu preserves the order you pass.

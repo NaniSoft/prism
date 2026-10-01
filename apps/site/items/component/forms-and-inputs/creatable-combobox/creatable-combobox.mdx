@@ -1,0 +1,108 @@
+---
+slug: components/creatable-combobox
+title: CreatableCombobox
+---
+
+## Overview
+
+A Creatable combobox filters a list of options and lets the reader commit a value
+that is not in it, from inside the same popover.
+
+The second editable control is the whole reason this is not a `Combobox` with a prop.
+Creating a value needs somewhere to type it, and the honest place is inside the
+surface the reader is already looking at. Everything downstream of that decision is
+different from a single-select combobox and none of it is reachable from a boolean.
+
+**The focus order gains a stop inside the popover.** Tab out of the search field
+enters the create field and the list stays open. Arrow Up from the create field goes
+back into the list with the highlight on the first option, so the path is reversible.
+Escape in the create field returns to the search field with the list still open; only
+Escape in the search field closes it.
+
+**The create row is not an option.** It sits outside the listbox element, the
+highlight index runs over matched options only, and `aria-activedescendant` is never
+written with the create row's id. A row carried inside the listbox would be announced
+as an option, and it would be counted by the index that names options, so Enter could
+commit a row the reader never highlighted.
+
+**The validation is the create field's own, and it is your rule.** Prism ships no
+length limit, no pattern and no uniqueness check, because what may be created is a
+fact about your data. While a message is showing, the create control is not drawn.
+
+## Usage
+
+```tsx
+import { CreatableCombobox } from '@nanisoft/prism-ui/components/creatable-combobox'
+
+<CreatableCombobox
+  label="Data region"
+  draftLabel="New region name"
+  createLabel="Create region"
+  placeholder="Search or type a new region"
+  name="region"
+  items={regions}
+  value={region}
+  onValueChange={setRegion}
+  onCreate={(draft) => createRegion(draft)}
+  validate={(draft) => (draft.length < 3 ? 'At least three letters.' : null)}
+  empty={{ message: (query) => `No region is called ${query}` }}
+/>
+```
+
+<ComponentDemo slug="creatable-combobox" />
+
+## Guidelines
+
+### When to use
+
+Use it when the set genuinely grows while the reader works: a region they have never
+heard of, a tag their team has not used, a project that does not exist yet. The list
+is what they will choose from most of the time and the create path is what stops them
+leaving the field to go and add it somewhere else first.
+
+Use it when your data has rules. `validate` is where they live, and the message is
+announced as it appears because it renders as a `FieldError`.
+
+### When not to use
+
+Do not use it when the option set is yours and complete. A reader who can type a value
+your backend will reject has been given a field that fails, and a `Combobox` plus an
+"Add" button beside it puts the decision where the reader can see it.
+
+Do not use it for free text with no list behind it. `Input` is that control.
+
+Do not use it for many values. That is `MultiCombobox`, and the two disagree about
+whether Enter finishes the interaction.
+
+Do not expect `onValueChange` to fire for a created value. It does not, and the reason
+is on the Component: whether a newly typed string becomes the selection is your
+decision, because your records may already hold it. Set the value from `onCreate`.
+
+### Best practices
+
+- `createLabel` is the name of the control that commits, and `draftLabel` is the name
+  of the field above it. Two controls, two jobs, two names. The draft itself is
+  attached to the control as its description rather than interpolated into its name,
+  so localising the sentence does not mean translating the data.
+- `validate` must be pure. It is read on every render of the draft rather than on a
+  keystroke, so the answer can never go stale against text the reader has moved on
+  from.
+- Focusing the create field copies the query into it, because the reader's typed
+  words are what they want to create. After that the two are deliberately not wired
+  together: editing the draft does not narrow the list, because a half-typed new value
+  filtering the list to nothing on every keystroke reads as a broken search.
+- The create row disappears when the draft already matches an option's label or value
+  exactly, because offering to create something already in the list is offering to
+  make a duplicate.
+- The options are the same `ComboboxItem` shape a `Combobox` takes, imported rather
+  than restated, and ranked by the same scorer the command palette uses.
+- The list is anchored to the field rather than portalled, so put the field near the
+  top of any scroll container it lives in.
+
+### Content guidelines
+
+- Write the create message as an action, in your own words: "Create region", "Add
+  tag", "New workspace". Prism cannot write it, because it does not know what the
+  reader is creating.
+- Write the validation message as the rule and the limit together: "At least three
+  letters", not "Invalid input".

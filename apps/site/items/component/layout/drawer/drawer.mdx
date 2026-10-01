@@ -1,0 +1,153 @@
+---
+slug: components/drawer
+title: Drawer
+---
+
+## Overview
+
+A Drawer is a panel anchored to an edge of the viewport that the reader can push
+away. It ships as `Drawer`, `DrawerTrigger`, `DrawerContent`, `DrawerHeader`,
+`DrawerBody`, `DrawerFooter`, `DrawerTitle`, `DrawerDescription`, `DrawerHandle`
+and `DrawerClose`.
+
+The distinction from a Sheet is a gesture and nothing else, and it is worth
+stating plainly because the two read as synonyms. A `Sheet` is `Dialog` with a
+named edge: the same focus trap, the same Escape key, the same outside press, the
+same portal, and a panel the reader leaves by pressing something. A Drawer is a
+panel the reader can also leave by dragging it off the edge with their thumb, and
+it says so: it draws a grip, its exit follows the pointer, and its own content
+region is marked so that selecting text with a mouse does not read as the start
+of a drag. Base UI, which supplies both, draws the same line.
+
+**If the reader can throw it away, use a Drawer. If the reader dismisses it, use
+a Sheet.**
+
+## Usage
+
+```tsx
+import {
+  Drawer,
+  DrawerBody,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@nanisoft/prism-ui/components/drawer'
+
+<Drawer>
+  <DrawerTrigger>Adjust filters</DrawerTrigger>
+  <DrawerContent side="bottom" closeLabel="Close the filters">
+    <DrawerHeader>
+      <DrawerTitle>Adjust filters</DrawerTitle>
+      <DrawerDescription>Narrow the table to the rows you need.</DrawerDescription>
+    </DrawerHeader>
+
+    <DrawerBody>{/* the controls */}</DrawerBody>
+
+    <DrawerFooter>
+      <DrawerClose>Clear</DrawerClose>
+      <Button onClick={apply}>Apply</Button>
+    </DrawerFooter>
+  </DrawerContent>
+</Drawer>
+```
+
+<ComponentDemo slug="drawer" />
+
+## Guidelines
+
+### When to use
+
+Use a Drawer for a focused task the reader reaches for on a phone or a tablet: a
+filter set, a quick edit, a confirmation of one value, a sheet of actions on a
+row. The reader arrived by tapping something and will leave by throwing the panel
+away, and a thumb is the input they have.
+
+Use it when the task is the reason they are here. A panel the reader can dismiss
+is a panel they may dismiss by accident, so what is in it has to be worth the
+moment of attention it costs.
+
+### When not to use
+
+Do not use a Drawer for anything the reader can throw away before they have read
+it. A destructive decision is an `AlertDialog`, which refuses a stray press; a
+short form in the middle of the page is a `Dialog`; a panel that belongs to the
+page behind it is a `Sheet`.
+
+Do not use a Drawer for a page. A full-screen bottom panel on a wide viewport is
+a route, and a route is addressable, linkable and reachable by the back button.
+
+Do not reach for a Drawer to get the gesture without wanting the gesture's other
+half. Snap points and the nested-drawer stack are not exposed here, and the
+reason is in the Component's documentation.
+
+### Best practices
+
+- Always render a `DrawerTitle`. It names the panel for every reader, and Base UI
+  points the panel's `aria-labelledby` at it.
+- Name the side deliberately. `bottom` for a task on a phone, `right` for a panel
+  beside a list on a tablet.
+- Keep the body scrollable and short. `DrawerBody` is the only part that scrolls,
+  and the header and footer stay put above and below it, so the reader always
+  knows what the panel is and can always reach the control that commits the task.
+- Put the primary action first in `DrawerFooter`. It lands at the bottom on a
+  narrow screen and at the right from `sm` up, so it is under the same thumb
+  either way.
+- Keep the panel's content reachable without the gesture. Escape closes it and
+  the close control is on by default, because the grip is decorative and a
+  decorative bar is not a way out for a reader who cannot drag.
+
+### Accessibility
+
+`modal` defaults to `true`, so focus is trapped inside the panel, page scroll is
+locked, and the rest of the document is inert to the pointer. Focus moves into
+the panel on open and returns to whatever opened it on close. Escape closes the
+panel, and there is deliberately no prop that stops it: a panel a reader cannot
+leave by the keyboard is a trap in both the ordinary and the technical sense.
+
+The grip is `aria-hidden`. It is a grey bar with no name and no role, and the
+reader who can use it learns what it does from the panel moving under their
+thumb. The reader who cannot drag it is owed an announced control, and that is
+the close control.
+
+The close control draws its focus ring at full strength, and so does the
+trigger. The panel itself draws one on `focus-visible` rather than suppressing
+the indicator, because a reader who lands on the panel is on a surface nothing
+else marks.
+
+### What this is not
+
+There are no snap points, so a half-expanded bottom sheet is not available here.
+There is no nested-drawer stack and no indent effect, so a drawer inside a drawer
+is not a shape this Component draws. There is no top edge, because a panel that
+arrives from above the reader is a shade rather than a task surface.
+
+### Motion
+
+The panel's entrance is a transform across the whole width of the viewport, which
+is spatial movement, so it is guarded with `motion-safe:` and lasts
+`duration-slow`, the token DESIGN.md reserves for transform and layout state
+such as a disclosure. A reader who has asked for reduced motion gets the panel
+already open, with no fade either, because the panel's resting state is its full
+form. The backdrop fades rather than travels, so its transition is unguarded on
+the shorter token duration.
+
+The release from a fast flick is not matched to the flick's velocity: the panel
+completes over the same 280ms whether it was thrown or nudged. Matching it would
+mean a computed millisecond value in a class string, which the motion law does
+not allow.
+
+### Content guidelines
+
+- Make the title the thing the panel is for: "Adjust filters", "Rename run",
+  "Notifications".
+- One sentence of description, saying what the panel changes about the page
+  behind it, or what putting it away would lose.
+- Keep the body to the task. A Drawer is a panel the reader may throw away, and
+  every paragraph in it is a reason to read it first and dismiss it after.
+
+It is a client component, because a drag is a stream of pointer events and a
+portal needs the document.

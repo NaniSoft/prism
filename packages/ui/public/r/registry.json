@@ -188,6 +188,29 @@
       ]
     },
     {
+      "name": "billing-source",
+      "title": "Billing-source",
+      "description": "Shared billing-source primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "@base-ui/react",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/billing-source.tsx",
+          "type": "registry:component",
+          "target": "components/ui/billing-source.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "breadcrumb",
       "title": "Breadcrumb",
       "description": "Shared breadcrumb primitive. Installed automatically as a dependency of any block that uses it.",
@@ -392,6 +415,51 @@
       ]
     },
     {
+      "name": "checklist",
+      "title": "Checklist",
+      "description": "Shared checklist primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/checklist.tsx",
+          "type": "registry:component",
+          "target": "components/ui/checklist.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "choice-card",
+      "title": "Choice-card",
+      "description": "Shared choice-card primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/choice-card.tsx",
+          "type": "registry:component",
+          "target": "components/ui/choice-card.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "code-block",
       "title": "Code-block",
       "description": "Shared code-block primitive. Installed automatically as a dependency of any block that uses it.",
@@ -405,6 +473,28 @@
           "path": "src/components/ui/code-block.tsx",
           "type": "registry:component",
           "target": "components/ui/code-block.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "cohort-grid",
+      "title": "Cohort-grid",
+      "description": "Shared cohort-grid primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/cohort-grid.tsx",
+          "type": "registry:component",
+          "target": "components/ui/cohort-grid.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -551,6 +641,28 @@
       ]
     },
     {
+      "name": "creatable-combobox",
+      "title": "Creatable-combobox",
+      "description": "Shared creatable-combobox primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/creatable-combobox.tsx",
+          "type": "registry:component",
+          "target": "components/ui/creatable-combobox.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "cta-link",
       "title": "Cta-link",
       "description": "Shared cta-link primitive. Installed automatically as a dependency of any block that uses it.",
@@ -687,6 +799,30 @@
       ]
     },
     {
+      "name": "drawer",
+      "title": "Drawer",
+      "description": "Shared drawer primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "@base-ui/react",
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/drawer.tsx",
+          "type": "registry:component",
+          "target": "components/ui/drawer.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "dropdown-menu",
       "title": "Dropdown-menu",
       "description": "Shared dropdown-menu primitive. Installed automatically as a dependency of any block that uses it.",
@@ -725,6 +861,28 @@
           "path": "src/components/ui/dropzone.tsx",
           "type": "registry:component",
           "target": "components/ui/dropzone.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "emoji-picker",
+      "title": "Emoji-picker",
+      "description": "Shared emoji-picker primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/emoji-picker.tsx",
+          "type": "registry:component",
+          "target": "components/ui/emoji-picker.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -823,6 +981,51 @@
       ]
     },
     {
+      "name": "form-dialog",
+      "title": "Form-dialog",
+      "description": "Shared form-dialog primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/form-dialog.tsx",
+          "type": "registry:component",
+          "target": "components/ui/form-dialog.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "form-wizard",
+      "title": "Form-wizard",
+      "description": "Shared form-wizard primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/form-wizard.tsx",
+          "type": "registry:component",
+          "target": "components/ui/form-wizard.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "form",
       "title": "Form",
       "description": "Shared form primitive. Installed automatically as a dependency of any block that uses it.",
@@ -869,6 +1072,52 @@
       ]
     },
     {
+      "name": "image-list-field",
+      "title": "Image-list-field",
+      "description": "Shared image-list-field primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/image-list-field.tsx",
+          "type": "registry:component",
+          "target": "components/ui/image-list-field.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "image-zoom",
+      "title": "Image-zoom",
+      "description": "Shared image-zoom primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/image-zoom.tsx",
+          "type": "registry:component",
+          "target": "components/ui/image-zoom.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "input-group",
       "title": "Input-group",
       "description": "Shared input-group primitive. Installed automatically as a dependency of any block that uses it.",
@@ -904,6 +1153,30 @@
           "path": "src/components/ui/input.tsx",
           "type": "registry:component",
           "target": "components/ui/input.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "intensity-grid",
+      "title": "Intensity-grid",
+      "description": "Shared intensity-grid primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "a little here",
+        "clsx",
+        "tailwind-merge",
+        "there is no cell here"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/intensity-grid.tsx",
+          "type": "registry:component",
+          "target": "components/ui/intensity-grid.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -970,6 +1243,29 @@
           "path": "src/components/ui/label.tsx",
           "type": "registry:component",
           "target": "components/ui/label.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "lifecycle-button",
+      "title": "Lifecycle-button",
+      "description": "Shared lifecycle-button primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/lifecycle-button.tsx",
+          "type": "registry:component",
+          "target": "components/ui/lifecycle-button.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -1059,6 +1355,30 @@
           "path": "src/components/ui/mark.tsx",
           "type": "registry:component",
           "target": "components/ui/mark.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "mega-menu",
+      "title": "Mega-menu",
+      "description": "Shared mega-menu primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "Pricing, tab list",
+        "Primary, tab list",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/mega-menu.tsx",
+          "type": "registry:component",
+          "target": "components/ui/mega-menu.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -1182,6 +1502,51 @@
       ]
     },
     {
+      "name": "money-field",
+      "title": "Money-field",
+      "description": "Shared money-field primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/money-field.tsx",
+          "type": "registry:component",
+          "target": "components/ui/money-field.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "multi-combobox",
+      "title": "Multi-combobox",
+      "description": "Shared multi-combobox primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/multi-combobox.tsx",
+          "type": "registry:component",
+          "target": "components/ui/multi-combobox.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "native-select",
       "title": "Native-select",
       "description": "Shared native-select primitive. Installed automatically as a dependency of any block that uses it.",
@@ -1220,6 +1585,28 @@
           "path": "src/components/ui/navigation-menu.tsx",
           "type": "registry:component",
           "target": "components/ui/navigation-menu.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "nested-tabs",
+      "title": "Nested-tabs",
+      "description": "Shared nested-tabs primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/nested-tabs.tsx",
+          "type": "registry:component",
+          "target": "components/ui/nested-tabs.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -1276,6 +1663,29 @@
       ]
     },
     {
+      "name": "overflow-actions",
+      "title": "Overflow-actions",
+      "description": "Shared overflow-actions primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/overflow-actions.tsx",
+          "type": "registry:component",
+          "target": "components/ui/overflow-actions.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "pack-swatch",
       "title": "Pack-swatch",
       "description": "Shared pack-swatch primitive. Installed automatically as a dependency of any block that uses it.",
@@ -1289,6 +1699,29 @@
           "path": "src/components/ui/pack-swatch.tsx",
           "type": "registry:component",
           "target": "components/ui/pack-swatch.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "pack-switcher",
+      "title": "Pack-switcher",
+      "description": "Shared pack-switcher primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "@base-ui/react",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/pack-switcher.tsx",
+          "type": "registry:component",
+          "target": "components/ui/pack-switcher.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -1335,6 +1768,50 @@
           "path": "src/components/ui/password-field.tsx",
           "type": "registry:component",
           "target": "components/ui/password-field.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "pill",
+      "title": "Pill",
+      "description": "Shared pill primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/pill.tsx",
+          "type": "registry:component",
+          "target": "components/ui/pill.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "platform-modifier-key",
+      "title": "Platform-modifier-key",
+      "description": "Shared platform-modifier-key primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/platform-modifier-key.tsx",
+          "type": "registry:component",
+          "target": "components/ui/platform-modifier-key.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -1456,6 +1933,51 @@
       ]
     },
     {
+      "name": "prompt-composer",
+      "title": "Prompt-composer",
+      "description": "Shared prompt-composer primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/prompt-composer.tsx",
+          "type": "registry:component",
+          "target": "components/ui/prompt-composer.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "proportion-list",
+      "title": "Proportion-list",
+      "description": "Shared proportion-list primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/proportion-list.tsx",
+          "type": "registry:component",
+          "target": "components/ui/proportion-list.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "prose",
       "title": "Prose",
       "description": "Shared prose primitive. Installed automatically as a dependency of any block that uses it.",
@@ -1546,6 +2068,29 @@
       ]
     },
     {
+      "name": "range-field",
+      "title": "Range-field",
+      "description": "Shared range-field primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "@base-ui/react",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/range-field.tsx",
+          "type": "registry:component",
+          "target": "components/ui/range-field.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "relative-time",
       "title": "Relative-time",
       "description": "Shared relative-time primitive. Installed automatically as a dependency of any block that uses it.",
@@ -1559,6 +2104,74 @@
           "path": "src/components/ui/relative-time.tsx",
           "type": "registry:component",
           "target": "components/ui/relative-time.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "reorderable-list",
+      "title": "Reorderable-list",
+      "description": "Shared reorderable-list primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/reorderable-list.tsx",
+          "type": "registry:component",
+          "target": "components/ui/reorderable-list.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "repeatable-rows",
+      "title": "Repeatable-rows",
+      "description": "Shared repeatable-rows primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/repeatable-rows.tsx",
+          "type": "registry:component",
+          "target": "components/ui/repeatable-rows.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "repo-stars",
+      "title": "Repo-stars",
+      "description": "Shared repo-stars primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/repo-stars.tsx",
+          "type": "registry:component",
+          "target": "components/ui/repo-stars.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -1697,6 +2310,29 @@
           "path": "src/components/ui/select.tsx",
           "type": "registry:component",
           "target": "components/ui/select.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "selection-toolbar",
+      "title": "Selection-toolbar",
+      "description": "Shared selection-toolbar primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/selection-toolbar.tsx",
+          "type": "registry:component",
+          "target": "components/ui/selection-toolbar.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -1884,6 +2520,51 @@
       ]
     },
     {
+      "name": "split-button",
+      "title": "Split-button",
+      "description": "Shared split-button primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/split-button.tsx",
+          "type": "registry:component",
+          "target": "components/ui/split-button.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "stateful-table",
+      "title": "Stateful-table",
+      "description": "Shared stateful-table primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/stateful-table.tsx",
+          "type": "registry:component",
+          "target": "components/ui/stateful-table.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "status",
       "title": "Status",
       "description": "Shared status primitive. Installed automatically as a dependency of any block that uses it.",
@@ -1897,6 +2578,29 @@
           "path": "src/components/ui/status.tsx",
           "type": "registry:component",
           "target": "components/ui/status.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "stepper",
+      "title": "Stepper",
+      "description": "Shared stepper primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/stepper.tsx",
+          "type": "registry:component",
+          "target": "components/ui/stepper.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -2033,6 +2737,51 @@
           "path": "src/components/ui/tag-group.tsx",
           "type": "registry:component",
           "target": "components/ui/tag-group.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "task-progress",
+      "title": "Task-progress",
+      "description": "Shared task-progress primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/task-progress.tsx",
+          "type": "registry:component",
+          "target": "components/ui/task-progress.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "text-format-toolbar",
+      "title": "Text-format-toolbar",
+      "description": "Shared text-format-toolbar primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/text-format-toolbar.tsx",
+          "type": "registry:component",
+          "target": "components/ui/text-format-toolbar.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -2214,6 +2963,28 @@
           "path": "src/components/ui/typography.tsx",
           "type": "registry:component",
           "target": "components/ui/typography.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "video-player",
+      "title": "Video-player",
+      "description": "Shared video-player primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/video-player.tsx",
+          "type": "registry:component",
+          "target": "components/ui/video-player.tsx"
         },
         {
           "path": "src/lib/utils.ts",

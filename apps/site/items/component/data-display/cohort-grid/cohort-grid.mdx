@@ -1,0 +1,147 @@
+---
+slug: components/cohort-grid
+title: CohortGrid
+---
+
+## Overview
+
+A CohortGrid is a retention matrix: rows are cohorts, columns are ordinal offsets from
+each row's own start, and every cell is the share still present at that offset, printed
+as a percentage under one sequential shade.
+
+It is a table, and that is the Component rather than an implementation detail. A
+retention grid is the one data display whose job is to be read one cell at a time: a
+reader asks what share of the March cohort was still sending readings at month three,
+and the answer is a cell. So it composes `Table`, with a row header per cohort, a column
+header per offset and a readable percentage in every cell.
+
+Two decisions shape it. Print, then shade, and never the other way round: every cell
+carries its number and the shade is laid over the cell behind it, so a reader who cannot
+rank five steps of one hue reads every number in the grid. And the scale is absolute by
+default, running from `min` to `max`, because two months of the same product have to be
+comparable; a grid that fitted its scale to the rows in front of it would be the
+pre-normalised mistake `Chart` refuses to make.
+
+The third decision is about the empty cells. The youngest cohort has one measurement
+and the oldest has six, so a retention grid is ragged and `null` is a first-class value:
+an offset the cohort has not reached. A `null` prints nothing and a zero prints `0%`,
+because one of them is a measurement and the other is an arithmetic fact about the
+calendar.
+
+## Usage
+
+```tsx
+import {
+  CohortGrid,
+  type CohortGridRow,
+} from '@nanisoft/prism-ui/components/cohort-grid'
+
+const COLUMNS = [
+  { key: 'start', label: 'Signed up' },
+  { key: 'm1', label: 'Month 1' },
+  { key: 'm2', label: 'Month 2' },
+]
+
+const ROWS: CohortGridRow[] = [
+  { key: '2026-09', label: 'September 2026', shares: [100, null, null] },
+  { key: '2026-08', label: 'August 2026', shares: [100, 74, null] },
+  { key: '2026-07', label: 'July 2026', shares: [100, 79, 61] },
+]
+
+<CohortGrid
+  label="Share of each monthly cohort still sending readings"
+  rowHeading="Cohort"
+  rows={ROWS}
+  columns={COLUMNS}
+  caption="Of the accounts that were sending readings in the month they signed up, the share still sending at each later month"
+/>
+```
+
+<ComponentDemo slug="cohort-grid" />
+
+## Guidelines
+
+### When to use
+
+Use a CohortGrid where the reader's question names a cohort and a time past its start.
+Account retention, cohort revenue still standing, workspaces still active, agents still
+running after they were switched on. The shape of the answer is "how much of them is
+left, and how fast it went", which is a table of percentages read diagonally.
+
+Use it whenever the columns are ordinal offsets rather than a continuous domain. That
+is the case it exists for: month three on the March row and month three on the
+September row are two different months in the calendar, so there is no axis to draw and
+nothing may be read as being half way between two cells.
+
+Use it in place of a heat map of categories. `IntensityGrid` shades cells whose columns
+are names with no order at all and never prints a number; a retention grid has ordered
+columns and is read cell by cell, which is the opposite trade.
+
+### When not to use
+
+Do not use it for cohorts whose offsets are not shared. Two grids at different
+cadences, a monthly grid and a weekly one, are two figures rather than one, because
+month three on one row is a different period from week three on another and a single
+matrix cannot say which is which.
+
+Do not use it for arbitrary columns. `Table` is the Component for a table with no domain
+behind it, and there is no way to add a column beside the matrix, because a column that
+is not an offset is not a column of this figure.
+
+Do not use it for a measure whose middle means something. The scale runs from nothing
+to the largest, which has no place to put a midpoint, so a delta or a variance is a
+table of numbers.
+
+Do not use it to show that a cohort is large. This is a table of percentages and no
+counts, and a count beside each cohort name is a column this Component has no room
+for.
+
+### Best practices
+
+- Give every row one entry per column, `null` for each offset the cohort has not
+  reached. A short row throws rather than drawing as a row of empties, because a row of
+  empties claims the cohort had nothing at those offsets.
+- Pass `rowHeading`. The corner is the only cell that names the row headers, and a
+  retention table that has one nearly always does.
+- Write `caption` with the denominator in it. The cells print bare shares and the
+  caption is what says what they are a share of.
+- Leave `max` alone unless the useful range is narrow. A scale that stops short of a
+  hundred makes every cohort above it draw the same step, which is a claim the reader
+  has been told about rather than one they have inferred.
+- Order the cohorts yourself, newest first unless there is a reason not to. The
+  youngest cohort is the one being watched.
+- Pass `precision={1}` when the counts behind the shares are small enough that a point
+  of a percent is a real difference. Whole numbers are the default because a retention
+  grid is a shape rather than a set of measurements.
+
+### Accessibility
+
+The table carries the whole contract. Each cohort is a row header, each offset is a
+column header, and each cell is a readable percentage, so a reader navigating by row
+hears the cohort and the offset with every number and never has to reconstruct which
+pair a cell belongs to. The name of the matrix is the table's own caption, which is why
+the figure carries no `aria-label`: a name spoken on the figure and again by the caption
+is a name a reader hears twice on the way into the same data.
+
+**Shading is never the only carrier of the number.** Every cell prints its share, which
+is what makes the arrangement legal here and illegal in `IntensityGrid`, where the
+shade is the whole point and the numbers live in the caller own sentence. A cell that
+cannot be printed is not drawn at all: a share outside `min` to `max` throws rather than
+clamping to the ceiling, because a clamped retention cell is a cell claiming its share
+is the ceiling when it is not, in a table whose whole claim is that every number in it
+was measured.
+
+An offset the cohort has not reached is an empty cell. It is not a zero and not a
+hyphen: most readers announce a blank cell as blank, which is the honest answer for an
+offset that was never measured, and the difference survives in the markup as
+`data-state="not-reached"`.
+
+Nothing moves. A hover state would have to change the cell's surface, and the surface is
+what the number is printed on, so a hover would change the reading while the pointer
+rested on it.
+
+### What this is not
+
+There is no axis, no tick spacing, no interpolation, no stacking, no cohort size column,
+no drill-down and no cell interaction. The ordinal axis is why: nothing between two
+offsets means anything, so there is nothing for an axis to say.

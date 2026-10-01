@@ -1,0 +1,192 @@
+---
+slug: components/billing-source
+title: BillingSource
+---
+
+## Overview
+
+A BillingSource is one payment or billing source, drawn from words and a mark the
+caller owns. `BillingSource` is the single-source display and `BillingSources` is
+the chooser, and both take the same entry, so moving between them is a change of
+arrangement rather than a change of data.
+
+**Nothing on it is a payment fact, and that is the whole of the design.** There is
+no number, no network, no brand, no currency and no expiry rule, because each of
+those is a fact about somebody else's payment method and this package has no
+business asserting one. A source is a set of caller-owned words and a caller-owned
+mark arranged into a shape a reader can scan.
+
+**The value is drawn exactly as passed, and the absence of a `mask` prop is the
+decision rather than an omission.** What may be shown on a billing surface is a
+compliance question with a different answer in every product, in every jurisdiction
+and for every field: a full number on an invoice a reader has already
+authenticated for, four digits on a shared screen, a provider token that has no
+digits to show at all, an account code for a mandate. A Component that masked would
+be picking the answer, and a Component that refused to mask would be refusing a
+legitimate display. So the value arrives already decided and this module puts it in
+text and nowhere else: never in a `data-` attribute, never in a class name, never in
+a `title`, never in an `aria-label` of its own.
+
+**`valueLabel` is the seam that lets a caller mask without the Component knowing what
+a mask is.** A value of dots and a value of four digits are both unreadable when
+spoken. When the caller passes it, the drawn value is hidden from assistive
+technology and the words are read instead, so a reader hears which card is about to
+be charged rather than a row of punctuation. It cannot be required when it matters,
+because a rule that said "pass this whenever the value is masked" would have to know
+what a mask is, and that is the caller's compliance posture rather than a property
+of the string.
+
+**`mark` is a slot and no card marks ship here.** A network's mark is a licensed
+asset with rules governing its size, its clear space, its colour and its use on a
+third party's surface, and a set of them shipped as a Component is a set that is out
+of date within a year as networks add and retire programmes. So the space is here,
+the frame is a size and a clip and nothing else, and a source with no mark draws no
+frame rather than a grey disc where a logo would be. An amount is a `Price` the
+caller composes, not a currency symbol this Component draws.
+
+**The chooser is a radio group and the whole row is the radio.** One source is
+always the one in use and choosing either of any two leaves the same state as
+choosing the other. A control the size of a card and a name the length of one is a
+control a reader aims at without reading, a reader using voice control can name, and
+a finger can hit without landing on a small target beside a sentence it does not
+want.
+
+## Usage
+
+```tsx
+import {
+  BillingSources,
+  type BillingSourceItem,
+} from '@nanisoft/prism-ui/components/billing-source'
+
+const sources: BillingSourceItem[] = [
+  {
+    id: 'src_4417',
+    name: 'Corporate card',
+    value: '**** **** **** 4417',
+    valueLabel: 'Card ending 4417',
+    kind: 'Card',
+    note: 'Expires 03/2029',
+  },
+  {
+    id: 'inv_0031',
+    name: 'Invoice account NET-30',
+    value: 'INV-0031',
+    kind: 'Invoice',
+  },
+]
+
+<BillingSources
+  sources={sources}
+  value={activeId}
+  onChange={setActiveId}
+  label="Charge to"
+  name="billingSource"
+  empty="No payment source is on file."
+/>
+```
+
+<ComponentDemo slug="billing-source" />
+
+## Guidelines
+
+### When to use
+
+Use `BillingSources` where a reader chooses which of two to four sources on file
+the next charge falls to: a checkout summary, a settings panel, a provisioning
+step. The count is what makes a radio group right; a workspace has a handful of
+sources and a handful can be scanned.
+
+Use `BillingSource` alone where there is one source to state rather than choose: a
+receipt, an order summary, a read-only record of what a charge fell to.
+
+Pass `valueLabel` whenever the drawn value would say nothing aloud. It is the only
+prop in the module that is about how a value is read rather than what it is, and it
+is the difference between a screen reader user knowing which card is about to be
+charged and hearing four asterisks.
+
+Pass `name` when a form posts the choice. The hidden field carries the caller's `id`
+and nothing else, so the form posts an opaque handle rather than the value printed
+beside it.
+
+### When not to use
+
+Do not use a BillingSource to collect a new card. Entering a source is a hosted
+form, a redirect to a provider or a route in the caller's own application, and a
+Component that chose would be choosing for every consumer at once. Compose a
+`Button` and open the caller's own thing.
+
+Do not use it for a plan, a seat count or an amount. Those are `Price` with the
+numbers, and a currency symbol drawn by a Component is a claim about a market.
+
+Do not use it for a whole billing page. `BillingSource01` is the Block that holds
+these rows in a section with a heading, a set-as-default control and a remove
+control. This module is the row and the chooser, and it imports no Block.
+
+Do not use it for more than about five sources. A long list of saved methods is a
+`Select` or a `Combobox` with its own search, and a radio group of thirty rows is a
+wall.
+
+### Best practices
+
+- Pass the value you have concluded is safe to render. The Component will not mask
+  it, will not shorten it and will not tell you it is a mask.
+- Pass the kind in your own machine words. One product prints "Card", another prints
+  "VISA", and a third prints a provider's own code. All three are correct and none
+  of them is this package's to translate.
+- Print the expiry yourself. A Component that formatted a date would be choosing a
+  locale, a calendar and a granularity on a reader's behalf, and would put `Intl`
+  into every consumer's bundle for a rendering Prism has no stake in.
+- Pass `disabled` on a source that cannot be chosen rather than leaving it out. A
+  source a reader cannot choose is still a source they have on file, and a row that
+  silently vanished is a row they will think has been removed.
+- Pass `empty` when a workspace with no sources should still be visible. Without it
+  the chooser renders nothing at all, which is what `TagGroup` does.
+- Keep the name to a `string` when a control elsewhere has to name the source. A
+  node label is fine here because the control names are the caller's, and a
+  Component that had to interpolate one into a sentence would have to be told the
+  sentence as a function.
+
+### Accessibility
+
+The chooser is a real radio group: one Tab stop for the whole set and the arrow keys
+moving between the rows inside it. Every row carries `aria-checked`, and the border
+and fill repeat it rather than replacing it, so a reader who cannot separate the two
+surfaces and a reader using a screen reader are told the same thing. Every row
+draws its indicator at full strength, and it is drawn on the row rather than on a
+circle inside it, so the ring bounds the thing it names.
+
+A disabled row stays in the list, in the accessibility tree and focusable order, so a
+reader is told it exists and is not available rather than finding it missing with
+nothing said.
+
+A `string` value is drawn in the mono face, because the platform monospace annotates
+a machine-readable reading, and a value the caller composed out of several parts is
+left in the interface face. Where the caller has passed `valueLabel`, the drawn
+value is `aria-hidden` and the words are read instead, so the value is never
+announced twice.
+
+The single-source display renders a `div` and no region. A caller who needs the row
+named wraps it in a `Field` and a `FieldLabel`, or puts it in a `ListPanel` whose
+region they name themselves, because this Component draws no heading and there is
+nothing here for a `SectionHeading` to be right about.
+
+### What this is not
+
+There is no brand set, no network detection, no Luhn check, no expiry validation and
+no currency. Each of those is a fact about a payment method, and a Component that
+knew one would be asserting it on a consumer's behalf.
+
+There is no confirmation on a change, and no control for adding, removing or
+replacing a source. What removing a source with charges against it means is a
+product's decision, and the honest place for it is the caller's own confirm and the
+Block's own controls.
+
+It is a client Component, and the directive is unconditional, so a consumer for whom
+the single-source display is the only use still gets this module in their client
+bundle where a server render would have shipped no JavaScript at all. That is the
+price of one boundary rather than two arrangements of the same surface.
+
+The two exports do not import each other's Block and no Block has to import them. The
+section around these rows is `BillingSource01`, and the relationship is a vocabulary
+rather than a dependency: either can be used without the other.

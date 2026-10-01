@@ -1,0 +1,177 @@
+---
+slug: components/reorderable-list
+title: ReorderableList
+---
+
+## Overview
+
+A ReorderableList is a set of rows the reader can put in a different order, with a
+pointer or with the keyboard, where the two arrangements have to agree. It is a
+Client Component and it takes a render prop rather than a slot.
+
+**The two input models are one function.** A pointer drag measures where the finger
+is and computes a destination; a keyboard reorder computes one destination per arrow
+key. Both call the same code, which is the only place a row changes places, which
+emits the announcement, and which applies the locked-row rule. A list that has one
+handler for the drag and another for the keys is a list where the two can disagree
+about what a locked row means, and the disagreement shows up as a row that a pointer
+cannot move past and a keyboard reader can.
+
+**A locked row is an obstacle and not a wall.** A locked row can be neither picked
+up nor crossed: it holds its position, and a move that would put another row on the
+far side of it is clamped to the locked row's own slot. If a locked row were a wall,
+a keyboard reader below it pressing the down arrow would stop there and have no way
+past, because an arrow key moves one position at a time. The cost is that a locked
+row does not partition the list: a row above one can still be moved below it in a
+single gesture. A consumer whose locked rows are meant to be hard boundaries
+partitions into two lists instead.
+
+**The keyboard model is four behaviours.** Space or Enter picks the focused row up,
+the arrow keys move it one position at a time and announce every move, Space or
+Enter puts it down, and Escape restores the arrangement the list had when the row was
+picked up. The arrow keys are the browser's until a row is picked up, because they
+belong to every control inside a row until then, so nothing here holds a roving tab
+stop. The price is one extra key press before a reorder begins, and it buys back
+every arrow key inside a row.
+
+**Escape restores rather than unwinds.** The order is snapshotted when the row is
+picked up and handed back whole, so a cancelled move is one call and one
+announcement rather than one per position the row travelled. That is why
+`onOrderChange` takes the whole order and not a pair of positions.
+
+## Usage
+
+```tsx
+import {
+  ReorderableList,
+  type ReorderableMove,
+} from '@nanisoft/prism-ui/components/reorderable-list'
+
+const [stages, setStages] = useState(INITIAL)
+
+<ReorderableList
+  label="Pipeline stages"
+  rows={stages}
+  getRowId={(stage) => stage.id}
+  isLocked={(stage) => stage.pinned === true}
+  onOrderChange={setStages}
+  handleLabel={(index) =>
+    `Reorder ${stages[index]?.name}, position ${index + 1} of ${stages.length}`
+  }
+  instructionsLabel="Press Space or Enter to pick this stage up, the up and down arrows to move it, Space or Enter to put it down, and Escape to put it back where it started."
+  announce={(move: ReorderableMove) =>
+    `${move.id} moved to position ${move.to + 1} of ${move.total}.`
+  }
+  blockedLabel={(index) => `${stages[index]?.name} holds its position.`}
+  cancelLabel="Stage returned to the position it started in."
+>
+  {(stage, info) => (
+    <div className="flex flex-col gap-0.5">
+      <span className="text-sm font-medium">{stage.name}</span>
+      <span className="text-muted-foreground text-xs">
+        {info.locked ? 'Pinned. ' : ''}
+        {stage.detail}
+      </span>
+    </div>
+  )}
+</ReorderableList>
+```
+
+<ComponentDemo slug="reorderable-list" />
+
+## Guidelines
+
+### When to use
+
+Use a ReorderableList where the order is itself the thing a reader is setting: the
+stages of a pipeline, the columns of a board, the routes of a deployment, the
+readers of a queue. The order is the data and the reader owns it.
+
+Use it where a locked row is a real fact. A stage a validation step must run in, a
+route that cannot be moved because something references it by position: those are
+locked rows, and the rule this Component applies is the one a consumer would
+otherwise re-derive slightly differently in every list.
+
+### When not to use
+
+Do not use it for a set a reader does not reorder. A `ListPanel` of `Item` rows is
+the answer, and it is a smaller thing with no handles in it.
+
+Do not use it for an order the reader cannot change, even temporarily. A list whose
+order is fixed by a dependency graph and shown only for reference is not a
+reorderable list with every row locked, because every handle is then a control that
+accepts a press and refuses.
+
+Do not use it to collect a variable number of records. Adding and removing rows is
+`RepeatableRows`, and the two compose: put a ReorderableList inside one when the
+rows are both editable and ordered.
+
+### Best practices
+
+- Hold the rows in state and keep the objects stable across renders. The Component
+  keys each row by its identity, and a caller who rebuilds the rows with a spread on
+  every render pays a remount on every render of the parent.
+- Pass `handleLabel` from the index, never from the row's own fields. The sentence
+  has to be true after a move, and a sentence written from a row's contents goes
+  stale exactly when a reader is reading it.
+- Write `announce` so the sentence carries the destination and the total. "Moved"
+  without either is a sentence a reader cannot check.
+- Write `blockedLabel` as the reason, not as "cannot move". It is the answer to a
+  reader who has just pressed a key and got nothing.
+- Write `instructionsLabel` once for the whole list. It is the same sentence on
+  every row and a reader who has read it does not need it again on row nine.
+- Keep each row short. A row taller than about three lines makes the pointer's
+  row-middles test coarse, because one press then moves the row several positions.
+- Use `className` for width and placement only. It cannot change a Prism-owned
+  visual property.
+
+### Accessibility
+
+The list is an `ol`, so a screen reader announces each row's position and the count
+behind it. Each row carries a real button with `aria-pressed` for the picked-up
+state and `aria-describedby` pointing at the instructions, which are `sr-only` and
+stated once for the list.
+
+Every move, every refused move and every cancellation is announced through a live
+region, and the region is `assertive` because a reader who has just pressed a key
+and is waiting for a reorder to happen is exactly the reader a polite queue makes
+wait. Nothing in the DOM otherwise says a row changed places, so `announce` is the
+accessibility contract rather than a nicety: a caller who renders this without it
+gets a reordering surface a screen reader cannot follow.
+
+Focus follows the row on a keyboard move, because the row is keyed by identity and
+React moves the element that already held focus rather than making a new one. After a
+pointer drop the focus is moved to the moved row's handle, because a pointer reader
+has no cursor to follow and would otherwise be left wherever the drop left them.
+
+A locked row's handle stays focusable and says so rather than being disabled. A
+natively disabled control leaves the tab order, so a reader tabs onto where it was,
+presses Enter and gets nothing with no announcement to explain it.
+
+### Motion
+
+The drag overlay carries no transition on its transform, which is the one place in
+this package where a token duration would be wrong. It is tracking a finger, and an
+eased follow is lag between the finger and the thing the finger is holding. The
+motion that is here is the drop target changing its border ink and its fill together,
+on `duration-fast`, so a reader can see both the hole the row came from and the place
+it is about to land.
+
+The overlay is the caller's own row, drawn by calling the render prop a second time,
+rather than a picture of it. A row holding a chart and three badges is lifted as
+that, not as a grey box approximating it.
+
+### Content guidelines
+
+- Write `handleLabel` as the action and the position: "Reorder Billing, position 2 of
+  5".
+- Write `announce` as the name, the destination and the total: "Billing moved to
+  position 4 of 7."
+- Write `blockedLabel` as the reason and, where there is one, the way past it: "The
+  validate stage holds its position. Change the pipeline to move it."
+- Write `instructionsLabel` in one sentence, in the present tense, naming all four
+  behaviours.
+- Write `cancelLabel` as the outcome, not as the key: "Stage returned to the position
+  it started in."
+- Write `label` as the set's noun in the plural: "Pipeline stages", "Notification
+  routes".

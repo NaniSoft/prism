@@ -1,0 +1,111 @@
+---
+slug: components/range-field
+title: RangeField
+---
+
+## Overview
+
+A Range field edits an interval: two thumbs on one track, the lower and the upper
+bound, and a sentence that says how wide the interval is.
+
+**The value is a tuple, so the single-value plumbing does not apply.** `Slider` takes
+`value?: number` and `onValueChange?: (value: number) => void`: one number in, one
+number out. `NumberField` is the same shape for a scalar the reader types. An interval
+is two numbers whose relationship to each other is the answer, and no arrangement of
+two `Slider`s produces it, because each would own a value, an accessible name and a
+tab stop, and two independently focusable controls that know nothing about each other
+are a pair that can cross. Writing that today means writing the plumbing twice and
+writing the guard that stops the crossing yourself, and the guard's absence is
+invisible until a form submits a negative span.
+
+**Base UI's Slider is a range primitive already, and this Component uses it rather
+than reimplementing one.** The check was made before the code: the root is declared
+over a single number or an array of them, each thumb takes an index into that array,
+and the root carries a minimum distance between values for the crossing guard, which
+is what `minGap` forwards to. Composing two Prism `Slider`s was rejected on its
+merits: it would carry the same internal dependency twice for one control and leave
+the collision behaviour to whichever of the two answered last. So the two focusable
+handles, the Home and End keys and the form integration are **inherited, not written
+here**, and the reason to own the surface at all is the announcement.
+
+**The announcement is the contribution.** Two range inputs side by side announce two
+numbers. What a reader wants from a band is a sentence with a direction: which end is
+the floor, which is the ceiling, and how wide it is. Each thumb is named by your
+`boundLabel`, which is handed which end it is, and the span is announced once, from a
+visually hidden sentence your `spanLabel` writes.
+
+## Usage
+
+```tsx
+import { RangeField, type RangeValue } from '@nanisoft/prism-ui/components/range-field'
+
+const [retention, setRetention] = useState<RangeValue>([30, 90])
+
+<RangeField
+  label="Retention window, days"
+  min={0}
+  max={365}
+  minGap={7}
+  value={retention}
+  onValueChange={setRetention}
+  boundLabel={(bound, formatted) =>
+    bound === 'start' ? `Earliest day, ${formatted}` : `Latest day, ${formatted}`
+  }
+  spanLabel={(span, formatted) => `Window is ${formatted} days wide.`}
+/>
+```
+
+<ComponentDemo slug="range-field" />
+
+## Guidelines
+
+### When to use
+
+Use it wherever the answer is a band rather than a figure: a retention window, a price
+range a buyer will pay, a severity range on an alert, a reporting period. The two
+bounds are chosen together and their relationship is part of the answer.
+
+Use `minGap` whenever there is a real minimum width. It is the guard against a
+negative span, and a negative span is a value a backend rejects and a reader cannot
+explain.
+
+### When not to use
+
+Do not use it for one number. That is `Slider` for a value the reader drags and
+`NumberField` for one they type.
+
+Do not use it where the exact figures matter more than their relationship. Two typed
+fields with a validation rule between them are better when a reader needs to see both
+numbers at once and may have to type either.
+
+Do not compose two `Slider`s to make one. You would end up with two tab stops, two
+accessible names, no knowledge between them and no guard.
+
+### Best practices
+
+- Pass a tuple, `readonly [number, number]`, lowest first. It is a tuple rather than an
+  array because the two numbers are not interchangeable and an array would let a
+  caller pass them the wrong way round.
+- `onValueChange` receives the whole pair, not the bound that moved, because the span
+  is a fact about the two of them together and this Component has already done the
+  subtraction.
+- Use one formatter. `format` changes the presentation of the drawn bounds, the two
+  thumb names and the hidden span sentence at once, so the number on screen and the
+  number announced cannot disagree.
+- Prism prints bare figures and writes no word beside them, because the words next to
+  a bound are yours. A unit or a currency goes through `format`, which is the same
+  route `Price` takes rather than a second prop for a suffix.
+- `boundLabel` and `spanLabel` are both required. An unsaid span is not a neutral
+  omission: it is the one figure in the control a reader cannot derive, and deriving
+  it means holding two announced values and subtracting them while driving.
+- Each thumb renders its own range input, so a form with a `name` on this field
+  submits both bounds under it.
+
+### Content guidelines
+
+- Name each bound by its direction: "Earliest day", "Up to", "At least". The pair has
+  to read as a sentence when the two names are read one after the other.
+- Write `spanLabel` as a complete statement with the unit in it, because it is read on
+  its own and out of the context of the field label.
+- Put the unit in `label` when the bounds are plain numbers, the way the demo does, so
+  the caption carries what the figures do not.

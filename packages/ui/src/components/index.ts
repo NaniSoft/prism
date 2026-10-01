@@ -361,3 +361,140 @@ export { Announcement } from './ui/announcement'
 export type { AnnouncementProps, AnnouncementTone } from './ui/announcement'
 export { ModeToggle } from './ui/mode-toggle'
 export type { ModeToggleProps } from './ui/mode-toggle'
+
+/*
+ * The nine Components the 2026-09 component sweep added, grouped here by the job
+ * rather than appended in the order they were written.
+ *
+ * Three of them are server Components that take a function prop, which is legal
+ * and is argued in each module: `Metric` and `SearchField` set the precedent. Five
+ * are client, and the directive on each is unconditional because each either holds
+ * state or forwards a handler. `VideoPlayer` is a server Component that ships no
+ * JavaScript at all, which is the reason it is worth reading before any consumer
+ * reaches for a player engine.
+ */
+export { PackSwitcher } from './ui/pack-switcher'
+export type { PackSwitcherProps, PackSwitcherPack } from './ui/pack-switcher'
+export { Pill } from './ui/pill'
+export type { PillProps, PillTone } from './ui/pill'
+export { BillingSource, BillingSources } from './ui/billing-source'
+export type { BillingSourceProps, BillingSourcesProps, BillingSourceItem } from './ui/billing-source'
+export { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter, DrawerTitle, DrawerDescription, DrawerHandle, DrawerClose } from './ui/drawer'
+export type { DrawerProps, DrawerTriggerProps, DrawerContentProps, DrawerHeaderProps, DrawerBodyProps, DrawerFooterProps, DrawerTitleProps, DrawerDescriptionProps, DrawerHandleProps, DrawerCloseProps, DrawerSide } from './ui/drawer'
+export { ImageZoom } from './ui/image-zoom'
+export type { ImageZoomProps } from './ui/image-zoom'
+export { VideoPlayer } from './ui/video-player'
+export type { VideoPlayerProps, VideoPlayerTrack } from './ui/video-player'
+export { EmojiPicker } from './ui/emoji-picker'
+export type { EmojiPickerProps, EmojiPickerItem, EmojiPickerGroup, EmojiPickerSize } from './ui/emoji-picker'
+export { RepoStars } from './ui/repo-stars'
+export type { RepoStarsProps, RepoStarsSize } from './ui/repo-stars'
+export { ChoiceCard } from './ui/choice-card'
+export type { ChoiceCardProps, ChoiceCardOption, ChoiceCardColumns } from './ui/choice-card'
+
+/* The three data-figure Components of the 2026-09 audit: a cell grid graded by a scale
+ * the caller supplies, a share of one whole drawn as a bar, and a retention matrix read
+ * as a table. All three are server Components, so a dashboard full of them costs no
+ * client code, and all three refuse to draw a number a reader cannot read. */
+export { IntensityGrid } from './ui/intensity-grid'
+export type { IntensityGridProps, IntensityGridBand } from './ui/intensity-grid'
+export { ProportionList } from './ui/proportion-list'
+export type { ProportionListProps, ProportionListItem } from './ui/proportion-list'
+export { CohortGrid } from './ui/cohort-grid'
+export type { CohortGridProps, CohortGridRow, CohortGridColumn } from './ui/cohort-grid'
+
+/*
+ * The four Components the strict audit of 2026-09 kept, and the argument each one
+ * survives on, which is the argument a later reader will otherwise optimise away.
+ *
+ * `multi-combobox` and `creatable-combobox` are two different state machines
+ * around a list, not two configurations of one combobox: the first keeps the list
+ * open because a set grows after every commit, the second adds an editable control
+ * inside the popover whose row must stay out of the listbox. `range-field`
+ * carries a TUPLE, so no single-value prop can express it. And
+ * `platform-modifier-key` is the only one that resolves anything at runtime, which
+ * is why it holds no glyph and no word of its own.
+ */
+export { MultiCombobox } from './ui/multi-combobox'
+export type { MultiComboboxProps } from './ui/multi-combobox'
+export { CreatableCombobox } from './ui/creatable-combobox'
+export type { CreatableComboboxProps } from './ui/creatable-combobox'
+export { RangeField } from './ui/range-field'
+export type { RangeFieldProps, RangeValue, RangeBound } from './ui/range-field'
+export { PlatformModifierKey } from './ui/platform-modifier-key'
+export type { PlatformModifierKeyProps, PlatformModifierKeyName, PlatformModifier, PlatformChord } from './ui/platform-modifier-key'
+
+/*
+ * The last five Components the strict audit of 2026-09 kept, and the one thing
+ * each is really about.
+ *
+ * Three of them are about focus after a change: `image-list-field` moves it to a
+ * neighbouring remove button, `repeatable-rows` moves it into a new row and renumbers
+ * the ones below, and `text-format-toolbar` takes it from an editor and gives it
+ * back. A control that unmounts or rearranges without answering that question is
+ * the defect all three exist to prevent, and it is invisible in a screenshot.
+ *
+ * `prompt-composer` and `lifecycle-button` are the two lifecycles. Both take their
+ * state as a union the CALLER owns, so Prism draws a position on a line and never
+ * infers one, and both refuse to own the work: there is no model client here and no
+ * request, only the control surface over a state machine somebody else drives.
+ */
+export { ImageListField } from './ui/image-list-field'
+export type { ImageListFieldProps, ImageListFieldImage } from './ui/image-list-field'
+export { RepeatableRows } from './ui/repeatable-rows'
+export type { RepeatableRowsProps, RepeatableRowInfo } from './ui/repeatable-rows'
+export { TextFormatToolbar } from './ui/text-format-toolbar'
+export type { TextFormatToolbarProps, TextFormatCommand } from './ui/text-format-toolbar'
+export { PromptComposer } from './ui/prompt-composer'
+export type { PromptComposerProps, PromptComposerState, PromptComposerPhase, PromptComposerAttachment } from './ui/prompt-composer'
+export { LifecycleButton } from './ui/lifecycle-button'
+export type { LifecycleButtonProps, LifecycleButtonState, LifecycleButtonPhase } from './ui/lifecycle-button'
+
+/*
+ * The last thirteen Components the strict audit of 2026-09 kept.
+ *
+ * Five of them exist because two Components DISAGREE and the disagreement is the
+ * defect: `split-button` joins a trigger and a menu trigger into one shape, `stepper`
+ * clamps two controls at one bound, `overflow-actions` moves actions into a menu when
+ * the row runs out, `selection-toolbar` and `text-format-toolbar` take opposite
+ * positions on whether focus may move, and `nested-tabs` orders two tab axes that look
+ * identical. In each case a single-value prop cannot express the conflict, and the
+ * honest fix is a Component that owns both halves rather than a boolean.
+ *
+ * Three are about where focus goes after something changes: `reorderable-list`,
+ * `form-dialog` and `form-wizard`. Each answers a question a screenshot cannot show,
+ * and each JSDoc says which destination it chose and what a reader loses because of
+ * it.
+ *
+ * `stateful-table` is the one Component here that decides something about the
+ * caller's data, and it is bounded to the order and only where the caller supplied
+ * an accessor. `money-field` is the one that holds two kinds of value at once, a
+ * number for the caller and a locale-formatted string for the reader, and the round
+ * trip between them is the Component.
+ */
+export { ReorderableList } from './ui/reorderable-list'
+export type { ReorderableListProps, ReorderableMove, ReorderableRowInfo } from './ui/reorderable-list'
+export { Checklist } from './ui/checklist'
+export type { ChecklistProps, ChecklistTask, ChecklistPriority } from './ui/checklist'
+export { FormDialog } from './ui/form-dialog'
+export type { FormDialogProps, FormDialogPhase, FormDialogIssue } from './ui/form-dialog'
+export { FormWizard } from './ui/form-wizard'
+export type { FormWizardProps, FormWizardStep, FormWizardIssue } from './ui/form-wizard'
+export { StatefulTable } from './ui/stateful-table'
+export type { StatefulTableProps, StatefulTableState, StatefulTableChange, StatefulTableColumnUnion, StatefulTableSortableColumn, StatefulTableColumn, StatefulTableSort, StatefulTableDirection } from './ui/stateful-table'
+export { NestedTabs } from './ui/nested-tabs'
+export type { NestedTabsProps, NestedTabSection, NestedTabPanel } from './ui/nested-tabs'
+export { MegaMenu } from './ui/mega-menu'
+export type { MegaMenuProps, MegaMenuGroup, MegaMenuPanel, MegaMenuColumn, MegaMenuLink } from './ui/mega-menu'
+export { TaskProgress } from './ui/task-progress'
+export type { TaskProgressProps, TaskProgressPhase } from './ui/task-progress'
+export { SplitButton } from './ui/split-button'
+export type { SplitButtonProps, SplitButtonAction } from './ui/split-button'
+export { Stepper } from './ui/stepper'
+export type { StepperProps } from './ui/stepper'
+export { OverflowActions } from './ui/overflow-actions'
+export type { OverflowActionsProps, OverflowAction } from './ui/overflow-actions'
+export { SelectionToolbar } from './ui/selection-toolbar'
+export type { SelectionToolbarProps, SelectionToolbarCommand } from './ui/selection-toolbar'
+export { MoneyField } from './ui/money-field'
+export type { MoneyFieldProps } from './ui/money-field'

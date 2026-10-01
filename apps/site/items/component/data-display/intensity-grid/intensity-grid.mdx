@@ -1,0 +1,147 @@
+---
+slug: components/intensity-grid
+title: IntensityGrid
+---
+
+## Overview
+
+An IntensityGrid is a matrix of two categorical axes drawn as a cell grid under one
+sequential intensity scale. Rows are one set of names, columns are another, and every
+cell is filled by how much was measured at the pair of them.
+
+Neither axis is a scale. "Kiln Wharf in March" is not half way between anything, so
+there is no horizontal axis to draw and no vertical one to read, and there is no
+`mark` prop, because a mark is a way of drawing a position and a cell has none.
+
+Two decisions shape it. The scale is derived: pass magnitudes and the Component works
+out the largest cell and reads every other one as a share of it, so a caller never
+pre-normalises. The bands are not: no Component can see that forty findings on one
+estate is a crisis and the same forty on another is an ordinary Tuesday, so `bands`
+is required and is the caller's own statement of what each step means.
+
+The cost of that division is stated where it belongs, on `bands` below, and it is the
+one to read before passing one: Prism cannot check that the scale you pass is
+sequential.
+
+## Usage
+
+```tsx
+import {
+  IntensityGrid,
+  type IntensityGridBand,
+} from '@nanisoft/prism-ui/components/intensity-grid'
+
+const ROWS = [
+  { key: 'kiln-wharf', label: 'Kiln Wharf' },
+  { key: 'harrow-reach', label: 'Harrow Reach' },
+]
+
+const COLUMNS = [
+  { key: 'march', label: 'March' },
+  { key: 'april', label: 'April' },
+]
+
+const CELLS = [
+  { rowKey: 'kiln-wharf', columnKey: 'march', value: 26 },
+  { rowKey: 'kiln-wharf', columnKey: 'april', value: 96 },
+  { rowKey: 'harrow-reach', columnKey: 'march', value: 52 },
+  // No cell for Harrow Reach in April: the pair was not reported.
+
+const QUARTERS: IntensityGridBand[] = [
+  { from: 0, to: 25, level: 1 },
+  { from: 25, to: 50, level: 2 },
+  { from: 50, to: 75, level: 3 },
+  { from: 75, to: 100, level: 4 },
+]
+
+<IntensityGrid
+  label="Findings raised, by estate and month"
+  rows={ROWS}
+  columns={COLUMNS}
+  cells={CELLS}
+  bands={QUARTERS}
+  cellLabel={({ cell, row, column }) =>
+    `${cell.value} findings raised on ${String(row.label)} in ${String(column.label)}`
+  }
+/>
+```
+
+<ComponentDemo slug="intensity-grid" />
+
+## Guidelines
+
+### When to use
+
+Use an IntensityGrid when both axes are names a reader already holds and the question
+is where the readings are. An estate by a month, a collector by a source, a region by
+a failure mode, a service by a weekday. The answer is a shape, and the shape is the
+point: a reader should find the hot cell before they read a number.
+
+Use it when the measure is an intensity that has a bottom. Counts, durations, weights
+and rates all have one. A measure whose middle means something, a delta or a variance,
+is not this Component, because a scale from nothing to the largest value drawn has no
+place to put a midpoint.
+
+### When not to use
+
+Do not use it where the reader needs the numbers. A matrix of forty cells with a
+number in each is a table with shading on it, and there is a Component for that:
+`CohortGrid` prints every cell, and `table` is the general answer.
+
+Do not use it for a measure that moves along a continuous axis. Marks over a domain
+are `Chart`, and a mark is a way of drawing a position, which is why this Component
+has no `mark` prop to be wrong about.
+
+Do not use it for days. A calendar has rules this Component does not: a window, a
+week that starts on a day the caller chooses, and a cell for every day in it. That is
+`ContributionGraph`, which derives its own axes and owns the arithmetic.
+
+Do not reach for it to grade anything. A grid of per-person readings is legible at a
+glance in a way a table is not, which is exactly what makes it the wrong shape for a
+thing a person is judged on.
+
+### Best practices
+
+- Pass raw magnitudes. Prism derives the scale from the largest cell drawn, and a
+  caller who pre-normalises has two chances to get it wrong.
+- Expect the largest cell to flatten the rest. Quartiles of a maximum put most cells
+  in the first band when one cell is an outlier, which is what quartiles of an outlier
+  are. Narrow your bands around the range that matters instead.
+- Give every row and every column a cell where you have one, and leave the pairs you
+  do not have out of `cells` entirely. A missing pair draws as the empty cell and is
+  not named, because an absence is not a zero.
+- Read `bands` in the order you pass them and treat the order as your claim. A caller
+  who wants a key draws one from the same array the cells were graded with.
+- Keep `cellLabel` short. It is announced a cell at a time, so a five by six matrix is
+  thirty stops before the reader reaches anything else on the page.
+
+### Accessibility
+
+The grid is read row by row, and each cell is a picture named by the caller. `cellLabel`
+is required because a shade is not information a screen reader can use: the number
+behind it has to be spoken in the words of the product that measured it, and Prism
+cannot compose a sentence in a caller's language and calendar.
+
+Shade is the redundant channel and never the only one. Every cell carries a spoken
+name, and the value is not printed in the cell, which is the deliberate half of the
+trade: a matrix is scanned at a glance, and printing a number in every cell covers the
+channel the figure exists to provide. A reader who cannot rank five steps of one hue
+has no route to the number on the page, and the answer is `cellLabel` for the reader
+navigating by cell and `CohortGrid` for a figure whose cells have to be read one at a
+time.
+
+An absent pair is hidden from assistive technology rather than named empty. There is
+nothing to name: an absence is not a measurement and has no number to speak, and the
+difference survives in the markup as `data-state="absent"`.
+
+Nothing moves. A hover state would have to change the cell's surface, and the surface
+is what the shade is composited against, so a hover would change the reading while the
+pointer rested on it.
+
+### What this is not
+
+There is no legend, no hover tooltip, no scale bar, no sorting, no `weekStartsOn`, no
+`max`, no `levelFor` and no cell interaction. The legend is absent on purpose: a key
+would assert an ordering Prism cannot check, so the caller who wants one draws it from
+the same `bands` array. The tooltip is absent for the reason `Chart` refuses one, which
+is that a tooltip answers a question a pointer asked and a keyboard never asks.

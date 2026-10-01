@@ -1,0 +1,165 @@
+---
+slug: components/repo-stars
+title: RepoStars
+---
+
+## Overview
+
+A RepoStars is a readout of how many people starred a source repository, beside
+the host's own mark. It is a small figure with a unit attached, and it belongs
+to Data display because that is what it is: a reading, not a control and not a
+navigation.
+
+The decision that shapes it is that **the mark is a slot and never a mark this
+package draws.** Prism's icon lane is Lucide, and Lucide draws interface glyphs
+rather than other companies' trademarks. A repository host's mark is a licensed
+asset with rules about its clear space, its colour, its minimum size and where it
+may appear, so a package that shipped one would be distributing an asset it does
+not own and would be wrong within a year as hosts redraw. The caller passes the
+mark and this Component draws the frame around it: a size, a clip and nothing
+else, so a vector mark and a raster asset come out the same height.
+
+The second decision is that **the count is printed by a callback and the fallback
+is the bare number.** "1.2k" is two decisions in one string. It is a locale,
+because the compact form an English reader expects is not the one a German or a
+Japanese reader expects, and it is a judgement, because a count of 1,204 reads as
+a large project on a repository page and as a rounding error beside a funding
+total. Only the caller knows which page it is on. `Intl` is deliberately not the
+fallback either: a server-rendered figure formatted in the runtime's own locale
+changes when the deployment region changes, and a number that reads "1,204" in
+one build and "1.204" in another is a number two readers were told different
+things about.
+
+The third is that **`href` is a caller's prop and this Component renders no
+navigation region.** A `<nav>` is a set of routes and a star count is not a
+place, so the readout draws an anchor or a span and nothing else. The `href` is
+the caller's to resolve; Prism validates nothing about it and the package imports
+no router and no transport.
+
+## Usage
+
+```tsx
+import { RepoStars } from '@nanisoft/prism-ui/components/repo-stars'
+
+// A readout on its own, in a footer. No link, because a footer that reports a
+// project's popularity should not also offer to leave the page.
+<RepoStars
+  count={18432}
+  mark={<img src="/marks/github.svg" alt="" />}
+  label="stars"
+  size="sm"
+/>
+
+// A readout that leads to the repository, with the count in the compact form the
+// surrounding page already uses everywhere else.
+<RepoStars
+  count={18432}
+  mark={<img src="/marks/github.svg" alt="" />}
+  label="stars on this repository"
+  format={(count) => `${new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(count)}`}
+  href="https://github.com/NaniSoft/prism"
+/>
+```
+
+<ComponentDemo slug="repo-stars" />
+
+## Guidelines
+
+### When to use
+
+Use a RepoStars wherever a page states how popular a source repository is: a
+project header, a package README rendered on a site, a documentation footer, a
+table of the repositories behind a product.
+
+Pass a mark you are licensed to use. A host's brand asset is a real thing with
+real rules, and the honest source of one is the host's own brand page rather than
+a package that shipped it for you.
+
+Pass a `label` that says what is being counted, and say the repository too when
+the surrounding surface does not. "stars" is right on a page whose heading names
+the repository. "stars on this repository" is right on a page where the link
+would otherwise be named only by a number.
+
+Use the small step in a footer, a table row or a card description, and the default
+in a card or page header. There is no larger step, because a star count is never
+the headline figure of a page and a Component that could be drawn at the title
+step would be asking to be the thing it annotates.
+
+### When not to use
+
+Do not use it when there is no host to point at. A readout with no mark beside it
+is a number and a noun and nothing saying which host they are about, and the
+honest answer for a self-hosted repository is a `Metric`, which is a figure that
+needs no host.
+
+Do not use it for a figure that is not a star count. Downloads, forks, issues and
+watchers are all counts, and drawing them as stars is a claim about what the
+number means. A `Metric` takes any figure and any unit.
+
+Do not use it as a live count. This Component renders from props and does not
+subscribe to anything, so a count that refreshes itself is a `live` surface and a
+subscription the consumer owns. A count that was fetched a minute ago and drawn
+from props is this Component.
+
+Do not reach for it to make a page feel social. A star count on a page whose
+repository has four stars is a small number published on purpose, and whether
+that is honest is a claim about the product rather than about the Component.
+
+### Best practices
+
+- **Source the mark, and keep it in the accessibility tree.** The slot is not
+  hidden, because a licensed asset may be the only thing on the readout that says
+  which host this is, and hiding the slot would make your own `alt` unreachable.
+  If your mark really is decoration, pass an `aria-hidden` image and decide that
+  yourself, which is the only party that knows.
+- **Pass a formatter, and pick the compact form that matches your page.** With no
+  `format`, the number is printed exactly as given, which is honest and wider
+  than most people want for a six figure count. The fallback is deliberately not
+  `Intl`, so pass the locale you mean rather than the one the runtime has.
+- **Name the repository in `label` when the page does not.** A link whose
+  accessible name is a number and a bare noun does not say where it goes, and a
+  screen reader user has to activate it to find out.
+- **Expect all six digits with no formatter.** That is the visible cost of the
+  refusal above, and it is stated here rather than discovered in a review.
+- **There is no `target` and no `rel` on this Component.** Both belong to the
+  anchor, and the anchor is inside the readout, so an anchor-shaped root that
+  changed element with `href` would put `rel` and `target` onto a `span` on every
+  readout that has no link, which is invalid markup for a control Prism did not
+  draw. If you need a new tab or a referrer policy, write your own anchor around
+  the readout.
+- **A readout with no `href` is a legitimate state.** A footer that reports a
+  project's popularity is reporting it, and offering a link there invites a
+  reader off a page they are reading.
+- **`className` is layout only.** It cannot re-ink the readout, and there is no
+  second route to its ink, so the figure takes `foreground` as a plain readout and
+  `brand-ink` as a link, per the Brand Ink Rule.
+
+### Accessibility
+
+A readout with no `href` is a span containing a number, a noun and your mark, in
+that order, and a screen reader reads all three in one pass. A readout with an
+`href` is an anchor around the mark, the number and the noun, so the three are
+one thing to follow rather than three things to read, and the whole readout is
+the anchor's hit area.
+
+The number and its noun are one text run rather than two elements, because a
+link's accessible name is the concatenation of its contents and a layout gap
+between two spans is not a space. Two spans would be announced as "1,204stars";
+one run is announced as "1,204 stars" because there is a space in it.
+
+The link's focus ring is drawn at full strength by this Component rather than
+left to the browser, so the indicator this Component owns is the indicator a
+contrast gate can measure. The readout's own ink is `foreground` and a link's is
+`brand-ink`, which is DESIGN.md's Brand Ink Rule rather than a preference:
+`brand-ink` is gated at 4.5:1 against the page, a card and the accent surface in
+both modes of all six sources.
+
+It is a server Component. No hook, no state, no effect, no handler and no
+directive, so a page with four readouts ships no JavaScript for them at all. With
+no `href` there is no interaction, and with one the only behaviour is the
+browser's own navigation, so there is nothing here that could need a client
+runtime. The cost is that a consumer who wants the count to refresh itself is
+reaching for a `live` surface and a subscription Prism does not own.

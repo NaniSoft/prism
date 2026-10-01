@@ -1,0 +1,123 @@
+---
+slug: components/text-format-toolbar
+title: TextFormatToolbar
+---
+
+## Overview
+
+A TextFormatToolbar is a row of commands that act on a text selection somewhere
+else on the page. It is a `toolbar` region, so the arrow keys walk the commands and
+Tab steps over the whole row. It is a Client Component and the caller owns the
+editor.
+
+The commands are caller data. Each one carries an `id`, an accessible `label`, an
+optional `icon`, an optional `pressed`, an `isEnabled` boolean and an `onApply`
+callback. Prism draws the row, the keyboard model, the enabled state and the focus
+handoff; the caller reads the selection, decides what each command can do, and
+applies it.
+
+Prism cannot verify most of what a format toolbar is about, and it says so rather
+than implying otherwise. It never calls `window.getSelection`. The editor may be a
+`contenteditable`, a third-party editor with its own document, an `iframe` or a
+canvas, and in every one of those cases the DOM selection is absent or a fiction.
+So three things are the caller's: whether a command can run, what running it does,
+and where the range is afterwards.
+
+What Prism does own is the focus. A mouse press on a command never takes focus out
+of the editor, because focus leaving a `contenteditable` collapses its selection in
+several engines and the command would act on nothing. A keyboard press does, so
+after the command has run the focus goes back to the element `getEditor` returned,
+and only if the reader is still on the toolbar, so a command that opened something
+else keeps the focus it moved.
+
+## Usage
+
+```tsx
+import { TextFormatToolbar } from '@nanisoft/prism-ui/components/text-format-toolbar'
+
+<TextFormatToolbar
+  label="Text formatting"
+  getEditor={() => editorRef.current}
+  commands={[
+    {
+      id: 'bold',
+      label: 'Bold',
+      icon: <BoldIcon aria-hidden="true" />,
+      isEnabled: selectionIsNotEmpty,
+      pressed: selectionIsBold,
+      onApply: () => wrapSelection('**'),
+    },
+    {
+      id: 'link',
+      label: 'Insert link',
+      icon: <LinkIcon aria-hidden="true" />,
+      isEnabled: selectionIsNotEmpty,
+      onApply: () => openLinkDialog(),
+    },
+  ]}
+/>
+```
+
+<ComponentDemo slug="text-format-toolbar" />
+
+## Guidelines
+
+### When to use
+
+Use a TextFormatToolbar over a rich text field, a markdown source field, or any
+editor where commands act on a selection rather than on the field as a whole.
+
+Pass `pressed` on every command that has an on state, and leave it off on the rest.
+The difference between "bold is available here" and "bold is on right now" is the
+difference between a toolbar that reports a fact and one that guesses, and a
+guessing toolbar tells a screen reader user their text is bold when it is not.
+
+Return the element that should receive focus from `getEditor`, and return `null`
+when your commands open something instead of editing text.
+
+### When not to use
+
+Do not use it for a row of controls that act on a record rather than on a
+selection: save, share, print. Those are a `ButtonGroup` or a `DataToolbar`, and a
+`toolbar` role on them teaches a reader an arrow-key model they will then find
+broken.
+
+Do not use it to hold a formatting select, a colour swatch row or a block-type
+menu. Those open something, and a `Menu` or a `Select` is the control with the
+right model.
+
+Do not use it for a rich text editor's whole chrome. Toolbar, then a separate
+control for the block type, then a separate control for alignment, and a single row
+claiming to be all four is a row whose contents no longer match the promise the
+role makes.
+
+### Best practices
+
+- Read `isEnabled` from the selection on every render rather than at press time. A
+  press has already disturbed the selection, so a command that checked at that
+  moment would be answering about a selection that no longer exists.
+- Restore the range after `onApply` returns, in an effect keyed on the value. The
+  Component hands focus back last, so your range is the last thing standing, and a
+  command that changes the value will have destroyed the browser's own selection by
+  the time you want it back.
+- Key commands by a stable string, not by the label. Labels are localised, and a
+  toolbar keyed on one remounts a control the moment the reader changes language.
+- Mark the icon `aria-hidden`. The `label` already names the control, and two names
+  is a name a reader has to reconcile.
+- Expect the row to be wider than the set of things a reader can do right now. An
+  unavailable command keeps its place and says so, and the reason is yours to
+  state beside the editor.
+- Compose your own `Tooltip` around a non-control if you want a phrase beside a
+  glyph. `TooltipTrigger` draws its own button, so wrapping a command in one would
+  put a button inside a button.
+
+### Content guidelines
+
+- Write `label` as what the commands act on: "Text formatting", "Formatting for the
+  description". It is the region's accessible name and a generic one is a landmark
+  a reader walks past twice.
+- Write each command's `label` as the reader would say it, in the product's
+  language: "Bold", "Insert link", "Decrease indent". Format commands are almost
+  always icon-only, so this string is the only thing that tells three glyphs apart.
+- Order the commands by how often they are used. A link control between bold and
+  italic is something every reader has to learn again.

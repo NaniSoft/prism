@@ -1,0 +1,202 @@
+---
+slug: components/form-dialog
+title: FormDialog
+---
+
+## Overview
+
+A FormDialog is a modal that owns a validating submit. It runs your rules before the
+submission, draws what is wrong where it can be acted on, and keeps the reader where
+they were when a submission is refused. It is a Client Component.
+
+**It is the accessibility centrepiece of the three modal shapes, and what makes it
+one is a focus move rather than a drawing.** A form dialog has four things a reader
+must be able to do from a keyboard: submit it, be told what is wrong, get to whatever
+is wrong, and get back to where they were. The first three are ordinary and the fourth
+is where a hand-rolled version fails. A refusal tends to re-render the form's
+content, and a re-render that replaces the control the reader was on leaves focus on
+the body of the document: a reader in a six-field form is now at the top of the page
+with no idea which field they were in. So on a refusal the error summary takes focus,
+and nothing else does.
+
+**The move is to the summary and not to the first invalid field, because a summary is
+a list and a first field is one of its entries.** A reader with one mistake out of six
+needs the count and the whole list, because they have to decide whether to fix
+everything or abandon the form. Landing them in the first field gives them neither and
+makes them Tab through the rest to assemble what they were just told. Each entry is an
+anchor to the control that caused it, with the field's own label as the visible text
+and the message beneath it, so following one puts the reader on the field rather than
+merely scrolling past it.
+
+**Validation runs before the submission, and its result is unioned with the server's
+by position rather than merged.** `validate` is a local check over the form's own
+values, so a field left empty is caught before a request goes out and the reader is
+not made to wait for a round trip to be told what the form already knew. `issues` is
+the other route, for a request that came back refused, and both reach the same summary
+because a form that can show local errors and not server errors is a form whose worst
+errors are the ones it hides. Merging was rejected: a local result arriving after the
+server's would overwrite the sentence that says why the server said no.
+
+**It is not a Popover and it is not an AlertDialog, and the refusals are the argument
+rather than a preference.** A Popover closes on an outside press, so for a form it
+means a reader who clicks the page behind has silently lost six fields of typing with
+no warning and no route back. An AlertDialog refuses dismissal outright, so for a form
+it is a trap: a twelve-field dialog with no outside press and no Escape is a surface a
+reader cannot leave once they are in it. Dialog is the only one of the three that can
+be dismissed and does not dismiss itself, and that is the property a form needs.
+
+**The modal is `Dialog` and the submission is this Component's.** The backdrop, the
+portal, the focus trap, the scroll lock, Escape and the outside press are composed
+rather than reimplemented. What this Component owns is the part `Dialog` has no
+opinion about, which is what happens between the reader pressing submit and the
+reader being able to act on the answer.
+
+## Usage
+
+```tsx
+import {
+  FormDialog,
+  type FormDialogIssue,
+  type FormDialogPhase,
+} from '@nanisoft/prism-ui/components/form-dialog'
+import { Field, FieldDescription, FieldError, FieldLabel } from '@nanisoft/prism-ui/components/field'
+import { Input } from '@nanisoft/prism-ui/components/input'
+
+const [open, setOpen] = useState(false)
+const [phase, setPhase] = useState<FormDialogPhase>('idle')
+const [issues, setIssues] = useState<readonly FormDialogIssue[]>([])
+
+<FormDialog
+  open={open}
+  onOpenChange={setOpen}
+  trigger="Create an environment"
+  phase={phase}
+  title="Create an environment"
+  description="The environment is created in the region you pick and starts empty."
+  idleLabel="Create environment"
+  invalidLabel="Create environment"
+  submittingLabel="Creating"
+  failedLabel="Environment not created"
+  errorSummaryLabel="The environment was not created"
+  fieldLabel={(field) => (field === 'name' ? 'Environment name' : 'Region')}
+  validate={(values): readonly FormDialogIssue[] => {
+    const found: FormDialogIssue[] = []
+    if (String(values.get('name') ?? '').trim() === '') {
+      found.push({ field: 'name', message: 'Enter a name for the environment.' })
+    }
+    return found
+  }}
+  issues={issues}
+  onSubmit={(form) => {
+    setPhase('submitting')
+    createEnvironment(new FormData(form)).catch((reason) => {
+      setPhase('failed')
+      setIssues(reason)
+    })
+  }}
+  cancelLabel="Cancel"
+>
+  <Field>
+    <FieldLabel htmlFor="name">Environment name</FieldLabel>
+    <Input id="name" name="name" aria-invalid={issues.length > 0 || undefined} />
+    <FieldDescription>Letters, numbers and hyphens.</FieldDescription>
+    {issues.length > 0 ? <FieldError>{issues[0]?.message}</FieldError> : null}
+  </Field>
+</FormDialog>
+```
+
+<ComponentDemo slug="form-dialog" />
+
+## Guidelines
+
+### When to use
+
+Use a FormDialog for a short form that interrupts: create this, rename that, change
+these three settings, invite somebody. It is the Component for a form where being
+wrong is expensive enough to be worth a check before a request goes out.
+
+Use `validate` for the rules the browser could check and did not: a field that must
+agree with another, a value outside a range the platform cannot express, a set of
+answers that are individually valid and jointly impossible.
+
+Use `issues` for what a server said. It is a separate prop rather than a merged
+result because a form that can only show local errors cannot show the one that matters
+most.
+
+### When not to use
+
+Do not use it for a long form. A modal that has to scroll, or one with more than about
+six fields, is a route, and a route is addressable, linkable and reachable by the back
+button.
+
+Do not use it to confirm a destructive decision. That is an `AlertDialog`, which
+refuses the outside press on purpose. A FormDialog dismisses, and a decision that a
+mis-click can answer should not dismiss.
+
+Do not use it for a setting a reader changes often. A `Popover` or a `FilterPanel` is
+lighter, and a form in a popover closes on an outside press, which is fine for
+something with one field and not for something with six.
+
+Do not use it to collect a variable number of records. `RepeatableRows` inside a
+`Dialog` is the arrangement, because the add and remove affordances and the focus
+moves belong to the set.
+
+### Best practices
+
+- Keep `phase` controlled and move it from your transport's events. The Component
+  draws the label, the refusal, the summary and the focus move a position implies, and
+  moves nothing itself.
+- Set `phase` to `invalid` when your issues arrive rather than before. A refusal with
+  nothing to draw is the caller's own transitional state, and the Component says
+  nothing during it rather than inventing a sentence.
+- Give each control an `id` that matches the `field` on its issue. The summary's
+  entries are anchors to those ids, and an id that does not match is an entry that
+  goes nowhere.
+- Render the message under the control as well as in the summary. The summary is the
+  index and the message beside the field is the text, and a reader who followed an
+  entry still has to be told what is wrong once they are there.
+- Write `invalidLabel` as the action again, not as the error. The control is still a
+  control the reader can press once they have fixed what is wrong.
+- Set the control's `aria-invalid` yourself. The Component cannot see your fields, so
+  it cannot mark them, and marking them is the part that tells a reader looking at one
+  field that this one is the wrong one.
+- Use `className` for width and placement only. It cannot change a Prism-owned visual
+  property.
+
+### Accessibility
+
+The summary is a `Field`, so it is a named `group` drawn from the same primitive your
+own fields are made of and it reads as part of the form rather than as an alert
+dropped above it. It takes focus when the refusal arrives, once per refusal, so a
+reader who tabs away from it and comes back is not dragged onto it again. It is
+deliberately not a `role="alert"`, because the focus move already announces it and an
+alert in the same commit is one refusal heard twice in two voices.
+
+The summary is `tabIndex={-1}`, which makes it a focus target for a script and
+nothing else. It exists only after a refusal, and a region that appears and
+disappears must not leave a permanent hole in the tab order.
+
+While the submission is running the submit control is `aria-disabled` rather than
+natively disabled: it keeps its place in the tab order, keeps its ring, and announces
+itself as busy. A natively disabled control answers a press with silence, which is
+the state this package refuses to leave a control in.
+
+The running and refused positions are announced through a live region, because a
+focus move does not cover them. The refusal is not announced there, for the reason it
+is not an alert.
+
+## Content guidelines
+
+- Write `title` as the thing being created or changed: "Create an environment",
+  "Rename the connector".
+- Write `description` as one sentence saying what will happen and what the reader
+  cannot get back.
+- Write `errorSummaryLabel` with the count where you can: "Two fields need
+  attention", "The environment was not created".
+- Write `fieldLabel` as the field's own name, the one on its `FieldLabel`, so the
+  summary and the form say the same thing.
+- Write each issue's `message` as what to do, not as what is wrong: "Enter a name for
+  the environment", "Use 32 characters or fewer".
+- Write `idleLabel`, `invalidLabel`, `submittingLabel` and `failedLabel` as four
+  distinct words. Passing the same string four times is allowed and is usually right;
+  passing "Submit" for all four is a form that never says what is happening.

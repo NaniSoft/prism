@@ -1,0 +1,141 @@
+---
+slug: components/pill
+title: Pill
+---
+
+## Overview
+
+A Pill is one small fully rounded chip holding one value, with a slot at each end.
+It is a single chip and not a group: a set of values is `TagGroup`, which wraps,
+which labels itself, which owns the remove handler, and which is a client Component
+the moment that handler is passed.
+
+**It is not a `Tag`, and both differences are load bearing rather than cosmetic.**
+The first is the shape. A pill is fully rounded, and full rounding is the one radius
+a `data-pack` boundary is allowed to sit on, because `--radius-sm` through
+`--radius-4xl` are all computed from the pack's own `--radius` by multiplication: a
+`rounded-md` chip carrying a `data-pack` boundary is a chip whose corners move with
+its colour, and a row of six of them shows five corner radii for one pack. A `Tag` is
+a `rounded-md` chip because it is a chip in a running row, where a capsule per chip
+reads as a row of buttons. A pill is a capsule because it is one value standing on
+its own.
+
+The second is the two slots, and it is where the cross of a `Tag` lives. A value on
+its own has at least as many reasons to end in something that is not a cross: a count
+of what the pill counts, a state the value is in, a link to the record it names, a
+control the caller owns. So the trailing slot is a slot, and the caller puts their
+own `Button` in it with their own accessible name and their own confirmation.
+
+**The tone is the caller's, and `neutral` is the default because it is the answer
+when there is nothing to say.** A tier, a recipient, a filter, a licence key and a
+network segment are all pills, and which of them deserves the destructive fill is a
+judgement about the caller's own product. Every tone states its own fill and its own
+ink, so a pill never becomes unreadable by being moved onto another surface.
+
+**It is a server Component, and that is what buys the two slots.** No hook, no state
+and no handler, so a page carrying two hundred pills ships no JavaScript at all. The
+cost is the one on the trailing slot: the pill cannot offer the affordance a caller
+most often wants, because offering it would mean shipping a handler and a client
+runtime for a chip.
+
+## Usage
+
+```tsx
+import { Pill } from '@nanisoft/prism-ui/components/pill'
+import { Button } from '@nanisoft/prism-ui/components/button'
+
+<Pill label="Overdue" tone="destructive" />
+
+<Pill
+  label="Northwind Traders"
+  leading={<Avatar fallback="NT" />}
+  trailing={
+    <Button
+      variant="ghost"
+      size="icon"
+      aria-label="Remove Northwind Traders"
+      onClick={remove}
+    >
+      <X aria-hidden="true" />
+    </Button>
+  }
+/>
+```
+
+<ComponentDemo slug="pill" />
+
+## Guidelines
+
+### When to use
+
+Use a Pill for one value that is worth marking and not worth a row: a tier on a
+record, a network segment on a host, a filter summary above a table, a state beside
+a figure, a count beside a label.
+
+Use the `leading` slot for a mark that is not the label, such as an avatar, a
+monogram or a `Status`. Use the `trailing` slot for a count, a unit, or a control
+the caller owns.
+
+Use one size per region. `sm` is for a dense table row, a filter summary and a
+chart legend; `md` is for a row a reader is meant to read.
+
+### When not to use
+
+Do not use a Pill for a set. A wrapping row of values the reader chose and can take
+back is `TagGroup`, which owns the wrap, the group's name and the remove handler.
+
+Do not use a Pill for a status the system decided. A count, a plan name and a
+licence tier are `Badge`, and a state with a dot beside its words is `Status`. A
+pill is for a value the reader picked, and the difference is whether anybody can
+change it.
+
+Do not put a sentence in a Pill. The label truncates rather than wrapping, because a
+chip that runs to three lines is a paragraph with a fill round it, and a value too
+long for a chip wants a table cell or a `Tooltip` beside the pill.
+
+### Best practices
+
+- Choose the tone for what the value means, not for how urgent it looks. A
+  destructive pill is a value the reader can remove by removing a permission.
+- Pass `leading` and `trailing` rather than composing around the pill. A control
+  placed inside a pill keeps the pill's 44px coarse-pointer target; a control
+  placed beside it is the caller's to size.
+- Name a control in the trailing slot yourself. Prism cannot check that it has an
+  accessible name, which is the one thing `Tag` enforces by throwing, so a caller
+  who puts an unlabelled button there ships an unlabelled button.
+- Leave the label as a plain string unless it really is a mark and a word. A node
+  is accepted because a pill is often both, and the cost of accepting one is that
+  the type no longer tells a caller which they have.
+- Keep `className` to layout. Changing a Prism-owned visual property from here is
+  prohibited, and the two slots are the supported way to change what a pill shows.
+
+### Accessibility
+
+A Pill renders a `span` and nothing a reader can reach, so it owns no focus
+indicator and no role. That is the honest role for a value the reader is not
+operating, and it is the reason the two ends are slots: a mark or a control passed
+into one of them is the caller's element with the caller's semantics, so the
+caller's own `alt` and the caller's own accessible name are what reach a screen
+reader.
+
+The label truncates rather than wrapping, so a long value is cut rather than
+reflowed, and a value whose tail matters should say so somewhere a reader can reach
+it.
+
+The clipping is on the label and not on the pill. A pill that also carried
+`overflow-hidden` would cut the indicator of a control in the trailing slot in half,
+so the pill clips nothing and a control at either end draws its ring outside the
+fill.
+
+### What this is not
+
+There is no group, no wrap, no count and no `empty` state. Those belong to
+`TagGroup`, which is the Component for a set of chosen values, and writing them here
+would be a second vocabulary for the same thing.
+
+There is no built-in remove control. See the trailing slot above for why, and for
+the cost.
+
+It is a server Component, so a control the caller puts in either slot brings the
+client runtime with it. That is the arrangement working as intended: the chip costs
+nothing and the caller's affordance costs what the caller's affordance costs.

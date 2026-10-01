@@ -1,0 +1,218 @@
+---
+slug: components/stateful-table
+title: StatefulTable
+---
+
+## Overview
+
+A StatefulTable is a row set that owns its sort, its selection, its column visibility
+and its page, and hands all four to the caller as one value. It is a Client Component.
+
+**Prism's `table` is presentational and `table-sort` is a header cell, and this is
+the thing neither of them is.** `Table` forwards every native table prop and holds
+nothing. `TableSort` reports a direction and leaves the reordering to the caller.
+Between them is the half every consumer writes again: the row order, which rows are
+selected, which columns are on screen and which page is showing, and the four have to
+agree with each other after every change. That agreement is the Component. A caller
+holding them as four independent props gets a page number that does not match the sort
+they have just set, which is a table whose rows are not in the order its own header
+claims.
+
+**One state value rather than four props, for the same reason.** The four are not
+independent: which page is showing is a function of the order and the set in every
+implementation anyone writes. One value is also one place to hold it, so you can put
+it in a reducer, in your store, or in an address query and this Component does not care
+which. The cost is that changing one fact spreads the rest, which is one line and is
+the price of the four being unable to disagree.
+
+**It owns the order, and the accessor is how.** This is the one place a Component in
+this package decides something about your data, and the refusal to do it any other way
+is the design. A column is sortable only when it carries an `accessor`, so the value
+sorted on is yours and never the cell's text: a status column that orders `critical,
+degraded, healthy` and a column of charts that orders on the number the chart reports
+are both expressible here, and neither is guessable from a cell. That is why the
+column type is a union of a sortable arm and a plain one rather than two optionals: an
+optional accessor beside a `sortable` boolean is a combination that type-checks and then
+cannot sort anything.
+
+**A server-ordered set is the original order, and that is what `sort: null` means.**
+Hand over rows already in the order a query produced and a reader who sorts and then
+unsorts gets your order back. The three-state cycle on the header is `table-sort`'s and
+it is spent here, in the third state: one route back to the original, and it is the
+header they already know.
+
+**Selection is a set of your keys, and the header's control covers the page rather
+than the set.** The two differ whenever you page, and conflating them is the defect
+this Component exists to prevent. A "select all" that selected every row on the server
+when twenty are on screen acted on four hundred rows a reader never saw. So the
+header's checkbox covers the rows on the current page, and it is `indeterminate` when
+some of them are selected.
+
+**Column visibility is the reader's preference and lives beside the columns rather
+than inside them.** A column marked hidden in your array would be undone by every fetch
+that rebuilds the array, and your columns say which columns exist rather than which are
+on screen right now. Nothing is hidden on width alone: a table with eleven columns on a
+phone is a hard problem, and pruning columns by guessing at a width takes away a column
+the reader needed without telling them.
+
+## Usage
+
+```tsx
+import {
+  StatefulTable,
+  type StatefulTableColumnUnion,
+  type StatefulTableState,
+} from '@nanisoft/prism-ui/components/stateful-table'
+
+const RANK: Record<Reading['status'], number> = { offline: 0, degraded: 1, healthy: 2 }
+
+const columns: StatefulTableColumnUnion<Reading>[] = [
+  {
+    id: 'site',
+    header: 'Site',
+    cell: (reading) => reading.site,
+    sortable: true,
+    accessor: (reading) => reading.site,
+  },
+  {
+    id: 'status',
+    header: 'Status',
+    cell: (reading) => <Badge>{STATUS[reading.status]}</Badge>,
+    // Sorts on the product's own order of urgency. The cell says "Offline" and
+    // "Degraded", and neither sorts where a reader wants it.
+    sortable: true,
+    accessor: (reading) => RANK[reading.status],
+  },
+  {
+    id: 'lastSeen',
+    header: 'Minutes since a reading',
+    cell: (reading) => `${reading.lastSeen}`,
+    sortable: true,
+    accessor: (reading) => reading.lastSeen,
+  },
+]
+
+const [state, setState] = useState<StatefulTableState>({
+  sort: null,
+  selection: [],
+  hiddenColumns: [],
+  page: 0,
+})
+
+<StatefulTable
+  rows={READINGS}
+  getRowId={(reading) => reading.id}
+  columns={columns}
+  state={state}
+  onChange={(change) => setState(change.state)}
+  label="Estate readings"
+  announceSort={(column, direction) => sayWhatThePressWillDo(column, direction)}
+  selectAllLabel="Select every reading on this page"
+  selectRowLabel={(rowKey) => `Select reading ${rowKey}`}
+  columnsLabel="Columns"
+  emptyLabel="No readings in this window."
+  previousPageLabel="Previous"
+  nextPageLabel="Next"
+  pageLabel={(page, pages) => `Page ${page + 1} of ${pages}`}
+  pageSize={5}
+/>
+```
+
+<ComponentDemo slug="stateful-table" />
+
+## Guidelines
+
+### When to use
+
+Use a StatefulTable when the reader is expected to change four things about the set at
+once and those four have to stay consistent: an operations list, an audit log, a set
+of runs with a filter bar above it. The single strongest signal is that you find
+yourself writing a `useEffect` that resets the page when the sort changes. That effect
+is this Component.
+
+Use `accessor` rather than sorting on the cell's text whenever the cell's text is not
+the value. Status columns, tier columns, duration columns and anything with a
+product-specific order all need it.
+
+### When not to use
+
+Do not use it for a read-only table. `Table` and its parts are the whole Component
+when there is nothing to change, and a table that offers a sort nobody will use and a
+selection nobody will make is a table with four extra controls on it.
+
+Do not use it when paging is the server's and you are rendering one page. Pass the
+page's rows and leave `page` alone, or compose `Pagination` beside a `Table` and own
+the two yourself. This Component pages what it is given, so handing it one page and a
+`pageSize` equal to that page's length produces one page, which is right and is not
+what you wanted.
+
+Do not use it for two or three rows. Four pieces of state and a column disclosure on a
+table of three rows is a control panel around a sentence.
+
+Do not use it to sort by something only the server can sort, such as relevance. The
+accessor receives a row that is already in the document, so it cannot see a field the
+query did not return. Server-side sorting is your transport's and `TableSort` is the
+header to drive it with.
+
+### Best practices
+
+- Put the whole state in one place you own: a reducer, a store, or a query string.
+  Read `changed` when you want to persist one thing rather than four.
+- Give rows a stable key you own. Selection is a set of keys, and a key built from an
+  index selects the wrong row the instant the order changes.
+- Return a number from an accessor when the column holds a number. Numbers compare as
+  numbers; everything else goes through the platform's collator with `numeric` on, so a
+  column of identifiers orders 2 before 10.
+- Never write an `accessor` that reads the rendered cell. The comparator runs on the
+  row, not on the DOM, and an accessor that needs a ref has defeated the point.
+- Keep `label` short enough to survive the width a column header gets. A name that
+  wraps is a header the reader reads twice.
+- Set `aria-invalid`-style state yourself nowhere here: there is no cell editing, and
+  if you add one, `TableCell` is the element to mark.
+- Use `className` for width and placement only. It cannot change a Prism-owned visual
+  property.
+
+### Accessibility
+
+The header is a real `<tr>` of `<th scope="col">` cells, and the sortable ones are
+`TableSort` composed, which is why `aria-sort` lands on the cell rather than on a
+button inside it: a screen reader moving across a table announces the column, and the
+sort state is a property of that column rather than of a control in it. `aria-sort`
+is set on exactly one header at a time, because two columns both reporting an order is
+a table claiming to be sorted two ways at once.
+
+The header's select-all is `indeterminate` when some of the page's rows are selected,
+which is the state that tells a reader they have a partial selection rather than none
+or all.
+
+The empty case is drawn as a real row spanning every column, so the table keeps its
+shape and the sentence is where a reader expects to find it rather than in a gap.
+
+The pager is drawn only when there is more than one page, because a pager on a set of
+four rows is a row of controls describing a choice the reader does not have. Its
+`aria-label` is your `pageLabel`, so a reader who arrives at that row is told where
+they are before they touch either control, and the visible page sentence is
+`aria-hidden` so it is not read twice.
+
+The pager's controls are `aria-disabled` rather than natively disabled on the end
+pages: they keep their place in the tab order and their ring, and a reader paging a
+table is pressing at the ends to find out whether there is more. A natively disabled
+control leaves the tab order and answers a press with silence.
+
+## Content guidelines
+
+- Write `label` as the set's noun: "Estate readings", "Failed runs".
+- Write `announceSort` as what the press will do, given the next direction: "Sort
+  minutes since a reading from lowest to highest", "Return to the order the server
+  sent". One string cannot be right for all three states, and a string chosen for one
+  of them is wrong for the other two in a way the reader cannot detect.
+- Write `selectAllLabel` with the page in it: "Select every reading on this page".
+- Write `selectRowLabel` with the row's own name rather than its key: "Select Northfield
+  array".
+- Write `emptyLabel` as the reason the set is empty: "No readings in the last hour",
+  "Nothing failed in the last day". A set that is loading and a set that has nothing
+  are two different sentences.
+- Write `previousPageLabel` and `nextPageLabel` as a pair, and translate both or
+  neither.
+- Write `pageLabel` as a function of both numbers, so the sentence can put the total
+  first where the language does.

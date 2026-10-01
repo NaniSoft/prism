@@ -1,0 +1,219 @@
+---
+slug: components/form-wizard
+title: FormWizard
+---
+
+## Overview
+
+A FormWizard is a sequence of steps where each one gates the way forward and none of
+them gates the way back. It is a Client Component.
+
+**It is not `Steps`, and the difference is a check rather than a drawing.** `Steps` is
+an ordered indicator of where a reader is: it derives three marks from one number, it
+marks the current step with `aria-current`, and it throws when the marks disagree,
+which is a stronger guarantee than any arrangement drawn here. It has no opinion at
+all about whether a reader may move, because showing a reader their position and
+deciding whether they may leave it are different jobs, and upstream ships the second
+as the first with the decision left out. This Component composes `Steps` for the rail
+and owns the gate. A caller who wants a rail composes `Steps`; a caller who reaches
+for `Tabs` has picked the wrong Component, because a tab list is peer views of one
+subject and a wizard's steps are a route through it.
+
+**Back is always allowed, and that asymmetry is the whole Component.** Forward is
+gated, and the gate is the point: a wizard exists to stop a reader submitting a
+sequence with a hole in it. Back is not, for a reason that is about the reader rather
+than about the data. A gated back control traps a reader in the very step they opened
+the wizard to escape: they have opened step two, found it asks for something they do
+not have, and pressing back does nothing either. No arrangement of the data makes that
+acceptable and the fix is not a better error message, it is that going back is always
+available. So the back control is drawn, named and operable at every step including
+the first, where it is inert rather than absent: a control that appears and disappears
+moves the row a reader is aiming at, and its absence on step one would be a claim
+that there is nothing before here, which is true and not worth a layout shift to say.
+
+**A refused forward move takes focus to the refusal and announces nothing else.** The
+same reasoning as `FormDialog`, and the two are kept consistent on purpose. The
+refusal is announced once, by a focus target the reader lands on and can read a list
+out from, rather than by an alert and a focus move, which is one refusal heard twice
+in two voices. There is no live region on this Component at all, and that is the
+decision: a permanently mounted one would announce the refusal a second time when the
+focus move commits.
+
+**Forward is gated twice over and the order matters.** The step's own `validate` runs
+first, because it is about the reader's answers. The sequence's own `validate` runs
+second, because it is about the submission. A step that fails its own rules never
+reaches the sequence's, which is what stops a reader being told their card was
+declined when the field they left empty was the problem.
+
+**The gate is yours and the drawing is Prism's.** Each step's `validate` decides
+whether its step may be left forwards, and this Component refuses the move and draws
+what came back. It never marks a control invalid and never shows a message under one,
+because it cannot see your form. Your fields are your own `Field`s and your own
+`Input`s, and reaching into them would be the override path this package refuses
+everywhere else. The cost is that you have to render each message under its control as
+well as in the refusal list, and a caller who does only the first has a list a reader
+can follow and controls that do not say why.
+
+**The last step's control is a different prop and not a computed label.** `nextLabel`
+and `finishLabel` are two claims about what the press does. A sequence whose last
+control says "Next" has not told the reader it is the end, and one that says "Finish"
+and then opens step four has lied about something a reader will act on. Both are
+required, and neither has a default, because this package does not know whether the
+product's word is "Continue", "Weiter" or "Siguiente".
+
+## Usage
+
+```tsx
+import {
+  FormWizard,
+  type FormWizardIssue,
+  type FormWizardStep,
+} from '@nanisoft/prism-ui/components/form-wizard'
+
+const [at, setAt] = useState(0)
+const [name, setName] = useState('')
+
+const steps: FormWizardStep[] = [
+  {
+    id: 'organisation',
+    label: 'Organisation',
+    description: 'What is this workspace called?',
+    validate: (form) => {
+      const value = String(new FormData(form).get('name') ?? '').trim()
+      return value === ''
+        ? [{ field: 'name', message: 'Enter a name for the workspace.' }]
+        : []
+    },
+    children: (
+      <Field>
+        <FieldLabel htmlFor="name">Workspace name</FieldLabel>
+        <Input id="name" name="name" value={name} onChange={onName} />
+      </Field>
+    ),
+  },
+  {
+    id: 'region',
+    label: 'Region',
+    description: 'Where is its data held?',
+    children: <RegionField />,
+  },
+]
+
+<FormWizard
+  steps={steps}
+  current={at}
+  onStepChange={(next, direction) => {
+    setAt(next)
+    if (direction === 'forward' && next === steps.length - 1) submit()
+  }}
+  validate={() => (terms ? [] : [{ field: 'terms', message: 'Accept the terms.' }])}
+  backLabel="Back"
+  nextLabel="Continue"
+  finishLabel="Create workspace"
+  blockedLabel="This step is not finished"
+  progressLabel="Workspace setup"
+  issueLabel={(field) => (field === 'name' ? 'Workspace name' : 'Terms')}
+  instructionsLabel="Continue moves forward and is checked before it goes. Back is always available, including on the first step, where it does nothing."
+/>
+```
+
+<ComponentDemo slug="form-wizard" />
+
+## Guidelines
+
+### When to use
+
+Use a FormWizard for a task with several dependent stages where the order is a route
+rather than a preference: setting up a workspace, provisioning an account,
+onboarding a member. The gate is what earns it. Without a gate, a multi-step form is
+a `Dialog` with a progress bar and no argument for being one screen tall.
+
+Give a step its own `validate` only when it has something to refuse. A step that asks
+for nothing has nothing to check, and a `validate` that returns an empty array is a
+branch the caller maintains for no reason.
+
+Use the sequence-level `validate` for the checks no single step can make: terms
+accepted three screens ago, a plan that was changed under the wizard, a quota that ran
+out while the reader was filling in step one.
+
+### When not to use
+
+Do not use it for peer views of one subject. Those are `Tabs`, and a wizard whose
+steps may be visited in any order has taught the reader the wrong thing about the
+order.
+
+Do not use it when the steps are all on one screen. A two-field form split across two
+steps with a rail is a form with a rail.
+
+Do not use it to make a reader agree to something on the last step. A consent that is
+gated behind three screens of setup is a consent that is refused, and the right answer
+is to ask earlier.
+
+Do not use it for a read-only progress display. That is `Steps`, which is what this
+Component composes for its own rail.
+
+### Best practices
+
+- Clamp nothing yourself. `current` is clamped on the way out, so an index that
+  outlives a shorter `steps` array lands on the last step rather than on nothing.
+- Read `direction` in `onStepChange`. The last step's control submits and does not
+  advance, so the index is unchanged and the direction is the only way to tell the
+  submission from a step.
+- Keep the step objects' `id`s stable. They are what your own per-step state is keyed
+  on, and a wizard whose saved answers have nowhere to live is a wizard the reader
+  retypes on every visit.
+- Give each control an `id` that matches the `field` on its issue. The refusal's
+  entries are anchors to those ids.
+- Render each message under its control as well as in the refusal list, and set
+  `aria-invalid` yourself. The Component cannot see your fields, so it cannot mark
+  them.
+- Write `instructionsLabel` to say that going back is always allowed. It is the one
+  sentence a stuck reader most needs, and it is read once for the whole sequence.
+- Use `className` for width and placement only. It cannot change a Prism-owned visual
+  property.
+
+### Accessibility
+
+The rail is `Steps` with the caller's accessible name, and it reads the same index
+the navigation moves, so the two cannot disagree about which step is current. The
+step's own region is a named `group` labelled by the step's own heading, so the name a
+reader hears and the name a sighted reader reads are the same text by construction.
+
+The refusal is a named `group` with `tabIndex={-1}`: a script focus target and not a
+tab stop, because it exists only after a refusal and a region that appears and
+disappears must not leave a permanent hole in the tab order. Focus moves once per
+refusal and not on every render, so a reader who tabs away and comes back is not
+dragged onto it again.
+
+The back control is `aria-disabled` on the first step rather than natively disabled:
+it keeps its place in the tab order and its ring, and the refusal is in the fact that
+there is nothing before the first step. A reader paging a wizard is pressing at the
+ends to find out whether there is more.
+
+The forward control is the form's submit, so `Enter` in any control inside the step
+moves forward. That is what a reader expects from a form that shows one step at a time,
+and it is why the handler is on the form rather than on a click.
+
+### Content guidelines
+
+- Write each step's `label` as a noun a reader would use about it: "Organisation",
+  "Region", "Retention".
+- Write each step's `description` as one sentence saying what this step asks for, in
+  the imperative or as a question. It is read on arrival, not scanned.
+- Write `progressLabel` as the sequence's noun: "Workspace setup", "Account
+  provisioning".
+- Write `nextLabel` and `finishLabel` as two different claims, and make sure the last
+  one really is the last.
+- Write `blockedLabel` with the count where you can: "Two fields need attention".
+- Write `issueLabel` as the field's own name, the one on its label, so the refusal and
+  the form say the same thing.
+- Write each issue's `message` as what to do rather than what is wrong.
+
+## Motion
+
+There is no motion here beyond what `Steps` and `Button` already draw, and that is
+deliberate rather than an omission. A refused forward move is a state change on the
+step's own region, not a transition the reader is waiting to watch, and a panel that
+slides while a reader is being told their field was empty moves the thing they are
+about to read. The rail's marks change on the same state feedback every other state
+change in this package uses.

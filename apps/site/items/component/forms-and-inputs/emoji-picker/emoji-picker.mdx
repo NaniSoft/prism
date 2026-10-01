@@ -1,0 +1,226 @@
+---
+slug: components/emoji-picker
+title: EmojiPicker
+---
+
+## Overview
+
+An EmojiPicker is a grid of emoji the reader chooses one of, with a search field
+above it and a rail of categories beside it. It is the Component for a reaction
+bar, a status field, a labelling field on a ticket, anywhere the reader picks a
+glyph.
+
+The decision that shapes it is that **the emoji set is a prop and this package
+ships no table.** A data set is either licensed or derived, it changes in every
+Unicode release, and what belongs on a rail is the product's own claim about
+itself: a support product wants issue numbers, a documentation product wants
+symbols, an operations console wants state marks. None of those three is a subset
+this package could pick, and a table shipped here would be a second source of
+truth for a surface whose data the consumer owns. So the caller holds the rows
+and this Component draws the control.
+
+The second decision is that **the caller's duty is to pass a bounded set, and
+this Component will not virtualise.** A grid of three thousand emoji is a slow
+grid, and the honest answer to that is a different surface rather than a
+virtualised one under this name. The reasoning is in the guidelines below, and it
+is the part of this Item most likely to be argued with, so it is argued there
+rather than here.
+
+The third is that **every word on the surface is a prop.** The search field's
+name, its placeholder, each category's name, the sentence for a search that
+matched nothing, the name of the control that clears the field, and the sentence
+announced after a choice. A picker that shipped "Search emoji" or "No matches"
+would put an English sentence into a product in any other language, and the only
+fix a consumer would have is a fork.
+
+## Usage
+
+```tsx
+import { useState } from 'react'
+import { EmojiPicker } from '@nanisoft/prism-ui/components/emoji-picker'
+
+// The set is the caller's data, grouped the way their product groups it.
+const GROUPS = [
+  {
+    id: 'reactions',
+    name: 'Reactions',
+    items: [
+      { id: 'thumbs-up', glyph: '\u{1F44D}', name: 'Thumbs up', keywords: ['approve', 'yes', 'like'] },
+      { id: 'eyes', glyph: '\u{1F440}', name: 'Eyes', keywords: ['look', 'watch', 'review'] },
+    ],
+  },
+]
+
+function ReactionField() {
+  const [chosen, setChosen] = useState('thumbs-up')
+
+  return <EmojiPicker
+    groups={GROUPS}
+    value={chosen}
+    onValueChange={setChosen}
+    searchLabel="Find a reaction"
+    searchPlaceholder="Name or keyword"
+    clearLabel="Clear the search"
+    emptyLabel="No reaction matches that."
+    selectLabel={(item) => `${item.name} chosen`}
+    className="max-h-96"
+  />
+}
+```
+
+<ComponentDemo slug="emoji-picker" />
+
+## Guidelines
+
+### When to use
+
+Use an EmojiPicker when a reader chooses a glyph and the set is small enough to
+browse. Pass a set of a few hundred entries at most, which is several screens
+and not several minutes, and give every entry an `id` that is unique across all
+your groups, a `name` and optionally some `keywords`.
+
+Use the search field as the primary route and the grid as the confirmation. A
+reader who knows the name of the glyph they want types it; a reader who does not
+scrolls the categories. Both are supported, and the search searches every
+category at once rather than only the one on screen, so a reader who has landed
+on one category and typed a word is never told the product has no answer.
+
+Compose it inside a `Field` with a `FieldLabel` when the picker is one field
+among several, or inside a `Popover` when it is opened by a button. The picker
+draws no region of its own and no title, so whatever names the surface around it
+is yours to write.
+
+### When not to use
+
+Do not use an EmojiPicker for the full Unicode set. Three thousand entries is a
+slow grid, and a picker that is slow is a control a reader gives up on. The
+honest answer for a large set is a search-first field with a short result list,
+which is a `Combobox` over your own data rather than this Component.
+
+Do not use it for several independent choices. A reader who can pick three
+reactions is not choosing one, so the grid is a `Checkbox` set or a `TagGroup`
+and the single-selection model here is the wrong claim.
+
+Do not pass entries with no `name`. The glyph is hidden from assistive
+technology, so a cell with a glyph and no name is announced as "button" and
+nothing else. A data set that carries names is the ordinary case, so this costs a
+consumer who already has one nothing.
+
+Do not expect the picker to close itself. It draws no popover and no dialog, so
+if it is inside one, pass `onDismiss` and wire it to the close your own surface
+already has.
+
+### Best practices
+
+- **Pass a bounded set, and know why.** Every entry is a real button in the
+  document. That is what makes the roving tab stop a button, what makes the
+  browser's own find-in-page reach a glyph, and what makes the accessibility
+  tree report how many entries there are honestly. A virtualised grid would take
+  all three away: the tab stop becomes a placeholder, find-in-page stops finding
+  glyphs, and the count a screen reader announces becomes a number the Component
+  asserted rather than one it could see. It would also need the row height and
+  the scroll offset, which are layout measurements, which a server render cannot
+  make and which your `className` already decides. So Prism does not virtualise:
+  it would be a different control wearing this name.
+- **Keep ids unique across every group.** The selected value is one id and the
+  roving tab stop is one id, so two entries sharing an id make one of them
+  unreachable rather than ambiguous.
+- **Bound the height with `className`.** The picker is not bounded by Prism. Pass
+  something like `max-h-96`, which is layout only, and let it grow if your set is
+  short. A picker with no bound is a picker whose height is its content's height.
+- **Read the search rule before you write your set.** A query is split on
+  whitespace and every term has to match somewhere in the entry's name or
+  keywords, folded to lower case. So a two word query narrows rather than
+  widens, and `keywords` are what make a search on names alone useful.
+- **Give the grid a column count your width can hold.** `size` sets the cell step
+  and the column count together, and the down arrow moves by one of those
+  columns. A picker squeezed into a narrow column with `size="lg"` moves down by
+  a row the reader cannot see, and Prism does not measure the rendered column
+  count for the reason it does not virtualise.
+- **Expect the rail to disappear while a reader types.** It is drawn only while
+  the query is empty, because a category button shown during a search would be a
+  control that does nothing. The layout shifts; the alternative is a lie.
+- **Set the selection from outside.** `value` and `onValueChange` are both
+  required, so the picker cannot own its answer. That is what lets it be embedded
+  in a form you validate, restored from a save, and cleared by anything outside
+  itself.
+- **A `value` naming no entry is a legitimate state.** Nothing is selected and
+  nothing is announced, which is what a saved record pointing at an emoji you
+  have since withdrawn should look like rather than a crash.
+
+### Accessibility
+
+**The grid is a radio group of buttons with a roving tab stop, and the selection
+is real.** The container is `role="radiogroup"` and each cell is a
+`role="radio"` with `aria-checked`, which is the only description of "exactly one
+of these" that is true. Pressed buttons would say each cell is independent, which
+is the claim one selection is denying.
+
+**The whole grid is one Tab stop, and it sits on the chosen entry.** If nothing
+is chosen, it sits on the first cell. The stop is a derivation over a piece of
+state, so a stop naming an entry the current search has filtered out falls back
+to the chosen entry and then to the first cell: the grid can always be entered
+and is never entered twice.
+
+**The keyboard model, in full, because a reader cannot discover it.** Left and
+right move by one cell. Up and down move by one column, and each is clamped at
+the edge rather than wrapped, because a grid that wraps surprises a reader
+reading a row as a row. Home and End go to the first and the last visible cell.
+Arrow Down from the search field moves into the grid on the current stop, which is
+what makes the field and the grid one control rather than two stops to learn.
+Enter and Space choose. Escape empties the query, which is the picker's own
+cancel, and calls `onDismiss` when you passed one.
+
+**The rail is a row of ordinary tab stops.** Each button carries the category's
+name and the showing one carries `aria-current`, so a reader hears which category
+they are in. The rail is not a tablist: a tablist is a required-name role, and
+using it would need a seventh string prop for a control whose members are already
+named by the category names.
+
+**The grid is named by the category while browsing and by the search field's own
+label while a query is present.** Both names are props you already passed, so
+Prism writes neither. The scroll region beside it takes the same name, because
+the region and the grid hold the same entries and a reader who hears two
+different names for one set has been told two things.
+
+**A choice is announced in a polite live region.** It is in the document from
+the first paint with nothing in it, which is the only reliable way to use a live
+region: one that arrives with its first message is announced least reliably of
+all. The sentence is your `selectLabel` function, because the only word this
+package has for an entry is your own `name`.
+
+**Motion is state feedback on two tokens and there is no keyframe.** The cell and
+the rail change ink at `duration-fast ease-out`, which is not guarded, because
+the system's position is that feedback motion is shortened rather than removed
+under reduced motion. The one spatial change here, the press, is guarded with
+`motion-safe:`, so a reader who asked for less movement gets the colour change at
+full strength and no movement at all. Nothing here waits for a script, a scroll
+position or a timer, so the picker is complete and legible at first paint
+whatever the reader's settings are.
+
+### What this is not
+
+There is no tooltip on a cell, no recent or frequently-used row, no skin tone or
+variant-selector handling, no GIF or sticker support, no clipboard, and no
+shortcode. A tooltip per cell is several hundred more Components in the tree for
+a name you already hold in your data, and Prism will not draw a browser tooltip
+it cannot style. The rest is Unicode data work, and a data set is the consumer's.
+
+It is a client Component, and the directive is unconditional. The picker holds
+the query, the showing category, the roving stop and the announcement, and all
+four are the control rather than a decoration of it. The cost is named: a
+consumer rendering a read-only list of the set they already hold ships a client
+runtime for it, and the honest answer for that case is their own list.
+
+## Content guidelines
+
+- Write each entry's `name` as the thing a reader would say about it, because it
+  is the accessible name of the cell. "Thumbs up" is a name; "+1" is a filename.
+- Write `keywords` as the words a reader would type, not as synonyms of the name.
+  "approve", "yes", "like" is what makes a search useful; "like1" is not.
+- Write category names as the reader's own categories, in the reader's language.
+  They are the rail's buttons and the grid's name while browsing.
+- Keep the empty sentence short and say what to do next: "No reaction matches
+  that" tells a reader to try a shorter word, and "No results" does not.
+- Keep the announcement short. It is read after every choice, so a sentence with a
+  clause in it is a sentence the reader hears on every tap.

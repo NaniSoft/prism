@@ -1,0 +1,129 @@
+---
+slug: components/prompt-composer
+title: PromptComposer
+---
+
+## Overview
+
+A PromptComposer composes a model request with what is attached to it, and can be
+cancelled while the answer is still arriving. It is a Client Component and it owns
+no model and no transport: it is a control surface over a state machine the caller
+drives.
+
+The state is a controlled union of five positions, `idle`, `sending`, `streaming`,
+`done` and `failed`, and the affordances are a table rather than a judgement. A
+request that is being sent and one whose answer is arriving in pieces are different
+situations, not different degrees of the same one: there is nothing to stop in the
+first and everything to stop in the second. So the stop control exists in exactly
+one position, while `streaming`, and its absence elsewhere is drawn as absence
+rather than as a greyed control, because there is genuinely nothing to stop yet.
+
+The request field goes `readOnly` while the answer is coming rather than going
+`disabled`, so a reader mid-stream can still read what they sent and select part of
+it. The attachments tray is a nested list with its own remove controls, and removing
+one moves the focus to a neighbour, or to the attach control when the last one
+goes.
+
+Prism owns no client, no socket and no persistence. The caller owns the request,
+the transport, the order the pieces arrive in and the position, and moves it when
+the transport says so. That is the same division `LiveRegion` makes with the events
+it announces, and it is why no consumer inherits a connection it did not ask for.
+
+## Usage
+
+```tsx
+import {
+  PromptComposer,
+  type PromptComposerState,
+} from '@nanisoft/prism-ui/components/prompt-composer'
+
+const [state, setState] = useState<PromptComposerState>({ phase: 'idle' })
+const [text, setText] = useState('')
+
+<PromptComposer
+  label="What should the agent do?"
+  state={state}
+  text={text}
+  onTextChange={setText}
+  onSubmit={(request) => send(request, setState)}
+  onStop={() => abort()}
+  onRetry={() => send(text, setState)}
+  sendLabel="Send"
+  stopLabel="Stop generating"
+  retryLabel="Try again"
+  attachLabel="Attach"
+  onAttach={() => picker.current?.click()}
+  attachments={attachments}
+  onRemoveAttachment={(id) => setAttachments(drop(id))}
+  removeAttachmentLabel={(name) => `Remove ${name}`}
+/>
+```
+
+<ComponentDemo slug="prompt-composer" />
+
+## Guidelines
+
+### When to use
+
+Use a PromptComposer wherever a reader writes a request that comes back over time
+and can be stopped: an agent console, a copilot in a form, a chat composer with
+attachments.
+
+Move the position yourself, and only from your transport's events. `sending` when
+the request is on its way, `streaming` when the first piece of the answer arrives,
+`done` when the last one does, `failed` when the request will not complete.
+
+Keep the request text controlled. A composer whose draft lives inside a design
+system is a draft you cannot seed from a conversation, restore from a store, count
+tokens against, or clear when a send succeeds.
+
+### When not to use
+
+Do not use it for a form field that happens to sit near a submit button. A field
+with a button is a `Field` and a `Button`, and a request lifecycle on a control
+that has no answer arriving is five states where two would do.
+
+Do not use it for a request that cannot be cancelled once it is under way, such as
+a form submission that navigates. There is nothing for a stop control to stop, and
+offering one is a promise the product cannot keep.
+
+Do not use it as a file uploader. It draws no picker, and the tray it draws is a
+list of references rather than a list of transfers: an attachment is usually
+already in your storage, so there is no byte count to show and no meter to run.
+
+### Best practices
+
+- Pass `onStop` and `onRetry` even if you do not expect to need them. The union names
+  `streaming` and `failed`, so a position you can reach owes a way out of it, and a
+  Component that renders a state it cannot exit is a surface where a reader's
+  request runs on with no way to end it.
+- On stop, decide what the position becomes and say so in your own surface. There is
+  no cancelled member here, because whether a stop leaves a partial answer is a fact
+  about your transport. Returning to `idle` and keeping the draft is the common
+  choice.
+- Clear the draft yourself when a send succeeds, and restore it yourself on retry.
+  Both are decisions about your product's data, and both are one line in the
+  callback you already have.
+- Keep the row order as it is: send, then stop or retry, with attach at the leading
+  edge. The Composer draws them in that order for the reason it does, and
+  `className` is layout only.
+- Expect the reason beneath the field to be announced as an alert, because it is
+  drawn with `FieldError`. A composer that also holds a control with its own
+  validation error will announce both the same way; compose your own region beside
+  the field if you need them told apart.
+
+### Content guidelines
+
+- Write `label` as the question the reader is about to ask: "What should the agent
+  do?", "Message the pipeline".
+- Write `sendLabel` and `stopLabel` as two different actions in the product's own
+  words, not as one word with an ellipsis. "Stop generating" and "Send" are two
+  decisions; "Stop..." and "Send" read as the same control in two states.
+- Write `retryLabel` with the cost in it where there is one: "Try again" for a
+  request that may succeed unchanged, "Try again, shorter" when a length limit is
+  the likely cause.
+- Write the failure `reason` with the cause and the way past it. It is announced, so
+  it is read aloud: "The agent could not read that run. Narrow the window and try
+  again."
+- Write `removeAttachmentLabel` as the action and the attachment: "Remove
+  site-plan.pdf".

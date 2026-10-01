@@ -1,0 +1,125 @@
+---
+slug: components/proportion-list
+title: ProportionList
+---
+
+## Overview
+
+A ProportionList draws each labelled category's share of one whole as a bar, with the
+share printed beside it. The unit is a share, which is what shapes the whole
+Component: the bars are constrained to sum to the total, so they cannot be modelled as
+independent series and there is no `series` prop, no `mark` and no axis.
+
+Two decisions shape it. The bar is drawn with `Meter`, so the bar, its tone vocabulary
+and its accessibility belong to one Component rather than two. And the bar is
+decorative: a `Meter` announces its name and its value, the row prints both, and an
+announced bar beside a printed one is the same sentence twice on every row of the page.
+
+The third decision is the one that costs. A share needs a whole, the whole is a claim
+about the caller's data, and Prism knows the sum and not the thing summed. So the
+Component prints no total and puts no unit beside the shares, and `caption` is where
+the caller writes the sentence that says what the shares are a share of.
+
+## Usage
+
+```tsx
+import {
+  ProportionList,
+  type ProportionListItem,
+} from '@nanisoft/prism-ui/components/proportion-list'
+
+const ITEMS: ProportionListItem[] = [
+  { label: 'Estate observation', value: 482_400, status: { tone: 'success', label: 'On plan' } },
+  { label: 'Market capture', value: 268_900, status: { tone: 'success', label: 'On plan' } },
+  { label: 'Agent runners', value: 151_200, status: { tone: 'warning', label: 'Near the cap' } },
+  { label: 'Storage overage', value: 18_700, status: { tone: 'destructive', label: 'Over the cap' } },
+]
+
+<ProportionList
+  label="Where the quarter estate budget went"
+  items={ITEMS}
+  caption="Of 985,300 credits committed in the quarter"
+/>
+```
+
+<ComponentDemo slug="proportion-list" />
+
+## Guidelines
+
+### When to use
+
+Use a ProportionList when the reader's question is "how much of this is that", asked of
+several categories at once. A budget breakdown, a traffic mix, a share of estate
+covered, a split of failures by stage. The unit is the share, and the bars being on one
+common baseline is what lets a reader compare two of them without reading either
+number.
+
+Use it when there are more rows than a donut can hold. Three parts are a `Chart`
+`donut`, which answers one glance; eight parts in a ring is a puzzle, and a list of
+bars is the shape that survives greyscale and holds up at that length.
+
+Use `total` whenever the list is not exhaustive. A bar measured against the sum of what
+is shown overstates every category on the page, and the Component cannot tell an
+exhaustive list from a truncated one.
+
+### When not to use
+
+Do not use it for values that are not shares. A series against a shared baseline is a
+`Chart` `bar`, and a bounded measurement with a limit on it is a `Meter`. A share needs
+a whole and a `Meter` does not.
+
+Do not use it for a table. One measure beside its name is a list; several measures and
+a header row is `table`.
+
+Do not use it for a comparison with no whole behind it. "Kiln Wharf collected 42
+readings and Harrow Reach collected 19" is two numbers, not two shares, and dividing
+them by their sum would answer a question nobody asked.
+
+Do not use it to sort. The order you pass is the order drawn and read, and that is
+almost always the ranking you already computed.
+
+### Best practices
+
+- Pass the count and let the Component divide. A percentage in `value` means the whole
+  has been computed twice, once by you and once here.
+- Pass `text` per row when the printed reading is more than a share. "1,204 captures"
+  and "4 of 9 sites" are both ordinary readings, and a Component that assembled either
+  would be shipping a currency or a counting format into every consumer's product.
+- Pass `status` as a pair. A tone without words is a colour a screen reader cannot read
+  and a sighted reader who cannot separate the tones cannot either, so the Component
+  will not render one.
+- Write `caption` with the whole in it. The cells print bare shares, so the sentence
+  underneath is what says what they are a share of.
+- Expect a `neutral` or `info` status to draw a neutral bar. `StatusTone` has five
+  members and `MeterTone` has four, and there is no informational fill, so the colour
+  meaning of those two is carried by the dot beside the label and not by the bar.
+- Order the items yourself and pass `precision` to match the precision of the numbers
+  behind them. One decimal place is the default because a share is a rounded quantity.
+
+### Accessibility
+
+The rows are a `ul` of `li`, so a reader moving by list item is told how many
+categories there are and each row is one stop. Nothing in a category list is tabular
+data: there is one measure and it is beside its name.
+
+**The bar is decorative and the printed number is the reading, said plainly.** The
+`Meter` is wrapped in an `aria-hidden` box because it announces its name and its value,
+the row already prints both, and an announced bar beside a printed one says the same
+thing twice for every row. A reader who cannot rank the fills still has every number,
+which is the whole reason the number is printed rather than left to the bar.
+
+The state is never carried by colour alone. The tone fills the bar and the dot beside
+the label, and the words naming the state are in the row, so a reader who cannot
+separate `warning` from `destructive` still reads which is which.
+
+Nothing moves, and nothing is interactive. A hover state on a row that cannot be
+pressed is an affordance for something the page does not do.
+
+### What this is not
+
+There is no stacked bar, no total printed on the figure, no interactive sort, no row
+selection and no tooltip. A stack puts the shares in one figure where the reader has
+to find the boundary between two categories to compare them, and this list exists to
+put each one on its own common baseline. The total is absent because Prism knows the
+sum and not the thing summed, and a number with no unit beside it is the number a
+reader misreads.

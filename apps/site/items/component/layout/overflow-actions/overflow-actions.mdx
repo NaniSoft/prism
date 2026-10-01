@@ -1,0 +1,116 @@
+---
+slug: components/overflow-actions
+title: OverflowActions
+---
+
+## Overview
+
+An OverflowActions row gives up its trailing actions when it runs out of room, moving
+them into a menu behind a single trailing control. It is a Client Component.
+
+It observes itself, and that is why it is a Component. A row of five actions inside a
+table cell is a layout problem no prop describes, because the answer depends on a
+width Prism cannot see: the cell, the sidebar, the zoom level, the font the reader
+chose, and the strings the caller localised last week. Every prop is a decision taken
+before the width is known. This one is taken after it.
+
+## What the first frame draws
+
+A server render has no width to measure, so the first frame draws every action the
+caller passed and **no cap**. That is the row the caller described rather than the row
+this Component would have guessed at.
+
+The correction is made in a layout effect, which runs after the DOM is mutated and
+before the browser paints, so a reader with scripting sees the corrected row as the
+first frame they ever see and never sees the un-collapsed one. What is visible to a
+reader without scripting, to a crawler and in a print stylesheet is the full row, which
+is the correct answer for all three: a cap that cannot open is a control that lies.
+
+The cap itself is always in the document and is taken out of the flow rather than
+unmounted. A trigger that is not rendered has no width to read, and a row that changed
+width when the cap appeared would move its actions on every resize. While nothing has
+collapsed the cap is invisible, out of flow, out of the tab order and out of the
+accessibility tree, and its width is still readable.
+
+## Usage
+
+```tsx
+import {
+  OverflowActions,
+  type OverflowAction,
+} from '@nanisoft/prism-ui/components/overflow-actions'
+
+const actions: readonly OverflowAction[] = [
+  { id: 'open', label: 'Open' },
+  { id: 'share', label: 'Share' },
+  { id: 'archive', label: 'Archive' },
+  { id: 'trash', label: 'Delete', tone: 'danger' },
+]
+
+<div className="w-full max-w-72">
+  <OverflowActions
+    actions={actions}
+    overflowLabel="More actions for this row"
+    onOverflowChange={(ids) => console.log('in the menu', ids)}
+  />
+</div>
+```
+
+<ComponentDemo slug="overflow-actions" />
+
+## Guidelines
+
+### When to use
+
+Use it in a row of row actions that will sometimes not fit: a table cell, a card
+footer, a list panel. The leading actions stay drawn and the trailing ones move, so
+the actions a wide row already fit are the ones a narrow one keeps.
+
+Give the row a bounded width through `className` or through its container. A row that
+sizes itself to its content has no room to run out of, and the consequence of
+ignoring this is not a row that overflows its container but a row that empties itself
+into a cap.
+
+Use `onOverflowChange` when the row means something different once actions are hidden:
+a description of what is in the menu, a measurement, an event. It fires on the change
+and never on the first render.
+
+### When not to use
+
+Do not use it for a toolbar above a table. That is a `DataToolbar`, which reflows onto
+a second line rather than hiding anything, because a control the reader did not see
+should still be on the page and still be reachable.
+
+Do not use it for a row whose actions are all equally important. Collapsing the
+trailing one says it matters least, and if it does not, nothing should be collapsed
+and the row should wrap.
+
+Do not use it when the actions are the only route to something. An action that can
+only be reached by opening a menu is a menu item, and `DropdownMenu` is the Component
+for it.
+
+Do not expect it to move the leading actions. It collapses from the trailing end
+because those are the ones a narrow row has to give up, and reversing that would hide
+the action a reader reached for.
+
+### Best practices
+
+- Order `actions` by how often each is used, because the trailing ones are the ones
+  that move. The order is the only grouping the row has: nothing is drawn between the
+  actions.
+- Give each action a real `label` rather than an icon alone, because the drawn action
+  is measured as it is drawn and an icon-only row gives the reader nothing to compare.
+- Expect an action in the menu to keep its label, its mark and its unavailable state.
+  It is the same action in a different frame.
+- Expect a command that cannot run right now to be unavailable rather than removed.
+  Use the `disabled` field on the action rather than filtering it out of the list.
+- Use `className` for width and placement only. Changing the gap through it is
+  allowed, because the row reads its own gap back rather than assuming one.
+
+### Content guidelines
+
+- Write `overflowLabel` as what is inside: "More actions for this row", "Remaining
+  actions". It is announced on a control that appeared without the reader asking, so
+  it has to say what it is before they press it.
+- Keep a moved action's label identical to its drawn label. A reader who found it in
+  the menu is looking at the same thing they were looking at in the row.
