@@ -36,6 +36,7 @@ const SCRIPT_DIR = path.join(REPO, 'scripts')
 const DASHES = path.join(SCRIPT_DIR, 'check-dashes.mjs')
 const ELEVATION = path.join(SCRIPT_DIR, 'check-elevation-layout.mjs')
 const CHANGESETS = path.join(SCRIPT_DIR, 'validate-changesets.mjs')
+const HEADING_SCALE = path.join(SCRIPT_DIR, 'check-heading-scale.mjs')
 const DETERMINISM = path.join(REPO, 'packages', 'tokens', 'scripts', 'check-determinism.mjs')
 const NOT_THE_ROOT = path.join(REPO, 'packages', 'ui')
 
@@ -251,10 +252,12 @@ test('the real gates still pass and state their coverage', () => {
   const dashes = run(DASHES, REPO)
   const elevation = run(ELEVATION, REPO)
   const changesets = run(CHANGESETS, REPO)
+  const headingScale = run(HEADING_SCALE, REPO)
 
   assert.equal(dashes.status, 0, dashes.stderr)
   assert.equal(elevation.status, 0, elevation.stderr)
   assert.equal(changesets.status, 0, changesets.stderr)
+  assert.equal(headingScale.status, 0, headingScale.stderr)
   assert.match(dashes.stdout, /0 in reader-facing copy/)
   assert.match(dashes.stdout, /0 unresolved\)/)
   assert.match(dashes.stdout, /read but not gated: .*scripts \(read, not gated\)/)
@@ -263,4 +266,9 @@ test('the real gates still pass and state their coverage', () => {
   assert.match(elevation.stdout, /excluded from every rule: .*check-elevation-layout\.mjs/)
   assert.match(changesets.stdout, /read \d+ changeset\(s\) and \d+ workspace manifest\(s\)/)
   assert.match(changesets.stdout, /0 unresolved/)
+  // Its own cases are in `heading-scale.test.mjs`, staged against trees rather
+  // than this repository, so all this asserts is that the shipped Component is not
+  // a case the gate is red on today.
+  assert.match(headingScale.stdout, /0 finding\(s\)/)
+  assert.match(headingScale.stdout, /0 root\(s\) unresolved/)
 })

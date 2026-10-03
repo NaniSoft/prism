@@ -370,11 +370,28 @@ Text sizes are authored as size and line-height pairs: `xs` 0.75/1.333, `sm`
 
 ### Hierarchy
 
-- **Display** (600, 1.875rem / 1.2, -0.025em): section titles, the CTA banner
-  heading, and every page `h1`. It steps up to 2.25rem at `sm` and carries
-  `text-balance`. Nothing in the system goes above `4xl`.
-- **Title** (600, 1.5rem / 1.333, -0.025em): a block detail `h1`, stat values
-  and plan prices. A card title uses `font-semibold` at the inherited size.
+A heading's size follows its level. The level is already on every Block as
+`headingLevel` and `childLevel()` already carries it down a level, so the size is
+derived from the level rather than chosen beside it, and there is no prop that
+sets it.
+
+- **Display** (600, 1.875rem / 1.2, -0.025em): every page `h1`, and a Block
+  composed as one. It steps up to 2.25rem at `sm` and carries `text-balance`.
+  Nothing in the system goes above `4xl`, and no heading level steps above
+  Display: the `h1` is the ceiling because a page has one top-level claim.
+- **Title** (600, 1.5rem / 1.333, -0.025em): the section title, which is the
+  `h2` and therefore what almost every Block renders, at 1.875rem above `sm`. Also
+  stat values and plan prices. A card title uses `font-semibold` at the
+  inherited size.
+- **Step** (600, 1.25rem / 1.4, -0.025em): the `h3`, at 1.5rem above `sm`, which
+  is where a Block embedded inside a catalogue card or a panel lands.
+- **Floor** (600, 1.125rem / 1.556, -0.025em): `h4`, `h5` and `h6`, at 1.25rem
+  above `sm`, and this is where the scale stops. `lg` is the deepest authored step
+  that is not smaller than Body, so a heading that stepped one further would
+  render smaller than the copy it introduces. The three levels share one step and
+  do not wrap, which is the same trade `childLevel()` makes when it clamps at
+  `h6`. A heading at the floor is still a heading: weight, tracking and
+  `text-balance` carry it, not size alone.
 - **Body** (400, 1.125rem / 1.556): section and page descriptions, with
   `text-pretty`. Supporting copy drops to 0.875rem.
 - **Label** (500, 0.875rem / 1.429): buttons, nav links, option rows, and card
@@ -383,6 +400,19 @@ Text sizes are authored as size and line-height pairs: `xs` 0.75/1.333, `sm`
   text, opt-in only.
 - **Mono** (400, 0.625rem, line-height 1): token values, install commands,
   category tags and machine annotations.
+
+The one heading outside this table is the CTA banner, which is not a section
+title: `Cta01` draws a centred title on a filled panel with nothing under it, so
+it resolves its own tag and asks this table for its size rather than keeping a
+second answer to the same question.
+
+**`Prose` walks the same ladder**, and it did before `SectionHeading` did. Its
+child treatments set `h1` at `3xl`, `h2` at `2xl`, `h3` at `xl` and `h4` at `lg`,
+which is this table step for step and stops where this table stops. A document
+rendered through `Prose` and a page composed from Blocks now read as one
+hierarchy. `SectionHeading` was the second answer, and it was the one every
+catalogue Item used, so the two agreed about prose and disagreed about
+everything else.
 
 ### Named rules
 
@@ -395,6 +425,15 @@ when you mean it.
 block is composed rather than a page, so the surrounding document already owns
 the `h1`. The site's landing page is the one place that opts up. A document with
 no `h1` gives screen readers and search engines no top-level entry point.
+
+**The Level-Carries-The-Size Rule.** The heading level decides the size as well
+as the tag, and no prop decides either. The alternative was a `size` prop on
+`SectionHeading` and on every Block that renders one, which widens the public
+surface across ten Blocks for a decision the surrounding document has already
+made by choosing a level. A consumer composing a hero and six Blocks gets the
+hierarchy by passing the levels it was already passing, and a Block moved from an
+`h2` section into an `h3` one carries its size with it, which is what
+`headingLevel` was introduced to do.
 
 ## Layout
 

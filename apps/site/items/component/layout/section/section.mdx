@@ -13,6 +13,22 @@ rhythm instead of each block re-deriving its own padding.
 title, and an optional description. Its `as` prop selects the heading level, and
 it defaults to `h2` because a Block is composed rather than a page.
 
+The level also picks the size. There is no `size` prop, and the table below is
+what `as` resolves against.
+
+| Level | Step | Value | Above `sm` |
+| --- | --- | --- | --- |
+| `h1` | `text-3xl` | 1.875rem | 2.25rem |
+| `h2` | `text-2xl` | 1.5rem | 1.875rem |
+| `h3` | `text-xl` | 1.25rem | 1.5rem |
+| `h4` | `text-lg` | 1.125rem | 1.25rem |
+| `h5` | `text-lg` | 1.125rem | 1.25rem |
+| `h6` | `text-lg` | 1.125rem | 1.25rem |
+
+`h4` is where the scale stops. `lg` is the deepest authored step that is not
+smaller than body copy, so a heading one step further down would read as a
+caption. `h5` and `h6` hold at that step rather than wrapping.
+
 ## Usage
 
 ```tsx
@@ -42,6 +58,8 @@ between blocks to keep the rhythm continuous.
 
 Use `SectionHeading` with `as="h1"` when the section is the page's primary
 heading, and with a deeper level when the document already names the content.
+Either way the level decides the size, so a band composed one level deeper reads
+as one level deeper without anything else being passed.
 
 ### When not to use
 
@@ -52,12 +70,16 @@ Do not re-declare the container width or the section padding at a call site. If
 a band needs a different width, that is a token or a component change, not a
 `max-w-*` on the section.
 
+Do not restate the size. There is no way to, and that is deliberate: a heading
+whose size a call site sets is a heading whose size a consumer has to know.
+
 ### Best practices
 
 - One `h1` per page. Every other heading nests under it, and `SectionHeading`'s
   default `h2` is the level below the page title.
 - Pass `headingLevel` or `as` at the call site when a Block sits under a heading
-  the document already owns, so the outline stays single-rooted.
+  the document already owns, so the outline stays single-rooted and the size
+  follows the outline rather than being chosen separately.
 - Keep `eyebrow` opt-in. It has no default, because a hardcoded eyebrow makes
   every consumer inherit a claim about their product.
 - Use `align="left"` for data sections and the centered default for hero and

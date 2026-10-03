@@ -88,6 +88,43 @@ export function childLevel(level: HeadingLevel): HeadingLevel {
 }
 
 /**
+ * The step of the authored type scale each heading level renders at.
+ *
+ * Private, and read through `headingSizeClass`, so there is one list and a caller
+ * cannot add a step to it. The table and the reasoning behind it are on
+ * `SectionHeading`, which is the documentation source the declaration build
+ * preserves and the corpus reads, and `scripts/check-heading-scale.mjs` holds the
+ * two copies in step.
+ */
+const HEADING_SIZE: Record<HeadingLevel, string> = {
+  h1: 'text-3xl sm:text-4xl',
+  h2: 'text-2xl sm:text-3xl',
+  h3: 'text-xl sm:text-2xl',
+  h4: 'text-lg sm:text-xl',
+  h5: 'text-lg sm:text-xl',
+  h6: 'text-lg sm:text-xl',
+}
+
+/**
+ * The size classes a heading at `level` renders at.
+ *
+ * Exported for the one Block that resolves its own heading tag on a filled
+ * surface rather than composing `SectionHeading`: `Cta01` cannot borrow this
+ * Component's markup, because its copy sits on a `bg-primary` panel where the
+ * muted description colour and `gap-4` are wrong, so it writes the element itself
+ * and used to write the size with it. Two answers to the same question is how the
+ * one-size defect reached a second surface, so it asks here rather than keeping a
+ * second table.
+ *
+ * The classes are the whole answer, `font-semibold`, `tracking-tight` and
+ * `text-balance` are not included, so a caller composes them onto the surface it
+ * owns and cannot inherit this Component's decisions by accident.
+ */
+export function headingSizeClass(level: HeadingLevel): string {
+  return HEADING_SIZE[level]
+}
+
+/**
  * The heading a section opens with: an optional eyebrow, the title, an optional
  * supporting line, and the level of the one heading it renders.
  *
@@ -95,6 +132,62 @@ export function childLevel(level: HeadingLevel): HeadingLevel {
  * container. `center` is right for a band that is only a heading, and `left` is
  * right for a section with content under it, where a centred title above a
  * left-aligned list reads as two unrelated pieces.
+ *
+ * **`as` decides the size as well as the tag, and the size is derived rather than
+ * passed.** `as` was already on every Block as `headingLevel` and `childLevel()`
+ * already existed to carry a level down a level, so the document decided where
+ * each heading sits in the outline and the visual size simply never followed it.
+ * One class string was written for all six levels, so a page `h1` and the `h2`
+ * sections under it came out byte-identical, and a landing page of a hero and six
+ * Blocks showed one `h1` and six section titles at 36 pixels with no hierarchy
+ * between what the page claims and what it elaborates. A consumer could not
+ * correct it: the size was hardcoded here, no Block exposed a way to change it,
+ * and restyling a catalogue item is what the no-override-path rule does not allow.
+ *
+ * **The table is the authored scale walked down one step per level, and it stops
+ * at the floor rather than running off the bottom.**
+ *
+ * | level | step | authored value | at `sm` | authored value |
+ * | --- | --- | --- | --- | --- |
+ * | `h1` | `text-3xl` | 1.875rem / 1.2 | `sm:text-4xl` | 2.25rem / 1.111 |
+ * | `h2` | `text-2xl` | 1.5rem / 1.333 | `sm:text-3xl` | 1.875rem / 1.2 |
+ * | `h3` | `text-xl` | 1.25rem / 1.4 | `sm:text-2xl` | 1.5rem / 1.333 |
+ * | `h4` | `text-lg` | 1.125rem / 1.556 | `sm:text-xl` | 1.25rem / 1.4 |
+ * | `h5` | `text-lg` | 1.125rem / 1.556 | `sm:text-xl` | 1.25rem / 1.4 |
+ * | `h6` | `text-lg` | 1.125rem / 1.556 | `sm:text-xl` | 1.25rem / 1.4 |
+ *
+ * **`h1` is Display and stays Display**, because that is the role `DESIGN.md`
+ * gives it: a page's own heading is the largest thing on the page. The step above
+ * it does not exist and this table does not invent one, so "nothing in the system
+ * goes above `4xl`" is untouched and the authored scale in `packages/tokens` does
+ * not change.
+ *
+ * **`h2` is one step below it, and `h2` is what almost every Block renders**,
+ * because a Block is composed under a heading the document already owns. That is
+ * the whole of the change a consumer sees: a section title moves from 1.875rem to
+ * 1.5rem, and above `sm` from 2.25rem to 1.875rem.
+ *
+ * **The floor is `h4`, and the floor is `text-lg`.** `lg` is the deepest authored
+ * step that is not smaller than Body, and Body is 400 at 1.125rem, so a heading
+ * that stepped one further would render smaller than the copy it introduces and
+ * read as a caption rather than as a heading. `h5` and `h6` hold at that step and
+ * do not wrap: `childLevel()` already clamps at `h6` for the same reason, and a
+ * repeated size in a document that has nested a Block three deep is the cheaper
+ * trade against a heading smaller than its own body. A heading at the floor is
+ * still a heading: it keeps `font-semibold`, keeps `tracking-tight`, and keeps
+ * `text-balance` at every step, so weight and tracking tell it apart from body
+ * copy where size no longer can.
+ *
+ * So a consumer gets the hierarchy by passing the level it was already passing,
+ * and a Block moved from an `h2` section into an `h3` one carries its size with
+ * it, which is what `headingLevel` was introduced to do.
+ *
+ * **`Prose` already walked this ladder**, at the same steps and stopping at the
+ * same `h4`, so a document rendered through `Prose` and a page composed from
+ * Blocks now read as one hierarchy rather than as two answers to one question.
+ * This Component was the second answer, and it was the one every catalogue Item
+ * used, which is why the disagreement was visible on every product page and not
+ * on a documentation page.
  */
 export function SectionHeading({
   index,
@@ -129,6 +222,13 @@ export function SectionHeading({
    * A page that renders a block as its primary heading passes `as="h1"`; a
    * document with no `h1` gives screen-reader and search engines no top-level
    * entry point.
+   *
+   * It also picks the size, and there is no prop for the size. The table is in
+   * this Component's JSDoc above: `h1` at 1.875rem, `h2` at 1.5rem, `h3` at
+   * 1.25rem, and `h4` through `h6` at 1.125rem, each stepping up one authored
+   * step above `sm`. Passing a deeper level is therefore a typographic decision
+   * as well as an outline one, which is the point: a Block composed one level
+   * deeper should read as one level deeper.
    */
   as?: HeadingLevel
   /**
@@ -166,7 +266,7 @@ export function SectionHeading({
       ) : null}
       <Heading
         id={id}
-        className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl"
+        className={cn('font-semibold tracking-tight text-balance', headingSizeClass(Heading))}
       >
         {title}
       </Heading>

@@ -2,7 +2,8 @@ import { ArrowRight } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 import { CtaLink } from '../../components/ui/cta-link'
-import { Section, type HeadingLevel } from '../../components/ui/section'
+import { Section, headingSizeClass, type HeadingLevel } from '../../components/ui/section'
+import { cn } from '../../lib/utils'
 
 /**
  * One closing action.
@@ -100,7 +101,13 @@ export type Cta01Props = {
    * here is where to watch it".
    */
   note?: ReactNode
-  /** Heading level for the headline. See `HeadingLevel`. */
+  /**
+   * Heading level for the headline. See `HeadingLevel`.
+   *
+   * It picks the headline's size as well as its tag, from the table in
+   * `headingSizeClass`, so a banner composed at the default `h2` reads as the
+   * section it is rather than as a second page heading.
+   */
   headingLevel?: HeadingLevel
 }
 
@@ -132,6 +139,14 @@ export function Cta01({
    * `SectionHeading`'s muted-surface description colour and `gap-4` would be
    * wrong. So the tag is resolved here and the classes stay surface-specific
    * rather than the heading level being the reason the markup stays hardcoded.
+   *
+   * The size is asked of `headingSizeClass` rather than written here, and that
+   * line is the reason it is not written here. This block drew its heading at one
+   * size for every level, which is the defect `SectionHeading` had too, so a page
+   * whose closing banner sat at the default `h2` would have shown that banner a
+   * step above every other section title on the page and the same size as the
+   * page's own `h1`. Two surfaces answering one question separately is how it
+   * reached two surfaces.
    */
   const Heading = headingLevel
 
@@ -143,7 +158,9 @@ export function Cta01({
           className="from-primary-foreground/15 pointer-events-none absolute inset-0 bg-gradient-to-tr to-transparent"
         />
         <div className="relative flex flex-col items-center gap-6">
-          <Heading className="max-w-measure text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+          <Heading
+            className={cn('max-w-measure font-semibold tracking-tight text-balance', headingSizeClass(headingLevel))}
+          >
             {title}
           </Heading>
           {description ? (

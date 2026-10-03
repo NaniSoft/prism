@@ -30,7 +30,7 @@ and it is the only row below whose subject is this document.
 | `prism-ui` | `scripts/validate-registry.mjs`, `scripts/check-catalogue.mjs`, `scripts/check-surface.mjs`, `scripts/check-focus-indicators.mjs`, `scripts/check-breakpoint-variants.mjs`, `scripts/check-container-namespace.mjs`, `scripts/check-pack-boundary.mjs`, `scripts/check-vector-ink.mjs`, `scripts/check-client-budget.mjs`, `scripts/check-theme-resolution.mjs`, `scripts/check-boot-budget.mjs`, `scripts/check-item-docs.mjs`, `scripts/check-block-copy.mjs`, `scripts/check-item-category.mjs`, `scripts/check-block-imports.mjs`, `scripts/check-gate-kit.mjs`, `scripts/check-typeface.mjs`, `scripts/check-variant-ink.mjs` | surface scan, registry validator (registry and published file list), the three-way catalogue comparison, the focus-indicator class-string scan across every shipped source file, the breakpoint-variant rule, the container-namespace rule over the built stylesheet, the pack-boundary law, the vector-ink contract, the theme-resolution equivalence table, the boot-path byte ceiling, a JSDoc block on every catalogue Item, a Block and a Page shipping no copy or an accessible name, the closed set of seven Categories and the absence of one on a Block or a Page, the modules a Block and a Page may not import, the face a token names against the `@font-face` rules and binaries the package ships, the metric-adjusted fallback and the licence beside it, the consumer gate kit's registry and published surface, the component and axe suites, and a variant that sets its own fill setting its own ink | per-item client-JavaScript measurement |
 | `prism-llms` | `scripts/check.mjs` | corpus drift, per-item mirror and store coverage, the store type round-trip, the declared output list | none |
 | `prism-mcp-server` | `test/registration.test.ts` and the bundled-data hash | the protocol round-trip suite, the registered tool list equals the package's declared `TOOL_ORDER` with every tool served from the bundled corpus, the bundled `data.json` hash | corpus freshness stamp (`scripts/stamp-built.mjs`) |
-| repository root | `scripts/check-dashes.mjs`, `scripts/check-elevation-layout.mjs`, `scripts/check-motion.mjs`, `scripts/check-nested-controls.mjs`, `scripts/check-block-controls.mjs`, `scripts/check-encoding.mjs`, `scripts/check-no-legacy-line.mjs`, `scripts/check-gate-table.mjs`, `scripts/validate-changesets.mjs` | the dash gate, the elevation and layout gate, the motion gate, the nested-control rule, the block-control rule, the encoding gate, the retired-line gate, the gate-table gate, the changeset validator | none |
+| repository root | `scripts/check-dashes.mjs`, `scripts/check-elevation-layout.mjs`, `scripts/check-heading-scale.mjs`, `scripts/check-motion.mjs`, `scripts/check-nested-controls.mjs`, `scripts/check-block-controls.mjs`, `scripts/check-encoding.mjs`, `scripts/check-no-legacy-line.mjs`, `scripts/check-gate-table.mjs`, `scripts/validate-changesets.mjs` | the dash gate, the elevation and layout gate, the heading-scale gate, the motion gate, the nested-control rule, the block-control rule, the encoding gate, the retired-line gate, the gate-table gate, the changeset validator | none |
 | `@nanisoft/site` (private) | `scripts/check-utility-cascade.mjs`, `scripts/check-content-joins.mjs`, `scripts/check-pattern-composition.mjs`, `scripts/check-search-budget.mjs` | content joins (including the redirect coverage and the Worker's first-run prefixes), utility cascade, a Pattern naming an Item that does not exist plus its Section's `meta.json` in both directions, search gzip budget | visual regression and the computed display assertions, both inside the report-only `visual` job |
 
 **Two of the rows above are not `check` tasks, and the table says which.** `prism-mcp-server`
@@ -341,6 +341,60 @@ segment as a screen would report the `md` in an error message as a dead variant,
 and a gate with a finding rate set by English prose is a gate nobody runs. A
 screen this repository wants belongs in `layout.tokens.json` with the other four,
 where the build emits it and this gate then holds the class to it.
+
+## The heading scale
+
+`scripts/check-heading-scale.mjs` reads the table `SectionHeading` sizes its
+heading by, judges every step in it against the `text` group in
+`packages/tokens/src/foundation/base.tokens.json`, and holds the table against the
+markdown table the Component's own JSDoc states.
+
+It was written for a defect that shipped and that no other gate could see.
+`DESIGN.md` under Typography, Hierarchy gave Display two roles at once: "section
+titles, the CTA banner heading, and every page `h1`". `SectionHeading` wrote one
+class string for all six levels, so an `h1` and an `h2` came out byte-identical
+and a landing page of a hero plus six Blocks showed one `h1` and six section
+titles at 36 pixels. Every other gate was green and correctly so: the outline was
+right at every level, the alignment was left where the shared rule says it must be,
+every Block forwarded its `headingLevel` faithfully, and
+`test/card-title-headings.test.tsx` held the outline. The size was a constant
+inside a Component, and a Block that forwarded its level perfectly was
+indistinguishable from one that ignored it, because forwarding it changed nothing
+a test could observe.
+
+**The rules.** Every level in the outline has an entry. Every step named is a step
+the token source authors. The top two levels do not share a step. The steps
+descend one authored step at a time until they stop. The largest step anywhere in
+the table is the largest step the token source authors, which is how "nothing in
+the system goes above `4xl`" is held from the component side. The floor is at or
+above the step `DESIGN.md` gives Body. `font-semibold`, `tracking-tight` and
+`text-balance` are on the heading and not in the per-level strings. The JSDoc table
+is the code table, cell for cell. And `DESIGN.md`'s Hierarchy gives Display one
+role, and it is not the section title.
+
+**Why the top-two rule is its own rule.** Every level at one step is flat, and
+flat is not descending, so a rule that only asked whether the sequence falls would
+have printed a clean line over the exact defect that shipped. The staged fixture in
+`scripts/__tests__/heading-scale.test.mjs` is that table, and the gate is asserted
+to fail on it.
+
+**Two copies of one table in one file, and why that is not the second copy this
+repository refuses.** The map is private and read through `headingSizeClass`; the
+markdown table is in the JSDoc, which the declaration build preserves and the
+corpus reads. Reading only the map would pass a Component whose documentation
+promises a size it does not render, which is the half of the defect that reached a
+consumer.
+
+**What it does not hold, stated.** The step `DESIGN.md` gives Body is named in the
+gate rather than read, because "Body is 400 at `lg`" is a sentence in a document
+and not a field in the token source; its value is read from the source and printed
+on every run, so a retune of `lg` shows in the output even though the rule does not
+follow it. The rule about `DESIGN.md` reads one bullet and refuses two words in it,
+so a rewrite of the surrounding prose does not turn the gate red. And the whole
+gate reads one file, so a second surface that resolves its own heading tag is out
+of its reach unless it is named as a root; `Cta01` is the one that is, because it
+is the one that drew its own heading element, and a second literal step on it is a
+finding.
 
 ## The nested-control rule
 
