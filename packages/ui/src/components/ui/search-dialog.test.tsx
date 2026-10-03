@@ -157,6 +157,22 @@ describe('SearchDialog', () => {
       )
     }
 
+    // The trap arms asynchronously, and this waits for it rather than assuming it.
+    // A modal that has taken focus for its `initialFocus` is a trap that is armed,
+    // so this is the first observable fact that distinguishes "the trap has not
+    // engaged yet" from "the trap let focus go", which are the same two facts the
+    // assertion below cannot tell apart on its own. It absorbs the arming race and
+    // nothing else: the cycle below asserts immediately after each Tab, with no
+    // wait, so a focus that escapes and stays escaped still fails.
+    //
+    // Recorded because it is Linux-and-load-specific. The same test passed six
+    // consecutive times in isolation on Windows and failed in CI, where 125 files
+    // run at once and `userEvent`'s deferred Tab can resolve between Base UI taking
+    // focus and its trap installing the guards.
+    await waitFor(() => {
+      expect(withinModal()).toBe(true)
+    })
+
     await user.tab()
     expect(behind).not.toHaveFocus()
     expect(withinModal()).toBe(true)
