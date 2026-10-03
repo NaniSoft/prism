@@ -1,5 +1,1392 @@
 # @nanisoft/prism-ui
 
+## 0.15.0
+
+### Minor Changes
+
+- 6dc7bb8: A Block action is a destination or your own control, and a gate now holds it
+  
+  **Five Blocks shipped a control that could not be acted on, and the previous release
+  fixed three of them without the law.** `Hero01`, `Hero02` and `Hero03` each declared
+  an action union whose `href`-less arm rendered a bare `Button`, and that release closed
+  the arm and then said, in its own changeset, that seven sibling Blocks still had it and
+  that "a law held by a type in three Blocks is three types". That was the right
+  reasoning and it was also the reason the hole stayed open: the next audit found five
+  more Blocks, and one of them had a shape nobody had looked for.
+  
+  **`About01` and `Showcase01`** declared the same two-arm union as the heroes and
+  rendered a `Button` on the arm with no `href`. Each one's JSDoc called it "inert by
+  design" and defended that as a Block shipping no behaviour, which is true and is not an
+  answer. Both are now a union of two named arms: `AboutLinkAction` /
+  `AboutSlotAction` and `ShowcaseLinkAction` / `ShowcaseSlotAction`. `href` is required
+  on the link arm; the slot arm carries the caller's own `ReactNode` and forbids `label`,
+  `href`, `newTab` and `variant`.
+  
+  **`PageHeader01` was worse, and its own type said so.** `PageHeaderAction` had **no
+  `href` member at all**, so there was nothing to make optional: `{ label: 'Share' }` was
+  the only value the type could express and every value rendered a `Button` that
+  activated to nothing, at the top of every screen a consumer rendered. It is now the
+  same two-arm union. Its `actionsSlot` sibling prop is **gone**, and that is the one
+  structural change here: a sibling slot renders before the row's own actions and cannot
+  say which position it fills, so a caller who wanted a primary menu trigger at the front
+  and a link behind it had to put the link first and accept the order, or pass the trigger
+  in `actions` where it was a dead button. As an arm, position and element are the same
+  value.
+  
+  **`Pricing01` was the one no audit had found.** `Plan` carried a required `cta: string`
+  and the Block rendered it as a `Button`, so every pricing table in every consumer's
+  product shipped a focusable control, announced as a button, that activated to nothing, on
+  the card a reader was about to decide on. `cta` is replaced by `action`, a two-arm union,
+  and a plan whose control is a checkout trigger is the `slot` arm. The featured plan
+  still draws a filled anchor and the rest an outlined one, so the recommendation still
+  reads. `pricing-01/index.tsx` also exported the value alone until now, so a consumer
+  could not name `Plan` at all; `Plan`, `Pricing01Props` and the three action types are on
+  the surface.
+  
+  **`Plan` now carries a required `id`, which is the second change to one record and was
+  deferred from this entry once.** The first version of this changeset recorded the
+  observation and the reason for leaving it: *"a second breaking change to a record this
+  release already changes, and bundling two migrations into one entry makes both harder to
+  read. It is a follow-up, not an oversight."* Both halves of that reasoning have since
+  stopped applying, and the second one was never quite true.
+  
+  The `id` is real. `Pricing01` keyed its cards on `plan.name`, which is the word a reader
+  reads on the card, so a monthly and an annual row of the same tier produced a React
+  duplicate key and cards the renderer had been told are ambiguous, and a rename in the
+  copy was a rename in the key, which loses a caller's saved selection over an edit to a
+  sentence. `Careers01` and every other Block in this package key on an `id` and say why;
+  `Pricing01` was the last one that did not.
+  
+  The bundling reason does not survive contact with the release. There is no released
+  boundary between the two changes, because both are in this same unreleased body of work,
+  so "bundling" describes nothing a reader would ever have to unpick: they upgrade once
+  and read one entry either way. And one `Plan` with two migrations in one place is more
+  readable than one `Plan` with two migrations in two places, because the second entry has
+  to re-establish that it is talking about the same record. It is in this entry for that
+  reason and the deferral was the mistake, not the delay.
+  
+  **`Waitlist01` is the fifth, and it is not a union.** `Waitlist01Referral` declared
+  `copyLabel` and `copied`: the accessible name of a copy control and the state to draw on
+  it. The Block then rendered `<Button type="button">{copyLabel}</Button>` with **no
+  handler**, beside a read-only field holding the code it was labelled as copying. The
+  JSDoc described a second weight and a `data-copied` attribute for a control that never
+  copied anything. Both props are gone and `copyControl` is a `ReactNode`. Prism will not
+  call `navigator.clipboard` on a consumer's behalf and then report a success it cannot
+  verify: the permission is the caller's to grant, the secure context is the caller's to
+  know about, and a copy can fail. The sentence that says it worked belongs in `status`,
+  which is where it already belonged.
+  
+  **The four Blocks whose union renders nothing on the `href`-less arm were already
+  correct, and the audit that named them was wrong.** `Careers01`, `CaseStudies01`,
+  `Industries01` and `Services01` each declare an item union whose no-link arm renders **no
+  control at all**: the `CtaLink` is inside `isLink ? … : null`. That is the right shape
+  for a card, where a link is an addition rather than a required part, and there is nothing
+  to repair. `Gallery01` is the same story with a different reason: its tile is a real
+  `<button>` with an `onClick` that opens the lightbox, in a `'use client'` Block. Five of
+  the nine names in the earlier changeset were false positives, and saying so is part of
+  the record: a list of sites is a claim about a tree, and the tree is what settles it.
+  
+  **`scripts/check-block-controls.mjs` is the gate, and it is green.** The previous release
+  declined to write one because it would have failed on five real Blocks, and that was the
+  right call at the time. It can be green now, so it exists. It reads `packages/ui/src/blocks`
+  and `packages/ui/src/pages` and fails on a rendered `Button` or `CtaLink` that carries
+  none of `onClick`, `type="submit"` or `type="reset"`, and no `href`. It deliberately does
+  **not** read `apps/site/items`, because the documentation Demo for `Button` renders
+  `<Button>Save changes</Button>` with no handler and showing the control is the whole
+  point of showing it; the demos are held by the compiler, because a demo passes a Block's
+  props and fails to build the moment `AboutAction` stops accepting a dead action. The
+  gate's own proof is `scripts/__tests__/block-controls.test.mjs`, which plants each of the
+  five shipped shapes as a fixture, because the five Blocks that shipped them have since
+  been fixed and a gate whose only evidence is a clean run is a gate nobody has watched
+  fail.
+  
+  Two things the first version of that gate got wrong are recorded because they are the
+  kind of defect a clean run hides. It deleted comments rather than blanking them, which
+  removed their newlines and printed every finding below the first JSDoc block on the
+  wrong line. And it matched a tag's attributes with `<Name([^<>]*)>`, which stops at the
+  first `<` or `>` in the attribute text, which in JSX is very often not the end of the tag:
+  `onClick={() => step(-1)}` contains `=>`, `disabled={position <= 0}` contains `<=`, and
+  `disabled={currentPage >= pageCount}` contains `>=`. Each truncated the attributes before
+  the handler two lines further down, so three Blocks with working handlers were reported
+  as shipping dead buttons. The tag end is found by brace and paren balance now.
+  
+  **The bump is `minor` rather than `major`, and the argument is the version line rather
+  than the severity.** Five Blocks' public prop types change and two of them (`Plan.cta`
+  and `Waitlist01Referral`) do not compile against a value that compiled a release ago.
+  That is breaking by any ordinary reading and this entry says so plainly. `major` in this
+  repository publishes `1.0.0`, and every release to date has been `minor` on a `0.y.z`
+  line where the `y` is already the breaking-equivalent slot; publishing 1.0.0 with this in
+  it would assert an API stability guarantee this library has not earned, and it would be
+  the first release in the project's history to use the bump at all. The same argument
+  carried the hero change and the `Cta01` change at 0.6.0. The break is real and is the
+  subject of this entry; the number it lands on is the line's decision.
+  
+  Migration, per Block:
+  
+  ```tsx
+  // About01, Showcase01, PageHeader01: an action with no href
+  // Before
+  actions={[{ label: 'Start free' }, { label: 'Docs', href: '/docs' }]}
+  // After
+  actions={[
+    { slot: <NextLink href="/start">Start free</NextLink> },
+    { label: 'Docs', href: '/docs' },
+  ]
+  
+  // PageHeader01 only: actionsSlot is gone, and the node moves into the row
+  // Before
+  <PageHeader01 actions={[{ label: 'New deployment' }]} actionsSlot={<Menu />} />
+  // After
+  <PageHeader01 actions={[{ slot: <Menu /> }, { label: 'New deployment', href: '/deployments/new' }]} />
+  
+  // Pricing01: `cta: string` becomes `action`, and the card is keyed on an `id`
+  // Before
+  plans={[{ name: 'Team', price: '$24', features: [], cta: 'Choose Team' }]}
+  // After
+  plans={[{ id: 'team', name: 'Team', price: '$24', features: [], action: { label: 'Choose Team', href: '/signup?plan=team' } }]
+  
+  // Waitlist01: the copy control is the caller's, whole
+  // Before
+  referral={{ value: CODE, label: 'Your referral code', copyLabel: 'Copy code', copied }}
+  // After
+  referral={{
+    value: CODE,
+    label: 'Your referral code',
+    copyControl: <Button onClick={() => navigator.clipboard.writeText(CODE)}>Copy code</Button>,
+  }}
+  ```
+  
+  Every one of these was a compile error before and is a compile error now, which is the
+  point: a consumer upgrading finds a failed build rather than a page that silently renders
+  nothing.
+  
+  **One thing about the `Pricing01` migration is separate from the rest of it.** Every other
+  line above changed a member a consumer had to add. The `id` also changes what a consumer
+  has to add to the same object, so a plan that compiles after this release and renders two
+  cards correctly is a plan that passed an `id`. Nothing here needs a second entry, and the
+  observation that started this is in the entry above rather than at the end of this one.
+- 6dc7bb8: A disclosure opens at the step the motion scale gives it, and the rail says why it is still a width
+  
+  `DESIGN.md` has said for a while that `duration-slow` is "transform or layout
+  state such as a disclosure". Three disclosures animated a height or a width at
+  `duration-base`, which is 160ms against the 280ms the scale assigns them, and both
+  chevrons rotated at `base` beside a panel that now takes longer than the icon does.
+  
+  **`AccordionContent`, `CollapsibleContent` and `Sidebar` are on `duration-slow`,
+  and so are the two chevrons.** A chevron and the panel it opens are one motion, and
+  a 160ms icon against a 280ms panel is two events where the reader is watching one.
+  
+  **`Progress` stays at `duration-base` and this is the one exception the scale has.**
+  A disclosure is a spatial transition that happens once, on a reader's click, and
+  280ms is what makes it read as opening. A progress indicator's value changes on
+  every tick of a running job, often several times a second, and the reader did not
+  cause it: at 280ms the bar lags the work it is reporting. It is the same
+  distinction the two laws of motion draw, applied inside the feedback scale. An
+  answer wants the long end of the band; a reading wants the middle of it.
+  
+  **`Sidebar`'s rail still animates `width`, and it is a named exception rather than
+  an unexplained gap.** `Progress` and `RangeField` both express their value as a
+  `scaleX` about the inline start, and a rail cannot: it carries a mark, a list of
+  items with a 16px icon, each item's label and a trailing count, and a `scaleX`
+  scales every one of them into ovals, condensed labels and unreadable numbers. The
+  decisive part is that a transform cannot reflow text. At `scaleX(0.25)` the labels
+  are still laid out for a 16rem column, so the rail's contents would never reflow
+  into the 4rem column they are supposed to occupy, and the only property that does
+  that is the one being animated.
+  
+  The cost is stated rather than argued away: it is a main-thread layout pass, once
+  per reader's click, over one element with a small subtree. That is a different
+  order of cost from a bar that advances on every frame of a running job, which is
+  why the two were not the same decision.
+  
+  `DESIGN.md`'s motion section records all of it, so the table and the call sites no
+  longer disagree.
+- 6dc7bb8: A form-level error marks the field it is about, not every field
+  
+  `AuthForm01` set `aria-invalid` on every field whenever a form-level `error` existed,
+  so a reader tabbing through a sign-in card heard "invalid" on a correctly filled
+  email address because the password was wrong. A form-level message is usually not
+  about a control at all: bad credentials, a locked account and a rate limit are three
+  things no field is wrong about, and the first thing a screen reader says about each
+  field is the state, so a reader told two correct answers are wrong stops trusting the
+  rest of the form.
+  
+  `AuthFormField` gains `errorId`. The Block marks the field whose `id` the caller
+  names there and no other, and a caller with nothing to name leaves every field
+  unmarked, which is the honest state: the message is still drawn in an `Alert`, which
+  is announced when it enters, and WCAG 3.3.1 is answered by the message rather than by
+  a mark on a control that is not the problem. Omitting `errorId` on every field is now
+  the way to say "this is about the submission", and the JSDoc says so.
+  
+  **A field's description was drawn and never announced.** The `FieldDescription`
+  carried no id and the input carried no `aria-describedby`, so a hint about a format
+  or a constraint was on the page for a sighted reader alone. The id is derived from
+  the field's own `id`, which is already the one stable caller-owned string on the
+  field, so the reference costs a template and cannot collide. `login-01` and
+  `signup-01` already wired the pair; this was the Block that had not.
+  
+  **`SettingsNotifications01` had the same unlinked description.** Each event's
+  `FieldDescription` was drawn under the control's visible label and referred to by
+  nothing, while the section note was referred to by every read-only switch. The one
+  `aria-describedby` now carries both: the event's own description and, on a read-only
+  control, the note that says why it will not move. A reader who meets one without the
+  other has to work out which half they are missing.
+  
+  Two notes for a caller. `AuthForm01` renders no `aria-invalid` on any field unless a
+  field names itself, so a form that relied on every field being marked has to name the
+  one that is. And `SettingsNotifications01` writes the joined pair as a template rather
+  than through a `join`, which is the same reason `MultiCombobox` does: a bare
+  separator literal is a string the copy gate reads as a space somebody typed.
+  
+  No prop is removed and no import breaks.
+- 97d9b99: A heading's size follows its level, so a page `h1` and its section titles are no longer one size
+  
+  **If you composed a page from Blocks, every section title on it just got smaller.**
+  An `h2` section title moves from 1.875rem to 1.5rem, and above `sm` from 2.25rem to
+  1.875rem. A page `h1` is unchanged at 1.875rem, and 2.25rem above `sm`. Nothing
+  about the props you pass changes, and nothing about the outline changes: the same
+  `headingLevel` you already pass now decides the size as well as the tag.
+  
+  `DESIGN.md` gave Display two roles at once, "section titles, the CTA banner
+  heading, and every page `h1`", and `SectionHeading` implemented that literally by
+  writing one class string for all six levels. So an `h1` and an `h2` came out
+  byte-identical, and a landing page of a hero plus six Blocks showed one `h1` and
+  six section titles at 36 pixels, with no hierarchy between what the page claims
+  and what it elaborates. The level was already on every Block as `headingLevel`
+  and `childLevel()` already existed to carry it down a level, so the document
+  decided where each heading sits in the outline and the visual size simply never
+  followed it.
+  
+  **The table, and where it stops.**
+  
+  | level | step | value | above `sm` |
+  | --- | --- | --- | --- |
+  | `h1` | `text-3xl` | 1.875rem | 2.25rem |
+  | `h2` | `text-2xl` | 1.5rem | 1.875rem |
+  | `h3` | `text-xl` | 1.25rem | 1.5rem |
+  | `h4` | `text-lg` | 1.125rem | 1.25rem |
+  | `h5` | `text-lg` | 1.125rem | 1.25rem |
+  | `h6` | `text-lg` | 1.125rem | 1.25rem |
+  
+  It is the authored scale walked down one step per level, and it floors at `h4`.
+  `lg` is the deepest authored step that is not smaller than Body, which is 400 at
+  1.125rem, so a heading one step further down would render smaller than the copy it
+  introduces and read as a caption. `h5` and `h6` hold at that step rather than
+  wrapping, which is the same trade `childLevel()` makes when it clamps at `h6`. A
+  heading at the floor is still a heading: it keeps `font-semibold`,
+  `tracking-tight` and `text-balance` at every step, so weight and tracking tell it
+  apart from body copy where size no longer can.
+  
+  **Nothing goes above `4xl`, and no scale changed.** The step above Display does
+  not exist and this does not invent one, so `DESIGN.md`'s ceiling holds untouched
+  and `@nanisoft/prism-tokens` is unchanged. `h1` is Display because that is the
+  role the document gives it, and `h2` is the step below.
+  
+  **No new prop.** The alternative was a `size` on `SectionHeading` and on every
+  Block that renders one, which widens the public surface across more than a
+  hundred call sites for a decision the surrounding document has already made by
+  choosing a level. You get the hierarchy by passing the level you were already
+  passing, and a Block moved from an `h2` section into an `h3` one carries its size
+  with it, which is what `headingLevel` was introduced to do. Nothing about the
+  no-override-path rule changes: a consumer who wanted Display for their thesis
+  still has it, at `h1`.
+  
+  **`Cta01` follows its level too, and this is the one Block outside
+  `SectionHeading`.** It draws a centred title on a filled primary panel with
+  nothing under it, so the muted description colour and `gap-4` are wrong there and
+  it resolves its own heading element. It was carrying the same hardcoded size, so
+  fixing the Component and not it would have left a closing banner one step above
+  every other section title on the page and level with the page's own `h1`. Its
+  banner moves with everything else: an `h2` closing banner is 1.5rem, and at `h1`
+  it is 1.875rem.
+  
+  **The blast radius, measured rather than guessed.** 132 `SectionHeading` render
+  sites across 115 files resolve to this table. 6 are at `h1` and are unchanged.
+  125 are at `h2` and each moves from `text-3xl sm:text-4xl` to
+  `text-2xl sm:text-3xl`. 1 is at `h3` and moves to `text-xl sm:text-2xl`. That is
+  the whole change, and it is deliberately not softened: a documentation site
+  whose own prose hierarchy shifts is a visible change, and the point of the fix is
+  that the shift is the hierarchy coming back.
+  
+  **A gate now holds the table, and proof it fires.**
+  `scripts/check-heading-scale.mjs` reads the table out of `section.tsx`, judges
+  every step in it against the `text` group in the token source rather than a list
+  beside the gate, and holds it against the markdown table the Component's own
+  JSDoc states, which is the documentation source the declaration build preserves
+  and the corpus reads. It fails on a level with no size, on a step the token source
+  does not author, on `h1` and `h2` sharing one step, on a step-down table that
+  rises, on a level deeper than the page heading rendering above it, on a floor below
+  Body, on the heading losing its weight, tracking or balance, on the JSDoc and the
+  code disagreeing, and on `DESIGN.md` giving Display the section title as well as
+  the `h1`. `scripts/__tests__/heading-scale.test.mjs` stages each of those against
+  a tree the gate reads, including the table the Component actually shipped before
+  this change, and asserts the gate is red on it.
+- 6dc7bb8: A hero action is a destination or your own control, and never an inert button
+  
+  `Hero01`, `Hero02` and `Hero03` accepted an action of `{ label }` with no
+  destination, and each Block rendered that as a bare `Button`. Every one of those is
+  a focusable control, announced as a button, that activates to nothing, and it sat
+  where a reader looks first: the primary call to action of a marketing hero, in
+  three published Blocks, so every consumer of any of them shipped a dead button
+  where the most important action should have been. Each Block's JSDoc called the
+  button "inert by design" and defended that as a Block shipping no behaviour, which
+  is true and is not an answer. A Block that ships no behaviour cannot make a control
+  work, so it should not render a control at all.
+  
+  **The defect was in the type, not in the render, so the fix is a type.** The
+  rendering half had already been repaired once: `CtaLink` renders a native anchor
+  and `Cta01` requires `href`, which is why the three heroes, predating both, kept
+  the old shape. What survived was the third arm, and it could only be closed by
+  removing it.
+  
+  `HeroAction`, `Hero02Action` and `Hero03Action` are now a union of two named arms
+  rather than one shape with an optional `href`:
+  
+  - `HeroLinkAction` (and its two siblings) **requires** `href`, so a value that is
+    sometimes a string and sometimes `undefined` is a compile error rather than a
+    control that navigates on the renders where the address happens to be there.
+    `slot` is forbidden on this arm.
+  - `HeroSlotAction` (and its two siblings) **carries `slot`**, the caller's own
+    control, and forbids `label`, `href`, `newTab` and `variant`. It exists because
+    a server Component cannot receive an `onClick`, so the honest form of "this does
+    something" in a composed section is a node the caller renders. This is
+    `Cta01`'s `actionSlot` moved inside the row, because a hero carries an ordered
+    list of up to two actions and a sibling prop cannot say which position it fills.
+    `check-block-imports.mjs` already holds that a `ReactNode` slot is how a consumer
+    injects an interactive child without the Block owning any state.
+  
+  The Block places a slot and adds no class to it, because a class it adds to a node
+  it does not render is a style the caller cannot see and cannot remove, and this
+  package has no override path.
+  
+  **Nothing else moved.** The anchor is the element the link arm always produced, at
+  the same size and the same variant, and the positional default variant still
+  follows the position: the first action in the row is filled and the rest are
+  outlined, whether the first one is an anchor or a caller's control. The forward
+  arrow still marks the row's one primary destination and now, with every action
+  Prism renders being a link, the position is the whole of the test. A `slot` at the
+  front of the row wears no arrow, because the control the caller drew owns its own
+  marks. Each Block is still a server Component.
+  
+  **The bump is `minor` rather than `major`, and the argument is the version line
+  rather than the severity.** `{ label: 'Coming soon' }` compiled a release ago and
+  does not now, which is breaking by any ordinary reading, and this entry says so
+  plainly. `major` in this repository publishes `1.0.0`, and every release to date
+  has been `minor` on a `0.y.z` line where the `y` is already the breaking-equivalent
+  slot. Publishing 1.0.0 with this change in it would assert an API stability
+  guarantee this library has not earned, and it would be the first release in the
+  project's history to use the bump at all. The same argument carried the `Cta01`
+  change at 0.6.0. The break is real and is the subject of this entry; the number it
+  lands on is the line's decision and the line is pre-1.0.
+  
+  Migration: every action in a hero now carries either a destination or your own
+  control. Where you passed a label alone and meant a link, give it the `href` it
+  was always declared with. Where you meant a control that is not a link, a router's
+  own `Link`, a submit button or a menu trigger, move it into `slot` as the element
+  itself rather than as a label:
+  
+  ```tsx
+  // Before
+  actions={[{ label: 'Start free' }, { label: 'Sign in', href: '/sign-in' }]}
+  
+  // After
+  actions={[
+    { slot: <NextLink href="/start">Start free</NextLink> },
+    { label: 'Sign in', href: '/sign-in' },
+  ]}
+  ```
+  
+  Both mistakes are now compile errors, which is the point: a consumer upgrading
+  finds a failed build rather than a site that silently renders nothing.
+  
+  **The same arm was still in seven sibling Blocks when this was written, and
+  `a-block-action-is-a-destination-or-your-own-control.md` closes them.** The audit
+  behind this entry named `About01`, `Careers01`, `CaseStudies01`, `Gallery01`,
+  `Industries01`, `Services01` and `Showcase01` as carrying the same two-arm union with
+  a rendered `Button` on the arm that has no `href`, and `PageHeader01` as rendering
+  its declared `actions` as buttons with no destination at all. **Five of those nine
+  were correct and four were defective, and the later entry records which is which**:
+  `About01` and `Showcase01` had the union, `PageHeader01` was worse and had no
+  destination member at all, and `Pricing01` and `Waitlist01` were not on the list at
+  all. `Careers01`, `CaseStudies01`, `Industries01` and `Services01` render **nothing**
+  on their `href`-less arm, which is the right shape for a card, and `Gallery01`'s tile
+  is a real button with an `onClick` in a client Block.
+  
+  This entry stands as the record of the heroes. The shape every Block now takes is the
+  one adopted here, and `scripts/check-block-controls.mjs` is what holds it: the earlier
+  reasoning in this paragraph, that "a law held by a type in three Blocks is three
+  types", was right about the risk and wrong about the remedy, and the remedy is a gate
+  rather than a shared type.
+- 6dc7bb8: A popup that matched nothing is still an open popup, and its message is not an option
+  
+  Four Components said "collapsed" while a popup was on the page, and two of them put
+  the sentence saying so inside the listbox.
+  
+  `aria-expanded` was reading "are there results" rather than "is the popup displayed",
+  and the two came apart in exactly the state a search field exists to render: a query
+  that matched nothing. `CommandPalette` and `Combobox` both drew a bordered panel
+  carrying the caller's empty sentence and told the field there was nothing to reach.
+  `aria-expanded` is now the open state in all four, because that is what the
+  attribute is for and because closing on a non-match tells the reader their keystroke
+  broke the control, which `Combobox` already argued in prose.
+  
+  `aria-controls` pointed at a listbox that was not rendered. `Combobox`,
+  `MultiCombobox` and `CreatableCombobox` omit the listbox entirely when nothing
+  matched and left the reference written anyway, so the field pointed at an id nothing
+  carried. **It now points at the popup rather than at the listbox inside it**, which
+  is the decision the existing axe run forced and the right one on its own terms:
+  `aria-controls` is a required attribute on an expanded `combobox`, so a field that is
+  expanded and carries no reference is itself a violation, and the panel is what the
+  field opened either way. `CommandPalette` points at the palette itself for the same
+  reason. All four write the reference only while the popup is displayed, so a closed
+  field carries none.
+  
+  **A listbox owns `option` and `group` and nothing else.** `CommandPalette` drew its
+  no-results `<p>` inside the listbox and its group headings in a bare `<div>`, so the
+  message was a row the index counted and no reader could choose, and the rows under a
+  heading could not say what they belonged to. `CreatableCombobox` drew its
+  `<p role="status">` in the same place. In all three the empty state is now a sibling
+  of the listbox rather than a child of it, which is the arrangement `Combobox` and
+  `MultiCombobox` already shared, and each group wrapper is a `group` named by the
+  heading already drawn above it through `aria-labelledby`.
+  
+  `CommandPalette` gains two things to know about: the two branches carry the same box,
+  so the panel does not change size or position when the last result is filtered out,
+  and its listbox now appears only when there is something in it, so a caller selecting
+  `[data-slot="command-palette-list"]` finds nothing in the empty state. The empty
+  state carries `data-slot="command-palette-empty-state"` on its box and the message
+  keeps `data-slot="command-palette-empty"`.
+  
+  No prop changes and no import breaks.
+- 6dc7bb8: `Prose` gives a table a scroll container, and the two search fields stop zooming an iPhone
+  
+  Four defects, three of them narrow-viewport, one of them about a reader's own
+  settings. A consumer sees all four.
+  
+  **A table in a Prose widened the page instead of scrolling.** The Component's
+  JSDoc has always listed tables among the content it accepts, and the code fence
+  beside them has always scrolled, but the table itself could not: `overflow`
+  applies to block containers, and a `display: table` element is not one. A table
+  box cannot be a scroll container, so a four-column table in a Markdown document
+  pushed the whole page sideways rather than offering a scrollbar.
+  
+  A `<table>` passed straight to a Prose now gets `display: block`, which is what
+  makes it a block container, and the same `overflow-x: auto` the code fence has.
+  The grid inside now sizes to its content up to the measure rather than stretching
+  to fill it, which is the trade the technique always carries and is the one worth
+  knowing about before you rely on it. Collapsed borders are unaffected: the row
+  groups are wrapped in an anonymous table box that still inherits
+  `border-collapse`.
+  
+  The treatment is a child selector rather than a descendant one, on purpose. A
+  descendant selector would reach a `Table` you have already put in a scroll
+  container of your own and set `display: block` on the table inside it, which
+  moves the caption off being a caption and stops the grid filling its wrapper. A
+  table you have wrapped in your own element is left alone as it was; give that
+  element `overflow-x-auto` and it is what scrolls. For a table whose markup you
+  control, `Table` remains the right answer.
+  
+  **`SearchDialog` and `CommandPalette` zoomed the page on focus.** Both drew their
+  search field at 14 pixels. iOS Safari zooms the viewport on a focused input whose
+  font size is under 16 pixels and does not zoom back out, so a reader who opened
+  either surface on a phone was left on a magnified page with no way off it. Both
+  now carry the `text-base` then `md:text-sm` pair that `Input`, `Textarea`,
+  `Combobox`, `Form` and `NumberField` already carried, which is the same 16 pixels
+  at a phone's width and the same 14 everywhere else.
+  
+  **The bump is `minor` rather than `patch`.** A table in a Prose renders
+  differently: a narrow one no longer stretches to the measure. That is a visible
+  change to a published Component rather than a fix nobody notices, and a site that
+  was relying on a prose table filling its column is the one thing that needs to
+  look at it.
+- 6dc7bb8: A tree is one Tab stop, and no node claims to collapse
+  
+  `Tree` documented a mechanism it did not have and shipped a state it could not
+  honour. Its JSDoc said "a tree is one Tab stop, and the arrow keys move inside it.
+  That is the ARIA pattern" and then described the roving tabindex that makes it true,
+  and no `tabIndex` appeared anywhere in the file: a forty-node rail was forty Tab
+  stops. A comment in the same file argued the other way, and it was wrong on its own
+  terms, because it deferred the keyboard model to "a caller's own keyboard model" in a
+  Component that does not forward `onKeyDown` and therefore has no caller's model to
+  defer to.
+  
+  The roving tabindex is now implemented, in the shape `ToggleGroup` already uses: the
+  stop is an address rather than an index, so a caller who reorders or removes nodes
+  does not strand the reader; it lands on the current address when the tree has one and
+  on the first destination otherwise; and it follows the reader once the arrows move
+  it, so Tab away and back returns them to where they were. The fallback and the
+  current address are not two answers: a `currentHref` naming another page is ordinary,
+  and reading either rule alone would give the tree two tab stops.
+  
+  **Nothing collapses, so nothing claims to.** Every group with children carried
+  `aria-expanded="true"`, hard-coded, which promises a second press that folds nothing
+  away. A node that cannot expand omits the attribute, and `aria-level` is what places
+  a node in the tree for a reader who wants that instead.
+  
+  **Two regions announced their bare role name.** `SelectionToolbar` drew the words
+  "3 selected" in its leading label and pointed at nothing, so a reader tabbing onto
+  the row heard "toolbar" and no more; it is now named by `aria-labelledby` on the
+  label, which works for the `ReactNode` label the count requires and cannot drift from
+  the words on screen. `ToggleGroup` declared `aria-label` optional while its own JSDoc
+  said the prop was required, so TypeScript enforced nothing and a group shipped
+  unnamed in both of its roles. See the separate entry for the type change.
+  
+  To know before you style against it: `Tree` now writes a `tabindex` on every
+  destination, so a page with two trees has two Tab stops where it had one per node.
+- 6dc7bb8: `Button` is `type="button"`, the carousel leaves the caret keys, and a number field takes one
+  
+  **`Button` defaults `type` to `"button"`.** A `<button>` with no `type` is a submit
+  button as far as the HTML is concerned, so the default was that every Prism `Button`
+  a consumer placed in their own form submitted it: a Cancel, a Close, a second step of
+  a wizard, anything that was not the one control that should. The failure is silent
+  and it costs data, which is why the default is stated on the Component rather than
+  left to the HTML.
+  
+  Nothing in this repository changed, and that is worth saying with the evidence rather
+  than as an assurance: every `<form>` in `packages/ui` and `apps/site` already states
+  its submit button's `type`, which is why no call site moved. The one behaviour change
+  is for a consumer who relied on the old default, and the migration is one token:
+  
+  ```tsx
+  // a control that used to submit by default
+  <Button>Save</Button>
+  
+  // now
+  <Button type="submit">Save</Button>
+  ```
+  
+  The trade is deliberate. A submit button is a decision someone makes about a form and
+  this Component cannot see the form, so making the destructive default the safe one
+  and the deliberate act the explicit one is the only arrangement where the mistake is
+  the one you have to write on purpose. `ToggleGroupItem`, `MultiCombobox` and
+  `SelectionToolbar` already wrote `type="button"` by hand for the same reason.
+  
+  **`Carousel` answered the arrow keys for whatever was inside a slide.** The key
+  handler sits on the region, so every key that bubbled out of a slide reached it, and a
+  slide is the caller's slot: it can hold a field, a number field, a `select` or an
+  editable region, and in all four Left, Right, Home and End belong to the value. The
+  Component was calling `preventDefault()` on them unconditionally, so a reader typing
+  a caption moved the carousel instead. It now answers a key only when nothing inside
+  is using it, which is the discipline `ResizableHandle` applies to the same keys on
+  the other axis. A reader arriving on the carousel or on one of its own controls is
+  unaffected.
+  
+  **`NumberField` documented a route to the unit that its props did not carry.** The
+  drawn unit is `aria-hidden`, on the reasoning that a screen reader already says the
+  unit when the caller puts it in the field's description, and there was no
+  `aria-describedby` on the props to put it in, so a value of 1,250 was announced as
+  1,250. The prop is there now and is forwarded to the input. The unit stays hidden: a
+  reference already says it once, and two announcements of the same word is one too
+  many. The unit belongs in the description and not in the accessible name, because
+  `aria-label` is optional, so a field with a real `<label>` has no name to put it in,
+  and a name reading "Parcel weight, kg" against a visible label reading "Parcel
+  weight" is what WCAG 2.5.3 forbids and what voice control cannot activate.
+  
+  `aria-describedby` is an addition, so nothing breaks. `Button` and `Carousel` change
+  behaviour, which is why they are here rather than described as a patch.
+- 6dc7bb8: Coarse-pointer controls take the 44px floor, and the focus gate reads the whole package
+  
+  Thirteen controls were drawing targets between 16 and 36 pixels with nothing done
+  about it on touch input, so a consumer composing the bare primitive shipped a
+  target that fails WCAG 2.2 SC 2.5.8 and falls short of this package's own 44px
+  standard. All of them are fixed, and **the desktop metrics are untouched**: a mouse
+  and a trackpad see exactly what they saw before, and every change is inside
+  `@media (pointer: coarse)`.
+  
+  `Checkbox`, `RadioGroupItem`, `Calendar`'s day cells and paging controls,
+  `Dialog`'s trigger and close control, and `SearchDialog`'s close control grow to
+  44 by 44. `Slider`'s and `RangeField`'s thumbs, `Switch`, and `DatePicker`'s clear
+  control take a transparent 44 by 44 band around the control instead, because
+  growing them would draw something the design does not have: a 44px ball on a six
+  pixel rail, a switch that is not a switch. The band is a pseudo-element, so the
+  box the value is computed from is the box you see.
+  
+  **`NumberField` turns its two steppers side by side on a coarse pointer.** This is
+  the one place the floor changes an arrangement rather than a size. Two 44px targets
+  stacked in the split column need an 88px field, and two 44px bands on two 18px rows
+  overlap so much that the lower stepper takes the boundary between them, so a press
+  aimed at increment would step down.
+  
+  **`Calendar` now matches `MiniCalendar` on the same controls.** The identical
+  control in one package at two target sizes is the defect, not the 32px.
+  
+  Three things to know before you style against these:
+  
+  - A `Calendar` on a phone is six rows of 44px rather than six of 36px, so the panel
+    is taller. It is the densest control in the package and the one a finger is least
+    able to aim at.
+  - `Checkbox` and `RadioGroupItem` draw a 44px bordered box on touch input, and the
+    row, column or field around them grows to hold it. That is the price
+    `tag-group.tsx` already records for its chips.
+  - On a `Slider` and a `RangeField`, a press inside a thumb's band drags the thumb
+    from where it was rather than jumping the value to where you pressed. The arrow
+    keys and the range input behind the track still reach every value. Two bounds
+    closer together than the band is wide are dragged by the one used last until Tab
+    moves to the other, so give a range a `minGap` a finger can pinch apart.
+  
+  `DESIGN.md` states both patterns and the three conditions that decide between them.
+  
+  **The focus-indicator gate read 132 of the package's 400 source files.** It read
+  `components/ui` and nothing else, so it saw no Block, no Page, neither `live`
+  surface and no provider, and it skipped any file whose JSDoc made no keyboard claim
+  before reading a single class string in it. It now reads `components`, `blocks`,
+  `pages`, `live` and `provider`, recursively, and judges every class string in the
+  scope. It does not read `apps/site`: that is another package with its own `check`
+  chain.
+  
+  **Its exclusion for menu and listbox options was a suffix match, and is now a
+  roster.** `/(?:-item|-sub-trigger)$/` is a statement about spelling rather than
+  about menus, and over the Blocks it swallowed `radio-group-item`,
+  `toggle-group-item`, `accordion-item`, `breadcrumb-item`, `tree-item` and about
+  thirty more, every one of which is an ordinary focusable control.
+  
+  **Two scanning defects are fixed, and both were making the gate report green over
+  a file it had not read.** A block comment inside a `cn()` call held an apostrophe,
+  which the scanner read as an opening quote and which hid every class after it; and
+  a module-level `const` was sliced to the end of its file rather than to the end of
+  its value, so a menu item read as carrying a full-strength ring that belonged to a
+  component further down the same module. Both are proved by fixtures that fail
+  without the fix. The shipped tree has no genuine findings; a planted one fires in a
+  Block and in a file whose JSDoc makes no claim, which is the negative control that
+  makes the clean run mean something.
+  
+  **The bump is `minor` rather than `patch`.** No prop, import or rendered element
+  changes, and no desktop metric changes, so nothing breaks a call site. It is
+  `minor` because thirteen controls now measure differently on a coarse pointer, and a
+  consumer who styles any of them has to know that: a `Calendar` panel is taller, a
+  `Checkbox` box and a `RadioGroup` column are bigger, and a `NumberField` lays its
+  steppers out differently. That is a visible metric change on the platform most of
+  these controls are used on, and describing it as a patch would describe something
+  nobody sees.
+- 6dc7bb8: `DocsShell` lays out three columns from `lg` rather than two
+  
+  The documentation frame's third track named a screen the emitted theme closes, so
+  the class compiled to nothing and the contents rail fell into an implicit `auto`
+  track: two columns at every width from 1024 pixels, with the article column about
+  340 pixels wide at 1024, on this site and in all four consumers. The rail is
+  15rem, the document takes the rest, and the contents rail is 13rem, all from `lg`,
+  which is where both rails already appeared. No prop, import or rendered element
+  changes, and the third track still exists only when you pass `toc`.
+  
+  **`check-breakpoint-variants.mjs` is new, and it is a gate rather than a fix.** It
+  reads every responsive variant out of the class strings in the component package
+  and the site and compares it to the screens the token package emits, read from
+  `layout.tokens.json` and from the build that closes `xl` and `2xl`. A class
+  written against a screen the theme does not have is now a finding with a file and
+  a line, and every other gate was green through the one above because each of them
+  held the value rather than the class.
+- 6dc7bb8: Nineteen Blocks name their table, and the name is the heading they already draw
+  
+  A `<table>` is named by a caption, an `aria-label` or an `aria-labelledby`, and by
+  nothing else. A heading that happens to sit above it does not name it: no assistive
+  technology derives a table's accessible name from a neighbouring heading. Nineteen
+  Blocks drew a real `<table>` under a caller-owned `SectionHeading` and gave the table
+  no name at all, so a reader listing the tables on a page found nineteen anonymous
+  entries while every element around them was named. `Table`'s own JSDoc asks for one
+  of the three.
+  
+  A Block cannot compose the words itself, so each one takes the name from the heading
+  it already draws, by reference. `SectionHeading` gains an optional `id` for the
+  handle; a generated id would be no handle at all, since nothing could be written
+  down to point at it. No new prop on any Block, no string shipped, and no caption
+  drawn: a visible line repeating the heading is noise, and a reference cannot drift
+  from the heading it names.
+  
+  **Three of them write the reference only while the heading is drawn.** `Compare01`,
+  `PricingCompare01`, `RateCard01` and `DataTable01` render their heading only when the
+  caller passed a `title`, so an unconditional reference would point at an element that
+  is not on the page, which is the defect this same release removed from
+  `CommandPalette`'s listbox. In the one state where a caller passed no title the table
+  is therefore unnamed, which is the honest trade and the caller's own choice: the
+  alternative is a reference to nothing.
+  
+  `DataTable01` also has a `caption` prop, and where a caller passes one the caption
+  wins, because a reference outranks a `<caption>` in the accessible name algorithm.
+  Writing both would quietly make the heading the name and the caller's own words the
+  thing only read on request. `Gantt01` already captioned its table and is unchanged.
+  
+  The rule is held by a test rather than a gate, and the reason is in that test's
+  header: whether a table is named is a runtime property, because the reference has to
+  resolve in every state a caller can reach. A source scan would only prove the
+  attribute is written, and this repository does not accept a report-only gate.
+  
+  No import breaks and no prop is removed.
+- 6dc7bb8: `OverflowActions` and `ResizableHandle` read layout when it can have changed
+  
+  Neither Component's rendered output changes for a caller who composes them the way
+  their own documentation says. What changes is how often each of them asks the browser
+  to settle layout, and a table of rows or a page of dragged panes pays that on the main
+  thread in the middle of a reader's work.
+  
+  `OverflowActions` measured itself after every render of every row, reading the row's
+  own box, the cap and every drawn action, and writing the answer back as state. **A
+  pass now runs on mount, when the actions' ids or their labels change, when `className`
+  changes, when the row's own box changes, and when the page's fonts have finished
+  loading.** Passing a fresh `actions` array on every render now costs nothing, which is
+  the ordinary case in a table cell under a filter box. **The fonts are in the list
+  because a self-hosted face swaps in after the first paint and changes the width of
+  every drawn action without changing the row's width**, so nothing else reported it, and
+  a row measured in the fallback face was a row whose widths were never true of the page
+  the reader was looking at.
+  
+  `ResizableHandle` read the group's box on every `pointermove`, immediately after the
+  frame before had written the new position and therefore written new styles: one forced
+  synchronous layout per frame of every drag. **The box is read once at `pointerdown`,
+  and every frame after that is arithmetic.** A drag measures from the press rather than
+  from the divider's own box, which is what a divider a pixel wide and a reader takes
+  hold of wherever their pointer lands requires, and it did that before.
+  
+  Two cases are pinned rather than handled, and both are written down in the JSDoc and
+  the site page:
+  
+  - A group resized by something else part way through a drag finishes that drag against
+    the travel it started with. A caller who needs a drag that follows a changing group
+    ends that drag and starts it again.
+  - `OverflowActions` cannot see a change that leaves both the row's box and its drawn
+    content exactly as they were: an ancestor's font size changing, or an action's mark
+    swapped for a different-width one while that action is drawn. Both used to be
+    corrected by the row's next render and neither is now.
+  
+  The bump is `minor` because those two are behaviour a consumer can observe, even though
+  no prop, import or rendered element changes.
+- 6dc7bb8: There is one container namespace, and `max-w-6xl` no longer resolves
+  
+  **If you wrote `max-w-6xl`, `max-w-2xl`, `max-w-xl`, `max-w-lg`, `max-w-md`,
+  `max-w-sm` or `max-w-5xl` against this package, that class now produces no rule at
+  all.** Nothing errors and nothing warns: the element simply loses its cap and lays
+  out at whatever its parent gives it. Grep your own repository for `max-w-` before
+  you upgrade. The replacements are in the list below and every one of them resolves.
+  
+  The reason is the defect this release ends. `@nanisoft/prism-tokens` authors three
+  container widths and Tailwind ships thirteen of its own, and until now both shipped
+  in the same stylesheet. Three of Tailwind's were numerically identical to three of
+  ours: its largest at 72rem beside `--container-page`, its fifth at 42rem beside
+  `--container-measure`, its fourth at 36rem beside `--container-measure-narrow`.
+  Nothing rendered differently, so nothing failed and every gate was green. What it
+  cost was that one width had two names, and the first retune of an authored token
+  would have moved every surface reaching it by one spelling and left every surface
+  reaching it by the other exactly where it was. `Section`, `SiteHeader`,
+  `SiteFooter`, `ChartCard01`, `DocsShell` and `QuickView01` all used the Tailwind
+  spelling of the page column; `Cta01` and `SectionHeading` used the Tailwind
+  spellings of the two measures.
+  
+  The token build now closes the whole namespace, with
+  `--container-*: initial` ahead of the authored entries rather than a list of the
+  seven steps that happened to be emitted. A wildcard is the load-bearing word: the
+  thirteen names it retires are `3xs 2xs xs sm md lg xl 2xl 3xl 4xl 5xl 6xl 7xl`,
+  and a list would have been a second list to keep in step with a dependency's
+  default theme, which is the event the line exists to survive. Order matters and is
+  asserted: Tailwind resolves a theme in source order, and the same declaration
+  written after the authored entries clears all eight of ours and ships no container
+  at all.
+  
+  **What to write instead**
+  
+  | You wrote | Write | Value |
+  | --- | --- | --- |
+  | `max-w-6xl` | `max-w-page` | 72rem |
+  | `max-w-2xl` | `max-w-measure` | 42rem |
+  | `max-w-xl` | `max-w-measure-narrow` | 36rem |
+  | `max-w-md` on a dialog or an alert | `max-w-overlay-dialog` | 28rem |
+  | `max-w-lg` on a form dialog | `max-w-overlay-form` | 32rem |
+  | `max-w-xl` on a command palette or a search | `max-w-overlay-palette` | 36rem |
+  | `max-w-sm` on a side sheet or a drawer | `max-w-overlay-panel` | 24rem |
+  | `max-w-5xl` on a lightbox | `max-w-overlay-media` | 64rem |
+  
+  **An overlay's width is a property of the kind of surface it is, not of the page
+  grid underneath it**, and that is why the five overlay widths are authored rather
+  than carried on a Tailwind name. A retune of the reading measure must not move a
+  dialog and a retune of the page column must not move either, so the two families
+  are named apart inside the one container group. They share a group because
+  Tailwind 4's `max-w-*` resolves `--spacing-*` and `--container-*` and nothing
+  else, so a maximum width that is to be a token has to live in one of those two
+  namespaces or it is a value written in a Component. `overlay-palette` and
+  `measure-narrow` are both 36rem; that is two measurements that happen to agree and
+  not one measurement with two names, and the token source says so and the emitted
+  contract holds it to saying so.
+  
+  **Nothing is supposed to change where you can see it.** Every migration above
+  preserves the exact rendered width, so a page that only consumed this stylesheet
+  looks the same before and after. What changes is the next retune: it now moves one
+  surface rather than half of them.
+  
+  **A width that was arithmetic on the spacing base is left alone, deliberately.**
+  `max-w-96`, `max-w-72`, `max-w-64`, `max-w-32` and `max-w-20` resolve to
+  `calc(var(--spacing) * N)` and never touched the container namespace at all. They
+  are how a chart's axis band, a token table's column and a documentation frame are
+  sized, where nobody took a decision and naming one would invent it. They stay.
+  
+  **Two gates now hold this down, because the question has two sides.**
+  `scripts/check-elevation-layout.mjs` reads every `w-*` and `max-w-*` name out of
+  the class strings and holds it to the container group read out of the token source,
+  so a width nobody authored is a finding with a file and a line; it reads
+  `apps/site/items` as well as `apps/site/src` and `packages/ui/src`, because that is
+  where the documentation Demos live and where the site's own build scans.
+  `packages/ui/scripts/check-container-namespace.mjs` reads the built stylesheet and
+  holds the artefact: that the theme block declares exactly the authored containers,
+  that none of Tailwind's thirteen steps is declared or read, that the close is
+  written ahead of the entries rather than after them, and that every container width
+  this package writes is emitted as a utility reading its own variable. It reads the
+  step list out of the installed `tailwindcss/theme.css` rather than restating it, so
+  a dependency that adds a step is covered without an edit. Tailwind's extractor
+  reads this package's comments as well as its code, so a retired class name written
+  down in a JSDoc block used to emit a utility; there is now a rule about that too.
+  
+  **The bump is `minor` rather than `major`, and the argument is the version line
+  rather than the severity.** A class a consumer wrote stops producing a rule with no
+  error, which is breaking by any ordinary reading, and this entry says so plainly.
+  `major` in this repository publishes `1.0.0`, and every release to date has been
+  `minor` on a `0.y.z` line where the `y` is already the breaking-equivalent slot.
+  Publishing 1.0.0 with this change in it would assert an API stability guarantee
+  this library has not earned, and it would be the first release in the project's
+  history to use the bump at all. The break is real and is the subject of this
+  entry; the number it lands on is the line's decision and the line is pre-1.0.
+  
+  **One collateral repair on the documentation site, recorded here because it is
+  why `globals.css` moved.** The site's own build and this package's meet in one
+  `utilities` layer, and this package emits a bare `.grid-cols-6` as the base of the
+  `lg:` variant four of its Blocks use. That bare rule landed after the site's
+  `sm:grid-cols-11`, so every colour ramp on the Foundations page was drawing six
+  columns at every width above 640 against a comment beside the class saying
+  eleven. Whether `check-utility-cascade.mjs` saw it depended on which order two
+  content-hashed CSS chunks sorted in, which this change perturbed and which nothing
+  about the tree controls. Neither side is wrong, so the site's variant is restated
+  in the `site-variants` layer that already exists for six other collisions. The
+  repaired behaviour is on the documentation site only; nothing in this package
+  changes.
+- 6dc7bb8: Ship the interface face and its metric-adjusted fallback, and stop the site loading its own
+  
+  `@nanisoft/prism-ui` shipped three Inter weights and no fallback face, so a reader
+  waiting on the web font saw the platform's UI face jump into place when Inter
+  arrived. The stylesheet now also ships a local Arial carrying Inter's metrics
+  through `size-adjust`, `ascent-override`, `descent-override` and
+  `line-gap-override`, and `--font-sans` names it immediately after Inter, so the
+  swap window occupies Inter's own line box. The four numbers are measured off the
+  shipped face rather than chosen, and they are the ones `next/font` measured for the
+  same typeface, so the line box is unchanged from what the documentation site had.
+  
+  A fourth face ships beside them: Inter italic at weight 400, the Latin subset of
+  the same release, covering the same 230 codepoints as its upright siblings.
+  `Prose` sets `blockquote` in italic and the surface had been asking for a style no
+  shipped file provided, so every consumer has been reading a synthesized oblique.
+  One real face covers every weight a browser asks for, because the font matcher
+  takes the closest available weight rather than synthesizing once a face exists.
+  The whole set is 93.5 KB, up 22.8 KB, and no consumer has to do anything.
+  
+  **The documentation site no longer loads a face of its own.** It shipped a 723 KiB
+  unsubsetted variable Inter and its italic through `next/font/local`, preloaded both
+  in all 581 exported documents, and applied the result to `<body>` as a directly set
+  `--font-sans`. A directly applied custom property outranks an inherited one, so the
+  library's faces were never fetched on the site that documents them: a missing or
+  corrupt shipped font rendered perfectly there with every gate green. The site now
+  resolves the same stack you do, which is the only way it can be evidence for the
+  package. If you were relying on the site to look right while your own copy of Inter
+  was broken, that is now a failure you can see.
+- 6dc7bb8: `Progress` announces a value text again, and `getAriaValueText` works
+  
+  Every `Progress` in every consumer was announcing a bare number. `aria-valuenow`
+  carried the position and `aria-valuetext` was absent from the tree altogether, so
+  the sentence a screen reader says for a bar was a number with nothing to say what
+  range it was a number in. A bar with `value={null}` was worse than bare: with no
+  `aria-valuenow` to fall back on, its entire value was nothing.
+  
+  **What changed.** `aria-valuetext` is now passed only when you pass `valueText`, so
+  the default that Base UI computes survives. You get it for free:
+  
+  - a determinate bar announces its value as a percentage of the range, so
+    `value={68}` is announced as `68%`;
+  - a bar of unknown length announces `indeterminate progress`.
+  
+  **`getAriaValueText` was dead and is not any more.** It was called on every render
+  and its return value was then discarded, so a consumer who wrote one was paying for
+  it and hearing nothing. It receives the formatted percentage first and the raw
+  `value` second, unchanged.
+  
+  **`format` and `locale` had no observable effect either, and now do.** Both exist
+  only to shape the announced string, so with the attribute absent there was nothing
+  for them to shape. One trap worth knowing: `format` is applied to the raw value on
+  the scale, not to the share of it, so `format={{ style: 'percent' }}` on a
+  zero-to-hundred range reads as `4050%`. The unformatted default is the only path
+  that asks for a percentage of the fraction.
+  
+  **Nothing you passed changes meaning.** An explicit `valueText` still wins, an
+  `aria-valuetext` written on the Component itself still wins over both, and a bar
+  given both `valueText` and `getAriaValueText` still throws. What a consumer hears
+  on a bar that passes neither of them is the whole of this change, and it is a
+  change to every bar a consumer that passes neither already has.
+  
+  The bump is `minor` because it changes what a screen reader says in every
+  composition of this Component. No prop, import or exported name changes.
+- 6dc7bb8: `Progress` expresses its value as a transform rather than as a width
+  
+  The fill was transitioned with `transition-[width]`, and `width` is a layout
+  property, so every frame of every advancing bar made the browser settle layout on
+  the main thread. `Progress` is one of the two or three most-composed Components in
+  this package, which is what makes it worth a release of its own: the cost was not
+  one bar on one page, it was every bar on every page, in every consumer that
+  composes one.
+  
+  **The indicator is now as wide as the track at every value and is scaled along the
+  reading axis.** `aria-valuenow` still comes from `ProgressRoot` and still reports
+  `value`, `min` and `max`; the scale factor is the same three numbers read a second
+  time, and the test suite holds the two to each other by asserting the transform
+  against the announced value rather than against a copy of the arithmetic.
+  
+  Three things to know:
+  
+  - **A rule that sized `[data-slot="progress-indicator"]` is now sizing a box this
+    Component does not resize.** Style the track's `height`, the track's `width`, or
+    the indicator's `transform` instead. The indicator's own inline `width` is `100%`
+    and outranks any class, because Base UI writes a percentage width onto the
+    element as an inline declaration and nothing in a class list can beat that.
+  - **The fill grows from the inline start edge in both directions.** `origin-left`
+    under a left-to-right `dir` and `rtl:origin-right` under a right-to-left one, so
+    the bar reads from the same end it always did. It takes the `rtl:` variant rather
+    than a logical property because CSS has no logical keyword for
+    `transform-origin` and Tailwind's `origin` utility ships the nine physical
+    positions and nothing else.
+  - **At a low value the leading cap is flatter than it was.** A scaled shape's corner
+    radius is scaled with it, so a bar at five percent is a short pill with a
+    compressed cap rather than a five percent slice of a round one. It is the standing
+    trade for a compositor animation, and it is the same one every other
+    compositor-priced fill in this package already makes.
+  
+  `value={null}` is unchanged: an unknown length renders no transform at all, so it is
+  the resting state it has always been rather than a zero to animate away from when
+  the length becomes known.
+  
+  The bump is `minor` rather than `patch` because a consumer who styles the indicator
+  has to move with it. No prop, import or announced value changes.
+- 6dc7bb8: Declare `react` and `react-dom` as peer dependencies
+  
+  `react` was already a peer dependency in fact: every module in the package imports
+  it, and nothing declared it. What that cost was not a failed install but silence.
+  A package with no peer range cannot be incompatible with a React version, so npm
+  and pnpm had nothing to warn about, and the manifest never said which React this
+  library is written for. Both are now `^19.2.0`, the range this repository builds
+  and tests against, and the site already resolves. `react` and `react-dom` stay in
+  `devDependencies` so the package still builds and tests locally.
+  
+  `react-dom` is a peer even though no module here imports it, because
+  `@base-ui/react` does, for the floating elements the Dialog, the Popover, the Menu
+  and the Tooltip render through. Two places already treated it as your copy rather
+  than the package's, the client budget's shared runtime and the registry's implicit
+  set; this is the manifest catching up with those two decisions.
+  
+  If your application is on React 18, install React 19. Nothing in the package uses a
+  React 19 only API, but every gate, test and build in this repository runs on 19, so
+  a narrower claim would not be one this repository can back.
+- 6dc7bb8: Reduced motion is now one unlayered rule in the stylesheet, and it stops everything
+  
+  If you have the `prefers-reduced-motion` setting on, this release changes what you
+  see in a way you will notice the first time you open one of our pages.
+  
+  **What a reader with the setting on gets now.** No animation runs and no transition
+  runs, anywhere in the component library. A dialog appears already open instead of
+  fading up, a hover changes colour instantly instead of over 80ms, a disclosure
+  opens at once instead of growing, a `Spinner` ring stands still instead of turning,
+  and a `Timeline`'s running mark holds one opacity instead of breathing. Everything
+  that is not movement is unchanged: nothing is hidden, no figure loses a state, and
+  every announcement is said exactly as before.
+  
+  **What this replaces.** The stylesheet already carried a `prefers-reduced-motion`
+  rule, and it did two things: it set `animation: none`, and it named the seven
+  `prism-ambient-*` classes rather than every element. So every `transition-*` in the
+  package ran at full duration, and two unbounded loops ran indefinitely: `Spinner`'s
+  ring turned for as long as the work did, and a running `Timeline` step breathed for
+  as long as the step did. The comment above that rule described the opposite, which
+  is the defect class this repository keeps finding, so the rule and its comment are
+  now the same document.
+  
+  **Why one rule rather than a guard at each call site.** A `motion-safe:` variant
+  ADDS a rule inside `prefers-reduced-motion: no-preference`; it never removes one.
+  Three Components were guarding a transition per call site and all three were
+  different shapes: `Drawer` and `ImageZoom` guarded a duration as well as the
+  property, `Lightbox` guarded the property and not the duration, and `RangeField`
+  guarded nothing at all while animating `left`, `right` and `width`. The one place
+  that decides is the stylesheet, and `scripts/check-motion.mjs` now fails on a
+  `motion-safe:` or `motion-reduce:` variant on a motion utility, so a call site
+  cannot quietly start answering for itself again.
+  
+  **What it means for a consumer.** Your own stylesheet is unaffected where it is
+  qualified by a class, an id or an inline style: the rule is unlayered and universal
+  rather than `!important`, so a class-qualified rule of yours outranks it and still
+  wins for your own elements. What changes is the library's motion, which is the
+  motion you inherited by installing it.
+  
+  **One Component had to be repaired before this was safe, and that is the load-bearing
+  part.** A stopped transition starts nothing and so never sends `transitionend`, and
+  an exit waiting on that event strands whatever it was hiding. `Toast` now asks the
+  browser what is actually running on its root and hands over on the same commit when
+  the answer is nothing, so a `Toast` still leaves under this rule and under your own
+  `transition: none`. The overlays are Base UI's and Base UI settles every popup on
+  `getAnimations()`, which resolves immediately when nothing is running.
+  
+  The bump is `minor` because every consumer of this package inherits the change and
+  one stylesheet is the whole surface it lands on. No prop, import or exported name
+  changes.
+- 6dc7bb8: `SearchDialog` is a real modal, and `Toast` dismisses when no transition runs
+  
+  Two accessibility defects, and a consumer sees both.
+  
+  **`SearchDialog` claimed modality it did not have.** It rendered `aria-modal="true"`
+  with no focus trap, so Tab walked out of the dialog and into the page behind it;
+  it took no focus back, so a keyboard reader who opened search, pressed Escape and
+  kept tabbing had lost their place entirely; its field suppressed the browser
+  outline and drew no replacement, so the one control holding focus showed nothing;
+  and it had no portal and no scroll lock, so the panel scrolled with the document
+  and could be clipped by an ancestor.
+  
+  It is now composed from `Dialog`, so the focus trap, the page scroll lock, the
+  portal, the dismissal on Escape and on the scrim, and the return of focus to the
+  control that opened it all come from the one modal implementation this package has.
+  There is one modal in the package rather than one and a claim. Its props, its
+  ranking, its result list and its live region are unchanged.
+  
+  Two things about the composition are worth knowing:
+  
+  - `onClose` now fires once the dialog has finished leaving rather than at the
+    moment it was asked to. The modal owns the reader's focus while it is closing,
+    so handing over earlier would take the focus return with it. Unmount from
+    `onClose` exactly as before.
+  - The panel and the scrim are now `Dialog`'s rather than the search dialog's own.
+    The scrim is a blurred `bg-background/80` wash instead of a `bg-foreground/40`
+    one, and the panel is centred in the viewport rather than pinned 15 percent from
+    the top. A site that styled either through its own sheet will want to know.
+  
+  **`Toast` dismissal depended on a transition ending.** The leave handed over on the
+  end of its own opacity transition, so a global reduced-motion kill written as
+  `transition: none` rather than as a `0.01ms` duration meant the event never fired,
+  `onDismiss` was never called, and the toast was stranded in `data-phase="leaving"`
+  for good: visible, undismissable, still taking the pointer, and a live region that
+  never stopped announcing. This is the one place in the system where a global
+  motion kill destroyed state rather than merely removing movement, and
+  `packages/ui/src/styles.css` states the invariant it broke.
+  
+  The leave now asks the browser what is actually running on the toast rather than
+  waiting for an event a killed transition never sends. It waits for the fade when
+  there is a fade, it hands over on the same commit when there is not, and
+  `onDismiss` is called exactly once either way. Nothing else about the contract
+  moved, and the length of the leave is still `duration-slow` from the stylesheet
+  rather than a number in this package.
+  
+  **`Dialog` takes an optional `initialFocus`.** Left out, the panel focuses its
+  first tabbable element, which is unchanged. It is named for the dialog whose first
+  tabbable element is not the control the reader came for, which is what
+  `SearchDialog` now uses to put the cursor in the field.
+  
+  **The bump is `minor` rather than `patch`, for two reasons.** `Dialog` gains a
+  public prop, which is new surface rather than a correction. And `SearchDialog`'s
+  panel and scrim visibly change to `Dialog`'s, which is a behaviour a consumer can
+  see on their site rather than a fix they never notice. Both are additive and
+  neither breaks a call site.
+- 6dc7bb8: `SiteNavbar` is opaque, and `sticky` can be turned off
+  
+  The bar was `bg-background/80` with a `backdrop-blur`. A backdrop filter is
+  evaluated against everything painted behind the element, and this element is a
+  full-viewport-width sticky bar, so on a scrolling page the browser re-sampled and
+  re-blurred the backdrop on every frame of the scroll, on every page of every site
+  that composes it. The bar is now `bg-background` with a `border-border` hairline,
+  which is what `SiteHeader` has always shipped.
+  
+  **The blur was not kept behind an `@supports` check, because a capability check does
+  not pay for it.** `@supports (backdrop-filter: blur(1px))` is false only in a
+  browser that was not compositing anything, and true in every browser that does the
+  expensive thing, so it changes no reader's cost. It would also have left a third
+  outcome in the world and the worst of the three: a bar that is a flat eighty
+  percent veil with unblurred text passing under it.
+  
+  **Opaque is also the more legible of the candidates, and that is the part a token
+  can be held to.** An opaque bar makes the bar's own contrast the pair
+  `muted-foreground` on `background`, in every pack and in both modes, which is the
+  pair the contrast gate already checks. An eighty percent background has no token
+  pair at all, because the colour under it is whatever the reader's scroll position
+  has brought there and no token in this system describes it.
+  
+  `will-change` is not on the bar and is not proposed for it. Nothing on the bar
+  animates, so a compositing hint applied at rest has no frame to be ready for and
+  nothing that would release it. This package ships no `will-change` anywhere.
+  
+  **`sticky={false}` now works.** The prop was destructured and never reached the
+  class list, so a site that passed it was given the sticky bar it had asked not to
+  have. The default is unchanged and for the reason it was there: the bar is how a
+  reader leaves the page they are on, and it takes that with them on exactly the long
+  pages where it is needed.
+  
+  Two things to know if you were styling against the old bar:
+  
+  - A rule that set the bar's background translucency has nothing to sit on now. Set
+    the colour on the page behind the bar, or leave the bar the way `SiteHeader` has
+    it.
+  - A rule that relied on the bar being translucent to hide a heading as it scrolled
+    under will no longer hide it, which is the point.
+  
+  The bump is `minor` because the bar's default appearance changes on every page of
+  every consumer. No prop, import or landmark changes.
+- 6dc7bb8: The elevation scale is three steps or it is nothing, and the gate now says so
+  
+  `SearchDialog` shipped `shadow-lg`, and `DESIGN.md` said no shipped component
+  uses one. Both were true once and neither was true when the sentence was last
+  read: the Component took `shadow-lg` as an override on top of the `shadow-md` its
+  own `DialogContent` already draws, and the site's skip link took `focus:shadow-lg`
+  under a heading that named "the theme disclosure and mobile nav panels" as the
+  only places it was allowed.
+  
+  **`shadow-lg` is not an authored step, so neither of those was drawing an authored
+  shadow.** The token package emits `--shadow-xs`, `--shadow-sm` and `--shadow-md`
+  and nothing else, so `shadow-lg` resolved against Tailwind's own stock theme. That
+  is the second source of truth this package exists to prevent, and the reason it
+  was invisible is that Tailwind's `shadow-lg` is a perfectly good black-alpha
+  shadow: nothing looked wrong. What was wrong is that a retune of the elevation
+  scale would have moved every lifted surface in every consumer and left that panel
+  exactly where it was.
+  
+  **`SearchDialog` now says nothing about elevation at all.** The panel is the one
+  lifted element over a modal scrim, which is what `--shadow-md` is for, and
+  `DialogContent` already draws it, so the override is deleted rather than
+  replaced. A consumer who styles `DialogContent` keeps styling it, which was not
+  true of a hardcoded `shadow-lg` sitting on top of it.
+  
+  **`scripts/check-elevation-layout.mjs` now fails on any `shadow-*` step the token
+  source did not author**, in every root it reads, the site's own source included.
+  It reads the authored set from `shadow.tokens.json` rather than from a list beside
+  the gate, for the reason the width rule beside it reads the container names from
+  `layout.tokens.json`: a gate whose subject is the authored scale cannot be
+  answered by a second copy of it. `shadow-none` is allowed, because the absence of
+  a shadow is not one more step of the scale, and `shadow-inner` is not, because it
+  is a shadow nobody authored.
+  
+  **There is no docs-only exception any more, and that is the part worth arguing
+  with.** The exemption said site apparatus is not installable surface. The site's
+  own Tailwind build is a second consumer of the same token package, so "the site"
+  is not outside the system, it is inside it twice: a site class resolving a shadow
+  out of Tailwind is the second source of truth wearing the word apparatus. The
+  site's skip link draws `shadow-md` now, which is what it should have drawn.
+  
+  The bump is `minor` rather than `patch` because a consumer who styles the search
+  panel's elevation sees it move from Tailwind's `lg` to Prism's `md`, which is a
+  visible change to a published surface and the right one.
+- 6dc7bb8: `RangeField` expresses its band as a transform rather than as three layout properties
+  
+  The band between two bounds was transitioned with `transition-[left,right,width]`.
+  Base UI positions that element with a logical `inset-inline-start` and a `width`,
+  so `left` and `right` were properties the browser checked on every frame in order
+  to discover they had not moved, and `width` was a layout-and-paint animation on
+  every frame of every drag. A range is the one control in this package whose value
+  changes on every pointer move rather than on every commit, which is why the cost
+  was larger here than on the Component that retired the same mechanism a release
+  ago.
+  
+  **The band is now as wide as the track and is scaled about the inline start.**
+  `aria-valuenow` still comes from Base UI and still reports each bound; the scale
+  factor is the same division read a second time, and the test suite holds the two to
+  each other by asserting the transform against what the two thumbs announce.
+  
+  Three things to know:
+  
+  - **A rule that sized or positioned `[data-slot="range-field-indicator"]` is now
+    sizing or positioning a box this Component does not resize.** Style its
+    `transform`, or style the track. Its own inline `width` is `100%` and outranks any
+    class, because Base UI writes a percentage width onto the element as an inline
+    declaration. Its POSITION is still Base UI's, untouched: the element keeps the
+    logical `inset-inline-start` that places the band's left edge on the lower bound
+    under a left-to-right `dir` and on the same distance from the other end under a
+    right-to-left one, so a `dir="rtl"` band needs no arithmetic of its own.
+  - **A partial band has a straight edge where it stops, and no rounded edge.** The
+    previous fill carried `rounded-full`, and a `scaleX` scales the shape it is applied
+    to, including its own corners, so a band at 40 percent drew a 3px cap squashed to
+    1.2px on one axis and left at 3px on the other. The ends of a band are the two
+    round thumbs drawn on top of it, so the radius was a second, smaller circle under a
+    larger one and squashing it landed on exactly the edge the reader is looking at.
+    The track still carries `rounded-full` with `overflow-hidden`, so a band at full
+    span has both of its ends rounded. This is the one place the shape differs from
+    `Progress`, and the reason is on the Component.
+  - **A vertical field scales on `scaleY` about the bottom edge**, chosen by the
+    `orientation` the Component already forwards, rather than having the horizontal
+    animation applied to a vertical box.
+  
+  `RangeField` also carried a `motion-safe:` variant on that transition, which was
+  doing nothing: the variant adds a rule rather than removing one, so the unguarded
+  transition ran at every setting. See the reduced-motion changeset for where the
+  policy now lives.
+  
+  The bump is `minor` because a consumer who styles the indicator has to move with it.
+  No prop, import or announced value changes.
+- 6dc7bb8: The rest of the controls take the coarse-pointer floor, and the divider explains itself
+  
+  Fifteen controls were drawing targets between 28 and 40 pixels with nothing done about
+  it on touch input, and three more were found by going looking rather than by reading a
+  list. All of them now take the 44px floor, and **the desktop metrics are untouched**: a
+  mouse and a trackpad see exactly what they saw before, and every change is inside
+  `@media (pointer: coarse)`.
+  
+  **Sixteen take a step, and the step is the default for all of them.** A popup trigger
+  (`PopoverTrigger`, `DropdownMenuTrigger`, `NavigationMenuTrigger`, `MenubarTrigger`,
+  `AlertDialogTrigger`), an alert dialog's confirm and dismiss pair, a page link
+  (`PaginationLink` and the previous and next controls), a tab and its list, a select
+  trigger and a native select, a `Toggle`, a `ToggleGroupItem` and the sidebar's toggle
+  all grow to 44 tall through `pointer-coarse:h-11`. `Carousel`'s two controls, both of
+  `Lightbox`'s, both of `ImageZoom`'s, the drawer's close control and `PaginationLink`'s
+  `icon` size take `pointer-coarse:size-11` and are 44 by 44.
+  
+  **Four of them take `min-w-11` on the second axis as well, because a floor paid on one
+  axis is not a floor.** A one-digit page link at 44 tall is 20 wide. An icon-only
+  `Toggle` is `size-4` plus `px-2.5`. An icon-only `ToggleGroupItem` is the same. This is
+  the arrangement `Button` already states and the reason it states it, and the page-link
+  case is the one worth naming: `PaginationPrevious` and `PaginationNext` pass
+  `size="default"` and override the padding to `px-2.5`, so on a phone the word is hidden
+  and the control is an icon with a 40 pixel width until `min-w-11` says otherwise.
+  
+  **`TabsList` grows too, and that is the half that is easy to forget.** The list is
+  `h-9 p-1`, so its content box is 28 tall and a trigger grown to 44 would not fit inside
+  it. It takes `pointer-coarse:h-13`, which is the trigger's 44 plus the list's own `p-1`
+  on each side. Both halves are asserted in the test, because either alone leaves a
+  control under the floor or a list that clips one.
+  
+  **Two of the fifteen are not targets and take nothing, and both are worth stating
+  because each looks exactly like every other finding here.**
+  
+  `steps.tsx`'s marker is a `<span>` with no role, no `tabIndex` and no handler. It is not
+  focusable, it is announced by nothing, and a press on it falls through to the step's own
+  text. The rail is a reading structure: the `<ol>` carries `aria-label`, the `<li>`
+  carries `aria-current="step"`, and the connecting rule is `aria-hidden`. Growing a 32px
+  disc to 44 would pay the floor on a decoration and push the step's text down the page.
+  
+  `pagination.tsx`'s ellipsis is a `<span aria-hidden="true">`, for the same reason. The
+  page links around it are the targets and they take the floor in `PaginationLink`. The
+  floor is a claim about targets a finger is asked to hit, and neither of these is one.
+  
+  **`ResizableHandle` takes a band, and it is the only control here where a step is
+  arithmetically impossible rather than merely wrong.** The panes are given
+  `flexBasis: <size>%` with `flexShrink: 0`, so the two of them already sum to the group's
+  whole width and the divider is what overflows it, by exactly its own one pixel. A `w-11`
+  divider would overflow the group by 44, which on a phone pushes the right pane's edge off
+  the screen, and making room would mean changing what `size` means.
+  
+  The band works because three facts hold that the three conditions in `DESIGN.md` ask
+  about. It is a pseudo-element, so the box the drag measures stays the drawn box:
+  `onPointerDown` reads the **group's** rect and `onPointerMove` divides by the group's
+  travel, so nothing reads this element's own size at all, which is the failure `DESIGN.md`
+  warns about for a `Slider` thumb and which does not apply here. It paints above both
+  panes without a `z-index`, because the handle is `relative` with `z-index: auto` and the
+  panes are static, and a positioned descendant paints after non-positioned siblings. And
+  it is 44 by 44 rather than 44 by the handle's length, which is what keeps the overlap
+  local: along the split the handle already spans the group so 44 there is free, and across
+  the split it reaches 21 pixels into each pane over a 44 pixel stretch of the line rather
+  than the whole height of the group.
+  
+  **The cost is stated at the class rather than hidden in a document.** A press within 21
+  pixels of the line, over a 44 pixel stretch of it, grabs the divider rather than the
+  pane, and `touch-none` travels with the band because the pseudo-element resolves its
+  `touch-action` from this element. Text selection near the divider is unavailable inside
+  that patch. That is the trade a resize gutter makes on every platform, and it is bounded
+  to a patch rather than run the length of both panes.
+  
+  Three things to know before you style against these:
+  
+  - A tab list, a menubar, a navigation bar and a segmented toggle group are 44 tall on
+    touch rather than 28 to 36. A `Tabs` panel is that much further down the page.
+  - A page header's row of links, an alert dialog's footer and a carousel's control row are
+    each 8 to 16 pixels taller on touch. Nothing shifts off an edge: every one of them is
+    content-sized and centred rather than flush.
+  - On a resizable split, a press inside 21 pixels of the divider grabs the divider. The
+    arrow keys, Home and End still move it, and `aria-valuenow` still reports where it is.
+  
+  **Three controls the earlier list did not name, found by searching for the two patterns
+  rather than reading a line number.** `Toggle`, `SelectTrigger` and `NativeSelect` were
+  all drawing 32 or 36 pixel targets and all three are the same family as controls the
+  earlier release had already fixed. They are included because a trigger that opens a
+  popup is a button, not a text field: it has no caret, takes no typed input, and its job
+  is to be pressed.
+  
+  **One family was found and deliberately left, and the reason is worth having in writing.**
+  `Input`, `Textarea`, `Form`'s `FieldControl`, `Combobox`'s input and the draft field in
+  `CreatableCombobox` all draw 36 tall on a coarse pointer. Growing them is a different
+  decision from every one above rather than an omission: a text field is the one control
+  whose height also sets the line box the caret sits in, it is composed into dozens of
+  Blocks, and this package already carries a deliberate narrow-viewport decision on exactly
+  these elements (the `text-base md:text-sm` pair that stops iOS zooming the page on focus).
+  The line this release draws is **triggers and buttons take the floor; text entry does
+  not, in this sweep**, and the text-entry family is a separate piece of work rather than a
+  gap in this one.
+  
+  **The bump is `minor` rather than `patch`.** No prop, import or rendered element changes,
+  and no desktop metric changes, so nothing breaks a call site. It is `minor` because
+  eighteen controls now measure differently on a coarse pointer, and a consumer who styles
+  any of them has to know that: a tab list is taller, a navigation bar is taller, a
+  segmented group is taller, a resizable split claims 21 pixels either side of its line.
+  That is a visible metric change on the platform most of these controls are used on, and
+  describing it as a patch would describe something nobody sees. This is the same judgement
+  the earlier release made for the thirteen controls it fixed.
+  
+  `DESIGN.md` states both patterns and the three conditions that decide between them, and
+  `test/coarse-pointer-floor.test.tsx` asserts the class each floor is written as. **What
+  that test does not do is prove a size of 44 pixels, and the file says so in its first
+  paragraph:** jsdom has no CSS engine, no cascade and no box, so `@media (pointer: coarse)`
+  is never evaluated here and a coarse-pointer variant is a string that a test can only
+  assert is present on the element the Component rendered. The assertions query by role and
+  name rather than searching the source, so they catch a floor that was moved onto a
+  wrapper or dropped in a refactor; they do not and cannot catch a browser that lays the
+  element out at 30 pixels. `apps/site/e2e/display.spec.ts` over a real browser is where
+  that is checked.
+- 6dc7bb8: `SiteFooter`, `DataTable01` and `RunConsole01` take a heading level
+  
+  Three Blocks drew a hard-coded `<h2>`. A fixed level is right for a Block at the top
+  of a page and wrong everywhere else, and all three are Blocks a product opens inside
+  something: a footer as the last region of a settings page, a table in a drawer, a run
+  console in a panel. In each case the heading became a sibling of the heading the
+  surrounding section already had, so "skip to the next heading at or below level two"
+  walks straight past the thing the reader came to read.
+  
+  All three take `headingLevel?: HeadingLevel` and default to `'h2'`, which is the
+  arrangement every other Block in this package already uses and which
+  `childLevel()` exists to compose. Nothing rendered changes for a caller that passes
+  nothing. `DataTable01`'s JSDoc had claimed the fix was needed, so this is the code
+  catching up to its own documentation.
+  
+  **The audit behind this said `SiteFooter` was the only Block in the tree with no
+  `headingLevel` prop. It was three.** The count matters because it changes the shape of
+  the fix: a single instance reads as a judgement call about that Block and a class of
+  three reads as a rule the package had not finished applying, which is what this
+  release says.
+- 6dc7bb8: `ToggleGroup` requires the accessible name its role already needed
+  
+  `aria-label` was declared optional on `ToggleGroupProps` while the JSDoc directly
+  above it said "Required rather than defaulted". TypeScript enforced nothing, so a
+  group shipped unnamed, and both roles this Component draws are ones ARIA puts a MUST
+  on: a reader tabbing onto an unnamed `toolbar` is told "toolbar" and cannot ask which
+  set of controls they have reached, and an unnamed `radiogroup` says nothing about
+  which question its radios are answering. `TextFormatToolbar` draws the same role with
+  a required `label`, which is the shape this now matches.
+  
+  **This is a compile-time break, and the fix is one prop.** A `ToggleGroup` that
+  passed no name now fails to build:
+  
+  ```tsx
+  // before
+  <ToggleGroup value={range} onValueChange={setRange}>
+  
+  // after
+  <ToggleGroup aria-label="Date range" value={range} onValueChange={setRange}>
+  ```
+  
+  `aria-labelledby` still arrives through the forwarded props, so a caller whose name
+  is already drawn somewhere can point at it rather than repeat it.
+  
+  **Why `minor` and not `major`.** The bump line for this repository is `0.y.z` and the
+  package is at 0.7, so `major` would be 1.0.0 and would claim a stability promise for
+  a design system whose catalogue gained 130 Items in the release before this one. The
+  published precedent is in `packages/ui/CHANGELOG.md`: the `*Variant` to `*Form`
+  renames and the prop removals in 0.7.0 shipped on the `minor` line, each with its
+  reason in the entry. This is the same shape of change, and it is described here in
+  full rather than left to be discovered by a compiler.
+
+### Patch Changes
+
+- Updated dependencies [6dc7bb8]
+- Updated dependencies [6dc7bb8]
+  - @nanisoft/prism-tokens@0.15.0
+
 ## 0.14.0
 
 ### Minor Changes
