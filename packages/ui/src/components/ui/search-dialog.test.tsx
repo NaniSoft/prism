@@ -157,30 +157,36 @@ describe('SearchDialog', () => {
       )
     }
 
-    // The trap arms asynchronously, and this waits for it rather than assuming it.
-    // A modal that has taken focus for its `initialFocus` is a trap that is armed,
-    // so this is the first observable fact that distinguishes "the trap has not
-    // engaged yet" from "the trap let focus go", which are the same two facts the
-    // assertion below cannot tell apart on its own. It absorbs the arming race and
-    // nothing else: the cycle below asserts immediately after each Tab, with no
-    // wait, so a focus that escapes and stays escaped still fails.
+    // Two assertions, and they are deliberately not the same strength.
     //
-    // Recorded because it is Linux-and-load-specific. The same test passed six
-    // consecutive times in isolation on Windows and failed in CI, where 125 files
-    // run at once and `userEvent`'s deferred Tab can resolve between Base UI taking
-    // focus and its trap installing the guards.
-    await waitFor(() => {
-      expect(withinModal()).toBe(true)
-    })
-
-    await user.tab()
-    expect(behind).not.toHaveFocus()
-    expect(withinModal()).toBe(true)
-
-    // And all the way round: the cycle closes rather than falling out of it.
-    for (let step = 0; step < 8; step += 1) {
+    // `behind` not focused is asserted immediately after every Tab, with no wait.
+    // That is the accessibility claim, it is a fact about the element rather than
+    // about a moment, and it catches an escape at the moment it happens.
+    //
+    // Containment is asserted after the trap has been given the chance to settle.
+    // It cannot be asserted immediately, and the reason is jsdom rather than the
+    // trap: jsdom has no native sequential focus navigation, so `userEvent.tab()`
+    // walks its own computed list of tabbable elements and does not route through
+    // the focus guards a real browser lands on when Tab wraps past the last
+    // control. The guard's redirect is therefore a real effect with nothing to
+    // intercept it, and `document.activeElement` is briefly the body between the
+    // guard taking focus and the trap moving it on. Waiting is what makes the
+    // settled fact observable; it does not make an escape pass, because a focus
+    // that reached the page behind never settles inside the modal and the wait
+    // times out.
+    //
+    // Recorded because it was Linux-and-load-specific: the same test passed six
+    // consecutive times in isolation on Windows and failed twice in CI, where 125
+    // files run at once, and the first fix attempted here, a single wait for the
+    // trap to arm, passed the arming window and then failed on the seventh Tab of
+    // the cycle. The reordering is what fixed it, and it is a stronger test than
+    // the one it replaces rather than a looser one.
+    for (let step = 0; step < 9; step += 1) {
       await user.tab()
-      expect(withinModal()).toBe(true)
+      expect(behind).not.toHaveFocus()
+      await waitFor(() => {
+        expect(withinModal()).toBe(true)
+      })
     }
     expect(behind).not.toHaveFocus()
   })
