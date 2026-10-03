@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "check": "node scripts/check-dashes.mjs && node scripts/check-elevation-layout.mjs && node scripts/check-encoding.mjs && node scripts/check-no-legacy-line.mjs && turbo run check",
+    "check": "node scripts/check-dashes.mjs && node scripts/check-elevation-layout.mjs && node scripts/check-motion.mjs && node scripts/check-nested-controls.mjs && node scripts/check-block-controls.mjs && node scripts/check-encoding.mjs && node scripts/check-no-legacy-line.mjs && node scripts/check-gate-table.mjs && turbo run check",
     "test": "turbo run test && pnpm test:scripts",
     "test:scripts": "node --test \"scripts/__tests__/*.test.mjs\" \"packages/*/gates/__tests__/*.test.mjs\"",
     "lint": "turbo run lint",

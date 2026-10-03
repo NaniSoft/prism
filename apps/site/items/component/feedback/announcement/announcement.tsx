@@ -21,7 +21,7 @@ export default function AnnouncementDemo() {
   const [dismissed, setDismissed] = useState(false)
 
   return (
-    <div className="flex max-w-measure-wide flex-col gap-3">
+    <div className="flex max-w-page flex-col gap-3">
       {TONES.map((tone) => (
         <Announcement
           key={tone}

@@ -44,7 +44,7 @@ export function ItemHeader({
   category: ComponentCategory | null
   status: 'stable' | 'deprecated'
 }) {
-  const label = 'rounded px-1.5 py-0.5 font-mono text-[10px] uppercase'
+  const label = 'rounded px-1.5 py-0.5 font-mono text-mono uppercase'
 
   return (
     <header className="border-border flex flex-col gap-3 border-b pb-8">

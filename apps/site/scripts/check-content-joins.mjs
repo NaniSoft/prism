@@ -309,8 +309,20 @@ for (const file of await walkFiles(APP_ROOT)) {
     .filter((segment) => segment && segment !== '.')
   // A dynamic segment is served by the collections above, not by a file.
   if (segments.some((segment) => segment.startsWith('['))) continue
-  staticRoutes.add(`/${segments.join('/')}`)
-  routes.add(`/${segments.join('/')}`)
+  /*
+   * A route group is a directory and not a URL segment, which is the whole point
+   * of the convention: `app/(site)/foundation/themes/page.tsx` serves
+   * `/foundation/themes` and the group is how the site gives one subtree its own
+   * root layout. Joining it into the address would publish `/(site)/foundation/themes`,
+   * and every finding below this line would then be a true statement about a route
+   * nobody can reach.
+   *
+   * The parenthesised form is the convention's own marker, so it is read from the
+   * name rather than from a list of groups, and a new group needs no edit here.
+   */
+  const served = segments.filter((segment) => !segment.startsWith('('))
+  staticRoutes.add(`/${served.join('/')}`)
+  routes.add(`/${served.join('/')}`)
 }
 for (const item of store.items) {
   routes.add(item.url)

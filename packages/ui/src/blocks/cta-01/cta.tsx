@@ -143,11 +143,11 @@ export function Cta01({
           className="from-primary-foreground/15 pointer-events-none absolute inset-0 bg-gradient-to-tr to-transparent"
         />
         <div className="relative flex flex-col items-center gap-6">
-          <Heading className="max-w-2xl text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+          <Heading className="max-w-measure text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
             {title}
           </Heading>
           {description ? (
-            <p className="max-w-xl text-lg text-pretty opacity-90">{description}</p>
+            <p className="max-w-measure-narrow text-lg text-pretty opacity-90">{description}</p>
           ) : null}
           {action ? (
             <div className="flex flex-col items-center gap-3 sm:flex-row">
@@ -159,7 +159,7 @@ export function Cta01({
                 className="group"
               >
                 {action.label}
-                <ArrowRight className="motion-safe:transition-transform size-4 group-hover:translate-x-0.5" />
+                <ArrowRight className="transition-transform size-4 group-hover:translate-x-0.5" />
               </CtaLink>
               {secondaryAction ? (
                 <CtaLink
@@ -176,7 +176,7 @@ export function Cta01({
             actionSlot
           ) : null}
           {note ? (
-            <p className="max-w-2xl text-pretty text-sm opacity-80">{note}</p>
+            <p className="max-w-measure text-pretty text-sm opacity-80">{note}</p>
           ) : null}
         </div>
       </div>

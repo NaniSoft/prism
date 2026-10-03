@@ -45,7 +45,7 @@ export default function RunConsole01Demo() {
   const [arriving, setArriving] = useState(false)
 
   return (
-    <div className="flex max-w-measure-wide flex-col gap-8">
+    <div className="flex max-w-page flex-col gap-8">
       <RunConsole01
         title="Nightly reconcile"
         detail="Finished, 9.7 seconds"

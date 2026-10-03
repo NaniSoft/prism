@@ -29,7 +29,7 @@ export default function AspectRatioDemo() {
   const ratio = wide ? RATIOS[0] : RATIOS[2]
 
   return (
-    <div className="flex max-w-measure-wide flex-col gap-4">
+    <div className="flex max-w-page flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <AspectRatio ratio={ratio.value}>
           <Panel name="A screenshot" detail={`${ratio.label}, ${ratio.value.toFixed(2)}`} />

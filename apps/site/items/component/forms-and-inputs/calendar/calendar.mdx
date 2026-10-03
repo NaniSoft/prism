@@ -98,6 +98,11 @@ with the date is faster than a grid for a choice with two answers.
 - A `DatePicker` seeds the grid's month from the chosen date each time it opens.
   If you build your own surface, do the same, or a reader re-picking a date in
   another month lands in the month the field was created in.
+- A coarse pointer grows the day cell to 44px and the paging controls to 44px on
+  their own, which makes six rows a taller panel than six rows of 36px. That is
+  the price the whole package pays for every other control, and a month grid is
+  the one control a finger is least able to aim at. Do not add a second size rule
+  for touch; `MiniCalendar` takes the same step on the same controls.
 
 ### Content guidelines
 

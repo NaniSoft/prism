@@ -1,7 +1,16 @@
 'use client'
 
 import { EllipsisIcon } from 'lucide-react'
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import {
+  isValidElement,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 
 import { Button } from './button'
 import {
@@ -125,6 +134,29 @@ function gapOf(row: HTMLElement): number {
 }
 
 /**
+ * The text a `ReactNode` draws, flattened, because the text is the width.
+ *
+ * This is not a measurement and it does not claim to be one. It is the cheapest
+ * description of a label that changes when the drawn width does, and it is here so
+ * that a render which changed nothing measurable can be told apart from one that
+ * changed a label without reading a box to find out.
+ *
+ * An element contributes its own text wrapped in a bracket, because a caller may put
+ * an emphasis inside a label and the markup around the words is part of what has to be
+ * measured. Its props are not folded in: a serialised prop is a component's source
+ * where the prop holds a component, which would make this a description of the
+ * caller's code rather than of the row they are asking about.
+ */
+function textOf(node: ReactNode): string {
+  if (typeof node === 'string' || typeof node === 'number') return String(node)
+  if (Array.isArray(node)) return node.map(textOf).join('')
+  if (node !== null && typeof node === 'object' && isValidElement<{ children?: ReactNode }>(node)) {
+    return `<${textOf(node.props.children)}>`
+  }
+  return ''
+}
+
+/**
  * A row of actions that gives up its trailing actions when it runs out of room.
  *
  * **It observes itself, and that is the reason it is a Component.** A row of five
@@ -163,6 +195,20 @@ function gapOf(row: HTMLElement): number {
  * out of, so nothing collapses.** `className` must give the row a bounded width,
  * and the consequence of ignoring that is not a row that overflows its container
  * but a row that empties itself into a cap.
+ *
+ * **A pass runs when the measurement could have changed, and not on every render.**
+ * Every read a pass makes is a read the browser cannot answer without settling
+ * layout first, so a row that measures on every render spends a forced layout on
+ * every render, and a table of them spends one per row for every keystroke in a
+ * filter box somewhere above it. So a pass runs on mount, when the actions' ids or
+ * their labels change, when `className` changes, when the row's own box changes, and
+ * when the page's fonts have finished loading. That last one earns its place: a
+ * self-hosted face swaps in after the first paint and changes the width of every
+ * drawn action without changing the row's width, so nothing else reports it, and a
+ * row measured in the fallback face is a row whose widths were never true of the page
+ * the reader is looking at. A caller who re-renders a row for a reason of its own
+ * pays nothing, which is the whole of the claim: the read happens on the frames
+ * where the answer could have been different, and on no others.
  *
  * **The determinate part of the motion budget is not spent here at all.** The row
  * changes membership rather than animating: an action leaves, the cap arrives, and
@@ -236,22 +282,49 @@ function OverflowActions({
     setCollapsed((current) => (current === hidden ? current : hidden))
   }, [actions])
 
-  // The newest measurement pass, so the observer below is subscribed once rather
-  // than torn down and rebuilt on every render. A caller that passes a fresh
-  // `actions` array each render gives `measure` a new identity each render, and an
-  // effect that depended on it would disconnect and re-observe the row that often
-  // for a subscription whose job never changes.
+  // The newest measurement pass, held in a ref and refreshed during render rather
+  // than in an effect, so that both callers below can reach the current pass without
+  // subscribing to it. A caller that passes a fresh `actions` array each render gives
+  // `measure` a new identity each render, and an effect that depended on it would
+  // disconnect and re-observe the row that often, and would re-measure it that
+  // often, for a subscription whose job never changes.
   const measureRef = useRef(measure)
-  useLayoutEffect(() => {
-    measureRef.current = measure
-  })
+  measureRef.current = measure
 
-  // After every render, because a label the caller changed has a different width
-  // and the row has to know it. `measure` only writes state when the membership
-  // changed, so a pass that finds nothing new costs no render.
+  // What the next pass has to take into account, as one string.
+  //
+  // `actions` is the input and its identity is not the signal. A caller who maps a
+  // list into a fresh array on every render has changed nothing a width depends on,
+  // so measuring on that is measuring to find out what was already known. What a key
+  // carries is the two things that move a width: each action's id, because it decides
+  // which action the row is counting and in what order, and its label's own text,
+  // because a button sizes to its content. What is left out is `icon`, and `Button`
+  // gives every mark it draws the same square, so a different mark of the same shape
+  // is the same width; a caller who wants a different width puts it in the label,
+  // which is the field documented as the measurement.
+  //
+  // The separators are control characters rather than punctuation because an id and
+  // a label may both contain anything a reader can type, and a key built from a
+  // printable separator can be two different rows reported as one.
+  const content = useMemo(
+    () => actions.map((action) => `${action.id}\u0000${textOf(action.label)}`).join('\u0001'),
+    [actions],
+  )
+
+  // On mount, and again when the drawn content or the row's own layout changed.
+  //
+  // `className` is in the list because a gap is layout and layout is what
+  // `className` is for: a caller who widens the row's gap changes the arithmetic
+  // without changing the row's box, so the observer below has nothing to report and
+  // this is the only signal there is. The pass writes membership rather than
+  // geometry, so a pass that finds nothing new costs no render, and a pass that does
+  // find something new is followed by a render this effect does not measure again:
+  // the content it changed is the content this effect depends on, and re-reading the
+  // row immediately after writing to it is the read that forces the layout it just
+  // dirtied.
   useLayoutEffect(() => {
-    measure()
-  })
+    measureRef.current()
+  }, [content, className])
 
   useEffect(() => {
     const row = rowRef.current
@@ -262,6 +335,28 @@ function OverflowActions({
     const observer = new ResizeObserver(() => measureRef.current())
     observer.observe(row)
     return () => observer.disconnect()
+  }, [])
+
+  // The face, when it lands after the first paint.
+  //
+  // A self-hosted font changes the width of every drawn action and leaves the row's
+  // own width exactly where it was, so the observer above never fires for it and a
+  // width measured in the fallback face is a width that was never true of the row.
+  // `document.fonts.ready` is the one signal that reports it, and it costs one pass
+  // on the page rather than one pass per render.
+  //
+  // The guard is a runtime one because jsdom has no `FontFaceSet`, and a Component
+  // that cannot tell is a Component that throws in a test rather than a Component
+  // that reads less often.
+  useEffect(() => {
+    if (typeof document.fonts === 'undefined') return
+    let live = true
+    void document.fonts.ready.then(() => {
+      if (live) measureRef.current()
+    })
+    return () => {
+      live = false
+    }
   }, [])
 
   const inside = actions.slice(0, actions.length - collapsed)

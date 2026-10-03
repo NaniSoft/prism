@@ -68,6 +68,12 @@ palette is a second way to the same place.
 - Set `label` to the name a reader would use for the tree, not to the section it
   sits in. "Documentation" names a tree with a reader's own trees in it;
   "Sidebar" names a place on the page.
+- The tree is one Tab stop. The arrows move which node is the stop, Home and End take
+  it to the first and last destination, and the stop follows the reader once they have
+  moved, so Tab returns them to where they were. It lands on the current address when
+  the tree has one and on the first destination otherwise.
+- Nothing collapses, so no node carries `aria-expanded`. A node that cannot fold its
+  children away must not say it can, because the attribute promises a second press.
 - Set `currentHref` to the address the reader is at. The current node is marked
   with an attribute rather than a colour, so a reader who cannot distinguish the
   colours still knows where they are.

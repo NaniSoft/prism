@@ -1,7 +1,7 @@
 'use client'
 
 import { XIcon } from 'lucide-react'
-import { useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 
 import { Button } from './button'
 import { cn } from '../../lib/utils'
@@ -172,6 +172,14 @@ function isNothing(label: ReactNode): boolean {
  * drawn affordance, so the cost is one more stop in a row whose commands are
  * otherwise the caller's.
  *
+ * **The row is named by the label it already draws.** `aria-labelledby` on the
+ * leading label rather than an `aria-label`, because `label` is a `ReactNode` and
+ * there is no string here to put in an `aria-label`, while a reference reads the
+ * rendered words. So a reader tabbing onto the row hears the selection and the
+ * commands in one announcement, and the two cannot drift apart.
+ * `TextFormatToolbar` states the same rule from the other end, where its name is a
+ * string and `aria-label` is what takes it.
+ *
  * **It is a client Component**, because it holds the one tab stop the `toolbar`
  * role promises, walks it with four keys, and takes the dismissal callback. What
  * that costs is that a server-rendered page cannot show a selection toolbar at all,
@@ -186,6 +194,15 @@ function SelectionToolbar({
   className,
 }: SelectionToolbarProps) {
   const rootRef = useRef<HTMLDivElement | null>(null)
+  // The name of the toolbar, taken from the label the reader can already see.
+  //
+  // The visible label is a `ReactNode` because the count is a sentence in the
+  // caller's language and this Component may not compose one, so the name cannot be
+  // an `aria-label`: there is no string here to put in one. `aria-labelledby` reads
+  // the rendered text of the element it points at, which is the arrangement
+  // `ChoiceCard` uses for its legend and for the same reason, and it has the second
+  // property that matters, which is that the name and the words cannot drift apart.
+  const labelId = useId()
   // The one tab stop the `toolbar` role promises, held as a position so a caller
   // who reorders the commands does not strand the reader on a command that moved.
   const [active, setActive] = useState(0)
@@ -236,6 +253,13 @@ function SelectionToolbar({
       ref={rootRef}
       data-slot="selection-toolbar"
       role="toolbar"
+      // The name, and the reason it is a reference rather than a string is the note
+      // on `labelId`. A `toolbar` is one of the roles ARIA names a MUST for: a reader
+      // arriving at it by Tab is told "toolbar" and nothing else, so a page with two
+      // of them is a page where they cannot tell which row of commands they have
+      // reached. The row drew its name all along, in the leading label a sighted
+      // reader reads first.
+      aria-labelledby={labelId}
       aria-orientation="horizontal"
       onKeyDown={onKeyDown}
       className={cn(
@@ -243,7 +267,11 @@ function SelectionToolbar({
         className,
       )}
     >
-      <span data-slot="selection-toolbar-label" className="text-muted-foreground px-2 text-sm font-medium">
+      <span
+        id={labelId}
+        data-slot="selection-toolbar-label"
+        className="text-muted-foreground px-2 text-sm font-medium"
+      >
         {label}
       </span>
 

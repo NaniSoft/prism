@@ -19,7 +19,7 @@ export function Pager({ flat, currentUrl }: { flat: FlatNav[]; currentUrl: strin
         >
           <ArrowLeft className="size-3.5" />
           <span>
-            <span className="block text-[10px] uppercase">Previous</span>
+            <span className="block text-mono uppercase">Previous</span>
             <span className="text-foreground font-medium">{previous.title}</span>
           </span>
         </Link>
@@ -32,7 +32,7 @@ export function Pager({ flat, currentUrl }: { flat: FlatNav[]; currentUrl: strin
           className="text-muted-foreground hover:text-foreground ml-auto inline-flex items-center gap-2 text-right text-sm transition-colors"
         >
           <span>
-            <span className="block text-[10px] uppercase">Next</span>
+            <span className="block text-mono uppercase">Next</span>
             <span className="text-foreground font-medium">{next.title}</span>
           </span>
           <ArrowRight className="size-3.5" />

@@ -67,6 +67,27 @@ const dashRootCount = () => {
   return block.split('\n').filter((line) => /^ {2}'[a-zA-Z]/.test(line)).length
 }
 
+/**
+ * The roots `check-elevation-layout` declares, read out of the gate rather than
+ * typed here, for the reason `dashRootCount` gives.
+ *
+ * The count alone was hard-coded until this gate took a fourth root, and the test
+ * that staged it into a directory that is not the repository then failed with
+ * `2 of 3 configured roots` against a gate saying `3 of 4`. That is the same
+ * defect the count was introduced to prevent, one layer up: a number about a
+ * gate's coverage, written beside the gate instead of read from it. So the names
+ * come out of the array too, and the assertion below names the roots the gate
+ * itself will name, which is the whole claim.
+ */
+const elevationRoots = () => {
+  const source = readFileSync(ELEVATION, 'utf8')
+  const block = source.slice(source.indexOf('const ROOTS = ['), source.indexOf('const EXT ='))
+  return block
+    .split('\n')
+    .filter((line) => /^ {2}'[a-zA-Z]/.test(line))
+    .map((line) => line.trim().replace(/'/g, '').replace(/,$/, ''))
+}
+
 /** Both causes, so a test cannot pass on a message that names only one. */
 const BOTH_CAUSES = /wrong working directory[\s\S]*does not exist in the repository at all/
 
@@ -109,9 +130,12 @@ test('check-elevation-layout pointed at a directory that is not the repository f
   assert.equal(result.status, 1)
   assert.match(result.stderr, BOTH_CAUSES)
   // The staged `scripts` root does resolve, which is the point: a partial read
-  // is reported rather than passing as a smaller run.
-  assert.match(result.stderr, /2 of 3 configured roots do not resolve/)
-  assert.match(result.stderr, /"apps\/site\/src", "packages\/ui\/src"/)
+  // is reported rather than passing as a smaller run. `stageGate` writes into
+  // `<dir>/scripts`, so that is the one root of the gate's own list that exists.
+  const roots = elevationRoots()
+  const absent = roots.filter((root) => root !== 'scripts')
+  assert.match(result.stderr, new RegExp(`${absent.length} of ${roots.length} configured roots do not resolve`))
+  assert.match(result.stderr, new RegExp(absent.map((root) => `"${root}"`).join(', ')))
 })
 
 test('the changeset validator tells a missing .changeset from an empty one', () => {

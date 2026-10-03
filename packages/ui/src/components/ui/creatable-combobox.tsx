@@ -192,6 +192,10 @@ function CreatableCombobox({
   const generated = useId()
   const inputId = id ?? generated
   const listId = `${generated}-list`
+  // The popup the field controls. Separate from the listbox id because the listbox is
+  // not rendered at all when nothing matched, and `aria-controls` is a required
+  // attribute on an expanded combobox.
+  const popupId = `${generated}-popup`
   const draftId = `${generated}-draft`
   const draftErrorId = `${generated}-draft-error`
 
@@ -383,7 +387,10 @@ function CreatableCombobox({
         role="combobox"
         autoComplete="off"
         aria-expanded={isOpen}
-        aria-controls={listId}
+        // The popup rather than the listbox inside it, for the reason the note on
+        // `popupId` states: `aria-controls` is required on an expanded combobox, and
+        // the listbox is not on the page at all when nothing matched.
+        aria-controls={isOpen ? popupId : undefined}
         aria-haspopup="listbox"
         aria-autocomplete="list"
         aria-label={label}
@@ -437,30 +444,41 @@ function CreatableCombobox({
 
       {isOpen ? (
         <div
+          id={popupId}
           data-slot="creatable-combobox-popup"
           className="bg-popover text-popover-foreground absolute z-50 mt-1 w-full min-w-(--anchor-width) rounded-md border p-1 shadow-md"
         >
-          <div
-            data-slot="creatable-combobox-list"
-            id={listId}
-            ref={listRef}
-            role="listbox"
-            aria-label={label}
-            className="max-h-72 overflow-y-auto"
-          >
-            {ranked.length === 0 ? (
-              <p
-                data-slot="creatable-combobox-empty"
-                role="status"
-                className="text-muted-foreground px-3 py-6 text-center text-sm"
-              >
-                {empty.message(trimmed)}
-                {empty.hint === undefined ? null : (
-                  <span className="mt-1 block text-xs">{empty.hint}</span>
-                )}
-              </p>
-            ) : (
-              ranked.map((hit, index) => {
+          {/*
+           * The empty message is a sibling of the listbox and never a child of it.
+           * An element inside a listbox that is not an option is announced as an
+           * option, and it would be counted by the index that names options, so the
+           * message that says nothing matched was a phantom row a reader could count
+           * and not choose. The arrangement is the one `Combobox` and
+           * `MultiCombobox` already share, and the listbox is not rendered at all in
+           * this branch, which is also why `aria-controls` is written only while there
+           * is one.
+           */}
+          {ranked.length === 0 ? (
+            <p
+              data-slot="creatable-combobox-empty"
+              role="status"
+              className="text-muted-foreground px-3 py-6 text-center text-sm"
+            >
+              {empty.message(trimmed)}
+              {empty.hint === undefined ? null : (
+                <span className="mt-1 block text-xs">{empty.hint}</span>
+              )}
+            </p>
+          ) : (
+            <div
+              data-slot="creatable-combobox-list"
+              id={listId}
+              ref={listRef}
+              role="listbox"
+              aria-label={label}
+              className="max-h-72 overflow-y-auto"
+            >
+              {ranked.map((hit, index) => {
                 const isActive = index === activeIndex
                 return (
                   <div
@@ -504,9 +522,9 @@ function CreatableCombobox({
                     )}
                   </div>
                 )
-              })
-            )}
-          </div>
+              })}
+            </div>
+          )}
 
           {/*
            * The create surface is a sibling of the listbox and never a child of it.

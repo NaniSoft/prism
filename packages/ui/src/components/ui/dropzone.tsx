@@ -157,11 +157,14 @@ const carriesFiles = (event: DragEvent<HTMLButtonElement>): boolean =>
  * in a row would get one call to `onFiles` and no way to ask again. Setting the
  * value back to empty after reading it is what makes the second pick an event.
  *
- * **The only motion is the drag-over colour.** It is a state feedback, it is
- * guarded behind `motion-safe`, and it is the one moment the target has something
- * new to say. A dropzone that faded, grew or drew an arrow travelling into itself
- * would be performing, and a target that performs is a target a reader waits to
- * finish before they know whether their file was accepted.
+ * **The only motion is the drag-over colour.** It is a state feedback, it is the
+ * one moment the target has something new to say, and under reduced motion it
+ * arrives instantly rather than never, because the reduced-motion rule at the foot
+ * of `packages/ui/src/styles.css` stops every transition rather than sparing the
+ * ones that are not movement. A dropzone that faded, grew or drew an arrow
+ * travelling into itself would be performing, and a target that performs is a
+ * target a reader waits to finish before they know whether their file was
+ * accepted.
  *
  * It needs the client directive for the drag state, for the click that opens the
  * picker and for the ref that reaches the input. None of the three can be known
@@ -264,7 +267,7 @@ function Dropzone({
         onDrop={onDrop}
         className={cn(
           'border-input bg-background text-foreground flex w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed px-6 py-8 text-center outline-none',
-          'motion-safe:transition-colors duration-fast',
+          'transition-colors duration-fast',
           'focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px]',
           'aria-disabled:cursor-not-allowed aria-disabled:opacity-50',
           over && 'border-primary bg-accent text-accent-foreground',

@@ -63,7 +63,7 @@ export function ItemGrid({ items, empty }: { items: GridItem[]; empty?: string }
           >
             <span className="flex items-baseline justify-between gap-3">
               <span className="font-medium tracking-tight">{item.name}</span>
-              <span className="text-muted-foreground shrink-0 font-mono text-[10px] uppercase">
+              <span className="text-muted-foreground shrink-0 font-mono text-mono uppercase">
                 {item.category ?? kindLabel(item.kind)}
               </span>
             </span>
@@ -71,7 +71,7 @@ export function ItemGrid({ items, empty }: { items: GridItem[]; empty?: string }
               <span className="text-muted-foreground text-pretty text-sm">{item.description}</span>
               <ArrowRight
                 aria-hidden
-                className="motion-safe:transition-transform group-focus-visible:opacity-100 group-hover:translate-x-0.5 group-hover:opacity-100 mt-1 size-3.5 shrink-0 opacity-0"
+                className="transition-transform group-focus-visible:opacity-100 group-hover:translate-x-0.5 group-hover:opacity-100 mt-1 size-3.5 shrink-0 opacity-0"
               />
             </span>
           </Link>

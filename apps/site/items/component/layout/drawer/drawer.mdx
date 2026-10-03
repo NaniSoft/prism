@@ -128,12 +128,13 @@ arrives from above the reader is a shade rather than a task surface.
 ### Motion
 
 The panel's entrance is a transform across the whole width of the viewport, which
-is spatial movement, so it is guarded with `motion-safe:` and lasts
-`duration-slow`, the token DESIGN.md reserves for transform and layout state
-such as a disclosure. A reader who has asked for reduced motion gets the panel
-already open, with no fade either, because the panel's resting state is its full
-form. The backdrop fades rather than travels, so its transition is unguarded on
-the shorter token duration.
+is spatial movement, and it lasts `duration-slow`, the token DESIGN.md reserves
+for transform and layout state such as a disclosure. A reader who has asked for
+reduced motion gets the panel already open, with no fade either, because the
+panel's resting state is its full form. Nothing here carries a `motion-safe:`
+guard, and neither does anything else in this package: the library's one
+stylesheet ends with an unlayered `prefers-reduced-motion` rule that stops every
+transition, so the decision is made once rather than at each call site.
 
 The release from a fast flick is not matched to the flick's velocity: the panel
 completes over the same 280ms whether it was thrown or nudged. Matching it would

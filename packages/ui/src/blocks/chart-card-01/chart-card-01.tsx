@@ -164,7 +164,7 @@ const SPAN: Record<ChartCard01Span, string> = {
  * **The card is a `Card` and not a `Section`, and that is what makes it a card.** A
  * `Section` owns the container and the vertical rhythm, and a panel that owns a
  * container cannot be a grid item in somebody else's, because a `Section` inside a
- * grid cell is a second `max-w-6xl` at one third of the width. So this Block
+ * grid cell is a second `max-w-page` at one third of the width. So this Block
  * composes the card and takes the rhythm from whatever composed it, which is
  * `chart-group-01` for the ordinary case and the caller's own grid otherwise.
  *

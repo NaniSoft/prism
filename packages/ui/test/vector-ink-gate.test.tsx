@@ -9,21 +9,29 @@ import { describe, expect, it } from 'vitest'
  *
  * A gate that has only ever been green is not evidence of anything, and this one
  * has four rules that fail in four different ways, so each is proven red
- * separately over the real source rather than over a fixture the rule cannot
- * reach. The staged tree exists for the two failures that cannot be produced by
- * editing a Component: a Component that is not on disk, and a token contract
- * that reads as empty. Both are cases where a gate that reads nothing would
- * otherwise print a clean result, which is the exact failure the gate's own
- * header claims to replace.
+ * separately. Every red case runs over a **staged tree**, never over the real source.
+ * That is not a tidiness point and it was a bug once: an earlier version of this
+ * file wrote its defect into `packages/ui/src/components/ui/<file>.tsx`, ran the
+ * gate over this repository, and restored the file in a `finally`. Vitest runs test
+ * files in parallel in separate workers against one filesystem, so a sibling file
+ * importing `src/components/ui/product-mark.tsx` could read the file between the
+ * truncate and the write, and the write could be lost by the `finally` racing
+ * another write. That is a test that can corrupt a source file, which is a far worse
+ * failure than a test that times out, and it is why the staged tree exists for all
+ * five cases rather than for the two that cannot be produced by editing a Component.
  *
  * The staged tree carries the emitted token CSS, which is build output and is
  * not in a fresh clone. A `git clone` would be the obvious way to build one and
  * is the wrong one: it has no `dist/`, so every staged case would fail for the
  * wrong reason and prove nothing.
+ *
+ * Each case gets its own tree because a tree reused across cases is a shared
+ * mutable fixture, and the cost of that is a class of failure nobody can reproduce.
+ * The gate resolves its roots from its own location, so a tree carrying exactly
+ * its declared inputs is a tree the gate can judge completely.
  */
 const REPO = path.resolve(import.meta.dirname, '..', '..', '..')
 const GATE = path.join(REPO, 'packages', 'ui', 'scripts', 'check-vector-ink.mjs')
-const COMPONENTS = path.join(REPO, 'packages', 'ui', 'src', 'components', 'ui')
 
 function run(cwd = REPO): SpawnSyncReturns<string> {
   return spawnSync(process.execPath, [GATE], { cwd, encoding: 'utf8' })
@@ -31,28 +39,6 @@ function run(cwd = REPO): SpawnSyncReturns<string> {
 
 function cleanup(targets: string[]) {
   for (const target of targets) rmSync(target, { force: true, recursive: true })
-}
-
-/**
- * A Component with a defect written into it, removed afterwards whatever happens.
- *
- * The write is a `Set-Content`-free read/replace/write in one process so the
- * file's line endings and its trailing byte survive the round trip: a finding
- * that reports a line number is only worth anything if the line numbers on the
- * green run and the red run are the same file.
- */
-function withDefect(file: string, from: string, to: string, assertion: (result: SpawnSyncReturns<string>) => void) {
-  const full = path.join(COMPONENTS, file)
-  const original = readFileSync(full, 'utf8')
-  if (!original.includes(from)) {
-    throw new Error(`check-vector-ink-gate: ${file} does not contain the text this test replaces`)
-  }
-  try {
-    writeFileSync(full, original.replace(from, to), 'utf8')
-    assertion(run())
-  } finally {
-    writeFileSync(full, original, 'utf8')
-  }
 }
 
 /**
@@ -90,6 +76,43 @@ function stageTree() {
     cpSync(path.join(REPO, relative), to, { recursive: true })
   }
   return dir
+}
+
+/** The staged copy of one drawing Component, which is the only thing a case edits. */
+function staged(dir: string, name: string) {
+  return path.join(dir, 'packages', 'ui', 'src', 'components', 'ui', name)
+}
+
+/**
+ * A Component with a defect written into a STAGED copy of it.
+ *
+ * The replacement is a read/replace/write in one process so the file's line endings
+ * and its trailing byte survive the round trip: a finding that reports a line number
+ * is only worth anything if the line numbers on the green run and the red run are the
+ * same file. The assertion runs the gate inside the staged tree, and the tree is
+ * removed in a `finally` because a staged tree left behind is a directory in the
+ * system temp directory rather than a defect, and one that grows.
+ */
+function withDefect(
+  name: string,
+  from: string,
+  to: string,
+  assertion: (result: SpawnSyncReturns<string>) => void,
+) {
+  const dir = stageTree()
+  try {
+    const full = staged(dir, name)
+    const original = readFileSync(full, 'utf8')
+    if (!original.includes(from)) {
+      throw new Error(
+        `check-vector-ink-gate: the staged copy of ${name} does not contain the text this test replaces`,
+      )
+    }
+    writeFileSync(full, original.replace(from, to), 'utf8')
+    assertion(runStaged(dir))
+  } finally {
+    cleanup([dir])
+  }
 }
 
 function runStaged(dir: string) {

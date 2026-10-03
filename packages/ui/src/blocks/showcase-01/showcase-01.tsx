@@ -1,44 +1,114 @@
-import type { ReactNode } from 'react'
+import { Fragment, type ReactNode } from 'react'
 
 import { ArrowRight } from 'lucide-react'
 
-import { Button } from '../../components/ui/button'
 import { CtaLink } from '../../components/ui/cta-link'
 import { FactList, type Fact } from '../../components/ui/fact-list'
 import { Section, SectionHeading, type HeadingLevel } from '../../components/ui/section'
 import { cn } from '../../lib/utils'
 
 /**
- * One action in a showcase's action row.
+ * One action in a showcase's action row that names a destination.
  *
- * The same two arms `Hero01` declares, spelled again here rather than imported, and
- * the reason is the same one: a shared type would make
- * `@nanisoft/prism-ui/blocks/hero-01` a dependency of
- * `@nanisoft/prism-ui/blocks/showcase-01`, and a consumer installing a section that
- * shows a capability in depth would be made to resolve a marketing hero to get it.
- * The link arm requires `href` and the button arm declares `href?: never`, because an
- * optional `href` makes a link whose address is sometimes undefined compile into a
- * button that goes nowhere.
+ * One of the two arms of `ShowcaseAction`, and named rather than left as an inline
+ * member of the union so a caller assembling a row from its own data can say which
+ * arm it is building. `href` is required and that is the whole of the arm: a
+ * control drawn as a call to action and with nowhere to go is the dead end
+ * `CtaLink`'s own JSDoc names, and this Block cannot repair it, because a Block
+ * ships no behaviour.
  */
-export type ShowcaseAction = {
+export type ShowcaseLinkAction = {
+  /** The words on the control. Every string a showcase renders is the caller's. */
   label: string
+  /**
+   * Where the action goes. Required rather than optional, so that "a link whose
+   * address is sometimes undefined" is a compile error rather than a control that
+   * navigates on the renders where the address happens to be there.
+   */
+  href: string
+  /** Opens the destination in a new browsing context, with the matching `rel`. */
+  newTab?: boolean
+  /**
+   * Which weight this action draws at, when the caller does not say.
+   *
+   * Defaults to `default` for the first action in the row and `outline` for the
+   * rest. A slot carries its own weight, so it does not take one from here.
+   */
   variant?: 'default' | 'outline' | 'secondary' | 'ghost'
-} & (
-  | {
-      /** Where the action goes. Present makes the action an anchor. */
-      href: string
-      /** Opens the destination in a new tab, with the matching `rel`. */
-      newTab?: boolean
-    }
-  | {
-      /**
-       * Forbidden, so that "a link whose address happens to be undefined" is a type
-       * error rather than a button.
-       */
-      href?: never
-      newTab?: never
-    }
-)
+  /**
+   * Forbidden, so that an action cannot be both a destination and a caller's own
+   * control. The two are rendered by different code on different elements, and a
+   * value carrying both would have to pick one silently.
+   */
+  slot?: never
+}
+
+/**
+ * One action in a showcase's action row that is the caller's own control.
+ *
+ * **This is the arm that replaced a rendered button, and the reason it is a slot
+ * rather than an `onClick` is that a Block cannot receive one.** This is a server
+ * Component, so a handler is not a prop it can be given, and the arm it replaced
+ * rendered a bare `<Button>` under the standfirst: focusable, announced as a button,
+ * and activating to nothing, on the section's primary ask. The defect was in the
+ * **type**, not in the render, because a `label` with no destination was a legal
+ * value.
+ *
+ * What belongs here is anything Prism cannot make work: a router's own `Link`, a
+ * control that opens a configurator or a trial dialog. What does not belong here is
+ * a plain anchor; that is the other arm.
+ */
+export type ShowcaseSlotAction = {
+  /**
+   * The caller's own control, placed in the row where this action sits.
+   *
+   * The whole control, including its own label, its own weight and any icon. The
+   * Block draws no frame around it and adds no class to it, because a class it adds
+   * is a style the caller cannot see and cannot remove, and this package has no
+   * override path.
+   */
+  slot: ReactNode
+  /**
+   * Forbidden on this arm, and for a reason rather than by tidiness: the Block
+   * renders `slot` and nothing else, so a `label` beside it would be a word no
+   * reader ever sees and a caller would reasonably believe had been rendered.
+   */
+  label?: never
+  /** Forbidden: an anchor belongs on the other arm, where Prism renders it. */
+  href?: never
+  /** Forbidden with `href`, for the same reason. */
+  newTab?: never
+  /**
+   * Forbidden, because the Block cannot style a node it does not render. A weight
+   * accepted here and dropped would be the one prop in this Block that a reader of
+   * the type could believe was in effect when it is not.
+   */
+  variant?: never
+}
+
+/**
+ * One action in a showcase's action row, as a union of the two things an action in
+ * this position can honestly be.
+ *
+ * **A caller should not be able to reach a dead control by accident, and the union
+ * is what stops it.** A single shape with an optional `href` made both of these
+ * mistakes silent, and each was a legal value that rendered a control which
+ * activated to nothing: `{ label: 'Configure it' }`, which was the likely mistake
+ * because a showcase's first action is almost always a link, and
+ * `{ label, href: maybeUrl }`, which navigated on the renders where the address
+ * happened to be there and rendered a button on the others.
+ *
+ * The first arm therefore **requires** `href`, and the second carries the caller's
+ * own control rather than a `Button` this Block cannot wire to anything.
+ *
+ * It is declared here rather than imported from `hero-01`, following
+ * `ProcessFlow01`'s note on the same point, and `scripts/check-block-controls.mjs`
+ * is what holds the shape: a consumer installing a section that shows a capability
+ * in depth would otherwise be made to resolve a marketing hero to get it, and a
+ * shared type would be a ninth copy of the law that could drift from the other
+ * eight. The gate is the single place the law is written down.
+ */
+export type ShowcaseAction = ShowcaseLinkAction | ShowcaseSlotAction
 
 /**
  * The props a Showcase01 takes. Every string is a prop and the Block ships none.
@@ -89,7 +159,11 @@ export type Showcase01Props = {
    * a page that may carry three of them.
    */
   mediaLabel?: string
-  /** Up to two actions, under the standfirst. See `ShowcaseAction`. */
+  /**
+   * Up to two actions, under the standfirst. See `ShowcaseAction` and its two arms:
+   * every action Prism renders here is a link, and an action that cannot be one is a
+   * slot the Block places without styling.
+   */
   actions?: ShowcaseAction[]
   /**
    * Which side the media panel takes.
@@ -208,21 +282,20 @@ export function Showcase01({
           {actions.length ? (
             <div data-slot="showcase-01-actions" className="flex flex-col gap-3 sm:flex-row">
               {actions.map((action, index) => {
-                const variant = action.variant ?? (index === 0 ? 'default' : 'outline')
-                // The arrow follows the element rather than the position, for the
-                // reason `Hero01` states: the row's primary destination gets the
-                // mark, and only if it is something that can be followed.
-                const isLink = action.href !== undefined
-                const content = (
-                  <>
-                    {action.label}
-                    {index === 0 && isLink ? (
-                      <ArrowRight className="motion-safe:transition-transform size-4 group-hover:translate-x-0.5" />
-                    ) : null}
-                  </>
-                )
+                // A slot is the caller's own control, placed where it asked to be and
+                // otherwise untouched. Keyed positionally for the reason the other
+                // keyed lists in this package state: two actions may share a label,
+                // and a row keyed on a localised label remounts when the reader
+                // changes language.
+                if ('slot' in action) {
+                  return <Fragment key={index}>{action.slot}</Fragment>
+                }
 
-                return isLink ? (
+                // The variant follows the position, which is a decision about the
+                // row's shape rather than about the element.
+                const variant = action.variant ?? (index === 0 ? 'default' : 'outline')
+
+                return (
                   <CtaLink
                     key={index}
                     href={action.href}
@@ -231,12 +304,11 @@ export function Showcase01({
                     variant={variant}
                     className="group"
                   >
-                    {content}
+                    {action.label}
+                    {index === 0 ? (
+                      <ArrowRight className="transition-transform size-4 group-hover:translate-x-0.5" />
+                    ) : null}
                   </CtaLink>
-                ) : (
-                  <Button key={index} size="lg" variant={variant} className="group">
-                    {content}
-                  </Button>
                 )
               })}
             </div>

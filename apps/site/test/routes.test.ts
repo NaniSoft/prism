@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
+import { readFileSync, readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -89,7 +89,14 @@ function publishedRoutes(): string[] {
       .split(path.sep)
       .filter((segment) => segment && segment !== '.')
     if (segments.some((segment) => segment.startsWith('['))) continue
-    routes.add(`/${segments.join('/')}`)
+    // A route group is a directory and not a URL segment: the site keeps its pages
+    // under `(site)` and its preview documents under `(preview)` precisely so that
+    // each can have its own root layout, and the group itself is not in any
+    // address. The gate in `check-content-joins.mjs` reads the same convention for
+    // the same reason, and this test has to agree with it or the two disagree about
+    // which routes exist.
+    const served = segments.filter((segment) => !segment.startsWith('('))
+    routes.add(`/${served.join('/')}`)
   }
   for (const file of walk(path.join(SITE, 'items'))) {
     if (!file.endsWith('.mdx')) continue
@@ -342,8 +349,28 @@ describe('a live route', () => {
   it('is served by a page file of its own, not by the catch-all', () => {
     for (const live of LIVE_ROUTES) {
       const segments = live.href.replace(/^\//, '').split('/')
-      const file = path.join(APP, ...segments, 'page.tsx')
-      expect(existsSync(file), `${live.href} has no page file of its own`).toBe(true)
+      /*
+       * The page file is found by walking rather than by joining the address onto
+       * the App Router root, because the site's pages sit under a `(site)` route
+       * group and the group is not in the address. A path built from the address
+       * would name `src/app/foundation/themes/page.tsx`, which does not exist, and
+       * the assertion would fail for a live route that is served correctly.
+       *
+       * The walk also stops the assertion being satisfied by a page file in the
+       * wrong group: a file whose segments, less its groups, are the address is the
+       * file that serves the address, and any other match is a second page claiming
+       * the same route.
+       */
+      const matches = walk(APP)
+        .filter((file) => path.basename(file) === 'page.tsx')
+        .filter((file) => {
+          const served = path
+            .relative(APP, path.dirname(file))
+            .split(path.sep)
+            .filter((segment) => segment && segment !== '.' && !segment.startsWith('('))
+          return served.join('/') === segments.join('/')
+        })
+      expect(matches, `${live.href} has no page file of its own`).toHaveLength(1)
       // A segment in brackets is the catch-all, which serves the content tree and
       // knows nothing about a reader. A live route with one is a document at the
       // same address wearing the reader's name.

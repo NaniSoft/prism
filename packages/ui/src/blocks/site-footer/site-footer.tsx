@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { ProductMark, type ProductMarkProps } from '../../components/ui/product-mark'
+import { type HeadingLevel } from '../../components/ui/section'
 import { cn } from '../../lib/utils'
 
 /**
@@ -97,6 +98,17 @@ export type SiteFooterProps = {
    */
   legal?: ReactNode
   /**
+   * Heading level for the footer's column headings. @defaultValue 'h2'
+   *
+   * A prop for the reason every Block's is: the surrounding document decides where
+   * this lands in the outline, not the Block. Four of the five NaniSoft sites put
+   * the footer at the root of their layout, where a column heading at level two is
+   * the top of that part of the document; the fifth composes the same Block as the
+   * last region of a settings page, where the same fixed level made every column a
+   * sibling of the heading that section already had.
+   */
+  headingLevel?: HeadingLevel
+  /**
    * Layout only, exactly as on every Component. Changing a Prism-owned visual
    * property from here is prohibited.
    */
@@ -127,6 +139,11 @@ export type SiteFooterProps = {
  * title. A reader who navigates by landmark can therefore reach "Documentation"
  * rather than arriving at one anonymous list of links.
  *
+ * The level of those headings is the caller's rather than fixed, for the reason
+ * every Block's is. This footer is composed by four products at the root of their
+ * layouts and by one inside a page, and a fixed level answers only the first of
+ * those.
+ *
  * The social links open in a new browsing context by default, because a link that
  * leaves the site and comes back is a reader who has lost the page they were on.
  * That default is a decision this Block makes, and `newTab={false}` on one link
@@ -142,14 +159,16 @@ export function SiteFooter({
   columns,
   social,
   legal,
+  headingLevel = 'h2',
   className,
 }: SiteFooterProps) {
+  const ColumnTitle = headingLevel
   return (
     <footer
       data-slot="site-footer"
       className={cn('border-border bg-background w-full border-t', className)}
     >
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-12 lg:px-8">
+      <div className="mx-auto flex w-full max-w-page flex-col gap-10 px-6 py-12 lg:px-8">
         <div className="flex flex-col gap-10 md:flex-row md:justify-between">
           <div className="flex flex-col gap-4">
             <ProductMark id={product.id} name={product.name} pack={product.pack} size="lg" />
@@ -180,7 +199,7 @@ export function SiteFooter({
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {columns.map((column) => (
                 <nav key={column.title} aria-label={column.title} className="flex flex-col gap-3">
-                  <h2 className="text-sm font-semibold">{column.title}</h2>
+                  <ColumnTitle className="text-sm font-semibold">{column.title}</ColumnTitle>
                   <ul className="flex flex-col gap-2">
                     {column.links.map((link) => (
                       <li key={link.href}>

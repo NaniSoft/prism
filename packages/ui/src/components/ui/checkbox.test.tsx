@@ -27,4 +27,17 @@ describe('Checkbox', () => {
       'mixed',
     )
   })
+
+  it('keeps the coarse-pointer 44px target in the class contract', () => {
+    render(<Checkbox aria-label="Accept terms" />)
+    const className = screen.getByRole('checkbox', { name: 'Accept terms' }).className
+    // The floor, as a step rather than a band, so the row grows with the box and
+    // nothing within a band of the control is swallowed. See `todo-01`, whose rows
+    // are stacked against a shared border.
+    expect(className).toContain('pointer-coarse:')
+    expect(className).toContain('pointer-coarse:size-11')
+    // And the desktop box is untouched: a form checkbox is a document control, and
+    // a 44px square in a column of fields is not one.
+    expect(className).toContain('size-4')
+  })
 })

@@ -30,7 +30,7 @@ colors:
   sky-foreground: "#2b2e32"
 typography:
   display:
-    fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
+    fontFamily: "Inter, 'Inter Fallback', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
     fontSize: "1.875rem"
     fontWeight: 600
     lineHeight: 1.2
@@ -312,13 +312,52 @@ allows above 400. That is why dark is brand 200.
 **The Semantic-Utility Rule.** A component references semantic utilities only
 (`bg-background`, `text-muted-foreground`, `border-primary`), never a ramp step
 and never a raw value, so theming is automatic, including at runtime. This is
-enforced by the grep and motion gates described under Token Contract.
+enforced by the grep gates and by `scripts/check-motion.mjs`, described under
+Token Contract.
 
 ## Typography
 
 Inter is the only interface face. The platform monospace stack annotates
 machine-readable values. Both are authored tokens (`font.sans`, `font.mono`) and
 both reach CSS, so the type system is no longer Tailwind's to change.
+
+**The component package ships the face, and the reference site reads it.**
+`font.sans` is `Inter`, then `Inter Fallback`, then the platform stack. The four
+`@font-face` rules and the four binaries that back the first two entries are in
+the component package's stylesheet and beside it in `dist/fonts`, under the SIL
+Open Font License with the licence text shipped alongside the binaries. Nothing
+downstream loads Inter. That is a law and it is one line: a consumer installs
+`@nanisoft/prism-ui`, imports one stylesheet, and has the face, so a site cannot
+reach a second answer to what `font.sans` names. The documentation site shipped
+its own copy through `next/font/local` until this was written, and the cost was
+not only 723 KiB of unsubsetted variable font preloaded twice per document: the
+copy was applied to `<body>` as a directly set `--font-sans`, which outranks the
+inherited token, so the library's three faces were never fetched on the site that
+documents them. A reference site that cannot fail on the thing it documents is
+not evidence for it, and the same copy also carried an optical-sizing axis the
+shipped static faces do not, so the site and its consumers were reading one family
+name and two different typefaces.
+
+**`Inter Fallback` is a local Arial with Inter's metrics, and that is the point.**
+`size-adjust`, `ascent-override`, `descent-override` and `line-gap-override` on a
+plain `@font-face` are the whole of the technique: during the swap window the
+fallback occupies Inter's own line box, so the text does not move when Inter
+arrives. The numbers are measured off the shipped face rather than chosen, and
+they are tuned to the reading weight, because the fallback is only on screen
+while a face is loading. It is declared in the library for the same reason the
+face is: a consumer has no way to know it exists, and four sites each deriving it
+is four sites each getting it wrong.
+
+**The shipped faces are three static Latin subsets plus one italic, and nothing
+else.** 400, 500 and 600 upright and 400 italic. The authored weight axis emits
+four and the shipped source renders three, so 700 is absent: a 23 KB file that no
+page renders is 23 KB every consumer downloads forever, for a token nothing uses.
+The weight axis is the files' only axis; the design system retired the width axis,
+and optical sizing is the browser's business, which for a static face means it
+does not happen. The italic is there because `Prose` sets `blockquote` in italic
+and the surface therefore had been asking for a style no shipped face provided;
+one real face covers every weight a browser asks for, because the font matcher
+takes the closest available weight rather than synthesising once a face exists.
 
 ### The scale
 
@@ -364,14 +403,52 @@ authored tokens rather than Tailwind's.
 
 ### Container and measure
 
+**One namespace, and it is this repository's.** The group is closed: the token
+build emits `--container-*: initial` into the `@theme static` block ahead of the
+authored entries, so Tailwind's own thirteen `--container-*` steps resolve to
+nothing and a `max-w-6xl` compiles to no rule at all. That line is not tidiness.
+Three of those steps were numerically identical to three authored widths (its
+largest at 72rem beside `page`, its fifth at 42rem beside `measure`, its fourth at
+36rem beside `measure-narrow`), so nothing rendered differently, nothing failed,
+and the cost was a retune of `--container-page` that would have moved every
+surface reaching the page column by one spelling and left every surface reaching it
+by the other exactly where it was.
+
+The page family:
+
 - `--container-page` (72rem) for the page container.
 - `--container-measure` (42rem) for prose.
 - `--container-measure-narrow` (36rem) for narrower copy.
+
+The overlay family, and the reason it is a family rather than three more steps:
+
+- `--container-overlay-panel` (24rem) a side panel or a narrow summary.
+- `--container-overlay-dialog` (28rem) a decision or a short task.
+- `--container-overlay-form` (32rem) a form.
+- `--container-overlay-palette` (36rem) a searchable list of full sentences.
+- `--container-overlay-media` (64rem) a picture.
+
+**An overlay's width is a property of the kind of surface it is, not of the page
+grid underneath it.** That is the whole reason the two families share a group
+rather than running together as one scale: a retune of the reading measure must not
+move a dialog, and a retune of the page column must not move either. They share a
+group because Tailwind 4's `max-w-*` resolves `--spacing-*` and `--container-*` and
+nothing else, so a maximum width that is to be a token has to live in one of those
+two namespaces or it is a value in a Component. `overlay-palette` and
+`measure-narrow` are both 36rem; that is two measurements that happen to agree and
+not one measurement with two names, and the authored group says so and
+`check-emitted-contract.mjs` holds it to saying so.
 
 A gutter is a spacing token (`--spacing-6` at 1.5rem, `--spacing-8` at 2rem), so
 the container contract is max-width (token), plus gutter (spacing token), plus
 `mx-auto w-full` (composition). `Section` consumes the container, and nothing
 re-declares the literal.
+
+A box that is not held to a decision is arithmetic on the base unit and says so:
+`max-w-96` is `calc(var(--spacing) * 96)`, and it is how a chart's axis band, a
+token table's column and a documentation Demo's frame are sized. Naming those
+would invent a decision nobody took, and an arbitrary `max-w-[...]` is refused by
+`scripts/check-elevation-layout.mjs`.
 
 ### Breakpoints
 
@@ -382,6 +459,39 @@ authored. Breakpoints are not consumer-overridable. A breakpoint exists only as
 the threshold Tailwind compiles into a media query inside `styles.css`; the
 consumer does not run Tailwind, and the contract forbids re-declaring the
 namespace.
+
+**Closing a screen closes the class as well as the value, and the class is the
+half that was unchecked.** `packages/ui/scripts/check-breakpoint-variants.mjs`
+reads every responsive variant out of the class strings in `packages/ui/src` and
+`apps/site/src` and compares it to the screens `layout.tokens.json` authors minus
+the ones `build.mjs` closes, so a class written against a screen the emitted
+theme does not have is a finding rather than a media query nobody compiles. It
+exists because `DocsShell`'s frame carried an `xl:` grid template while its
+contents rail sat in an implicit `auto` track: two columns from 1024 pixels up,
+with the document squeezed to about 340 pixels, and every other gate green
+because each of them holds the value and not the class.
+
+**The container namespace was closed for the same reason, and it took two gates
+because the question has two sides.** `scripts/check-elevation-layout.mjs` reads
+every `w-*` and `max-w-*` name out of the class strings in `apps/site/src`,
+`apps/site/items`, `packages/ui/src` and `scripts`, and holds it to the container
+group in `layout.tokens.json`, so a width nobody authored is a finding with a file
+and a line. It judges the NAME, and a name is all a source scan can see.
+`packages/ui/scripts/check-container-namespace.mjs` reads
+`packages/ui/dist/styles.css` and judges the ARTEFACT: that the `@layer theme`
+block declares exactly the authored containers, that none of Tailwind's thirteen
+steps is declared or read, that the close is declared ahead of the authored
+entries rather than after them, and that every container width this package writes
+is emitted as a utility reading its own variable. The step list is read out of the
+installed `tailwindcss/theme.css` rather than restated, because the thing being
+defended against is that list.
+
+Neither gate would have caught the other half. A source scan cannot see that a
+framework resolved nothing; an artefact scan cannot see a Component that named a
+width nobody authored, because by then the class is not in the sheet at all.
+`packages/ui/test/container-namespace.test.tsx` states the same artefact facts
+through the CSS reader the other built-sheet tests use, so the fact sits next to
+`reduced-motion.test.tsx` rather than only inside a release lane.
 
 ### Vertical rhythm
 
@@ -417,12 +527,11 @@ properties that have no token-shaped value:
   repository.
 - **Gradients.** The geometry. The colour stops are semantic.
 - **Media-feature variants.** `pointer-coarse:` and container variants.
-- **One docs-only shadow value**, named under Elevation and Depth.
 
 In one sentence: Tailwind remains authoritative for layout composition, state
-multipliers, utility property lists and media-feature variants, and for exactly
-one named docs-only shadow value; it is no longer authoritative for any shipped
-token value.
+multipliers, utility property lists and media-feature variants; it is no longer
+authoritative for any token value, and the one shadow exception this list used to
+name is gone because the site turned out to be using it.
 
 ## Elevation & Depth
 
@@ -438,18 +547,40 @@ mode-independent, all black-alpha with a real vertical offset and a soft blur.
 No shadow is tinted, zero-offset or hard-offset, and the authored set is
 exhaustive, so the rule is structural rather than a review claim.
 
-### The docs-only exception
+### There is no docs-only exception, and there was one
 
-`shadow-lg` is deliberately not authored. The theme disclosure and mobile nav
-panels in the site keep Tailwind's built-in value, because they are site
-apparatus rather than installable surface. It is the one named residual shadow
-literal; a consumer never receives it and no shipped component uses it.
+This section used to carry a subsection called the docs-only exception, and it
+said `shadow-lg` is deliberately un-authored because the theme disclosure and the
+mobile nav panels are site apparatus, that it is the one named residual shadow
+literal, and that a consumer never receives it and no shipped component uses it.
+**Every factual claim in that paragraph was wrong, and nothing could have caught
+it**, which is the reason the exception is gone rather than corrected.
+
+`SearchDialog` shipped `shadow-lg` on its panel, as an override on top of the
+`shadow-md` its own `DialogContent` already draws, and the site's skip link
+shipped `focus:shadow-lg`. Neither is what the paragraph described. And the reason
+is the part worth keeping: `shadow-lg` is not an authored step, so it resolved
+against **Tailwind's stock theme** in both places, which means the elevation a
+reader saw was a value the token source did not own and a retune of the shadow
+scale would not have moved. "Site apparatus rather than installable surface" is
+not a defence of that, because the site's own Tailwind build is a second consumer
+of the same token package, so a site class resolving a shadow out of Tailwind is
+the second source of truth this whole section exists to prevent, wearing the word
+apparatus.
+
+`scripts/check-elevation-layout.mjs` now refuses any `shadow-*` step the token
+source did not author, in every root it reads, site included, and reads the
+authored set from `shadow.tokens.json` rather than from a list beside the gate.
+`shadow-none` is allowed, because the absence of a shadow is not one more step of
+the scale; `shadow-inner` is not, because it is a shadow nobody authored and a
+Component that wants an inset edge asks upstream for one.
 
 ### Named rules
 
 **The Three-Step Rule.** The installable surface uses exactly three shadows:
-`xs` on filled controls, `sm` on cards, `md` on the lifted element. Anything
-higher is reserved for floating panels, which do not ship.
+`xs` on filled controls, `sm` on cards, `md` on the lifted element. `md` is the
+ceiling rather than a floor: the floating panels a fourth step was reserved for
+are drawn at `md`, so there is nothing in this system a fourth step is for.
 
 **The Unlit Shadow Rule.** No shadow is tinted or hard-offset. Every authored
 layer is a black alpha with real vertical offset and soft blur.
@@ -657,13 +788,18 @@ entry points.
 - **Do** give a coarse-pointer control a 44px floor, and keep the desktop
   metrics for mouse and trackpad.
 - **Do** name a motion token (`duration-fast`, `ease-out`) rather than a value,
-  and guard spatial movement with `motion-safe:`.
+  and leave reduced motion to the one rule that already decides it.
 
 ### Don't
 
 - **Don't** rename a semantic token. The names are shadcn's variable contract,
   and renaming breaks unmodified shadcn blocks, third-party themes and existing
   consumers.
+- **Don't** load your own copy of the interface face, by any mechanism. The
+  component package ships it and the stylesheet backs `font.sans`, so a second
+  copy is a second answer to a token the library already resolves, and the site
+  shipped one for months without anyone noticing that it had stopped rendering
+  the face the library publishes.
 - **Don't** write a raw hex outside the foundation tier, and do not add a raw
   ramp utility to a component.
 - **Don't** hardcode a duration, an easing curve or a token value in a
@@ -677,12 +813,87 @@ entry points.
 - **Don't** hardcode copy, a price or a metric inside a Block.
 - **Don't** wipe the token dist before a build. Write over the top and prune
   afterwards; see Token Contract.
-- **Don't** add a keyframe animation or an entrance or scroll effect. Feedback
-  motion is state feedback, shortened rather than removed under reduced motion.
+- **Don't** add a keyframe animation or an entrance or scroll effect. Reduced
+  motion is one unlayered rule in the component package's stylesheet, and a
+  Component never re-decides it with a `motion-safe:` or `motion-reduce:` variant.
 - **Don't** author an ambient cycle outside the six classes the stylesheet
   publishes, and never give a keyframe a duration of its own.
 - **Don't** add an em dash or an en dash to reader-facing copy. The dash gate
   covers this file and the other root documents.
+
+### The coarse-pointer floor
+
+The Do list above says what every control owes a finger. This says how it is
+paid, because the two answers in this repository are not interchangeable and
+choosing wrongly is a defect rather than a taste.
+
+**A step, and it is the default.** `pointer-coarse:size-11` on the element, in
+`@layer utilities`, inside `@media (pointer: coarse)`. The desktop utility is
+untouched, so a mouse and a trackpad get the metrics that were designed and a
+finger gets 44px. `Button` has always been written this way and it is the right
+first answer.
+
+**A band, where a step would draw something the design does not have.** A
+`::before` pseudo-element, 44 by 44, centred on the control and transparent. It
+gives the same target with the control exactly as drawn, which is the only way
+to pay the floor on a shape whose drawn size is the point: a slider thumb, a
+switch pill, an icon control in a corner of a panel. Three conditions decide it,
+and all three have to hold.
+
+1. **Nothing the band reaches is a target the reader was aiming at.** A band adds
+   fourteen pixels in every direction. Beside a checkbox in a list whose rows are
+   stacked against a shared border, that fourteen pixels is the next row's own
+   checkbox, so a checkbox takes a step. A switch in a settings row has empty
+   space above and below it, so a switch takes a band.
+2. **Growing the control would move the drawing rather than the target.** A
+   `size-11` thumb is a 44px ball on a six pixel rail. Worse, Base UI reads the
+   press offset from the thumb's own box and the value from the control's own box,
+   so a resized thumb leaves the drawing and the arithmetic disagreeing. A band is
+   a pseudo-element and contributes to neither.
+3. **The control is absolutely positioned with less than 44px of inset.** A band
+   anchored at a 16px inset hangs off the panel it sits in, and on a phone the
+   panel is the viewport minus its own gutter, so the overhang is clipped by the
+   screen. A step is the answer there, at the cost of overhanging the panel's
+   padding into the empty end of its header row.
+
+**Two neighbours can still compete, and the package says so rather than hiding
+it.** Two 44px bands on two 18px rows overlap by more than half of each, so a
+`NumberField` turns its steppers side by side on a coarse pointer and stays 44
+tall. Two 44px bands on two slider thumbs overlap once the bounds are closer
+together than the band is wide, and the answer is a `minGap` a finger can pinch
+apart. A band is a real target, and real targets have real neighbours.
+
+**A band is 44 by 44, not 44 by the control's length, and that is what keeps
+it local.** On a control that is short on one axis and long on the other, the
+band takes 44 on both. The long axis is free, because the control already spans
+it, so the whole of the band's cost lands on the short axis: a `Resizable`
+divider is one pixel wide and the full height of the group, so its band reaches
+21 pixels into each pane over a 44 pixel stretch of the line rather than down the
+whole of both panes. A band sized to the control's length would claim the entire
+side of both panes.
+
+**The floor is a claim about targets, so an element that is not a target takes
+nothing.** Two controls in this package are drawn at 28 to 36 pixels and are
+deliberately left there: `Steps`' marker, which is a `span` with no role, no tab
+stop and no handler, and `Pagination`'s ellipsis, which is `aria-hidden`. Neither
+is focusable, neither is announced, and a press on either falls through to the
+content behind it. Growing them would pay the floor on a decoration and push the
+surrounding copy down the page. The test for whether a control owes the floor is
+whether a reader is asked to hit it, not how small it is drawn.
+
+**The floor is held by tests rather than by a gate, and that is worth saying
+before anyone looks for one.** Nothing in `pnpm check` measures a target size, in
+this package or any other, so each primitive asserts the class its own floor is
+written as, which is the shape `button.test.tsx` uses. A primitive that loses its
+floor fails its own suite. That is a weaker mechanism than a gate and it is the
+honest one available: a gate here would need a browser, and Known Open Items
+already records that this repository's real-browser checks are Chromium only.
+
+**A `min-w-11` belongs beside the height whenever the width is content.** A
+one-digit page link at 44 tall is 20 wide, an icon-only `Toggle` is `size-4` plus
+`px-2.5`, and a floor paid on one axis is not a floor. This is the arrangement
+`Button` states for its own sizes and the reason it states it, and it is why
+`PaginationLink`, `Toggle` and `ToggleGroupItem` all carry both halves.
 
 ## Token Contract
 
@@ -732,7 +943,42 @@ reference them. Duration is the one namespace that needs a mirror: Tailwind's
 `cubic-bezier(0.65, 0, 0.35, 1)`. Neither curve has a control point above 1, so
 neither can overshoot. `fast` is hover and active feedback, `base` is the
 default and carries focus rings and shadow state, and `slow` is transform or
-layout state such as a disclosure. Spatial transitions keep `motion-safe:`.
+layout state such as a disclosure. A spatial transition does not carry a
+`motion-safe:` variant any more, and the reason is stated under Reduced motion
+below rather than here: the whole scale is decided in one place, so there is no
+call site left to guard.
+
+**The sentence above was contradicted by six call sites and has now been applied
+to five of them.** `AccordionContent`, `CollapsibleContent` and `Sidebar` animated
+a height or a width at `duration-base`, which is the case the sentence names `slow`
+for, and both chevrons rotated at `base` beside a panel that now takes 280ms. A
+chevron and the panel it opens are one motion, so a 160ms icon against a 280ms
+panel is two events where the reader is watching one. All five are `duration-slow`
+now.
+
+**One call site stays at `base`, and it is named rather than left as a gap.**
+`Progress`'s indicator is a `transition-transform`, which the same sentence puts in
+`slow`, and it is deliberately not there. A disclosure is a spatial transition that
+happens once, on a reader's click, and 280ms is what makes it read as opening. A
+progress fill is a value that changes on **every tick of a running job**, often many
+times a second, and the reader did not cause it: at 280ms the bar lags the work it is
+reporting and is behind the moment the job moved on. That is the same distinction
+the two laws of motion below draw, applied inside the feedback scale: a
+disclosure is an answer and wants the long end of the band, and a continuously
+advancing indicator is a reading and wants the middle of it. It is the one exception
+this scale has, `Progress`'s own source says why, and the reason is a mechanism rather
+than a preference.
+
+**One surface animates a layout property and is not moving.** `Sidebar`'s rail is
+`transition-[width]`, where `Progress` and `RangeField` are `scaleX` about the inline
+start, and the difference is that a bar and a band are shapes while a rail is not. A
+`scaleX` on the rail scales its icons into ovals, condenses its labels, and squashes
+the counts beside them, and a transform cannot reflow text, which is the entire reason
+a rail animates: the labels have to be laid out for 4rem by the time the rail is 4rem,
+and only `width` does that. The rail is therefore the one named layout animation in
+the package, its cost is one main-thread layout pass over one small subtree per
+reader's click rather than per frame of a running job, and `sidebar.tsx` says so where
+the class is.
 
 ## Motion
 
@@ -843,12 +1089,60 @@ runs the animation at all sees the whole drawing. This is why a consumer needs
 no exception to enable the `hidden-state` gate: the state does not exist.
 
 **Reduced motion removes the movement, not the figure.** The
-`prefers-reduced-motion` block is one `animation: none`, and it is the reason
-this is safe to ship: because every element's resting state is its full form,
-that reader gets the same figure, still. Not a slower one, not a faded one, not
-a summary of one. The system's standing position is that motion is shortened
-rather than removed under reduced motion; for a cycle, the shortening is to
-zero, and the figure was built so that zero costs the reader nothing.
+`prefers-reduced-motion` block at the foot of `packages/ui/src/styles.css` is one
+rule setting `animation: none` and `transition: none` on the universal selector,
+and it is the reason this is safe to ship: because every element's resting state is
+its full form, that reader gets the same figure, still. Not a slower one, not a
+faded one, not a summary of one.
+
+**And it is one rule for the whole package, which is a change of position and
+not a change of wording.** This file used to say that motion is shortened rather
+than removed under reduced motion, with a cycle shortened to zero, and the
+stylesheet implemented neither half. There was no mechanism in a stylesheet that
+could: a shortened transition is a duration, and a duration cannot tell three
+things apart that the rule has to tell apart. It cannot tell a property that
+changed colour from one that moved. It cannot tell a property that transitions
+because a Component said so from one that transitions because nothing said it
+should, and `transition-property` starts at `all` while `transition-duration`
+starts at `0s`, so one rule that shortened them would give a duration to every
+element in a consumer's document that had never animated anything at all. And it
+cannot be written at a call site, because Tailwind's `motion-safe:` variant ADDS
+a rule inside `prefers-reduced-motion: no-preference` and never removes one: the
+three guards this package shipped were the property without its duration, the
+duration with its property, and a transition of `left`, `right` and `width` that
+the guard beside it did nothing about.
+
+So the position is now that reduced motion is a stop rather than a shortening, for
+every animation and every transition, written once. What a reader keeps is
+everything that is not movement: a hover still changes colour, a focus ring still
+appears, a dialog still opens and closes, a disclosure still opens, and none of
+them takes time to do it. The system's first law of motion says a reader who
+hovered something is owed an answer, and it is still answered; it is just not
+answered over 80ms.
+
+**What made one global stop safe, and it was one Component.** `transition: none`
+starts nothing, so `transitionend` never fires for a transition it removed, and
+an exit waiting on that event strands whatever it was hiding. `Toast` was the one
+such exit, and it hands over by asking the browser what is actually running on its
+root rather than waiting for an event; the overlays are Base UI's, and Base UI
+settles every popup on `getAnimations()`, which resolves at once when the list is
+empty. So no state in this system has an exit that depends on an animation or a
+transition running to completion, which is what one rule needs and what a hundred
+per-call-site guards never established. `packages/ui/test/reduced-motion.test.tsx`
+reads the emitted block out of `dist/styles.css` and holds it to four claims, and
+`scripts/check-motion.mjs` holds the source to the same four.
+
+**What it costs, named rather than argued away.** `Spinner`'s ring stops turning
+and `Timeline`'s running mark stops breathing, and each of them is `aria-hidden`
+beside a label or an entry's own words, so the announcement is unchanged and only
+the movement is gone. A caller who drew a spinner with nothing beside it has lost
+the only signal there was, and `Spinner` requires a label for that reason. A
+disclosure now opens at once rather than growing, which costs a reader nothing,
+because a panel's resting state when open is its full height. And a caller who
+wants a shortened hover rather than an instant one cannot have it from this
+package without overriding the stylesheet, which is the no-override-path rule
+applied to motion: a preference the reader set is not a preference a Component
+negotiates.
 
 **The pause is a first-class state.** `prism-ambient-paused` is a published
 utility rather than something each consumer invents, because the alternative is
@@ -929,14 +1223,39 @@ contrast-checkable. One more pair earns its row on its own evidence:
 pill, avatar fallback, kbd and tab-list pattern sits on the tinted surface rather
 than the page ground.
 
-**The grep gates.** A motion gate fails on a `cubic-bezier(...)` literal, an
-arbitrary duration or easing utility, or a bare millisecond value in component
-source, outside the token package. A surface gate scans the emitted declarations
-for a Base UI module specifier or type and for a re-exported variant recipe. An
-elevation and layout gate fails on a raw `box-shadow`, an arbitrary or out-of-set
-shadow utility, a re-declared shadow, breakpoint or container property outside
-the token package, an arbitrary container width, and the old container literals.
-Allowed everywhere are the authored names and their `var(--...)` reads.
+**The grep gates.** `scripts/check-motion.mjs` fails on a `cubic-bezier(...)`
+literal, an arbitrary duration, easing or animation utility, a time value beside a
+motion property in component source outside the token package, a per-call-site
+reduced-motion guard on a motion utility, and a `prefers-reduced-motion` block in
+the library's stylesheet that is not one unconditional unlayered rule declaring
+both `animation: none` and `transition: none`. It blanks comments before it reads,
+because a JSDoc block that quotes a banned value while explaining why it is banned
+is a record and not a violation; it judges a millisecond only beside a closed table
+of motion property names, because a caller stating a reading in their own register
+is content and not a style; and it reads the five authored source trees rather than
+the gates and the scripts, which spell out the patterns they ban as a matter of
+course. A surface gate scans the emitted
+declarations for a Base UI module specifier or type and for a re-exported variant
+recipe. An elevation and layout gate fails on a raw `box-shadow`, an arbitrary
+shadow or container utility, a re-declared shadow, breakpoint or container property
+outside the token package, a `w-*` or `max-w-*` naming a container this
+repository does not author, and a `shadow-*` naming an elevation step the token
+source does not author. That last rule is new and the two ends of it do not
+overlap: the token package's emitted-contract gate reads the emitted theme and
+refuses a `--shadow-lg`, and this one reads the source and refuses a `shadow-lg`
+in any root it reads, so the value can be authored in neither place and neither
+gate has to know about the other. A breakpoint-variant gate
+fails on a class that names a screen the token package does not emit, which is the
+other direction from the elevation gate's rule about a re-declared `--breakpoint-`
+property. A
+container-namespace gate reads the built stylesheet and fails when the theme block
+carries anything but the authored containers, when one of Tailwind's own steps
+survives in it or is read by a rule, when the close is written after the entries it
+was meant to precede, and when a width this package writes is not emitted as a
+utility reading its own variable. Allowed everywhere are the authored names and
+their `var(--...)` reads, a bare number or a fraction as arithmetic on `--spacing`,
+and the keyword widths (`full`, `fit`, `max`, `min`, `none`, `auto`, `screen`,
+`prose`, `px`), which name the reader's own box rather than a value out of a scale.
 
 ## Theme Switching
 
@@ -990,6 +1309,40 @@ beside it rather than replacing it, and the two are one rule with one declaratio
 block, so an element matching both resolves the same way either way. A
 zero-specificity wrapper was considered and rejected: it loses to an unlayered
 consumer rule on import order, and the no-override-path law decides that.
+
+**There is no light-forced form, and the reason is the mode axis rather than the
+selector language.** An element cannot ask for the opposite of its ancestor's
+mode, because the mode is that ancestor's class and CSS has no way to say "this
+element, whatever is above it". A selector that resolves a pack boundary as light
+inside a dark document is writable and would win:
+`.dark [data-pack="<id>"]:not(.dark [data-pack="<id>"] *)` is (0,4,0) against the
+descendant form's (0,2,0), because `*` contributes nothing inside `:not()` and the
+argument carries the whole descendant selector. The obvious form,
+`[data-pack="<id>"]:not(.dark, .dark *)`, does not work and is worth knowing why:
+its argument `.dark *` matches every element of a dark document including the
+boundary itself, so the `:not()` is false exactly where it is needed, and where it
+is true it ties the descendant form at (0,2,0) and loses on order.
+
+The working selector is therefore not a light-forced boundary at all. It matches
+EVERY top-level pack boundary on a dark page, because "top level" is the only
+thing distinguishing it from the rest, so publishing it would put a light patch on
+every boundary a dark document draws. Picking one element out of that set needs a
+per-element signal, and there is no attribute for one: the boundary surface today
+is a pack attribute and a mode class, and a third would be a third axis rather than
+a second form of the second.
+
+**The consequence, stated so it is not rediscovered in a screenshot.** A consumer
+cannot render a light-mode swatch or preview of a pack inside a dark document. The
+boundary resolves dark there, so a mark showing both modes shows the dark value
+twice and reads as one colour where the reader expected two. The site's own pack
+mark is that mark, and it is correct in a light document.
+
+**This is a decision and not a gap, and it is the maintainer's.** Closing it means
+moving the mode off the ancestor and onto the element, which changes the two-axis
+model this section states and touches the provider, the boot script, every emitted
+selector and the no-override-path law. `CONTRIBUTING.md` sends that upstream, and
+until it is decided the boundary surface stays at two forms per pack and the
+limitation stands where it is written rather than in each consumer's code.
 
 **Selection is declarative by default.** Put `data-pack="<id>"` on an element and
 add `class="dark"` only to one that must hold a fixed mode. It is SSR-safe and
@@ -1179,6 +1532,57 @@ Recorded as facts. None of these is fixed in this document.
   candidate for a future fail gate and is not adopted.
 - **No cross-browser or cross-engine testing.** jsdom is not a browser, and the
   visual and real-browser axe checks are Chromium only.
+- **The prose code fences render monochrome, and the mechanism is understood and
+  the fix is not applied.** Measured in `out/` after a clean build: 277 of 583
+  pages carry a `<pre class="shiki shiki-themes github-light github-dark">`, those
+  304 elements carry 22677 inline `--shiki-light` / `--shiki-dark` declarations,
+  and **not one stylesheet in the export mentions either property.** Each token
+  therefore inherits the surrounding colour, so every fenced block in every MDX
+  document is plain text in the page's ink, and two themes' worth of GitHub hex
+  ships on every one of those pages doing nothing.
+
+  The mechanism is `fumadocs-core`'s `rehypeCode`, which is in `fumadocs-mdx`'s
+  default preset because this site declares no `rehypeCodeOptions`. Its defaults
+  are `themes: { light: 'github-light', dark: 'github-dark' }` with
+  `defaultColor: false`, and `defaultColor: false` is shiki's mode for emitting
+  the **pair** as custom properties instead of a resolved `color`. Something has to
+  resolve them, and the something is shiki's own stylesheet, which nothing here
+  imports. Note the config surface, because it is not the obvious one:
+  `fumadocs-mdx` 15.4.5 has no `mdxOptions.highlight` key at all. The lever is
+  `mdxOptions.rehypeCodeOptions`.
+
+  There are two repairs and only one of them is this system's.
+
+  - *Ship the two consuming rules.* Smallest diff, and wrong here. It makes Prism's
+    prose depend on GitHub's palette, and GitHub's palette has never been measured
+    against Prism's grounds in any pack or mode. A design system whose first
+    characteristic is that contrast is a build gate would then be shipping unmeasured
+    hex on 277 pages.
+  - *Point the highlighter at Prism tokens.* `apps/site/src/lib/highlight.ts` already
+    holds a shiki theme whose every colour is a Prism custom property, expressed in
+    three roles and two emphases precisely so a pack change re-themes the code with
+    the page. Reusing it here, with `defaultColor: false`, makes each token emit
+    `var(--brand-ink)` or `var(--foreground)` as the value of `--shiki-light`, and
+    the consuming rule follows `.dark` because the values are tokens rather than
+    hex. This is the right answer and it is the one this entry does not apply.
+
+  **It is not applied because the prerequisite is a contrast measurement nobody has
+  made, and it is the wrong session to make one in.** `highlight.ts` states its
+  three inks were measured on the Demo panel's `bg-muted` across all twelve
+  pack and mode combinations. The prose fence is not on that ground: `.prose pre`
+  in `apps/site/src/app/globals.css` paints
+  `color-mix(in oklab, var(--muted) 50%, transparent)` over the page, which is a
+  different surface with a different effective contrast in every pack. Adopting the
+  theme without measuring against that ground would put this repository in the
+  position it exists to prevent. The work is: add the two consumer roles to
+  `check-contrast.mjs` as a measured pair against the fence ground, then point
+  `rehypeCodeOptions` at the existing theme, then add a gate in the shape of
+  `scripts/check-vector-ink.mjs` that fails on a literal colour in a prose fence.
+  That is one change with a gate and a measurement, not a colour swap.
+
+  `apps/site/src/lib/highlight.ts` is a different thing and is not the defect: it
+  themes the Demo panel, and the panel is a Prism surface with a Prism token behind
+  every ink in it.
 - **The registry validator proves internal consistency, not installability.**
   The tarball verifier proves contents, not runtime compatibility.
 - **Supply-chain and dependency automation is deferred.** CodeQL, OSSF

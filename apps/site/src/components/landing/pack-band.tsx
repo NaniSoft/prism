@@ -95,7 +95,7 @@ export function PackBand({
               </div>
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-medium tracking-tight">{pack.name}</span>
-                <span className="text-muted-foreground font-mono text-[10px]">r {pack.radius}</span>
+                <span className="text-muted-foreground font-mono text-mono">r {pack.radius}</span>
               </div>
             </div>
           </li>
@@ -106,7 +106,7 @@ export function PackBand({
         <CtaLink href={action.href} variant="outline" className="group">
           {action.label}
           <ArrowRight
-            className="motion-safe:transition-transform size-4 group-hover:translate-x-0.5"
+            className="transition-transform size-4 group-hover:translate-x-0.5"
             aria-hidden
           />
         </CtaLink>

@@ -1,7 +1,6 @@
 'use client'
 
-import { useId } from 'react'
-import type { ReactNode } from 'react'
+import { useId, type ReactNode } from 'react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar'
 import { CtaLink } from '../../components/ui/cta-link'

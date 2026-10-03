@@ -95,9 +95,24 @@ export interface LightboxProps {
   className?: string
 }
 
-/** The focus ring every control in this Component draws, at full strength. */
+/**
+ * The metrics every control in this Component draws, and the coarse-pointer floor.
+ *
+ * `pointer-coarse:size-11` is a step rather than a band. These are ghost icon
+ * controls in a centred bar inside the dialog, and the drawn size is not the point of
+ * any of them, which is the condition a band exists for and the reason the switch,
+ * thumb and corner-icon cases in `DESIGN.md` band instead. The bar is `gap-2`, so
+ * growing each control by four pixels on each side costs eight pixels of gap per
+ * neighbour and the bar is centred rather than flush, so nothing shifts off the edge.
+ *
+ * The close control here is a `DialogClose`, and `DialogClose` carries no size of its
+ * own: `dialog.tsx` puts its coarse-pointer floor on the close control it renders
+ * inside `DialogContent`, and this one is a separate `DialogClose` passed as a child,
+ * so this string is the only thing sizing it. See DESIGN.md, The coarse-pointer floor.
+ */
 const CONTROL =
-  'text-muted-foreground hover:text-foreground inline-flex size-9 items-center justify-center rounded-md outline-none transition-colors duration-fast ease-out disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-ring focus-visible:ring-[3px]'
+  'text-muted-foreground hover:text-foreground inline-flex size-9 items-center justify-center rounded-md outline-none transition-colors duration-fast ease-out disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-ring focus-visible:ring-[3px]' +
+  ' pointer-coarse:size-11'
 
 /** An index held inside the set, which is what keeps a rail control from falling off it. */
 function clamp(value: number, total: number): number {
@@ -152,7 +167,10 @@ function clamp(value: number, total: number): number {
  * each of those is a bespoke pointer model that has to be discovered, whereas a
  * scrollable frame is a thing every reader already knows. The transition on the
  * image is a state change the reader caused, which is the first motion law's own
- * case, and it is under `motion-safe:` because a scale is spatial movement.
+ * case, and it carries no `motion-safe:` guard because it does not need one:
+ * `packages/ui/src/styles.css` ends with one unlayered `prefers-reduced-motion`
+ * rule that stops every transition, so a reader who has asked for less motion
+ * gets the new size immediately and loses only the travel between the two.
  *
  * **The rail is a list of real buttons and the current one is named, not
  * coloured.** A rail of thumbnails is the one place a lightbox most often gets
@@ -229,7 +247,7 @@ function Lightbox({
       <DialogContent
         data-slot="lightbox"
         showCloseButton={false}
-        className={cn('max-w-5xl', className)}
+        className={cn('max-w-overlay-media', className)}
       >
         <DialogTitle
           data-slot="lightbox-title"
@@ -263,7 +281,7 @@ function Lightbox({
             src={src}
             alt={alt}
             className={cn(
-              'mx-auto block motion-safe:transition-transform duration-base ease-out',
+              'mx-auto block transition-transform duration-base ease-out',
               zoomed ? 'max-w-none' : 'max-h-[70vh] max-w-full object-contain',
             )}
           />

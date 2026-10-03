@@ -24,7 +24,7 @@ export default function ResizableDemo() {
   const [orientation, setOrientation] = useState<'horizontal' | 'vertical'>('horizontal')
 
   return (
-    <div className="flex max-w-4xl flex-col gap-4">
+    <div className="flex max-w-224 flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
         <Button
           variant={orientation === 'horizontal' ? 'default' : 'outline'}

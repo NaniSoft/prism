@@ -19,7 +19,7 @@ import { PrismProvider } from '@nanisoft/prism-ui/provider'
 export default function ModeToggleDemo() {
   return (
     <PrismProvider>
-      <div className="flex max-w-measure-wide flex-col gap-6">
+      <div className="flex max-w-page flex-col gap-6">
         <div className="flex flex-wrap items-center gap-4">
           <ModeToggle label="Switch to dark mode" />
           <ModeToggle label="Switch to dark mode" size="sm" />

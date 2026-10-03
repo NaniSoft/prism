@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useId, type ReactNode } from 'react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar'
 import { CtaLink } from '../../components/ui/cta-link'
@@ -515,6 +515,8 @@ export function ProjectList01({
   headingLevel = 'h2',
   className,
 }: ProjectList01Props) {
+  // The handle a table below takes its name from; see the note on the table.
+  const headingId = useId()
   // Checked before anything is drawn, so the run fails once with the name of the
   // project rather than once per row with a malformed cell on the page.
   for (const project of projects) {
@@ -551,6 +553,7 @@ export function ProjectList01({
   const heading = (
     <SectionHeading
       as={headingLevel}
+      id={headingId}
       align="left"
       eyebrow={eyebrow}
       title={title}
@@ -614,7 +617,19 @@ export function ProjectList01({
     variant === 'table' ? (
       <div data-slot="project-list" data-variant={variant}>
         <div className="border-border overflow-hidden rounded-xl border">
-          <Table>
+
+          {/*
+           * The table takes its name from the heading above it rather than from a
+           * second copy of the same words. A `<table>` is named by a caption, an
+           * `aria-label` or an `aria-labelledby`, and none of the three is inferred
+           * from a heading that happens to be nearby, so a reader listing the tables
+           * on a page found this one anonymous while every other element around it was
+           * named. A reference rather than a caption because a caption is drawn, and a
+           * visible line repeating the heading is noise; a reference because `title`
+           * is the caller own words and a Block may not compose a second set. See
+           * `Table`, which asks for exactly one of the three.
+           */}
+          <Table aria-labelledby={headingId}>
             <TableHeader>
               <TableRow>
                 {(columns ?? []).map((column) => (

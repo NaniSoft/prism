@@ -44,6 +44,27 @@ Writing a plain `<p>` and a plain `<h2>` gets the system treatment, and writing
 Prism's own `Heading` and `Text` gets the same result, because the two spellings
 converge on the same element.
 
+### Tables
+
+A `<table>` passed straight to a Prose scrolls rather than widening the page, and
+the code fence beside it already did. A table box cannot be a scroll container on
+its own: `overflow` applies to block containers, and a `display: table` element is
+not one, so an `overflow-x: auto` written straight onto the table is ignored. The
+Component gives the table `display: block` to make it one, which means the grid
+inside sizes to its content up to the measure rather than stretching to fill it.
+
+Two things follow from that, and both are worth knowing before you rely on it:
+
+- The treatment is a **child** selector. A table you have already put in a scroll
+  container of your own is left alone, which is what keeps `Table` working inside
+  a Prose.
+- If you wrap your table in your own element, that element is yours: give it
+  `overflow-x-auto` and the wrapper is what scrolls.
+
+For a table you control the markup of, compose `Table`. It brings its own scroll
+container, keeps the caption as a caption, and is the right answer for tabular
+data rather than for a table that happens to appear in a document.
+
 ### When not to use
 
 Do not use a Prose for a supporting line under a heading. That is `Text`, and a

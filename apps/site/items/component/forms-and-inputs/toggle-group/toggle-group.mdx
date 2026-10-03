@@ -67,9 +67,10 @@ two-member group is a control with a keyboard model a reader did not need.
 
 ### Best practices
 
-- Always pass `aria-label`. A group of toggles with no name is announced as an
-  unnamed group, and a page with four of them is a page where a reader cannot tell
-  which they are in.
+- Pass `aria-label`. It is a required prop and TypeScript will say so. A group of
+  toggles with no name is announced as an unnamed group, and a page with four of
+  them is a page where a reader cannot tell which they are in. `aria-labelledby`
+  arrives through the forwarded props if the name is already drawn somewhere.
 - Choose `selectionMode` from the constraint, not from the look. "Only one at a
   time" is `single`; "any number" is `multiple`. If a reader can turn two on, it is
   `multiple` whatever the data model says.

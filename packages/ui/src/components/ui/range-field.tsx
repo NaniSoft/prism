@@ -102,9 +102,58 @@ export interface RangeFieldProps {
  * the contrast gate would measure a compliant ring and never see that this one has
  * to clear 3:1. This is the element a keyboard reader lands on, so it is the one
  * indicator they have.
+ *
+ * The coarse-pointer floor is a band and not a `size-11` step, for the reason
+ * `slider.tsx` argues at length: Base UI positions the thumb with `left:
+ * <percent>%` and reads the press offset from the thumb's own box, so a band gives
+ * a 44px target around an unchanged 16px dot and a step would put a 44px ball on a
+ * six pixel rail.
+ *
+ * The cost is stated because it is specific to two thumbs. Two 44px bands around
+ * two 16px dots overlap once the bounds are closer together than the band is wide,
+ * and the later thumb paints above the earlier one, so on a coarse pointer a pair
+ * of bounds inside about forty pixels of each other are dragged by the bound that
+ * was last used until the Tab key moves to the other. That is a wider dead zone
+ * than the desktop sixteen pixels, it is the price of the floor rather than a
+ * defect in it, and the answer is `minGap`: a caller who needs two bounds a reader
+ * can pinch apart on a phone needs a gap wide enough to pinch.
  */
 const THUMB =
-  'border-primary bg-background shadow-xs ring-ring block size-4 shrink-0 rounded-full border outline-none transition-[color,box-shadow] duration-fast ease-out hover:ring-4 focus-visible:ring-4 data-[disabled]:pointer-events-none'
+  'border-primary bg-background shadow-xs ring-ring block size-4 shrink-0 rounded-full border outline-none transition-[color,box-shadow] duration-fast ease-out hover:ring-4 focus-visible:ring-4 data-[disabled]:pointer-events-none pointer-coarse:before:absolute pointer-coarse:before:left-1/2 pointer-coarse:before:top-1/2 pointer-coarse:before:h-11 pointer-coarse:before:w-11 pointer-coarse:before:-translate-x-1/2 pointer-coarse:before:-translate-y-1/2 pointer-coarse:before:content-[""]'
+
+/**
+ * The fraction of the whole track the band between two bounds covers, from 0 to 1.
+ *
+ * **This is Base UI's arithmetic restated, and the restatement is the point.**
+ * `SliderIndicator` writes `inset-inline-start: <percent>%` and `width:
+ * <percent>%` as inline styles, and the second of those is `(end - min) / (max -
+ * min)` expressed as a percentage of the track. A transform needs a unitless factor
+ * rather than a percentage of a box, so the factor has to exist somewhere
+ * JavaScript can put it, and there are exactly two ways to get one: restate the
+ * line, or parse the percentage back out of Base UI's own inline style string. The
+ * restatement is the honest one, and `range-field.test.tsx` holds it against what
+ * the two thumbs announce rather than against a second copy of these two lines.
+ *
+ * **Only the WIDTH is restated. The position is Base UI's, and that is the whole
+ * of why this Component does not have to think about direction.** It writes
+ * `inset-inline-start` as a logical property, so the left edge of the band lands
+ * on the lower bound under a left-to-right `dir` and on its mirror under a
+ * right-to-left one, and a transform only has to scale it about whichever edge
+ * that is. `Progress` could take the position back as well because its fill
+ * always starts at the inline start; a range's does not, and a band computed here
+ * as one number translated into place would have had to flip its sign under
+ * `dir="rtl"`, which is the bug this arrangement exists to not have.
+ *
+ * `max === min` is a division by zero rather than an interval, and the band on it
+ * is a band at zero rather than a band at `NaN`; the infinities a reversed range
+ * produces need no case of their own, because the same clamp resolves them to the
+ * nearer bound.
+ */
+function bandOf(start: number, end: number, min: number, max: number): number {
+  const span = (end - start) / (max - min)
+  if (Number.isNaN(span)) return 0
+  return Math.min(1, Math.max(0, span))
+}
 
 /**
  * Two thumbs on one track, editing the lower and the upper bound of an interval.
@@ -134,6 +183,17 @@ const THUMB =
  * End keys and the form integration, none of which is this Component's own
  * contribution. **Those three are therefore inherited, not written here**, and the
  * reason to own the surface at all is the announcement below.
+ *
+ * **The band between the bounds is a transform, and the transform is its whole
+ * geometry.** It is the same decision `Progress` states for the same reason, and
+ * on a range it matters more rather than less, because a range is the one control
+ * here whose value changes on every pointer move rather than on every commit: a
+ * band that animated `left` and `width` settled layout on every frame of a drag,
+ * on the page the consumer composed it into, for as long as their finger was down.
+ * The indicator is as wide as the track at every value and is scaled about the
+ * inline start, so advancing a bound is a compositor animation. **A consumer who
+ * styled the indicator's width has to move with it**, exactly as with `Progress`:
+ * the honest replacement is a rule on its `transform`.
  *
  * **The announcement is the contribution.** Two range inputs side by side announce
  * two numbers. What a reader wants from a band is a sentence with a direction: which
@@ -192,6 +252,8 @@ function RangeField({
   const start = bounds[0]
   const end = bounds[1]
   const span = end - start
+  const vertical = orientation === 'vertical'
+  const band = bandOf(start, end, min, max)
 
   const formatter = new Intl.NumberFormat(locale, {
     style: 'decimal',
@@ -247,7 +309,58 @@ function RangeField({
           >
             <SliderPrimitive.Indicator
               data-slot="range-field-indicator"
-              className="bg-primary absolute h-full rounded-full transition-[left,right,width] duration-fast ease-out motion-safe:transition-[left,right,width]"
+              /*
+               * `scaleX` rather than a width, for the reason `Progress` gives at
+               * length. The class named three layout properties and exactly one of
+               * them ever changed: Base UI writes `inset-inline-start` and `width`
+               * onto this element as inline declarations, so `left` and `right` were
+               * properties the browser checked on every frame in order to discover
+               * they had not moved, and `width` was a layout-and-paint animation on
+               * every frame of every drag. The style below is merged over Base UI's
+               * rather than beside it, which is the only way to reach an inline
+               * declaration, and it takes the width back and leaves the position
+               * alone.
+               *
+               * The origin is the inline start in both directions, and it takes an
+               * `rtl:` variant to say so rather than a logical property, because CSS
+               * has no logical keyword for `transform-origin` and Tailwind 4.3's
+               * `origin` utility ships the nine physical positions and nothing else.
+               * `origin-left` is the inline start under a left-to-right `dir` and
+               * `rtl:origin-right` is the inline start under a right-to-left one,
+               * which is the edge Base UI's own logical `inset-inline-start` has
+               * already anchored the band to.
+               *
+               * The element stays as wide as the track and overflows it, and the
+               * track's `overflow-hidden` is what turns that into a band between two
+               * bounds rather than a band at the wrong end of the rail. The band is a
+               * vertical orientation's `scaleY` about the bottom edge, chosen by the
+               * prop the Component already forwards, so a vertical field gets the
+               * same compositor animation rather than the horizontal one applied to a
+               * vertical box.
+               *
+               * NO `rounded-full` ON THE BAND, AND THAT IS THE ONE PLACE THIS
+               * DIFFERS FROM `Progress`. A `scaleX` scales the shape it is applied
+               * to, including its own corners, so a rounded end on a band at 40%
+               * draws a 3px cap squashed to 1.2px on the horizontal axis and left at
+               * 3px on the vertical one, which reads as a lens rather than as an end.
+               * `Progress` can afford to keep its radius because a bar's trailing end
+               * is the figure and its radius is part of the figure; here the ends of
+               * the band are the two thumbs, which are circles drawn on top of it, so
+               * a radius on the band is a second, smaller circle under a larger one
+               * and squashing it lands on exactly the edge the reader is looking at.
+               * The track carries `rounded-full` with `overflow-hidden`, so a band at
+               * full span still has both of its ends rounded, and a partial one has a
+               * straight edge at the bound, which is what a bound looks like.
+               *
+               * `absolute` is not written here because it does nothing: Base UI sets
+               * `position` inline for this element, and an inline declaration beats a
+               * class on every document.
+               */
+              className={cn(
+                'bg-primary h-full w-full transition-transform duration-fast ease-out',
+                vertical ? 'origin-bottom' : 'origin-left rtl:origin-right',
+              )}
+              style={vertical ? { height: '100%', transform: `scaleY(${band})` } : { width: '100%', transform: `scaleX(${band})` }}
             />
           </SliderPrimitive.Track>
           <SliderPrimitive.Thumb

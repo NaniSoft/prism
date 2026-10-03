@@ -14,7 +14,8 @@
  *   4. no extras: no declaration exists in a bound namespace that the source did
  *      not author (this is what once let an unbounded group hide);
  *   5. the mode-independent groups: shadows, the closed breakpoint set, the
- *      containers, and the zero-overshoot easing and closed duration set.
+ *      containers and the whole-container close, and the zero-overshoot easing
+ *      and closed duration set.
  *
  * It also checks the runtime selector shape, so the emitted CSS cannot drift from
  * the `themeSelector` output switch.
@@ -130,6 +131,10 @@ for (const [key, token] of groupEntries(foundationTree, ['shadow'])) put(`shadow
 for (const [key, token] of groupEntries(foundationTree, ['breakpoint'])) put(`breakpoint-${key}`, readToken(token))
 put('breakpoint-xl', 'initial')
 put('breakpoint-2xl', 'initial')
+
+// Tailwind's own `--container-*` namespace is closed whole, before the authored
+// entries, so `max-w-6xl` cannot resolve to 72rem beside `max-w-page`.
+put('container-*', 'initial')
 for (const [key, token] of groupEntries(foundationTree, ['container'])) put(`container-${key}`, readToken(token))
 
 // ── Emitted files ─────────────────────────────────────────────────────────────
@@ -299,7 +304,71 @@ check(JSON.stringify(breakpointKeys) === JSON.stringify(['lg', 'md', 'sm']), `br
 check(staticDecls.get('breakpoint-xl') === 'initial' && staticDecls.get('breakpoint-2xl') === 'initial', 'breakpoint-xl and breakpoint-2xl must be closed with `initial`')
 
 const containerKeys = groupEntries(foundationTree, ['container']).map(([key]) => key).sort()
-check(JSON.stringify(containerKeys) === JSON.stringify(['measure', 'measure-narrow', 'page']), `container set must be {page, measure, measure-narrow}, found {${containerKeys.join(', ')}}`)
+check(
+  JSON.stringify(containerKeys) ===
+    JSON.stringify([
+      'measure',
+      'measure-narrow',
+      'overlay-dialog',
+      'overlay-form',
+      'overlay-media',
+      'overlay-palette',
+      'overlay-panel',
+      'page',
+    ]),
+  `container set must be {page, measure, measure-narrow} plus the five overlay widths ` +
+    `{overlay-panel, overlay-dialog, overlay-form, overlay-palette, overlay-media}, found {${containerKeys.join(', ')}}`,
+)
+
+// The two families, asserted apart rather than as one list, because the reason
+// they share a group is a framework limit and the reason they must not share a
+// scale is a design one. An overlay's width is a property of the kind of surface
+// it is, so a retune of the reading measure must not move a dialog.
+const PAGE_FAMILY = ['measure', 'measure-narrow', 'page']
+const OVERLAY_FAMILY = ['overlay-dialog', 'overlay-form', 'overlay-media', 'overlay-palette', 'overlay-panel']
+check(
+  containerKeys.filter((key) => !PAGE_FAMILY.includes(key)).join(',') === OVERLAY_FAMILY.join(','),
+  `every authored container must be in the page family {${PAGE_FAMILY.join(', ')}} or the overlay ` +
+    `family {${OVERLAY_FAMILY.join(', ')}}, so an overlay width is never named after a document measure`,
+)
+
+// Every overlay width must differ from every page width unless the group says it
+// is a coincidence. `overlay-palette` and `measure-narrow` are both 36rem and the
+// authored description says why; a second pair appearing without being written
+// down is a silent alias, which is the same failure this whole namespace is about.
+const containerEntries = new Map(groupEntries(foundationTree, ['container']))
+const containerValue = (key) => readToken(containerEntries.get(key))
+for (const overlay of OVERLAY_FAMILY) {
+  for (const page of PAGE_FAMILY) {
+    if (overlay === 'overlay-palette' && page === 'measure-narrow') continue
+    check(
+      containerValue(overlay) !== containerValue(page),
+      `--container-${overlay} is ${containerValue(overlay)}, the same value as --container-${page}. Two ` +
+        'names for one width is how a retune moves one surface and not the other; either give one of ' +
+        'them its own value or record the agreement in the group description',
+    )
+  }
+}
+check(
+  containerValue('overlay-palette') === containerValue('measure-narrow'),
+  'the one authored coincidence, overlay-palette with measure-narrow at 36rem, is a decision the ' +
+    'group description states and this assertion holds it to',
+)
+
+// The close has to come first. Tailwind resolves a theme in source order and
+// `initial` clears everything declared so far, so the same declaration written
+// after the authored entries would clear all eight and leave the sheet with no
+// container at all. Reading the emitted order is the only way to tell which of
+// the two happened.
+const staticBody = atRuleBody(themeCss, '@theme static {') ?? ''
+const closeAt = staticBody.search(/^\s*--container-\*:\s*initial;/m)
+const firstAuthoredAt = staticBody.search(/^\s*--container-(?![\s*])/m)
+check(closeAt !== -1, 'theme.css @theme static does not close the container namespace with `--container-*: initial`')
+check(
+  closeAt !== -1 && firstAuthoredAt !== -1 && closeAt < firstAuthoredAt,
+  'theme.css @theme static writes `--container-*: initial` after an authored `--container-*` entry, which ' +
+    'clears the authored widths as well as Tailwind\'s and ships no container at all',
+)
 
 // 6. The runtime selector shape comes from the single output switch.
 const manifest = await readJson(path.join(DIST, 'themes.json'))

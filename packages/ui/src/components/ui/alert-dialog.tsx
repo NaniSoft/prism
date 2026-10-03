@@ -114,6 +114,12 @@ function AlertDialogTrigger({ className, ...props }: AlertDialogTriggerProps) {
         'hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px]',
         'disabled:pointer-events-none disabled:opacity-50',
         className,
+        // The coarse-pointer floor, as a step. The trigger opens a dialog and the pair in the
+        // footer confirm and dismiss it, so all three are buttons a finger has to hit, and a
+        // band would overhang a footer button the caller placed in its own row. The cost is a
+        // 44 tall footer on touch rather than a 36 one, which is what the platform's own
+        // dialogs use. See DESIGN.md, The coarse-pointer floor.
+        'pointer-coarse:h-11',
       )}
       {...props}
     />
@@ -132,7 +138,7 @@ function AlertDialogContent({ className, ...props }: AlertDialogContentProps) {
         <AlertDialogPrimitive.Popup
           data-slot="alert-dialog-content"
           className={cn(
-            'bg-background shadow-md relative grid w-full max-w-md gap-4 rounded-xl border p-6 outline-none',
+            'bg-background shadow-md relative grid w-full max-w-overlay-dialog gap-4 rounded-xl border p-6 outline-none',
             'transition-[opacity,transform] duration-base ease-out',
             'focus-visible:ring-ring focus-visible:ring-[3px]',
             'data-[starting-style]:scale-95 data-[starting-style]:opacity-0',
@@ -216,6 +222,12 @@ function AlertDialogAction({ className, variant = 'destructive', ...props }: Ale
         'disabled:pointer-events-none disabled:opacity-50',
         ACTION_VARIANTS[variant],
         className,
+        // The coarse-pointer floor, as a step. The trigger opens a dialog and the pair in the
+        // footer confirm and dismiss it, so all three are buttons a finger has to hit, and a
+        // band would overhang a footer button the caller placed in its own row. The cost is a
+        // 44 tall footer on touch rather than a 36 one, which is what the platform's own
+        // dialogs use. See DESIGN.md, The coarse-pointer floor.
+        'pointer-coarse:h-11',
       )}
       {...props}
     />
@@ -233,6 +245,12 @@ function AlertDialogCancel({ className, ...props }: AlertDialogCancelProps) {
         'hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px]',
         'disabled:pointer-events-none disabled:opacity-50',
         className,
+        // The coarse-pointer floor, as a step. The trigger opens a dialog and the pair in the
+        // footer confirm and dismiss it, so all three are buttons a finger has to hit, and a
+        // band would overhang a footer button the caller placed in its own row. The cost is a
+        // 44 tall footer on touch rather than a 36 one, which is what the platform's own
+        // dialogs use. See DESIGN.md, The coarse-pointer floor.
+        'pointer-coarse:h-11',
       )}
       {...props}
     />

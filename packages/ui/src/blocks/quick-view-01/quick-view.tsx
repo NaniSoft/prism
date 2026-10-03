@@ -46,11 +46,21 @@ export type QuickView01Fact = {
  * Applied at the `sm` breakpoint and above, so on a phone the panel is the width the
  * viewport gives it with its own padding either way, and the three sizes only decide
  * how much of the page the panel occupies once there is room to decide it.
+ *
+ * **The three are overlay widths rather than steps of a size scale**, and that is the
+ * whole reason the token build closes Tailwind's own container namespace. These used
+ * to be spelled with three of its steps, which ship at the same values, so nothing
+ * rendered differently; what they cost was that the widest step also meant something
+ * on a page, and a retune of this panel would have moved the panel and left the page.
+ * An overlay's width is a property of the kind of surface it is, so it is named for
+ * that surface and it moves on its own or not at all. The retired names are written
+ * here in prose rather than as classes because Tailwind's extractor reads this file's
+ * comments, and a class recorded in a JSDoc block is a class the sheet emits.
  */
 const WIDTH: Record<QuickView01Size, string> = {
-  sm: 'sm:max-w-sm',
-  md: 'sm:max-w-md',
-  lg: 'sm:max-w-lg',
+  sm: 'sm:max-w-overlay-panel',
+  md: 'sm:max-w-overlay-dialog',
+  lg: 'sm:max-w-overlay-form',
 }
 
 /**
@@ -213,12 +223,12 @@ export type QuickView01Props = {
  * **This Block does not compose `Section`, and that is a decision rather than an
  * oversight.** Every other Block in this package opens with `Section` so it inherits
  * the container and the vertical rhythm. A modal has no container to inherit: `Section`
- * is a `max-w-6xl` column with the page's vertical padding, and putting that inside a
- * panel that is at most `max-w-lg` produces a page layout applied to a four-hundred
- * pixel box. `DialogContent` already owns the padding and the gap, and `Lightbox` and
- * `SearchDialog` are absent from `Section` for the same reason. The corollary is that
- * this Block draws no `SectionHeading` either, and its heading is its own element,
- * aligned flush left by construction rather than by a prop.
+ * is the page column with the page's vertical padding, and putting that inside a
+ * panel that is at most `max-w-overlay-dialog` produces a page layout applied to a
+ * four-hundred pixel box. `DialogContent` already owns the padding and the gap, and
+ * `Lightbox` and `SearchDialog` are absent from `Section` for the same reason. The
+ * corollary is that this Block draws no `SectionHeading` either, and its heading is
+ * its own element, aligned flush left by construction rather than by a prop.
  *
  * **The specification is `FactList`, and the panel draws no more than the caller
  * passes.** A quick view that grew its own layout for a longer summary would be a

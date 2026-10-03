@@ -115,8 +115,8 @@ none of the four and would rather compose its own.
   playground. They render after the controls this bar composes, at the right-hand
   end.
 - Leave `sticky` on unless the page does not scroll. The bar is how a reader leaves
-  the page they are on, and it takes that with it on exactly the long pages where it
-  is needed.
+  the page they are on, and it takes that with them on exactly the long pages where
+  it is needed. `sticky={false}` is honoured and puts the bar back in the flow.
 
 ### Content guidelines
 
@@ -128,6 +128,36 @@ none of the four and would rather compose its own.
   a different set on every page.
 
 ## Notes
+
+### The bar is opaque, and the hairline is the separator
+
+The bar is `bg-background` with a `border-border` hairline, and it is what
+`SiteHeader` has always shipped. It used to be `bg-background/80` with a
+`backdrop-blur`, so the page showed through it blurred.
+
+A backdrop filter is evaluated against everything painted behind the element. This
+element is a full-viewport-width sticky bar, so on a scrolling page the browser
+re-sampled and re-blurred the backdrop on every frame, on every page of every site
+that composes the bar. Keeping the blur behind an `@supports` check would not have
+paid for it either: the check is false only in a browser that was not compositing
+anything, and true in every browser that does the expensive thing.
+
+Opaque is also the more legible of the two, and this is the part a token can be
+held to. An opaque bar makes the bar's own contrast the pair `muted-foreground` on
+`background`, in every pack and in both modes, which is the pair the contrast gate
+already checks. An eighty percent background has no token pair at all, because the
+colour underneath it is whatever the reader's scroll position has brought there.
+
+Two things to know if you were styling against the old bar:
+
+- A rule that set the bar's background translucency has nothing to sit on now. Set
+  the colour on the page behind the bar, or leave the bar to `SiteHeader`'s.
+- A rule that relied on the bar being translucent to hide a scrolling heading will
+  no longer hide it, which is the point.
+
+`will-change` is not on the bar and is not proposed for it. Nothing on the bar
+animates, so a compositing hint applied at rest has no frame to be ready for and
+nothing that would release it.
 
 ### The one client boundary
 

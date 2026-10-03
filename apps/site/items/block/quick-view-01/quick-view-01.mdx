@@ -56,9 +56,9 @@ package's default would carry is a consumer who cannot fix it.
 ## It does not compose `Section`
 
 Every other Block opens with `Section` so it inherits the container and the vertical
-rhythm. A modal has no container to inherit: `Section` is a `max-w-6xl` column with
-the page's vertical padding, and putting that inside a panel at most `max-w-lg`
-produces a page layout applied to a four-hundred pixel box.
+rhythm. A modal has no container to inherit: `Section` is the page column with the
+page's vertical padding, and putting that inside a panel at most
+`max-w-overlay-dialog` produces a page layout applied to a four-hundred pixel box.
 
 `Lightbox` and `SearchDialog` are absent from `Section` for the same reason. The
 corollary is that this Block draws no `SectionHeading` either, and its heading is its

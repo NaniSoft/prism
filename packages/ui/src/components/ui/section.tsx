@@ -4,6 +4,21 @@ import { cn } from '../../lib/utils'
 /**
  * Container primitive. Every block composes its own section from this so vertical
  * rhythm stays consistent across the catalog instead of being re-invented per block.
+ *
+ * The page column is `max-w-page` and there is one spelling of it. This line used
+ * to name the sixth step of Tailwind's own container namespace, which ships at
+ * the same 72rem, so nothing rendered differently and nothing failed; the two
+ * names drifted the moment `--container-page` was retuned, because a retune of the
+ * authored token moved every surface reaching it by name and left every surface
+ * reaching it by the other where it was, with no gate firing. That namespace is
+ * now closed in the token build, and `scripts/check-elevation-layout.mjs` reads
+ * the authored container names out of the token source so the retired spelling is
+ * a finding rather than a synonym.
+ *
+ * **The retired name is written here in prose and not as a class, on purpose.**
+ * Tailwind's extractor reads this file, comments included, so a utility quoted in
+ * a JSDoc block is a utility the shipped stylesheet emits. A record of a retired
+ * class written as a class is a second copy of the tree nobody edits.
  */
 export function Section({
   className,
@@ -15,7 +30,7 @@ export function Section({
       className={cn('py-16 sm:py-24', className)}
       {...props}
     >
-      <div className="mx-auto w-full max-w-6xl px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-page px-6 lg:px-8">
         {children}
       </div>
     </section>
@@ -88,6 +103,7 @@ export function SectionHeading({
   as: Heading = 'h2',
   description,
   align = 'center',
+  id,
   className,
 }: {
   /**
@@ -115,6 +131,19 @@ export function SectionHeading({
    * entry point.
    */
   as?: HeadingLevel
+  /**
+   * The heading's own id, so something else on the page can name itself from it.
+   *
+   * A prop rather than a generated id because the reference is the point: a caller
+   * that draws a table, a list or a region under this heading and wants that thing
+   * to carry an accessible name needs a handle on this element, and an id nobody
+   * can write down is no handle. `aria-labelledby` on the table is the case that
+   * made it necessary, and it is the arrangement `ChoiceCard` uses for its legend.
+   *
+   * Not generated here, because a generated id cannot be referred to and an unused
+   * one on every section heading is noise in the markup.
+   */
+  id?: string
   className?: string
 }) {
   return (
@@ -135,11 +164,14 @@ export function SectionHeading({
           {eyebrow}
         </span>
       ) : null}
-      <Heading className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+      <Heading
+        id={id}
+        className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl"
+      >
         {title}
       </Heading>
       {description ? (
-        <p className="text-muted-foreground max-w-2xl text-lg text-pretty">
+        <p className="text-muted-foreground max-w-measure text-lg text-pretty">
           {description}
         </p>
       ) : null}

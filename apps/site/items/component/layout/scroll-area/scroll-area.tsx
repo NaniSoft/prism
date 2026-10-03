@@ -30,7 +30,7 @@ export default function ScrollAreaDemo() {
   const [frame, setFrame] = useState<'card' | 'plain'>('card')
 
   return (
-    <div className="flex max-w-measure-wide flex-col gap-4">
+    <div className="flex max-w-page flex-col gap-4">
       <ScrollArea
         label="Collector run output"
         className={

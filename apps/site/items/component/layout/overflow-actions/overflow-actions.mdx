@@ -32,6 +32,28 @@ width when the cap appeared would move its actions on every resize. While nothin
 collapsed the cap is invisible, out of flow, out of the tab order and out of the
 accessibility tree, and its width is still readable.
 
+## When it measures
+
+Every read a measurement makes is a read the browser answers by settling layout first,
+so the row measures when the measurement could have changed and not on every render.
+A pass runs on mount, when the actions' ids or their labels change, when `className`
+changes, when the row's own box changes, and when the page's fonts have finished
+loading.
+
+The last of those is in the list because a self-hosted face swaps in after the first
+paint and changes the width of every drawn action without changing the row's width, so
+nothing else reports it, and a row measured in the fallback face is a row whose widths
+were never true of the page the reader is looking at.
+
+So passing a fresh `actions` array on every render costs nothing, which matters on a
+page of rows: a table cell that re-renders on every keystroke in a filter box above it
+should not force a layout per row per keystroke.
+
+What a pass cannot see is a change that leaves both the row's box and its drawn content
+exactly as they were: an ancestor's font size changing, or an action's mark being
+swapped for a different-width one while that action is drawn. Both are cases where the
+row is measured from what is on the page rather than from what the page has become.
+
 ## Usage
 
 ```tsx
@@ -105,7 +127,8 @@ the action a reader reached for.
 - Expect a command that cannot run right now to be unavailable rather than removed.
   Use the `disabled` field on the action rather than filtering it out of the list.
 - Use `className` for width and placement only. Changing the gap through it is
-  allowed, because the row reads its own gap back rather than assuming one.
+  allowed, because the row reads its own gap back rather than assuming one, and
+  changing it is one of the few things that makes the row measure again.
 
 ### Content guidelines
 

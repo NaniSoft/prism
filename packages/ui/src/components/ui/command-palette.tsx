@@ -118,6 +118,17 @@ type HitGroup = { id: string; label: string; hits: Hit[] }
  * highlight through the list rather than moving focus into it, so a reader can keep
  * typing while they choose, and the highlighted row carries the state. That is the
  * combobox pattern and it is the reason the arrows do not steal the caret.
+ *
+ * **A query that matched nothing is a popup that is still open.** The panel stays,
+ * it says so in the caller's sentence, and the field announces itself expanded,
+ * because a palette that closed itself on a non-match tells the reader their
+ * keystroke broke it. The message is a sibling of the listbox rather than a child of
+ * it, because a listbox owns `option` and `group` and nothing else, and
+ * `aria-controls` points at the palette rather than at the listbox, because the
+ * listbox is not on the page in that state and `aria-controls` is required on an
+ * expanded combobox. `Combobox`, `MultiCombobox` and `CreatableCombobox` make the
+ * same choices, and they make them here rather than each answering the question
+ * again.
  */
 function CommandPalette({
   open,
@@ -134,6 +145,10 @@ function CommandPalette({
   const [active, setActive] = useState(0)
   const listRef = useRef<HTMLDivElement>(null)
   const titleId = useId()
+  // The surface the field controls, which is the palette itself. Separate from the
+  // listbox id because the listbox is not rendered at all when nothing matched, and
+  // `aria-controls` is a required attribute on an expanded combobox.
+  const popupId = `${titleId}-popup`
 
   const trimmed = query.trim()
 
@@ -266,9 +281,14 @@ function CommandPalette({
         // reader is already in. The DialogTitle is still rendered and still names
         // the dialog for assistive technology, which is the whole reason it
         // exists separately from anything visible.
+        //
+        // The id is the field's `aria-controls`. It is on the surface rather than on
+        // the listbox because the listbox is not rendered when nothing matched, and
+        // the field is expanded whenever the palette is open.
+        id={popupId}
         side="top"
         showCloseButton={false}
-        className={cn('max-w-xl gap-0 p-0', className)}
+        className={cn('max-w-overlay-palette gap-0 p-0', className)}
       >
         <DialogTitle className="sr-only">{label}</DialogTitle>
 
@@ -277,8 +297,27 @@ function CommandPalette({
             data-slot="command-palette-input"
             type="text"
             role="combobox"
-            aria-expanded={flat.length > 0}
-            aria-controls={`${titleId}-list`}
+            /*
+             * `aria-expanded` is `open`, and the alternative it replaced was
+             * `flat.length > 0`. That expression answered "are there results" and
+             * the attribute asks "is the popup displayed", and the two came apart
+             * in exactly the state this Component exists to render: a query that
+             * matched nothing, which draws a bordered panel saying so. The field
+             * announced collapsed while a visible popup stood under it, so a reader
+             * pressing Down to reach the answer was told there was nothing to
+             * reach. `Combobox` states the same refusal in prose: a surface that
+             * closes itself on a non-match tells the reader their keystroke broke
+             * it.
+             *
+             * `aria-controls` points at the surface the field opens, which is the
+             * palette, rather than at the listbox inside it. The listbox is not
+             * rendered when nothing matched, and `aria-controls` is a required
+             * attribute on an expanded combobox, so a reference to it was a reference
+             * to an id nothing carried in exactly the state that says nothing
+             * matched.
+             */
+            aria-expanded={open}
+            aria-controls={open ? popupId : undefined}
             aria-activedescendant={
               flat[activeIndex] === undefined ? undefined : `${titleId}-item-${flat[activeIndex]?.id}`
             }
@@ -294,28 +333,75 @@ function CommandPalette({
             // immediately. Nothing else in the surface is focusable, which is what
             // makes this a combobox rather than a list of buttons.
             autoFocus
-            className="placeholder:text-muted-foreground h-12 w-full bg-transparent text-sm outline-none"
+            // The ring is at full strength, and it is drawn at all because this is
+            // the control focus lands in and `outline-none` is what removed the
+            // browser's indicator from it. A field with no visible focus is a field
+            // a keyboard reader cannot say they are inside. The ring and not the
+            // border, as `Command` draws it: this field has no border to colour.
+            //
+            // `text-base` then `md:text-sm`, which is the pair `Input`, `Textarea`,
+            // `Combobox`, `Form` and `NumberField` all carry and which this field
+            // was the one exception to. The reason is iOS Safari and not a visual
+            // one: it zooms the viewport on a focused input under 16 pixels and does
+            // not zoom back out, so a palette opened on a phone was a page the reader
+            // could not get out of.
+            className="placeholder:text-muted-foreground h-12 w-full bg-transparent text-base outline-none focus-visible:ring-ring focus-visible:ring-[3px] md:text-sm"
           />
         </div>
 
-        <div
-          data-slot="command-palette-list"
-          id={`${titleId}-list`}
-          ref={listRef}
-          role="listbox"
-          aria-label={label}
-          className="max-h-80 overflow-y-auto p-1"
-        >
-          {results.length === 0 ? (
-            <p data-slot="command-palette-empty" className="text-muted-foreground px-3 py-6 text-center text-sm">
+        {/*
+         * The listbox and the empty message are two branches rather than one
+         * element with two children, and the reason is what a listbox owns: an
+         * element inside a `listbox` that is not an `option` or a `group` is
+         * announced as an option, so a `<p>` in the empty branch was a phantom row
+         * the index counted and no reader could choose. So the empty state sits
+         * beside the listbox rather than inside it, which is the arrangement
+         * `Combobox`, `MultiCombobox` and `CreatableCombobox` already share, and
+         * the two branches carry the same box so the panel does not change size or
+         * position when the last result is filtered out.
+         */}
+        {results.length === 0 ? (
+          <div
+            data-slot="command-palette-empty-state"
+            className="max-h-80 overflow-y-auto p-1"
+          >
+            <p
+              data-slot="command-palette-empty"
+              role="status"
+              className="text-muted-foreground px-3 py-6 text-center text-sm"
+            >
               {empty.message(trimmed)}
               {empty.hint === undefined ? null : (
                 <span className="mt-1 block text-xs">{empty.hint}</span>
               )}
             </p>
-          ) : (
-            results.map((group) => (
-              <div key={group.id} data-slot="command-palette-group" className="mb-1 last:mb-0">
+          </div>
+        ) : (
+          <div
+            data-slot="command-palette-list"
+            id={`${titleId}-list`}
+            ref={listRef}
+            role="listbox"
+            aria-label={label}
+            className="max-h-80 overflow-y-auto p-1"
+          >
+            {results.map((group) => (
+              /*
+               * `role="group"` and not a bare `<div>`. A listbox owns `option` and
+               * `group` and nothing else, so a wrapper with no role puts its options
+               * straight into the listbox and the heading beside them becomes an
+               * unowned loose text node: a reader hears the heading as another row
+               * and has no way to ask what the rows under it belong to. The name is
+               * `aria-labelledby` on the heading that is already drawn rather than a
+               * second copy of the words in an attribute that could drift from it.
+               */
+              <div
+                key={group.id}
+                role="group"
+                aria-labelledby={`${titleId}-group-${group.id}`}
+                data-slot="command-palette-group"
+                className="mb-1 last:mb-0"
+              >
                 {/*
                  * Sticky, so the group a reader is choosing from stays named while
                  * they move through a long list. A heading that scrolls away is a
@@ -324,6 +410,7 @@ function CommandPalette({
                  * place.
                  */}
                 <div
+                  id={`${titleId}-group-${group.id}`}
                   data-slot="command-palette-group-label"
                   className="text-muted-foreground bg-popover text-xs font-medium tracking-wide uppercase sticky top-0 px-3 py-1.5"
                 >
@@ -368,9 +455,9 @@ function CommandPalette({
                   )
                 })}
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   )

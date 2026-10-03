@@ -1,5 +1,6 @@
 import { LiveRegion } from '../../components/ui/live-region'
 import { Meter } from '../../components/ui/meter'
+import { type HeadingLevel } from '../../components/ui/section'
 import { Timeline, type TimelineEntry } from '../../components/ui/timeline'
 import { cn } from '../../lib/utils'
 
@@ -71,6 +72,18 @@ export interface RunConsole01Props {
    * caller knows whether the transport has finished.
    */
   streaming?: boolean
+  /**
+   * Heading level for the run's heading. @defaultValue 'h2'
+   *
+   * A prop for the reason every Block's is: the surrounding document decides where
+   * this lands in the outline, not the Block. The heading was a hard-coded `<h2>`,
+   * which is right at the top of a page and wrong anywhere else, because a run
+   * console is a panel a product opens beside something. Three Blocks in this
+   * package held that level and `SiteFooter` and `DataTable01` already take this
+   * prop, so this is the fourth name being spelled the same way rather than a new
+   * convention.
+   */
+  headingLevel?: HeadingLevel
   /** Layout only. */
   className?: string
 }
@@ -116,9 +129,11 @@ export function RunConsole01({
   budget,
   detail,
   streaming = false,
+  headingLevel = 'h2',
   className,
 }: RunConsole01Props) {
   const waiting = steps.length === 0
+  const Heading = headingLevel
 
   // Built once and placed in one of two places, so the streaming and the finished
   // rendering cannot drift apart. Two copies of this markup would be two answers
@@ -138,12 +153,16 @@ export function RunConsole01({
     >
       <header data-slot="run-console-01-header" className="flex flex-col gap-1">
         {/*
-         * The heading is a real heading at level two rather than a styled span.
-         * A console is a region of a page, and a reader navigating by heading has
-         * to be able to find it and skip it, and neither works with a div that
-         * looks like a heading.
+         * The heading is a real heading rather than a styled span, at the level the
+         * caller says. A console is a region of a page, and a reader navigating by
+         * heading has to be able to find it and skip it, and neither works with a div
+         * that looks like a heading. The level was fixed at two, which answers the
+         * first half and not the second: a console opened as a panel inside a page
+         * that already has an `h2` becomes a sibling of it rather than a child, so
+         * "skip to the next heading at or below level two" walks straight past the
+         * run the reader came to read.
          */}
-        <h2 className="text-foreground text-base font-semibold tracking-tight">{title}</h2>
+        <Heading className="text-foreground text-base font-semibold tracking-tight">{title}</Heading>
         {detail === undefined ? null : (
           <p className="text-muted-foreground text-sm">{detail}</p>
         )}

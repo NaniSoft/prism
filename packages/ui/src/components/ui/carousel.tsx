@@ -124,6 +124,13 @@ export interface CarouselProps extends Omit<ComponentProps<'div'>, 'children'> {
  * handler, which is the version a consumer cannot assemble for themselves because
  * every one of those keys is a chance to get one wrong.
  *
+ * **A slide that is holding the caret keeps the keys.** The handler is on the
+ * region, so it sees everything that bubbles out of a slide, and a slide is the
+ * caller's slot: it can hold a field, a `select` or an editable region, and in all
+ * three those four keys belong to the value. So a key is answered only when it did
+ * not land in one of them, which is the discipline `ResizableHandle` applies to the
+ * same keys on the other axis.
+ *
  * **The slide transition is a state change and not an entrance.** The track moves
  * with `duration-base ease-out`, which is the reader's own press being reported
  * back, and there is no fade on mount and no motion a reader did not ask for.
@@ -165,10 +172,20 @@ function Carousel({
 
   // The reader's own arrow keys, which are the reason this is a Component rather
   // than a stack of divs with two buttons beside them.
+  //
+  // The handler is on the region, so it sees every key that bubbles up out of a
+  // slide, and a slide is a caller's slot: it can hold a text field, a number input,
+  // a code block that scrolls sideways or a `contenteditable`. Left and right are the
+  // caret keys in all four, and this Component was calling `preventDefault()` on
+  // them unconditionally, so a reader typing a value into a caption field moved the
+  // carousel instead. So the keys are answered only when nothing inside the carousel
+  // is using them, which is the discipline `ResizableHandle` follows for the same
+  // keys on the other axis: only what a Component owns is consumed.
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End']
     if (!keys.includes(event.key)) return
     if (total <= 1) return
+    if (usesItsOwnArrows(event.target)) return
     event.preventDefault()
     if (event.key === 'Home') set(0)
     else if (event.key === 'End') set(total - 1)
@@ -295,6 +312,14 @@ function Carousel({
             onClick={() => set(at - 1)}
             className={cn(
               'border-input bg-background text-foreground inline-flex size-9 items-center justify-center rounded-md border outline-none',
+              // The coarse-pointer floor, as a step, because these are bordered icon
+              // buttons at the two ends of a row with a text between them and nothing
+              // adjacent to either. Growing them pushes the position readout inward by
+              // ten pixels, which is the whole of the cost and is the right trade: a
+              // band on a bordered box would reach four pixels past the box on each side
+              // into an eight pixel gap and reach nothing at all on the ends of the row.
+              // See DESIGN.md, The coarse-pointer floor.
+              'pointer-coarse:size-11',
               'transition-colors duration-fast ease-out',
               'hover:bg-accent hover:text-accent-foreground',
               'focus-visible:ring-ring focus-visible:ring-[3px]',
@@ -328,6 +353,14 @@ function Carousel({
             onClick={() => set(at + 1)}
             className={cn(
               'border-input bg-background text-foreground inline-flex size-9 items-center justify-center rounded-md border outline-none',
+              // The coarse-pointer floor, as a step, because these are bordered icon
+              // buttons at the two ends of a row with a text between them and nothing
+              // adjacent to either. Growing them pushes the position readout inward by
+              // ten pixels, which is the whole of the cost and is the right trade: a
+              // band on a bordered box would reach four pixels past the box on each side
+              // into an eight pixel gap and reach nothing at all on the ends of the row.
+              // See DESIGN.md, The coarse-pointer floor.
+              'pointer-coarse:size-11',
               'transition-colors duration-fast ease-out',
               'hover:bg-accent hover:text-accent-foreground',
               'focus-visible:ring-ring focus-visible:ring-[3px]',
@@ -357,6 +390,30 @@ function clamp(value: number, total: number): number {
   if (!Number.isFinite(value)) return 0
   if (total === 0) return 0
   return Math.min(Math.max(Math.trunc(value), 0), total - 1)
+}
+
+/**
+ * Whether the element a key landed in spends that key itself.
+ *
+ * Four answers and no more, because those four are the ways a slide can hold
+ * something that reads the arrow keys: a text field, a number field, a `select` and
+ * an editable region. Left and right move the caret in the first three and move the
+ * insertion point in the fourth, and `Home` and `End` move to the start and the end
+ * of the value. A scroll container answers them too, but a slide is a caller's slot
+ * and this Component cannot see whether the caller made one, so a caller who puts a
+ * horizontally scrolling element in a slide and wants the carousel to keep answering
+ * those keys stops the event at it. That is the cheaper of the two mistakes: a key
+ * that does nothing inside a text field is invisible, and a key that moves the
+ * carousel while a reader is typing is not.
+ */
+function usesItsOwnArrows(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false
+  if (target.isContentEditable) return true
+  return (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement
+  )
 }
 
 export { Carousel }

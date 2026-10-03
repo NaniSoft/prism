@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronDown, ListFilter, MoreHorizontal, Search } from 'lucide-react'
-import { Fragment, useState, type ReactNode } from 'react'
+import { Fragment, useId, useState, type ReactNode } from 'react'
 
 import { Button } from '../../components/ui/button'
 import { Checkbox } from '../../components/ui/checkbox'
@@ -17,6 +17,7 @@ import {
 import { Input } from '../../components/ui/input'
 import { Pagination, PaginationContent, PaginationItem } from '../../components/ui/pagination'
 import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover'
+import { type HeadingLevel } from '../../components/ui/section'
 import {
   Table,
   TableBody,
@@ -95,6 +96,16 @@ export type DataTable01Props = {
   getRowId: (row: DataTableRow) => string
   /** Names the table for assistive technology when no heading does. */
   caption?: ReactNode
+  /**
+   * Heading level for the table's own heading. @defaultValue 'h2'
+   *
+   * A prop for the reason every Block's is: the surrounding document decides where
+   * this lands in the outline, not the Block. The heading was a hard-coded `<h2>`,
+   * and this is a Block that a product puts inside a settings page or a drawer as
+   * readily as it puts at the top of a page, where a fixed level makes the table a
+   * sibling of the section it belongs to.
+   */
+  headingLevel?: HeadingLevel
   /** Adds the selection column and the selection summary. */
   selectable?: boolean
   selectedIds?: string[]
@@ -139,7 +150,18 @@ function RowMenu({ actions, label }: { actions: DataTableRowAction[]; label: str
   if (!actions.length) return null
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger aria-label={label} className="size-8 p-0">
+      {/*
+        `pointer-coarse:size-11` is the 44px floor and it is here rather than on
+        `DropdownMenuTrigger` because this is not that control at another size: a
+        table cell is 40px tall whatever this is, so a 44px trigger would grow the row
+        on a phone and a 32px one leaves a target under both the standard and WCAG
+        2.5.8. The cell grows with the trigger rather than the other way round, which
+        is what `className` is for.
+      */}
+      <DropdownMenuTrigger
+        aria-label={label}
+        className="size-8 p-0 pointer-coarse:size-11"
+      >
         <MoreHorizontal className="size-4" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -191,7 +213,11 @@ export function DataTable01({
   toolbarActions,
   emptyMessage,
   labels,
+  headingLevel = 'h2',
 }: DataTable01Props) {
+  const Heading = headingLevel
+  // The handle the table names itself from; see the note on the table.
+  const headingId = useId()
   const [internalSelected, setInternalSelected] = useState<string[]>(defaultSelectedIds ?? [])
   const [internalPage, setInternalPage] = useState(defaultPage)
   const [internalSearch, setInternalSearch] = useState('')
@@ -266,7 +292,11 @@ export function DataTable01({
     <div className="flex flex-col gap-4">
       {title || description ? (
         <div className="flex flex-col gap-1">
-          {title ? <h2 className="text-lg font-semibold tracking-tight">{title}</h2> : null}
+          {title ? (
+            <Heading id={headingId} className="text-lg font-semibold tracking-tight">
+              {title}
+            </Heading>
+          ) : null}
           {description ? (
             <p className="text-muted-foreground text-sm">{description}</p>
           ) : null}
@@ -361,7 +391,20 @@ export function DataTable01({
       </div>
 
       <div className="border-border overflow-hidden rounded-xl border">
-        <Table>
+        {/*
+         * The table takes its name from the heading above it, and from caption when
+         * the caller gave one. A <table> is named by a caption, an ria-label or an
+         * ria-labelledby, and none of the three is inferred from a heading that
+         * happens to be nearby, so a reader listing the tables on a page found this one
+         * anonymous while every other element around it was named. The reference is
+         * written only while the heading is drawn, because this Block's title is
+         * optional and a reference to an element that is not there is the defect
+         * `CommandPalette` had. And it is written only while the caller brought no
+         * `caption`, because a reference outranks a `<caption>` in the accessible
+         * name algorithm, so writing both would quietly make the heading the name
+         * and the caller own words the thing that is only read on request.
+         */}
+        <Table aria-labelledby={caption === undefined && title ? headingId : undefined}>
           {caption ? <TableCaption>{caption}</TableCaption> : null}
           <TableHeader>
             <TableRow>

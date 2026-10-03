@@ -95,7 +95,7 @@ export default function ItemDemo() {
   )
 
   return (
-    <div className="flex max-w-measure-wide flex-col gap-6">
+    <div className="flex max-w-page flex-col gap-6">
       <ul aria-label="Packages" className="border-border divide-border divide-y rounded-md border">
         {rows.map((entry) => (
           <li key={entry.id}>

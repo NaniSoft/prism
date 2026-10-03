@@ -317,6 +317,10 @@ function assertProps(props: {
  * difference rather than a nicety: a sentence a reader has to go and find is a
  * sentence most readers do not go and find, and a control that will not move with
  * an unfound reason behind it is exactly the control a reader reports as broken.
+ * The same attribute carries the event's own description, which was drawn and never
+ * referred to, so the two are assembled rather than chosen between: a read-only
+ * event has both, and a reader who meets one without the other has to work out
+ * which half they are missing.
  *
  * **A switch is the control, and not a checkbox and not a button.** `Switch` is
  * composed for all three reasons the Component's own JSDoc gives, and the third
@@ -442,6 +446,27 @@ export function SettingsNotifications01({
                 {channel.events.map((event) => {
                   const controlId = `${base}-${channel.id}-${event.id}`
                   const required = event.required === true
+                  const descriptionId =
+                    event.description === undefined ? undefined : `${controlId}-description`
+                  /*
+                   * Up to two referrers, one attribute, assembled rather than chosen
+                   * between. The event's own description says what the event is and
+                   * what it carries, and the note says why a control will not move; a
+                   * read-only event has both, and a reader who meets one without the
+                   * other has to guess which half they are missing. Assembled from
+                   * templates rather than from a `join`, for the reason
+                   * `MultiCombobox` gives for its own pair: a bare separator literal
+                   * is a string the copy gate reads as a space somebody typed.
+                   */
+                  const describedBy =
+                    descriptionId === undefined
+                      ? required
+                        ? noteId
+                        : undefined
+                      : required && noteId !== undefined
+                        ? `${descriptionId} ${noteId}`
+                        : descriptionId
+                  const describedByIds = describedBy === '' ? undefined : describedBy
 
                   return (
                     <li
@@ -455,8 +480,16 @@ export function SettingsNotifications01({
                         <FieldLabel htmlFor={controlId} className="text-base">
                           {event.label}
                         </FieldLabel>
+                        {/*
+                          The description is drawn under the control's visible label and
+                          was never announced: it carried no id and the switch pointed at
+                          nothing, so the sentence about what an event carries was on the
+                          page for a sighted reader alone. The id is derived from the
+                          control's, which is already built from `base` and the two
+                          caller's own keys.
+                        */}
                         {event.description === undefined ? null : (
-                          <FieldDescription>{event.description}</FieldDescription>
+                          <FieldDescription id={descriptionId}>{event.description}</FieldDescription>
                         )}
                       </Field>
 
@@ -491,7 +524,7 @@ export function SettingsNotifications01({
                               ? undefined
                               : updateLabel(channel, event, !event.on)
                           }
-                          aria-describedby={required ? noteId : undefined}
+                          aria-describedby={describedByIds}
                           onCheckedChange={
                             onToggle === undefined
                               ? undefined

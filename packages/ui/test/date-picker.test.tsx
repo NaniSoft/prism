@@ -164,6 +164,20 @@ describe('DatePicker', () => {
     expect(screen.getByRole('button', { name: 'Delivery date' }).textContent).toBe('Choose a date')
   })
 
+  it('takes the coarse-pointer 44px floor on the clear control as a band', () => {
+    renderPicker({ defaultValue: new Date(2026, 2, 17), clearLabel: 'Clear the date' })
+    const className = screen.getByRole('button', { name: 'Clear the date' }).className
+
+    expect(className).toContain('pointer-coarse:before:h-11')
+    expect(className).toContain('pointer-coarse:before:w-11')
+    // A band and not a step: the control sits over the field's own trigger at
+    // `right-9`, and `pr-16` on that trigger reserves 64px of clear space. A 44px step
+    // there would be 44 wide starting at that offset and would run sixteen pixels
+    // under the value the reservation exists to keep clear; the band adds ten.
+    expect(className).not.toMatch(/pointer-coarse:(?:size|h|w|min-w)-/)
+    expect(className).toContain('size-6')
+  })
+
   it('refuses to choose a date the caller disabled', async () => {
     const user = userEvent.setup()
     const onValueChange = vi.fn()

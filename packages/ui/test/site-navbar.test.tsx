@@ -229,6 +229,93 @@ describe('the bar of a product site', () => {
   })
 })
 
+/**
+ * The two claims about the bar's own surface that a consumer inherits and cannot
+ * see from the source.
+ *
+ * **The bar is opaque, and that is a decision rather than an omission.** It used to
+ * carry `bg-background/80` and `backdrop-blur`, so the page showed through it
+ * blurred, and a backdrop filter on a full-viewport-width sticky bar is re-sampled
+ * against the whole page on every frame of every scroll, on every page of every site
+ * that composes this bar. An opaque `bg-background` is the surface `SiteHeader` has
+ * always shipped, and it is also the only one of the candidates whose contrast is a
+ * token pair: `muted-foreground` on `background` in every pack and in both modes,
+ * with nothing composited between the ink and the ground.
+ *
+ * **These are class-string assertions, and the reason is the choice they are making.**
+ * A bar's background and a bar's filter are the two facts this package publishes
+ * about it, and both are class names. jsdom resolves neither, so a test that read a
+ * computed colour would be answering a different question. What a class-string
+ * assertion does settle is the claim a consumer actually has to be able to make,
+ * which is that the bar is not filtering its backdrop and is not translucent.
+ *
+ * **`sticky` was accepted and ignored, and this is the assertion that it is not any
+ * more.** The prop was destructured and never reached the class list, so
+ * `sticky={false}` shipped the sticky bar a site had asked not to have. A prop that
+ * cannot be declined is not an opt-out.
+ */
+describe('the bar of a product site: its own surface', () => {
+  const bar = (container: HTMLElement): string[] =>
+    container.querySelector('[data-slot="site-navbar"]')!.className.split(/\s+/).filter(Boolean)
+
+  const barWith = (props: { sticky?: boolean } = {}) =>
+    render(
+      <SiteNavbar
+        product={PRODUCT}
+        defaultPack="lavender"
+        defaultMode="light"
+        navLabel={COPY.nav}
+        mobileLabels={{ open: COPY.menuOpen, close: COPY.menuClose }}
+        {...props}
+      />,
+    )
+
+  it('is an opaque ground with a hairline, and filters nothing behind it', () => {
+    const { container } = barWith()
+    const classes = bar(container)
+    // The ground, at full strength. An `/80` here is a bar whose contrast is not a
+    // token pair, and this is the assertion that the pair `check-contrast.mjs` holds
+    // is the pair the bar actually paints.
+    expect(classes).toContain('bg-background')
+    expect(classes.filter((token) => token.startsWith('bg-background'))).toEqual(['bg-background'])
+    // The retired pair, named so a reintroduction is a failing line rather than a
+    // silent return to a per-scroll-frame blur on every page of every consumer.
+    expect(classes.some((token) => token.startsWith('backdrop-'))).toBe(false)
+    expect(classes.some((token) => token.startsWith('bg-background/'))).toBe(false)
+    // The separator is a line and not a second fill, which is what the JSDoc says it
+    // is and what the class said `border-border/80` did not.
+    expect(classes).toContain('border-border')
+    expect(classes).toContain('border-b')
+  })
+
+  it('asks for no compositing hint, because nothing on the bar animates', () => {
+    // A `will-change` applied at rest keeps a layer alive for a frame that is not
+    // coming, so its absence is part of the decision and is asserted rather than left
+    // as the default.
+    const { container } = barWith()
+    expect(bar(container)).not.toContain('will-change-transform')
+    expect(bar(container).some((token) => token.startsWith('will-change'))).toBe(false)
+  })
+
+  it('is sticky by default, and puts itself back in the flow when told not to be', () => {
+    const { container: stickyBar, unmount } = barWith()
+    expect(bar(stickyBar)).toEqual(expect.arrayContaining(['sticky', 'top-0', 'z-20']))
+    unmount()
+
+    // The opt-out. Before this release the prop was destructured and dropped, so this
+    // exact assertion is what a consumer who passed it would have needed and never
+    // had.
+    const { container: flowing } = barWith({ sticky: false })
+    const classes = bar(flowing)
+    expect(classes.some((token) => token === 'sticky' || token === 'top-0' || token === 'z-20')).toBe(
+      false,
+    )
+    // Everything else about the bar is unchanged by the opt-out, so a site that turns
+    // it off is not also changing its surface.
+    expect(classes).toEqual(expect.arrayContaining(['border-border', 'bg-background', 'w-full']))
+  })
+})
+
 describe('the search in the bar', () => {
   const INDEX = [
     { id: '/docs', title: 'The data platform', url: '/docs', content: 'every market minute' },

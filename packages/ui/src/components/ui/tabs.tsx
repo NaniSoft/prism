@@ -75,7 +75,18 @@ function Tabs({ className, ...props }: TabsProps) {
   )
 }
 
-/** The row or column of tab triggers. */
+/**
+ * The row or column of tab triggers.
+ *
+ * `pointer-coarse:h-13` is half of the coarse-pointer floor and it is the half that is
+ * easy to forget: the list is `h-9 p-1`, so its content box is 28 tall and a trigger
+ * grown to 44 would not fit inside it. `h-13` is 52, which is the trigger's 44 plus
+ * the list's own `p-1` on each side. The vertical orientation is exempt, because there
+ * the list is `h-fit flex-col` and each trigger sizes the row it is in. A band was
+ * rejected on condition 1 for the sharpest possible reason: the triggers sit a `gap-1`
+ * apart inside one list, so a band on one is a press aimed at its neighbour. See
+ * DESIGN.md, The coarse-pointer floor.
+ */
 function TabsList({ className, ...props }: TabsListProps) {
   return (
     <TabsPrimitive.List
@@ -83,6 +94,7 @@ function TabsList({ className, ...props }: TabsListProps) {
       className={cn(
         'bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center gap-1 rounded-lg p-1',
         'data-[orientation=vertical]:h-fit data-[orientation=vertical]:flex-col',
+        'pointer-coarse:h-13',
         className,
       )}
       {...props}
@@ -90,7 +102,15 @@ function TabsList({ className, ...props }: TabsListProps) {
   )
 }
 
-/** One trigger in the tab list. */
+/**
+ * One trigger in the tab list.
+ *
+ * `pointer-coarse:h-11` is the other half of the floor. The trigger states its height
+ * through `py-1` and its content, so this states it outright rather than growing the
+ * padding to an implied 44: twelve pixels of padding either side of a twenty pixel
+ * line box is the floor reached by arithmetic, and an arithmetic floor is a number a
+ * later edit can change without noticing. See The coarse-pointer floor.
+ */
 function TabsTrigger({ className, ...props }: TabsTriggerProps) {
   return (
     <TabsPrimitive.Tab
@@ -102,6 +122,7 @@ function TabsTrigger({ className, ...props }: TabsTriggerProps) {
         'data-[active]:bg-background data-[active]:shadow-xs',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         "[&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
+        'pointer-coarse:h-11',
         className,
       )}
       {...props}

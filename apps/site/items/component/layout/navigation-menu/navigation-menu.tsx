@@ -29,7 +29,7 @@ export default function NavigationMenuDemo() {
   const [current, setCurrent] = useState('/products/alpha')
 
   return (
-    <div className="flex max-w-4xl flex-col gap-4">
+    <div className="flex max-w-224 flex-col gap-4">
       <NavigationMenu label="Primary">
         <NavigationMenuList>
           <NavigationMenuItem value="products">

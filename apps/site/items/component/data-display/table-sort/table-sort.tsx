@@ -63,7 +63,7 @@ export default function TableSortDemo() {
   })
 
   return (
-    <div className="max-w-measure-wide">
+    <div className="max-w-page">
       <Table>
         <TableCaption>Spend by month, in the order the reader chose</TableCaption>
         <TableHeader>

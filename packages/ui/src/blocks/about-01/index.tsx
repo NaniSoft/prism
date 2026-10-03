@@ -7,6 +7,8 @@ export { About01, default } from './about'
 export type {
   About01Props,
   AboutAction,
+  AboutLinkAction,
+  AboutSlotAction,
   AboutFigure,
   AboutPrinciple,
 } from './about'

@@ -87,6 +87,9 @@ every step twice.
   notches is a number; the notches are what make it a measurement.
 - Leave `duration` off any step whose length is meaningless. A run's opening event
   has no duration, and a bar beside it reads as "this was instant".
+- Pass `headingLevel` when the console is a panel inside a page rather than a section of
+  one. It defaults to `h2`, and a fixed level makes the run a sibling of the heading the
+  surrounding section already has.
 - Omit `detail` rather than inventing one. The Block will not make up where a run
   came from.
 

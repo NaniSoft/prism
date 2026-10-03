@@ -84,9 +84,14 @@ two carousels is a page where a reader cannot tell which set of slides they are 
 and the role description is what tells a reader it is a carousel rather than some
 other group of slides.
 
-Every slide stays in the document and is labelled, so the carousel is not the only
-route to its content. The slides that are not current are `aria-hidden`, so they are
-not announced but are still there for anything that reads the markup.
+The arrow keys belong to the carousel only when nothing inside a slide is using them.
+A field, a `select` or an editable region in a slide keeps Left, Right, Home and End
+for the value, so a text control in a slide is not competing with the carousel for
+them.
+
+Every slide stays in the document and is labelled, so the carousel is not the only route
+to its content. The slides that are not current are `aria-hidden`, so they are not
+announced but are still there for anything that reads the markup.
 
 The position is in a polite live region, because a carousel that moves silently
 under a reader is one they cannot follow. Polite rather than assertive, because the

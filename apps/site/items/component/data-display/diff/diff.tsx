@@ -42,7 +42,7 @@ export default function DiffDemo() {
   const [large, setLarge] = useState(false)
 
   return (
-    <div className="flex max-w-measure-wide flex-col gap-6">
+    <div className="flex max-w-page flex-col gap-6">
       <Diff
         lines={SMALL}
         label="Changes to syncWorkspace"

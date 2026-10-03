@@ -130,6 +130,9 @@ client.
   rail as a pipeline and its contents as a reference has both in one render.
 - Pass `toc` whole or not at all. A partial outline is a contents list that lies
   about the page.
+- Expect three columns from `lg`: a 15rem rail, the document, and a 13rem
+  contents rail. The third track exists only when you pass `toc`, so a route with
+  no outline gets the width back rather than a hole in the frame.
 - Omit `title` when your document owns its own heading. The Page renders no empty
   `h1` to fill the gap, so a document with no title keeps exactly the outline its
   own content declares.

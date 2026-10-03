@@ -25,6 +25,18 @@
  * A third: a shipped face with no licence beside it is a redistribution problem
  * rather than a dependency, and the obligation has to travel with the file.
  *
+ * A fourth, added because this gate had no model for it and reported a correct
+ * mechanism as a defect. A metric-adjusted fallback is an `@font-face` reading
+ * `local(...)` with `size-adjust`, `ascent-override`, `descent-override` and
+ * `line-gap-override` on it, and it names a family of its own rather than shipping
+ * a file. This gate inferred the shipped families from the file names in
+ * `dist/fonts`, so it called that family a mid-stack name resolving nowhere, and
+ * its own source check called the rule a face with no `src`. Both halves were
+ * wrong. The gate now reads the families the emitted sheet declares, exempts a
+ * `local()` face from the file check while requiring all four descriptors of it,
+ * and fails a fallback face no token names, because a hand-written set of metric
+ * numbers that no stack reaches is the shape that rots.
+ *
  * Run: pnpm --filter @nanisoft/prism-ui check:typeface
  */
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
@@ -90,6 +102,16 @@ const SYSTEM_FACES = new Set([
 /** A family this package may name without shipping it: a generic or a system face. */
 const provided = (family) => GENERIC.has(family) || SYSTEM_FACES.has(family)
 
+/**
+ * A family the emitted stylesheet actually publishes: a file this package copies,
+ * or an `@font-face` this package declares. The second half is what a
+ * `local()`-backed fallback needs, because it ships no file and would otherwise be
+ * reported as a mid-stack name that resolves nowhere, which is exactly the
+ * behaviour it was added to replace.
+ */
+const backs = (family) =>
+  shipped.has(family.toLowerCase()) || declared.has(family.toLowerCase()) || provided(family)
+
 /** The token families the gate reads, and the property each is declared by. */
 const TOKENS = [
   { property: '--font-sans', token: 'the interface face' },
@@ -117,6 +139,65 @@ function familiesOf(property) {
     .filter(Boolean)
 }
 
+/**
+ * Every `@font-face` the emitted sheet declares, read out of the artefact.
+ *
+ * Two shapes, and the second one is why this reads the rules rather than the
+ * directory listing. A face backed by a file names one on disk, and the family is
+ * then inferred from the file name, which is a proxy: `inter-latin-400.woff2`
+ * implies `Inter` by convention and nothing enforces the convention. A face
+ * backed by `local()` names no file at all, and that is the shape a
+ * metric-adjusted fallback takes:
+ *
+ *     @font-face {
+ *       font-family: 'Inter Fallback';
+ *       src: local('Arial');
+ *       size-adjust: 107.89%;
+ *       ascent-override: 89.79%;
+ *       descent-override: 22.36%;
+ *       line-gap-override: 0%;
+ *     }
+ *
+ * The four descriptors are the whole of the technique and they need no build tool,
+ * so a package that ships a face can and should ship the fallback that makes the
+ * swap window occupy the real face's line box. This gate read the stylesheet and
+ * could not see it: the rule declared no `src` it could resolve, so it was
+ * reported as a face with no source, and the family it declared was then called a
+ * mid-stack name that resolves nowhere. Both halves were wrong about a mechanism
+ * the gate had no model for, and a rule that reports a correct mechanism as a
+ * defect gets switched off within a week.
+ */
+function readFaces() {
+  return [...sheet.matchAll(/@font-face\s*\{([^{}]*)\}/g)].map((match) => {
+    const body = match[1]
+    const local = /src:\s*local\((['"]?)([^'")]+)\1\)/.exec(body)
+    return {
+      body,
+      family: (/font-family:\s*['"]?([^;'"}]+)/.exec(body)?.[1] ?? '').trim(),
+      style: (/font-style:\s*([\w-]+)/.exec(body)?.[1] ?? 'normal').trim(),
+      weight: (/font-weight:\s*([\d\s]+)/.exec(body)?.[1] ?? '').trim(),
+      file: /url\(['"]?([^'")]+)/.exec(body)?.[1] ?? null,
+      local: local ? local[2].trim() : null,
+    }
+  })
+}
+
+const FACES = readFaces()
+
+/** The family every `@font-face` in the artefact declares, lowercased. */
+const declared = new Set(FACES.map((face) => face.family.toLowerCase()).filter(Boolean))
+
+/**
+ * The four descriptors a metric-adjusted fallback is made of, and the check that
+ * a face declaring them is actually adjusting something.
+ */
+const METRIC_DESCRIPTORS = [
+  'size-adjust',
+  'ascent-override',
+  'descent-override',
+  'line-gap-override',
+]
+
 // 1. Every named family in a token stack is one this package ships.
 const shipped = new Set()
 for (const file of existsSync(FONT_DIR) ? readdirSync(FONT_DIR) : []) {
@@ -128,6 +209,12 @@ for (const file of existsSync(FONT_DIR) ? readdirSync(FONT_DIR) : []) {
 console.log('typeface: the faces this package ships')
 if (shipped.size === 0) report('  none', true, 'a token that names no face is then a finding below')
 for (const family of [...shipped].sort()) report(`  ${family}`, true)
+// Declared by the sheet rather than inferred from a file name, so a family this
+// package publishes as a rule is backed whether or not a file carries its name.
+for (const family of [...declared].sort()) {
+  if (shipped.has(family)) continue
+  report(`  ${family}`, true, 'declared by the sheet, not backed by a file: the metric-adjusted fallback')
+}
 
 // 2. The first family of each token is backed by a @font-face, read from the
 //    emitted artefact. This is the check that would have caught the consumer
@@ -146,7 +233,7 @@ for (const { property, token } of TOKENS) {
   // refuses is a first family that is neither shipped here nor provided by the
   // reader's machine, because then the stack's head resolves to nothing and the
   // page silently renders in the fallback, which is the defect.
-  const backed = shipped.has(first.toLowerCase()) || provided(first)
+  const backed = backs(first)
   report(`  ${property} (${token})`, true, `${first} + ${rest.length} fallback(s)`)
   if (!backed) {
     failures.push(
@@ -156,11 +243,34 @@ for (const { property, token } of TOKENS) {
     )
   }
   for (const family of rest) {
-    if (shipped.has(family.toLowerCase()) || provided(family)) continue
+    if (backs(family)) continue
     failures.push(
       `${property} names "${family}" mid-stack, which neither this package nor the reader's ` +
         `machine provides; a family that resolves nowhere is a name that costs a round trip and ` +
         `picks nothing.`,
+    )
+  }
+}
+
+/**
+ * A fallback face earns its place in a stack, and this is where it is checked.
+ *
+ * A `local()`-backed rule that no token names is dead CSS a reader never reaches,
+ * and it is the shape most likely to rot: the four descriptors are hand-written
+ * numbers, so a face left behind by a retune is indistinguishable from one still in
+ * use. Naming it is also the only thing that keeps it adjacent to the face it
+ * measures, which is the relationship the technique exists for.
+ */
+const namedSomewhere = new Set(
+  TOKENS.flatMap(({ property }) => familiesOf(property) ?? []).map((family) => family.toLowerCase()),
+)
+for (const face of FACES) {
+  if (face.local === null) continue
+  if (!namedSomewhere.has(face.family.toLowerCase())) {
+    failures.push(
+      `the metric-adjusted fallback "${face.family}" is declared as an @font-face but no font ` +
+        `token names it, so nothing ever reaches it. Name it in --font-sans, immediately after ` +
+        `the face it measures, or delete the rule.`,
     )
   }
 }
@@ -170,30 +280,47 @@ for (const { property, token } of TOKENS) {
 //    consumer's origin, which is how the old line's face failed silently in all
 //    four repositories.
 console.log('\ntypeface: every @font-face source resolves from the package')
-const faceRule = /@font-face\s*\{([^{}]*)\}/g
 let faces = 0
-for (const match of sheet.matchAll(faceRule)) {
+for (const face of FACES) {
   faces += 1
-  const body = match[1]
-  const src = /url\(['"]?([^'")]+)/.exec(body)?.[1]
-  const weight = /font-weight:\s*([\d]+)/.exec(body)?.[1]
-  if (!src) {
+  if (face.local !== null) {
+    const missing = METRIC_DESCRIPTORS.filter(
+      (descriptor) => !new RegExp(`${descriptor}:`).test(face.body),
+    )
+    if (missing.length > 0) {
+      failures.push(
+        `the @font-face for "${face.family}" reads local('${face.local}') and adjusts nothing: ` +
+          `it is missing ${missing.join(', ')}. A local face with no metric descriptors is the ` +
+          `platform's own face under a name, which is the fallback the adjustment exists to fix.`,
+      )
+      continue
+    }
+    report(`  ${face.family}`, true, `local('${face.local}') with the four metric descriptors`)
+    continue
+  }
+  if (!face.file) {
     failures.push('an @font-face rule declares no src')
     continue
   }
-  if (src.startsWith('/') || /^[a-z]+:\/\//i.test(src)) {
+  if (face.file.startsWith('/') || /^[a-z]+:\/\//i.test(face.file)) {
     failures.push(
-      `@font-face src "${src}" is an absolute or web-root path; it resolves against the ` +
+      `@font-face src "${face.file}" is an absolute or web-root path; it resolves against the ` +
         `consumer's origin, not the package, and fails silently in every repository.`,
     )
     continue
   }
-  const onDisk = path.join(path.dirname(EMITTED), src)
+  const onDisk = path.join(path.dirname(EMITTED), face.file)
   if (!existsSync(onDisk)) {
-    failures.push(`@font-face src "${src}" does not exist next to the emitted stylesheet`)
+    failures.push(`@font-face src "${face.file}" does not exist next to the emitted stylesheet`)
     continue
   }
-  report(`  weight ${weight ?? '?'}`, true, `${path.basename(src)}, ${(statSync(onDisk).size / 1024).toFixed(1)} KB`)
+  const at = face.weight ? `weight ${face.weight}` : `weight ?`
+  const style = face.style === 'normal' ? '' : ` ${face.style}`
+  report(
+    `  ${at}${style}`,
+    true,
+    `${path.basename(face.file)}, ${(statSync(onDisk).size / 1024).toFixed(1)} KB`,
+  )
 }
 if (faces === 0) {
   failures.push(
@@ -229,6 +356,6 @@ if (failures.length > 0) {
   process.exit(1)
 }
 console.log(
-  `typeface: every token family is either a shipped face or a system generic, ` +
+  `typeface: every token family is a face this package publishes or a system generic, ` +
     `${faces} @font-face rule(s) resolve from the package, and the licence ships beside the binary`,
 )

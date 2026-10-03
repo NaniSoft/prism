@@ -41,6 +41,9 @@ the reader's language and the caller owns it.
 ```tsx
 import { useState } from 'react'
 import { Waitlist01 } from '@nanisoft/prism-ui/blocks/waitlist-01'
+import { Button } from '@nanisoft/prism-ui/components/button'
+
+const CODE = 'NEXUS-4KD2-1190'
 
 export function LaunchWaitlist() {
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
@@ -65,10 +68,26 @@ export function LaunchWaitlist() {
             : ` ${localeWord('of')} ${new Intl.NumberFormat(undefined).format(total)}`),
       }}
       referral={{
-        value: 'NEXUS-4KD2-1190',
+        value: CODE,
         label: 'Your referral code',
-        copyLabel: 'Copy code',
-        copied,
+        // Yours, whole. Prism draws the field and the label; it will not call the
+        // clipboard for you and then report a success it cannot verify, so the
+        // handler, the accessible name, the confirmation and the failure path are
+        // all yours.
+        copyControl: (
+          <Button
+            type="button"
+            variant={copied ? 'secondary' : 'outline'}
+            onClick={() =>
+              navigator.clipboard
+                .writeText(CODE)
+                .then(() => setCopied(true))
+                .catch(() => setMessage('The clipboard was refused, so select the code and copy it.'))
+            }
+          >
+            {copied ? 'Copied' : 'Copy code'}
+          </Button>
+        ),
       }}
       status={{
         state,
@@ -106,6 +125,13 @@ invent.
 
 Use `referral` once the caller has somewhere for a referred reader to go. A code
 with no landing behind it is a promise about a page that does not exist.
+
+`referral.copyControl` is a `ReactNode` and it is the caller's, whole. It used to be
+`copyLabel` and `copied`, which named a control and described its state while the
+Block rendered a `Button` with no handler: a control labelled "Copy code" beside a
+field holding the code, copying nothing. Prism will not call `navigator.clipboard`
+on your behalf and then report a success it cannot verify, because the permission is
+yours to grant, the secure context is yours to know about, and a copy can fail.
 
 ### When not to use
 

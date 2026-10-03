@@ -86,6 +86,10 @@ layout does not fit there anyway.
   divider with nothing to divide.
 - Set `disabled` on the group while a layout is loading, rather than hiding the
   divider and shifting the panes underneath the reader.
+- Expect a drag to be measured against the group's size at the moment of the press. A
+  group that changes size while a pointer is down on the divider finishes that drag
+  against the travel it started with; end the drag and start it again rather than
+  resizing the group under the reader's hand.
 
 ### Content guidelines
 

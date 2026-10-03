@@ -73,7 +73,7 @@ export default function ImageListFieldDemo() {
         removeLabel={(name) => `Remove ${name}`}
         empty="No photographs yet. A listing shows up to three."
         capLabel="Three is the most a listing takes. Remove one to swap it."
-        className="max-w-sm"
+        className="max-w-96"
       />
 
       <ImageListField
@@ -86,7 +86,7 @@ export default function ImageListFieldDemo() {
         removeLabel={(name) => `Remove ${name}`}
         empty="No photographs yet."
         capLabel="Two is the most this variant takes."
-        className="max-w-sm"
+        className="max-w-96"
       />
 
       <p className="text-muted-foreground text-sm">

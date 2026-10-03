@@ -77,41 +77,54 @@ export type Waitlist01Position = {
 /**
  * The code a reader shares, and the control that copies it.
  *
- * **Every word here is the caller's, including the one that says it worked.** `value`
- * is the caller's code, `label` is the caller's name for it, and `copyLabel` is the
- * accessible name of the one control, which a screen reader reads before the reader
- * presses it. `copied` is the state Prism marks on the control, and Prism marks it
- * with ink and an attribute and writes no sentence about it: a control that says
- * "Copied" is a sentence every consumer of this Block inherits, and it is a
- * sentence about an event Prism cannot see, because a copy can fail.
+ * **The control is the caller's, and this is a change from a shape that looked
+ * complete.** The record used to carry `copyLabel` and `copied`: the accessible name
+ * of a copy control, and the state to draw on it. The Block then rendered
+ * `<Button type="button">{copyLabel}</Button>` with **no handler at all**, so every
+ * consumer shipping a referral code shipped a focusable control, announced as a
+ * button, that activated to nothing, next to a field holding the very thing it was
+ * labelled as copying. The JSDoc called it "the one control" and described a second
+ * weight and a `data-copied` attribute for a control that never copied anything.
  *
- * So the confirmation is the caller's, and the place to put it is `status`. A caller
- * whose transport is local sets `status` with their own "Copied to clipboard" for as
- * long as they want it on the page. The cost is stated rather than hidden: a caller
- * who passes nothing gets a button whose ink changes and no words, which tells a
- * sighted reader that something happened and tells a screen reader nothing at all.
- * That is the correct default for a frame that refuses to write the sentence, and
- * the fix is one prop rather than a fork.
+ * **A Block cannot fix this by copying the code itself, and the reason is worth
+ * stating because `'use client'` makes it look like it might.** This Block is a
+ * client Component, so it could call `navigator.clipboard.write`. It should not,
+ * for three reasons that are the caller's to settle and not the Block's: the
+ * clipboard write is subject to a permission the Block cannot ask for on the
+ * caller's behalf, it needs a secure context the Block cannot know it is in, and the
+ * confirmation of whether it worked is a sentence only the caller owns. A Block that
+ * copied silently would be a Block reporting a success it cannot verify.
  *
- * There is no remove control here either. A code is a fact about a waitlist entry
- * rather than a thing the reader chose a moment ago, and a control that undoes a
- * code is a control whose effect a caller would have to reverse.
+ * So `copyControl` is a `ReactNode`: the caller's own button or trigger, wired to
+ * their own clipboard call, their own success sentence and their own failure path.
+ * The Block places it beside the read-only field and adds nothing to it, because a
+ * class it adds to a node it does not render is a style the caller cannot see and
+ * cannot remove, and this package has no override path.
+ *
+ * `value` and `label` are still props, and both are still the caller's: the code is
+ * their code and the name for it is their name for it. Prism draws the field and the
+ * label and nothing else. A caller who wants Prism's own copy control composes
+ * `Button` with their own handler, which is one line, rather than receiving a frame
+ * that guesses at their transport.
+ *
+ * There is no remove control here, and there was never a reason for one. A code is a
+ * fact about a waitlist entry rather than a thing the reader chose a moment ago, and a
+ * control that undoes a code is a control whose effect a caller would have to
+ * reverse.
  */
 export type Waitlist01Referral = {
   /** The code itself. A string, so it can be selected, copied and read aloud. */
   value: string
-  /** The caller's name for what the code is, drawn as the control's label. */
+  /** The caller's name for what the code is, drawn as the field's label. */
   label: string
-  /** The accessible name of the control that copies it. */
-  copyLabel: string
   /**
-   * Whether the caller considers the code copied right now.
+   * The caller's own control that copies the code, placed beside the field.
    *
-   * Drawn as a state on the control: a second weight and `data-copied`, so the
-   * change is visible. Not announced by Prism, because the sentence is the
-   * caller's. See the note on `status`.
+   * The whole control: its accessible name, its own weight, its own confirmation and
+   * its own failure path. See the note above for why Prism does not draw this one,
+   * and why `'use client'` is not an answer.
    */
-  copied: boolean
+  copyControl: ReactNode
 }
 
 /** The props a Waitlist01 takes. Every string in this Block is one of them. */
@@ -182,8 +195,9 @@ export type Waitlist01Props = {
    * The outcome of the caller's request, drawn in a live region and announced.
    *
    * A prop and never an internal state, and it is also where a caller puts the
-   * confirmation for `referral.copied`, because that sentence is the caller's for
-   * the same reason the success sentence is.
+   * confirmation that a code was copied, because that sentence is the caller's for
+   * the same reason the success sentence is: a clipboard write can fail and Prism
+   * cannot see whether it did.
    */
   status?: Waitlist01Status
   /**
@@ -229,16 +243,13 @@ export type Waitlist01Props = {
  * rather than a fixed phrase, so the honest interface is a function and not two
  * strings.
  *
- * **The referral copy button is fully caller-driven, including its own copied
- * confirmation, and the reason is that a control saying "Copied" is a sentence Prism
- * would be shipping.** The value, the name for it, the accessible name of the
- * control and the state that says it has fired are all the caller's, and what Prism
- * does with `copied` is change the control's weight and mark `data-copied`, which is
- * visible and says nothing. The sentence that says it worked belongs in `status`,
- * because a copy can fail and Prism cannot see whether it did. The cost is stated
- * rather than hidden: a caller who passes nothing gets a button whose ink changes
- * and no words, so a screen reader hears nothing at all. That is the honest default
- * for a frame that will not write the sentence, and the fix is one prop.
+ * **The referral's control is the caller's own, whole, and that is a repair rather
+ * than a preference.** The record used to carry the accessible name of a copy
+ * control and a boolean to draw on it, and the Block rendered a `Button` with no
+ * handler: a control labelled "Copy code" that copied nothing, beside a field
+ * holding the code. Prism cannot call the clipboard on the caller's behalf and then
+ * report a success it cannot verify, so the control is a `ReactNode` now and the
+ * sentence that says it worked belongs in `status`. See `Waitlist01Referral`.
  *
  * **The position line is drawn above the field and the referral below it, and the
  * order is a decision about what the reader is looking at.** A reader who opens a
@@ -360,14 +371,13 @@ export function Waitlist01({
                   value={referral.value}
                   className="font-mono"
                 />
-                <Button
-                  data-slot="waitlist-01-copy"
-                  type="button"
-                  variant={referral.copied ? 'secondary' : 'outline'}
-                  data-copied={referral.copied || undefined}
-                >
-                  {referral.copyLabel}
-                </Button>
+                {/*
+                  The caller's own control, placed in the row beside the field and
+                  given no class. A class the Block added to a node it does not render
+                  is a style the caller cannot see and cannot remove, and this package
+                  has no override path. See `Waitlist01Referral`.
+                */}
+                {referral.copyControl}
               </div>
             </div>
           )}

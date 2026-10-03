@@ -56,6 +56,11 @@ control that matches the kind of value.
 - Set sensible `min` and `max` for the task. An unbounded slider invites values
   the rest of the product cannot use.
 - Use the disabled state with a nearby reason, as with any other control.
+- A coarse pointer gets a 44px target as a transparent band around the thumb, so
+  the dot stays 16px on every pointer and a press inside the band drags the thumb
+  from where it was rather than jumping the value to where you pressed. That is
+  the trade a six pixel rail cannot avoid, and the arrow keys still reach every
+  value.
 
 ### Content guidelines
 

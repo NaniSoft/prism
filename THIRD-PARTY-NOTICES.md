@@ -32,13 +32,28 @@ compiled output is part of the component package's precompiled `styles.css`.
 
 ## Fonts
 
-The documentation site self-hosts Inter under `apps/site/src/fonts/`, loaded
-through `next/font/local`. The shipped files are `InterVariable.woff2` and
-`InterVariable-Italic.woff2` from the official Inter release 4.1, and the site
-is the only consumer. Inter is licensed under the **SIL Open Font License,
-Version 1.1**; the license text is committed at
-`apps/site/src/fonts/LICENSE.txt`. Inter is copyright The Inter Project Authors
-(rsms.me/inter).
+`@nanisoft/prism-ui` redistributes Inter, because its stylesheet ships the
+`@font-face` rules that back the `--font-sans` token. The binaries are the four
+static Latin subsets in `dist/fonts`: `inter-latin-400.woff2`,
+`inter-latin-500.woff2`, `inter-latin-600.woff2` and
+`inter-latin-400-italic.woff2`, together with the licence text as
+`dist/fonts/Inter-OFL.txt`. Nothing else in these packages ships a font, and no
+downstream site loads its own copy: `next/font` and every other font loader are
+absent from the site as well as from the packages, because a site that loads its
+own face stops rendering the face the library ships.
+
+The four files are the Latin subset of the official Inter release 4.001 (see the
+`name` table's unique identifier, `4.001;RSMS;...`). The three upright files are
+the static instances that release publishes; the italic is the same release's
+variable italic, instanced at weight 400 and subset to the same 230 codepoints
+as its upright siblings, so the four files cover one character set.
+
+Inter is licensed under the **SIL Open Font License, Version 1.1**; the license
+text is committed at `packages/ui/public/fonts/Inter-OFL.txt` and ships beside
+the binaries. Inter is copyright The Inter Project Authors (rsms.me/inter). The
+Open Font License permits redistribution inside a package of this kind, and
+requires the license to travel with the files, which is why it is in `dist/fonts`
+rather than only in this notice.
 
 ## Build and development toolchain
 

@@ -88,19 +88,25 @@
   "publishConfig": {
     "access": "public"
   },
+  "peerDependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
   "scripts": {
     "sync": "node scripts/sync-registry.mjs",
     "validate": "node scripts/validate-registry.mjs",
     "build": "node scripts/build.mjs && pnpm sync && pnpm validate && node scripts/check-catalogue.mjs && shadcn build && node scripts/check-surface.mjs && node scripts/check-focus-indicators.mjs && node scripts/check-item-docs.mjs && node scripts/check-block-copy.mjs && node scripts/check-item-category.mjs && node scripts/check-block-imports.mjs",
-    "check": "node scripts/validate-registry.mjs && node scripts/check-catalogue.mjs && node scripts/check-surface.mjs && node scripts/check-focus-indicators.mjs && node scripts/check-pack-boundary.mjs && node scripts/check-vector-ink.mjs && node scripts/check-client-budget.mjs && node scripts/check-theme-resolution.mjs && node scripts/check-boot-budget.mjs && node scripts/check-item-docs.mjs && node scripts/check-block-copy.mjs && node scripts/check-item-category.mjs && node scripts/check-block-imports.mjs && node scripts/check-gate-kit.mjs && node scripts/check-typeface.mjs && node scripts/check-variant-ink.mjs",
+    "check": "node scripts/validate-registry.mjs && node scripts/check-catalogue.mjs && node scripts/check-surface.mjs && node scripts/check-focus-indicators.mjs && node scripts/check-breakpoint-variants.mjs && node scripts/check-container-namespace.mjs && node scripts/check-pack-boundary.mjs && node scripts/check-vector-ink.mjs && node scripts/check-client-budget.mjs && node scripts/check-theme-resolution.mjs && node scripts/check-boot-budget.mjs && node scripts/check-item-docs.mjs && node scripts/check-block-copy.mjs && node scripts/check-item-category.mjs && node scripts/check-block-imports.mjs && node scripts/check-gate-kit.mjs && node scripts/check-typeface.mjs && node scripts/check-variant-ink.mjs",
     "check:gate-kit": "node scripts/check-gate-kit.mjs",
     "check:vector-ink": "node scripts/check-vector-ink.mjs",
     "check:client-budget": "node scripts/check-client-budget.mjs",
+    "check:container-namespace": "node scripts/check-container-namespace.mjs",
     "check:pack-boundary": "node scripts/check-pack-boundary.mjs",
     "check:theme-resolution": "node scripts/check-theme-resolution.mjs",
     "check:boot-budget": "node scripts/check-boot-budget.mjs",
     "check:catalogue": "node scripts/check-catalogue.mjs",
     "check:focus-indicators": "node scripts/check-focus-indicators.mjs",
+    "check:breakpoint-variants": "node scripts/check-breakpoint-variants.mjs",
     "check:item-docs": "node scripts/check-item-docs.mjs",
     "check:block-copy": "node scripts/check-block-copy.mjs",
     "check:item-category": "node scripts/check-item-category.mjs",

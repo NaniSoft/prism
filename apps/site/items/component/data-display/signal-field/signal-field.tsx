@@ -20,7 +20,7 @@ export default function SignalFieldDemo() {
           <h3 className="mt-3 text-3xl font-semibold tracking-tight text-balance">
             A field as a ground, with type over it
           </h3>
-          <p className="text-muted-foreground mt-4 max-w-2xl text-lg text-pretty">
+          <p className="text-muted-foreground mt-4 max-w-168 text-lg text-pretty">
             The marks are a texture the heading reads against. Still by default, because
             movement behind a reading passage is the first thing a reader asks to have
             gone.
@@ -37,7 +37,7 @@ export default function SignalFieldDemo() {
           <h3 className="mt-3 text-3xl font-semibold tracking-tight text-balance">
             The same field, with drift on
           </h3>
-          <p className="text-muted-foreground mt-4 max-w-2xl text-lg text-pretty">
+          <p className="text-muted-foreground mt-4 max-w-168 text-lg text-pretty">
             Each mark drifts on its own long cycle and out of step with its neighbours, so
             the field reads as a system rather than as a loop.
           </p>

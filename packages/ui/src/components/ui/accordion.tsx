@@ -100,7 +100,7 @@ function AccordionTrigger({ className, children, ...props }: AccordionTriggerPro
         {...props}
       >
         {children}
-        <ChevronDownIcon className="text-muted-foreground pointer-events-none size-4 shrink-0 translate-y-0.5 transition-transform duration-base ease-out data-[panel-open]:rotate-180" />
+        <ChevronDownIcon className="text-muted-foreground pointer-events-none size-4 shrink-0 translate-y-0.5 transition-transform duration-slow ease-out data-[panel-open]:rotate-180" />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   )
@@ -113,7 +113,13 @@ function AccordionContent({ className, ...props }: AccordionContentProps) {
       data-slot="accordion-content"
       className={cn(
         'h-(--accordion-panel-height) overflow-hidden text-sm',
-        'transition-[height] duration-base ease-out data-[starting-style]:h-0 data-[ending-style]:h-0',
+        // `duration-slow` and not `duration-base`, because this is the disclosure the
+        // motion scale in `DESIGN.md` names as the case `slow` exists for: "transform
+        // or layout state such as a disclosure". The chevron above carries the same
+        // step rather than `base`, because a 160ms icon against a 280ms panel reads
+        // as two events and a reader is looking at both at once. The rest of this
+        // Component stays on `fast` and `base` because the rest of it is colour.
+        'transition-[height] duration-slow ease-out data-[starting-style]:h-0 data-[ending-style]:h-0',
         className,
       )}
       {...props}

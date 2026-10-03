@@ -377,6 +377,18 @@ describe('the Command palette', () => {
     expect(container).toBeTruthy()
   })
 
+  it('sets its field at 16px below md, so a phone does not zoom the page on focus', () => {
+    open()
+    const field = screen.getByRole('combobox')
+    // The pair every other field in this package carries, and the reason is
+    // iOS Safari: it zooms the viewport on a focused input whose computed font
+    // size is under 16 pixels and does not zoom back out, so a reader who opened
+    // the palette on a phone was left on a magnified page with no way off it.
+    // jsdom computes nothing, so what is asserted is the pair itself.
+    expect(field.className.split(' ')).toContain('text-base')
+    expect(field.className.split(' ')).toContain('md:text-sm')
+  })
+
   it('has no accessibility violations when it is on the page', async () => {
     open()
     await waitFor(() => {

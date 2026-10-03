@@ -231,6 +231,10 @@ function MultiCombobox({
   const generated = useId()
   const inputId = id ?? generated
   const listId = `${generated}-list`
+  // The popup the field controls. Separate from the listbox id because the listbox is
+  // not rendered at all when nothing matched, and `aria-controls` is a required
+  // attribute on an expanded combobox.
+  const popupId = `${generated}-popup`
   const chipsId = `${generated}-chips`
 
   const chosen = value === undefined ? ownValue : value
@@ -442,7 +446,10 @@ function MultiCombobox({
           role="combobox"
           autoComplete="off"
           aria-expanded={isOpen}
-          aria-controls={listId}
+          // The popup rather than the listbox inside it, for the reason the note on
+          // `popupId` states: `aria-controls` is required on an expanded combobox and
+          // the listbox is not on the page when nothing matched.
+          aria-controls={isOpen ? popupId : undefined}
           aria-haspopup="listbox"
           aria-autocomplete="list"
           aria-label={label}
@@ -498,6 +505,7 @@ function MultiCombobox({
 
       {isOpen ? (
         <div
+          id={popupId}
           data-slot="multi-combobox-popup"
           className="bg-popover text-popover-foreground absolute z-50 mt-1 w-full min-w-(--anchor-width) rounded-md border p-1 shadow-md"
         >

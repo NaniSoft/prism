@@ -116,7 +116,7 @@ function CollapsibleTrigger({ className, children, ...props }: CollapsibleTrigge
       {...props}
     >
       {children}
-      <ChevronRightIcon className="text-muted-foreground pointer-events-none size-4 shrink-0 transition-transform duration-base ease-out group-data-[panel-open]:rotate-90" />
+      <ChevronRightIcon className="text-muted-foreground pointer-events-none size-4 shrink-0 transition-transform duration-slow ease-out group-data-[panel-open]:rotate-90" />
     </CollapsiblePrimitive.Trigger>
   )
 }
@@ -127,6 +127,17 @@ function CollapsibleTrigger({ className, children, ...props }: CollapsibleTrigge
  * The height transition is state feedback rather than decoration: the panel is
  * opening or closing and the reader can watch it happen, which is the one motion
  * this system allows on a surface like this.
+ *
+ * **`duration-slow` and not `duration-base`, and the reason is the motion scale
+ * rather than a preference.** `DESIGN.md` assigns `slow` to "transform or layout
+ * state such as a disclosure", and this is the disclosure: a height animation is the
+ * case the sentence is written about. The chevron in the trigger carries the same
+ * step for the same reason, because a 160ms icon against a 280ms panel is two events
+ * where the reader is watching one, and a reader who opens this cannot tell whether
+ * the icon or the panel was late.
+ *
+ * The reduced-motion rule does not shorten it, it removes it, so a reader who asked
+ * for no motion gets the panel at its resting height with nothing to wait for.
  */
 function CollapsibleContent({ className, ...props }: CollapsibleContentProps) {
   return (
@@ -134,7 +145,7 @@ function CollapsibleContent({ className, ...props }: CollapsibleContentProps) {
       data-slot="collapsible-content"
       className={cn(
         'h-(--collapsible-panel-height) overflow-hidden text-sm',
-        'transition-[height] duration-base ease-out',
+        'transition-[height] duration-slow ease-out',
         'data-[starting-style]:h-0 data-[ending-style]:h-0',
         '[&[hidden]:not([hidden="until-found"])]:hidden',
         className,

@@ -19,7 +19,7 @@ const TEAM = [
 /** The three sizes, the two ring orders, and the two cap ends. */
 export default function AvatarGroupDemo() {
   return (
-    <div className="flex max-w-measure-wide flex-col gap-6">
+    <div className="flex max-w-page flex-col gap-6">
       <div className="flex flex-wrap items-center gap-6">
         <AvatarGroup avatars={TEAM} max={4} overflowLabel={(count) => `+${count}`} reverse />
         <AvatarGroup avatars={TEAM} max={4} overflowLabel={(count) => `+${count}`} />

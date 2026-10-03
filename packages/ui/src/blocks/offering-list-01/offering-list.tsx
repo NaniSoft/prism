@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, type ReactNode } from 'react'
+import { useId, useMemo, type ReactNode } from 'react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { CtaLink } from '../../components/ui/cta-link'
@@ -543,6 +543,8 @@ export function OfferingList01({
   headingLevel = 'h2',
   className,
 }: OfferingList01Props) {
+  // The handle a table below takes its name from; see the note on the table.
+  const headingId = useId()
   const searching = onValueChange !== undefined
 
   /*
@@ -662,6 +664,7 @@ export function OfferingList01({
     <Section data-slot="offering-list-01" className={className}>
       <SectionHeading
         as={headingLevel}
+        id={headingId}
         align="left"
         eyebrow={eyebrow}
         title={title}
@@ -718,7 +721,19 @@ export function OfferingList01({
           data-slot="offering-list-01-table"
           className={cn('border-border overflow-hidden rounded-xl border', className)}
         >
-          <Table>
+
+          {/*
+           * The table takes its name from the heading above it rather than from a
+           * second copy of the same words. A `<table>` is named by a caption, an
+           * `aria-label` or an `aria-labelledby`, and none of the three is inferred
+           * from a heading that happens to be nearby, so a reader listing the tables
+           * on a page found this one anonymous while every other element around it was
+           * named. A reference rather than a caption because a caption is drawn, and a
+           * visible line repeating the heading is noise; a reference because `title`
+           * is the caller own words and a Block may not compose a second set. See
+           * `Table`, which asks for exactly one of the three.
+           */}
+          <Table aria-labelledby={headingId}>
             <TableHeader>
               <TableRow>
                 {columns.map((column) => (

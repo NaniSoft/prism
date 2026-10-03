@@ -40,12 +40,21 @@ export interface ToggleGroupProps extends Omit<ComponentProps<'div'>, 'onChange'
   /**
    * The group's accessible name.
    *
-   * Required rather than defaulted. A group of toggles with no name is announced
-   * as an unnamed group, and a toolbar with two of them is a toolbar where a
-   * reader cannot tell which set of controls they are in. The name is the
-   * caller's word, for the reason every region's name in this package is.
+   * Required, and required by the type rather than only by this paragraph, which is
+   * the whole of the change: it was declared optional while the sentence beneath it
+   * said "Required rather than defaulted", so TypeScript enforced nothing and the
+   * group shipped unnamed. Both roles this Component draws are ones ARIA names a
+   * MUST for, and both announce as their bare role name when unnamed: a reader
+   * tabbing onto a toolbar with two of them is told "toolbar" and has no way to ask
+   * which set of controls they have reached, and a radiogroup with no name says
+   * nothing about which question its radios are answering. `TextFormatToolbar` draws
+   * the same role with a required `label`, which is the shape this now matches.
+   *
+   * The name is the caller's word, for the reason every region's name in this package
+   * is. `aria-labelledby` also arrives through `...props`, so a caller whose name is
+   * already drawn somewhere can point at it rather than repeat it.
    */
-  'aria-label'?: string
+  'aria-label': string
   /** The direction the arrow keys move in. @defaultValue 'horizontal' */
   orientation?: 'horizontal' | 'vertical'
   /** Layout only. */
@@ -252,6 +261,10 @@ function ToggleGroup({
       // reasons the multiple mode is a toolbar: a toolbar is the role that says
       // "a set of controls operated with the arrow keys", and it is the role that
       // carries an orientation.
+      //
+      // Both of those roles are announced by their bare name when nothing names
+      // them, which is why `aria-label` is a required prop rather than an optional
+      // one; see the prop.
       role={selectionMode === 'multiple' ? 'toolbar' : 'radiogroup'}
       aria-orientation={orientation}
       onKeyDown={(event) => {
@@ -343,6 +356,16 @@ function ToggleGroupItem({
         // inherited ink is the same control on the page ground and a different one
         // inside a Block.
         'data-[pressed]:bg-accent data-[pressed]:text-accent-foreground',
+        // The coarse-pointer floor, as a step with `min-w-11` on the other axis, and
+        // a band is the worst of the three answers here. These are the members of one
+        // segmented set, so they sit directly beside each other: a 44px band on one
+        // member is a press aimed at its neighbour, which is condition 1 of the three
+        // in `DESIGN.md` failing outright. `min-w-11` is the width half for the reason
+        // `Button` gives, since an icon-only member is `size-4` plus `px-2.5` and would
+        // otherwise stay under the floor across. The cost is that the group is 44 tall
+        // on touch rather than 32, and it is paid uniformly because the class is on the
+        // member and every member carries it. See DESIGN.md, The coarse-pointer floor.
+        'pointer-coarse:h-11 pointer-coarse:min-w-11',
         inert ? 'cursor-not-allowed opacity-50' : '',
         className,
       )}

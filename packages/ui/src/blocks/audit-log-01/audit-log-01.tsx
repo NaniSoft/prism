@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useId, type ReactNode } from 'react'
 
 import { CtaLink } from '../../components/ui/cta-link'
 import { Diff } from '../../components/ui/diff'
@@ -418,6 +418,8 @@ export function AuditLog01({
   headingLevel = 'h2',
   className,
 }: AuditLog01Props) {
+  // The handle a table below takes its name from; see the note on the table.
+  const headingId = useId()
   // A day's heading is one step below the section that introduces the log, so a log
   // embedded one level deeper carries its outline with it.
   const GroupHeading = childLevel(headingLevel)
@@ -560,6 +562,7 @@ export function AuditLog01({
       <Section data-slot="audit-log-01" className={className}>
         <SectionHeading
           as={headingLevel}
+          id={headingId}
           align="left"
           eyebrow={eyebrow}
           title={title}
@@ -591,6 +594,7 @@ export function AuditLog01({
       <Section data-slot="audit-log-01" className={className}>
         <SectionHeading
           as={headingLevel}
+          id={headingId}
           align="left"
           eyebrow={eyebrow}
           title={title}
@@ -598,7 +602,18 @@ export function AuditLog01({
           className="mb-8"
         />
 
-        <Table data-slot="audit-log-01-table">
+        {/*
+         * The table takes its name from the heading above it rather than from a
+         * second copy of the same words. A `<table>` is named by a caption, an
+         * `aria-label` or an `aria-labelledby`, and none of the three is inferred
+         * from a heading that happens to be nearby, so a reader listing the tables
+         * on a page found this one anonymous while every other element around it was
+         * named. A reference rather than a caption because a caption is drawn, and a
+         * visible line repeating the heading is noise; a reference because `title`
+         * is the caller own words and a Block may not compose a second set. See
+         * `Table`, which asks for exactly one of the three.
+         */}
+        <Table aria-labelledby={headingId} data-slot="audit-log-01-table">
           {head}
 
           {[...days].map(([key, inDay]) => (
@@ -633,6 +648,7 @@ export function AuditLog01({
     <Section data-slot="audit-log-01" className={className}>
       <SectionHeading
         as={headingLevel}
+        id={headingId}
         align="left"
         eyebrow={eyebrow}
         title={title}
@@ -640,7 +656,7 @@ export function AuditLog01({
         className="mb-8"
       />
 
-      <Table data-slot="audit-log-01-table">
+      <Table aria-labelledby={headingId} data-slot="audit-log-01-table">
         {head}
         <TableBody>{entries.map(row)}</TableBody>
       </Table>

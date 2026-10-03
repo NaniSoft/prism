@@ -78,16 +78,33 @@ const buttonVariants = cva(
  * Renders a native `<button>` and takes the standard React button props plus
  * `variant` and `size`. The coarse-pointer media query grows the target to 44px
  * on touch input without changing the desktop metrics.
+ *
+ * **`type` defaults to `"button"`.** A `<button>` with no `type` is a submit button
+ * as far as the HTML is concerned, so the default here was that every Prism `Button`
+ * a consumer placed in their own form submitted it: a Cancel, a Close, a second step
+ * of a wizard, anything that was not the one control that should. The failure is
+ * silent and it costs data, which is why the default is stated here rather than left
+ * to the HTML.
+ *
+ * The cost is one consumer who relied on the old default, and the migration is one
+ * token: pass `type="submit"`. That is a deliberate trade rather than an oversight.
+ * A submit button is a decision someone makes about a form, and this Component
+ * cannot see the form; making the destructive default the safe one and the
+ * deliberate act the explicit one is the only arrangement where the mistake is the
+ * one you have to write on purpose. Every form in this repository already states its
+ * submit button's `type`, which is why nothing here changed when the default did.
  */
 function Button({
   className,
   variant,
   size,
+  type = 'button',
   ...props
 }: ComponentProps<'button'> & VariantProps<typeof buttonVariants>) {
   return (
     <button
       data-slot="button"
+      type={type}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     />

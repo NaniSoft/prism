@@ -39,7 +39,7 @@ export default function ToggleDemo() {
   const pending = !same(marks, applied.marks) || wrap !== applied.wrap
 
   return (
-    <div className="flex max-w-measure-wide flex-col gap-8">
+    <div className="flex max-w-page flex-col gap-8">
       <section className="flex flex-col gap-3">
         <p className="text-muted-foreground text-sm">
           Formatting, which the reader composes and the document has not changed yet.

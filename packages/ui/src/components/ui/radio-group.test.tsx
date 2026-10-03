@@ -27,4 +27,15 @@ describe('RadioGroup', () => {
     await userEvent.keyboard('{ArrowDown}')
     expect(screen.getByRole('radio', { name: 'Pro' })).toBeChecked()
   })
+
+  it('keeps the coarse-pointer 44px target in the class contract', () => {
+    render(<Example />)
+    const className = screen.getByRole('radio', { name: 'Basic' }).className
+    // The floor, as a step rather than a band: a band's fourteen pixels reach the
+    // next item in a stacked group, where a step moves the group instead.
+    expect(className).toContain('pointer-coarse:')
+    expect(className).toContain('pointer-coarse:size-11')
+    // And the desktop item is untouched.
+    expect(className).toContain('size-4')
+  })
 })

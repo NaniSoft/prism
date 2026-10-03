@@ -316,12 +316,14 @@ function haystack(item: EmojiPickerItem): string {
  *
  * **Motion is state feedback on two tokens and there is no keyframe.** The cell
  * and the rail change ink with `duration-fast ease-out`, which is the same
- * feedback the rest of the package gives and is not guarded, because DESIGN.md's
- * position is that feedback motion is shortened rather than removed. The one
- * spatial change here, the press, is guarded with `motion-safe:` so a reader who
- * asked for less movement gets the colour change at full strength and no
- * movement at all. Nothing here waits for a script, a scroll position or a
- * timer, so the picker is complete and legible at first paint whatever the
+ * feedback the rest of the package gives, and the press scales by a token-free
+ * factor on `transition-[color,background-color,scale]`. Neither carries a
+ * `motion-safe:`: `packages/ui/src/styles.css` ends with one unlayered
+ * `prefers-reduced-motion` rule that stops every transition in the package, so a
+ * reader who has asked for less motion gets the colour change at full strength
+ * and the press with no movement at all, and the two decisions live in one place
+ * rather than one per cell. Nothing here waits for a script, a scroll position or
+ * a timer, so the picker is complete and legible at first paint whatever the
  * reader's settings are.
  *
  * **It is a client Component, and the directive is unconditional.** The picker
@@ -556,7 +558,7 @@ function EmojiPicker({
                       // changes are feedback and are not guarded, which is the
                       // position DESIGN.md takes on reduced motion.
                       'transition-[color,background-color,scale] duration-fast ease-out',
-                      'motion-safe:active:scale-95',
+                      'active:scale-95',
                       'focus-visible:ring-ring focus-visible:ring-[3px]',
                       drawn.cell,
                       'pointer-coarse:min-h-11',

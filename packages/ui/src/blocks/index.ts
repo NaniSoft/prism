@@ -6,11 +6,14 @@
  * suffix is the block-family variant ordinal.
  */
 export { Hero01 } from './hero-01'
+export type { HeroAction, HeroLinkAction, HeroSlotAction, Hero01Props } from './hero-01'
 export { FeatureGrid01 } from './feature-grid-01'
 export { Stats01 } from './stats-01'
 export { Pricing01 } from './pricing-01'
+export type { Plan, Pricing01Props, PricingAction, PricingLinkAction, PricingSlotAction } from './pricing-01'
 export { Cta01 } from './cta-01'
 export { PageHeader01 } from './page-header-01'
+export type { PageHeader01Props, PageHeaderAction, PageHeaderLinkAction, PageHeaderSlotAction, PageHeaderCrumb } from './page-header-01'
 export { DataTable01 } from './data-table-01'
 export { SettingsPanel01 } from './settings-panel-01'
 export { AuthForm01 } from './auth-form-01'
@@ -33,7 +36,7 @@ export { SiteFooter } from './site-footer'
  * build the props. The catalogue is the list of record; this is the convenience barrel.
  */
 export { About01 } from './about-01'
-export type { About01Props, AboutAction, AboutFigure, AboutPrinciple } from './about-01'
+export type { About01Props, AboutAction, AboutLinkAction, AboutSlotAction, AboutFigure, AboutPrinciple } from './about-01'
 export { Awards01 } from './awards-01'
 export type { Awards01Props, Awards01Award } from './awards-01'
 export { Backdrop01 } from './backdrop-01'
@@ -79,9 +82,21 @@ export type { Gallery01Props, Gallery01Item, Gallery01Labels, Gallery01Ratio, Ga
 export { Help01 } from './help-01'
 export type { Help01Article, Help01Category, Help01Props } from './help-01'
 export { Hero02 } from './hero-02'
-export type { Hero02Action, Hero02Props } from './hero-02'
+export type {
+  Hero02Action,
+  Hero02LinkAction,
+  Hero02SlotAction,
+  Hero02Props,
+} from './hero-02'
 export { Hero03 } from './hero-03'
-export type { Hero03Action, Hero03Point, Hero03Proof, Hero03Props } from './hero-03'
+export type {
+  Hero03Action,
+  Hero03LinkAction,
+  Hero03SlotAction,
+  Hero03Point,
+  Hero03Proof,
+  Hero03Props,
+} from './hero-03'
 export { Industries01 } from './industries-01'
 export type { Industries01Props, Industry, IndustryLink } from './industries-01'
 export { Integration01 } from './integration-01'
@@ -109,7 +124,7 @@ export type { RunConsole01Props, RunConsole01Copy } from './run-console-01'
 export { Services01 } from './services-01'
 export type { Services01Props, Service, ServiceLink } from './services-01'
 export { Showcase01 } from './showcase-01'
-export type { ShowcaseAction, Showcase01Props } from './showcase-01'
+export type { ShowcaseAction, ShowcaseLinkAction, ShowcaseSlotAction, Showcase01Props } from './showcase-01'
 export { SiteNavbar } from './site-navbar'
 export type { SiteNavbarProps, SiteNavLink, SiteNavSearch, SiteNavTheme, SiteNavMode, SiteNavMobileLabels } from './site-navbar'
 export { Story01 } from './story-01'

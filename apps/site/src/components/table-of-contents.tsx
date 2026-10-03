@@ -13,7 +13,7 @@ export function TableOfContents({ toc }: { toc: TOCItemType[] }) {
 
   return (
     <nav aria-label="On this page" className="flex flex-col gap-2">
-      <span className="text-muted-foreground text-[10px] font-medium uppercase">On this page</span>
+      <span className="text-muted-foreground text-mono font-medium uppercase">On this page</span>
       <ul className="flex flex-col gap-1.5">
         {items.map((item) => (
           <li key={item.url}>

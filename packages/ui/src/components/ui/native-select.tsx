@@ -96,6 +96,13 @@ function NativeSelect({
           // inherit one in every engine and a control in the platform's face
           // beside text in Inter is a control nobody designed.
           'font-inherit',
+          // The coarse-pointer floor, as a step, and the same string `select.tsx` puts on
+          // its trigger. This Component exists to take over the platform's own arrow, so
+          // its metrics are Prism's to state rather than the browser's, and the argument
+          // is the trigger's: a select is a control a finger presses to open a list, not a
+          // field a finger types into, so its height belongs on the floor. It is `w-full`,
+          // so only the height was short. See DESIGN.md, The coarse-pointer floor.
+          'pointer-coarse:h-11',
           size === 'sm' ? 'h-8' : 'h-9',
           className,
         )}

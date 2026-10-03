@@ -90,8 +90,12 @@ it was a video with extra steps.
 - Pass `figureLabel`. It is the accessible name of the figure region and Prism will
   not compose it: "the queue, live" and "the estate, now" are two different claims
   about two different systems.
-- Pass at most two actions, the first with an `href`. The arrow on the first action
-  appears only when that action is a link that can be followed.
+- Pass at most two actions, the first with an `href`. An action is either an
+  anchor the block renders or the `slot` you fill with your own control; there is
+  no third arm, so `{ label: 'Coming soon' }` does not compile. See Hero01 for the
+  two arms and why the button that used to stand for the second one is gone.
+- The arrow on the first action appears only when the row is all anchors. A `slot`
+  at the front wears no arrow, because the control you drew owns its own marks.
 - Set `headingLevel="h1"` when the hero is the page's top-level heading. The default
   is `h2`, because a Block is composed rather than a page.
 - Pass an eyebrow only when it is true and current. It renders nothing when absent.

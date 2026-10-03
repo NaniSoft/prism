@@ -14,26 +14,45 @@ reports and is published.
 The script column is the gate. A row that named an aspiration rather than a
 script has been corrected, because a gate list that names a gate which does not
 exist is the same defect class as a catalogue whose registry and list disagree:
-it is green, it is believed, and it is not checking anything.
+it is green, it is believed, and it is not checking anything. **The table used to
+hold the opposite defect, and it was worse.** Seven scripts were added to chains
+this effort and the table was never updated, so the half that actually happened is
+a gate running and not being listed, and five of the seven are explained in prose
+further down this same file, which is what made it a record rather than an
+oversight. `scripts/check-gate-table.mjs` now reads the chains out of each
+manifest and compares them with this table in both directions, so the table is
+held by a gate rather than maintained by a human. It is a gate about the gate set
+and it is the only row below whose subject is this document.
 
 | Package | Script | Fails the build | Reports only |
 | --- | --- | --- | --- |
-| `prism-tokens` | `scripts/check-contrast.mjs`, `scripts/check-emitted-contract.mjs`, `scripts/check-determinism.mjs` | the contrast gate's role walk, its exemption list, the mode rule and the chart-series distinctness assertion, the emitted contract (completeness, value equality, spacing arithmetic, no extras, and the mode-independent groups including the closed duration, easing, shadow, breakpoint and container sets), build-twice determinism | the three advisory contrast pairs (`border`, `input` and `sidebar-border`) |
-| `prism-ui` | `scripts/validate-registry.mjs`, `scripts/check-catalogue.mjs`, `scripts/check-surface.mjs`, `scripts/check-focus-indicators.mjs`, `scripts/check-pack-boundary.mjs`, `scripts/check-vector-ink.mjs`, `scripts/check-client-budget.mjs`, `scripts/check-theme-resolution.mjs`, `scripts/check-boot-budget.mjs`, `scripts/check-gate-kit.mjs` | surface scan, registry validator (registry and published file list), the three-way catalogue comparison, the focus-indicator table, the pack-boundary law, the vector-ink contract, the theme-resolution equivalence table, the boot-path byte ceiling, the consumer gate kit's registry and published surface, the component and axe suites | per-item client-JavaScript measurement |
+| `prism-tokens` | `scripts/check-contrast.mjs`, `scripts/check-emitted-contract.mjs`, `scripts/check-determinism.mjs` | the contrast gate's role walk, its exemption list, the mode rule and the chart-series distinctness assertion, the emitted contract (completeness, value equality, spacing arithmetic, no extras, and the mode-independent groups including the closed duration, easing and shadow sets, the closed breakpoint set, and the container group: its closed set, its two families, the single authored value coincidence, and the order of the whole-namespace close relative to the authored entries), build-twice determinism | the three advisory contrast pairs (`border`, `input` and `sidebar-border`) |
+| `prism-ui` | `scripts/validate-registry.mjs`, `scripts/check-catalogue.mjs`, `scripts/check-surface.mjs`, `scripts/check-focus-indicators.mjs`, `scripts/check-breakpoint-variants.mjs`, `scripts/check-container-namespace.mjs`, `scripts/check-pack-boundary.mjs`, `scripts/check-vector-ink.mjs`, `scripts/check-client-budget.mjs`, `scripts/check-theme-resolution.mjs`, `scripts/check-boot-budget.mjs`, `scripts/check-item-docs.mjs`, `scripts/check-block-copy.mjs`, `scripts/check-item-category.mjs`, `scripts/check-block-imports.mjs`, `scripts/check-gate-kit.mjs`, `scripts/check-typeface.mjs`, `scripts/check-variant-ink.mjs` | surface scan, registry validator (registry and published file list), the three-way catalogue comparison, the focus-indicator class-string scan across every shipped source file, the breakpoint-variant rule, the container-namespace rule over the built stylesheet, the pack-boundary law, the vector-ink contract, the theme-resolution equivalence table, the boot-path byte ceiling, a JSDoc block on every catalogue Item, a Block and a Page shipping no copy or an accessible name, the closed set of seven Categories and the absence of one on a Block or a Page, the modules a Block and a Page may not import, the face a token names against the `@font-face` rules and binaries the package ships, the metric-adjusted fallback and the licence beside it, the consumer gate kit's registry and published surface, the component and axe suites, and a variant that sets its own fill setting its own ink | per-item client-JavaScript measurement |
 | `prism-llms` | `scripts/check.mjs` | corpus drift, per-item mirror and store coverage, the store type round-trip, the declared output list | none |
-| `prism-mcp-server` | `src/registration.test.ts` and the bundled-data hash | the protocol round-trip suite, the registered tool list equals the package's declared `TOOL_ORDER` with every tool served from the bundled corpus, the bundled `data.json` hash | corpus freshness stamp (`scripts/stamp-built.mjs`) |
-| repository root | `scripts/check-dashes.mjs`, `scripts/check-elevation-layout.mjs`, `scripts/validate-changesets.mjs` | the dash gate, the elevation and layout gate, the changeset validator | none |
-| `@nanisoft/site` (private) | `scripts/check-utility-cascade.mjs`, `scripts/check-content-joins.mjs`, `scripts/check-search-budget.mjs` | content joins (including the redirect coverage and the Worker's first-run prefixes), utility cascade, search gzip budget | visual regression and the computed display assertions, both inside the report-only `visual` job |
+| `prism-mcp-server` | `test/registration.test.ts` and the bundled-data hash | the protocol round-trip suite, the registered tool list equals the package's declared `TOOL_ORDER` with every tool served from the bundled corpus, the bundled `data.json` hash | corpus freshness stamp (`scripts/stamp-built.mjs`) |
+| repository root | `scripts/check-dashes.mjs`, `scripts/check-elevation-layout.mjs`, `scripts/check-motion.mjs`, `scripts/check-nested-controls.mjs`, `scripts/check-block-controls.mjs`, `scripts/check-encoding.mjs`, `scripts/check-no-legacy-line.mjs`, `scripts/check-gate-table.mjs`, `scripts/validate-changesets.mjs` | the dash gate, the elevation and layout gate, the motion gate, the nested-control rule, the block-control rule, the encoding gate, the retired-line gate, the gate-table gate, the changeset validator | none |
+| `@nanisoft/site` (private) | `scripts/check-utility-cascade.mjs`, `scripts/check-content-joins.mjs`, `scripts/check-pattern-composition.mjs`, `scripts/check-search-budget.mjs` | content joins (including the redirect coverage and the Worker's first-run prefixes), utility cascade, a Pattern naming an Item that does not exist plus its Section's `meta.json` in both directions, search gzip budget | visual regression and the computed display assertions, both inside the report-only `visual` job |
+
+**Two of the rows above are not `check` tasks, and the table says which.** `prism-mcp-server`
+declares no `check` script; its column is its test lane and the bundled-data hash its build
+asserts. `check-search-budget.mjs` runs in the site's `postbuild` rather than in its
+`check`, because it reads the built export and `next build` is what produces it.
+`scripts/check-gate-table.mjs` reads `check` tasks only, so a gate wired into another
+task is out of its scope by construction and both of these are correct rather than
+omissions. The residual it does not cover is a gate wired into no task at all, which
+nothing here can see.
 
 Two entries this list used to make, and what they really are:
 
 - **JSDoc and catalogue coverage is not a `prism-ui` gate.** It is asserted by
   `packages/llms/scripts/check.mjs` against the emitted declarations, so it is
   attributed to `prism-llms`.
-- **The dash and elevation gates are repository-root scripts, not `prism-ui`
-  tasks.** The dash gate lists the site's and the packages' trees among its
-  roots, which is not the same as the site's `check` running it. They run first
-  in the root `check` chain.
+- **The dash, elevation and motion gates are repository-root scripts, not
+  `prism-ui` tasks.** The dash gate lists the site's and the packages' trees among
+  its roots, and the motion gate lists the three component-source trees
+  `check-pack-boundary.mjs` reads plus the two published source trees an agent
+  reads, which is not the same as the site's `check` running either of them. They
+  run first in the root `check` chain.
 - **The demo `client` flag and the per-item site client measurement are not in
   any gate lane.** The flag is produced by the manual `catalog:analyze` task and
   CI never runs it; the per-item measurement is `prism-ui`'s
@@ -212,6 +231,28 @@ It failed silently, and for a long time. The header's navigation row, both docum
 
 The layer exists because raising the whole of the site's utility layer above the library's, which is the other obvious answer, is wrong here. The library generates class names at runtime from its own source, so a Button rendered by a Demo carries `h-9` and `pointer-coarse:h-11` without either string appearing in anything this site's build scans. Handing the base the win there drops the control from 44px to 36px, under the coarse-pointer floor.
 
+**A seventh restatement exists because this gate was green over a collision whose
+visibility depended on a content hash.** The library's Blocks carry
+`lg:grid-cols-6`, and Tailwind emits the BARE `.grid-cols-6` alongside the variant,
+so the library's copy of that one rule landed after this build's
+`sm:grid-cols-11` in the one shared `utilities` layer. A media query adds no
+specificity to either, so the bare rule won: every colour ramp on the Foundations
+page rendered six columns at every width above 640, against a comment beside the
+class saying eleven tracks from `sm` and six below. Neither side is wrong and
+neither can be changed: the library's bare rule is the base of a variant four of
+its Blocks use, and the site's variant means what its class says, so the loser is
+restated in `site-variants`, which is what the layer is for.
+
+Whether the gate SAW it was a coin flip. The two builds meet in content-hashed
+chunk files under `out/_next/static`, the gate concatenates them in `localeCompare`
+order, and the library's chunk hashed to a name that sorted after the site's.
+Nothing about the tree changed when that flipped, so the same tree passed or
+failed on a hash. The restatement is what makes the answer independent of it, and
+the general shape is worth more than the instance: a cross-build collision whose
+visibility depends on file ordering is worse than one that is simply present,
+because it is intermittent and it will not reproduce on the machine that has the
+other hash.
+
 **The limit, stated plainly.** The gate reads declarations, at three widths, and
 only over class lists written in the site's own source. An element whose classes
 the library composes at runtime is not in that set, because nothing in the site's
@@ -226,6 +267,274 @@ lane sees what the other cannot. A third lane, `header-fit.spec.ts`, reads the
 measured widths rather than the computed values, because a rule can compute to
 exactly the value it should and still render 245 pixels wider than the viewport;
 see the visual regression section for what that cost.
+
+**`--font-sans` is declared twice in the composed export, and it is harmless, and
+the answer is worth writing down because "harmless" and "cannot drift" are
+different claims.** The site's build imports `@nanisoft/prism-tokens/dist/theme.css`
+from `apps/site/src/app/globals.css` and the library's build imports the same file
+from `packages/ui/src/styles.css`, so each Tailwind build inlines the `@theme static`
+block and the reader's document carries `--font-sans` twice: once in the site's
+chunk and once in the library's. Both are `@layer theme { :root, :host { ... } }`,
+both carry the same value because both were produced from the same file in the same
+build, and the second therefore resolves to the same string as the first. Measured
+in `out/`: two chunks, one declaration each, both loaded on the same page, both
+identical.
+
+It cannot drift, and the reason is not that the values agree today. It is that
+there is nothing to disagree about: a plain CSS `@import` of one file into two
+Tailwind builds produces two copies of whatever that file says, at the same build,
+so a divergence would require the token package to change between the two reads,
+which is not a thing a single `next build` can do. The drift that *is* possible is
+the other direction and it is the one worth naming: if one build stopped importing
+`theme.css`, that build would emit no `--font-sans` at all and every `font-sans`
+class it generated would resolve against Tailwind's default, which is the same
+silent loss the gate above was written for. That is a deletion, not a conflict, and
+`check-emitted-contract.mjs` holds the token side of it.
+
+So the duplication is bytes and nothing else, the alternative is worse, and the
+answer is recorded here rather than left as a thing somebody re-derives from a
+stylesheet.
+
+## The breakpoint variants
+
+`packages/ui/scripts/check-breakpoint-variants.mjs` reads every responsive
+variant out of the class strings in `packages/ui/src` and `apps/site/src` and
+compares it to the screens the token package actually emits. It is the other half
+of a question every other gate held one side of: the token side is asserted
+(`check-emitted-contract.mjs` fails unless the emitted set is exactly
+`{sm, md, lg}` with `xl` and `2xl` closed to `initial`, and the elevation gate
+fails on a `--breakpoint-` property declared outside the token package), and the
+class side was not, so the authored `breakpoint` group's own description claimed a
+protection nobody was checking.
+
+It was written for a defect that shipped. `DocsShell`'s frame read
+`xl:grid-cols-[15rem_minmax(0,1fr)_13rem]` as its third track, and because the
+theme closes `xl` the class compiled to nothing: the contents rail's
+`lg:col-start-3` landed in an implicit `auto` track, the frame was two columns at
+every width from 1024 pixels, and the article column was about 340 pixels wide at
+1024 on the site and in all four consumers. Every other gate was green.
+
+**The screens are read from the token source and never from `dist/`.** The
+authored set is `packages/tokens/src/foundation/layout.tokens.json`, read from
+source because a gate whose subject is the authored scale cannot be answered by a
+build output a warm cache may have left behind. The closed set is
+`packages/tokens/build/build.mjs`, read because a screen that is authored *and*
+closed with `initial` is still closed, so reading the JSON alone would pass an
+`xl:` class on the day somebody added `xl` without removing the line that closes
+it. The usable set is authored minus closed, and both halves print on every run.
+
+**What counts as a class is narrow in two directions, each to avoid a finding
+that is not there.** The scan reads string literals rather than source lines,
+because a variant name is a class only inside a class and the `size` variant map
+of `Heading` holds a key `xl` that is a step on a type scale. It skips comments,
+for the reason the retired-line gate states: a JSDoc block explaining that `xl` is
+closed is a record, not a class. Strings are read wherever they are rather than
+only at a `className=`, so a class in a `cva` map or a module constant is judged
+too; the cost is that prose in a thrown `Error` is read as well, and that is why
+a segment counts as a screen only when it is one of Tailwind's names
+(`sm`, `md`, `lg`, `xl`, `2xl`, plus the container steps `3xl` and `4xl`, which are
+a breakpoint in nobody's) or a `min-`/`max-` ranged form of one.
+
+**The rule it does not hold, stated.** A screen name written in a third shape, an
+invented bare word such as `wide:`, is not judged. Treating every bare lowercase
+segment as a screen would report the `md` in an error message as a dead variant,
+and a gate with a finding rate set by English prose is a gate nobody runs. A
+screen this repository wants belongs in `layout.tokens.json` with the other four,
+where the build emits it and this gate then holds the class to it.
+
+## The nested-control rule
+
+`scripts/check-nested-controls.mjs` reads the JSX in `packages/ui/src`,
+`apps/site/src` and `apps/site/items`, and fails on a control inside a control. The
+HTML content model puts a hard boundary around the interactive content of an anchor
+and around the content of a button, and both halves of that are defects a reader
+meets rather than a validator's opinion: a keyboard reader reaches two tab stops for
+one action and hears two things, and a pointer reader's press has to be resolved
+between two elements whose activation rules disagree.
+
+**The one occurrence shipped, on the 404 route.** `apps/site/src/app/(site)/not-found.tsx`
+wrapped a `Button` in a `next/link`, so the page a reader reaches by following a
+dead address emitted `<a href><button>…</button></a>`. It type-checked, because both
+Components accept the props they were given, and it passed every other gate,
+including the focus gate and the rendered-output claim, because each of those asks
+whether something is right and none of them asks whether two elements may sit inside
+each other. The repository had already answered the question twice in writing, in
+`dropdown-menu.tsx` and at the `render={<a/>}` call site in
+`blocks/site-navbar/sites-menu.tsx`: a control that navigates has to BE the link.
+`Button` carries no `render` or `asChild` seam, so a caller cannot express that and
+nesting one inside the other is the only way left to get an anchor in a button's
+clothes. The gate is what stops the nesting from being how anyone finds out.
+
+**What counts as a control, and what is declared not to.** A native `button`,
+`input`, `select`, `textarea` and `summary`, and an `a` carrying an `href`. The
+Prism Components whose element is one of those, plus `Link` and `NavLink`, because a
+router link renders an anchor: the defect was a `Button` inside a `Link`, and a
+table that only knew the lowercase tags would have read it as a Component inside an
+unknown element and found nothing.
+
+**`label` is the exception, and the first run proved it was needed.** A label
+wrapping the control it names is the pattern the specification recommends, and this
+repository ships four of them. A rule that counted every label as interactive
+reported four findings on correct markup, which is the failure a gate nobody has
+watched fail cannot be told apart from. So a `label` counts as a parent only for a
+descendant that is not a labelable control, and `label` prints on every run with the
+number of times it was read as one: four in this tree, rejecting nothing.
+
+**An anchor counts as a parent only when it carries an `href`.** The transparent
+content model applies when it does not, so `<a><button/></a>` is a placeholder and is
+legal while `<a href="…"><button/></a>` is not. The rule is applied to parents as
+well as to children, because a gate that is exact in one direction and approximate
+in the other is a gate whose answer depends on which way the markup was written.
+
+**The rule it does not hold, stated.** It reads source, not rendered output. A
+control chosen at runtime, one composed inside a fragment the scan does not track,
+and one assembled in a string are all invisible to it, and an anchor is a control
+here on the word `href` being present rather than on its value. What it holds is the
+shape a later edit changes, which is the same claim the narrow-viewport suite makes
+for the same reason. Test files are excluded, because a spec that renders
+`<a><button/></a>` to prove a page no longer does is writing the defect down on
+purpose.
+
+**The proof is `scripts/__tests__/nested-controls.test.mjs`, not a run.** Four
+cases must fire and five must stay green, each named for the rule whose removal
+would redden it, and every case runs the gate as a process against a staged tree so
+no test has to dirty the repository to see the gate react. The shipped tree has no
+genuine finding.
+
+## The container-namespace gates
+
+The container namespace needed two gates for the reason the breakpoint namespace
+needed two directions, and the split is the same one each time: the value is one
+question and the class is another, and this repository has twice found that a
+gate holding one half was green over a tree that failed on the other.
+
+`scripts/check-elevation-layout.mjs` holds the NAME. It reads every `w-*` and
+`max-w-*` out of the class strings in `apps/site/src`, `apps/site/items`,
+`packages/ui/src` and `scripts`, and holds each to the `container` group read out
+of `layout.tokens.json`, so adding a container to the token source widens the rule
+without editing the gate. It judges the shape rather than the spelling: a bare
+number or a fraction is arithmetic on `--spacing` and is left alone, a word is a
+name and has to be one this repository authors, an arbitrary value is refused by
+the older rule beside it, and the keyword widths are declared rather than inferred
+because they name the reader's own box rather than a value out of a scale. Comments
+are blanked before it reads, because a JSDoc block that explains that the
+namespace is closed is a record rather than a class.
+
+`packages/ui/scripts/check-container-namespace.mjs` holds the ARTEFACT, and it is
+the half a source scan cannot reach. The defect it was written for shipped and
+every other gate was green: Tailwind's own thirteen `--container-*` steps survived
+into the shipped stylesheet beside the three this package authors, and three of
+them were numerically identical to authored widths (its largest at 72rem beside
+`page`, its fifth at 42rem beside `measure`, its fourth at 36rem beside
+`measure-narrow`), so a retune of `--container-page` would have moved every
+surface reaching the page column by one spelling and left every surface reaching it
+by the other exactly where it was. It reads `dist/styles.css` and fails when the
+`@layer theme` block declares anything but the authored containers, when one of
+Tailwind's steps is declared or read, when the close is written after the entries
+it was meant to precede, when a width this package writes is not emitted as a
+utility reading its own variable, and when an authored container no surface
+reaches. Tailwind's step list is read out of the installed `tailwindcss/theme.css`
+rather than restated, so a dependency that adds a step is covered without an edit
+and a framework that will not resolve fails the run rather than checking an empty
+set.
+
+`packages/ui/test/container-namespace.test.tsx` states the same artefact facts
+through `packages/ui/test/sheet-reader.ts`, beside `reduced-motion.test.tsx` and
+`progress-origin.test.tsx`, so the built-sheet facts a reader comes looking for are
+in one place. `packages/tokens/scripts/check-emitted-contract.mjs` holds the third
+thing, which is the order: the close has to be written ahead of the authored
+entries, because Tailwind resolves a theme in source order and the same declaration
+written after them clears all eight and ships no container at all.
+
+## The motion gate
+
+`scripts/check-motion.mjs` is the newest gate here and it exists because two
+documents described it and nothing implemented it. `AGENTS.md` lists `motion` in
+the `pnpm check` line and `DESIGN.md` states the law as "enforced by the grep and
+motion gates", and there was no motion gate: a Component could have written
+`duration-[400ms]` or `cubic-bezier(0.4,0,0.2,1)` and all twenty-eight gates would
+have been green. That is the defect class this document's own header names, so it
+is worth being exact about the order of events: the law was written, described as
+enforced, and left unenforced until a reader went looking for the file.
+
+It reads component source, which is the five authored trees whose source reaches a
+reader's screen or an agent's answer: `packages/ui/src`, `packages/llms/src`,
+`packages/mcp-server/src`, `apps/site/src` and `apps/site/items`. It is a
+repository-root script for the reason the elevation gate is one: the population
+spans two packages, so no package's own `check` can own it.
+
+**Four rules, and four narrow readings that keep them off the wrong thing.**
+
+1. A `cubic-bezier(` literal, matched **with its argument list**. The word alone is
+   allowed, and had to be: the rule string `packages/mcp-server/src/rules.ts` serves
+   to an agent reads "never by a millisecond or a `cubic-bezier` literal", with no
+   parentheses, and it must keep reading correctly.
+2. An arbitrary duration, easing or animation utility: `duration-[...]`,
+   `ease-[...]`, `animate-[...]`. `animate-[...]` is not in the sentence
+   `DESIGN.md` uses and is here anyway, because `backdrop-01` records the rejected
+   shape as `animate-[prism-travel_7.2s_linear_infinite]`, which is a duration and
+   an easing in one bracket form. A rule that banned only the other two would be
+   passed through by rewriting the same defect in a third utility.
+3. A time value beside a motion property, where the property is a **closed table**
+   printed on every run.
+4. A **per-call-site reduced-motion guard**: a `motion-safe:` or `motion-reduce:`
+   variant on `transition-*`, `duration-*` or `ease-*`. Those three bases are the
+   ones `packages/ui/src/styles.css` decides for every element, and a guard beside
+   them is either inert or a second place to retune the policy. The variant has to
+   be immediately before the utility, because a compound of two variants is two
+   variants and only the last one applies.
+
+**And a fifth thing, which is not a pattern.** The gate reads `.css` files, and
+`packages/ui/src/styles.css` is read twice over: once as component source and once
+as the file the reduced-motion policy lives in. `reduced-motion-block` is a check
+over that one file rather than a pattern over five roots, and it fires when the
+file is in the population and stays quiet in a staged tree with no stylesheet in
+it. It asserts four things, and each is a shape this policy has actually been
+wrong in: one `@media (prefers-reduced-motion: reduce)` block rather than two, a
+selector that names no class, both `animation: none` and `transition: none`
+declared, and a block that is not inside an `@layer`. That last one is the rank
+the rule has: a declaration outside any layer outranks a declaration in one
+whatever its specificity, and a rule at `*` inside `@layer utilities` would be
+outranked by `.duration-slow` and ship a policy that does nothing.
+
+`packages/ui/test/reduced-motion.test.tsx` holds the same four claims against the
+**emitted** sheet, with the cascade comparator `progress-origin.test.tsx` brought
+out of that file and shared, because a test that reads what the build wrote is
+stronger than a gate that reads what a Component meant. The gate is not redundant
+with it: the test cannot run before a build, and a gate that needs a build is not
+a gate.
+
+**Comments are blanked before anything is read.** Seven of the `\d+ms` occurrences
+in `packages/ui/src` today are inside JSDoc blocks that quote the value while
+explaining why it is banned: `drawer.tsx` on 280ms, `toast.tsx` on `0.01ms`,
+`backdrop-01` on the rejected `animate-[...]`. A line-based rule would have failed
+the build on day one over seven records.
+
+**A string is not a comment.** `check-breakpoint-variants.mjs` already settled
+where that line falls for classes: a variant name is a class whenever it is inside
+a string, because a class held in a `cva` map or a module constant is as much a
+class as one written inline. So a `duration-[400ms]` in a module constant is a
+finding, and moving that same sentence into a comment makes it a record. The gate
+reads a regex literal rather than opening a string inside one, on the standard
+preceding-token heuristic, which is an approximation and is stated as one.
+
+**What it does not read, and that is a scope decision rather than an omission.**
+`packages/tokens/**` is the foundation tier and owns the values: the literal curve
+is in `packages/tokens/src/foundation/base.tokens.json` and the writer is
+`packages/tokens/build/serialize.mjs`. `packages/ui/gates/**`, `scripts/**` and
+every package's `scripts/**` are a gate's rule table and the consumer gate kit,
+which exist to restate laws as failure messages in a consumer's own repository;
+reading them would mean either a permanent exclusion list or a gate that reports
+its own table. `apps/site/src/generated/**` is written at `pretest` from the Demos
+in `apps/site/items`, which are read directly. Every exclusion prints on every run.
+
+**Coverage is asserted and so is the rule's reach.** Roots resolve from the script's
+own location and a missing root fails naming both causes; a run that read no file
+fails; and a run that read files and found no `duration-fast`, `duration-base`,
+`duration-slow`, `ease-out` or `ease-in-out` in any of them fails as well, because
+a tree carrying no motion is a tree the rule cannot see. `scripts/__tests__/motion.test.mjs`
+stages seventeen failing and twelve passing cases against the real gate, because a
+clean repository cannot tell a rule from a pattern that never matches anything.
 
 ## The search index
 
@@ -438,6 +747,21 @@ free of these defects.
   `import()` or a `require` assembled at runtime.
 - The motion and semantic-utility gates are textual. A duration computed in
   JavaScript or a custom property assembled at runtime can slip past a grep.
+- The breakpoint-variant gate judges Tailwind's screen names and the `min-`/`max-`
+  forms of them, and it reads the class strings a source file writes. A screen
+  named in a third shape, and a class string assembled at runtime, are both
+  outside it.
+- The focus-indicator gate reads class strings in `packages/ui/src` and no
+  consumer stylesheet, and it reads the five roots the package ships
+  (`components`, `blocks`, `pages`, `live`, `provider`) and not `apps/site`,
+  which is another package with its own `check` chain. It cannot prove which
+  declaration wins a cascade, and a control that answers focus with a fill rather
+  than a ring is an exclusion rather than a finding, so the three declared
+  exclusions in `EXCLUSIONS` are the whole of what it will not report.
+- No gate measures a target size. The 44px coarse-pointer floor is asserted by
+  the test beside each primitive, naming the class its own floor is written as,
+  which is a weaker mechanism than a scan and the only one available without a
+  browser.
 - The dash gate covers em and en dashes and the `???` pattern only, in the
   listed files.
 - The registry validator proves internal consistency, not installability. The
@@ -451,6 +775,16 @@ free of these defects.
 - No byte budget is enforced for `styles.css`. The client analyzer measures
   source, not the compiled bytes a consumer downloads; a `styles.css` gzip
   budget is the strongest candidate for a future fail gate and is not adopted.
+- The typeface gate reads the emitted stylesheet and the binaries beside it, so it
+  proves that every family `--font-sans` names resolves to something this package
+  publishes and that the licence ships with the file. It does not prove a browser
+  fetched it. Nothing in the gate set preloads the face, and nothing can: a
+  preloaded URL is content-hashed at build time, so the only lane that could emit
+  one is the one that used to, `next/font`, and the site no longer uses it. The
+  metric-adjusted fallback is what stands in for the lost preload, because it
+  removes the layout shift rather than the round trip, and the round trip is a
+  cost a reader on a fast connection will not notice and a reader on a slow one
+  will.
 - There is no cross-browser or cross-engine testing. jsdom is not a browser, and
   the visual job is Chromium only.
 - A passing suite proves the assertions passed, not that they were the right

@@ -34,7 +34,7 @@ export default function NativeSelectDemo() {
   const [status, setStatus] = useState('active')
 
   return (
-    <div className="grid max-w-measure-wide gap-8 sm:grid-cols-2">
+    <div className="grid max-w-page gap-8 sm:grid-cols-2">
       <section className="flex flex-col gap-3">
         <p className="text-muted-foreground text-sm">
           The platform element. The wheel, the picker and the form submission all still
@@ -104,7 +104,7 @@ export default function NativeSelectDemo() {
           A form that submits without JavaScript. Only the native field is in it,
           because the custom one needs a change handler to submit at all.
         </p>
-        <Field className="max-w-sm">
+        <Field className="max-w-96">
           <FieldLabel htmlFor="native-form-region">Default region</FieldLabel>
           <NativeSelect id="native-form-region" name="defaultRegion" defaultValue="eu-west">
             {REGIONS.map((option) => (

@@ -80,8 +80,9 @@ matters. That is a `Slider`.
   text field that happens to accept digits.
 - Pass `labels` with a name for each stepper, in the reader's words. "Increase" is
   right in one language and wrong in another, and the Component cannot know which.
-- Pass `unit` for the unit and say the same unit once in the field's description.
-  The visible one is decoration; the description is what a screen reader reaches.
+- Pass `unit` for the unit and say the same unit once in the field's description,
+  through `aria-describedby`. The visible one is decoration; the description is what
+  a screen reader reaches, and `unit` alone reaches nobody.
 - Pass `format` when your product groups thousands or fixes decimals, so the field
   writes numbers the way the rest of your product does.
 - Treat `null` as "not answered" rather than as zero. A form that turns `null` into
@@ -89,6 +90,11 @@ matters. That is a `Slider`.
 - A controlled `value` outside the range displays the clamped number. Take the
   clamped one back through `onValueChange`; this Component will not rewrite state
   it does not own.
+- The two steppers turn side by side on a coarse pointer and the field stays 44px
+  tall. There is no touch size to add and no band to add either: two 44px targets
+  stacked in the column would need an 88px field, and two 44px bands on two 18px
+  rows overlap so much that the lower stepper would take the boundary between
+  them.
 
 ### Content guidelines
 

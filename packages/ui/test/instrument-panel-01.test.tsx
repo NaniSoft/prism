@@ -85,3 +85,70 @@ describe('a panel around an instrument', () => {
     expect(container.querySelector('figure')).toHaveAttribute('aria-label', 'Live capture')
   })
 })
+
+/**
+ * The bar's two truncating spans, and the reason this file asserts what they
+ * carry rather than what a row would do with them.
+ *
+ * **The bar cannot overflow horizontally, and the reason is a spec rule rather
+ * than a class.** A flex item's automatic minimum size is its content-based
+ * minimum size, which is where the folklore that a `truncate` needs `min-w-0`
+ * comes from. CSS Flexbox 1 §4.5 carves out the exception that settles it: the
+ * automatic minimum size is zero "for scroll containers", and `overflow: hidden`
+ * is what makes a box a scroll container. Tailwind's `truncate` sets
+ * `overflow: hidden`, so both spans already have an automatic minimum size of
+ * zero, both shrink, and the bar stays the width of the figure whether the label
+ * is two words or thirty. Adding `min-w-0` here would change nothing that is
+ * painted, and a class written to prevent an overflow that cannot happen is a
+ * false record in the source.
+ *
+ * **So what this asserts is the invariant the whole thing rests on.** If a later
+ * edit replaced `truncate` on either span with `whitespace-nowrap`, or with a
+ * line clamp that does not set `overflow`, the automatic minimum size would go
+ * back to the text's own width and the row would start pushing the figure wider
+ * than the panel it is in. That is the regression worth a test, and it is a
+ * regression guard rather than a proof of a fix, because nothing here was broken
+ * and nothing here was changed.
+ *
+ * The other twelve `truncate` sites in the tree that carry no `min-w-0` are the
+ * same case and are not listed here: a `truncate` inside a flex COLUMN is sized
+ * by `align-items: stretch` rather than by flex shrinking, and a `truncate` whose
+ * flex parent already carries `min-w-0` inherits the behaviour from it.
+ */
+describe('the bar a panel titles itself with', () => {
+  it('truncates both of its text spans, which is what lets them shrink at all', () => {
+    const { container } = render(
+      <InstrumentPanel01 label="The estate, as one graph" state="live" stateLabel="live view">
+        <span />
+      </InstrumentPanel01>,
+    )
+
+    const bar = container.querySelector('[data-slot="instrument-panel-bar"]')!
+    const truncating = [...bar.querySelectorAll('span')].filter((span) =>
+      span.className.split(' ').includes('truncate'),
+    )
+    expect(truncating.map((span) => span.textContent)).toEqual(['The estate, as one graph', 'live view'])
+  })
+
+  it('keeps the dot and the actions slot out of the shrinking', () => {
+    const { container } = render(
+      <InstrumentPanel01
+        label="The loop"
+        state="live"
+        stateLabel="live"
+        actions={<button type="button">pause</button>}
+      >
+        <span />
+      </InstrumentPanel01>,
+    )
+
+    const bar = container.querySelector('[data-slot="instrument-panel-bar"]')!
+    // The dot is eight pixels and the actions slot is application content whose
+    // width the caller owns, so both are held at their own size and the two text
+    // spans are what yield. A row of four where nothing could shrink would be a
+    // row that pushes the panel wider than the figure; a row where the dot and
+    // the actions can be squeezed is a row that hides the controls.
+    expect(bar.querySelector('[data-state]')?.className).toContain('shrink-0')
+    expect(bar.querySelector('button')?.parentElement?.className).toContain('shrink-0')
+  })
+})

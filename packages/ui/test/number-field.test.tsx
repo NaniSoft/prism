@@ -123,6 +123,33 @@ describe('NumberField', () => {
     expect(decrease().getAttribute('tabindex')).toBe('0')
   })
 
+  it('gives each stepper 44px on a coarse pointer and lays them side by side', () => {
+    const { container } = renderField({ min: 0, max: 100, defaultValue: 5 })
+    const stepper = container.querySelector('[data-slot="number-field-stepper"]')
+    const group = container.querySelector('[data-slot="number-field-group"]')
+    expect(stepper).not.toBeNull()
+
+    // Two 44px targets inside the split column need an 88px field, which is not a
+    // field, and two 44px bands centred on two 18px rows overlap by more than half of
+    // each, so the lower row would take the boundary and a press aimed at increment
+    // would step down. Side by side is the only arrangement where the two do not
+    // compete, so the column turns and the field stays 44px tall.
+    expect(stepper?.className).toContain('pointer-coarse:flex-row')
+    expect(increase().className).toContain('pointer-coarse:min-w-11')
+    expect(decrease().className).toContain('pointer-coarse:min-w-11')
+    expect(increase().className).toContain('pointer-coarse:h-auto')
+    expect(decrease().className).toContain('pointer-coarse:h-auto')
+    expect(group?.className).toContain('pointer-coarse:h-11')
+
+    // And the desktop column is untouched: stacked, half the field each, 36 tall.
+    // Read as tokens rather than as a substring, because `pointer-coarse:flex-row`
+    // contains `flex-row` and the assertion is about the unqualified one.
+    const tokens = (stepper?.className ?? '').split(/\s+/)
+    expect(tokens).toContain('flex-col')
+    expect(tokens).not.toContain('flex-row')
+    expect(increase().className).toContain('h-1/2')
+  })
+
   it('clamps a pasted value', async () => {
     const user = userEvent.setup()
     const onValueChange = vi.fn()

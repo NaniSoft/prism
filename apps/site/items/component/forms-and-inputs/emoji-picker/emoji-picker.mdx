@@ -190,13 +190,12 @@ all. The sentence is your `selectLabel` function, because the only word this
 package has for an entry is your own `name`.
 
 **Motion is state feedback on two tokens and there is no keyframe.** The cell and
-the rail change ink at `duration-fast ease-out`, which is not guarded, because
-the system's position is that feedback motion is shortened rather than removed
-under reduced motion. The one spatial change here, the press, is guarded with
-`motion-safe:`, so a reader who asked for less movement gets the colour change at
-full strength and no movement at all. Nothing here waits for a script, a scroll
-position or a timer, so the picker is complete and legible at first paint
-whatever the reader's settings are.
+the rail change ink at `duration-fast ease-out`, and the press scales. Neither
+carries a `motion-safe:` guard, so a reader who asked for less movement gets the
+colour change at full strength and the press with no travel, from the one
+unlayered `prefers-reduced-motion` rule at the foot of the library's stylesheet.
+Nothing here waits for a script, a scroll position or a timer, so the picker is
+complete and legible at first paint whatever the reader's settings are.
 
 ### What this is not
 

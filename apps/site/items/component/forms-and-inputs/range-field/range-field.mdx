@@ -100,6 +100,19 @@ accessible names, no knowledge between them and no guard.
   it means holding two announced values and subtracting them while driving.
 - Each thumb renders its own range input, so a form with a `name` on this field
   submits both bounds under it.
+- Give the bounds a `minGap` wide enough to pinch apart on a phone. Each thumb
+  takes a 44px target on a coarse pointer as a transparent band, so two bounds
+  closer together than the band is wide are dragged by the one used last until
+  the Tab key moves to the other. A gap you would call too large for a form is
+  about the right size for a finger.
+- Do not size or position `[data-slot="range-field-indicator"]` in your own
+  stylesheet. The band is drawn by a `transform` on an element as wide as the
+  track, and Base UI places it with a logical `inset-inline-start` that puts its
+  edge on the lower bound in either writing direction. Style its `transform`, or
+  style the track. It has no radius of its own: the track's `rounded-full` and
+  `overflow-hidden` supply the ends, because a scaled shape squashes its own
+  corner radius and the ends of a band are the two round thumbs drawn on top of
+  it.
 
 ### Content guidelines
 

@@ -70,6 +70,12 @@ the screen and reserve the menu for secondary commands.
   current page in, so the table stays a view rather than a state store.
 - Give every row a stable `getRowId`. An index-based id loses the selection
   when the page changes.
+- Pass `headingLevel` when the table is inside a section that already has a heading.
+  It defaults to `h2` and the Block draws no `Section` of its own.
+- Pass `caption` when the table needs a name that is not the Block title. A
+  `<caption>` is the strongest of the three ways to name a table and the caller own
+  words are the right ones; without it the table is named by the heading through a
+  reference, and with no `title` either it is unnamed.
 - Pass every string in `labels`, and reset the page to one when the search or a
   filter changes.
 

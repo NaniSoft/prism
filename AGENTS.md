@@ -48,7 +48,8 @@ the source of truth for what a script does today.
   `cubic-bezier(...)` literal, and never a keyframe. A figure that shows a system
   running is the one other case: name an `ambient-*` token and one of the six
   `prism-ambient-*` classes the stylesheet publishes, which resolves the cycle
-  for you. Read `DESIGN.md` under Motion before authoring one.
+  for you. Read `DESIGN.md` under Motion before authoring one. The gate is
+  `scripts/check-motion.mjs`.
 - **One stylesheet.** A consumer imports `@nanisoft/prism-ui/styles.css` once.
   Tailwind is an internal build dependency of the component package and the site,
   never the consumer's.
@@ -128,6 +129,51 @@ Two rules follow from that, and both are about what may be written where:
   `CONTRIBUTING.md` and `docs/**` alongside the package sources, and fails on an
   em or en dash or a `???` sequence in reader-facing copy. Keep them free of
   all three.
+- **The motion gate reads component source and the one stylesheet that decides
+  reduced motion.** `scripts/check-motion.mjs` reads `packages/ui/src`,
+  `packages/llms/src`, `packages/mcp-server/src`, `apps/site/src` and
+  `apps/site/items`, and it reads `packages/ui/src/styles.css` twice over: once as
+  component source and once as the file the reduced-motion policy lives in. It does
+  not read `packages/tokens`, which owns the values; `scripts/**`,
+  `packages/*/scripts/**` or `packages/ui/gates/**`, which spell out the patterns
+  they ban as a matter of course; or `apps/site/src/generated`, whose Demos are read
+  in `apps/site/items`. So a curve literal in a Component is a finding and a curve
+  literal in a gate's own rule table is not, and the run prints which surfaces it
+  did not read rather than leaving that in this list alone. The policy is one
+  unlayered `@media (prefers-reduced-motion: reduce)` rule setting `animation: none`
+  and `transition: none` on the universal selector, so a Component that re-decides
+  reduced motion with a `motion-safe:` or `motion-reduce:` variant is a finding and
+  a block narrowed back to a list of class names is a finding.
+- **A control inside a control is a finding, and the reason is that the alternative
+  is unreachable.** `scripts/check-nested-controls.mjs` reads the JSX in
+  `packages/ui/src`, `apps/site/src` and `apps/site/items`, and fails on a control
+  nested inside one. `Button` carries no `render` and no `asChild`, so a caller who
+  wants a button that navigates cannot make one element that is both, and the only
+  route left is to nest an anchor inside a button or a button inside an anchor,
+  which is invalid markup and two tab stops for one action. Where a Component
+  already takes a `render` element, use it: `DropdownMenuItem` is the one, and
+  `blocks/site-navbar/sites-menu.tsx` is the call site that says why. Two things
+  the gate deliberately does not call a finding: a `label` wrapping the control it
+  names, which is the pattern the specification recommends and this repository
+  ships four of, and an anchor with no `href`, which is a placeholder under the
+  transparent content model. Its proof is `scripts/__tests__/nested-controls.test.mjs`.
+- **A Block rendering a control that cannot act is a finding, and the gate is the only
+  reason five of them are not still shipping one.** `scripts/check-block-controls.mjs`
+  reads `packages/ui/src/blocks` and `packages/ui/src/pages` and fails on a rendered
+  `Button` or `CtaLink` carrying none of `onClick`, `type="submit"`, `type="reset"` or
+  `href`. A Block ships no behaviour, so a `<button>` it renders cannot be given a
+  handler: it is a server Component unless it says `'use client'`, and it is
+  focusable, announced as a button, and activates to nothing. Five Blocks shipped one,
+  every one at the place a reader looks first. The escape is a slot: `href` required on
+  the arm that navigates, a `ReactNode` the Block places without styling on the arm that
+  is not a link, which is `hero-01`'s `HeroLinkAction` and `HeroSlotAction`. It does
+  **not** read `apps/site/items`, because the documentation Demo for `Button` renders a
+  `Button` with no handler and showing the control is the point; the demos are held by
+  the compiler, since a Demo passes a Block's props. Two defects in the gate's own first
+  version are recorded in `scripts/__tests__/block-controls.test.mjs`: deleting comments
+  rather than blanking them moved every line number below a JSDoc block, and matching a
+  tag's attributes with a pattern stopped at the `<` or `>` inside `=>`, `<=` and `>=`.
+  Read a tag's end by brace and paren balance.
 - **Package scope and layout.** The npm scope is `@nanisoft`; the library
   packages are `@nanisoft/prism-tokens` in `packages/tokens` and
   `@nanisoft/prism-ui` in `packages/ui`, and the site is `@nanisoft/site` in

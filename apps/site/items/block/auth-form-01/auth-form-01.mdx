@@ -63,8 +63,15 @@ different shape, and `footer` is not the place for it.
 
 - Set `type`, `autoComplete` and `required` on every field. Browsers use them to
   fill and validate, so the typing is the whole reason the field is typed.
-- Keep the error to one sentence and mark the failed fields. The Alert names the
-  problem; `aria-invalid` on each input is what a screen reader announces.
+- Keep the error to one sentence and name the field it is about, with that field's
+  `errorId`. The Alert names the problem; `aria-invalid` on the named input is what a
+  screen reader announces. Leave `errorId` off every field when the message is about
+  the submission rather than about one control, which is what bad credentials, a
+  locked account and a rate limit all are. A field left unmarked is correct, and
+  marking all of them tells a reader that the answers they got right are wrong.
+- Give a field a `description` when it needs one. It is drawn under the field and
+  the field refers to it, so the sentence reaches a reader who lands on the input
+  rather than only a reader who reads down the page.
 - Disable the submit control while `pending` and pass `pendingLabel`, so the
   reader sees that work is happening.
 

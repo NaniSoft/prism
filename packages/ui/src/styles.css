@@ -7,10 +7,13 @@
  * Structure:
  *   tailwindcss        the framework and its preflight
  *   @source            Prism's own component and block source
- *   the face           `@font-face` for the three weights the scale renders
+ *   the face           `@font-face` for the weights and the one style the scale
+ *                      renders, plus the metric-adjusted fallback beside them
  *   token CSS          the emitted `:root`/`.dark`/`[data-pack=...]` variables
  *   token theme        the `@theme` bindings that produce the semantic utilities
  *   base layer         Prism's own defaults, not a consumer's globals
+ *   reduced motion     the one `prefers-reduced-motion` block, unlayered on
+ *                      purpose so it outranks the utility layer
  */
 @import 'tailwindcss';
 
@@ -18,7 +21,7 @@
 @source './';
 
 /*
- * The face, and the licence beside it.
+ * The face, the metric-adjusted fallback, and the licence beside them.
  *
  * `--font-sans` names Inter as its first family, and naming a family is not
  * shipping it: without these rules the first entry resolves to nothing and every
@@ -32,14 +35,65 @@
  * package. The old line emitted the face at an absolute path and it silently
  * failed in all four consumer repositories.
  *
- * Three weights, and 700 is deliberately absent. The authored scale emits four
- * (`--font-weight-bold: 700`) and the shipped source renders three: 400 three
- * times, 500 ninety-nine, 600 forty-six, and 700 nothing. A 23.8 KB file that no
- * page renders is 23.8 KB every consumer downloads on every install, forever, for
- * a token nothing uses. The weight axis is also the file's only axis: the design
- * system retired the width axis, and optical sizing, which it approximated, is
- * the browser's initial behaviour. A file carrying a width range is not the file
- * this design asked for.
+ * ONE STRATEGY, AND THE SITE USES THIS ONE
+ *
+ * The documentation site used to ship its own Inter through `next/font/local`:
+ * a variable face at weights 100 to 900 plus its italic companion, 723 KiB of
+ * binary, unsubsetted, preloaded in every exported document whether or not the
+ * page set italic type, and applied to `<body>` as a directly set `--font-sans`,
+ * which outranks the inherited token. So the three rules below were never fetched
+ * on the site that documents them, and a shipped face that was missing or corrupt
+ * rendered perfectly there with every gate green. A reference site that cannot
+ * fail on the thing it documents is not evidence for it. The site's copy is gone
+ * and what is here is what all four consumer repositories get.
+ *
+ * THE METRIC-ADJUSTED FALLBACK, WHICH THE SITE HAD AND NOBODY ELSE DID
+ *
+ * `next/font` emits a second face from `local('Arial')` carrying `size-adjust`,
+ * `ascent-override`, `descent-override` and `line-gap-override`, and names it
+ * immediately after the real face, so the fallback a reader sees during the swap
+ * window occupies Inter's own line box and the text does not move when Inter
+ * arrives. None of that needs a build tool: a plain `@font-face` carries the four
+ * descriptors, which is why they are declared here rather than left to a consumer
+ * who has no way to know they exist.
+ *
+ * The four numbers are measured off this face, not chosen. Inter's hhea ascent is
+ * 1984 and its descent -494 on a 2048 em, and the average advance width over the
+ * 43 characters that decide a Latin average width is 1008.2 units against
+ * Arial's 934.5 on the same em, which is 107.89%; the overrides follow from the
+ * vertical metrics divided by that. `adjustFontFallback: 'Arial'` on the variable
+ * file this replaces measured 107.89%, 89.79%, 22.36% and 0% for the same
+ * typeface, so the line box a reader gets is the one the site already had.
+ *
+ * It is tuned to weight 400 and is not tuned to 500 or 600, which is the reading
+ * and not an oversight: the fallback is only on screen while a face is loading,
+ * and the face on screen while body copy paints is the reading weight. It is the
+ * second family of `--font-sans`, so it occupies the slot between Inter and the
+ * platform stack, and a reader whose machine has no Arial never resolves it.
+ *
+ * THREE WEIGHTS, AND 700 IS DELIBERATELY ABSENT. The authored scale emits four
+ * (`--font-weight-bold: 700`) and the shipped source renders three: `font-normal`
+ * 21 times, `font-medium` 199, `font-semibold` 101, and `font-bold` nowhere. A
+ * 23 KB file that no page renders is 23 KB every consumer downloads on every
+ * install, forever, for a token nothing uses. The weight axis is also the file's
+ * only axis: the design system retired the width axis, and optical sizing is the
+ * browser's business.
+ *
+ * That last sentence has a limit worth naming, because the file it replaces did
+ * not have it. Optical sizing is the browser's behaviour only for a font carrying
+ * an `opsz` axis, and these are static instances with none, so no optical sizing
+ * happens on these faces at any size. The variable file the site shipped did carry
+ * one, defaulting to 14, which is a third way the site and its consumers were
+ * reading the same family name and not the same typeface.
+ *
+ * ONE ITALIC, AT 400, BECAUSE `Prose` RENDERS ONE
+ *
+ * `Prose` sets `blockquote` in italic, so the shipped surface has been asking for
+ * a style no face here provided and every consumer has been reading a synthetic
+ * oblique. One real face covers every weight a browser asks for, because the
+ * matcher takes the closest available weight rather than synthesising once a face
+ * exists. A second and a third italic are 23 KB each for nothing this surface
+ * renders, and the rule that refuses 700 is the rule that refuses them.
  *
  * The licence ships beside the binaries rather than in a repository document,
  * because the obligation is discharged once here and the consumer who installs
@@ -65,6 +119,26 @@
   font-weight: 600;
   font-display: swap;
   src: url('./fonts/inter-latin-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./fonts/inter-latin-400-italic.woff2') format('woff2');
+}
+/*
+ * The fallback the swap window is measured against, and the reason it is here
+ * rather than in each consumer. See the block above for where the four numbers
+ * come from.
+ */
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial');
+  size-adjust: 107.89%;
+  ascent-override: 89.79%;
+  descent-override: 22.36%;
+  line-gap-override: 0%;
 }
 
 /* Semantic variables: the shadcn-compatible neutral default and the five packs. */
@@ -386,37 +460,132 @@
 /*
  * Reduced motion, and the whole of what this system does about it.
  *
- * It is one `animation: none` and it sits outside every layer, so it is the
- * last rule the cascade reaches for the property and it wins without needing a
- * specificity contest. `none` is the whole of it, and the choice matters: the
- * alternative is a slow version, or a fade, or a shorter cycle, and each of
- * those still animates a property a reader asked the platform not to animate.
+ * TWO DECLARATIONS, AND BOTH OF THEM ARE OUTSIDE EVERY LAYER
  *
- * What this rule deliberately does NOT do is hide anything, and that is a
- * property of the ambient layer rather than of this block. Because no rule in
- * the layer sets `opacity: 0` and no figure waits for a script, a figure is
- * complete at first paint and its resting state is its full form. So a reader
- * who lands here gets the same figure, motionless, and a print stylesheet gets
- * the same figure too. There is no state anywhere in this system whose exit
- * depends on an animation running to completion, which is why this block can be
- * a single line and why the `hidden-state` gate in the consumer kit has nothing
- * to check on this side of the seam.
+ * `animation: none` and `transition: none` on the universal selector, and the
+ * layer thing is load-bearing rather than tidy. A normal declaration outside any
+ * layer outranks a normal declaration inside one whatever its specificity says,
+ * and every utility this package renders lives in Tailwind's `utilities` layer,
+ * so this is the only place a rule of ours can reach one without naming it. The
+ * block used to name seven of them, the seven `prism-ambient-*` classes, which is
+ * why it reached the ambient layer and nothing else in the package.
  *
- * Feedback motion is untouched by this block beyond the same treatment, and
- * that is the intended reading of the rule rather than a side effect: the
- * system's standing position is that motion is "shortened rather than removed
- * under reduced motion", and for feedback that shortening is to zero. A hover
- * that still transitions at 80ms when the reader has asked for no motion is a
- * hover that ignored them.
+ * NO `!important`, AND A CONSUMER'S OWN CSS IS NOT THIS BLOCK'S BUSINESS
+ *
+ * The selector is the universal one and the declarations are not important, and
+ * those two facts together are the scope. A consumer's stylesheet is unlayered
+ * and qualified by a class, an id or an inline style, so it outranks `*` and
+ * still wins for its own elements. What this block stops is the motion a
+ * consumer inherits by installing this package, which is the motion the
+ * Components author. An `!important` here would reach past that into a surface
+ * Prism did not write, which is the override path the adoption contract forbids
+ * in the other direction.
+ *
+ * THE UNIVERSAL SELECTOR, AND THE TWO LOOPS IT CAUGHT
+ *
+ * The old block named the cycles the ambient layer publishes. It could not name
+ * every animation, because a class name is not a name this file can enumerate,
+ * and the two unbounded animations in the package were outside it for as long as
+ * it existed: `animate-spin` on `Spinner`, which turned for as long as the work
+ * did, and `animate-pulse` on `Timeline`'s running mark, which breathed for as
+ * long as the step did. A reader who asked the platform for less motion got an
+ * endless loop from both, in every mode, in all four consumer repositories, and
+ * every gate here was green, because the block had never claimed to cover them
+ * and nothing had gone looking for what it did not cover. One rule on everything
+ * means the next animation is covered by having been written.
+ *
+ * Neither loop loses anything by stopping, and that is worth saying because a
+ * spinner that does not spin sounds like a defect. `Spinner` is a `role="status"`
+ * whose accessible name is the caller's own sentence and whose ring is
+ * `aria-hidden`; `Timeline`'s mark is `aria-hidden` inside a rail, and the state
+ * is carried by the entry's words and by `data-state`. What such a reader sees
+ * where a ring was turning is a still ring, and what they hear is unchanged. The
+ * cost is named rather than argued away: a caller who used the ring alone, with
+ * no words beside it, has lost the only signal there was, and the answer is the
+ * label the Component already requires of every caller.
+ *
+ * Nothing is hidden, and that is a property of the ambient layer rather than of
+ * this block. No rule in the layer sets `opacity: 0` and no figure waits for a
+ * script, so a figure is complete at first paint and its resting state is its
+ * full form. A reader who lands here gets the same figure, motionless, and a
+ * print stylesheet gets the same figure too.
+ *
+ * WHY `none` AND NOT THE FAST TOKEN, WHICH IS THE PART THAT CHANGED
+ *
+ * The text this block replaces argued for `none` on animations and then said the
+ * system's standing position was that feedback is "shortened rather than removed",
+ * which is a position no mechanism in a stylesheet can implement. A shortened
+ * transition is a duration, and a duration cannot tell three things apart that
+ * this rule has to tell apart:
+ *
+ *   - A property that TRANSITIONS from a colour to a colour, from a colour the
+ *     reader hovered, which is the whole of the first law of motion in
+ *     `DESIGN.md`.
+ *   - A property that TRANSFORMS, where the reader has asked the platform not to
+ *     animate movement.
+ *   - A property that transitions because nothing said it should. A duration on
+ *     its own cannot see this one at all: `transition-property` starts at `all`
+ *     and `transition-duration` starts at `0s`, so one rule that sets the
+ *     duration retunes every element in the document that never declared a
+ *     transition, including a consumer's own markup, and a page that never
+ *     animated anything would begin to.
+ *
+ * `none` answers all three with one property and no per-element judgement, and it
+ * is the property that means what it says: not a faster movement, no movement.
+ * The price is that the first law's answer arrives instantly rather than over
+ * 80ms, and that is the price of having one rule: a hover still changes colour,
+ * a focus ring still appears, a dialog still opens and closes, and none of them
+ * takes time to do it. `DESIGN.md` said "shortened rather than removed" and the
+ * stylesheet implemented neither, which is the defect class this repository keeps
+ * finding, so the sentence is what moved rather than the code.
+ *
+ * WHAT MAKES ONE GLOBAL KILL SAFE, AND IT WAS NOT SAFE YESTERDAY
+ *
+ * `none` starts nothing, so `transitionend` never fires for a transition that
+ * `none` removed, and any exit in this system that waited for that event would
+ * strand whatever it was hiding: still on the page, still taking the pointer,
+ * still inside a live region. `Toast` was the one such exit, and it now asks the
+ * browser what is actually running on its root and hands over on the same commit
+ * when the answer is nothing, so a `Toast` survives this block, and survives a
+ * consumer who kills transitions in their own stylesheet as well. The overlays
+ * below it are Base UI's, and Base UI settles every popup on
+ * `getAnimations()` rather than on an event, so a Dialog, a Popover, a Select, a
+ * menu and a disclosure all remove themselves at once instead of waiting for a
+ * transition this block has just deleted. That is the whole of what had to be
+ * true before one rule could replace a hundred decisions, and it is why
+ * `packages/ui/test/reduced-motion.test.tsx` reads this block out of the built
+ * sheet rather than trusting it.
+ *
+ * AND WHY THERE IS NO PER-CALL-SITE GUARD LEFT IN THE TREE
+ *
+ * A reduced-motion variant ADDS a rule inside `prefers-reduced-motion:
+ * no-preference`. It never removes one, so a class string carrying both a
+ * transition utility and its guarded twin ran the transition at every setting:
+ * `RangeField` shipped exactly that, naming three layout properties and guarding
+ * one of them, so a drag animated a `width` at every width in every mode in all
+ * four consumer repositories. A guard is a thing to remember at every call site,
+ * this file is a thing to write once, and the guards this block makes redundant
+ * were three shapes out of three in the same package: `drawer` and `image-zoom`
+ * guarding a duration as well as the property, `lightbox` guarding the property and
+ * not the duration, and `range-field` guarding nothing at all.
+ * `scripts/check-motion.mjs` now fails on a guarded motion utility, which is what
+ * stops the next one from arriving now that there is nothing left for it to guard.
+ *
+ * ONE THING THIS BLOCK COSTS, IN THE INTEREST OF NOT BEING SURPRISED BY IT
+ *
+ * Tailwind's extractor reads this file, comments included, so a class name
+ * written inside a comment is a class name the build emits. Every utility quoted
+ * in the paragraphs above is therefore written in prose rather than in backticks
+ * with its colons, and that is the reason: a record of a retired class is a
+ * record, and a stylesheet that ships the retired class because it was written
+ * down is a second copy of the tree that nobody edits.
  */
 @media (prefers-reduced-motion: reduce) {
-  .prism-ambient-travel,
-  .prism-ambient-sweep,
-  .prism-ambient-drift,
-  .prism-ambient-scan,
-  .prism-ambient-pulse,
-  .prism-ambient-shimmer,
-  .prism-ambient-rise {
+  *,
+  ::before,
+  ::after {
     animation: none;
+    transition: none;
   }
 }
+

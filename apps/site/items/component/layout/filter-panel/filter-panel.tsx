@@ -33,7 +33,7 @@ export default function FilterPanelDemo() {
   }`
 
   return (
-    <div className="flex max-w-measure-wide flex-col gap-4">
+    <div className="flex max-w-page flex-col gap-4">
       <FilterPanel
         className="w-80"
         title="Collectors"

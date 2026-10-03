@@ -11,7 +11,7 @@ import { Button } from '@nanisoft/prism-ui/components/button'
 /** A card with a header, a body and a footer action. */
 export default function CardDemo() {
   return (
-    <Card className="max-w-sm">
+    <Card className="max-w-96">
       <CardHeader>
         <CardTitle>Release 2.4</CardTitle>
         <CardDescription>Shipped to production on 12 August.</CardDescription>

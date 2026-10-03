@@ -390,6 +390,20 @@ const BUDGETS = {
   'radio-group': 4,
   resizable: 8,
   'scroll-area': 6,
+  /*
+   * Left at the figure it had when it carried none of this, and that is the
+   * convention rather than an oversight: 27 other rows read over, including
+   * `dialog` at 9 KB against 24.7 measured, and the gate prints an overage
+   * instead of failing on it because a per-item figure cannot be compared like
+   * for like across Components that compose each other.
+   *
+   * `search-dialog` now composes `Dialog` rather than hand-rolling a modal, so its
+   * per-item bundle is almost entirely the Base UI dialog subtree that `dialog`,
+   * `alert-dialog` and `command-palette` already carry between them. A reader who
+   * has opened any modal in a product has paid for it once, and the deduplicated
+   * figure below is the one that measures that; this row is the `command-palette`
+   * case one Component over, and it does not try to.
+   */
   'search-dialog': 3,
   select: 12,
   sheet: 8,
@@ -462,14 +476,15 @@ const EXCLUSIONS = [
     reason: "TypeScript's own incremental-build cache: it is an input to a later build, not an output of this one",
   },
   {
-    // The face is not JavaScript and it is not a module: it is 70.7 KB of font
+    // The face is not JavaScript and it is not a module: it is 93.5 KB of font
     // binary that a browser fetches over the network, once, and that no bundler
     // inlines. It is a real cost to a consumer and it is priced in its own budget
-    // (check-typeface.mjs reads the licence and the @font-face sources), so
-    // excluding it here is not a way of losing it. Counting it as a module would
-    // be a worse lie, because gzipping a woff2 measures nothing a reader pays.
+    // (check-typeface.mjs reads the licence, the @font-face sources and the metric
+    // fallback), so excluding it here is not a way of losing it. Counting it as a
+    // module would be a worse lie, because gzipping a woff2 measures nothing a
+    // reader pays.
     match: (rel) => /^fonts\//.test(rel),
-    reason: 'the face and its licence: 70.7 KB of binary fetched over the network, priced by check-typeface.mjs and not by this gate',
+    reason: 'the face and its licence: 93.5 KB of binary fetched over the network, priced by check-typeface.mjs and not by this gate',
   },
 ]
 

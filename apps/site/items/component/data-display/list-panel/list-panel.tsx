@@ -34,7 +34,7 @@ const REGIONS: ItemEntry[] = (
 /** The bounded panel, and the one whose list fits. */
 export default function ListPanelDemo() {
   return (
-    <div className="flex max-w-measure-wide flex-col gap-8">
+    <div className="flex max-w-page flex-col gap-8">
       <ListPanel
         title="Collectors"
         description="Every collector this account can see"

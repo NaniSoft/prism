@@ -46,7 +46,7 @@ export default function SidebarDemo() {
   const [created, setCreated] = useState(false)
 
   return (
-    <div className="flex max-w-3xl flex-col gap-4">
+    <div className="flex max-w-192 flex-col gap-4">
       <div className="flex overflow-hidden rounded-lg border">
         {/*
          * Controlled rather than uncontrolled, because a real product keeps this

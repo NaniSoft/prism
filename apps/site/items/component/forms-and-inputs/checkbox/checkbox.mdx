@@ -60,6 +60,10 @@ does not do a thing.
   controlled box, or `defaultChecked` when the form owns it.
 - Show a required checkbox's consequence in the label, not as a separate error
   after submission.
+- A coarse pointer grows the box to 44px on its own. Do not add a second size rule
+  for touch, and do not add a band around it: a band reaches 14px past the box, and
+  in a list whose rows are stacked against a shared border that is the next row's
+  own checkbox. The row grows with the box instead.
 
 ### Content guidelines
 

@@ -66,10 +66,15 @@ large margin around it.
   belongs together before you split it into columns.
 - **Links that leave the site open in a new tab by default**, because a link that
   leaves and comes back is a reader who has lost the page they were on. Pass
-  `newTab={false}` on one link to override it: Prism does not decide which
+  
+ewTab={false}` on one link to override it: Prism does not decide which
   destinations are external, so the per-link prop wins.
 - Put a social icon in `icon`. It is `aria-hidden`, so the label is announced once
   rather than twice.
+- Pass `headingLevel` when the footer is not the last region of a page. It defaults
+  to `h2`, which is right for a footer at the root of a layout and wrong inside a
+  section that already has a heading at that level, where every column would become a
+  sibling of it.
 - Use `legal` for the copyright, the licence or the version. It is a slot because
   every one of those is a fact about a specific product and about the year it was
   published, and a block that held a year would be a block that went stale.

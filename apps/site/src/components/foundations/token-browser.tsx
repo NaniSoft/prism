@@ -64,7 +64,22 @@ export function TokenBrowser() {
           {semantics.length} custom properties. The names are shadcn&apos;s variable
           contract and are stable across versions.
         </p>
-        <div className="border-border overflow-hidden rounded-xl border">
+        {/*
+          `overflow-x-auto`, not `overflow-hidden`, and the sibling reader in
+          `token-table.tsx` is the reason to copy rather than to invent.
+
+          A semantic name and a foundation key are both longer than a phone is
+          wide, and a table cannot shrink below its min-content width, so the
+          frame has to be a scroll container rather than a clipping one: `hidden`
+          cut the tail off with no way to reach it, and a reader on a phone could
+          not read half the inventory. The rounded clip the frame wanted is not
+          lost by the change, because `border-radius` clips overflow whatever the
+          overflow is, and `overflow-x: auto` computes `overflow-y` to `auto`
+          rather than to `hidden`, so nothing is clipped vertically that was not
+          clipped before. The frame has no height of its own, so that second axis
+          never has anything to scroll.
+        */}
+        <div className="border-border overflow-x-auto rounded-xl border">
           <table className="w-full border-collapse text-left text-sm">
             <thead className="bg-muted/40">
               <tr>
@@ -93,7 +108,7 @@ export function TokenBrowser() {
       {groupNames.map((group) => (
         <section key={group} className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold tracking-tight">{group}</h2>
-          <div className="border-border overflow-hidden rounded-xl border">
+          <div className="border-border overflow-x-auto rounded-xl border">
             <table className="w-full border-collapse text-left text-sm">
               <thead className="bg-muted/40">
                 <tr>

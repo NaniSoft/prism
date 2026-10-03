@@ -78,7 +78,7 @@ export default function ThemesPage() {
       <div className="flex flex-col gap-10">
         <header className="flex flex-col gap-3">
           <h1 className="text-3xl font-semibold tracking-tight">Themes</h1>
-          <p className="text-muted-foreground max-w-2xl text-sm">
+          <p className="text-muted-foreground max-w-measure text-sm">
             Five pastel themes, generated from OKLCH so every ramp is perceptually even and
             the set reads as one family. Each theme is a tinted neutral plus a pastel brand
             ramp, re-pointed onto the shared semantic contract at build time.
@@ -104,7 +104,7 @@ export default function ThemesPage() {
                 <div className="flex flex-col gap-1">
                   <div className="flex items-baseline justify-between gap-2">
                     <h2 className="font-medium tracking-tight">{theme.name}</h2>
-                    <span className="text-muted-foreground font-mono text-[10px]">
+                    <span className="text-muted-foreground font-mono text-mono">
                       r {theme.radius}
                     </span>
                   </div>
@@ -145,7 +145,27 @@ export default function ThemesPage() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2">
+                {/*
+                  Three columns from `lg`, and one or two below it, and the
+                  breakpoints are the PARENT grid's rather than the page's.
+
+                  This grid sits inside a card, and the card is one column wide
+                  below `sm`, two from `sm` and three from `lg`. So the box this
+                  grid has to divide is widest exactly where the page is
+                  narrowest, and a track count that ignored that read the card's
+                  own width twice: at 320 pixels the card gives about 248 pixels
+                  of content, three tracks and two gaps take 16 of them, and what
+                  is left is about 77 pixels a track against an `oklch(0.9766
+                  0.014 254.604)` value. `truncate` was doing what it is for and
+                  showing a reader twelve characters of twenty-six.
+
+                  So the track count follows the card, in step with the grid that
+                  made it: one below `sm`, two from `sm`, three from `lg`. The
+                  value is legible at one and at two, and at three it truncates
+                  the same way it always did on a desktop, which is the shape the
+                  `truncate` on that line was written for.
+                */}
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   {SWATCHES.map(([key, label]) => {
                     const value = tokens[key]?.value
                     return (
@@ -154,16 +174,16 @@ export default function ThemesPage() {
                           className="border-border/60 h-9 w-full rounded-md border"
                           style={{ background: value }}
                         />
-                        <span className="text-muted-foreground truncate font-mono text-[10px]">
+                        <span className="text-muted-foreground truncate font-mono text-mono">
                           {value}
                         </span>
-                        <span className="text-muted-foreground text-[10px]">{label}</span>
+                        <span className="text-muted-foreground text-mono">{label}</span>
                       </div>
                     )
                   })}
                 </div>
 
-                <code className="text-muted-foreground bg-muted rounded px-2 py-1 font-mono text-[10px]">
+                <code className="text-muted-foreground bg-muted rounded px-2 py-1 font-mono text-mono">
                   [data-pack=&quot;{theme.id}&quot;]
                 </code>
               </section>

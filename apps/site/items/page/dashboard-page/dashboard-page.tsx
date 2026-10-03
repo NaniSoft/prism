@@ -70,7 +70,7 @@ export default function DashboardPageDemo() {
         breadcrumbs: [{ label: 'Dashboard', href: '#dashboard' }, { label: 'Overview' }],
         title: 'Overview',
         description: 'Accounts, usage and the people on this workspace.',
-        actions: [{ label: 'New account' }],
+        actions: [{ label: 'New account', href: '#new-account' }],
       }}
       stats={{
         eyebrow: 'This month',

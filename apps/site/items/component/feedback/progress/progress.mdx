@@ -10,10 +10,44 @@ minimum and its maximum through ARIA, so a screen reader announces the position
 rather than the width of a coloured bar. Pass a number for a task of known
 length, or `value={null}` for a task whose end is unknown, which is announced as
 indeterminate.
-
 The bar is a status, not a control. The reader watches it; nothing about it is
-clickable or focusable. Decorative movement is deliberately absent: the bar
-changes width only when the value changes.
+clickable or focusable. Decorative movement is deliberately absent: the bar moves
+only when the value changes, and it moves by scaling, which is a change on the
+compositor rather than a reflow of the page around it. `Progress` is one of the
+most-composed Components in the system, so that cost is paid on every bar of every
+page rather than on one bar of one page.
+
+The fill grows from the inline start edge, which is the left in a left-to-right
+document and the right in a right-to-left one, so a bar reads from the same end in
+either direction.
+
+### What a screen reader hears
+
+A bar announces a name, a position and a sentence. The position is
+`aria-valuenow`, and the sentence is `aria-valuetext`, and you get the sentence
+whether or not you ask for one: a determinate bar announces its value as a
+percentage of the range, and a bar of unknown length announces `indeterminate
+progress`, because there is no number to fall back on there.
+
+Pass `valueText` when your task has a better sentence than a percentage, which is
+most real ones. `valueText="42 of 300 files"` says what `42%` cannot: what the
+number is a count of, and how many there are altogether. The string is the whole
+answer, so a server Component that composes `Progress` can hand it over as data.
+
+Pass `getAriaValueText` instead when the sentence is cheaper to compute in the
+browser. It receives the formatted percentage first and the raw value second, so a
+callback can build "42 of 300 files, 14%" from the two arguments with no
+arithmetic of its own. The two props are mutually exclusive: a bar given both
+throws, because two different answers to one question leave the reader to guess
+which the framework preferred.
+
+Use `format` and `locale` to shape what the default sentence looks like. `format`
+takes `Intl.NumberFormat` options and is applied to the raw value on the scale, so
+`style: 'percent'` on a zero-to-hundred range reads as `4050%`; the unformatted
+default is the one path that asks for a percentage of the fraction. `locale`
+chooses the locale. Both shape only the announcement and change nothing a reader
+sees.
+
 
 ## Usage
 
@@ -23,6 +57,7 @@ import { Progress } from '@nanisoft/prism-ui/components/progress'
 <Progress value={68} aria-label="Uploading assets" />
 <Progress value={null} aria-label="Preparing preview" />
 <Progress value={100} aria-label="Build complete" />
+<Progress value={42} valueText="42 of 300 files" aria-label="Uploading assets" />
 ```
 
 <ComponentDemo slug="progress" />
@@ -49,6 +84,9 @@ for a countable task hides real information.
 
 - Give the bar an accessible name with `aria-label` or an adjacent heading, so
   the value is announced against a subject.
+- Pass `valueText` when a percentage does not describe the task. "42 of 300
+  files", "step 3 of 7" and "6 minutes remaining" all say something a percentage
+  cannot, and the sentence is the only part of the bar a reader cannot see.
 - Show the value as text next to the bar when the reader needs the number, and
   keep it in step with the bar.
 - Use `value={null}` only while the length is genuinely unknown, and switch to a

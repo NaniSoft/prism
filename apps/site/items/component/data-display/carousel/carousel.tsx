@@ -73,7 +73,7 @@ export default function CarouselDemo() {
   const [empty, setEmpty] = useState(false)
 
   return (
-    <div className="flex max-w-measure-wide flex-col gap-8">
+    <div className="flex max-w-page flex-col gap-8">
       <section className="flex flex-col gap-3">
         <Carousel
           slides={empty ? [] : narrow ? SLIDES.slice(0, 1) : showAll ? WITH_A_WIDE_SLIDE : SLIDES}

@@ -107,6 +107,24 @@ wrong one for anything else.
 
 ## Notes
 
+### It is a `Dialog`, and everything a modal owes a reader comes from there
+
+The dialog traps the keyboard, marks the page behind it inert, locks page scroll,
+closes on Escape and on the scrim, and returns focus to the control that opened it
+when it closes. Those are the four things a modal claims, and they all come from
+`Dialog` rather than from a second implementation here, so there is one modal in
+the package rather than one and a claim.
+
+Two things follow that are worth knowing before you compose it.
+
+`onClose` fires once the dialog has finished leaving, not at the moment it was
+asked to. The modal owns the reader's focus while it is closing, so handing
+over earlier would take the focus return with it. Unmount the dialog from
+`onClose`, and render it only while the reader is searching.
+
+The field takes focus when the dialog opens, because a reader who opened a search
+box opened it to type into it.
+
 ### The ranking is a scorer, not a search engine
 
 There is no stemming, no fuzzy matching and no typo tolerance. A query token matches

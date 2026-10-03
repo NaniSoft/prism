@@ -178,11 +178,14 @@ look-alike controls the reader has reached.
 
 ### Motion
 
-The scale transition is `motion-safe:transition-transform` on `duration-base` with
+The scale transition is `transition-transform` on `duration-base` with
 `ease-out`, and it is the only motion on the surface. Magnifying a picture is
-spatial movement of a whole surface, which DESIGN.md says to guard rather than
-shorten, so a reader who has asked for reduced motion gets the new size
-immediately and loses nothing but the travel between the two.
+spatial movement of a whole surface, so a reader who has asked for reduced motion
+gets the new size immediately and loses nothing but the travel between the two.
+Nothing here carries a `motion-safe:` guard: the library's one stylesheet ends
+with an unlayered `prefers-reduced-motion` rule that stops every transition, and a
+guard at a call site would either do nothing beside an unguarded utility or be a
+second place to retune the policy.
 
 The transition is on `transform` and on nothing else. An animated `width` or
 `height` is a layout animation on the main thread, which is the defect the

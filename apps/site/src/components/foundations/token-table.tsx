@@ -136,7 +136,7 @@ function Preview({ row }: { row: Row }) {
     case 'motion':
       return (
         <span
-          className="bg-primary/40 hover:translate-x-2 motion-safe:transition-transform inline-block size-5 rounded-sm"
+          className="bg-primary/40 hover:translate-x-2 transition-transform inline-block size-5 rounded-sm"
           style={{
             transitionDuration: row.key.startsWith('duration')
               ? `var(${row.variable})`

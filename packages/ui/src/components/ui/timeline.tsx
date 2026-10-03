@@ -224,7 +224,16 @@ function Timeline({
                   STATE_MARK[state],
                   // A running step is the one that is still moving, and a ring that
                   // pulses is the only motion in the Component. It is state
-                  // feedback, not decoration: it stops when the step stops.
+                  // feedback, not decoration: it stops when the step stops. It is
+                  // not guarded here because the stylesheet stops it: the
+                  // reduced-motion rule at the foot of `packages/ui/src/styles.css`
+                  // sets `animation: none` on the universal selector, and an
+                  // `animate-pulse` outside the seven classes that rule used to name
+                  // is the second unbounded loop this Component was shipping. The
+                  // mark is `aria-hidden` inside a `data-state` rail and the entry's
+                  // own words carry the state, so a reader with the setting on reads
+                  // "Deploying" and watches a still ring, which is the same sentence
+                  // with the emphasis removed.
                   state === 'running' && 'animate-pulse',
                 )}
               />

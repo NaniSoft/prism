@@ -105,9 +105,25 @@ export interface ImageZoomProps extends Omit<ComponentProps<'div'>, 'children'> 
   className?: string
 }
 
-/** The magnification every control in this Component draws. */
+/**
+ * The magnification every control in this Component draws.
+ *
+ * One string rather than three, for the reason `drawer.tsx` states: a control bar
+ * where the out control has its own metrics and the reset has another is a bar a
+ * reader moving by Tab finds unevenly spaced, and the difference is invisible in
+ * review.
+ *
+ * `pointer-coarse:size-11` is the coarse-pointer floor, as a step, because the bar
+ * is `flex flex-wrap items-center gap-2` and a bordered box at 44px is what a finger
+ * aims at. A band was rejected on condition 1: the controls sit eight pixels apart,
+ * and a 44px band centred on a 36px box overhangs its box by four on each side, which
+ * lands inside that gap rather than on a neighbour, so the band would buy eight
+ * pixels of reach for a target that is already only eight short and would leave the
+ * drawn box at 36. See DESIGN.md, The coarse-pointer floor.
+ */
 const CONTROL =
-  'text-muted-foreground hover:text-foreground border-input bg-background inline-flex size-9 items-center justify-center rounded-md border outline-none transition-colors duration-fast ease-out disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-ring focus-visible:ring-[3px]'
+  'text-muted-foreground hover:text-foreground border-input bg-background inline-flex size-9 items-center justify-center rounded-md border outline-none transition-colors duration-fast ease-out disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-ring focus-visible:ring-[3px]' +
+  ' pointer-coarse:size-11'
 
 /** A magnification inside the caller's bounds, so no press can leave the range. */
 function bound(value: number, low: number, high: number): number {
@@ -149,15 +165,17 @@ function bound(value: number, low: number, high: number): number {
  * magnification controls cannot have them here, and the answer is that this is
  * the wrong Component for a caller who wants that.
  *
- * **The scale transition is a transform under `motion-safe:`, with a token
- * duration, and it is the only motion on the surface.** Magnifying a picture is
- * spatial movement of a whole surface, which is the case DESIGN.md says to guard
- * rather than shorten, so a reader who has asked for reduced motion gets the new
- * size immediately and loses nothing but the travel between the two. The
- * transition is on `transform` and on nothing else: an animated `width` or
- * `height` is a layout animation on the main thread, which is the defect the
- * compositor rule in the ambient layer exists to prevent, and a magnified diagram
- * is large enough for that to be visible.
+ * **The scale transition is a transform with a token duration, and it is the only
+ * motion on the surface.** Magnifying a picture is spatial movement of a whole
+ * surface, so a reader who has asked for reduced motion gets the new size
+ * immediately and loses nothing but the travel between the two. Nothing here is
+ * guarded per call site any more: `packages/ui/src/styles.css` stops every
+ * transition under `prefers-reduced-motion` in one unlayered rule, and a
+ * `motion-safe:` beside an unguarded `transition-transform` was inert rather than
+ * cautious. The transition is on `transform` and on nothing else: an animated
+ * `width` or `height` is a layout animation on the main thread, which is the
+ * defect the compositor rule in the ambient layer exists to prevent, and a
+ * magnified diagram is large enough for that to be visible.
  *
  * **The scale reaches its final value before the pixels do, and that is the
  * price of using a transform.** A transform does not change layout, so the
@@ -286,7 +304,7 @@ function ImageZoom({
           // ceiling is whichever factor the caller happened to be closest to is a
           // magnifier that rounds the reader's request.
           style={{ transform: `scale(${at})` }}
-          className="block h-auto w-full origin-top-left motion-safe:transition-transform motion-safe:duration-base motion-safe:ease-out"
+          className="block h-auto w-full origin-top-left transition-transform duration-base ease-out"
         />
       </div>
 

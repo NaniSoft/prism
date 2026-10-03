@@ -152,7 +152,28 @@ const shiftMonth = (date: Date, months: number): Date => {
 const DAY_CELL =
   // `transition-colors` is a property list, which Tailwind owns; the duration and
   // the easing are the motion tokens, and neither is written here as a number.
-  'text-foreground hover:bg-accent hover:text-accent-foreground flex h-9 w-full cursor-pointer items-center justify-center rounded-md text-sm tabular-nums outline-none transition-colors duration-fast ease-out focus-visible:ring-ring focus-visible:ring-[3px]'
+  //
+  // The `pointer-coarse:h-11` is the same step `mini-calendar.tsx` takes on the same
+  // control, and it was missing here for the reason a pair of identical controls in
+  // one package usually diverges: the smaller grid was written first and the floor
+  // was added to it, and the fuller grid kept the 36px cell that is the same cell at
+  // a different size. A month grid is the densest control in the package and the one
+  // most worked with a thumb, so it is the last place the floor can be argued about.
+  'text-foreground hover:bg-accent hover:text-accent-foreground flex h-9 w-full cursor-pointer items-center justify-center rounded-md text-sm tabular-nums outline-none transition-colors duration-fast ease-out pointer-coarse:h-11 focus-visible:ring-ring focus-visible:ring-[3px]'
+
+/**
+ * The two paging controls.
+ *
+ * Held as one string for the same reason `mini-calendar.tsx` holds its own as one:
+ * they were written twice, as `size-8` each, and the small calendar's copy grew the
+ * coarse-pointer floor while this one did not. The identical control in one package
+ * at two target sizes is the defect, not the 32px, so the two strings are written out
+ * in both files on purpose: a shared constant would couple two Components that are
+ * allowed to diverge, and the line that has to stay in step is exactly the one that
+ * should be visible at both call sites.
+ */
+const NAV_CONTROL =
+  'text-muted-foreground hover:bg-accent hover:text-accent-foreground inline-flex size-8 shrink-0 items-center justify-center rounded-md outline-none transition-colors duration-fast ease-out pointer-coarse:size-11 focus-visible:ring-ring focus-visible:ring-[3px]'
 
 /**
  * How a day cell looks.
@@ -210,6 +231,15 @@ const DAY_STATE = {
  * **The caption is a live region.** Paging a month changes the month with no other
  * visible change for a reader who is on the grid, so the caption announces itself
  * when it changes.
+ *
+ * **A coarse pointer gets the 44px floor and the desktop metrics are untouched.**
+ * Both the day cell and the two paging controls grow inside `@media (pointer: coarse)`
+ * and are 36px and 32px for a mouse and a trackpad. The grid is the densest control
+ * in this package, so the floor costs it the most: on a phone six rows of 44px is a
+ * taller panel than six rows of 36px, and that is the price the whole package has
+ * already agreed to pay for every other control rather than a reason this one is the
+ * exception. A month grid is also the control a finger is least able to aim at, so it
+ * is the last place the floor can be argued about.
  */
 function Calendar({
   label,
@@ -363,8 +393,7 @@ function Calendar({
           disabled={disabled}
           onClick={() => onMonthChange(shiftMonth(month, -1))}
           className={cn(
-            'text-muted-foreground hover:bg-accent hover:text-accent-foreground inline-flex size-8 items-center justify-center rounded-md outline-none',
-            'transition-colors duration-fast ease-out focus-visible:ring-ring focus-visible:ring-[3px]',
+            NAV_CONTROL,
             'disabled:pointer-events-none disabled:opacity-50',
           )}
         >
@@ -392,8 +421,7 @@ function Calendar({
           disabled={disabled}
           onClick={() => onMonthChange(shiftMonth(month, 1))}
           className={cn(
-            'text-muted-foreground hover:bg-accent hover:text-accent-foreground inline-flex size-8 items-center justify-center rounded-md outline-none',
-            'transition-colors duration-fast ease-out focus-visible:ring-ring focus-visible:ring-[3px]',
+            NAV_CONTROL,
             'disabled:pointer-events-none disabled:opacity-50',
           )}
         >

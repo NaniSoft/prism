@@ -11,7 +11,7 @@ the figure is still true and still legible.
 are waiting for an answer, so the answer is fast, decelerating and never
 overshoots. The scale is `fast` 80ms, `base` 160ms and `slow` 280ms, with
 `ease-out` and `ease-in-out`. A component names a duration token and an easing
-token rather than a value, and spatial movement is guarded with `motion-safe:`.
+token rather than a value, and it does not decide reduced motion for itself.
 
 **A cycle is a demonstration.** A marker crosses a rail, a reticle crosses a
 series, a wavefront crosses a field. The reader did not cause it and is not
@@ -32,10 +32,21 @@ Three rules bound it, and none of them is a matter of taste.
   paint, so a reader with scripting off, a print stylesheet or a crawler sees the
   whole drawing.
 - **Reduced motion removes the movement, not the figure.** The
-  `prefers-reduced-motion` block is one `animation: none`, and because every
-  resting state is the full form, that reader gets the same figure, still.
+  `prefers-reduced-motion` block is one unlayered rule setting `animation: none`
+  and `transition: none` on the universal selector, and because every resting
+  state is the full form, that reader gets the same figure, still.
 - **Compositor properties only.** Every keyframe animates `transform` or
   `opacity`. Nothing in the layer animates a layout or paint property.
+
+One rule covers the whole package rather than each component guarding itself, and
+that is a correction rather than a preference. A `motion-safe:` variant adds a
+rule inside `prefers-reduced-motion: no-preference` and never removes one, so a
+guarded transition beside an unguarded one ran at every setting: three components
+were guarding, all three were different shapes, and one was guarding nothing. A
+duration cannot express the policy either, because it cannot tell a colour that
+changed from something that moved. What a reader with the setting on keeps is
+everything that is not movement, which is to say every state and every
+announcement, without the time.
 
 A keyframe is a mechanism and lives in the component package's stylesheet; a
 duration is a value and lives in the token source. They meet at exactly one

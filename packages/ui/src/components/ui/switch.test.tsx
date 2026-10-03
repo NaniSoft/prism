@@ -19,4 +19,18 @@ describe('Switch', () => {
     await userEvent.keyboard(' ')
     expect(control).toBeChecked()
   })
+
+  it('takes the coarse-pointer 44px floor as a band and leaves the pill alone', () => {
+    render(<Switch aria-label="Notifications" />)
+    const className = screen.getByRole('switch', { name: 'Notifications' }).className
+    expect(className).toContain('pointer-coarse:before:h-11')
+    expect(className).toContain('pointer-coarse:before:w-11')
+    expect(className).toContain('pointer-coarse:before:-translate-x-1/2')
+    expect(className).toContain('pointer-coarse:before:-translate-y-1/2')
+    // A band and not a step, so the pill is 20 by 36 on every pointer. A step would
+    // have had to be 44 square, which is not a switch, or wider, which moves the
+    // thumb's `translate-x-4` travel with the box.
+    expect(className).not.toMatch(/pointer-coarse:(?:size|h|w|min-w)-/)
+    expect(className).toContain('h-5 w-9')
+  })
 })

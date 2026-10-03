@@ -58,11 +58,18 @@ export function ColorTokens() {
               <Swatch value={entry.value} />
               <div className="flex min-w-0 flex-col gap-1">
                 <span className="font-mono text-xs font-medium break-all">{key}</span>
-                <span className="text-muted-foreground font-mono text-[11px] break-all">
+                {/*
+                  The pair of values is machine data and takes the mono step, one
+                  below the name above it. It was at 11 pixels, which is on no step
+                  of the authored scale, and it sat next to a name already at `text-xs`
+                  so the only thing the number was doing was being smaller by an
+                  amount nobody had chosen.
+                */}
+                <span className="text-muted-foreground font-mono text-mono break-all">
                   {entry.value} / {DARK[key]?.value ?? entry.value}
                 </span>
                 {entry.description ? (
-                  <span className="text-muted-foreground text-[11px] leading-snug">
+                  <span className="text-muted-foreground text-xs leading-snug">
                     {entry.description}
                   </span>
                 ) : null}
@@ -91,14 +98,31 @@ export function ColorTokens() {
                   <span className="font-mono text-xs font-medium tracking-wide uppercase">
                     {name}
                   </span>
-                  <div className="grid grid-cols-11 gap-1">
+                  {/*
+                    Eleven tracks from `sm`, and six below it.
+
+                    A ramp is eleven or twelve steps and the reader is comparing
+                    them, so the row that holds all of them is the whole point of
+                    the figure. What it needs is a swatch wide enough to read as a
+                    swatch: the cell is `h-10`, so a track narrower than about
+                    40 pixels draws a vertical sliver. Eleven of them at 320
+                    pixels leaves about 22, and the step number underneath it was
+                    the only thing that still fit. Six tracks leave about 43, which
+                    is the height the swatch is drawn at, and the twelve steps
+                    read as two rows of six and the eleven as six and five.
+
+                    `sm` rather than `md` because eleven tracks want about 590
+                    pixels of content before the swatch is wider than it is tall,
+                    and `sm` is the first authored threshold past that.
+                  */}
+                  <div className="grid grid-cols-6 gap-1 sm:grid-cols-11">
                     {(ramps[name] ?? []).map(([step, value]) => (
                       <div key={step} className="flex flex-col items-center gap-1.5">
                         <span
                           className="border-border/60 h-10 w-full rounded border"
                           style={{ background: value }}
                         />
-                        <span className="text-muted-foreground font-mono text-[10px]">{step}</span>
+                        <span className="text-muted-foreground font-mono text-mono">{step}</span>
                       </div>
                     ))}
                   </div>

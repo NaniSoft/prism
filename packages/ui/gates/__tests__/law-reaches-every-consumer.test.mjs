@@ -17,6 +17,29 @@
  * Then it restores the law, because a test that leaves the package edited is a test
  * that fails the next run for a reason of its own making.
  *
+ * **The law it edits is a COPY.** The demonstration used to write into
+ * `packages/ui/gates/laws.mjs`, which is a tracked source file in this repository,
+ * and `pnpm test:scripts` runs every file under `gates/__tests__` in its own process
+ * at the same time. `gates.test.mjs` imports `laws.mjs` by URL, so a sibling process
+ * could import it between this file's truncate and its write, or read it while the
+ * demonstration's wording was in place. That is the same defect
+ * `vector-ink-gate.test.tsx` had, and it is the class this repository keeps paying
+ * for: a test that proves its point by editing a shared source file.
+ *
+ * The copy is the whole `gates/` directory minus its own tests, and the CLI runs from
+ * there. That works because `run.mjs` resolves `@nanisoft/prism-ui` through the
+ * **consumer's** `package.json`, which is the rule the kit is built on: the consumer's
+ * own half of the contract stays where the consumer keeps it, so moving the program
+ * does not move anything it depends on. The demonstration is therefore still the same
+ * demonstration. One edit, in one copy of the package, reaching four consumers.
+ *
+ * The one write that is not in a temporary directory is each consumer's
+ * `out/index.html`, and that one is inherent: the links gate reads the export the
+ * site publishes, so a demonstration that the gate finds a broken destination has to
+ * put a broken destination in an export. It is a build output, it is gitignored, and
+ * the test removes what it planted on the way out and asserts the removal rather than
+ * assuming it.
+ *
  * The consumer copies need their own `node_modules` junction and their built
  * `out/`, because the links gate reads a real export and the pin gate resolves the
  * installed package through the consumer's own export map. When a copy is missing
@@ -27,14 +50,14 @@
  */
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 import { pathToFileURL } from 'node:url'
 
 const KIT = path.resolve(import.meta.dirname, '..')
 const REPO = path.resolve(KIT, '..', '..', '..')
-const LAWS = path.join(KIT, 'laws.mjs')
 const CONSUMERS = ['landing-page', 'atlas', 'nexus', 'alphalens']
 const HERE = path.join(REPO, '..')
 
@@ -43,10 +66,28 @@ const PUBLISHED =
   "message:\n      'A reader followed a link on this site and arrived nowhere. Every address a reader has ever used\\n' +"
 const EDITED = "message:\n      'EDITED ONCE, IN THE PACKAGE. Every address a reader has ever used\\n' +"
 
+/**
+ * A copy of the kit in a temporary directory, with its own tests left out.
+ *
+ * A copy rather than an edit of the real one, for the reason the header gives: the
+ * demonstration's whole claim is about a file the package owns, and the file it was
+ * editing was a tracked source file in a repository where another test process
+ * imports it.
+ */
+function stageKit() {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'prism-kit-'))
+  const gates = path.join(dir, 'gates')
+  mkdirSync(gates, { recursive: true })
+  for (const entry of ['cli.mjs', 'index.mjs', 'laws.mjs', 'links.mjs', 'run.mjs']) {
+    cpSync(path.join(KIT, entry), path.join(gates, entry))
+  }
+  return gates
+}
+
 /** Run the links gate in one consumer, and capture what it printed either way. */
-function runLinks(site) {
+function runLinks(site, gates) {
   try {
-    const stdout = execFileSync(process.execPath, [path.join(KIT, 'cli.mjs'), '--gate=links'], {
+    const stdout = execFileSync(process.execPath, [path.join(gates, 'cli.mjs'), '--gate=links'], {
       cwd: path.join(HERE, site),
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -60,10 +101,10 @@ function runLinks(site) {
 /**
  * Plant one defect per consumer, on the copy the site itself publishes.
  *
- * On the real repositories this mutates `out/index.html`, which is a build output
- * and is gitignored, so a run leaves the working tree's tracked files untouched. It
- * is still a write into a live repository's export, so the test removes what it
- * planted on the way out and the removal is asserted rather than assumed.
+ * On the real repositories this mutates `out/index.html`, which is a build output and
+ * is gitignored, so a run leaves the working tree's tracked files untouched. It is
+ * still a write into a live repository's export, so the test removes what it planted
+ * on the way out and the removal is asserted rather than assumed.
  */
 const planted = new Map()
 function plant(site) {
@@ -90,10 +131,12 @@ test('one edit to a law reaches every consumer, and no consumer file is edited',
   }
   for (const site of available) plant(site)
 
+  const gates = stageKit()
+  const laws = path.join(gates, 'laws.mjs')
   try {
     // Run 1: the law as published. Each consumer must find the defect AND print
     // the wording, which is the whole claim: the message is not the consumer's.
-    const first = available.map((site) => ({ site, ...runLinks(site) }))
+    const first = available.map((site) => ({ site, ...runLinks(site, gates) }))
     for (const row of first) {
       assert.equal(row.exit, 1, `${row.site}: a planted broken destination must fail the gate`)
       assert.match(row.output, /\[internal-destination\]/, `${row.site}: the gate did not name the defect class`)
@@ -103,12 +146,12 @@ test('one edit to a law reaches every consumer, and no consumer file is edited',
       )
     }
 
-    // The edit. One line, in the package, and the consumers are not touched.
-    const source = readFileSync(LAWS, 'utf8')
+    // The edit. One line, in one copy of the package, and the consumers are not touched.
+    const source = readFileSync(laws, 'utf8')
     assert.ok(source.includes(PUBLISHED), 'the demonstration needs the published wording to be present in laws.mjs')
-    writeFileSync(LAWS, source.replace(PUBLISHED, EDITED))
+    writeFileSync(laws, source.replace(PUBLISHED, EDITED))
 
-    const second = available.map((site) => ({ site, ...runLinks(site) }))
+    const second = available.map((site) => ({ site, ...runLinks(site, gates) }))
     for (const row of second) {
       assert.equal(row.exit, 1, `${row.site}: the defect is still there, so the gate is still red`)
       assert.ok(
@@ -128,16 +171,20 @@ test('one edit to a law reaches every consumer, and no consumer file is edited',
       assert.doesNotMatch(config, /arrived nowhere/, `${site}/prism-gates.json restates the law`)
       assert.doesNotMatch(config, /EDITED ONCE/, `${site}/prism-gates.json restates the law`)
     }
-  } finally {
-    // Restore the law first, then the exports: a test that leaves the package
-    // edited fails the next run for a reason of its own making.
-    const source = readFileSync(LAWS, 'utf8')
-    if (source.includes(EDITED)) writeFileSync(LAWS, source.replace(EDITED, PUBLISHED))
-    unplant()
+
+    // And this repository's own copy of the law was never written to, which is the
+    // half the demonstration used to get wrong: it edited the file it was proving a
+    // property of, in a repository where another test process imports that file.
+    const real = readFileSync(path.join(KIT, 'laws.mjs'), 'utf8')
+    assert.ok(!real.includes('EDITED ONCE'), 'the demonstration left the package edited')
     assert.ok(
-      !readFileSync(LAWS, 'utf8').includes('EDITED ONCE'),
-      'the demonstration left the package edited',
+      real.includes(PUBLISHED.split('\n')[0]),
+      'the real laws.mjs no longer carries the published wording this test replaced',
     )
+  } finally {
+    unplant()
+    rmSync(gates, { force: true, recursive: true })
+    assert.equal(planted.size, 0, 'the demonstration left a planted defect in a consumer export')
   }
 })
 

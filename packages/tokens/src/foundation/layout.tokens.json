@@ -8,9 +8,14 @@
   },
   "container": {
     "$type": "dimension",
-    "$description": "Container width and prose measures. `page` is the page column; `measure` and `measure-narrow` cap running text. Gutters are spacing tokens, not container tokens.",
+    "$description": "Maximum widths a box is held to. Two families live here and they measure different things, so they are named apart rather than run together as one scale. The page family is the document: `page` is the page column a full-width surface is centred in, and `measure` and `measure-narrow` cap running text. The overlay family is a surface that floats above the document: `overlay-panel` is a side panel or a narrow summary, `overlay-dialog` is a decision or a short task, `overlay-form` is a form, `overlay-palette` is a searchable list of full sentences, and `overlay-media` is a picture. An overlay's width is a property of the kind of surface it is, so a retune of the reading measure must not move a dialog and a retune of the page column must not move either. Gutters are spacing tokens, not container tokens, and a box that is not held to a decision (a chart's axis band, a token table's column) is a multiple of the spacing base rather than a member of this group. `overlay-palette` and `measure-narrow` are both 36rem: that is two measurements that happen to agree, not one measurement with two names, and a retune of either is a decision about its own.",
     "page": { "$value": { "value": 72, "unit": "rem" } },
     "measure": { "$value": { "value": 42, "unit": "rem" } },
-    "measure-narrow": { "$value": { "value": 36, "unit": "rem" } }
+    "measure-narrow": { "$value": { "value": 36, "unit": "rem" } },
+    "overlay-panel": { "$value": { "value": 24, "unit": "rem" } },
+    "overlay-dialog": { "$value": { "value": 28, "unit": "rem" } },
+    "overlay-form": { "$value": { "value": 32, "unit": "rem" } },
+    "overlay-palette": { "$value": { "value": 36, "unit": "rem" } },
+    "overlay-media": { "$value": { "value": 64, "unit": "rem" } }
   }
 }

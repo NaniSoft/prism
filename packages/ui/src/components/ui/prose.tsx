@@ -87,6 +87,29 @@ export type ProseProps = ComponentProps<'div'> & {
  * type rule gives body copy `text-pretty` and putting it here means a caller's
  * own `<p>` inherits it rather than needing a class of its own.
  *
+ * **A table in the run scrolls, and it is the only treatment here that has to
+ * change the element's box type to get there.** A `display: table` box cannot be
+ * a scroll container: `overflow` applies to block containers, and CSS Tables 3
+ * says the overflow property on a table-root or table-wrapper box "when its value
+ * is not either visible, clip or hidden, is ignored and treated as if its value
+ * was visible". So `overflow-x: auto` written straight onto the table computes
+ * away, the table keeps its min-content floor, and a four-column table widens the
+ * page instead of scrolling it. `display: block` is what makes the element a block
+ * container, and the declaration the code fence above already has then works on
+ * it. The row groups are wrapped in an anonymous table box by the fixup rules, and
+ * that box still inherits `border-collapse`, so a collapsed table stays collapsed.
+ *
+ * The consequence worth naming is that the grid inside now sizes to its content up
+ * to the measure rather than stretching to fill it, which is what the same
+ * technique does everywhere it is used. A table wider than the measure scrolls.
+ *
+ * The treatment is a CHILD selector, and that is load-bearing rather than
+ * incidental. A descendant selector would reach a table the caller has already put
+ * in a scroll container of their own, `Table` above all, and `display: block`
+ * there would move `caption-side` onto a block box and stop the grid filling the
+ * wrapper it arrived in. A direct child is what this component says its content
+ * is: the caller's own flow content.
+ *
  * It is a server Component: no hook, no context and no client code.
  */
 function Prose({ children, size = 'base', fullWidth = false, className, ...props }: ProseProps) {
@@ -115,7 +138,13 @@ function Prose({ children, size = 'base', fullWidth = false, className, ...props
         '[&_pre]:bg-muted [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:p-4 [&_pre]:font-mono [&_pre]:text-xs',
         '[&_pre_code]:bg-transparent [&_pre_code]:p-0',
         '[&_strong]:font-semibold',
-        '[&_table]:w-full [&_td]:px-3 [&_td]:py-2 [&_td]:align-top [&_th]:px-3 [&_th]:py-2 [&_th]:text-left',
+        // The one treatment that changes a box type rather than decorating one.
+        // The reasoning, and the two spec rules it rests on, are in this
+        // component's JSDoc: a `display: table` box cannot be a scroll container,
+        // and a child selector is what keeps the rule off a table a caller has
+        // already wrapped in a scroll container of their own.
+        '[&>table]:block [&>table]:w-full [&>table]:overflow-x-auto',
+        '[&_td]:px-3 [&_td]:py-2 [&_td]:align-top [&_th]:px-3 [&_th]:py-2 [&_th]:text-left',
         className,
       )}
       {...props}

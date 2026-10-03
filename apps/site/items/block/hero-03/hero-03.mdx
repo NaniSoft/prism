@@ -83,6 +83,10 @@ composition rather than a preference.
 ### Best practices
 
 - Pass between two and four proofs. Three fills the row; one reads as an error.
+- Give every action a destination, or pass a `slot` holding the control you want.
+  `href` is required on the action arm and there is no third arm, so an action that
+  names a label and nothing else is a compile error rather than a button that goes
+  nowhere. See Hero01 for the two arms.
 - Pass `delta` as the number the reader should read. `Metric` prints the bare number
   because Prism cannot format a delta it has no unit for, so a percentage is `12` and
   not `0.12`.

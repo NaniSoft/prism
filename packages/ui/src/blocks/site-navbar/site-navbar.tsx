@@ -162,6 +162,11 @@ export type SiteNavbarProps = {
    * Keeps the bar at the top of the viewport as the page scrolls. On by default,
    * because the bar is how a reader leaves the page they are on, and a bar that
    * scrolls away takes that with it on exactly the long pages a reader needs it.
+   *
+   * `false` is honoured: the bar is then part of the flow and scrolls away with the
+   * page. It was accepted and ignored until this release, so a site that passed it
+   * was given the sticky bar it had asked not to have, and `SiteHeader` has always
+   * applied it the other way round.
    */
   sticky?: boolean
   /** Layout only. Changing a Prism-owned visual property from here is prohibited. */
@@ -206,9 +211,38 @@ export type SiteNavbarProps = {
  * The bottom hairline is `border-border`, so the bar separates from the page by a
  * line rather than by a fill change, which is how every surface in this system is
  * separated: in the base pack `background` and `card` resolve to the same value, so
- * a fill is not available as a separator. The bar is translucent and blurred, so the
- * content scrolling under it is legible through it rather than hidden by it, which
- * is the reason a sticky bar can be translucent at all.
+ * a fill is not available as a separator.
+ *
+ * **The bar is opaque, and it used not to be.** It carried `bg-background/80` and
+ * `backdrop-blur`, so the page showed through it blurred. A backdrop filter is
+ * evaluated against everything painted behind the element, and this element is a
+ * full-viewport-width sticky bar, so on a scrolling page the browser re-sampled and
+ * re-blurred that backdrop on every frame of the scroll, on every page of every site
+ * that composes this bar. It is the most expensive thing in the document for the
+ * least visible return: the twenty percent of the page showing through a bar that
+ * carries its own labels on top of it is not what a reader looks at.
+ *
+ * **The blur is not kept behind a capability check, because a capability check does
+ * not pay for it.** `@supports (backdrop-filter: blur(1px))` is false only in a
+ * browser that would have dropped the declaration and composited no no-op, and it is
+ * true in every browser that does the expensive thing, so it changes no reader's
+ * cost. It would also leave a third outcome in the world, and the worst one: a bar
+ * that is a flat eighty percent veil with unblurred text passing under it.
+ *
+ * What replaces the pair is `bg-background`, which is what `SiteHeader` already
+ * ships, and the reason this is legible rather than merely cheaper is that an opaque
+ * bar makes its own contrast the token pair the contrast gate already holds:
+ * `muted-foreground` on `background` in every pack and in both modes, with nothing
+ * composited between the ink and the ground. A `/80` background has no such pair at
+ * all, because the colour under it is a decision the reader's scroll position makes
+ * and no token in this system describes it.
+ *
+ * `will-change` is absent and stays absent. A `backdrop-filter` is promoted to its
+ * own layer by the browser when it has something to filter, so `will-change` on the
+ * bar would only keep that layer alive: nothing on this bar animates, there is no
+ * frame coming for the hint to be ready for, and a hint applied at rest is a hint
+ * with no release. This package ships no `will-change` anywhere, and the bar is not
+ * the place to start one.
  *
  * **It is a server Component with one client island inside it.** The lockup and the
  * navigation are rendered on the server and ship no JavaScript; the controls are a
@@ -244,7 +278,8 @@ export function SiteNavbar({
     <header
       data-slot="site-navbar"
       className={cn(
-        'border-border/80 bg-background/80 sticky top-0 z-20 w-full border-b backdrop-blur',
+        'border-border bg-background w-full border-b',
+        sticky && 'sticky top-0 z-20',
         className,
       )}
     >

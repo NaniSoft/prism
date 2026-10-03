@@ -221,7 +221,7 @@ const HEADINGS: Array<{
     render: () => (
       <Pricing01
         title={TITLE}
-        plans={[{ name: 'First plan', price: '$0', features: ['One line'], cta: 'Choose' }]}
+        plans={[{ id: 'first', name: 'First plan', price: '$0', features: ['One line'], action: { label: 'Choose', href: '/choose' } }]}
       />
     ),
   },

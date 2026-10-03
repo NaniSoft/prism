@@ -1,7 +1,7 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import axe from 'axe-core'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
   Resizable,
@@ -41,6 +41,62 @@ const split = (props: Partial<Parameters<typeof Resizable>[0]> = {}) =>
 
 /** The divider's reported position, which is what a reader is told. */
 const value = () => screen.getByRole('separator', { name: 'Resize the run list' }).getAttribute('aria-valuenow')
+
+/**
+ * A box for a jsdom that draws none, and a count of the reads made against it.
+ *
+ * The drag turns a distance the pointer travelled into a share of the group's travel,
+ * so it cannot be exercised at all without a group that reports a travel, and jsdom
+ * reports zero for every one of them. So the group is given one here: a thousand
+ * pixels along its axis, which makes one percent of the group ten pixels and lets a
+ * test say what a drag did in numbers a reader would recognise.
+ *
+ * **Two claims are kept apart on purpose.** The reads are counted for one test only,
+ * and that test says it is counting reads. Every other test here asserts where the
+ * divider ended up, which is the claim that survives a reader with a browser.
+ */
+function groupBox(read: () => { width: number; height: number }) {
+  const reads: Element[] = []
+  let proto: object | null = Object.getPrototypeOf(document.createElement('div'))
+  while (proto !== null && Object.getOwnPropertyDescriptor(proto, 'getBoundingClientRect') === undefined) {
+    proto = Object.getPrototypeOf(proto)
+  }
+  if (proto === null) throw new Error('jsdom owns no getBoundingClientRect, so there is no drag to test.')
+  const owner = proto
+  const original = Object.getOwnPropertyDescriptor(owner, 'getBoundingClientRect')
+  Object.defineProperty(owner, 'getBoundingClientRect', {
+    configurable: true,
+    value(this: Element) {
+      reads.push(this)
+      const box = read()
+      return {
+        x: 0,
+        y: 0,
+        top: 0,
+        left: 0,
+        right: box.width,
+        bottom: box.height,
+        width: box.width,
+        height: box.height,
+        toJSON: () => ({}),
+      }
+    },
+  })
+  return {
+    /** Reads of one element's own box, which is what a pointer drag is measured against. */
+    readsOf: (element: Element) => reads.filter((seen) => seen === element).length,
+    restore() {
+      if (original === undefined) delete (owner as Record<string, unknown>).getBoundingClientRect
+      else Object.defineProperty(owner, 'getBoundingClientRect', original)
+    },
+  }
+}
+
+const boxes: (() => void)[] = []
+
+afterEach(() => {
+  for (const restore of boxes.splice(0)) restore()
+})
 
 describe('the Resizable', () => {
   it('is a named group, so two unnamed panes on a page tell themselves apart', () => {
@@ -308,6 +364,158 @@ describe('the Resizable', () => {
     // moves and the pointer does not: a split that only half works, and a defect
     // that looks like a working drag in every screenshot.
     expect(seen.at(-1)).toBe(screen.getByRole('group', { name: 'Runs and details' }))
+  })
+
+  it('follows the pointer through a drag, from wherever the reader took hold', () => {
+    const box = groupBox(() => ({ width: 1000, height: 400 }))
+    boxes.push(box.restore)
+    split({ defaultPosition: 40 })
+    const handle = screen.getByRole('separator', { name: 'Resize the run list' })
+
+    // The divider is a pixel wide and a reader takes hold of it wherever their
+    // pointer landed, so the press is a hundred pixels to the right of the position
+    // the divider reports: four hundred pixels into a group of a thousand. **A drag
+    // measures from the press and not from the divider**, so the press itself moves
+    // nothing, and the first move of fifty pixels moves the divider by exactly the
+    // five percent those fifty pixels are. A divider that snapped to the pointer
+    // would be at fifty after the press, which is a divider that jumps out from
+    // under the finger holding it.
+    fireEvent.pointerDown(handle, { pointerId: 1, button: 0, clientX: 500, clientY: 0 })
+    expect(value()).toBe('40')
+
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 550, clientY: 0 })
+    expect(value()).toBe('45')
+
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 600, clientY: 0 })
+    expect(value()).toBe('50')
+  })
+
+  it('follows the pointer along the vertical axis for a stacked split', () => {
+    const box = groupBox(() => ({ width: 1000, height: 400 }))
+    boxes.push(box.restore)
+    split({ orientation: 'vertical', defaultPosition: 40 })
+    const handle = screen.getByRole('separator', { name: 'Resize the run list' })
+
+    // The same model on the other axis, and the axis is the caller's word rather
+    // than the Component's: a vertical split follows the y and a horizontal one the
+    // x, so a caller who passes the wrong one cannot get a divider that tracks the
+    // wrong coordinate.
+    fireEvent.pointerDown(handle, { pointerId: 1, button: 0, clientX: 0, clientY: 200 })
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 0, clientY: 240 })
+
+    expect(value()).toBe('50')
+  })
+
+  it('stops at its ends when a drag runs past them', () => {
+    const box = groupBox(() => ({ width: 1000, height: 400 }))
+    boxes.push(box.restore)
+    split({ defaultPosition: 50 })
+    const handle = screen.getByRole('separator', { name: 'Resize the run list' })
+
+    // A drag past the end is a drag past the end, and not a way to push a pane to
+    // nothing: the pointer carries on and the divider stops where the reader would
+    // expect the divider to stop.
+    fireEvent.pointerDown(handle, { pointerId: 1, button: 0, clientX: 500, clientY: 0 })
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 5000, clientY: 0 })
+    expect(value()).toBe('90')
+
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: -5000, clientY: 0 })
+    expect(value()).toBe('10')
+  })
+
+  it('stays put once the reader has let go', () => {
+    const box = groupBox(() => ({ width: 1000, height: 400 }))
+    boxes.push(box.restore)
+    split({ defaultPosition: 40 })
+    const handle = screen.getByRole('separator', { name: 'Resize the run list' })
+
+    fireEvent.pointerDown(handle, { pointerId: 1, button: 0, clientX: 500, clientY: 0 })
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 550, clientY: 0 })
+    fireEvent.pointerUp(handle, { pointerId: 1 })
+    expect(value()).toBe('45')
+
+    // A pointer that keeps travelling after the release is a pointer that is no
+    // longer holding the divider, so the divider does not go with it.
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 900, clientY: 0 })
+    expect(value()).toBe('45')
+  })
+
+  it('ignores a press that is not the divider being grabbed', () => {
+    const box = groupBox(() => ({ width: 1000, height: 400 }))
+    boxes.push(box.restore)
+    split({ defaultPosition: 40 })
+    const handle = screen.getByRole('separator', { name: 'Resize the run list' })
+
+    // A right-click is not a drag, so it neither moves the divider nor starts one
+    // that a later pointer event could carry on with.
+    fireEvent.pointerDown(handle, { pointerId: 1, button: 2, clientX: 500, clientY: 0 })
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 700, clientY: 0 })
+    expect(value()).toBe('40')
+  })
+
+  it('reads the group box once for a whole drag, rather than once for every frame', () => {
+    const box = groupBox(() => ({ width: 1000, height: 400 }))
+    boxes.push(box.restore)
+    split({ defaultPosition: 40 })
+    const group = screen.getByRole('group', { name: 'Runs and details' })
+    const handle = screen.getByRole('separator', { name: 'Resize the run list' })
+
+    fireEvent.pointerDown(handle, { pointerId: 1, button: 0, clientX: 500, clientY: 0 })
+    for (let frame = 0; frame < 8; frame += 1) {
+      fireEvent.pointerMove(handle, { pointerId: 1, clientX: 550 + frame * 50, clientY: 0 })
+    }
+    expect(value()).toBe('80')
+
+    // **This assertion is a count of reads and not a behaviour**, and it is here
+    // because jsdom does no layout, so what a read costs cannot be seen from here.
+    // What can be seen is how many there are. A drag needs the group's travel once,
+    // at the press, and the box cannot change while the drag runs: the panes are
+    // given a percentage of the group and the group is not given a percentage of the
+    // panes. Reading it again on every frame would be reading it immediately after
+    // the frame before wrote the new position and therefore wrote new styles, which
+    // is one forced synchronous layout per frame of every drag on the page.
+    expect(box.readsOf(group)).toBe(1)
+  })
+
+  it('keeps dragging against the box the press found, when the group changes size under it', () => {
+    const group = { width: 1000, height: 400 }
+    const box = groupBox(() => group)
+    boxes.push(box.restore)
+    split({ defaultPosition: 40 })
+    const handle = screen.getByRole('separator', { name: 'Resize the run list' })
+
+    fireEvent.pointerDown(handle, { pointerId: 1, button: 0, clientX: 500, clientY: 0 })
+    // The window under the reader's hand is twice as wide as it was when they took
+    // hold of the divider, and the box it reports now says so.
+    group.width = 2000
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 550, clientY: 0 })
+
+    // Fifty pixels of a group of a thousand is five percent, and the drag was
+    // measured against the box it started with rather than a box it never read. The
+    // trade is deliberate and it is written down at the ref: a reader mid-gesture is
+    // given the answer they can use, and a caller who resizes the group under a
+    // pointer has to end that drag and start it again. Pinned here so that changing
+    // it is a decision somebody takes rather than an accident.
+    expect(value()).toBe('45')
+  })
+
+  it('moves by a step with the keyboard on a group that reports no box at all', async () => {
+    const user = userEvent.setup()
+    split({ defaultPosition: 40 })
+    const handle = screen.getByRole('separator', { name: 'Resize the run list' })
+    handle.focus()
+
+    // **The claim is that the keyboard never needs the cached box.** jsdom reports a
+    // zero width and a zero height for everything, which is the exact reading a drag
+    // cannot use and a key press does not consult: a key moves the divider by a
+    // share of its position, so a Component that had put the drag's measurement on
+    // the keyboard's path would report a divider that had got a fifth narrower.
+    await user.keyboard('{ArrowRight}{ArrowRight}')
+    expect(value()).toBe('50')
+    await user.keyboard('{ArrowLeft}')
+    expect(value()).toBe('45')
+    await user.keyboard('{End}')
+    expect(value()).toBe('90')
   })
 
   it('has no accessibility violations when it is on the page', async () => {

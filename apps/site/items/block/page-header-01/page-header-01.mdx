@@ -14,13 +14,15 @@ The block composes these components:
 | Part | Component | Role |
 | --- | --- | --- |
 | Trail | Breadcrumb | the ancestor path, ending on the current page |
-| Actions | Button | one primary action and supporting actions |
+| Actions | CtaLink | one primary destination and supporting destinations |
 | Title | Typography | the page heading and its supporting line |
 | Rule | Separator | closes the band before the working content |
 
-Every step and action is a prop. The trail renders native anchors, so the
-consumer owns the destination; a router link or a stateful control goes through
-`actionsSlot` instead.
+Every step and action is a prop. Both the trail and the actions render native
+anchors with a required `href`, so the consumer owns the destination and a control
+reads as a link rather than as a command. A control that cannot be a link, such as a
+router `Link` or a menu trigger, is the `slot` arm of `actions` and the block places
+it where that action sits.
 
 ## Usage
 
@@ -36,7 +38,19 @@ import { PageHeader01 } from '@nanisoft/prism-ui/blocks/page-header-01'
   ]}
   title="Overview"
   description="Deployments, usage and the people on this project."
-  actions={[{ label: 'Share' }, { label: 'New deployment', variant: 'outline' }]}
+  actions={[
+    { label: 'New deployment', href: '/deployments/new' },
+    { label: 'Share', href: '/share', variant: 'outline' },
+  ]}
+/>
+
+// A control that is not a link is a slot, and it says which position it fills.
+// `actionsSlot` is gone; it could only ever render before the row's own actions.
+
+<PageHeader01
+  headingLevel="h1"
+  title="Overview"
+  actions={[{ slot: <WorkspaceMenu label="Actions" /> }, { label: 'New deployment', href: '/deployments/new' }]}
 />
 ```
 
@@ -64,8 +78,9 @@ orients a returning user, and the two carry different weight.
   composed under a heading the document already owns.
 - Keep the trail to the ancestors plus the current page. Repeating the title as
   the last step reads as noise.
-- Pass one primary action and at most two supporting ones, and put a link or a
-  menu in `actionsSlot` when it needs its own router or state.
+- Pass one primary action and at most two supporting ones. An action with a
+  destination is a link; a menu or a router link goes in the `slot` arm, where it can
+  take the position it needs rather than always landing first.
 
 ### Content guidelines
 

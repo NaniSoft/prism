@@ -13,6 +13,10 @@ and reaches you through the packages.
 pnpm add @nanisoft/prism-ui react react-dom
 ```
 
+`react` and `react-dom` are peer dependencies at `^19.2.0`, so your application
+owns them and gets exactly one copy. Bring your own React 19; the package is
+written and tested against that line.
+
 Import the one stylesheet in your app root and, if you want runtime switching,
 mount the provider:
 
@@ -43,7 +47,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 You install no Tailwind, no PostCSS and no token plugin. `styles.css` is
 self-sufficient: it carries the custom properties, the theme bindings, the
-compiled utilities every component uses, and the base layer.
+compiled utilities every component uses, the base layer, and the `@font-face`
+rules for Inter at the weights and the one style the scale renders, beside the
+binaries in `dist/fonts` and the licence that has to travel with them. You load no
+font of your own: `--font-sans` names the face this package ships, so a second
+copy is a second answer to a token the library already resolves.
 
 ## The provider
 

@@ -150,9 +150,9 @@ const PANEL: Record<DrawerSide, string> = {
   bottom:
     'w-full max-h-[85vh] rounded-t-xl border-x border-t [transform:translateY(calc(var(--drawer-swipe-movement-y,0px)+100%))] data-[starting-style]:[transform:translateY(calc(var(--drawer-swipe-movement-y,0px)+100%))] data-[ending-style]:[transform:translateY(calc(var(--drawer-swipe-movement-y,0px)+100%))]',
   left:
-    'h-full w-3/4 max-w-sm rounded-r-xl border-y border-r [transform:translateX(calc(var(--drawer-swipe-movement-x,0px)-100%))] data-[starting-style]:[transform:translateX(calc(var(--drawer-swipe-movement-x,0px)-100%))] data-[ending-style]:[transform:translateX(calc(var(--drawer-swipe-movement-x,0px)-100%))]',
+    'h-full w-3/4 max-w-overlay-panel rounded-r-xl border-y border-r [transform:translateX(calc(var(--drawer-swipe-movement-x,0px)-100%))] data-[starting-style]:[transform:translateX(calc(var(--drawer-swipe-movement-x,0px)-100%))] data-[ending-style]:[transform:translateX(calc(var(--drawer-swipe-movement-x,0px)-100%))]',
   right:
-    'h-full w-3/4 max-w-sm rounded-l-xl border-y border-l [transform:translateX(calc(var(--drawer-swipe-movement-x,0px)+100%))] data-[starting-style]:[transform:translateX(calc(var(--drawer-swipe-movement-x,0px)+100%))] data-[ending-style]:[transform:translateX(calc(var(--drawer-swipe-movement-x,0px)+100%))]',
+    'h-full w-3/4 max-w-overlay-panel rounded-l-xl border-y border-l [transform:translateX(calc(var(--drawer-swipe-movement-x,0px)+100%))] data-[starting-style]:[transform:translateX(calc(var(--drawer-swipe-movement-x,0px)+100%))] data-[ending-style]:[transform:translateX(calc(var(--drawer-swipe-movement-x,0px)+100%))]',
 }
 
 /**
@@ -163,7 +163,14 @@ const PANEL: Record<DrawerSide, string> = {
  * finds unevenly spaced, and the difference is invisible in review.
  */
 const CONTROL =
-  'text-muted-foreground hover:text-foreground inline-flex size-9 items-center justify-center rounded-md outline-none transition-colors duration-fast ease-out disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-ring focus-visible:ring-[3px]'
+  'text-muted-foreground hover:text-foreground inline-flex size-9 items-center justify-center rounded-md outline-none transition-colors duration-fast ease-out disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-ring focus-visible:ring-[3px]' +
+  // The coarse-pointer floor, as a step. The drawer's own close control is a flow
+  // child at the foot of the panel rather than a corner overlay, so the reason
+  // `dialog.tsx` gives for stepping rather than banding does not apply here and
+  // neither does the reason it gives for banding: there is no inset to overhang and
+  // no corner to be clipped by the screen. Growing it adds eight pixels to the foot
+  // row of the panel and nothing else. See DESIGN.md, The coarse-pointer floor.
+  ' pointer-coarse:size-11'
 
 /**
  * A panel anchored to an edge of the viewport that the reader can push away.
@@ -203,7 +210,8 @@ const CONTROL =
  * `Sheet` says in its own documentation.
  *
  * **A wide viewport gets a narrower panel, not a different Component.** The
- * cross-axis extent is capped, so a side drawer is `w-3/4` bounded by `max-w-sm`
+ * cross-axis extent is capped, so a side drawer is `w-3/4` bounded by
+ * `max-w-overlay-panel`
  * and a bottom drawer is full width with `max-h-[85vh]`: at 64rem the panel is a
  * panel beside the work rather than a wall across it. What Prism will not do is
  * swap the Drawer for a Dialog at a breakpoint. A surface that changes shape with
@@ -233,14 +241,17 @@ const CONTROL =
  * are about drawers inside drawers, which is a shape no consumer of this package
  * ships.
  *
- * **The entrance is a spatial move and it is under `motion-safe:`.** A panel
- * crossing the whole width of a viewport is the largest movement in the shipped
- * surface, and DESIGN.md's rule is that spatial movement is guarded rather than
- * shortened. A reader who has asked for reduced motion gets the panel already
- * open, with no fade either, because the panel's resting state is its full form
- * and there is nothing to lose. The backdrop is the other half of that decision:
- * it fades rather than travels, so its transition is left unguarded on the
- * shorter token duration, exactly as `Dialog`'s backdrop is.
+ * **The entrance is a spatial move, and the whole of it is stopped under reduced
+ * motion.** A panel crossing the whole width of a viewport is the largest movement
+ * in the shipped surface, and a reader who has asked for less motion gets the panel
+ * already open, with no fade either, because the panel's resting state is its full
+ * form and there is nothing to lose. That used to be this Component's own decision,
+ * spelled in a `motion-safe:` on the panel and left off the backdrop so the backdrop
+ * could still fade; it is now `packages/ui/src/styles.css`'s, in one unlayered rule
+ * that stops every transition in the package, which is both the fade and the travel
+ * and every other one. Nothing here is guarded per call site any more, and a guard
+ * that sits beside an unguarded `transition-transform` never stopped anything:
+ * Tailwind's variant adds a rule rather than removing one.
  *
  * **The release from a flick is not velocity-matched, and that is the price of
  * the token.** Base UI's own examples scale the dismissal duration by the swipe
@@ -300,8 +311,8 @@ function DrawerContent({
           className={cn(
             'bg-background text-foreground shadow-md flex flex-col outline-none',
             'focus-visible:ring-ring focus-visible:ring-[3px]',
-            'motion-safe:transition-transform motion-safe:duration-slow motion-safe:ease-out',
-            'motion-safe:data-swiping:transition-none',
+            'transition-transform duration-slow ease-out',
+            'data-swiping:transition-none',
             PANEL[side],
             className,
           )}

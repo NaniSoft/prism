@@ -31,6 +31,20 @@
     "check": {
       "dependsOn": ["build"]
     },
+    "@nanisoft/prism-ui#check": {
+      "dependsOn": ["build"],
+      "inputs": [
+        "*",
+        "**",
+        "!node_modules/**",
+        "!dist/**",
+        "!*.tsbuildinfo",
+        "!prettier*",
+        "$TURBO_ROOT$/apps/site/src/**",
+        "$TURBO_ROOT$/apps/site/items/**",
+        "$TURBO_ROOT$/packages/tokens/src/**"
+      ]
+    },
     "test": {
       "dependsOn": ["^build", "^test"]
     },

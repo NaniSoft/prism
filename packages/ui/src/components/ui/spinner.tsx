@@ -55,6 +55,19 @@ export interface SpinnerProps extends Omit<ComponentProps<'span'>, 'children'> {
  * loop is what `animate-spin` is. It is state feedback rather than decoration
  * for the reason `Timeline`'s pulsing mark is: it is running because work is
  * running, and it stops when the work does.
+ *
+ * **Under reduced motion the ring stops turning, and the reason it is not
+ * guarded here is that the stylesheet has already stopped it.** An unbounded
+ * loop is the one motion the setting was asked about, so
+ * `packages/ui/src/styles.css` ends with an unlayered `prefers-reduced-motion`
+ * rule that sets `animation: none` on the universal selector, and a
+ * `motion-safe:` beside an unguarded `animate-spin` would have been the inert
+ * shape `RangeField` shipped rather than a guard. What the reader gets instead
+ * is a still ring and the words beside it: the ring is `aria-hidden` and the
+ * name is on the `status`, so the announcement is unchanged and only the
+ * turning is gone. The cost is named rather than argued away, and it is the
+ * reason `label` is required: a caller who drew the ring with nothing beside it
+ * has no signal left, and there is one in this package that always worked.
  */
 const RING: Record<NonNullable<SpinnerProps['size']>, string> = {
   sm: 'size-4 border-2',

@@ -19,7 +19,7 @@ import { SettingsPage } from '../src/pages/settings-page'
 
 const features = [{ icon: Star, title: 'Tokens', body: 'One source for every value.' }]
 const stats = [{ label: 'Users', value: '1,204' }]
-const plans = [{ name: 'Free', price: '$0', features: ['One project'], cta: 'Start' }]
+const plans = [{ id: 'free', name: 'Free', price: '$0', features: ['One project'], action: { label: 'Start', href: '/signup' } }]
 const shell = { navigation: <a href="/">Home</a>, navigationLabel: 'Main' }
 
 const tableLabels: DataTable01Labels = {

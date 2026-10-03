@@ -44,6 +44,13 @@ export interface SliderProps extends Omit<ComponentProps<'div'>, 'onChange'> {
  * ends. Give it an `aria-label` or a visible label. Use a Slider for a value
  * that is approximate and continuous; when the exact number matters, use an
  * Input of type number.
+ *
+ * The thumb is 16px for a mouse and a trackpad and takes the 44px coarse-pointer
+ * floor on touch input as a transparent band around itself, so the dot you see and
+ * the dot you grab are the same size on every pointer. A press inside the band
+ * drags the thumb from where it was rather than jumping the value to where you
+ * pressed, which is the trade the floor costs on a six pixel rail; the arrow keys
+ * and the range input behind the track still reach every value.
  */
 function Slider({
   className,
@@ -74,9 +81,33 @@ function Slider({
             // the element the JSDoc above says stays focusable, so it is the one
             // indicator a keyboard user has. See the comment on the Button's base class.
             'border-primary bg-background shadow-xs ring-ring block size-4 shrink-0 rounded-full border outline-none',
+            // The 44px coarse-pointer floor, and here it is a band rather than a step.
+            //
+            // The two obvious steps are both wrong for a thumb. Growing the dot to 44px
+            // puts a ball the size of a switch on a 6px track, and Base UI positions the
+            // thumb with `left: <percent>%` plus a `translate`, so the value would not
+            // move, but the drawing would: a slider whose handle is seven times the
+            // thickness of its own rail reads as a different control. A band reaches the
+            // same 44px with the 16px dot untouched.
+            //
+            // The band is safe here because nothing sits within fourteen pixels of a
+            // thumb to be swallowed by it. It does overlap the track, and that is the
+            // trade rather than an oversight: a press inside the band grabs the thumb and
+            // drags it from where it was, where a press on the bare track 10px away would
+            // have jumped the value to that point. On a coarse pointer the drag is the
+            // model, a 6px rail cannot be tapped to a chosen value by anyone, and the
+            // keyboard still reaches every value through the range input behind it.
+            //
+            // Nothing about the value maths moves, and that is a claim about Base UI
+            // rather than about this class string. It reads the press offset from
+            // `getMidpoint(thumb)`, and it computes the value from the control's own
+            // `getBoundingClientRect()`, so a pseudo-element, which contributes to neither
+            // box, cannot shift either. `slider.test.tsx` asserts that the value still
+            // tracks a pointer press at a given coordinate.
             'transition-[color,box-shadow] duration-fast ease-out',
             'hover:ring-4 focus-visible:ring-4',
             'data-[disabled]:pointer-events-none',
+            'pointer-coarse:before:absolute pointer-coarse:before:left-1/2 pointer-coarse:before:top-1/2 pointer-coarse:before:h-11 pointer-coarse:before:w-11 pointer-coarse:before:-translate-x-1/2 pointer-coarse:before:-translate-y-1/2 pointer-coarse:before:content-[""]',
           )}
         />
       </SliderPrimitive.Control>

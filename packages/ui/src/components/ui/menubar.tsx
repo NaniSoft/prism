@@ -200,6 +200,15 @@ function MenubarMenu({ ...props }: MenubarMenuProps) {
  *
  * It is a real button and it is a menu item in the bar's own model, so Enter and
  * Arrow Down open the menu and the arrows along the bar move between triggers.
+ *
+ * `pointer-coarse:h-11` is the coarse-pointer floor, as a step. A band was rejected
+ * on condition 1 and this is the sharpest case of it in the package: the triggers sit
+ * beside each other along the bar, so a 44px band on one trigger is a press aimed at
+ * its neighbour. That is the same argument `DESIGN.md` makes for a checkbox beside the
+ * next row's own checkbox, and the same one that made `NumberField` turn its steppers
+ * side by side rather than stack two 44px bands on two 18px rows. Growing the bar's
+ * height from 32 to 44 on touch input is the cost, and it is the cost the platform's
+ * own menu bars pay. See DESIGN.md, The coarse-pointer floor.
  */
 function MenubarTrigger({ className, ...props }: MenubarTriggerProps) {
   return (
@@ -211,6 +220,7 @@ function MenubarTrigger({ className, ...props }: MenubarTriggerProps) {
         'hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring focus-visible:ring-[3px]',
         'data-[popup-open]:bg-accent data-[popup-open]:text-accent-foreground',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+        'pointer-coarse:h-11',
         className,
       )}
       {...props}

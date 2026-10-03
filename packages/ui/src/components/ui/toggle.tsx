@@ -100,6 +100,14 @@ function Toggle({
         // same control on the page ground and a different one inside a Block.
         'hover:bg-accent hover:text-accent-foreground',
         'data-[pressed]:bg-accent data-[pressed]:text-accent-foreground',
+        // The coarse-pointer floor, as a step with `min-w-11` on the other axis, and a
+        // band is rejected on condition 1 for the reason `toggle-group.tsx` rejects one:
+        // a `Toggle` is most often one member of a row or a set, and a 44px band on it is
+        // a press aimed at whatever sits beside it. `min-w-11` is the width half for the
+        // reason `Button` gives, since an icon-only toggle is `size-4` plus `px-2.5` and
+        // would otherwise stay under the floor across. See DESIGN.md, The coarse-pointer
+        // floor.
+        'pointer-coarse:h-11 pointer-coarse:min-w-11',
         size === 'sm' ? 'h-8 min-w-8 px-2.5' : 'h-9 min-w-9 px-3',
         className,
       )}

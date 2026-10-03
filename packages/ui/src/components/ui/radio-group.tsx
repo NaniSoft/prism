@@ -79,6 +79,13 @@ function RadioGroup({ className, ...props }: RadioGroupProps) {
  * submits with the form. Space selects the focused item when arrow-key
  * navigation has not already selected it. Put the item beside its
  * `FieldLabel`, and keep the group's name on the RadioGroup itself.
+ *
+ * **A coarse pointer gets a 44px item and the desktop 16px item is untouched.** The
+ * step is the one `checkbox.tsx` takes and for the same reason, and the reason it is a
+ * step rather than a band is the same one as well: a band's fourteen pixels reach the
+ * next item in a stacked group, where growing the item moves the group instead. The
+ * price is a 44px circle and a taller column, which is the price the whole package has
+ * already agreed to pay rather than a reason this control is exempt from it.
  */
 function RadioGroupItem({ className, value, ...props }: RadioGroupItemProps) {
   return (
@@ -87,6 +94,7 @@ function RadioGroupItem({ className, value, ...props }: RadioGroupItemProps) {
       data-slot="radio-group-item"
       className={cn(
         'border-input text-primary shadow-xs aspect-square size-4 shrink-0 rounded-full border outline-none',
+        'pointer-coarse:size-11',
         'transition-[color,box-shadow,border-color] duration-fast ease-out',
         'data-[checked]:border-primary',
         'focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px]',

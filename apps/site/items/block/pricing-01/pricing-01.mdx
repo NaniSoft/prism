@@ -8,11 +8,19 @@ title: Pricing01
 Pricing01 is a plan comparison: up to three plans side by side, one of which may
 be featured with a primary border, a filled action and a badge. Each plan
 carries a name, a price, an optional period, an optional body, a feature list
-and an action label.
+and one action.
 
-Every string is a prop, including the prices and the call to action. The block
+Every string is a prop, including the prices and the words on the action. The block
 previously hardcoded a price set and shipped a heading above a title that
 already said the same thing.
+
+**A plan's action is a destination or your own control, and it is a union rather
+than a label.** `Plan` carried a required `cta` string and the block rendered it as a
+`Button`: a focusable control, announced as a button, that activated to nothing, at
+the foot of the card a reader was about to decide on. A price is the one number on a
+marketing page a reader acts on. An action with an `href` renders as a native
+anchor; anything else is the `slot` arm and the block places that node in the card's
+foot.
 
 ## Usage
 
@@ -23,12 +31,41 @@ import { Pricing01 } from '@nanisoft/prism-ui/blocks/pricing-01'
   title="Pick a plan"
   description="Change or cancel at any time."
   plans={[
-    { name: 'Starter', price: '$0', period: ' / month', features: ['One project', 'Community support'], cta: 'Start' },
-    { name: 'Team', price: '$24', period: ' / month', features: ['Unlimited projects', 'Email support'], cta: 'Choose Team', featured: true },
-    { name: 'Business', price: '$68', period: ' / month', features: ['Everything in Team', 'Priority support'], cta: 'Contact sales' },
+    {
+      id: 'starter',
+      name: 'Starter',
+      price: '$0',
+      period: ' / month',
+      features: ['One project', 'Community support'],
+      action: { label: 'Start', href: '/signup' },
+    },
+    {
+      id: 'team',
+      name: 'Team',
+      price: '$24',
+      period: ' / month',
+      features: ['Unlimited projects', 'Email support'],
+      action: { label: 'Choose Team', href: '/signup?plan=team' },
+      featured: true,
+    },
+    {
+      id: 'business',
+      name: 'Business',
+      price: '$68',
+      period: ' / month',
+      features: ['Everything in Team', 'Priority support'],
+      // A control that is not a link: the caller's own checkout trigger, carrying
+      // its own accessible name and its own weight.
+      action: { slot: <CheckoutTrigger plan="business" /> },
+    },
   ]}
 />
 ```
+
+`id` is the plan's key and `name` is the word on its card. They are different
+facts and they are separate members because two plans can carry the same name, a
+monthly and an annual row of one tier, and React is told the cards are ambiguous
+the moment they do.
 
 <ComponentDemo slug="pricing-01" />
 
@@ -67,5 +104,6 @@ composition with a lot of vertical space.
 - A plan name is one word where possible and takes sentence case.
 - Write a feature as an outcome, not a limit: "Unlimited projects" reads better
   than "Projects: unlimited".
-- A call to action is verb-first and sentence case: "Choose Team", "Contact
-  sales".
+- The words on an action are verb-first and sentence case: "Choose Team", "Contact
+  sales". A label with no destination is no longer a legal value, so give the action
+  an `href` or move it into `slot`.

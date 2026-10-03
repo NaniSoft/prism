@@ -47,7 +47,7 @@ export function CategoryNav({
       className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-ring flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors focus-visible:ring-[3px] focus-visible:outline-none"
     >
       {label}
-      <span className="font-mono text-[10px] opacity-70">{count}</span>
+      <span className="font-mono text-mono opacity-70">{count}</span>
     </Link>
   )
 

@@ -96,27 +96,30 @@ author those.
   actions turn a decision into a menu.
 - Give the first action `default` and the second `outline`. The block already
   defaults to that order.
-- Give every action an `href`. An action with a destination renders as a real
-  anchor, because a control that looks like a link and is not one is a dead end.
-  An action with no destination renders as a `Button`, which is inert here by
-  design: a Block ships no behaviour. The two are told apart **in the type**, not
-  at runtime, so a mistake is a compile error rather than a dead button:
+- Give every action a destination, or hand the block the control you want instead.
+  `href` is **required** on the action arm, and there is no third arm, so a
+  `{ label }` on its own does not compile:
 
   ```tsx
-  // An anchor. `href` is required on this arm.
+  // An anchor. `href` is required on this arm, and `slot` is forbidden on it.
   { label: 'Get started', href: '/docs' }
-  // A button. `href` is forbidden on this arm, so a value that is sometimes a
-  // string and sometimes undefined cannot compile into a button by accident.
-  { label: 'Coming soon' }
+  // Your own control, for anything Prism cannot make work: a router link, a
+  // submit button, a menu trigger. The block places it and adds no class to it.
+  { slot: <NextLink href="/signup">Create an account</NextLink> }
   ```
 
+  The earlier shape accepted a third thing, `{ label: 'Coming soon' }`, and
+  rendered it as a `Button`. That control was focusable, announced as a button,
+  and activated to nothing, in the position a reader looks first. A block ships
+  no behaviour, so it cannot make a control work, and the two errors a caller can
+  make here are both compile errors rather than a runtime branch.
 - The forward arrow on the first action follows the **element**, not the position.
-  A first action that is a button does not get it, because an inert button wearing
-  a "goes forward" arrow is the one control in the row that says it can be followed
-  and cannot be. A second action gets no arrow even when it is a link, since the
-  arrow marks the row's one primary destination. The default *variant* is still
-  positional: what looks primary is about the row's shape, while whether it
-  navigates is about the element.
+  Every action the block renders is a link, so the position is the whole of the
+  test, and a `slot` at the front of the row wears no arrow because the control
+  you drew owns its own marks. A second action gets no arrow even when it is a
+  link, since the arrow marks the row's one primary destination. The default
+  *variant* is still positional: what looks primary is about the row's shape,
+  while who drew the control is about the element.
 - Set `headingLevel="h1"` when the hero is the page's top-level heading. Use the
   default `h2` when the page already owns an `h1`.
 - Pass an eyebrow only when it is true and current. It renders nothing when

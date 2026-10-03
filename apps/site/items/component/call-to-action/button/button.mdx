@@ -67,9 +67,11 @@ for the action that cannot.
   `Button` has to build all four by hand.
 - The coarse-pointer media query grows the target to 44px on touch input
   automatically. Do not add a second size rule for touch.
+- `type` defaults to `"button"`, so a Button in your form does nothing unless you
+  ask. Pass `type="submit"` on the one control that submits the form, which is the
+  arrangement every form in this documentation already uses.
 
 ### Content guidelines
-
 - Start a label with a verb in the imperative: "Save", "Delete project", "Add member".
 - Use sentence case and no period.
 - Name the object when the action is ambiguous: "Delete project" is better than

@@ -136,6 +136,25 @@ reason destructive actions are recoverable.
   reason.
 - One toast host per corner, and do not stack more than three. A wall of toasts
   is a queue the reader has to read before they can read the page.
+- Do not add your own `transition: none` on top of the library's. The component
+  package's stylesheet already carries one unlayered `prefers-reduced-motion` rule
+  that stops every transition, and a second copy in a consumer stylesheet is a
+  second copy of a law that can disagree with the first. The Toast survives
+  either way: the exit asks the browser what is running rather than waiting for a
+  transition end that a killed transition never sends.
+
+### `onDismiss` is called exactly once, and it is not up to the fade
+
+The Toast asks to be taken off the page and the caller does it. What changed
+lately is when the ask arrives. It used to arrive on the end of the Toast's own
+opacity transition, so a stylesheet that removed transitions left the toast
+parked in `leaving` forever: still on the page, still taking the pointer, and
+still inside a live region.
+
+It now arrives when the leave is over, or at once when there is no leave to
+watch. Nothing else about the contract moved: `onDismiss` is still the only way
+out, it is still called exactly once, and a Toast with no `onDismiss` still stays
+put indefinitely.
 
 ### Content guidelines
 

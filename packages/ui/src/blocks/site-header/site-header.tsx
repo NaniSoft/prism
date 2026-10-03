@@ -164,7 +164,7 @@ export function SiteHeader({
         className,
       )}
     >
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-6 gap-y-3 px-6 py-3 lg:px-8">
+      <div className="mx-auto flex w-full max-w-page flex-wrap items-center gap-x-6 gap-y-3 px-6 py-3 lg:px-8">
         <a href="/" className="flex shrink-0 items-center rounded-sm">
           <ProductMark id={product.id} name={product.name} pack={product.pack} size="md" />
         </a>

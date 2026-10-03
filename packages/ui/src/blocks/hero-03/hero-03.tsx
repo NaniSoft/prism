@@ -1,36 +1,103 @@
-import type { ReactNode } from 'react'
+import { Fragment, type ReactNode } from 'react'
 
 import { ArrowRight } from 'lucide-react'
 
-import { Button } from '../../components/ui/button'
 import { CtaLink } from '../../components/ui/cta-link'
 import { Metric } from '../../components/ui/metric'
 import { Section, SectionHeading, childLevel, type HeadingLevel } from '../../components/ui/section'
 import { cn } from '../../lib/utils'
 
 /**
- * One action in a hero's action row. See `Hero02Action` for the two arms and for
- * why the union is spelled again here rather than imported.
+ * One action in a hero's action row that names a destination.
+ *
+ * One of the two arms of `Hero03Action`, named for the reason `Hero01` names its
+ * own: a consumer assembling a row from its own data can say which arm it is
+ * building, and `FeatureGrid01` names its two arms the same way. See
+ * `Hero02LinkAction` for the two arms and for why the union is spelled again here
+ * rather than imported.
+ *
+ * `href` is required and that is the whole of the arm. A control drawn as a call
+ * to action and with nowhere to go is a dead end, and this Block cannot repair
+ * one: a Block ships no behaviour, so there is no handler to attach and no
+ * destination to invent.
  */
-export type Hero03Action = {
+export type Hero03LinkAction = {
+  /** The words on the control. Every string a hero renders is the caller's. */
   label: string
+  /**
+   * Where the action goes. Required rather than optional, so that "a link whose
+   * address is sometimes undefined" is a compile error rather than a control that
+   * navigates on the renders where the address happens to be there.
+   */
+  href: string
+  /** Opens the destination in a new tab, with the matching `rel`. */
+  newTab?: boolean
+  /**
+   * Which weight this action draws at, when the caller does not say. Defaults to
+   * `default` for the first action in the row and `outline` for the rest, which is
+   * a decision about the row's shape rather than about the element. A slot carries
+   * its own weight, so it does not take one from here.
+   */
   variant?: 'default' | 'outline' | 'secondary' | 'ghost'
-} & (
-  | {
-      /** Where the action goes. Present makes the action an anchor. */
-      href: string
-      /** Opens the destination in a new tab, with the matching `rel`. */
-      newTab?: boolean
-    }
-  | {
-      /**
-       * Forbidden, so that "a link whose address happens to be undefined" is a
-       * type error rather than a button.
-       */
-      href?: never
-      newTab?: never
-    }
-)
+  /**
+   * Forbidden, so that an action cannot be both a destination and a caller's own
+   * control. The two are rendered by different code on different elements and a
+   * value carrying both would have to pick one silently.
+   */
+  slot?: never
+}
+
+/**
+ * One action in a hero's action row that is the caller's own control.
+ *
+ * **This is the arm that replaced a rendered button, and the reason it is a slot
+ * rather than an `onClick` is that a Block cannot receive one.** This is a server
+ * Component, so a handler is not a prop it can be given, and the arm it replaced
+ * rendered a bare `<button>`: focusable, announced as a button, and activating to
+ * nothing, in the position a reader looks first. The defect was in the **type**,
+ * not in the render, so the fix is a type: the honest form of the escape hatch is
+ * a node the caller renders itself, which this Block can place but cannot make
+ * inert.
+ *
+ * What belongs here is anything Prism cannot make work: a router's own `Link`, a
+ * submit button in the caller's form, a menu trigger. What does not belong here is
+ * a plain anchor; that is the other arm, one property away rather than one
+ * component away.
+ */
+export type Hero03SlotAction = {
+  /**
+   * The caller's own control, placed in the row where this action sits.
+   *
+   * The whole control, including its own label, its own weight and any icon. The
+   * Block draws no frame around it and adds no class to it, because a class it
+   * adds is a style the caller cannot see and cannot remove, and this package has
+   * no override path.
+   */
+  slot: ReactNode
+  /**
+   * Forbidden on this arm, and for a reason rather than by tidiness: the Block
+   * renders `slot` and nothing else, so a `label` beside it would be a word no
+   * reader ever sees and a caller would reasonably believe had been rendered.
+   */
+  label?: never
+  /** Forbidden: an anchor belongs on the other arm, where Prism renders it. */
+  href?: never
+  /** Forbidden with `href`, for the same reason. */
+  newTab?: never
+  /**
+   * Forbidden, because the Block cannot style a node it does not render. A weight
+   * accepted here and dropped would be the one prop in this Block that a reader
+   * of the type could believe was in effect when it is not.
+   */
+  variant?: never
+}
+
+/**
+ * One action in a hero's action row, as a union of the two things an action in
+ * this position can honestly be. See `Hero02Action` for the two arms and for why
+ * the union is spelled again here rather than imported.
+ */
+export type Hero03Action = Hero03LinkAction | Hero03SlotAction
 
 /**
  * One of the things the product does, in the order a reader should meet them.
@@ -218,21 +285,18 @@ export function Hero03({
           {actions.length ? (
             <div data-slot="hero-03-actions" className="flex flex-col gap-3 sm:flex-row">
               {actions.map((action, index) => {
+                // A slot is the caller's own control, placed where it asked to be and
+                // otherwise untouched. Keyed positionally for the reason `Hero01`
+                // states.
+                if ('slot' in action) {
+                  return <Fragment key={index}>{action.slot}</Fragment>
+                }
+
                 const variant = action.variant ?? (index === 0 ? 'default' : 'outline')
                 // The arrow follows the element rather than the position, for the
                 // reason `Hero01` states: the row's primary destination gets the
-                // mark, and only if it is something that can be followed.
-                const isLink = action.href !== undefined
-                const content = (
-                  <>
-                    {action.label}
-                    {index === 0 && isLink ? (
-                      <ArrowRight className="motion-safe:transition-transform size-4 group-hover:translate-x-0.5" />
-                    ) : null}
-                  </>
-                )
-
-                return isLink ? (
+                // mark, and every action this Block renders is one.
+                return (
                   <CtaLink
                     key={index}
                     href={action.href}
@@ -241,12 +305,11 @@ export function Hero03({
                     variant={variant}
                     className="group"
                   >
-                    {content}
+                    {action.label}
+                    {index === 0 ? (
+                      <ArrowRight className="transition-transform size-4 group-hover:translate-x-0.5" />
+                    ) : null}
                   </CtaLink>
-                ) : (
-                  <Button key={index} size="lg" variant={variant} className="group">
-                    {content}
-                  </Button>
                 )
               })}
             </div>

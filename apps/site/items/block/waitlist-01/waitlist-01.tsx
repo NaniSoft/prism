@@ -3,6 +3,10 @@
 import { useState } from 'react'
 
 import { Waitlist01 } from '@nanisoft/prism-ui/blocks/waitlist-01'
+import { Button } from '@nanisoft/prism-ui/components/button'
+
+/** The code this Demo's copy control writes, named so the two cannot drift apart. */
+const CODE = 'NEXUS-4KD2-1190'
 
 /**
  * The band with the position sentence written four ways, which is the only way to
@@ -107,10 +111,34 @@ export default function Waitlist01Demo() {
           label: POSITIONS[locale].build,
         }}
         referral={{
-          value: 'NEXUS-4KD2-1190',
+          value: CODE,
           label: 'Your referral code',
-          copyLabel: 'Copy code',
-          copied,
+          // The copy control is this Demo's, not the Block's, and that is the point
+          // the shape is making. Prism will not call `navigator.clipboard` on a
+          // consumer's behalf and then report a success it cannot verify, so the
+          // control arrives whole: its own accessible name, its own handler, and its
+          // own failure path when the clipboard refuses.
+          copyControl: (
+            <Button
+              type="button"
+              variant={copied ? 'secondary' : 'outline'}
+              data-copied={copied || undefined}
+              onClick={() => {
+                // `navigator.clipboard` is absent in an insecure context and rejects
+                // when the permission is refused, so the Demo reports both rather than
+                // claiming a copy that did not happen.
+                void navigator.clipboard
+                  ?.writeText(CODE)
+                  .then(() => setCopied(true))
+                  .catch(() => {
+                    setCopied(false)
+                    setMessage('The clipboard was refused, so select the code and copy it.')
+                  })
+              }}
+            >
+              {copied ? 'Copied' : 'Copy code'}
+            </Button>
+          ),
         }}
         status={{
           state,

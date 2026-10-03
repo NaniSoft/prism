@@ -70,6 +70,13 @@ function PopoverTrigger({ className, ...props }: PopoverTriggerProps) {
         'transition-[color,box-shadow,background-color] duration-fast ease-out',
         'hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px]',
         'disabled:pointer-events-none disabled:opacity-50',
+        // The coarse-pointer floor, as a step. This is the same string
+        // `dropdown-menu.tsx` and `alert-dialog.tsx` draw on their triggers, and a
+        // trigger that opens a popup is a button: 36 tall, content wide, beside
+        // whatever else the caller put in the row. A band would overhang a trigger the
+        // caller sized themselves, which is the reason `DESIGN.md` reserves bands for
+        // a shape whose drawn size the design owns. See The coarse-pointer floor.
+        'pointer-coarse:h-11',
         className,
       )}
       {...props}

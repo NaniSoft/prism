@@ -89,6 +89,54 @@ describe('the Toast', () => {
     })
   }
 
+  /**
+   * What the browser reports as running on an element.
+   *
+   * jsdom has no Web Animations API, and the Component asks the browser what is
+   * running on its root rather than waiting for a `transitionend` that a killed
+   * transition never sends. So the answers a real browser gives have to be written
+   * down here to be testable at all: an empty list is what `transition: none` looks
+   * like from inside, and a list holding one `CSSTransition` is what `duration-slow`
+   * looks like. `undefined` is left alone deliberately, because that is what a
+   * browser without the API gives and the Component has to keep working there too.
+   *
+   * A `finished` promise that never settles is the backgrounded tab: the leave is
+   * real, the fade is running, and the reader is not there to see either.
+   */
+  const browserReports = (
+    transitions: { property: string; finished: Promise<unknown> }[] | undefined,
+  ) => {
+    const proto = Element.prototype as unknown as Record<string, unknown>
+    if (transitions === undefined) {
+      delete proto.getAnimations
+      return
+    }
+    Object.defineProperty(proto, 'getAnimations', {
+      configurable: true,
+      writable: true,
+      value: () =>
+        transitions.map((transition) => ({
+          transitionProperty: transition.property,
+          finished: transition.finished,
+        })),
+    })
+  }
+
+  /** One running transition whose end this test decides. */
+  const runningFade = () => {
+    let settle!: () => void
+    return {
+      settled: () => settle(),
+      finished: new Promise<void>((resolve) => {
+        settle = () => resolve()
+      }),
+    }
+  }
+
+  afterEach(() => {
+    browserReports(undefined)
+  })
+
   it('is announced politely and whole, because a title and a sentence are one notification', () => {
     const { container } = render(
       <Toast title="Invoice sent" description="Acme Ltd can see it now." closeLabel="Dismiss" />,
@@ -277,6 +325,129 @@ describe('the Toast', () => {
     // show up here, and each of them is a caller's unmount running twice.
     transitionEnd(container.querySelector('[data-slot="toast"]') as Element, 'opacity')
     expect(onDismiss).toHaveBeenCalledTimes(1)
+  })
+
+  it('hands over exactly once when the fade never runs, because no event will ever end it', () => {
+    const onDismiss = vi.fn()
+    // A browser with nothing running on the toast, which is what a consumer's
+    // own `transition: none` looks like from inside. This is the regression: the
+    // leave used to wait on `transitionend` alone, so this toast stayed in
+    // `leaving` for good, visible, undismissable and still announcing.
+    browserReports([])
+    const { container } = render(
+      <Toast title="Saved" closeLabel="Dismiss" onDismiss={onDismiss} />,
+    )
+    elapsed(32)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
+    expect(onDismiss).toHaveBeenCalledTimes(1)
+
+    // And once, not once per signal: the clock can run out on a toast whose fade
+    // never started, and the reader can press the control as well.
+    elapsed(60000)
+    expect(onDismiss).toHaveBeenCalledTimes(1)
+    expect(phaseOf(container)).toBe('leaving')
+  })
+
+  it('hands over when the fade runs, on the animation rather than only on the event', async () => {
+    const onDismiss = vi.fn()
+    const fade = runningFade()
+    browserReports([{ property: 'opacity', finished: fade.finished }])
+    const { container } = render(
+      <Toast title="Saved" closeLabel="Dismiss" onDismiss={onDismiss} />,
+    )
+    elapsed(32)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
+    // A leave with a fade in it is a leave that is still running, so the caller
+    // is not told yet: telling it early is what unmounts a toast half way out.
+    expect(onDismiss).not.toHaveBeenCalled()
+
+    await act(async () => {
+      fade.settled()
+    })
+    expect(onDismiss).toHaveBeenCalledTimes(1)
+    expect(phaseOf(container)).toBe('leaving')
+  })
+
+  it('waits for its own fade and not for the movement, because the movement can finish first', async () => {
+    const onDismiss = vi.fn()
+    // The root transitions `opacity` and `transform` together, and the transform
+    // is the travel that `motion-safe:` guards. Waiting on either would let the
+    // caller unmount the toast the instant the rise landed with the fade still
+    // running, and waiting on both would let a cancelled fade strand it.
+    const movement = runningFade()
+    const fade = runningFade()
+    browserReports([
+      { property: 'transform', finished: movement.finished },
+      { property: 'opacity', finished: fade.finished },
+    ])
+    render(<Toast title="Saved" closeLabel="Dismiss" onDismiss={onDismiss} />)
+    elapsed(32)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
+    await act(async () => {
+      movement.settled()
+    })
+    expect(onDismiss).not.toHaveBeenCalled()
+
+    await act(async () => {
+      fade.settled()
+    })
+    expect(onDismiss).toHaveBeenCalledTimes(1)
+  })
+
+  it('hands over rather than waiting on a movement that is all that is running', () => {
+    const onDismiss = vi.fn()
+    // No opacity transition means no fade to watch, so the leave is over. Waiting
+    // for a fade that was never created is how a toast gets stranded.
+    const movement = runningFade()
+    browserReports([{ property: 'transform', finished: movement.finished }])
+    render(<Toast title="Saved" closeLabel="Dismiss" onDismiss={onDismiss} />)
+    elapsed(32)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
+    expect(onDismiss).toHaveBeenCalledTimes(1)
+  })
+
+  it('hands over when the fade is cancelled, because a cancelled animation will not end', async () => {
+    const onDismiss = vi.fn()
+    const cancelled = Promise.reject(new Error('cancelled'))
+    // Handled in the same tick it is created, so the rejection is never
+    // unhandled. It is the same shape as a browser replacing a transition with a
+    // new one: the old animation is cancelled rather than finished.
+    cancelled.catch(() => undefined)
+    browserReports([{ property: 'opacity', finished: cancelled }])
+    render(<Toast title="Saved" closeLabel="Dismiss" onDismiss={onDismiss} />)
+    elapsed(32)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
+    await act(async () => {})
+    expect(onDismiss).toHaveBeenCalledTimes(1)
+  })
+
+  it('hands over once even when the leave re-renders under it', async () => {
+    const onDismiss = vi.fn()
+    browserReports([])
+    const { container, rerender } = render(
+      <Toast title="Saved" closeLabel="Dismiss" onDismiss={onDismiss} />,
+    )
+    elapsed(32)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
+    expect(onDismiss).toHaveBeenCalledTimes(1)
+
+    // A caller writing `onDismiss={() => setToast(null)}` hands the effect a new
+    // `onDismiss` on every render, and the leave re-runs against it. A guard that
+    // lived inside the effect would be a fresh `false` each time and the second
+    // run would be a second unmount.
+    for (let pass = 0; pass < 3; pass += 1) {
+      await act(async () => {
+        rerender(<Toast title="Saved" closeLabel="Dismiss" onDismiss={onDismiss} />)
+      })
+    }
+    expect(onDismiss).toHaveBeenCalledTimes(1)
+    expect(phaseOf(container)).toBe('leaving')
   })
 
   it('leaves no timer behind it, because a clock outliving its toast fires at nothing', () => {

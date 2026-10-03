@@ -100,6 +100,10 @@ for (const [key, token] of groupEntries(foundationTree, ['shadow'])) put(`shadow
 for (const [key, token] of groupEntries(foundationTree, ['breakpoint'])) put(`breakpoint-${key}`, readToken(token))
 put('breakpoint-xl', 'initial')
 put('breakpoint-2xl', 'initial')
+
+// Tailwind's own container namespace is closed whole, ahead of the authored
+// widths, so `max-w-6xl` cannot resolve to 72rem beside `max-w-page`.
+put('container-*', 'initial')
 for (const [key, token] of groupEntries(foundationTree, ['container'])) put(`container-${key}`, readToken(token))
 
 /* ── The emitted files ────────────────────────────────────────────────────── */
@@ -209,14 +213,61 @@ describe('emitted token contract', () => {
     }
   })
 
-  it('closes breakpoints to {sm, md, lg} with xl and 2xl initial, and containers to three', () => {
+  it('closes breakpoints to {sm, md, lg} with xl and 2xl initial', () => {
     const breakpointKeys = groupEntries(foundationTree, ['breakpoint']).map(([key]) => key).sort()
     expect(breakpointKeys).toEqual(['lg', 'md', 'sm'])
     expect(staticDecls.get('breakpoint-xl')).toBe('initial')
     expect(staticDecls.get('breakpoint-2xl')).toBe('initial')
+  })
 
+  it('closes containers to the page family and the five overlay widths', () => {
+    // Tailwind ships thirteen `--container-*` steps of its own, and three of them
+    // were numerically identical to an authored width: `6xl` was `page`, `2xl`
+    // was `measure`, `xl` was `measure-narrow`. Two spellings of one value is how
+    // a retune moves one surface and leaves the other where it was.
     const containerKeys = groupEntries(foundationTree, ['container']).map(([key]) => key).sort()
-    expect(containerKeys).toEqual(['measure', 'measure-narrow', 'page'])
+    expect(containerKeys).toEqual([
+      'measure',
+      'measure-narrow',
+      'overlay-dialog',
+      'overlay-form',
+      'overlay-media',
+      'overlay-palette',
+      'overlay-panel',
+      'page',
+    ])
+    expect(staticDecls.get('container-*')).toBe('initial')
+  })
+
+  it('writes the container close before the authored widths rather than after', () => {
+    // Tailwind resolves a theme in source order and `initial` clears everything
+    // declared so far, so the same line written after the authored entries would
+    // clear the eight this package authors along with the thirteen it retires and
+    // the shipped sheet would carry no container at all. This is the assertion
+    // that distinguishes the two, and it is why the close is written where it is.
+    const body = atRuleBody(themeCss, '@theme static {')
+    const closeAt = body.search(/^\s*--container-\*:\s*initial;/m)
+    const firstAuthoredAt = body.search(/^\s*--container-(?![\s*])/m)
+    expect(closeAt).toBeGreaterThanOrEqual(0)
+    expect(firstAuthoredAt).toBeGreaterThan(closeAt)
+  })
+
+  it('keeps an overlay width from being an alias of a document measure', () => {
+    // Two names for one width is the failure this namespace was closed over, so it
+    // is not allowed back inside it either. `overlay-palette` and `measure-narrow`
+    // are both 36rem and the authored description states why: two measurements
+    // that happen to agree, not one measurement with two names. Any second pair is
+    // an alias nobody wrote down.
+    const values = new Map(groupEntries(foundationTree, ['container']).map(([key, token]) => [key, readToken(token)]))
+    const page = ['measure', 'measure-narrow', 'page']
+    const overlay = ['overlay-dialog', 'overlay-form', 'overlay-media', 'overlay-palette', 'overlay-panel']
+    const aliases = []
+    for (const outer of overlay) {
+      for (const inner of page) {
+        if (values.get(outer) === values.get(inner)) aliases.push(`${outer}/${inner}`)
+      }
+    }
+    expect(aliases).toEqual(['overlay-palette/measure-narrow'])
   })
 
   it('emits the runtime selector the output switch produces for every theme and mode', async () => {

@@ -92,6 +92,10 @@ faster than opening a grid.
   question the reader cannot answer.
 - Pass `today` when the renderer's clock is not the reader's, so the mark lands on
   the right day.
+- The clear control takes a 44px target on a coarse pointer as a transparent band
+  rather than as a larger box, because it sits over the field and the field's own
+  `pr-16` reserves 64px of clear space. Keep that reservation if you style the
+  trigger, or the clear control and the value will fight for the same pixels.
 
 ### Content guidelines
 

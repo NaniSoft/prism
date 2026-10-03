@@ -122,7 +122,10 @@ type Hit = { item: ComboboxItem; rank: number; range?: readonly [number, number]
  * open and explains that the query found nothing, because a combobox that closed
  * itself on a non-match tells the reader their keystroke broke the control. The
  * explanation is a prop, since the sentence is the caller's and the query is put
- * into it.
+ * into it. The message is a sibling of the listbox and not inside it, because a
+ * listbox owns `option` and `group` and nothing else, and the field's
+ * `aria-controls` points at the popup rather than at the listbox, because there is
+ * no listbox in that state and `aria-controls` is required on an expanded combobox.
  *
  * **The field keeps the caret for the whole interaction.** The arrows move a
  * highlight through the list and leave focus where it is, so a reader can keep
@@ -172,6 +175,10 @@ function Combobox({
   const generated = useId()
   const inputId = id ?? generated
   const listId = `${generated}-list`
+  // The popup the field controls. Separate from the listbox id because the listbox is
+  // not rendered at all when nothing matched, and `aria-controls` is a required
+  // attribute on an expanded combobox.
+  const popupId = `${generated}-popup`
 
   const chosen = value === undefined ? ownValue : value
 
@@ -343,8 +350,20 @@ function Combobox({
         type="text"
         role="combobox"
         autoComplete="off"
-        aria-expanded={isOpen && ranked.length > 0}
-        aria-controls={listId}
+        // `isOpen`, not `isOpen && ranked.length > 0`. The attribute asks whether the
+        // popup is displayed and the popup is displayed whenever the field is open:
+        // a query that matched nothing still draws the bordered panel carrying the
+        // caller's empty sentence, and the field announcing `collapsed` under a
+        // visible popup is the field telling the reader there is nothing to reach.
+        // The JSDoc below says the same refusal in prose.
+        aria-expanded={isOpen}
+        // The popup, and not the listbox inside it. `aria-controls` is a required
+        // attribute on an expanded `combobox`, and the listbox is not rendered at all
+        // when nothing matched, so a reference to the listbox was a reference to an
+        // id nothing carried in exactly the state that says nothing matched. The
+        // panel is what the field controls either way and it is always on the page
+        // while the field is open, so the reference resolves in every state.
+        aria-controls={isOpen ? popupId : undefined}
         aria-haspopup="listbox"
         aria-autocomplete="list"
         aria-label={label}
@@ -394,11 +413,20 @@ function Combobox({
       )}
 
       {isOpen ? (
-        ranked.length === 0 ? (
-          <div
-            data-slot="combobox-popup"
-            className="bg-popover text-popover-foreground absolute z-50 mt-1 w-full min-w-(--anchor-width) rounded-md border p-1 shadow-md"
-          >
+        /*
+         * One popup with two children rather than two popups, because the empty
+         * message is a sibling of the listbox and not inside it: a listbox owns
+         * `option` and `group` and nothing else, so a `<p>` in the empty branch was a
+         * phantom row the index counted and no reader could choose. The id on the
+         * panel is what the field's `aria-controls` points at, so that reference
+         * resolves whether or not there is a listbox to point at.
+         */
+        <div
+          id={popupId}
+          data-slot="combobox-popup"
+          className="bg-popover text-popover-foreground absolute z-50 mt-1 w-full min-w-(--anchor-width) rounded-md border p-1 shadow-md"
+        >
+          {ranked.length === 0 ? (
             <p
               data-slot="combobox-empty"
               role="status"
@@ -409,12 +437,7 @@ function Combobox({
                 <span className="mt-1 block text-xs">{empty.hint}</span>
               )}
             </p>
-          </div>
-        ) : (
-          <div
-            data-slot="combobox-popup"
-            className="bg-popover text-popover-foreground absolute z-50 mt-1 w-full min-w-(--anchor-width) rounded-md border p-1 shadow-md"
-          >
+          ) : (
             <div
               data-slot="combobox-list"
               id={listId}
@@ -471,8 +494,8 @@ function Combobox({
                 )
               })}
             </div>
-          </div>
-        )
+          )}
+        </div>
       ) : null}
     </div>
   )

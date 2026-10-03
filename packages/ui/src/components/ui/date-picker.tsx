@@ -188,6 +188,14 @@ function DatePicker({
             'text-muted-foreground hover:text-foreground absolute top-1/2 right-9 z-10 inline-flex size-6 -translate-y-1/2 items-center justify-center rounded-sm outline-none',
             'transition-colors duration-fast ease-out focus-visible:ring-ring focus-visible:ring-[3px]',
             'disabled:pointer-events-none disabled:opacity-50',
+            // The floor, as a band rather than a step. This control is absolutely
+            // positioned over the field's own trigger, and `pr-16` on that trigger
+            // reserves exactly 64px of clear space; a 44px step at `right-9` would be
+            // 44 wide starting there and would run 16px under the value text the
+            // reservation exists to keep clear. The band adds ten rather than
+            // twenty-two, and `absolute` already gives it the containing block it
+            // needs, so no positioning class is added to the control itself.
+            'pointer-coarse:before:absolute pointer-coarse:before:left-1/2 pointer-coarse:before:top-1/2 pointer-coarse:before:h-11 pointer-coarse:before:w-11 pointer-coarse:before:-translate-x-1/2 pointer-coarse:before:-translate-y-1/2 pointer-coarse:before:content-[""]',
           )}
         >
           <XIcon className="size-4" aria-hidden="true" />

@@ -61,17 +61,26 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Motion policy for the site's own colour and opacity transitions. The property
- * they read is `var(--tw-duration, var(--default-transition-duration))`, so
- * retuning the inherited fallback shortens every transition that does not pin
- * its own duration. 80ms is the fast token, inside the immediate-feedback band.
- * Spatial movement is guarded at the call site with `motion-safe:`, not here.
+ * The site's reduced-motion policy is the library's, because the library states
+ * it in the one stylesheet both of them load. `packages/ui/src/styles.css` ends
+ * with an unlayered `prefers-reduced-motion` rule that sets `animation: none`
+ * and `transition: none` on the universal selector, so it outranks Tailwind's
+ * `utilities` layer without naming a single class, and a consumer's own
+ * class-qualified CSS still outranks it for its own elements.
+ *
+ * This file used to carry its own copy of the first half, as `:root {
+ * --default-transition-duration: var(--duration-fast) }`, and it shortened
+ * nothing: a transition reads `var(--tw-duration,
+ * var(--default-transition-duration))`, and every class in this repository names
+ * a `duration-*`, which writes `--tw-duration` itself. The rule stayed here
+ * because the comment above it said what it did and nothing had checked whether
+ * it did it, which is the second copy of a law failing in the way a second copy
+ * of a law fails: silently, and only for the transitions nobody pinned.
+ *
+ * There is nothing to add here, and that is the point. A site's own stylesheet
+ * is not where a component library's motion policy goes, because a policy the
+ * consumer has to re-declare is a policy the consumer can forget.
  */
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --default-transition-duration: var(--duration-fast);
-  }
-}
 
 /*
  * The article prose.
@@ -81,8 +90,29 @@
  * a raw value, and the measure comes from the authored container token.
  */
 @layer components {
-  .prose {
+  /*
+   * The showcase is a figure and not a paragraph, so it is not held to the
+   * measure.
+   *
+   * The measure was on `.prose` itself, which caps the article and therefore caps
+   * every descendant: no descendant rule can escape it, so a preview that needed
+   * the article's width could only get it by having the cap removed from the
+   * article. It is on the direct children instead, and `.showcase` opts out of
+   * that. Everything else keeps the measure, so the paragraphs, the lists and the
+   * code fences beside the showcase are unchanged.
+   *
+   * An Item's preview is looked at rather than read, and it is the reason the
+   * distinction is worth making: a Block's columns, a Page's whole arrangement and
+   * a control naming a device width all want the room the page had already given
+   * the article, and holding them to about 65 characters left the frame with two
+   * thirds of it.
+   */
+  .prose > * {
     max-width: var(--container-measure);
+  }
+
+  .prose > .showcase {
+    max-width: none;
   }
 
   .prose > * + * {
@@ -164,9 +194,31 @@
     font-size: var(--text-xs);
   }
 
-  .prose table {
+  /*
+   * The same treatment the code fence twelve rules above already has, and for
+   * the same reason, because a table box cannot take it directly: `overflow`
+   * applies to block containers, and a `display: table` box is not one. CSS
+   * Tables 3 says the overflow property on a table-root or table-wrapper box is
+   * ignored and treated as visible when its value is not `visible`, `clip` or
+   * `hidden`, so `overflow-x: auto` here would compute away and a Markdown table
+   * with four columns would widen the article instead of scrolling inside it.
+   * `display: block` is what makes the element a block container, and the row
+   * groups are wrapped in an anonymous table box that still inherits
+   * `border-collapse`, so the collapsed borders below are unaffected.
+   *
+   * The child combinator is load-bearing rather than incidental. A descendant
+   * selector would reach a `Table` rendered inside a demo figure further down
+   * this stylesheet, and `Table` brings its own `overflow-x-auto` wrapper
+   * precisely so its own scroll container is the one that scrolls; setting
+   * `display: block` on the table inside it would move `caption-side` onto a
+   * block box and stop the grid filling its wrapper. The article's own tables are
+   * direct children of `.prose`, which is what MDX emits for the pipe syntax.
+   */
+  .prose > table {
+    display: block;
     width: 100%;
     border-collapse: collapse;
+    overflow-x: auto;
     text-align: left;
     font-size: var(--text-sm);
   }
@@ -213,7 +265,13 @@
  *
  * It has since found a sixth, and it is a shape the five above could not have
  * found: both sides of that collision are media-scoped. See the rule at the
- * bottom of this layer.
+ * bottom of this layer. And a seventh, which was latent rather than absent: the
+ * library's bare `.grid-cols-6`, the base of the `lg:` variant its Blocks use,
+ * outranked this build's `sm:grid-cols-11`, so every colour ramp on the
+ * Foundations page drew six columns at every width above 640 against a comment
+ * saying eleven. Whether that was visible depended on which order two
+ * content-hashed CSS chunks sorted in, which is a worse property than a defect,
+ * because the same tree passed or failed on a hash.
  *
  * WHY A LAYER AND NOT A BIGGER SELECTOR
  *
@@ -285,6 +343,40 @@
      */
     .lg\:grid-cols-6 {
       grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+
+  @media (width >= theme(--breakpoint-sm)) {
+    /*
+     * The seventh, and the one that was latent rather than absent.
+     *
+     * The Foundations page draws each colour ramp as eleven tracks from `sm` and
+     * six below it, and the comment beside that class says exactly why: a ramp is
+     * eleven or twelve steps and the row holding all of them is the point of the
+     * figure. The library's Blocks carry `lg:grid-cols-6`, and Tailwind emits the
+     * BARE `.grid-cols-6` alongside the variant, so the library's copy of that one
+     * rule lands after this build's `sm:grid-cols-11` in the one shared `utilities`
+     * layer. A media query adds no specificity to either, so the bare rule won:
+     * every ramp on that page rendered six columns at every width above 640 and the
+     * eleven were never drawn, against a comment saying they were.
+     *
+     * **This was not introduced by anything that changed recently, and the reason
+     * it is worth a restatement rather than a fix to either side is that neither
+     * side is wrong.** The library's bare rule is the base of a variant its own
+     * Blocks use and cannot be removed without removing six-column grids from
+     * `bento-01`, `dashboard-01`, `logo-cloud-01` and `project-dashboard-01`. The
+     * site's variant is the one that means what its class says. So the loser is
+     * restated here, which is what this layer is for, and the layer exists because
+     * no other rank is available: both rules are in `utilities`, both are one
+     * class, and a media query is not a source of specificity.
+     *
+     * Whether it was visible depended on which order two content-hashed CSS chunks
+     * happened to sort in, which is a worse property than a defect: the same tree
+     * passed or failed the gate on a hash. The restatement is what makes the answer
+     * independent of the hash.
+     */
+    .sm\:grid-cols-11 {
+      grid-template-columns: repeat(11, minmax(0, 1fr));
     }
   }
 }

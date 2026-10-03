@@ -250,6 +250,26 @@ const ITEM_FILL: Record<'current' | 'rest', string> = {
  * `useState` and the same context around it. The toggle is a part rather than a
  * built-in control, so a product puts it in the rail's header or its footer
  * without the Component deciding where a rail's controls belong.
+ *
+ * **The rail animates `width` and not a transform, and this is the one place in
+ * this package that could not be moved.** `Progress` and `RangeField` both express
+ * their value as a `scaleX` about the inline start, because a bar and a band are
+ * shapes: scaling one squashes its own corner radius and nothing else, and both
+ * Components say so and accept the trade. A rail is not a shape. It carries a
+ * brand mark, a list of items with a 16px icon, the item's own label, and a
+ * trailing count, and a `scaleX` scales every one of them: the icons become ovals,
+ * the labels become condensed, and the counts are unreadable at exactly the moment
+ * the rail is moving. A transform cannot reflow text, which is the whole reason a
+ * rail is animated at all: at `scaleX(0.25)` the labels are still laid out for a
+ * 16rem column, so the rail's contents would never reflow into the 4rem column they
+ * are supposed to occupy. The property has to be the one that reflows them.
+ *
+ * So the rail keeps `transition-[width]` and is the named exception rather than an
+ * unexplained gap, and the cost is stated rather than argued away: it is a layout
+ * animation on the main thread, over a column that is one element with a small
+ * subtree, once per reader's click. That is a different order of cost from a bar
+ * that advances on every frame of a running job, which is why the two were not the
+ * same decision.
  */
 function Sidebar({
   collapsed: controlled,
@@ -296,7 +316,11 @@ function Sidebar({
           // The width is the state feedback, and it is the only motion on the
           // rail: a rail that collapsed and looked identical teaches a reader
           // that the control did nothing.
-          'transition-[width] duration-base ease-out',
+          //
+          // `duration-slow` because this is a layout animation, which is the case
+          // `DESIGN.md`'s motion scale assigns `slow` to. The items in the rail
+          // stay on `duration-fast` for colour, because colour is the other case.
+          'transition-[width] duration-slow ease-out',
           collapsed ? 'w-16' : 'w-64',
           className,
         )}
@@ -486,6 +510,15 @@ function SidebarItem({
  * a workspace switcher for the same row. It points at the rail by id, so the
  * region it controls is the element the rail actually rendered rather than a name
  * that has drifted from it.
+ *
+ * **`pointer-coarse:size-11` is the coarse-pointer floor, as a step.** A band was
+ * rejected on condition 1 for the same reason `dialog.tsx` rejects one: this control
+ * is the one thing in the rail's header row, so there is no neighbouring control for
+ * a band to reach, and there is no inset to overhang either. `SidebarHeader` is
+ * `p-3` open and `p-2` collapsed with no fixed height, so growing the toggle by
+ * twelve pixels grows the header by twelve and moves nothing. The collapsed rail is
+ * `w-16`, so a 44px control centred in it by `mx-auto` still has ten pixels of air on
+ * each side. See DESIGN.md, The coarse-pointer floor.
  */
 function SidebarToggle({
   collapseLabel,
@@ -506,6 +539,7 @@ function SidebarToggle({
       className={cn(
         'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-sidebar-ring focus-visible:ring-[3px] flex size-8 shrink-0 items-center justify-center rounded-md',
         'transition-colors duration-fast ease-out',
+        'pointer-coarse:size-11',
         collapsed && 'mx-auto',
         className,
       )}

@@ -193,6 +193,46 @@ function staticThemeDecls() {
   push('--breakpoint-xl', 'initial')
   push('--breakpoint-2xl', 'initial')
 
+  /*
+   * The whole Tailwind container namespace is closed, and this line is why two
+   * container families did not already exist in one stylesheet.
+   *
+   * Tailwind ships thirteen `--container-*` steps of its own, and until this line
+   * the ones a class happened to reach survived into `dist/styles.css` beside the
+   * three this package authors. Three of them were numerically identical to an
+   * authored token: `6xl` was `page`, `2xl` was `measure` and `xl` was
+   * `measure-narrow`. Nothing rendered differently, so nothing failed, and the
+   * cost was latent and specific: a retune of `--container-page` would have moved
+   * every surface that reached the page column through `max-w-6xl` and left every
+   * surface that reached it through `max-w-page` where it was, with no gate firing.
+   * One name meaning one thing is the whole law; two spellings of one value is how
+   * it fails quietly.
+   *
+   * A WILDCARD AND NOT A LIST, and that is the load-bearing word. Tailwind's theme
+   * is a map, so `--container-*: initial` empties the namespace rather than
+   * cancelling the seven steps that happened to be emitted on the day this was
+   * written. A list would have been a second list to keep in step with a
+   * dependency's default theme, and a Tailwind that adds a step is precisely the
+   * event this line exists to survive. The thirteen names this retires are
+   * `3xs 2xs xs sm md lg xl 2xl 3xl 4xl 5xl 6xl 7xl`.
+   *
+   * It has to come BEFORE the authored entries. Tailwind resolves the theme in
+   * source order and `initial` clears everything matching the wildcard declared
+   * so far, so the same line written after `emitGroup('container')` would clear
+   * the eight this package authors along with the thirteen it retires, and the
+   * shipped sheet would carry no container at all. Verified against tailwindcss
+   * 4.3.3, the version this repository pins, and asserted on the built artefact
+   * by `packages/ui/test/container-namespace.test.tsx` rather than trusted here.
+   *
+   * `--spacing-*` is NOT cleared, and that is deliberate rather than an omission.
+   * `max-w-64` and `w-3/4` resolve through the spacing multiplier, a chart's axis
+   * band and a token table's column are arithmetic on the base unit rather than
+   * decisions anyone took, and an arbitrary `max-w-[...]` is refused by
+   * `scripts/check-elevation-layout.mjs`. So the two namespaces stay where they
+   * are: the spacing scale for arithmetic, this group for a width somebody
+   * decided.
+   */
+  push('--container-*', 'initial')
   emitGroup('container')
   return decls
 }

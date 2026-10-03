@@ -18,6 +18,16 @@ export interface NumberFieldProps {
   labels: { increment: string; decrement: string }
   /** The accessible name of the field, when no visible label is used. */
   'aria-label'?: string
+  /**
+   * Identifies the element that describes the field, which is where a unit goes.
+   *
+   * Required whenever `unit` is passed, and the reason is in the JSDoc below: the
+   * unit is drawn `aria-hidden`, so this prop is the only route by which "kg" or
+   * "ms" reaches a reader at all. It was documented as the answer and not carried,
+   * so a caller following the documentation had nowhere to put the sentence and the
+   * value was announced as a bare figure.
+   */
+  'aria-describedby'?: string
   /** The current value, when the field is controlled. */
   value?: number | null
   /** The value the field starts at, for an uncontrolled field. */
@@ -42,8 +52,9 @@ export interface NumberFieldProps {
    *
    * A unit is a word in the reader's language and it is hidden from the
    * accessibility tree, because a screen reader already says the unit when the
-   * caller puts it in the field's description. It is a prop because the Component
-   * does not know whether the reader measures in kilograms, pounds or seconds.
+   * caller points `aria-describedby` at a sentence that carries it. It is a prop
+   * because the Component does not know whether the reader measures in kilograms,
+   * pounds or seconds.
    */
   unit?: string
   /** How the value is written for display: grouping, decimals, and so on. */
@@ -120,15 +131,37 @@ function clamp(
  * second stop, so they are put back: three stops for one value, and the arrow keys
  * still work for a reader who is typing through the form.
  *
+ * **A coarse pointer turns the two steppers side by side, and this is the one place
+ * the floor changes an arrangement rather than a size.** Two 44px targets stacked in
+ * the split column need an 88px field, and an 88px text field is not a text field;
+ * a band is not available either, because two 44px bands centred on two 18px rows
+ * overlap by more than half of each and the lower row would take the boundary, so a
+ * press aimed at increment would step down. Side by side, each stepper is 44 by 44
+ * inside a field that stays 44 tall, which is the arrangement every mobile platform
+ * draws and the only one where the two targets do not compete. On a mouse and a
+ * trackpad the column is 36 tall and stacked, exactly as before.
+ *
  * **Empty is a value.** The field reports `null` when it is cleared, rather than
  * zero, because zero is a number a reader may have meant and an empty field is
  * not. A consumer that treats `null` as zero has made a decision this Component
  * refuses to make for it.
  *
- * **The unit is decoration.** It is hidden from the accessibility tree and the
- * caller describes the field once, in words, where a screen reader will reach it.
- * Two announcements of the same unit is one too many, and the visible one is the
- * one that was written in the reader's language by the reader's own product.
+ * **The unit is decoration, and the description is where a reader hears it.** The
+ * drawn span is `aria-hidden` and the field takes an `aria-describedby` the caller
+ * points at their own sentence. Three reasons, and they are the reason rather than
+ * the decoration. The unit belongs to the value and not to the field's identity, so
+ * putting it in `aria-label` would make the name "Parcel weight, kg" against a
+ * visible label reading "Parcel weight", which is exactly what WCAG 2.5.3 forbids
+ * and what voice control cannot activate. The `aria-label` is optional, so a field
+ * with a real `<label>` has no name to put it in at all. And two announcements of
+ * the same unit is one too many: the visible one was written in the reader's
+ * language by the reader's own product, and this Component does not know that word.
+ *
+ * The cost was that the prop was described here and not carried, so a caller who
+ * followed the documentation had no route and a value of 1,250 was announced as
+ * 1,250. `aria-describedby` is now on the props for the same reason `Combobox` and
+ * `MultiCombobox` carry it: the sentence is the caller's and the reference is the
+ * only honest way to hand it over.
  *
  * Reachable by Tab, moved by the arrow keys and by its two steppers, and the whole
  * field reads as one surface: one frame, one border, one focus colour.
@@ -136,6 +169,7 @@ function clamp(
 function NumberField({
   labels,
   'aria-label': ariaLabel,
+  'aria-describedby': describedBy,
   value,
   defaultValue = null,
   onValueChange,
@@ -186,14 +220,25 @@ function NumberField({
           'border-input bg-background focus-within:border-ring flex w-full items-stretch rounded-md border shadow-xs',
           'transition-[color,box-shadow] duration-fast ease-out',
           'has-[input:disabled]:opacity-50',
+          // 44px on a coarse pointer, because the steppers beside it are 44px on a
+          // coarse pointer and a 36px field cannot hold two 44px targets without
+          // becoming an 88px field. See the JSDoc.
+          'pointer-coarse:h-11',
         )}
       >
         <NumberFieldPrimitive.Input
           data-slot="number-field-input"
           aria-label={ariaLabel}
+          // The route a caller uses to say the unit, the range or the step. See the
+          // JSDoc; it is the only way the drawn unit reaches a reader.
+          {...(describedBy === undefined ? null : { 'aria-describedby': describedBy })}
           className={cn(
             'placeholder:text-muted-foreground flex h-9 min-w-0 flex-1 border-0 bg-transparent px-3 py-1 text-base shadow-none outline-none md:text-sm',
             'focus-visible:border-0 focus-visible:ring-ring focus-visible:ring-[3px]',
+            // `items-stretch` on the group only sizes a child whose own height is
+            // `auto`, and this one states `h-9`, so the field's coarse-pointer height
+            // has to be stated here rather than inherited from the group.
+            'pointer-coarse:h-11',
           )}
         />
 
@@ -207,7 +252,22 @@ function NumberField({
           </span>
         )}
 
-        <div data-slot="number-field-stepper" className="border-input flex shrink-0 flex-col border-s">
+        {/*
+          The split column on a mouse and a trackpad, and a row of two 44px buttons on
+          a coarse pointer. `h-auto` on each stepper is what lets the column's
+          `items-stretch` size them once the column is a row, because `h-1/2` against
+          an auto-height parent is not a height at all; `min-w-11` is the floor on the
+          other axis. The `border-b` on increment becomes a `border-r` for the same
+          reason the layout turns: the divider between two stacked halves is a bottom
+          border, and the divider between two side-by-side halves is a right one.
+        */}
+        <div
+          data-slot="number-field-stepper"
+          className={cn(
+            'border-input flex shrink-0 flex-col border-s',
+            'pointer-coarse:flex-row',
+          )}
+        >
           <NumberFieldPrimitive.Increment
             data-slot="number-field-increment"
             aria-label={labels.increment}
@@ -217,6 +277,7 @@ function NumberField({
               'text-muted-foreground hover:bg-accent hover:text-accent-foreground flex h-1/2 items-center justify-center border-b px-2 outline-none',
               'transition-colors duration-fast ease-out focus-visible:ring-ring focus-visible:ring-[3px]',
               'data-[disabled]:pointer-events-none data-[disabled]:opacity-40',
+              'pointer-coarse:h-auto pointer-coarse:min-w-11 pointer-coarse:border-b-0 pointer-coarse:border-r',
             )}
           >
             <ChevronUpIcon className="size-3.5" />
@@ -229,6 +290,7 @@ function NumberField({
               'text-muted-foreground hover:bg-accent hover:text-accent-foreground flex h-1/2 items-center justify-center px-2 outline-none',
               'transition-colors duration-fast ease-out focus-visible:ring-ring focus-visible:ring-[3px]',
               'data-[disabled]:pointer-events-none data-[disabled]:opacity-40',
+              'pointer-coarse:h-auto pointer-coarse:min-w-11',
             )}
           >
             <ChevronDownIcon className="size-3.5" />

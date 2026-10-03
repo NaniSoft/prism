@@ -132,6 +132,14 @@ function SelectTrigger({ className, size = 'default', children, ...props }: Sele
         'aria-invalid:border-destructive aria-invalid:ring-destructive/20',
         'disabled:cursor-not-allowed disabled:opacity-50',
         'data-[placeholder]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0',
+        // The coarse-pointer floor, as a step. A select trigger opens a popup and is a
+        // button rather than a text field: it has no caret, takes no typed input, and its
+        // job is to be pressed. It is `w-full`, so only the height was ever short, and
+        // growing it adds eight pixels to every field a caller put it in on a phone,
+        // which is what the platform's own selects cost. A band was rejected because the
+        // trigger's drawn size is content the caller sized, not a shape the design owns.
+        // See DESIGN.md, The coarse-pointer floor.
+        'pointer-coarse:h-11',
         size === 'sm' ? 'h-8' : 'h-9',
         className,
       )}

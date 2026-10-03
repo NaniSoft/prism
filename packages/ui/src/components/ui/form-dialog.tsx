@@ -388,7 +388,7 @@ function FormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger data-slot="form-dialog-trigger">{trigger}</DialogTrigger>
 
-      <DialogContent closeLabel={closeLabel} className={cn('max-w-lg', className)}>
+      <DialogContent closeLabel={closeLabel} className={cn('max-w-overlay-form', className)}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description === undefined ? null : <DialogDescription>{description}</DialogDescription>}

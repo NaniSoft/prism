@@ -1,6 +1,5 @@
-import type { ReactNode } from 'react'
+import { Fragment, type ReactNode } from 'react'
 
-import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { CtaLink } from '../../components/ui/cta-link'
 import { Metric } from '../../components/ui/metric'
@@ -48,42 +47,118 @@ export type AboutFigure = {
 }
 
 /**
- * One action in the about band's action row.
+ * One action in the about band's action row that names a destination.
  *
- * The two arms are two elements, and the reason is `Hero01`'s: an action that
- * names a destination is an anchor and navigates, and an action that does not is
- * a button this Block cannot wire to anything, because a Block ships no
- * behaviour. The union is what makes both mistakes loud. `{ label }` alone would
- * compile and render a primary button that goes nowhere, which is the shape a
- * first action usually takes by accident, and `{ label, href: maybeUrl }` would
- * compile today and render a button on every render where the address is
- * `undefined`. So the link arm requires `href` and the button arm declares
- * `href?: never`.
+ * One of the two arms of `AboutAction`, and named rather than left as an inline
+ * member of the union so a caller assembling a row from its own data can say which
+ * arm it is building. `href` is required and that is the whole of the arm: a
+ * control drawn as a call to action and with nowhere to go is the dead end
+ * `CtaLink`'s own JSDoc names, and this Block cannot repair it, because a Block
+ * ships no behaviour and so there is no handler to attach and no destination to
+ * invent.
+ */
+export type AboutLinkAction = {
+  /** The words on the control. Every string an about band renders is the caller's. */
+  label: string
+  /**
+   * Where the action goes. Required rather than optional, so that "a link whose
+   * address is sometimes undefined" is a compile error rather than a control that
+   * navigates on the renders where the address happens to be there.
+   */
+  href: string
+  /** Opens the destination in a new browsing context, with the matching `rel`. */
+  newTab?: boolean
+  /**
+   * Which weight this action draws at, when the caller does not say.
+   *
+   * Defaults to `default` for the first action in the row and `outline` for the
+   * rest, which is a decision about the row's shape rather than about the element.
+   * A slot carries its own weight, so it does not take one from here.
+   */
+  variant?: 'default' | 'outline' | 'secondary' | 'ghost'
+  /**
+   * Forbidden, so that an action cannot be both a destination and a caller's own
+   * control. The two are rendered by different code on different elements, and a
+   * value carrying both would have to pick one silently.
+   */
+  slot?: never
+}
+
+/**
+ * One action in the about band's action row that is the caller's own control.
+ *
+ * **This is the arm that replaced a rendered button, and the reason it is a slot
+ * rather than an `onClick` is that a Block cannot receive one.** This is a server
+ * Component, so a handler is not a prop it can be given, and the arm it replaced
+ * rendered a bare `<button>`: focusable, announced as a button, and activating to
+ * nothing, at the foot of the section where the about band's own closing ask
+ * lives. The defect was in the **type**, not in the render. A `label` with no
+ * destination was a legal value, so the honest form of the escape hatch had to be a
+ * node the caller renders itself, which the Block can place but cannot make inert.
+ *
+ * What belongs here is anything Prism cannot make work: a router's own `Link`, a
+ * control that opens a dialog, a menu trigger. What does not belong here is a plain
+ * anchor; that is the other arm, and it is one property away rather than one
+ * component away.
+ */
+export type AboutSlotAction = {
+  /**
+   * The caller's own control, placed in the row where this action sits.
+   *
+   * The whole control, including its own label, its own weight and any icon. The
+   * Block draws no frame around it and adds no class to it, because a class it adds
+   * is a style the caller cannot see and cannot remove, and this package has no
+   * override path.
+   */
+  slot: ReactNode
+  /**
+   * Forbidden on this arm, and for a reason rather than by tidiness: the Block
+   * renders `slot` and nothing else, so a `label` beside it would be a word no
+   * reader ever sees and a caller would reasonably believe had been rendered.
+   */
+  label?: never
+  /** Forbidden: an anchor belongs on the other arm, where Prism renders it. */
+  href?: never
+  /** Forbidden with `href`, for the same reason. */
+  newTab?: never
+  /**
+   * Forbidden, because the Block cannot style a node it does not render. A weight
+   * accepted here and dropped would be the one prop in this Block that a reader of
+   * the type could believe was in effect when it is not.
+   */
+  variant?: never
+}
+
+/**
+ * One action in the about band's action row, as a union of the two things an action
+ * in this position can honestly be.
+ *
+ * **A caller should not be able to reach a dead control by accident, and the union
+ * is what stops it.** A single shape with an optional `href` made both of these
+ * mistakes silent, and each was a legal value that rendered a control which
+ * activated to nothing:
+ *
+ * - `{ label: 'Talk to an engineer' }`, which was the likely mistake because an
+ *   about band's closing ask is almost always a link, and it looked correct on the
+ *   page.
+ * - `{ label: 'Talk to an engineer', href: maybeUrl }`, which navigated on the
+ *   renders where the address happened to be there and rendered a button on the
+ *   others, a runtime branch the type said nothing about.
+ *
+ * The first arm therefore **requires** `href`, and the second carries the caller's
+ * own control rather than a `Button` this Block cannot wire to anything. There is no
+ * third arm and no optional key, so both of those values are compile errors now.
+ * `about-action.types.ts` holds that as an assertion, because a render cannot prove
+ * a value does not compile.
  *
  * It is declared here rather than imported from `hero-01`, following
- * `ProcessFlow01`'s note on the same point: an about band and a hero are
- * different sections making different claims, and a consumer composing one has
- * no reason to take the other's type.
+ * `ProcessFlow01`'s note on the same point: an about band and a hero are different
+ * sections making different claims, and a consumer composing one has no reason to
+ * take the other's type. `scripts/check-block-controls.mjs` is what holds the shape
+ * itself, so a seventh spelling that got the arms wrong would fail the gate rather
+ * than than reading a JSDoc in another Block.
  */
-export type AboutAction = {
-  label: string
-  variant?: 'default' | 'outline' | 'secondary' | 'ghost'
-} & (
-  | {
-      /** Where the action goes. Present makes the action an anchor. */
-      href: string
-      /** Opens the destination in a new browsing context, with the matching `rel`. */
-      newTab?: boolean
-    }
-  | {
-      /**
-       * Forbidden, so that "a link whose address happens to be undefined" is a
-       * type error rather than a button. Omit the key entirely to mean a button.
-       */
-      href?: never
-      newTab?: never
-    }
-)
+export type AboutAction = AboutLinkAction | AboutSlotAction
 
 /**
  * The props an About01 takes.
@@ -132,7 +207,11 @@ export type About01Props = {
    * claim is a sentence and nothing else.
    */
   figures?: AboutFigure[]
-  /** The band's own calls to action, at the foot of the section. */
+  /**
+   * The band's own calls to action, at the foot of the section. See `AboutAction`
+   * and its two arms: every action Prism renders here is a link, and an action that
+   * cannot be one is a slot.
+   */
   actions?: AboutAction[]
   /**
    * Where the statement and the supporting paragraph sit inside their column.
@@ -333,12 +412,21 @@ export function About01({
           className="mt-10 flex flex-wrap items-center gap-3"
         >
           {actions.map((action, index) => {
-            // The variant follows the position, so a caller who means two
-            // secondary actions passes them and the row still reads as a row.
-            const variant = action.variant ?? (index === 0 ? 'default' : 'outline')
-            const isLink = action.href !== undefined
+            // A slot is the caller's own control, placed where it asked to be and
+            // otherwise untouched. Keyed positionally for the reason the other keyed
+            // lists in this package state: two actions may share a label, and a row
+            // keyed on a localised label remounts when the reader changes language.
+            if ('slot' in action) {
+              return <Fragment key={index}>{action.slot}</Fragment>
+            }
 
-            return isLink ? (
+            // The variant follows the position, so a caller who means two secondary
+            // actions passes them and the row still reads as a row. It stays a visual
+            // default rather than following the element, which is a different question
+            // from the one `Hero01` separates it from.
+            const variant = action.variant ?? (index === 0 ? 'default' : 'outline')
+
+            return (
               <CtaLink
                 key={index}
                 href={action.href}
@@ -347,13 +435,6 @@ export function About01({
               >
                 {action.label}
               </CtaLink>
-            ) : (
-              // Inert by design, and the reason is `Hero01`'s: a Block ships no
-              // behaviour, so the honest form of "this does something" in a
-              // composed section is a control the caller renders itself.
-              <Button key={index} variant={variant}>
-                {action.label}
-              </Button>
             )
           })}
         </div>

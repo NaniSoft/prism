@@ -35,11 +35,21 @@
  *                           that is a client Component and make it a server one.
  *
  * What is NOT a finding, and why it is stated here rather than left to a reader:
- * `'use client'` is allowed, because interactivity is a Block's business and seven
- * of them ship it. A relative import of another Block, a Component or `cn` is
- * allowed, because composition is the whole point. A `ReactNode` slot is allowed,
- * because a slot is how a consumer injects an interactive child without the Block
- * owning any state.
+ * `'use client'` is allowed, because interactivity is a Block's business and
+ * shipping it is the ordinary case rather than the exception. A relative import of
+ * another Block, a Component or `cn` is allowed, because composition is the whole
+ * point. A `ReactNode` slot is allowed, because a slot is how a consumer injects
+ * an interactive child without the Block owning any state.
+ *
+ * **That sentence carries no count, and the reason it does not is this run.** The
+ * first version of it said "seven of them ship it", which was true when it was
+ * written and was wrong within one release: the client-free action-slot pattern
+ * put five more Blocks into the tree, and a count in prose cannot notice. It was
+ * wrong in the other direction too, because a count nobody re-reads does not decay
+ * gracefully, it is simply false and still reads as a fact. So the run measures the
+ * figure and prints it, and a reader who wants to know how many Blocks ship
+ * `'use client'` reads the output of the run rather than a sentence that has to be
+ * updated by whoever changes the tree.
  *
  * Every rule is declared with its reason, and every rule is printed on every run
  * with the number of hits it found. A rule with no hits is not an error here - the
@@ -254,6 +264,7 @@ const hits = new Map(DENIED_MODULES.map((rule) => [rule, []]))
 let filesRead = 0
 let modulesClassified = 0
 let networkCalls = 0
+let clientModules = 0
 
 for (const result of results) {
   for (const file of result.files) {
@@ -261,6 +272,12 @@ for (const result of results) {
     filesRead += 1
     const shown = rel(file)
     const source = maskProse(readFileSync(file, 'utf8'))
+
+    // The `'use client'` directive is not masked away by `maskProse`, because it is
+    // a directive and not prose, and it is counted rather than judged: the allowed
+    // case is stated in the header without a number precisely so the number is
+    // something this run can measure instead of something a sentence has to keep.
+    if (/^\s*(['"])use client\1/.test(source)) clientModules += 1
 
     for (const found of specifiers(source)) {
       modulesClassified += 1
@@ -316,9 +333,15 @@ console.log(
 )
 console.log(
   `${NAME}: allowed, and said here so a reader does not have to guess: 'use client', because interactivity is a\n` +
-    "  Block's business and seven of them ship it; a relative import of a Block, a Component or cn, because\n" +
-    '  composition is the point; and a ReactNode slot, because a slot is how a consumer injects an interactive\n' +
-    '  child without the Block owning any state.',
+    "  Block's business and shipping it is the ordinary case; a relative import of a Block, a Component or cn,\n" +
+    '  because composition is the point; and a ReactNode slot, because a slot is how a consumer injects an\n' +
+    '  interactive child without the Block owning any state.',
+)
+console.log(
+  `${NAME}: the figure the header declines to state in prose, measured by this run: ${clientModules} of the ` +
+    `${filesRead} Block and Page module(s) read carry 'use client'. This number is printed rather than\n` +
+    '  written down because a count in a sentence goes stale the moment the tree changes, and this run is\n' +
+    '  the only place the count can be correct without somebody remembering to update it.',
 )
 
 if (findings.length > 0) {

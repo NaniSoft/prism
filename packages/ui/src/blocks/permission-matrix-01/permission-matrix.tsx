@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { Check, CircleHelp, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 
@@ -372,6 +373,8 @@ export function PermissionMatrix01({
   headingLevel = 'h2',
   className,
 }: PermissionMatrix01Props) {
+  // The handle a table below takes its name from; see the note on the table.
+  const headingId = useId()
   if (roles.length === 0) {
     throw new Error(
       'PermissionMatrix01: roles is empty, so the matrix has no columns and the table would render a header ' +
@@ -442,6 +445,7 @@ export function PermissionMatrix01({
     <Section className={className} data-slot="permission-matrix">
       <SectionHeading
         as={headingLevel}
+        id={headingId}
         align="left"
         eyebrow={eyebrow}
         title={title}
@@ -451,7 +455,19 @@ export function PermissionMatrix01({
 
       <div data-slot="permission-matrix-table" className="flex flex-col gap-4">
         <div className="border-border overflow-hidden rounded-xl border">
-          <Table>
+
+          {/*
+           * The table takes its name from the heading above it rather than from a
+           * second copy of the same words. A `<table>` is named by a caption, an
+           * `aria-label` or an `aria-labelledby`, and none of the three is inferred
+           * from a heading that happens to be nearby, so a reader listing the tables
+           * on a page found this one anonymous while every other element around it was
+           * named. A reference rather than a caption because a caption is drawn, and a
+           * visible line repeating the heading is noise; a reference because `title`
+           * is the caller own words and a Block may not compose a second set. See
+           * `Table`, which asks for exactly one of the three.
+           */}
+          <Table aria-labelledby={headingId}>
             <TableHeader>
               <TableRow>
                 {/*

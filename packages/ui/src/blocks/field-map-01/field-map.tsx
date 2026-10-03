@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useId, type ReactNode } from 'react'
 
 import { Section, SectionHeading, type HeadingLevel } from '../../components/ui/section'
 import { Status, type StatusTone } from '../../components/ui/status'
@@ -311,6 +311,8 @@ export function FieldMap01({
   headingLevel = 'h2',
   className,
 }: FieldMap01Props) {
+  // The handle a table below takes its name from; see the note on the table.
+  const headingId = useId()
   if (!sourceLabel || !targetLabel) {
     throw new Error(
       'FieldMap01: one of the two system names was not passed, so one of the two columns would carry a ' +
@@ -357,6 +359,7 @@ export function FieldMap01({
     <Section>
       <SectionHeading
         as={headingLevel}
+        id={headingId}
         align="left"
         eyebrow={eyebrow}
         title={title}
@@ -365,7 +368,19 @@ export function FieldMap01({
       />
 
       <div data-slot="field-map" className={cn('border-border rounded-xl border', className)}>
-        <Table>
+
+        {/*
+         * The table takes its name from the heading above it rather than from a
+         * second copy of the same words. A `<table>` is named by a caption, an
+         * `aria-label` or an `aria-labelledby`, and none of the three is inferred
+         * from a heading that happens to be nearby, so a reader listing the tables
+         * on a page found this one anonymous while every other element around it was
+         * named. A reference rather than a caption because a caption is drawn, and a
+         * visible line repeating the heading is noise; a reference because `title`
+         * is the caller own words and a Block may not compose a second set. See
+         * `Table`, which asks for exactly one of the three.
+         */}
+        <Table aria-labelledby={headingId}>
           <TableHeader>
             <TableRow>
               <TableHead scope="col">{sourceLabel}</TableHead>

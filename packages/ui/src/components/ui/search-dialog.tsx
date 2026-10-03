@@ -1,7 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Search, X } from 'lucide-react'
+
+import { Dialog, DialogContent } from './dialog'
 
 /**
  * One page in a search index.
@@ -93,7 +95,17 @@ export type SearchDialogProps = {
   messages: SearchDialogMessages
   /** The text shown before the reader has typed anything. */
   hint?: string
-  /** Called when the reader dismisses the dialog, by Escape or by the backdrop. */
+  /**
+   * Called when the reader has finished with the dialog: by Escape, by the
+   * backdrop, by the close control, or by choosing a result.
+   *
+   * **The caller unmounts, and it is called once the dialog has actually left
+   * rather than at the moment it was asked to.** Those are different moments and
+   * the later one is the one the caller wants, because the dialog owns the
+   * reader's focus while it is closing and removing it out from under its own
+   * exit is what strands a keyboard reader on `<body>`. Render this Component
+   * only when the reader is searching, and unmount it from here.
+   */
   onClose: () => void
   /** The most results to draw. Further matches are dropped rather than paged. */
   limit?: number
@@ -111,6 +123,32 @@ export type SearchDialogProps = {
  * from the same bytes. `SiteNavbar` composes it behind a trigger, and a consumer
  * that wants a different ranking can render this directly or pass its own control
  * through the navbar's `actions` slot.
+ *
+ * **It is `Dialog`, and the composition is the point rather than an
+ * implementation detail.** A modal claims four things at once: that the page
+ * behind it is inert, that the keyboard cannot leave, that the page under it does
+ * not scroll, and that focus comes back to the control that opened it. Hand-rolled,
+ * those four are four pieces of code, and the version this Component used to carry
+ * declared the first with `aria-modal` while implementing none of the others: the
+ * page behind was reachable by Tab, focus fell to `<body>` when the dialog
+ * unmounted, and the panel scrolled with the document and could be clipped by an
+ * ancestor. `Dialog` already had all four, and this Component now takes the trap,
+ * the portal, the scroll lock, the outside-press dismissal and the overlay from it,
+ * so the package holds one modal rather than one and a claim. What is left here is
+ * the part that is specific to search: the fetch, the scorer, the field, the list
+ * and the count.
+ *
+ * **The field is focused on open, and it says why it asks rather than taking the
+ * default.** `Dialog` focuses the panel's first tabbable element, which is the
+ * field here, so the default would be right by accident; it is named anyway because
+ * the reason it is right is a fact about search and not about dialogs: a reader who
+ * opened a search box opened it to type into it, and the field is the only control
+ * in the panel that needs a keyboard.
+ *
+ * **Escape is answered by the modal rather than by a document-level listener.**
+ * A listener on `document` answers the key whether or not the dialog is the thing
+ * the reader is looking at, which is the same failure `Toast` records about
+ * floating surfaces that listen globally.
  *
  * **The ranking is a scorer, not a search engine, and the difference is the
  * trade.** There is no stemming, no fuzzy matching and no typo tolerance: a query
@@ -137,10 +175,9 @@ export type SearchDialogProps = {
  * the ranking and is a named constant so a reader can see the numbers rather than
  * infer them.
  *
- * The field is focused on mount and Escape closes, and the backdrop closes, so
- * every exit is a control rather than a gesture. The list is marked as a list of
- * results and the count is announced through a live region, so a screen reader
- * user learns that a search ran rather than hearing the list change under them.
+ * The list is marked as a list of results and the count is announced through a
+ * live region, so a screen reader user learns that a search ran rather than
+ * hearing the list change under them.
  */
 export function SearchDialog({
   indexUrl,
@@ -152,18 +189,25 @@ export function SearchDialog({
   className,
 }: SearchDialogProps) {
   const inputRef = useRef<HTMLInputElement>(null)
+  // The dialog is mounted only once a reader has asked for search, so it opens on
+  // its first render and this is what the modal is controlled by. It is local
+  // rather than derived from `onClose` because the caller unmounts and never
+  // renders a closed SearchDialog: the state here is what lets the modal run one
+  // exit, for every reason the reader left, before the handoff.
+  const [open, setOpen] = useState(true)
   const [query, setQuery] = useState('')
   const [entries, setEntries] = useState<readonly SearchIndexEntry[] | null>(null)
   const [failed, setFailed] = useState(false)
 
-  useEffect(() => {
-    inputRef.current?.focus()
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [onClose])
+  /**
+   * The one exit, for every reason the reader leaves.
+   *
+   * Escape and the backdrop arrive through `Dialog`'s own `onOpenChange`; the
+   * close control and a chosen result arrive here. Both write the same state, so
+   * there is one leave rather than one per reason, and the caller's unmount is
+   * one call at the end of it.
+   */
+  const dismiss = useCallback(() => setOpen(false), [])
 
   /**
    * The index, fetched once per dialog.
@@ -210,18 +254,37 @@ export function SearchDialog({
   })()
 
   return (
-    <div
-      role="presentation"
-      onClick={onClose}
-      className="bg-foreground/40 fixed inset-0 z-50 flex items-start justify-center p-4 pt-[15vh]"
+    <Dialog
+      open={open}
+      onOpenChange={setOpen}
+      // The handoff is on the way out rather than on the way in, for two reasons
+      // that are the same reason. The modal restores focus as it closes, and a
+      // caller that unmounted the dialog one frame earlier would take that focus
+      // return with it and drop the reader on `<body>`. And the exit is the
+      // caller's cue that the dialog is finished, so handing over at the end of
+      // it is what makes `onClose` mean "it is gone" rather than "it is going".
+      onOpenChangeComplete={(isOpen) => {
+        if (!isOpen) onClose()
+      }}
     >
-      <div
-        role="dialog"
-        aria-modal="true"
+      <DialogContent
+        initialFocus={inputRef}
+        // The panel draws its own close control, in its own field row, named with
+        // `messages.close`. `Dialog`'s is a fixed word in a fixed corner, and two
+        // close controls in one modal is one more control than the reader needs.
+        showCloseButton={false}
         aria-label={label}
-        onClick={(event) => event.stopPropagation()}
+        // No elevation here, and the absence is the point. This Component used to
+        // carry `shadow-lg` over the top of `DialogContent`'s own `shadow-md`, and
+        // the override was invisible as an improvement and permanent as a second
+        // answer: `shadow-lg` is not an authored step, so it resolved against
+        // Tailwind's stock theme rather than against the token source, and a
+        // retune of the elevation scale would have moved every other lifted
+        // surface in this package and left this panel exactly where it was. The
+        // panel is the one lifted element over a modal scrim, which is what
+        // `--shadow-md` is for, and `DialogContent` already draws it.
         className={
-          'border-border bg-popover text-popover-foreground flex max-h-[70vh] w-full max-w-xl flex-col overflow-hidden rounded-xl border shadow-lg ' +
+          'border-border bg-popover text-popover-foreground flex max-h-[70vh] w-full max-w-overlay-palette flex-col overflow-hidden rounded-xl p-0 gap-0 ' +
           (className ?? '')
         }
       >
@@ -233,13 +296,35 @@ export function SearchDialog({
             onChange={(event) => setQuery(event.target.value)}
             placeholder={label}
             aria-label={label}
-            className="text-foreground h-12 flex-1 bg-transparent text-sm outline-none"
+            // The ring is at full strength, and it is drawn at all because this is
+            // the control focus lands in and `outline-none` is what removed the
+            // browser's indicator from it. A search field with no visible focus is
+            // a search field a keyboard reader cannot say they are inside.
+            //
+            // `text-base` then `md:text-sm`, which is the pair every other field in
+            // this package carries and the reason is a platform one rather than a
+            // visual one: iOS Safari zooms the viewport on a focused input whose
+            // computed font size is under 16 pixels, and it does not zoom back out,
+            // so a reader who opened the palette on a phone was left looking at a
+            // magnified page they could not leave. A rem step also tracks a reader
+            // who has raised their browser's default size, which a pixel value does
+            // not.
+            className="text-foreground h-12 flex-1 bg-transparent text-base outline-none focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px] md:text-sm"
           />
           <button
             type="button"
-            onClick={onClose}
+            onClick={dismiss}
             aria-label={messages.close}
-            className="text-muted-foreground hover:text-foreground focus-visible:border-ring focus-visible:ring-ring rounded-md p-1 transition-colors focus-visible:ring-[3px] focus-visible:outline-none"
+            className={
+              // 24px for a mouse and a trackpad, `p-1` around a 16px icon, and the
+              // 44px coarse-pointer floor as a step rather than a band. A band here
+              // would hang off the top and bottom of the field row and over the result
+              // list under it, where a step does not: the row is 48px tall and the
+              // button grows to 44 inside it, so nothing moves and no list row is
+              // stolen. See `DialogContent`'s own close control, which is in a corner
+              // and says the other half of why the two are not the same shape.
+              'text-muted-foreground hover:text-foreground focus-visible:border-ring focus-visible:ring-ring pointer-coarse:size-11 rounded-md p-1 transition-colors focus-visible:ring-[3px] focus-visible:outline-none'
+            }
           >
             <X aria-hidden className="size-4" />
           </button>
@@ -285,7 +370,7 @@ export function SearchDialog({
               <li key={result.id}>
                 <a
                   href={result.url}
-                  onClick={onClose}
+                  onClick={dismiss}
                   className="hover:bg-accent focus-visible:border-ring focus-visible:ring-ring flex flex-col gap-0.5 rounded-lg px-3 py-2 transition-colors focus-visible:ring-[3px] focus-visible:outline-none"
                 >
                   <span className="text-foreground text-sm font-medium">{result.title}</span>
@@ -304,8 +389,8 @@ export function SearchDialog({
             ))}
           </ul>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 

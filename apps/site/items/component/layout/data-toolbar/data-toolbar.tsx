@@ -24,7 +24,7 @@ export default function DataToolbarDemo() {
   const [query, setQuery] = useState('')
 
   return (
-    <div className="flex max-w-measure-wide flex-col gap-4">
+    <div className="flex max-w-page flex-col gap-4">
       <DataToolbar
         {...(toolbar ? { role: 'toolbar' as const, 'aria-label': 'Collector table' } : null)}
         search={

@@ -142,9 +142,33 @@ export interface ResizablePanelProps extends ComponentProps<'div'> {
  * same class of defect as a control that forgets a setting the reader chose and
  * nobody can explain.
  *
+ * **A drag reads the group's box once, at the press, and is arithmetic after
+ * that.** Every frame of a drag needs the group's travel, and reading it on each
+ * frame means reading it immediately after the frame before wrote the new position
+ * and therefore wrote new styles: one forced synchronous layout per frame, on the
+ * main thread, in the middle of the interaction the reader is holding. The box
+ * cannot change under a drag this Component started, because the panes are given a
+ * percentage of the group rather than the other way round, so the box is read where
+ * the press happened and reused. **A group resized by something else part way through
+ * a drag finishes that drag against the travel it started with**, which is the answer
+ * a reader mid-gesture can use; a caller who needs a drag that follows a changing
+ * group ends that drag and starts it again. The keyboard reads no box at all: an
+ * arrow key moves the divider by a share of its position, so current layout is never
+ * stale for a move that does not consult it.
+ *
  * **A divider has a name and it is the caller's word.** There is no default,
  * because a default would be the same word on every divider on every page and
  * would be true of none of them.
+ *
+ * **The coarse-pointer floor is paid with a band, and the drag does not move.** A
+ * one pixel divider cannot be grown: the two panes are given percentages of the
+ * group and already fill it, so a 44 pixel divider would push a pane off the screen
+ * on a phone. A transparent 44 by 44 band centred on the line gives the target and
+ * leaves the drawing, the arithmetic and the layout exactly as they were, because the
+ * drag reads the group's box rather than this element's. The cost is that a press
+ * within 21 pixels of the line grabs the divider rather than the pane; it is stated
+ * at the class, which is where a reader changing that class will look. See
+ * `DESIGN.md`, The coarse-pointer floor.
  *
  * This is the one Component here that is not composed on a Base UI primitive,
  * because Base UI 1.8.0 ships none: the package has no `Resizable` in it, so the
@@ -306,9 +330,40 @@ function ResizableHandle({ className, label, onKeyDown, ...props }: ResizableHan
     groupElement,
   } = useResizableContext('divider')
   const last = useRef<number | null>(null)
+  // The group's box, read once at the press and held for the drag.
+  //
+  // A pointer drag moves the divider by a share of the group's travel, so every frame
+  // of the drag needs that box, and reading it inside `onPointerMove` means reading
+  // it immediately after the frame before wrote the new position and therefore
+  // wrote new styles. That is one forced synchronous layout per frame of every drag,
+  // on the main thread, in the middle of the interaction a reader is holding, and it
+  // is the whole cost of the divider for a number that cannot change while the drag
+  // runs: the panes are given a percentage of the group and the group is not given a
+  // percentage of the panes, so moving the divider does not move the box it is
+  // measured against. So the box is read where the press happened, which is the last
+  // moment before the drag with no pending write in front of it, and every frame
+  // after that is arithmetic. `ReorderableList` measures its rows the same way, once
+  // at `pointerdown`, for the same reason.
+  //
+  // **The keyboard never reads it.** A key press moves the divider by a fixed share
+  // of the position rather than by a distance through the group, so the keyboard
+  // model needs no box, and current layout is never stale for a move that does not
+  // consult it.
+  //
+  // What this does not see is a group resized by something else part way through a
+  // drag, which a read per frame would have picked up on the next frame. The ordinary
+  // case of that is a window resized mid-drag, and there the drag finishes against
+  // the travel it started with, which is the answer a reader who is mid-gesture can
+  // use; a caller who changes the group's size while a pointer is down on it is a
+  // caller whose drag has to end and start again, and nothing here pretends to hold
+  // that case rather than holding it badly.
+  const box = useRef<DOMRect | null>(null)
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (disabled || event.button !== 0) return
+    const group = groupElement()
+    if (group === null) return
+    box.current = group.getBoundingClientRect()
     event.currentTarget.setPointerCapture(event.pointerId)
     // The pointer's own coordinate, and not the divider's, because a drag is a
     // distance travelled and the first event is a press rather than a move.
@@ -318,14 +373,14 @@ function ResizableHandle({ className, label, onKeyDown, ...props }: ResizableHan
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (last.current === null) return
-    const box = groupElement()?.getBoundingClientRect()
-    if (box === undefined) return
+    const measured = box.current
+    if (measured === null) return
     // Measured along the group's own axis, so a horizontal split follows the x
     // and a vertical one follows the y, and a caller that passes the wrong
     // `orientation` cannot get a divider that tracks the wrong coordinate.
     const here = orientation === 'horizontal' ? event.clientX : event.clientY
     const delta = here - last.current
-    const travel = orientation === 'horizontal' ? box.width : box.height
+    const travel = orientation === 'horizontal' ? measured.width : measured.height
     if (travel === 0) return
     moveBy((delta / travel) * 100)
     last.current = here
@@ -335,6 +390,10 @@ function ResizableHandle({ className, label, onKeyDown, ...props }: ResizableHan
     if (last.current === null) return
     event.currentTarget.releasePointerCapture(event.pointerId)
     last.current = null
+    // The box belonged to the press that is ending here. A pointer move that arrives
+    // after the release is refused by `last` already, and holding a box a drag has
+    // given up is a number nothing could explain.
+    box.current = null
     setDragging(false)
   }
 
@@ -381,6 +440,38 @@ function ResizableHandle({ className, label, onKeyDown, ...props }: ResizableHan
         'hover:bg-ring focus-visible:bg-ring data-[dragging]:bg-ring',
         'focus-visible:ring-ring focus-visible:ring-[3px]',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+        // The coarse-pointer floor, as a band, and this is the least mechanical control
+        // in the package, so the reasoning is the whole of the note.
+        //
+        // **A step is impossible here, and the reason is arithmetic rather than
+        // taste.** The panes are given `flexBasis: <size>%` with `flexShrink: 0`, so the
+        // two of them already sum to the group's whole width and the divider is what
+        // overflows it, by exactly its own one pixel. A `w-11` divider would overflow the
+        // group by 44, which on a phone pushes the right pane's right edge off the screen.
+        // Making room would mean changing what `size` means, or giving the panes a
+        // coarse-pointer-only basis calculation, and either one re-derives the meaning of
+        // the number a caller passed. A one pixel divider cannot take a step.
+        //
+        // **A band works because three facts hold that the three conditions ask about.**
+        // It is a pseudo-element, so the box the drag measures stays the drawn box and the
+        // arithmetic above is untouched: `onPointerDown` reads the *group's* rect and
+        // `onPointerMove` divides by the group's travel, so nothing reads this element's
+        // own size at all. It paints above both panes without a `z-index`, because the
+        // handle is `relative` with `z-index: auto` and the panes are static, and a
+        // positioned descendant paints after non-positioned siblings. And the band is
+        // 44 by 44 rather than 44 by the handle's length, which is what keeps the overlap
+        // local: along the split the handle already spans the group, so 44 there is free,
+        // and across the split it reaches 21 pixels into each pane over a 44 pixel stretch
+        // of the line rather than the whole height of the group.
+        //
+        // **The cost is stated rather than hidden.** A press within 21 pixels of the line,
+        // over a 44 pixel stretch of it, grabs the divider rather than the pane, and
+        // `touch-none` travels with the band because the pseudo-element resolves its
+        // `touch-action` from this element. So text selection near the divider is
+        // unavailable inside that patch. That is the trade a resize gutter makes on every
+        // platform, and it is bounded to a patch rather than run the length of the panes.
+        // See DESIGN.md, The coarse-pointer floor.
+        'pointer-coarse:before:absolute pointer-coarse:before:left-1/2 pointer-coarse:before:top-1/2 pointer-coarse:before:h-11 pointer-coarse:before:w-11 pointer-coarse:before:-translate-x-1/2 pointer-coarse:before:-translate-y-1/2 pointer-coarse:before:content-[""]',
         className,
       )}
       {...props}

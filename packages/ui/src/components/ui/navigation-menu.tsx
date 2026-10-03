@@ -205,6 +205,13 @@ function NavigationMenuItem({ className, ...props }: NavigationMenuItemProps) {
  * group is open before they enter it. The chevron rotates on the open state
  * rather than on a timer, which is the only motion here: something happened and
  * the reader can see that it did.
+ *
+ * `pointer-coarse:h-11` is the coarse-pointer floor, as a step. The groups sit beside
+ * each other along the list with a `gap-1`, so a band on one trigger is a press aimed
+ * at its neighbour, which is condition 1 of the three in `DESIGN.md` failing. The cost
+ * is that the bar is 44 tall on touch rather than 36, and a navigation bar that a
+ * finger has to hit is the last thing that should still be 36. See The coarse-pointer
+ * floor.
  */
 function NavigationMenuTrigger({ className, children, ...props }: NavigationMenuTriggerProps) {
   return (
@@ -215,6 +222,7 @@ function NavigationMenuTrigger({ className, children, ...props }: NavigationMenu
         'transition-[color,background-color,box-shadow] duration-fast ease-out',
         'hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring focus-visible:ring-[3px]',
         'data-[popup-open]:bg-accent/60 data-[popup-open]:text-accent-foreground',
+        'pointer-coarse:h-11',
         className,
       )}
       {...props}

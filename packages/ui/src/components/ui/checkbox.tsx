@@ -45,6 +45,16 @@ export interface CheckboxProps extends Omit<ComponentProps<'span'>, 'onChange'> 
  * toggles the focused control, and the indeterminate state is announced as
  * `mixed` to assistive technology. Pair it with a `FieldLabel` in a `Field`,
  * and mark it invalid with `aria-invalid` when the value is rejected.
+ *
+ * **A coarse pointer gets a 44px box and the desktop 16px box is untouched.** The
+ * step is the same one `checklist.tsx` takes on the completion control it composes
+ * from this Component, and for the same reason: a queue is worked with a thumb and a
+ * form is filled with one, but neither is worked with a fingertip that can hit sixteen
+ * pixels of a bordered square. The desktop size stays `size-4` because a form
+ * checkbox is a document control and a 44px square in a column of fields is not one,
+ * and the floor is a `@media (pointer: coarse)` step rather than a second size for the
+ * same input. The price is a 44px bordered box and a row that grows to hold it, which
+ * is the price `tag-group.tsx` records for the same reason.
  */
 function Checkbox({ className, indeterminate, ...props }: CheckboxProps) {
   return (
@@ -53,6 +63,14 @@ function Checkbox({ className, indeterminate, ...props }: CheckboxProps) {
       indeterminate={indeterminate}
       className={cn(
         'border-input bg-background text-primary-foreground shadow-xs peer size-4 shrink-0 rounded-sm border outline-none',
+        // A `pointer-coarse:` step rather than an invisible band, and the reason is
+        // `todo-01`. A band around a 16px box reaches fourteen pixels past it in every
+        // direction, and that Block's rows are stacked against a shared border with no
+        // gap, so the band around one row's checkbox covers the top of the next row's
+        // checkbox. Growing the box grows the row with it, which cannot reach anything.
+        // See `switch.tsx` and `slider.tsx` for the cases where a band is the answer,
+        // which are the cases where nothing sits within a band of the control.
+        'pointer-coarse:size-11',
         'transition-[color,box-shadow,background-color] duration-fast ease-out',
         'data-[checked]:border-primary data-[checked]:bg-primary data-[indeterminate]:border-primary data-[indeterminate]:bg-primary',
         'focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-[3px]',

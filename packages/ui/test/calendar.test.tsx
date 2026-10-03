@@ -266,6 +266,25 @@ describe('Calendar', () => {
     expect(screen.getByText('March 2026')).toBeTruthy()
   })
 
+  it('keeps the coarse-pointer 44px floor on the paging controls and the day cells', () => {
+    const { container } = renderCalendar()
+    for (const label of ['Previous month', 'Next month']) {
+      const className = screen.getByRole('button', { name: label }).className
+      expect(className).toContain('pointer-coarse:size-11')
+      // The desktop control is 32px, which passes WCAG 2.5.8 and fails this package's
+      // own standard, and `mini-calendar.tsx` already took the same step on the
+      // identical control. The identical control at two target sizes in one package
+      // is the defect; the 32px is not.
+      expect(className).toContain('size-8')
+    }
+
+    // The day cell is the control this grid is, and it was the same 36px cell the
+    // small calendar had already grown to 44.
+    const cell = container.querySelector('[data-slot="calendar-day"]')
+    expect(cell?.className).toContain('pointer-coarse:h-11')
+    expect(cell?.className).toContain('h-9')
+  })
+
   it('submits the chosen date as a plain ISO day, and nothing when none is chosen', () => {
     const { container: chosen } = renderCalendar({ name: 'delivery', value: new Date(2026, 2, 17) })
     const { container: empty } = renderCalendar({ name: 'delivery' })

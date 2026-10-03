@@ -278,6 +278,14 @@ export type DocsShellProps = {
  * twenty-seven-page tree are both a full screen and neither is a page-long
  * sidebar.
  *
+ * **The frame is three columns from `lg`, and the third is the consumer's to
+ * fill.** The rail is 15rem, the document takes the rest, and the contents rail
+ * is 13rem. The third track exists only when `toc` is passed, because the
+ * document takes the second track by auto-placement and a template that named a
+ * track no child occupies would leave the document in the 15rem one. Below `lg`
+ * the frame is a single column with both rails hidden, which is the arrangement
+ * a phone gets.
+ *
  * It is a Page rather than a Block because it is a whole screen and it is the
  * screen a content pipeline targets: a route that reads one document and hands
  * it the page tree, the outline and the current address. A Block would be the
@@ -312,19 +320,28 @@ export function DocsShell({
   const neighbours = currentHref === undefined ? undefined : deriveNeighbours(nav ?? [], currentHref)
 
   return (
-    <div data-slot="docs-shell" className={cn('mx-auto w-full max-w-6xl px-6 py-10 lg:px-8', className)}>
+    <div data-slot="docs-shell" className={cn('mx-auto w-full max-w-page px-6 py-10 lg:px-8', className)}>
       {header}
 
       <div
         data-slot="docs-shell-frame"
         className={cn(
           'flex flex-col gap-8 lg:flex-row lg:gap-10',
-          // One column for the document, and a third for whichever rails are
-          // present. The frame is sized by what the consumer passed rather than
-          // by a fixed three-column grid, so a tree with no contents rail leaves
-          // the document the width the two remaining columns divide between
-          // them.
-          contents ? 'lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] xl:grid-cols-[15rem_minmax(0,1fr)_13rem]' : 'lg:grid lg:grid-cols-[15rem_minmax(0,1fr)]',
+          // One track for the rail, one for the document, and a third for the
+          // contents rail when there is one. The template names exactly the
+          // tracks the children occupy rather than a fixed three-column grid,
+          // because the document takes the second track by auto-placement: a
+          // tree with no contents rail has two children, so a three-track
+          // template would leave the document in the 15rem first track.
+          //
+          // The third track is at the same width as the two-column frame, and
+          // that is a fact about the token package rather than a preference: the
+          // emitted theme closes `xl` with `initial`, so a third track written
+          // against a wider screen compiled to no media query at all, and the
+          // contents rail landed in an implicit `auto` track rather than the
+          // 13rem one. `check-breakpoint-variants.mjs` is the gate that says so
+          // to the next class written against a screen the theme does not emit.
+          contents ? 'lg:grid lg:grid-cols-[15rem_minmax(0,1fr)_13rem]' : 'lg:grid lg:grid-cols-[15rem_minmax(0,1fr)]',
         )}
       >
         {rail ? (

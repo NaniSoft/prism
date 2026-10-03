@@ -53,6 +53,28 @@ const toastVariants = cva(
 type ToastPhase = 'entering' | 'open' | 'leaving'
 
 /**
+ * The opacity transitions currently running on one element, or `null` when the
+ * browser cannot be asked.
+ *
+ * `null` and an empty array are different answers and the difference is the whole
+ * point of the function. An empty array says the browser has nothing running,
+ * which is what `transition: none` looks like from inside; `null` says the
+ * browser cannot report, and a caller that treated that as "nothing is running"
+ * would hand over on every leave in a browser without the Web Animations API and
+ * take the fade with it.
+ *
+ * Read on the element and never on its subtree, because the dismiss control runs
+ * an opacity transition of its own and a subtree read would report the button's
+ * fade as the toast's.
+ */
+function opacityTransitions(element: HTMLElement): Animation[] | null {
+  if (typeof element.getAnimations !== 'function') return null
+  const isOpacity = (animation: Animation): animation is CSSTransition =>
+    (animation as CSSTransition).transitionProperty === 'opacity'
+  return element.getAnimations().filter(isOpacity)
+}
+
+/**
  * The props the Toast root accepts.
  *
  * Every reader-facing string on this surface is a prop, and the reason is the
@@ -111,6 +133,12 @@ export interface ToastProps
    * makes the leave transition possible at all, and it is stated here because a
    * caller who expects the toast to remove itself will write a no-op and leave
    * a toast parked on the page forever.
+   *
+   * **Called exactly once, and called whether or not the fade ran.** It fires at
+   * the end of the leave when there is a leave to watch, and on the same commit
+   * when there is not, so a consumer whose own stylesheet kills transitions with
+   * `transition: none` gets a toast that goes rather than a toast stuck in
+   * `data-phase="leaving"`.
    *
    * **Omitting it makes the toast permanent, and that is deliberate.** Without a
    * handoff there is nobody to take the toast off the page, so a clock with
@@ -231,16 +259,32 @@ export interface ToastProps
  * have.
  *
  * **It never removes its own transition, and the reason is the caller's
- * unmount.** The exit hands over on the end of the root's own opacity
- * transition, so under reduced motion the fade is *shortened* rather than
- * removed and the handoff still happens. Removing the fade there would have
- * needed this Component to read the media query and hand over at once instead,
- * which would be the same rule written twice: once in the stylesheet and once in
- * TypeScript, free to disagree the day the motion policy is retuned. Leaving
- * the fade in and shortening it keeps the decision in one place, and it is the
- * same choice `DESIGN.md` states for the package: motion is state feedback,
- * shortened rather than removed under reduced motion. The travel is the part
- * that is movement, so that is the part `motion-safe:` guards.
+ * unmount.** The enter and the leave are shortened rather than removed under
+ * reduced motion, and shortening them there would have needed this Component to
+ * read the media query and hand over at once instead, which would be the same
+ * rule written twice: once in the stylesheet and once in TypeScript, free to
+ * disagree the day the motion policy is retuned. It does not read it. It also
+ * does not guard the travel at the call site any more, because
+ * `packages/ui/src/styles.css` stops every transition and every animation under
+ * `prefers-reduced-motion` in one unlayered rule, and a `motion-safe:` beside an
+ * unguarded `transition-[opacity,transform]` was the shape `RangeField` shipped:
+ * a guard that adds a rule and therefore cannot remove one. The rise is movement
+ * and it is stopped, the fade is stopped with everything else, and the exit is
+ * asked about rather than assumed, which is what the paragraph below is for.
+ *
+ * **The leave is handed over whether or not the fade runs, and that is the
+ * contract `styles.css` states for the whole package.** `packages/ui/src/styles.css`
+ * says there is no state anywhere in this system whose exit depends on an animation
+ * running to completion, and this Component is where that was not true: the exit
+ * waited on `transitionend` and nothing else. A consumer's global
+ * `transition: none` broke it first, and the reduced-motion block at the foot of
+ * that stylesheet breaks it now that it names transitions as well as animations, so
+ * a toast stranded in `leaving` was and would be visible, undismissable and still
+ * inside a live region. So the exit asks the browser what is actually running on
+ * the root rather than waiting for an event that a killed transition never sends:
+ * it waits for the fade when there is a fade, it hands over on the same commit when
+ * there is not, and `onDismiss` is called exactly once either way. This Component is
+ * the reason the one unlayered rule above it is safe to ship.
  *
  * **It is a client Component** because it holds a clock, runs effects, and
  * attaches three handlers. The clock is a single `setTimeout` whose
@@ -346,44 +390,110 @@ function Toast({
     setPhase((current) => (current === 'leaving' ? current : 'leaving'))
   }, [])
 
+  /**
+   * Whether the caller has already been told, and a guard on the Component
+   * rather than on the effect below.
+   *
+   * A local flag in that effect would be a fresh `false` every time the effect
+   * re-runs, and it re-runs whenever `onDismiss` changes identity, which a caller
+   * writing an inline arrow does on every render. The thing this protects is the
+   * caller's unmount, and an unmount that runs twice is a state update against a
+   * Component that is already gone.
+   */
+  const handedOver = useRef(false)
+
   useEffect(() => {
     if (phase !== 'leaving') return
     const root = rootRef.current
     if (root === null) return
 
-    // The leave ends when the transition the CSS declared has run, and not on a
-    // second clock of this Component's own: the length of the leave is a CSS
-    // decision, and a number in TypeScript would be a second source of truth
-    // for it that would stop agreeing with the stylesheet the day the token
-    // moved.
-    //
-    // It is the root's own opacity rather than "the first transition to end",
-    // and that holds under reduced motion too. The fade is shortened there and
-    // not removed, so an opacity transition always runs and always ends, and the
-    // caller is always told to unmount. Reading the media query in JavaScript
-    // would put the same decision in two places: the stylesheet would shorten
-    // the fade and this code would have to guess the same rule to know whether
-    // to expect the event.
-    //
-    // A `const` arrow and not a hoisted declaration, for one reason that is not
-    // taste: a function declaration could be called before the null check above
-    // ran, so TypeScript drops the narrowing on `root` inside it, while an arrow
-    // assigned to a `const` cannot exist until the check has passed.
-    const finish = (event: Event) => {
-      // Filtered to this element's own opacity, because a child control's
-      // colour transition would otherwise end the toast's exit early and the
-      // caller would unmount it half way through the fade.
-      if (event.target !== root) return
-      if ((event as TransitionEvent).propertyName !== 'opacity') return
-      // Removed on the way through, because the phase does not change on the
-      // way out and so this effect is not re-run to clean up. A listener left
-      // attached would call the caller's unmount again on the next opacity
-      // transition on this element, and an unmount that runs twice is a state
-      // update on a component that is no longer there.
-      root.removeEventListener('transitionend', finish)
+    /**
+     * The one call, whichever of the two signals asked for it.
+     */
+    const settle = () => {
+      if (handedOver.current) return
+      handedOver.current = true
       onDismiss?.()
     }
+
+    /**
+     * The event, for a browser that runs the fade.
+     *
+     * Filtered to this element's own opacity, because a child control's colour
+     * transition would otherwise end the toast's exit early and the caller would
+     * unmount it half way through the fade. Removed on the way through, because
+     * the phase does not change on the way out and so this effect is not re-run
+     * to clean up; a listener left attached would call the caller's unmount again
+     * on the next opacity transition on this element.
+     *
+     * A `const` arrow and not a hoisted declaration, for one reason that is not
+     * taste: a function declaration could be called before the null check above
+     * ran, so TypeScript drops the narrowing on `root` inside it, while an arrow
+     * assigned to a `const` cannot exist until the check has passed.
+     */
+    const finish = (event: Event) => {
+      if (event.target !== root) return
+      if ((event as TransitionEvent).propertyName !== 'opacity') return
+      root.removeEventListener('transitionend', finish)
+      settle()
+    }
     root.addEventListener('transitionend', finish)
+
+    /**
+     * The animation, for the case where the event never arrives.
+     *
+     * **This is the one that makes the handoff independent of the fade rather than
+     * merely early, and the reason it exists is a transition that is stopped rather
+     * than shortened.** A reduced-motion kill is written two ways: as a duration of
+     * `0.01ms`, which still starts a transition and still ends it, or as
+     * `transition: none`, which starts nothing at all. Under the second form
+     * `transitionend` never fires, and an exit that waits only for that event
+     * leaves the toast in `data-phase="leaving"` for good: still on the page,
+     * still taking the pointer, and still inside a live region that has not
+     * stopped announcing. `styles.css` states the invariant this broke, that no
+     * state in this system has an exit that depends on an animation running to
+     * completion, and this Component was the one place it was not true. That block
+     * now writes `transition: none` itself, under `prefers-reduced-motion`, which
+     * is why this was repaired before it was needed rather than after.
+     *
+     * **The browser is asked, not guessed at.** `getAnimations()` returns what is
+     * actually running on this element, so it answers the question the stylesheet
+     * already answered: with the transition stopped there is nothing in it and the
+     * handoff happens at once, and with the fade running there is one transition
+     * and the handoff waits for it. Reading the media query in JavaScript instead
+     * would put one decision in two places, free to disagree the day the motion
+     * policy is retuned, and a reader who asked for less motion is not a reader
+     * whose toast should hang.
+     *
+     * **It settles on the animation and not on a clock, for the reason the exit
+     * has no number in it.** The length of the leave is a CSS decision taken by
+     * `duration-slow` above, and a timer here would be a second source of truth
+     * for it that would stop agreeing with the stylesheet the day the token moved.
+     * The animation carries the same length the CSS declared, so waiting on it
+     * keeps one answer to "how long does this leave run for".
+     *
+     * A rejected `finished` is a settled leave rather than an error: a cancelled
+     * or replaced animation is one that will not finish, and waiting on it is the
+     * way a toast gets stranded.
+     *
+     * Only this element's own animations are read, because `getAnimations()` is
+     * not asked for the subtree. The dismiss control runs its own opacity
+     * transition, and a subtree read would hand the toast's exit to a button.
+     *
+     * A `null` answer is left to do nothing: a browser that cannot be asked keeps
+     * the event as the only signal there is, which is the behaviour this Component
+     * had before and the only one it can have there.
+     */
+    const fade = opacityTransitions(root)
+    if (fade !== null && fade.length === 0) {
+      // Nothing is running, so nothing will end: no transition was ever created.
+      // This is the strand the whole block exists to prevent, and it settles on
+      // the same commit rather than waiting for an event that is not coming.
+      settle()
+    } else if (fade !== null) {
+      Promise.all(fade.map((animation) => animation.finished)).then(settle, settle)
+    }
+
     return () => root.removeEventListener('transitionend', finish)
   }, [phase, onDismiss])
 
@@ -427,17 +537,17 @@ function Toast({
         // anything arrived; `ease-out` because both directions are decelerating
         // into a resting state rather than accelerating out of one.
         'transition-[opacity,transform] duration-slow ease-out',
-        // Reduced motion shortens the fade and removes the travel, rather than
-        // removing the transition. The fade is what tells a reader the toast is
-        // there and then that it is gone, and a reader who asked for less motion
-        // has not asked to be told nothing; the rise is movement, and movement is
-        // what they asked not to have. It is also why the handoff below waits on
-        // an opacity transition rather than reading the media query in JavaScript:
-        // an opacity that always transitions always ends, so there is no case in
-        // which the caller is never told to unmount.
-        'motion-reduce:duration-fast',
-        'motion-safe:data-[phase=entering]:translate-y-1 motion-safe:data-[phase=leaving]:translate-y-1',
         'data-[phase=entering]:opacity-0 data-[phase=leaving]:opacity-0',
+        /*
+         * No `motion-safe:` here and no `motion-reduce:`. `styles.css` ends with one
+         * unlayered `prefers-reduced-motion` rule that stops every transition in the
+         * package, so a guard here would either be inert (beside an unguarded
+         * `transition-*`, which is what this Component used to carry) or a second
+         * place to retune the policy. A toast under reduced motion appears at its
+         * final opacity with no rise and leaves with no fade, and the arrival is
+         * still announced by the live region, which is the part the reader cannot
+         * do without and the part no transition was carrying.
+         */
         className,
       )}
       {...props}

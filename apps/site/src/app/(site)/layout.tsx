@@ -5,7 +5,6 @@ import { PrismThemeScript } from '@nanisoft/prism-ui/provider'
 import { themeAttributes } from '@nanisoft/prism-ui/theming'
 
 import { SiteBar } from '@/components/site-bar'
-import { inter } from '@/lib/fonts'
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site'
 import { DEFAULT_MODE, DEFAULT_PACK } from '@/lib/bar'
 
@@ -25,7 +24,15 @@ import { DEFAULT_MODE, DEFAULT_PACK } from '@/lib/bar'
 // variants stopped applying. `globals.css` moves exactly those five into a
 // cascade layer above the library's, which is a rank rather than a position, so the
 // two requirements no longer contradict each other.
-import './globals.css'
+/*
+ * The stylesheet sits in `src/app`, beside both root layouts rather than inside
+ * either group, because the site's own Tailwind build scans it and its `@source`
+ * globs are relative to its own location. Moving the file into one group would put
+ * the other group's scanned paths on the wrong side of the directory, and the
+ * utility generator would find the demos and the chrome by accident rather than by
+ * the declarations this file makes.
+ */
+import '../globals.css'
 import '@nanisoft/prism-ui/styles.css'
 
 export const metadata: Metadata = {
@@ -163,10 +170,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         stretched `main` with no content is the one case where a footer would ride
         up into the header, and the skip link's target is a block that fills what
         is left by default.
+
+        There is no font class on this element, and the absence is the change worth
+        reading. This body used to carry `inter.variable`, a generated class from
+        `next/font/local` that set `--font-sans` on the element itself, and a
+        directly applied custom property outranks an inherited one, so every page
+        resolved the interface face to the site's own copy of Inter and never to the
+        `@font-face` rules the library ships. The site therefore never exercised the
+        face it documents: a missing or corrupt shipped font rendered perfectly here
+        with every gate green. The token stack now resolves from `:root`, which is
+        the library's own declaration, so what a consumer installs is what this site
+        renders.
       */}
-      <body
-        className={`${inter.variable} flex min-h-dvh flex-col antialiased`}
-      >
+      <body className="flex min-h-dvh flex-col antialiased">
         {/*
           Skip link, first in the document on purpose.
 
@@ -214,7 +230,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         */}
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:border focus:border-ring focus:bg-background focus:px-3 focus:py-1.5 focus:text-sm focus:font-medium focus:text-foreground focus:shadow-lg focus:ring-ring focus:ring-[3px] focus:outline-none"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:border focus:border-ring focus:bg-background focus:px-3 focus:py-1.5 focus:text-sm focus:font-medium focus:text-foreground focus:shadow-md focus:ring-ring focus:ring-[3px] focus:outline-none"
         >
           Skip to content
         </a>

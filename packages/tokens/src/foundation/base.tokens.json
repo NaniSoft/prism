@@ -25,10 +25,11 @@
   },
   "font": {
     "$type": "fontFamily",
-    "$description": "Typeface stacks. The sans stack is a variable font; the mono stack is fixed-width.",
+    "$description": "Typeface stacks. The sans stack names the interface face the component package ships, then the metric-adjusted fallback it ships beside it, then the platform stack; the mono stack is fixed-width and this package ships nothing for it, so every entry is one the reader's own machine provides.",
     "sans": {
       "$value": [
         "Inter",
+        "Inter Fallback",
         "ui-sans-serif",
         "system-ui",
         "-apple-system",
@@ -53,7 +54,7 @@
   },
   "font-weight": {
     "$type": "fontWeight",
-    "$description": "Numeric weights matching the Inter variable font axes. `normal` is named to match the utility it generates rather than `regular`.",
+    "$description": "Numeric weights matching the Inter faces the component package ships, which are the three the scale renders at plus the one italic. `normal` is named to match the utility it generates rather than `regular`.",
     "normal": { "$value": 400 },
     "medium": { "$value": 500 },
     "semibold": { "$value": 600 },

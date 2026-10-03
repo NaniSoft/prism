@@ -57,8 +57,11 @@ each choice is independent; radio items imply a single answer.
   default you would defend.
 - Use `disabled` only with nearby text that explains why, not to hide an option
   that should not be offered.
-- Keep the item order stable across renders. Reordering radio items when a
+- Keep the item order stable across re-renders. Reordering radio items when a
   value changes makes the group feel unpredictable.
+- A coarse pointer grows each item to 44px on its own and the column grows with
+  it. Do not add a second size rule for touch, and do not add a band: a band
+  reaches 14px past an item, which is the next item in a stacked group.
 
 ### Content guidelines
 
