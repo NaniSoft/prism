@@ -26,14 +26,20 @@ pnpm install
 pnpm dev            # docs site
 pnpm build          # turbo build; packages emit dist/, the site exports out/
 pnpm test           # Vitest
-pnpm check          # contrast, emitted-contract, motion, surface, layout, dash, encoding, corpus drift, content joins
+pnpm check          # the repository gates; docs/quality-gates.md is the table,
+                    # and scripts/check-gate-table.mjs holds it against the chains
 pnpm lint           # oxlint
 pnpm typecheck
 pnpm changeset      # declare a release before merging
 ```
 
 Run one package with `pnpm --filter @nanisoft/prism-ui <task>`. `package.json` is
-the source of truth for what a script does today.
+the source of truth for what a script does today, and the gate list is not
+restated above on purpose: a second list of the gates is a list that will drift,
+so the one in `docs/quality-gates.md` is compared to every `check` task in every
+manifest by `scripts/check-gate-table.mjs` and fails in both directions. Add a
+gate to a chain and the table finding names the file; rename one and it fails the
+other way.
 
 ## Conventions
 

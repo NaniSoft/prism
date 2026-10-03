@@ -243,6 +243,27 @@ The verified facts behind it:
   package, and a name that does not exist on npm will not authenticate.
 - The published versions carry no provenance attestation, so the OIDC lane has
   never published here.
+
+**Consequence, recorded 2026-10-03: a release was published from a maintainer
+machine instead, so the lane is now known to be the obstacle rather than an
+assumption.** `@nanisoft/prism-tokens@0.15.0` and `@nanisoft/prism-ui@0.15.0`
+went up through `changeset publish` with local npm credentials, after
+`pnpm release:verify` and `pnpm release:dry` both passed and the dry run named
+exactly those two packages. Two costs, both real:
+
+- **No provenance attestation**, the same missing thing as above. The published
+  tarballs carry no OIDC provenance, and they will carry none until a trusted
+  publisher exists.
+- **The `npm-publish` environment's required reviewer was bypassed.** That
+  environment is the only thing standing between a merge and a registry write,
+  and a local publish has no environment at all. The version PR still went
+  through review and CI still gated the merge, so the gates ran; what did not run
+  is the reviewer who exists specifically to catch a bad publish.
+
+Neither cost is new and neither is an argument against publishing. They are the
+reason `scripts/configure-trusted-publishers.mjs` exists and the reason it is
+worth running: **a local publish is the fallback, not the lane.** The section
+above is unchanged and still the fix.
 - `NPM_TOKEN` is set as an **org** secret scoped to `PRIVATE` repositories. This
   repository is public, so that secret never reaches the job. A secret scoped to
   private repositories cannot be seen from a public repository, which is why the

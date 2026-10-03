@@ -1459,24 +1459,37 @@ the ramp file and the manifest are generated from it, never authored by hand.
 
 Recorded as facts. None of these is fixed in this document.
 
-- **The cutover is partly executed.** `@nanisoft/prism-tokens` and
-  `@nanisoft/prism-ui` are published at 0.6.0, `@nanisoft/prism-llms` at 0.5.0 and
-  `@nanisoft/prism-mcp-server` at 0.4.0, and the four consumer sites can install
-  them. The publish came from a maintainer machine rather than the release lane,
-  because the npm trusted publisher is not configured; see `CONTRIBUTING.md` for
-  that and for what it costs, which is a missing provenance attestation. Still
-  open: deprecating the retired pre-rebuild line, and moving
-  `prism.nanisoft.com` to the new site. `MIGRATION.md` is the draft that goes
-  live at cutover.
+- **The cutover is executed and one step of it is still open.** All four packages
+  are on npm and the four consumer sites install them. The publish came from a
+  maintainer machine rather than the release lane, because the npm trusted
+  publisher is still not configured; see `CONTRIBUTING.md` for that, for the
+  provenance attestation it costs, and for the environment check it bypasses.
+  Still open: deprecating the retired pre-rebuild line. `MIGRATION.md` is the
+  draft that goes live at cutover, and its own banner still says the cutover has
+  not happened, which is now the one place in this repository that says so.
+- **`prism.nanisoft.com` serves the new site, and the move is not an open item.**
+  The Worker is `prism-site` and `apps/site/wrangler.jsonc` claims
+  `prism.nanisoft.com` as a custom domain. The `deploy-site` job in
+  `.github/workflows/ci.yml` runs on every push to `main` after `verify` passes,
+  and it is not tied to a release: documentation and content ship faster than
+  versions. Every merge to `main` therefore replaces what a reader receives, and
+  `gh run view <run> --job <deploy-site>` ends with `Deployed prism-site triggers`
+  and the line `prism.nanisoft.com (custom domain)`.
 - **`CODEOWNERS` carries a placeholder owner line.** The project has one
   maintainer and no confirmed team handle yet; the cutover confirms it.
 - **The v1.1 roster tail is no longer deferred. It shipped.** (Specified on
   2026-09-28 when the count was 28 Components, 10 Blocks and 4 Pages, and
   discharged in 2026-09 by the roster expansion recorded in
   `docs/history/roster-expansion.md`, which took the catalogue from 106 Items to
-  236.) Every name the table below deferred is now in the tree, with one
-  resolution and one withdrawal, so v1.1 has no roster work left and
-  `check-catalogue.mjs` is the only count there is:
+  236 and has grown further since; `docs/history/` holds the record as it was
+  written and is deliberately not edited to match today.) Every name the table
+  below deferred is now in the tree, with one resolution and one withdrawal, so
+  v1.1 has no roster work left. **The count itself is not stated in this
+  document**, and the two figures this entry used to carry were both wrong the
+  moment they were written here: a count in prose goes stale silently, and a
+  stale count is worse than no count. `check-catalogue.mjs` is the only count
+  there is; run `pnpm --filter @nanisoft/prism-ui check:catalogue` and it prints
+  the roster by kind alongside the three-way comparison that holds it.
 
   | Kind | Was deferred to v1.1 | Shipped as |
   | --- | --- | --- |
@@ -1542,26 +1555,63 @@ Recorded as facts. None of these is fixed in this document.
   `empty-state-01`, a
   Block, because the old item was already a composition of icon, title, body
   and action, which is a Block's shape.
-- **Visual regression is report-only.** The Playwright job is committed with a
-  written promotion rule (two stable weeks, target ten merges); until the rule
-  fires, a visual diff is reported and does not fail the build.
+- **Visual regression is report-only, and it has never once been green.** The
+  promotion rule is written down in `apps/site/playwright.config.ts` (two
+  consecutive weeks with no unexplained diff, target ten consecutive merges,
+  `continue-on-error` comes off), and `docs/quality-gates.md` restates it. It
+  has not fired and is nowhere near firing, because the rule's precondition has
+  never held. **Every run of the job on `main` since it was added on 2026-09-26
+  has failed, and the green tick on the job is not evidence otherwise.** The job
+  carries `continue-on-error: true`, so GitHub reports the job and the step
+  inside it as `success` whatever Playwright exits with; the failure count is in
+  the log and nowhere else. `gh run view <run> --job <visual>` ends with a line
+  like `78 failed` beside `36 passed`, and every failure is one of three kinds:
+  `visual.spec.ts` screenshot mismatches, `display.spec.ts` computed-style
+  assertions, and `header-fit.spec.ts` overflow assertions. So the written
+  promotion rule describes a lane that has never had a stable week, and the
+  honest reading of the open item is that this is not a promotion waiting on a
+  clock but a lane reporting red into a report nobody reads.
+  **The consequence worth naming is that the same mask hides the two lanes that
+  are not visual.** `display.spec.ts` and `header-fit.spec.ts` assert cascade
+  and overflow outcomes rather than pixels, and `docs/quality-gates.md` calls the
+  display lane "the reason a cascade regression is a red line rather than a pixel
+  diff in a report nobody reads", while also recording that it runs inside this
+  report-only job and therefore does not fail CI. Those two statements are both
+  true and together they mean the red line is not red. The remedy is the one the
+  promotion rule already names, applied to the non-visual lanes first rather than
+  last.
 - **The client-JavaScript budget reports per item and fails only in total.** The
   per-item thresholds live in the `BUDGETS` table in
   `packages/ui/scripts/check-client-budget.mjs`; a component over its figure is
-  reported, and the deduplicated all-client bundle is held to the 260 KB gzip
-  ceiling and fails. The ceiling has moved four times: 90 to 92 when the roster
-  was completed, 92 to 116 when the roster was widened to the whole emitted tree,
-  which found 53 modules the two-directory roster had never read, 116 to 208 for
-  the deferred substrate tail, and 208 to 260 for the 2026-09 roster expansion,
-  which took the catalogue from 106 Items to 236 and the measured bundle from
-  156.6 KB to 250.4 KB. The gate's own comment records why each time, and the
-  reason the moves are allowed to differ is worth stating once: the first two
-  corrected a ceiling that was measuring the wrong set of files, and the last two
-  are forecasts about weight that had not landed when they were written, which is
-  a different kind of number and is treated as one. A ceiling with a fraction of
-  a kilobyte of headroom is not a policy but a pin, because it fails on an
-  unrelated dependency bump and teaches everyone to answer by rerunning it with a
-  bigger number.
+  reported, and the deduplicated all-client bundle is held to the gate's
+  `CEILING` and fails. **Neither the ceiling nor the measured figure is stated
+  here on purpose**, and this entry used to state both, which is the failure this
+  paragraph is now corrected for. Run `pnpm --filter @nanisoft/prism-ui
+  check:client-budget`; it prints the measured bundle, the ceiling, the entry
+  point count and the headroom on every run, and it prints the ceiling derived
+  from the constant rather than restated, precisely so a second copy of the
+  number cannot drift from the first. What belongs here and nowhere else is the
+  part no run prints: the ceiling has been moved by hand on every occasion a
+  batch of Items landed, and the gate's own header comment argues from its own
+  history that this makes it a counter rather than a budget, that a counter
+  measures the catalogue rather than the JavaScript, and that the honest
+  alternative, a fixed number somebody decides once on the evidence of what four
+  downstream repositories can load, is a product judgement rather than a
+  measurement and is therefore deliberately not made there. That comment is the
+  record; read it rather than this paragraph for the current figure.
+
+  The reasoning this entry adds is why a derived ceiling was considered and
+  rejected, because it is the argument the gate makes and a reader here will not
+  otherwise get it: a ceiling that scales with the catalogue lets the bundle grow
+  to whatever the catalogue happens to be, which is the same as having none. The
+  first moves corrected a ceiling measuring the wrong set of files, which is why
+  their history is stated as truth about the past; later ones were forecasts about
+  weight that had not landed; the most recent are reports, weight measured and
+  present. Three kinds of number, and the gate names which is which.
+
+  A ceiling with a fraction of a kilobyte of headroom is not a policy but a pin,
+  because it fails on an unrelated dependency bump and teaches everyone to answer
+  by rerunning it with a bigger number.
   **Pages carry no per-item budget and that is deliberate.** A Page is a
   composition of Blocks already in the table, so a budget for the Page would
   count the same bytes a second time and let one screen look like it costs what a
@@ -1572,13 +1622,20 @@ Recorded as facts. None of these is fixed in this document.
 - **No cross-browser or cross-engine testing.** jsdom is not a browser, and the
   visual and real-browser axe checks are Chromium only.
 - **The prose code fences render monochrome, and the mechanism is understood and
-  the fix is not applied.** Measured in `out/` after a clean build: 277 of 583
-  pages carry a `<pre class="shiki shiki-themes github-light github-dark">`, those
-  304 elements carry 22677 inline `--shiki-light` / `--shiki-dark` declarations,
-  and **not one stylesheet in the export mentions either property.** Each token
+  the fix is not applied.** The shape of the defect is stable and is what this
+  entry is for: a large majority of the exported pages carry a
+  `<pre class="shiki shiki-themes github-light github-dark">`, each of those
+  elements carries inline `--shiki-light` and `--shiki-dark` declarations, and
+  **not one stylesheet in the export mentions either property.** Each token
   therefore inherits the surrounding colour, so every fenced block in every MDX
   document is plain text in the page's ink, and two themes' worth of GitHub hex
-  ships on every one of those pages doing nothing.
+  ships on every one of those pages doing nothing. **The counts are not stated
+  here**, and the ones this entry used to carry were stale: measured again in
+  `out/` after a clean build they were off by a factor of four on the
+  declarations, because the roster grew under them and nothing counted it. No
+  gate prints them and none should, because a number in prose here goes stale
+  silently; measure with a count over `out/**/*.html` if the figure matters, and
+  treat the qualitative claim above as the record.
 
   The mechanism is `fumadocs-core`'s `rehypeCode`, which is in `fumadocs-mdx`'s
   default preset because this site declares no `rehypeCodeOptions`. Its defaults
@@ -1624,10 +1681,44 @@ Recorded as facts. None of these is fixed in this document.
   every ink in it.
 - **The registry validator proves internal consistency, not installability.**
   The tarball verifier proves contents, not runtime compatibility.
-- **Supply-chain and dependency automation is deferred.** CodeQL, OSSF
-  Scorecard, `dependency-review-action`, Renovate and pnpm `minimumReleaseAge`
-  are named as deferred in the header comment of `.github/workflows/ci.yml` and
-  are not adopted.
+- **Supply-chain and dependency automation is deferred, and two things a reader
+  might take for it are not.** CodeQL, OSSF Scorecard,
+  `actions/dependency-review-action`, Renovate and pnpm `minimumReleaseAge` are
+  named as deferred in the header comment of `.github/workflows/ci.yml`, and
+  none of the five is adopted: there is no `renovate.json`, no
+  `dependabot.yml` and no CodeQL, Scorecard or dependency-review workflow in
+  `.github/workflows/`, and `minimumReleaseAge` appears in no manifest, so
+  pnpm's age floor is off.
+
+  What *is* enforced, and was named in neither place until now, is this.
+  **The dependency graph is read, never grepped.** `scripts/check-no-legacy-line.mjs`
+  parses `pnpm-lock.yaml` into a graph and holds every manifest edge and every
+  lockfile edge against the retired line, so the assertion is reachability rather
+  than a string that happens to spell a forbidden name, and it reads `.github`
+  as one of its roots alongside the sources and the scripts. And **install
+  scripts are allowlisted**: `pnpm-workspace.yaml` carries an `allowBuilds` map
+  in which every entry is a decision, so a transitive dependency that grows a
+  postinstall fails the install rather than running it.
+
+  **One thing the `ci.yml` header asserts is not enforced, and it is the line
+  directly above the list.** Every third-party action is pinned to a full commit
+  SHA, and every one in the three workflows and four composite actions is, so the
+  header describes what is true. No gate holds it. `check-no-legacy-line.mjs`
+  reads `.github` for the retired line and for nothing else, and a workflow that
+  gained an unpinned `uses:` would pass every lane in this repository. That is an
+  unenforced instruction rather than a gate, and it is recorded as one here
+  rather than left to read as coverage; `docs/quality-gates.md` records its
+  equivalents in the same terms.
+
+  **One pnpm feature reads like a policy here and is not one.**
+  `pnpm release:verify` is `scripts/verify-tarballs.mjs`, which packs each
+  package and asserts its contents; it prints four `ok` lines and a `tarballs:
+  all pass` line and nothing else. It does not check a supply-chain policy, and
+  the string "Lockfile passes supply-chain policies" that pnpm 11.18 can print
+  is pnpm's own reporter for its lockfile-resolution verifier, not this
+  repository's output: it appears only when pnpm is configured with
+  `minimumReleaseAge` or `trustPolicy`, this repository configures neither, and
+  the line does not print on a `pnpm install` or a `pnpm release:verify` here.
 - **A one-way Figma Variables sync is not built.** The DTCG projection under
   `dist/dtcg/` exists; the sync and its plugin ownership do not, and two-way
   sync is out of scope.
@@ -1692,9 +1783,11 @@ Recorded as facts. None of these is fixed in this document.
   them unnamed is how the fourth Kind quietly becomes the answer to every agent
   problem, and it is not. See `docs/history/taxonomy-survey.md`, which found them
   by reading agent documentation rather than a component catalogue: none of the
-  108 commercial categories names a run, a tool call, an approval, a trace or a
-  cost, and none names an audit trail, a permission matrix, or a retention
-  control either.
+  commercial categories it catalogued names a run, a tool call, an approval, a
+  trace or a cost, and none names an audit trail, a permission matrix, or a
+  retention control either. The figure it counted is a property of that survey's
+  dated reading of a third-party listing and is left there, in the survey, rather
+  than restated here.
 
   **The name is settled: `live`, and the objection to it does not hold.** The
   working title was `live`, and the recorded worry was that a Kind named `live`

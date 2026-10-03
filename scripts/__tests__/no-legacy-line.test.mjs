@@ -354,7 +354,12 @@ test('the real repository passes, and prints every historical-record discharge',
   assert.match(result.stdout, new RegExp(`0 finding\\(s\\) in \\d+ file\\(s\\) read across ${ROOTS} root\\(s\\) \\(0 unresolved\\)`))
   // The vendor mentions that remain are discharged by convention and printed
   // rather than only counted, so an exemption is auditable from the run's output.
-  assert.match(result.stdout, /MIGRATION\.md:194\s+\[vendor-name\]\s+DISCHARGED by convention `migration-note`/)
+  // The line is matched as a number and not pinned: what is under test is that
+  // the migration note's discharge is *printed*, and pinning a line number couples
+  // this test to every unrelated edit to the note. It was pinned, and the first
+  // edit to MIGRATION.md's banner failed it, which is the brittleness the
+  // repository argues against elsewhere for exactly this reason.
+  assert.match(result.stdout, /MIGRATION\.md:\d+\s+\[vendor-name\]\s+DISCHARGED by convention `migration-note`/)
   // Two files are skipped as historical records. The migration note is one. The
   // licensing review under `docs/history` is the other, and it names the retired
   // line because a review of the terms governing a third-party component product

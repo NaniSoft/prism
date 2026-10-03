@@ -1,10 +1,20 @@
 # Migrating to Prism
 
-> **Draft.** This note was drafted before the new major was published. Version
-> numbers, install commands, deprecation lists and live URLs are provisional
-> until the new packages are on npm and `prism.nanisoft.com` serves the new
-> site. Nothing in it is installable yet. It lives in the repository root; at
-> cutover the same document is published on the site.
+> **Partly overtaken, and the parts still standing are named below.** Both of the
+> conditions this banner waited on have since been met: the packages are on npm
+> and `prism.nanisoft.com` serves the new site. So "nothing in it is
+> installable yet" is no longer true, and neither is the version prediction
+> further down, which expected `1.0.0` and got a `0.x` line instead. The version
+> table below is unaffected and stays as it is, because it is explicitly the
+> **last version before the rebuild** rather than a statement about today.
+>
+> What has **not** been done is the pass over the body this banner was waiting
+> for. The install commands, the deprecation list and the API mapping have not
+> been re-checked against a published release, so treat them as the draft the
+> banner always described and read them against the documentation site, which is
+> generated from the published packages rather than from this file. It lives in
+> the repository root; publishing it on the site is still open, because the cutover
+> is executed but that step is not.
 
 ## The short version
 
@@ -72,10 +82,14 @@ not unpublished**, when the new major ships):
 | `@nanisoft/prism-llms` | `0.4.0` |
 | `@nanisoft/prism-mcp-server` | `0.3.0` |
 
-The exact new version number is produced by the version pull request at publish
-time. The policy is a major bump on the published lines, so the first installable
-version of the new line is expected to be `1.0.0`. **Confirm the number at
-publish.**
+The version produced was **not** `1.0.0`. This line reasoned that a clean break
+should take the `major` slot, and the same reasoning is recorded against the
+`live` Kind in `DESIGN.md`, where the prediction is called out by name as one that
+did not hold: on a `0.y.z` line the `y` is already the breaking-equivalent slot,
+and taking `1.0.0` would have *declared the public API stable* rather than
+described a change. Read the published line's first entry rather than a number
+written here: `packages/ui/CHANGELOG.md` and `packages/tokens/CHANGELOG.md` are the
+record, and the table above stays as it is because it is history.
 
 ## There was a 1.0.0 that never shipped
 
