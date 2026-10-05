@@ -852,6 +852,29 @@ free of these defects.
   declaration wins a cascade, and a control that answers focus with a fill rather
   than a ring is an exclusion rather than a finding, so the three declared
   exclusions in `EXCLUSIONS` are the whole of what it will not report.
+- No gate reads an Item document against the component it documents, and the one
+  exception is the exception that shows why. `check-heading-scale.mjs` holds the
+  ladder in `apps/site/items/component/layout/section/section.mdx` against the
+  ladder the Component renders because a ladder is a markdown table with cells: it
+  reads both tables and compares them row for row, and it reads the whole Item
+  rather than a slice, so a second copy of the table in that prose is a finding
+  too. Everything else in an Item is a sentence, and a sentence is not decidable.
+  `apps/site/items/page/docs-shell/docs-shell.mdx` published "An entry with no
+  words is a label, not a link" through 0.16.0, and it was false for as long as it
+  stood: the Page drops a nameless entry and counts the drop on
+  `data-unnamed-entries`. `check-item-docs.mjs` holds the JSDoc and it holds that
+  it is the comment immediately before the declaration; nothing anywhere read the
+  Item's prose, so a false claim about behaviour shipped with a green build and a
+  green corpus. **This one is editorial, and the reason is written down rather than
+  shipped as a gate.** A gate over prose claims has to enumerate the claims, which
+  is a list somebody maintains, and that is the shape that already left the heading
+  gate holding `Cta01` alone and passing over the four Blocks it had not reached;
+  or it has to match on wording, which fires on a rewrite and not on a lie. Both
+  failure modes are worse than the one they would prevent: a gate that fires on
+  nothing is indistinguishable from a gate that found nothing to say, which is the
+  defect this document's own coverage section exists to name. The decidable half
+  has a gate. The half that is left is a judgement about whether a sentence is
+  still true, and that is a reader's.
 - No gate measures a target size. The 44px coarse-pointer floor is asserted by
   the test beside each primitive, naming the class its own floor is written as,
   which is a weaker mechanism than a scan and the only one available without a

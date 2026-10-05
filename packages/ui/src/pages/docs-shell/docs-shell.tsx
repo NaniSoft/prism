@@ -199,17 +199,11 @@ export type DocsShellProps = {
    * The accessible name of the rail. Required whenever `nav` is passed, because
    * it is a word a reader hears and a Page that ships no copy ships no
    * reader-facing copy either.
-   *
-   * It is also the visible word on the disclosure that stands in for the rail
-   * below `lg`, because it is already this navigation's name and a Page cannot
-   * invent a second one. A consumer that files its navigation in another language
-   * gets the control in that language by having done this once.
    */
   navLabel: string
   /**
    * The accessible name of the contents rail. Required whenever `toc` is passed,
-   * for the same reason `navLabel` is, and the contents disclosure below `lg`
-   * carries it for the same reason too.
+   * for the same reason `navLabel` is.
    */
   tocLabel: string
   /**
@@ -359,32 +353,51 @@ export type DocsShellProps = {
  * a fact about ink, and announcing it would put a sentence in the middle of a
  * list of a consumer's own pages.
  *
- * **Below `lg` there was no navigation at all, and the fix is a native
- * disclosure.** At 768 and at 1024 both rails were `hidden` and the only
- * navigation left inside `<main>` was the two-item pager at the foot of the
- * article, so a reader on a thirty-one document reference at tablet width had no
- * contents, no on-this-page and no way to a sibling page except Previous and
- * Next. The disclosure is `<details>` and `<summary>`, which is the one
- * disclosure widget that needs no runtime at all: it is expanded and collapsed by
- * the platform, it is a real control in the Tab order with a real expanded state,
- * and adding a client boundary to a server Component to reinvent it would put
- * bytes on every documentation page in the family to save a reader one click.
+ * **The tree is in the document once, at every width, and the price of that is a
+ * phone reader crossing the whole navigation to reach the article.** At 768 and
+ * at 1024 both rails used to be `hidden`, so the only navigation left inside
+ * `<main>` was the two-item pager at the foot of the article, and a reader on a
+ * twenty-seven document reference at tablet width had no contents, no
+ * on-this-page and no way to a sibling page except Previous and Next. 0.16.0
+ * closed that gap by drawing the tree a second time behind a `<details>`, one
+ * copy for the rail and one for the narrow frame, and it shipped a doubled
+ * document to every documentation page in the family with it: two
+ * `aria-current` markers for one page, two lists of a consumer's own pages, two
+ * `docs-nav-page` rows for every document, and a second `<nav>` carrying the
+ * rail's own accessible name, which is the thing a consumer's suite reaches the
+ * rail by. Three consumer test files failed against the published package: two on
+ * a count that came back doubled, and two on a `getByRole('navigation', { name })`
+ * that had two answers where it expects one. So there is one copy now, and it
+ * shows at every width.
  *
- * The tree is rendered twice, once in each arrangement, and only one of them is
- * in the document at any width: the rail is `hidden lg:block` and the disclosure
- * is `lg:hidden`, so the other one is `display: none` and is out of the
- * accessibility tree and out of the tab order rather than a second copy a reader
- * meets. The summary carries `navLabel` or `tocLabel`, which is the caller's own
- * word for that navigation and therefore the one word on the control that cannot
- * be wrong in a language the consumer did not write in.
+ * **What that costs, with the number.** A consumer's rail measured 1,318 pixels
+ * of content in a built export at 1280 by 680, and those rows wrap on a phone, so
+ * a reader arriving at the top of a documentation page scrolls past a thousand
+ * pixels of navigation before the article begins. That is a real regression for
+ * that reader and it is the reason a disclosure was reached for in the first
+ * place. It is paid rather than hidden, because every arrangement that avoids it
+ * is worse: a rail at `lg` and nothing below it reopens the gap this change
+ * closes, and drawing the tree twice to keep the scroll short is what broke three
+ * consumer test files in the first place.
+ *
+ * **What would actually remove the scroll.** A collapsed rail below `lg` needs an
+ * open state. A server Component cannot hold one, and `<details>` is the only
+ * disclosure the platform holds on the Page's behalf, so the control that opens
+ * it has to be a client island inside the Page. That is a separate piece of work
+ * with its own budget, and it is not built here: a Page that ships a client
+ * boundary to save one scroll is making a different trade than the one stated
+ * above, and it should be made deliberately rather than smuggled in as the side
+ * effect of fixing a duplicate.
  *
  * **The frame is three columns from `lg`, and the third is the consumer's to
  * fill.** The rail is 15rem, the document takes the rest, and the contents rail
  * is 13rem. The third track exists only when `toc` is passed, because the
  * document takes the second track by auto-placement and a template that named a
  * track no child occupies would leave the document in the 15rem one. Below `lg`
- * the frame is a single column: the document fills it and the two navigations sit
- * above it behind their disclosures.
+ * the frame is a single column and the children flow in the order they are
+ * written: the rail, then the document, then the contents rail. The rail is the
+ * first child for that reason, so a reader below `lg` meets the navigation before
+ * the text rather than after it, and one arrangement serves both widths.
  *
  * It is a Page rather than a Block because it is a whole screen and it is the
  * screen a content pipeline targets: a route that reads one document and hands
@@ -395,10 +408,9 @@ export type DocsShellProps = {
  *
  * It is a server Component. It fetches nothing, it holds no state and it imports
  * no router, so a consumer renders it from whichever route their framework names
- * and hands it the document their pipeline produced. The sub-`lg` disclosure is
- * the reason that stays true under pressure: it is the one feature on this Page
- * that a hand would be tempted to write as a client Component, and it is written
- * as markup instead.
+ * and hands it the document their pipeline produced. Nothing here needs a client
+ * boundary, and the one feature that would want one is named above as work not
+ * done rather than quietly added.
  */
 export function DocsShell({
   title,
@@ -449,33 +461,8 @@ export function DocsShell({
           contents ? 'lg:grid lg:grid-cols-[15rem_minmax(0,1fr)_13rem]' : 'lg:grid lg:grid-cols-[15rem_minmax(0,1fr)]',
         )}
       >
-        {/*
-          The narrow arrangement, first in the document so it is what a reader at
-          768 or 1024 meets before the text rather than after it. It is
-          `lg:hidden` because the rail below is `hidden lg:block`, so exactly one
-          of the two is displayed at any width and neither is a second copy in the
-          accessibility tree.
-        */}
-        {rail || contents ? (
-          <div data-slot="docs-nav-compact" className="flex flex-col gap-4 lg:hidden">
-            {rail ? (
-              <Disclosure label={navLabel} unnamed={unnamedNav}>
-                <NavList entries={rail} currentHref={currentHref} depth={0} />
-              </Disclosure>
-            ) : null}
-            {contents ? (
-              <Disclosure label={tocLabel} unnamed={unnamedToc}>
-                <NavList entries={contents} currentHref={currentHref} depth={0} />
-              </Disclosure>
-            ) : null}
-          </div>
-        ) : null}
-
         {rail ? (
-          <aside
-            data-slot="docs-rail"
-            className="hidden lg:col-start-1 lg:row-start-1 lg:block"
-          >
+          <aside data-slot="docs-rail" className="lg:col-start-1 lg:row-start-1">
             <Rail label={navLabel} entries={rail} currentHref={currentHref} unnamed={unnamedNav} />
           </aside>
         ) : null}
@@ -511,10 +498,7 @@ export function DocsShell({
         </article>
 
         {contents ? (
-          <aside
-            data-slot="docs-contents"
-            className="hidden lg:col-start-3 lg:row-start-1 lg:block"
-          >
+          <aside data-slot="docs-contents" className="lg:col-start-3 lg:row-start-1">
             <Rail label={tocLabel} entries={contents} currentHref={currentHref} unnamed={unnamedToc} />
           </aside>
         ) : null}
@@ -526,7 +510,7 @@ export function DocsShell({
 }
 
 /* ------------------------------------------------------------------ *
- * The two rails at lg
+ * The two rails
  * ------------------------------------------------------------------ */
 
 /**
@@ -561,6 +545,31 @@ export function DocsShell({
  * usual cost of a fade and the reason the padding is part of the answer rather
  * than a detail.
  *
+ * **The bound, the sticky offset, the band and the fade are all written against
+ * the same `lg:`, so below `lg` this rail is an ordinary block in the flow: no
+ * scroll region, no cut, no reservation, no fade.** That is the right shape for a
+ * rail that is the first thing in a single column, because a sticky region a full
+ * viewport tall above the article would be worse than a long one above it.
+ *
+ * **The fade and the band are bound to the cut rather than to the rail, and the
+ * reason is what a fade is for.** A fade marks a cut, so it may only exist where
+ * there is one, and the cut is the `overflow-y` at `lg`: the scroll region, the
+ * cap, the sticky offset, the reserved band and the gradient are one arrangement
+ * or none of them. The fade shipped unprefixed, which put the arrangement out of
+ * step with itself at the one width that has no cut to mark. Below `lg` the region
+ * is an ordinary block, so the `pb-8` reserving the band is inert there and the
+ * gradient fell on the last row or two of a rail that was simply running on. The
+ * band and the fade still measured equal and the reader still lost nothing
+ * legible, which is why looking did not catch it: a gradient painted over content
+ * is a defect, and it is not a legibility one.
+ *
+ * **The limit bought here is stated rather than left to be found.** Below `lg` the
+ * rail is bounded by its content rather than by the viewport, so a long tree runs
+ * past the fold of a phone screen with nothing marking where it ends: no cut to
+ * mark, no band to reserve and no scroll region to scroll inside. That is the
+ * honest price of one copy of the tree at every width, and the measurement behind
+ * it is stated once on the Page above rather than repeated here.
+ *
  * `unnamed` is carried on the `<nav>` rather than logged, for the reason
  * `unnamedIn` gives.
  */
@@ -592,50 +601,18 @@ function Rail({
         base layer puts on `<body>`; a consumer that puts the Page on a surface of
         its own is the one arrangement where that wash is the wrong value, and it
         is a Page that paints no surface of its own precisely so that this holds.
+
+        Every utility that puts this on the page carries the same `lg:` the cut is
+        created at, for the reason the JSDoc above gives. Below that bound the
+        element has no size and paints nothing, rather than washing the last rows
+        of a rail that is not scrolling.
       */}
       <div
         aria-hidden="true"
         data-slot="docs-rail-fade"
-        className="from-background pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t to-transparent"
+        className="pointer-events-none lg:absolute lg:inset-x-0 lg:bottom-0 lg:h-8 lg:bg-gradient-to-t lg:from-background lg:to-transparent"
       />
     </div>
-  )
-}
-
-/**
- * One tree behind a native disclosure, for the widths where there is no rail.
- *
- * `<details>` rather than a Component, and the whole argument is that it needs no
- * runtime: the platform holds the expanded state, the control is in the Tab order
- * with a real expanded state, and the Page stays a server Component. A Page that
- * shipped a client disclosure for this would put JavaScript on every documentation
- * page in the family to replace a browser feature that has been in the platform
- * since 2018.
- *
- * **The summary's word is the caller's.** `navLabel` and `tocLabel` are already
- * required props and already name these two navigations for a screen reader, so
- * the control that opens one says the same thing the region inside it is called
- * and the Page ships no word of its own. Nothing suppresses the browser's own
- * disclosure marker or its own focus ring: the marker is the cheapest honest
- * signal that the row is a disclosure, and `py-3` puts the target at 44 pixels for
- * a coarse pointer without a variant.
- */
-function Disclosure({
-  label,
-  unnamed,
-  children,
-}: {
-  label: string
-  unnamed: number
-  children: ReactNode
-}) {
-  return (
-    <details data-slot="docs-nav-disclosure">
-      <summary className="text-foreground cursor-pointer py-3 text-sm font-medium">{label}</summary>
-      <nav aria-label={label} data-unnamed-entries={unnamed} className="pb-4">
-        {children}
-      </nav>
-    </details>
   )
 }
 

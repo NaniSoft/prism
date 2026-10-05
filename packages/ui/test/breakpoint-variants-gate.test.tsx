@@ -295,7 +295,12 @@ describe('the shipped DocsShell frame', () => {
   })
 
   it('places the contents rail in the third track, not an implicit one', () => {
-    expect(source).toContain('lg:col-start-3 lg:row-start-1 lg:block')
+    // Placement only. The string carried `lg:block` until 0.16.1 took the rail out
+    // from behind `hidden`, which left the aside's classes as the explicit column
+    // and row and nothing else; the claim this test holds is the placement, and
+    // where the rail is displayed is asserted on the rendered element in
+    // `docs-shell.test.tsx`.
+    expect(source).toContain('lg:col-start-3 lg:row-start-1')
   })
 
   it('says why the third track is at the same width as the two-column frame', () => {

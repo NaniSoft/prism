@@ -114,11 +114,14 @@ client.
   put an `as` in every adapter. So the Page reads both trees before any of them
   renders and throws, naming the entry and which tree it came from. A label in
   its place would hide a page your tree is missing rather than report it.
-- **An entry with no words is a label, not a link.** A link with no accessible
-  name is announced as "link" and nothing else, so a nameless page and a nameless
-  section heading both render as a label, on the same rule as a section with no
-  index, and neither is one of the pager's two neighbours. One malformed row
-  cannot be published twice.
+- **An entry with no words is dropped, and the drop is counted.** A link with no
+  accessible name is announced as "link" and nothing else, so a nameless page and a
+  nameless section heading both render no row at all rather than a label: a blank
+  row is not a destination and it is not a label either, because a label is words.
+  The page is still there at its own address and every link into it still works;
+  what the rail loses is one row, and the count of those is on each rail as
+  `data-unnamed-entries`. A nameless entry is never one of the pager's two
+  neighbours either, so one malformed row cannot be published twice.
 - **Do not pass a previous and a next.** The pager is derived from `nav` and
   `currentHref`, which removes one derivation from every consumer. It is derived
   rather than passed for a second reason: a caller who passes neighbours can pass

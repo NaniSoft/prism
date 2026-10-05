@@ -4,7 +4,7 @@ import path from 'node:path'
 import { render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { DocsShell, type DocsNavEntry } from '../src/pages/docs-shell'
+import { DocsShell, type DocsNavEntry, type DocsShellProps } from '../src/pages/docs-shell'
 
 /**
  * The trees under test are the three consumer sites' own, transcribed from their
@@ -15,9 +15,9 @@ import { DocsShell, type DocsNavEntry } from '../src/pages/docs-shell'
  *   Nexus     six sections, twenty-seven pages, every section named for a
  *             documentation genre and every folder holding an index. Seven
  *             top-level entries once the root introduction is counted.
- *   AlphaLens six sections, twenty-seven pages, named for subject matter rather
- *             than for a genre, a status inside three of the titles, and six
- *             rules between the sections.
+*   AlphaLens six sections, twenty-seven pages, named for subject matter rather
+ *   than for a genre, a status inside three of the titles, and six rules
+ *   between the sections.
  *   Atlas     four sections, nineteen pages, named for a documentation genre,
  *             and NOT ONE of them holding an index. One of them holds nine pages
  *             under a single heading.
@@ -26,20 +26,16 @@ import { DocsShell, type DocsNavEntry } from '../src/pages/docs-shell'
  * is not repeated as a child. Every count below is asserted rather than
  * described, so a tree that drifts fails the test rather than the comment.
  *
- * **Every navigation in this Page is in the document twice, and that is the shape
- * rather than an accident of the test.** The tree is rendered once in the rail
- * the `lg` frame draws and once in the disclosure the narrow frame draws, and
- * exactly one of the two is displayed at any width: the rail's aside is
- * `hidden lg:block` and the disclosure is `lg:hidden`, so the other is
- * `display: none`. jsdom loads no stylesheet and evaluates no media query, so both
- * are in the DOM here, which means an unscoped `getByRole('navigation')` finds
- * two of everything and an unscoped `querySelectorAll` counts twice.
- *
- * So the helpers below are how a test says which arrangement it is asserting, and
- * `bothRenderings` is how it asserts that the two agree. Neither is a workaround:
- * a Page that rendered the tree once could not be both a sticky rail and a
- * disclosure without a client boundary, and the alternative was asserted rather
- * than assumed when it was chosen.
+ * **Every assertion here reads rendered output, and that is the lesson of the
+ * 0.16.0 regression rather than a style preference.** The Page rendered its
+ * navigation tree twice, once in the rail and once behind a `<details>`, and the
+ * suite in this file at the time passed 55 of 55 against it: its helpers were
+ * `bothRenderings` and `narrowOf`, so every query was scoped to one of the two
+ * copies, and a test that says which copy it means cannot notice that there are
+ * two. The three consumer suites, which address the Page by role and by a whole
+ * document, failed the moment it shipped. So there is no scoping helper here
+ * that names a copy, because there is only one, and the counts below are counted
+ * over `container` rather than over a region of it.
  */
 
 const REPO = path.resolve(import.meta.dirname, '..', '..', '..')
@@ -268,42 +264,123 @@ function destinationsOf(entries: readonly DocsNavEntry[]): DocsNavEntry[] {
 const sectionsOf = (entries: readonly DocsNavEntry[]) =>
   entries.filter((entry) => entry.type === 'group').length
 
+/**
+ * What the tree itself says, counted three ways, so the assertions can be about
+ * the corpus rather than about a number this file froze.
+ *
+ * These are the renderer read backwards, deliberately, and one of the three is
+ * the count that failed in a consumer: `pagesIn` is the `<li
+ * data-slot="docs-nav-page">` count, `labelsIn` the `<span
+ * data-slot="docs-nav-label">` count, and `headingsIn` the `<a
+ * data-slot="docs-nav-heading">` count. A Page that draws a tree twice answers
+ * all three with twice the tree, and a Page that drops a nameless row answers
+ * them with fewer, so an assertion against these three catches both.
+ */
+function pagesIn(entries: readonly DocsNavEntry[]): number {
+  return entries.reduce(
+    (n, entry) => n + (entry.type === 'page' ? 1 : entry.type === 'group' ? pagesIn(entry.items) : 0),
+    0,
+  )
+}
+
+function labelsIn(entries: readonly DocsNavEntry[]): number {
+  return entries.reduce((n, entry) => {
+    if (entry.type !== 'group') return n
+    // A label is a group the Page can name and cannot address. A group it cannot
+    // name draws no heading at all, so counting it here would over-count.
+    const isLabel = entry.title.trim() !== '' && !addressable(entry)
+    return n + (isLabel ? 1 : 0) + labelsIn(entry.items)
+  }, 0)
+}
+
+function headingsIn(entries: readonly DocsNavEntry[]): number {
+  return entries.reduce(
+    (n, entry) =>
+      n + (entry.type === 'group' ? (addressable(entry) ? 1 : 0) + headingsIn(entry.items) : 0),
+    0,
+  )
+}
+
+/** Every `<ul>` the tree draws: one per level, so one plus every group with pages. */
+function listsIn(entries: readonly DocsNavEntry[]): number {
+  return 1 + entries.reduce(
+    (n, entry) => n + (entry.type === 'group' && entry.items.length > 0 ? listsIn(entry.items) : 0),
+    0,
+  )
+}
+
+/** Whether a group has an address of its own, on the same rule `addressOf` reads. */
+const addressable = (group: { href?: string }) => group.href !== undefined && group.href.trim() !== ''
+
 /* ------------------------------------------------------------------ *
- * Which arrangement a test is asserting
+ * Reading the rendered output
  * ------------------------------------------------------------------ */
 
-/** The navigation the `lg` frame draws, as a scoped query rather than a role. */
+/** The navigation rail, by the slot its element carries. */
 const railOf = (container: HTMLElement) =>
   container.querySelector('[data-slot="docs-rail"] nav') as HTMLElement
 
-/** The contents rail the `lg` frame draws. */
+/** The contents rail, by the slot its element carries. */
 const contentsOf = (container: HTMLElement) =>
   container.querySelector('[data-slot="docs-contents"] nav') as HTMLElement
-
-/** The narrow arrangement: the region holding the disclosures. */
-const compactOf = (container: HTMLElement) =>
-  container.querySelector('[data-slot="docs-nav-compact"]') as HTMLElement
 
 /** Every anchor inside a region, in document order. */
 const linksIn = (region: HTMLElement) => [...region.querySelectorAll('a')]
 
 /**
- * Both renderings of one navigation, matched on its accessible name rather than
- * on its position, so a test can assert the two are the same list rather than
- * than one of them happens to be.
+ * The contents rail the way a consumer's suites reach it: by role and by the
+ * accessible name the caller passed.
  *
- * The name is compared in JavaScript rather than through an attribute selector
- * because it is a caller-supplied string and a selector would have to be escaped
- * against a value this file does not own. The narrow arrangement comes first in
- * the document, so `[0]` is the disclosure and `[1]` is the rail; a test that means
- * one of them should say so by name, which is what `narrowOf` is for.
+ * Deliberately a role query and not a slot query. Against a tree drawn twice it
+ * throws `Found multiple elements with the role "navigation" and name "On this
+ * page"`, and every assertion in a test that opens this way never runs. That is
+ * not a stricter test; it is the exact failure three consumer tests reported the
+ * day 0.16.0 shipped, so reproducing it here is what makes the local evidence
+ * and the consumer evidence the same evidence.
  */
-const bothRenderings = (container: HTMLElement, label: string) =>
-  [...container.querySelectorAll('nav')].filter((nav) => nav.getAttribute('aria-label') === label)
+const contentsRailByRole = () => screen.getByRole('navigation', { name: LABELS.tocLabel })
 
-/** One rendering, the one the narrow frame draws, named rather than indexed. */
-const narrowOf = (container: HTMLElement, label: string) =>
-  bothRenderings(compactOf(container), label)
+/** Every `data-slot` value under an element, sorted and deduplicated. */
+const slotsUnder = (region: HTMLElement) =>
+  [...new Set([...region.querySelectorAll('[data-slot]')].map((el) => el.getAttribute('data-slot') as string))].sort()
+
+/**
+ * Every control this Page could put in a rail, in one selector.
+ *
+ * The selector is the whole of the claim rather than a sample of it, and it is
+ * the list one consumer's own suite holds: a button, a summary, a disclosure, or
+ * anything with an expanded state or a button role. A rail that satisfies it
+ * cannot be operated, which is what "a section is a label and not a control"
+ * means at the level of the region rather than at the level of one row.
+ */
+const CONTROLS = 'button, summary, details, [aria-expanded], [aria-controls], [aria-pressed], [role="button"]'
+
+/**
+ * The rendered markup at one viewport width.
+ *
+ * jsdom loads no stylesheet and evaluates no media query, so there is no cascade
+ * here for a width to change and a `window.innerWidth` assignment cannot by
+ * itself move a box. What it CAN say is the thing this Page must be true of: the
+ * markup does not vary with width. So the assertion is that the two renders are
+ * identical, and the width read back is part of the test because an assignment
+ * that silently did nothing would make the two renders one render twice and the
+ * assertion would pass on nothing.
+ *
+ * The half that actually places the rail at each width is the shipped class
+ * contract, asserted separately and against the element rather than the source.
+ */
+function markupAt(width: number, props: Partial<DocsShellProps>): string {
+  Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: width })
+  expect(window.innerWidth).toBe(width)
+  const { container, unmount } = render(
+    <DocsShell {...LABELS} {...props}>
+      {BODY}
+    </DocsShell>,
+  )
+  const markup = container.innerHTML
+  unmount()
+  return markup
+}
 
 /**
  * The three trees by name, for the assertions that run over all of them.
@@ -317,6 +394,209 @@ const SITES: Array<[string, DocsNavEntry[]]> = [
   ['AlphaLens', ALPHALENS],
   ['Atlas', ATLAS],
 ]
+
+/**
+ * One current page marker in the whole document.
+ *
+ * This is the first assertion in this file and it is first because it is the one
+ * that failed in a consumer and it is the one that cannot be scoped away. The
+ * Page marks the page the reader is on with `aria-current="page"`, and 0.16.0
+ * rendered the navigation tree twice, so a documentation page published two
+ * markers for one page and a consumer's suite read `expected ...(2) to have a
+ * length of 1 but got 2` against the published package. Nothing here narrows the
+ * query to a region: `container` is the whole Page, and one marker on one page
+ * is the whole of what is promised.
+ */
+describe('the page the reader is on', () => {
+  it('is marked exactly once in the rendered output, at every width', () => {
+    for (const [site, nav] of SITES) {
+      const target = destinationsOf(nav)[3] as { href: string }
+      const { container, unmount } = render(
+        <DocsShell {...LABELS} nav={nav} toc={TOC} currentHref={target.href}>
+          {BODY}
+        </DocsShell>,
+      )
+
+      const marked = container.querySelectorAll('[aria-current="page"]')
+      expect(marked, site).toHaveLength(1)
+      expect(marked[0]?.getAttribute('href'), site).toBe(target.href)
+      // And it is one of the Page's own rows rather than something a consumer's
+      // header happened to mark, because a row that carries the slot is a row the
+      // Page drew.
+      expect(marked[0]?.getAttribute('data-slot'), site).toBe('docs-nav-link')
+      unmount()
+    }
+  })
+
+  it('is marked once for a section index too, and once for a label-only section', () => {
+    // Three arms, because the attribute is written in three places in this file
+    // and a count of one at one address says nothing about the other two.
+    const { container, rerender } = render(
+      <DocsShell {...LABELS} nav={NEXUS} currentHref="/docs/architecture">
+        {BODY}
+      </DocsShell>,
+    )
+    // A section's own index is a page, so the heading over the section is the row
+    // that carries the mark.
+    const onIndex = container.querySelectorAll('[aria-current="page"]')
+    expect(onIndex).toHaveLength(1)
+    expect(onIndex[0]?.getAttribute('data-slot')).toBe('docs-nav-heading')
+    expect(onIndex[0]?.getAttribute('href')).toBe('/docs/architecture')
+
+    // A page inside a section marks the page and only the page.
+    rerender(
+      <DocsShell {...LABELS} nav={NEXUS} currentHref="/docs/architecture/system-overview">
+        {BODY}
+      </DocsShell>,
+    )
+    const onPage = container.querySelectorAll('[aria-current="page"]')
+    expect(onPage).toHaveLength(1)
+    expect(onPage[0]?.getAttribute('data-slot')).toBe('docs-nav-link')
+
+    // Atlas has no section index anywhere, so a page inside one is the only arm
+    // that can produce a marker there.
+    rerender(
+      <DocsShell {...LABELS} nav={ATLAS} currentHref="/docs/architecture/query">
+        {BODY}
+      </DocsShell>,
+    )
+    const inLabelOnly = container.querySelectorAll('[aria-current="page"]')
+    expect(inLabelOnly).toHaveLength(1)
+    expect(inLabelOnly[0]?.getAttribute('href')).toBe('/docs/architecture/query')
+  })
+})
+
+/**
+ * One tree, drawn once.
+ *
+ * The three counts below are the ones a consumer's own suites assert, and each of
+ * them is the tree's own count rather than a number this file froze. Before the
+ * fix the rendered output carried each of them twice, because the rail and a
+ * disclosure behind it were both in the document: 52 `docs-nav-page` items on a
+ * twenty-one page corpus, 12 `docs-nav-label` spans on a six section one, and a
+ * landmark query by accessible name that found two navigations and refused to
+ * choose.
+ */
+describe('the tree is drawn once', () => {
+  it.each(SITES)(
+    'answers with the corpus counts for %s, over the whole document rather than one region',
+    (site, nav) => {
+      // No `toc`, so every row in the document belongs to the tree under test and
+      // the counts can be compared to the tree with nothing else in them.
+      const { container, unmount } = render(
+        <DocsShell {...LABELS} nav={nav} currentHref="/docs/introduction">
+          {BODY}
+        </DocsShell>,
+      )
+
+      expect(container.querySelectorAll('[data-slot="docs-nav-page"]'), site).toHaveLength(pagesIn(nav))
+      expect(container.querySelectorAll('[data-slot="docs-nav-label"]'), site).toHaveLength(labelsIn(nav))
+      expect(container.querySelectorAll('[data-slot="docs-nav-heading"]'), site).toHaveLength(headingsIn(nav))
+      // The corpus figures themselves, so a tree that drifts fails here rather
+      // than making the counts above agree with a tree that has drifted.
+      expect(pagesIn(nav), site).toBe(destinationsOf(nav).length - headingsIn(nav))
+      unmount()
+    },
+  )
+
+  it('draws the rail and the contents rail, each with only its own tree in it', () => {
+    const { container, unmount } = render(
+      <DocsShell {...LABELS} nav={NEXUS} toc={TOC} currentHref="/docs/introduction">
+        {BODY}
+      </DocsShell>,
+    )
+
+    expect(linksIn(railOf(container)), 'the rail').toHaveLength(destinationsOf(NEXUS).length)
+    expect(linksIn(contentsOf(container)), 'the contents rail').toHaveLength(TOC.length)
+
+    // Scoped to each rail on the way IN, because a contents entry is a fragment
+    // and a rail entry is a route, and the two are distinguishable by that alone.
+    expect(railOf(container).querySelectorAll('[data-slot="docs-nav-page"]')).toHaveLength(pagesIn(NEXUS))
+    expect(contentsOf(container).querySelectorAll('[data-slot="docs-nav-page"]')).toHaveLength(TOC.length)
+    // Neither rail holds anything of the other's, which is what "drawn once" means
+    // when a Page draws two trees.
+    expect([...railOf(container).querySelectorAll('a')].filter((a) => (a.getAttribute('href') ?? '').startsWith('#'))).toEqual([])
+    expect([...contentsOf(container).querySelectorAll('a')].filter((a) => !(a.getAttribute('href') ?? '').startsWith('#'))).toEqual([])
+    unmount()
+  })
+
+  it('is addressable by role, because one landmark with one name is findable', () => {
+    render(
+      <DocsShell {...LABELS} nav={NEXUS} toc={TOC} currentHref="/docs/introduction">
+        {BODY}
+      </DocsShell>,
+    )
+
+    // This is the query two consumers' suites write. Against the tree drawn twice
+    // it refused to choose between the two copies and every assertion after it
+    // never ran; that is why the count is asserted here and not only implied by
+    // the rest of the file.
+    expect(screen.getAllByRole('navigation', { name: LABELS.navLabel })).toHaveLength(1)
+    expect(screen.getAllByRole('navigation', { name: LABELS.tocLabel })).toHaveLength(1)
+    expect(screen.getAllByRole('navigation', { name: LABELS.pagerLabel })).toHaveLength(1)
+  })
+
+  it('draws no region in the frame beyond the rails, the article and the pager', () => {
+    const { container, unmount } = render(
+      <DocsShell {...LABELS} nav={NEXUS} toc={TOC} currentHref="/docs/introduction">
+        {BODY}
+      </DocsShell>,
+    )
+
+    // The whole published slot vocabulary of this Page in one list, on the tree
+    // that exercises every arm of it: six addressed sections, so six headings and
+    // no labels, and `docs-rail-fade` still there on both rails.
+    // `docs-nav-compact` and `docs-nav-disclosure` are gone, and this is where a
+    // second copy of the tree would come back under a name nobody re-reads.
+    expect(slotsUnder(container.querySelector('[data-slot="docs-shell-frame"]') as HTMLElement)).toEqual([
+      'docs-article',
+      'docs-contents',
+      'docs-nav-group',
+      'docs-nav-heading',
+      'docs-nav-link',
+      'docs-nav-list',
+      'docs-nav-page',
+      'docs-pager',
+      'docs-rail',
+      'docs-rail-fade',
+      'prose',
+    ])
+    unmount()
+  })
+
+  it('carries no control in the rail or anywhere else in the frame', () => {
+    for (const [site, nav] of SITES) {
+      const { container, unmount } = render(
+        <DocsShell {...LABELS} nav={nav} toc={TOC} currentHref="/docs/introduction">
+          {BODY}
+        </DocsShell>,
+      )
+
+      // Read over the whole frame and not over a section row, because 0.16.0 put
+      // a `<details>` and a `<summary>` inside the region whose own test asserted
+      // no disclosure control. Scoping that test to the stage rather than the rail
+      // was correct about the stage and wrong about the rail, and the consumer
+      // that holds the invariant holds it over the rail.
+      expect(container.querySelectorAll(CONTROLS), site).toHaveLength(0)
+      // Each rail holds the lists of its own tree and no other's, which is the
+      // per-tree half of "drawn once" and the half a scoped query can see.
+      expect(railOf(container).querySelectorAll('[data-slot="docs-nav-list"]').length, site).toBe(listsIn(nav))
+      expect(contentsOf(container).querySelectorAll('[data-slot="docs-nav-list"]').length, site).toBe(listsIn(TOC))
+      unmount()
+    }
+  })
+
+  it('renders the same markup at 375 and at 1440, because the Page does not branch on width', () => {
+    for (const [, nav] of SITES) {
+      const narrow = markupAt(375, { nav, toc: TOC, currentHref: '/docs/introduction' })
+      const wide = markupAt(1440, { nav, toc: TOC, currentHref: '/docs/introduction' })
+      expect(narrow).toBe(wide)
+      // And one copy is what is in it, at either width: the rail's own pages and
+      // the three entries of the outline, once each.
+      expect(narrow.split('data-slot="docs-nav-page"')).toHaveLength(pagesIn(nav) + TOC.length + 1)
+    }
+  })
+})
 
 describe('the three consumer documentation trees', () => {
   it('holds every tree inside the stated range of pages and sections', () => {
@@ -351,66 +631,19 @@ describe('the three consumer documentation trees', () => {
       </DocsShell>,
     )
 
-    // The rail carries every destination the tree holds, and nothing else. Read
-    // out of the `lg` aside rather than by role, because the narrow arrangement
-    // renders the same tree inside its disclosure and a role query finds both.
+    // The rail carries every destination the tree holds, and nothing else.
     expect(linksIn(railOf(container)), name).toHaveLength(all.length)
 
     // The contents rail carries the consumer's own outline.
     expect(linksIn(contentsOf(container)), name).toHaveLength(TOC.length)
 
-    // The pager renders both halves, derived from the tree and the address, and
-    // it is the one navigation on this Page that is drawn once.
+    // The pager renders both halves, derived from the tree and the address.
     const pager = screen.getByRole('navigation', { name: LABELS.pagerLabel })
     expect(within(pager).getAllByRole('link'), name).toHaveLength(2)
 
     // And the document, at the measure the system owns.
     expect(container.querySelector('[data-slot="docs-article"]'), name).toBeTruthy()
     expect(container.querySelector('[data-slot="prose"]'), name).toBeTruthy()
-  })
-
-  it('renders the same tree in both arrangements, so the narrow one is not a second list', () => {
-    for (const [site, tree] of SITES) {
-      const { container, unmount } = render(
-        <DocsShell {...LABELS} nav={tree} toc={TOC} currentHref="/docs/introduction">
-          {BODY}
-        </DocsShell>,
-      )
-
-      // One rendering in the rail and one behind the disclosure, and they are the
-      // same addresses in the same order. A second list that drifted from the
-      // first would be a navigation a reader could be sent down by nothing.
-      const navs = bothRenderings(container, LABELS.navLabel)
-      expect(navs, site).toHaveLength(2)
-      const addresses = navs.map((region) => linksIn(region).map((link) => link.getAttribute('href')))
-      expect(addresses[1], site).toEqual(addresses[0])
-
-      // The contents rail is drawn in both arrangements on the same terms.
-      const contents = bothRenderings(container, LABELS.tocLabel)
-      expect(contents, site).toHaveLength(2)
-      const outline = contents.map((region) => linksIn(region).map((link) => link.textContent))
-      expect(outline[1], site).toEqual(outline[0])
-      unmount()
-    }
-  })
-
-  it('carries the current page in the rail for every site', () => {
-    for (const [name, nav] of SITES) {
-      const target = destinationsOf(nav)[3] as { href: string }
-      const { container, unmount } = render(
-        <DocsShell {...LABELS} nav={nav} toc={TOC} currentHref={target.href}>
-          {BODY}
-        </DocsShell>,
-      )
-      // Exactly one mark in each arrangement, and the same address in both, so a
-      // reader does not see the page marked twice and no arrangement forgets it.
-      for (const region of bothRenderings(container, LABELS.navLabel)) {
-        const marked = region.querySelectorAll('[aria-current="page"]')
-        expect(marked, name).toHaveLength(1)
-        expect(marked[0]?.getAttribute('href'), name).toBe(target.href)
-      }
-      unmount()
-    }
   })
 })
 
@@ -452,22 +685,11 @@ describe('a section is a label and not a control', () => {
     // reader that a pipeline stage is an independent topic in any order, which is
     // the one misreading the information architecture exists to prevent.
     //
-    // Read out of the group's own row rather than out of the whole document,
-    // because the Page does draw a disclosure for the narrow frame and that
-    // disclosure is a control a reader operates. It is a control on the Page, over
-    // the whole navigation, and it is the opposite of a control on a stage: it
-    // says nothing about whether a pipeline stage is a topic. The claim under
-    // test is about the stage, so the assertion is scoped to the stage.
-    const stage = container.querySelector('[data-slot="docs-nav-group"]') as HTMLElement
-    expect(stage.querySelector('button')).toBeNull()
-    expect(stage.querySelector('[aria-expanded]')).toBeNull()
-    expect(stage.querySelector('[aria-controls]')).toBeNull()
-    expect(stage.querySelector('[aria-pressed]')).toBeNull()
-    expect(stage.querySelector('[aria-haspopup]')).toBeNull()
-    expect(stage.querySelector('summary')).toBeNull()
-    expect(stage.querySelector('details')).toBeNull()
-    expect(stage.querySelector('select')).toBeNull()
-    expect(stage.querySelector('input')).toBeNull()
+    // Asserted over the whole frame and not over the stage row, because the rail
+    // itself once carried a disclosure and a test scoped to the stage passed
+    // straight over it.
+    expect(container.querySelectorAll(CONTROLS)).toHaveLength(0)
+    expect(container.querySelectorAll('select, input')).toHaveLength(0)
 
     // And the element holding the title carries nothing that could be operated:
     // the title is words, so the row holding it is words too.
@@ -493,12 +715,7 @@ describe('a section is a label and not a control', () => {
       // would be a number a reader can act on, and the Page ships none. The
       // dropped-entry tally is not a word a reader meets: it is on the `<nav>` as
       // a data attribute, which is asserted separately and is never rendered.
-      for (const region of [
-        railOf(container),
-        contentsOf(container),
-        ...bothRenderings(container, LABELS.navLabel),
-        ...bothRenderings(container, LABELS.tocLabel),
-      ]) {
+      for (const region of [railOf(container), contentsOf(container)]) {
         expect(region.textContent, name).not.toMatch(/\d/)
       }
       expect(container.textContent, name).not.toMatch(/collapse|expand|sort/i)
@@ -516,7 +733,7 @@ describe('a group with no index', () => {
     )
 
     // Every one of Atlas's four sections has no index, so every one is a label.
-    const labels = railOf(container).querySelectorAll('[data-slot="docs-nav-label"]')
+    const labels = container.querySelectorAll('[data-slot="docs-nav-label"]')
     expect(labels).toHaveLength(4)
     expect([...labels].map((element) => element.textContent)).toEqual([
       'Architecture',
@@ -558,16 +775,11 @@ describe('a group with no index', () => {
 
     // Nexus's sections all have an index, so all six are links rather than
     // labels, filed in the order its own meta.json names them.
-    expect(railOf(container).querySelectorAll('[data-slot="docs-nav-label"]')).toHaveLength(0)
-    const headings = [...railOf(container).querySelectorAll('[data-slot="docs-nav-heading"]')]
-    expect(headings.map((element) => element.textContent)).toEqual([
-      'Concepts',
-      'Architecture',
-      'Configuration',
-      'Operations',
-      'Guides',
-      'Reference',
-    ])
+    expect(container.querySelectorAll('[data-slot="docs-nav-label"]')).toHaveLength(0)
+    const headings = [...container.querySelectorAll('[data-slot="docs-nav-heading"]')].map(
+      (element) => element.textContent,
+    )
+    expect(headings).toEqual(['Concepts', 'Architecture', 'Configuration', 'Operations', 'Guides', 'Reference'])
   })
 
   it('marks the section current when its own index is the page, and the page when it is not', () => {
@@ -577,7 +789,7 @@ describe('a group with no index', () => {
       </DocsShell>,
     )
     // A page inside a section marks the page, and only the page.
-    const first = railOf(container).querySelectorAll('[aria-current="page"]')
+    const first = container.querySelectorAll('[aria-current="page"]')
     expect(first).toHaveLength(1)
     expect(first[0]?.getAttribute('data-slot')).toBe('docs-nav-link')
 
@@ -586,7 +798,7 @@ describe('a group with no index', () => {
         {BODY}
       </DocsShell>,
     )
-    const second = railOf(container).querySelectorAll('[aria-current="page"]')
+    const second = container.querySelectorAll('[aria-current="page"]')
     expect(second).toHaveLength(1)
     expect(second[0]?.getAttribute('data-slot')).toBe('docs-nav-heading')
   })
@@ -601,11 +813,123 @@ describe('a group with no index', () => {
     // A label has no route to answer with, so it asks its children. Without this
     // a reader two levels into Atlas's tree would meet four identical muted
     // headings and no indication which one they were in.
-    const active = [...railOf(container)
+    const active = [...container
       .querySelectorAll('[data-slot="docs-nav-label"]')]
       .filter((element) => element.className.includes('text-foreground'))
     expect(active).toHaveLength(1)
     expect(active[0]?.textContent).toBe('Architecture')
+  })
+})
+
+/**
+ * The three behaviours a consumer's contents rail holds, on this side of the
+ * seam.
+ *
+ * A consumer resolves its own heading titles before it hands the tree over, so
+ * the words an element title resolves to are that consumer's arithmetic and not
+ * this Page's. What this Page owes the rail it is handed is the other half of
+ * each: it names every entry by the words it was given, it drops the one it
+ * cannot name without dropping the others, and it keeps every level the caller
+ * filed rather than a number of its own.
+ */
+describe('the contents rail', () => {
+  it('names every entry by the words the caller passed, in the order it passed them', () => {
+    const toc: DocsNavEntry[] = [
+      page('Columns', '#columns'),
+      page('Option chain', '#option-chain'),
+      page('Step one', '#step-one'),
+    ]
+    const { container } = render(
+      <DocsShell {...LABELS} nav={NEXUS} toc={toc} currentHref="/docs/reference/glossary">
+        {BODY}
+      </DocsShell>,
+    )
+
+    // Reached by role first, so a second copy of this navigation fails the test
+    // here rather than at a count further down.
+    expect(contentsRailByRole()).toBe(contentsOf(container))
+
+    // A caller that resolves a heading title to a string hands this Page a string,
+    // and the rail prints exactly it. Nothing is read out of it and nothing is
+    // added to it.
+    expect(linksIn(contentsRailByRole()).map((link) => link.textContent)).toEqual([
+      'Columns',
+      'Option chain',
+      'Step one',
+    ])
+    expect(linksIn(contentsRailByRole()).map((link) => link.getAttribute('href'))).toEqual([
+      '#columns',
+      '#option-chain',
+      '#step-one',
+    ])
+  })
+
+  it('drops the one entry it cannot name and keeps every other one', () => {
+    // The pair of shapes one consumer's pipeline produces, both asserted: an
+    // entry whose title resolved to nothing, and one whose title is a space. The
+    // promise is that dropping them does not widen the filter, so the two named
+    // entries either side of them survive, in order, with their addresses.
+    const toc: DocsNavEntry[] = [
+      page('Feed field reference', '#top'),
+      page('Columns', '#columns'),
+      page('', '#nameless'),
+      page('   ', '#blank'),
+      page('Option chain', '#option-chain'),
+    ]
+    const { container } = render(
+      <DocsShell {...LABELS} nav={NEXUS} toc={toc} currentHref="/docs/reference/glossary">
+        {BODY}
+      </DocsShell>,
+    )
+
+    const rail = contentsRailByRole()
+    expect(rail).toBe(contentsOf(container))
+    expect(linksIn(rail).map((link) => link.getAttribute('href'))).toEqual(['#top', '#columns', '#option-chain'])
+    // The dropped entries leave no row and no empty label behind, and the rail
+    // says how many it dropped rather than only what it kept.
+    expect([...rail.querySelectorAll('li:empty')]).toEqual([])
+    expect([...rail.querySelectorAll('[data-slot="docs-nav-label"]')]).toEqual([])
+    expect(rail.getAttribute('data-unnamed-entries')).toBe('2')
+  })
+
+  it('keeps a level as deep as the caller filed, because it imposes no depth filter', () => {
+    // Three levels, so a filter that kept one could not pass. The Page reads `toc`
+    // as the outline the document declares and nests one level per group, which
+    // is the same rule the rail walks. The two groups carry no address, so they
+    // draw labels and the four addresses below them are the four destinations.
+    const toc: DocsNavEntry[] = [
+      page('Feed field reference', '#top'),
+      {
+        type: 'group',
+        title: 'Columns',
+        items: [
+          page('Option chain', '#option-chain'),
+          {
+            type: 'group',
+            title: 'Per source',
+            items: [page('Field detail', '#per-source')],
+          },
+        ],
+      },
+    ]
+    const { container } = render(
+      <DocsShell {...LABELS} nav={NEXUS} toc={toc} currentHref="/docs/reference/glossary">
+        {BODY}
+      </DocsShell>,
+    )
+
+    const rail = contentsRailByRole()
+    expect(rail).toBe(contentsOf(container))
+    expect([...rail.querySelectorAll('[data-slot="docs-nav-list"]')].map((list) => list.getAttribute('data-depth'))).toEqual([
+      '0',
+      '1',
+      '2',
+    ])
+    expect(linksIn(rail).map((link) => link.getAttribute('href'))).toEqual([
+      '#top',
+      '#option-chain',
+      '#per-source',
+    ])
   })
 })
 
@@ -774,7 +1098,7 @@ describe('the pager is derived from the navigation', () => {
     )
 
     // The rail, in the tree's order and not alphabetised.
-    const headings = [...railOf(container).querySelectorAll('[data-slot="docs-nav-heading"]')].map(
+    const headings = [...container.querySelectorAll('[data-slot="docs-nav-heading"]')].map(
       (element) => element.textContent,
     )
     expect(headings).toEqual(['Concepts', 'Architecture', 'Configuration', 'Operations', 'Guides', 'Reference'])
@@ -927,26 +1251,21 @@ describe('an entry with no words', () => {
     // A row of nothing is not a destination and it is not a label either, because
     // a label is words. Asserted as the absence of the `<li>` and of the empty
     // `docs-nav-label` inside it, because either one alone would let the other
-    // back in.
-    const rows = railOf(container).querySelectorAll('[data-slot="docs-nav-page"]')
-    expect([...rows].map((row) => row.textContent)).toEqual(['First', 'Last'])
-    expect(
-      [...railOf(container).querySelectorAll('[data-slot="docs-nav-label"]')].filter(
-        (label) => label.textContent === '',
-      ),
-    ).toEqual([])
-    expect([...railOf(container).querySelectorAll('li:empty')]).toEqual([])
-
-    // And the same in the narrow arrangement, because it renders the same tree
-    // and a fix that reached one copy of the navigation would not be a fix.
-    for (const region of bothRenderings(container, LABELS.navLabel)) {
-      expect([...region.querySelectorAll('li:empty')]).toEqual([])
-      expect(
-        [...region.querySelectorAll('[data-slot="docs-nav-label"]')].filter(
-          (label) => label.textContent === '',
-        ),
-      ).toEqual([])
-    }
+    // back in, and over the whole frame rather than over the rail, because the
+    // rail was once one of two copies of the tree and a fix that reached one of
+    // them would not have been a fix.
+    const rows = container.querySelectorAll('[data-slot="docs-nav-page"]')
+    // Two from the rail's own tree and three from the contents outline, once each.
+    // Ten is what the tree drawn twice answered here.
+    expect([...rows].map((row) => row.textContent)).toEqual([
+      'First',
+      'Last',
+      'Overview',
+      'Usage',
+      'Guidelines',
+    ])
+    expect([...container.querySelectorAll('[data-slot="docs-nav-label"]')].filter((label) => label.textContent === '')).toEqual([])
+    expect([...container.querySelectorAll('li:empty')]).toEqual([])
   })
 
   it('counts what it dropped on the rail, because a row that did not draw is a fact', () => {
@@ -954,18 +1273,16 @@ describe('an entry with no words', () => {
 
     // `Diagram` answers a dropped relation with `data-unresolved-relations` on the
     // element rather than in a console, and a caller reads the element. So the
-    // count is on the `<nav>`, on both arrangements, and it is zero when nothing
-    // was dropped rather than absent.
-    for (const region of bothRenderings(container, LABELS.navLabel)) {
-      expect(region.getAttribute('data-unnamed-entries')).toBe('1')
-    }
+    // count is on the `<nav>` of each rail, and it is zero when nothing was
+    // dropped rather than absent.
+    expect(railOf(container).getAttribute('data-unnamed-entries')).toBe('1')
+    expect(contentsOf(container).getAttribute('data-unnamed-entries')).toBe('0')
 
     // Zero on a clean tree, and stated, so a consumer watching the attribute can
     // tell "nothing was wrong" from "the Page stopped counting".
     const { container: clean } = mount(ATLAS, '/docs/introduction')()
-    for (const region of bothRenderings(clean, LABELS.navLabel)) {
-      expect(region.getAttribute('data-unnamed-entries')).toBe('0')
-    }
+    expect(railOf(clean).getAttribute('data-unnamed-entries')).toBe('0')
+    expect(contentsOf(clean).getAttribute('data-unnamed-entries')).toBe('0')
   })
 
   it('counts every tree it dropped from, at any depth, in one number', () => {
@@ -1058,12 +1375,8 @@ describe('an entry with no words', () => {
 
     expect(container.querySelector('[data-slot="docs-article"]')).toBeTruthy()
     expect(screen.queryByRole('navigation', { name: LABELS.pagerLabel })).toBeNull()
-    // The whole tree is still there to leave by, in both arrangements.
+    // The whole tree is still there to leave by.
     expect(linksIn(railOf(container)).map((link) => link.getAttribute('href'))).toEqual([
-      '/docs/first',
-      '/docs/last',
-    ])
-    expect(linksIn(narrowOf(container, LABELS.navLabel)[0]!).map((link) => link.getAttribute('href'))).toEqual([
       '/docs/first',
       '/docs/last',
     ])
@@ -1166,7 +1479,7 @@ describe('an empty address on a group', () => {
     const { container } = mount(tree, '/docs/architecture/platform-flow')()
 
     // The reader is still inside it, and it still says so, through its children.
-    const active = [...railOf(container)
+    const active = [...container
       .querySelectorAll('[data-slot="docs-nav-label"]')]
       .filter((element) => element.className.includes('text-foreground'))
     expect(active).toHaveLength(1)
@@ -1196,6 +1509,7 @@ describe('an empty address on a group', () => {
     ])
   })
 })
+
 describe('one Page, three sites', () => {
   it('renders all three trees through the one export with no per-site arm', () => {
     for (const [name, nav] of SITES) {
@@ -1248,19 +1562,17 @@ describe('one Page, three sites', () => {
 
     // One renderer, read at four levels: the depth comes off the list, not out of
     // a fixed shape, so a tree deeper than any of the three is still the same code.
-    for (const rail of bothRenderings(container, LABELS.navLabel)) {
-      const lists = rail.querySelectorAll('[data-slot="docs-nav-list"]')
-      expect([...lists].map((list) => list.getAttribute('data-depth'))).toEqual([
-        '0',
-        '1',
-        '2',
-        '3',
-        '4',
-      ])
-      // Four labels and one page, and none of the four labels is a link.
-      expect(rail.querySelectorAll('[data-slot="docs-nav-label"]')).toHaveLength(4)
-      expect(linksIn(rail)).toHaveLength(1)
-    }
+    const rail = railOf(container)
+    expect([...rail.querySelectorAll('[data-slot="docs-nav-list"]')].map((list) => list.getAttribute('data-depth'))).toEqual([
+      '0',
+      '1',
+      '2',
+      '3',
+      '4',
+    ])
+    // Four labels and one page, and none of the four labels is a link.
+    expect(rail.querySelectorAll('[data-slot="docs-nav-label"]')).toHaveLength(4)
+    expect(linksIn(rail)).toHaveLength(1)
   })
 
   it('renders with a rail and with no rail, because both are trees', () => {
@@ -1280,6 +1592,10 @@ describe('one Page, three sites', () => {
     )
     expect(container.querySelector('[data-slot="docs-rail"]')).toBeNull()
     expect(container.querySelector('[data-slot="docs-article"]')).toBeTruthy()
+    // And the compact region that stood in for the rail is not there either: with
+    // no `nav` and no `toc` the frame holds the article and nothing else.
+    expect(container.querySelector('[data-slot="docs-nav-compact"]')).toBeNull()
+    expect(container.querySelector('[data-slot="docs-nav-disclosure"]')).toBeNull()
   })
 })
 
@@ -1379,6 +1695,151 @@ describe('the rail is bounded in height, and the bound is visible', () => {
     }
   })
 
+  /**
+   * The fade and the band belong to the cut, so both are written against the bound
+   * that creates it. `lg:` is the only width at which this rail scrolls, so `lg:` is
+   * the only width at which a cut exists, a band needs reserving and a fade has
+   * anything to mark.
+   */
+  describe('the fade and the band are bound to the cut they exist for', () => {
+    /**
+     * The bound one utility is written against: `'lg:'`, or `''` at every width.
+     *
+     * The pattern is matched against the utility with its prefix already cut off,
+     * so a rule here is written once and reads the same whether the utility carries
+     * `lg:` or not. Matching the whole token is what made the first version of this
+     * find nothing: `^overflow-y-auto$` does not match `lg:overflow-y-auto`.
+     */
+    const boundOf = (className: string, utility: RegExp, where: string): string => {
+      const token = className
+        .split(/\s+/)
+        .find((entry) => utility.test(entry.slice(entry.lastIndexOf(':') + 1)))
+      expect(token, `${where}: no utility matching ${String(utility)} in "${className}"`).toBeTruthy()
+      const colon = (token as string).lastIndexOf(':')
+      return colon === -1 ? '' : (token as string).slice(0, colon + 1)
+    }
+
+    /**
+     * What a width below `lg` actually receives: every utility carrying no bound.
+     *
+     * This is the projection the second test asserts against, and it is derived
+     * from the rendered class strings rather than from a second render, because
+     * jsdom loads no stylesheet and evaluates no media query. A utility with no
+     * variant is live at every width by definition, so dropping the bounded ones
+     * leaves exactly what a phone gets.
+     */
+    const atEveryWidth = (className: string): string[] =>
+      className.split(/\s+/).filter((token) => token !== '' && !token.includes(':'))
+
+    /** The three utilities that put the fade on the page, and the three that paint it. */
+    const PLACEMENT = /^(absolute|inset-x-0|bottom-0|h-\d+)$/
+    const PAINT = /^(bg-gradient-to-t|from-background|to-transparent)$/
+
+    it('writes every one of them against the same bound the overflow-y carries', () => {
+      const { container } = render(
+        <DocsShell {...LABELS} nav={ALPHALENS} toc={TOC} currentHref="/docs/data-contract/known-gaps">
+          {BODY}
+        </DocsShell>,
+      )
+
+      for (const slot of ['docs-rail', 'docs-contents']) {
+        const region = container.querySelector(`[data-slot="${slot}"]`) as HTMLElement
+        const wrapper = region.firstElementChild as HTMLElement
+        const scroller = wrapper.querySelector(':scope > nav') as HTMLElement
+        const fade = wrapper.querySelector(':scope > [data-slot="docs-rail-fade"]') as HTMLElement
+
+        // One bound, read off the utility that creates the cut, and then every other
+        // member of the arrangement asked to agree with it.
+        const cut = boundOf(scroller.className, /^overflow-y-auto$/, `${slot} scroller`)
+        expect(cut, `${slot}: the scroll region is not bound to any width`).not.toBe('')
+
+        expect(boundOf(scroller.className, /^max-h-\[calc/, `${slot} scroller`), slot).toBe(cut)
+        expect(boundOf(scroller.className, /^pb-\d+$/, `${slot} scroller`), slot).toBe(cut)
+        expect(boundOf(wrapper.className, /^sticky$/, `${slot} wrapper`), slot).toBe(cut)
+        expect(boundOf(wrapper.className, /^top-\d+$/, `${slot} wrapper`), slot).toBe(cut)
+
+        // The fade's half, measured as the utilities left unbound rather than as the
+        // ones written right: the test above asserts `toContain('absolute')`, and a
+        // substring cannot tell `absolute` from `lg:absolute`, which is the whole
+        // defect. The tree before this fix carried all seven unprefixed.
+        expect(
+          atEveryWidth(fade.className).filter((token) => PLACEMENT.test(token)),
+          `${slot}: the fade is positioned at a width with no cut to sit on`,
+        ).toEqual([])
+        expect(
+          atEveryWidth(fade.className).filter((token) => PAINT.test(token)),
+          `${slot}: the fade paints at a width with no cut to paint over`,
+        ).toEqual([])
+
+        // And it is still the fade it was, at the width the fade is for.
+        const tokens = fade.className.split(/\s+/)
+        for (const utility of [
+          'lg:absolute',
+          'lg:inset-x-0',
+          'lg:bottom-0',
+          'lg:bg-gradient-to-t',
+          'lg:from-background',
+          'lg:to-transparent',
+        ]) {
+          expect(tokens, `${slot}: ${utility}`).toContain(utility)
+        }
+        // The height is the band's, as the test above establishes, reasserted here on
+        // the prefixed spelling so the bound and the height cannot drift apart either.
+        expect(/\bpb-(\d+)/.exec(scroller.className)?.[1], slot).toBe(
+          /\bh-(\d+)/.exec(fade.className)?.[1],
+        )
+        expect(fade.className, slot).toContain('pointer-events-none')
+      }
+    })
+
+    it('leaves nothing to fade and nothing reserved at a width where the rail does not scroll', () => {
+      // The negative case, and the reason the positive one is worth having: the fade
+      // shipped unprefixed while the band was not, so at the one width this Page
+      // newly began serving the tree, the band went inert and the gradient kept
+      // painting over the last row or two of a rail that was simply running on.
+      // Both numbers still matched and no row lost legibility, which is why looking
+      // did not catch it.
+      const { container } = render(
+        <DocsShell {...LABELS} nav={ALPHALENS} toc={TOC} currentHref="/docs/data-contract/known-gaps">
+          {BODY}
+        </DocsShell>,
+      )
+
+      for (const slot of ['docs-rail', 'docs-contents']) {
+        const region = container.querySelector(`[data-slot="${slot}"]`) as HTMLElement
+        const wrapper = region.firstElementChild as HTMLElement
+        const scroller = wrapper.querySelector(':scope > nav') as HTMLElement
+        const fade = wrapper.querySelector(':scope > [data-slot="docs-rail-fade"]') as HTMLElement
+
+        // No scroll region, so no cut...
+        expect(
+          atEveryWidth(scroller.className).filter((token) => /^(overflow-y-auto|overflow-auto|overflow-y-scroll)$/.test(token)),
+          `${slot}: the rail scrolls at every width`,
+        ).toEqual([])
+        expect(
+          atEveryWidth(scroller.className).filter((token) => /^max-h-/.test(token)),
+          `${slot}: the rail is capped against the viewport at every width`,
+        ).toEqual([])
+        // ...and no sticky wrapper to pin a cut to the foot of.
+        expect(atEveryWidth(wrapper.className).filter((token) => /^sticky$/.test(token)), slot).toEqual([])
+        // No reserved band, because there is nothing for a band to hold clear.
+        expect(atEveryWidth(scroller.className).filter((token) => /^pb-\d+$/.test(token)), slot).toEqual([])
+        // And no fade: a gradient over content is a gradient over content.
+        expect(
+          atEveryWidth(fade.className).filter(
+            (token) => PLACEMENT.test(token) || PAINT.test(token),
+          ),
+          `${slot}: the fade paints below lg`,
+        ).toEqual([])
+
+        // Stated rather than left to be found: this is what a phone gets, and the
+        // price of it is the Page's own JSDoc above the fold of this file.
+        expect(fade.getAttribute('aria-hidden'), slot).toBe('true')
+        expect(fade.closest('[data-slot="docs-shell-frame"]'), slot).toBeTruthy()
+      }
+    })
+  })
+
   it('costs a keyboard and a screen-reader reader nothing', () => {
     const { container } = render(
       <DocsShell {...LABELS} nav={ALPHALENS} toc={TOC} currentHref="/docs/data-contract/known-gaps">
@@ -1405,12 +1866,14 @@ describe('the rail is bounded in height, and the bound is visible', () => {
       expect(fade.querySelector('a, button, summary, [tabindex]')).toBeNull()
     }
 
-    // And the reader still reaches every entry. The region scrolls on its own, so
-    // the arrow keys walk all thirty-one rows and Tab walks all thirty-one links,
-    // which is the claim an affordance has to leave alone to be free.
-    for (const rail of bothRenderings(container, LABELS.navLabel)) {
-      expect(linksIn(rail)).toHaveLength(destinationsOf(ALPHALENS).length)
-    }
+    // And the reader still reaches every entry, and reaches each of them once.
+    // The region scrolls on its own, so the arrow keys walk all thirty-one rows
+    // and Tab walks all thirty-one links, which is the claim an affordance has to
+    // leave alone to be free. The single rail is what makes "once" countable.
+    expect(linksIn(railOf(container))).toHaveLength(destinationsOf(ALPHALENS).length)
+    expect(container.querySelectorAll('a')).toHaveLength(
+      destinationsOf(ALPHALENS).length + TOC.length + 2,
+    )
   })
 
   it('keeps the rail scrolling inside its bound, because the fade marks a region rather than replacing one', () => {
@@ -1457,6 +1920,80 @@ describe('the rail is bounded in height, and the bound is visible', () => {
 
     expect(boundsOf(ATLAS)).toBe(boundsOf(ALPHALENS))
     expect(boundsOf(NEXUS)).toBe(boundsOf(ALPHALENS))
+  })
+})
+
+/**
+ * Where the rail sits at each width, asserted on the elements it renders.
+ *
+ * The rail is the frame's first child and it carries no `hidden`, so below `lg`
+ * the frame is not a grid and the children flow in document order: the rail, then
+ * the document, then the contents rail. At `lg` it is pinned to the first
+ * column. One copy, one marker, one set of rows, and the only thing that changes
+ * between a phone and a desktop is which column the rail is in.
+ *
+ * The cost of that is stated rather than designed around, and it is stated in the
+ * Page's own JSDoc because it is the Page's promise: a phone reader crosses the
+ * whole navigation before the article. The answer that removes the scroll needs
+ * open state, and open state is a client island this Page does not carry.
+ */
+describe('the navigation at every width', () => {
+  it('puts the rail first in the flow and in the first column, at both widths', () => {
+    const { container, unmount } = render(
+      <DocsShell {...LABELS} nav={NEXUS} toc={TOC} currentHref="/docs/introduction">
+        {BODY}
+      </DocsShell>,
+    )
+
+    const frame = container.querySelector('[data-slot="docs-shell-frame"]') as HTMLElement
+    // The rail is the first thing in the frame, so below `lg`, where the frame is
+    // a single column and the children flow, the reader meets the navigation
+    // before the document rather than after it.
+    expect(frame.firstElementChild?.getAttribute('data-slot')).toBe('docs-rail')
+
+    for (const slot of ['docs-rail', 'docs-contents']) {
+      const region = container.querySelector(`[data-slot="${slot}"]`) as HTMLElement
+      // Displayed at every width. `hidden` here is what 0.16.0 inherited and what
+      // this change removes, and `lg:hidden` on the compact wrapper is gone with it.
+      expect(region.className, slot).not.toContain('hidden')
+      // And placed by column at `lg`, on one row.
+      expect(region.className, slot).toContain(`lg:col-start-${slot === 'docs-rail' ? '1' : '3'}`)
+      expect(region.className, slot).toContain('lg:row-start-1')
+    }
+    unmount()
+  })
+
+  it('puts the contents rail after the article in the flow, so the document is not pushed down twice', () => {
+    const { container, unmount } = render(
+      <DocsShell {...LABELS} nav={NEXUS} toc={TOC} currentHref="/docs/introduction">
+        {BODY}
+      </DocsShell>,
+    )
+
+    // rail, article, contents. Read out of the frame's own children rather than
+    // out of the source order, because the source order is the claim under test.
+    const order = [...(container.querySelector('[data-slot="docs-shell-frame"]') as HTMLElement).children].map(
+      (child) => child.getAttribute('data-slot'),
+    )
+    expect(order).toEqual(['docs-rail', 'docs-article', 'docs-contents'])
+    unmount()
+  })
+
+  it('draws nothing over the tree, so the rail is the navigation and not a summary of it', () => {
+    const { container, unmount } = render(
+      <DocsShell {...LABELS} nav={ALPHALENS} toc={TOC} currentHref="/docs/data-contract/known-gaps">
+        {BODY}
+      </DocsShell>,
+    )
+
+    // The claim, over the whole frame: no disclosure, no summary, no button, no
+    // expanded state. A reader who opens the rail below `lg` meets the same rows
+    // there are at `lg`, and a consumer whose documentation rail is contractually
+    // free of controls is free of them.
+    expect(container.querySelectorAll('details, summary, button, [aria-expanded]')).toHaveLength(0)
+    expect(container.querySelector('[data-slot="docs-nav-compact"]')).toBeNull()
+    expect(container.querySelector('[data-slot="docs-nav-disclosure"]')).toBeNull()
+    unmount()
   })
 })
 
@@ -1515,19 +2052,17 @@ describe('the Page ships no copy of its own', () => {
       </DocsShell>,
     )
 
-    // Two rules in each of the two arrangements, and no words in any of them.
-    for (const rail of bothRenderings(container, LABELS.navLabel)) {
-      const dividers = rail.querySelectorAll('[data-slot="docs-nav-divider"]')
-      expect(dividers).toHaveLength(2)
-      for (const rule of dividers) {
-        expect(rule.textContent).toBe('')
-        expect(rule.querySelector('*')).toBeNull()
-      }
+    // Two rules, and no words in either of them.
+    const dividers = container.querySelectorAll('[data-slot="docs-nav-divider"]')
+    expect(dividers).toHaveLength(2)
+    for (const rule of dividers) {
+      expect(rule.textContent).toBe('')
+      expect(rule.querySelector('*')).toBeNull()
     }
   })
 
   it('names each region from a prop, so a site can file them its own way', () => {
-    const { container } = render(
+    render(
       <DocsShell
         {...LABELS}
         navLabel="Nexus documentation"
@@ -1542,95 +2077,15 @@ describe('the Page ships no copy of its own', () => {
     )
 
     // Three regions, three distinct names, so a reader who navigates by landmark
-    // reaches each one rather than meeting three anonymous lists of links. Two of
-    // them are drawn in both arrangements and carry the name in both.
-    expect(bothRenderings(container, 'Nexus documentation')).toHaveLength(2)
-    expect(bothRenderings(container, 'On this page')).toHaveLength(2)
+    // reaches each one rather than meeting three anonymous lists of links.
+    expect(screen.getAllByRole('navigation', { name: 'Nexus documentation' })).toHaveLength(1)
+    expect(screen.getAllByRole('navigation', { name: 'On this page' })).toHaveLength(1)
     expect(screen.getAllByRole('navigation', { name: 'Nexus pages' })).toHaveLength(1)
   })
 })
 
-describe('the navigation below `lg`', () => {
-  const middleOf = (tree: readonly DocsNavEntry[]) => {
-    const all = destinationsOf(tree)
-    return (all[Math.floor(all.length / 2)] as { href: string }).href
-  }
-
-  it('reaches both navigations, because a reader at 768 or 1024 had nothing but Previous and Next', () => {
-    // The gap: both rails were `hidden` below `lg`, so the only navigation left
-    // inside the article was the two-item pager at its foot. On a thirty-one
-    // document reference that is no contents, no on-this-page and no way to a
-    // sibling page except two links.
-    const { container } = render(
-      <DocsShell {...LABELS} nav={ALPHALENS} toc={TOC} currentHref={middleOf(ALPHALENS)}>
-        {BODY}
-      </DocsShell>,
-    )
-
-    const compact = compactOf(container)
-    expect(compact).toBeTruthy()
-    // Hidden at `lg` and above, which is what makes the duplicated tree one tree.
-    expect(compact.className).toContain('lg:hidden')
-
-    // The whole tree is in the document, reachable, in the narrow arrangement.
-    expect(linksIn(narrowOf(container, LABELS.navLabel)[0]!)).toHaveLength(
-      destinationsOf(ALPHALENS).length,
-    )
-    expect(linksIn(narrowOf(container, LABELS.tocLabel)[0]!)).toHaveLength(TOC.length)
-
-    // And the pager still is, so the narrow frame is strictly more than it was.
-    expect(
-      within(screen.getByRole('navigation', { name: LABELS.pagerLabel })).getAllByRole('link'),
-    ).toHaveLength(2)
-  })
-
-  it('puts each tree behind a native disclosure that needs no client boundary', () => {
-    const { container } = render(
-      <DocsShell {...LABELS} nav={ALPHALENS} toc={TOC} currentHref={middleOf(ALPHALENS)}>
-        {BODY}
-      </DocsShell>,
-    )
-
-    const disclosures = [...compactOf(container).querySelectorAll('details')]
-    expect(disclosures).toHaveLength(2)
-    for (const disclosure of disclosures) {
-      // `<details>` is the disclosure the platform holds the state for. There is
-      // no `open` in the markup, so a reader at 768 lands on the document rather
-      // than thirteen hundred pixels of navigation above it, and the state is a
-      // real expanded state on a real control rather than a `aria-expanded` this
-      // Page would have to keep in step with something.
-      expect(disclosure.hasAttribute('open')).toBe(false)
-      // The summary is the first child, which is what makes it the summary.
-      expect(disclosure.firstElementChild?.tagName).toBe('SUMMARY')
-      // No control inside the control: the links are siblings of the summary, not
-      // descendants, so a press on a link resolves against the link alone.
-      expect(disclosure.querySelector('summary a, summary button')).toBeNull()
-      // And nothing suppressed the platform's own marker or its focus ring.
-      const summary = disclosure.querySelector('summary') as HTMLElement
-      expect(summary.className).not.toMatch(/outline-none|ring-0/)
-      expect(summary.className).toContain('cursor-pointer')
-      expect(summary.className).toMatch(/\bpy-\d+\b/)
-    }
-  })
-
-  it('names each disclosure from the prop that already named its region', () => {
-    // A Page ships no reader-facing copy, so the control cannot say "Navigation"
-    // or "Menu": the two words it needs are the two the caller already passed to
-    // name these two navigations for a screen reader. One word, one language, one
-    // place to change it.
-    const { container } = render(
-      <DocsShell {...LABELS} nav={ALPHALENS} toc={TOC} currentHref={middleOf(ALPHALENS)}>
-        {BODY}
-      </DocsShell>,
-    )
-
-    const summaries = [...compactOf(container).querySelectorAll('summary')].map(
-      (summary) => summary.textContent,
-    )
-    expect(summaries).toEqual([LABELS.navLabel, LABELS.tocLabel])
-  })
-
-  it('ships no client boundary, because the disclosure is markup', () => {
+describe('the Page is a server Component', () => {
+  it('ships no client boundary, no state and no runtime token read', () => {
     // Read from the SOURCE, not from `dist/`. A `'use client'` line is written in
     // the source and the build does not add one, so the emitted module proves
     // nothing extra, and `dist/` is this package's own build output.
@@ -1641,8 +2096,9 @@ describe('the navigation below `lg`', () => {
     // The same classification `check-client-budget.mjs` uses, so a directive added
     // here would put the Page on the client roster.
     expect(/^['"]use client['"]/m.test(source)).toBe(false)
-    // No hook, no context and no event handler: the disclosure is the platform's,
-    // so there is nothing for any of the three to hold.
+    // No hook, no context and no event handler: nothing here holds state, and the
+    // narrow arrangement the 0.16.0 disclosure stood in for is now the rail
+    // showing, which is why there is nothing for any of the three to hold.
     expect(
       /from ['"]react['"].*\buse(State|Effect|Memo|Callback|Ref|Reducer|Context|SyncExternalStore)\b/.test(
         source,
