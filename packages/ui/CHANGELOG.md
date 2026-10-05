@@ -1,5 +1,590 @@
 # @nanisoft/prism-ui
 
+## 0.16.0
+
+### Minor Changes
+
+- 1a0ba35: A page `h1` is now visibly larger than the `h2` sections under it
+  
+  A page `h1` rendered at 1.875rem and every section heading under it at 1.5rem, so
+  the two were one fifth apart and the page had no top to its hierarchy. The fix is
+  in the type scale rather than in the Component, because the scale stopped at `4xl`
+  and there was no step for a page's own claim to take.
+  
+  **Two steps are authored, and they are the two widest gaps in the group.**
+  `5xl` is 3rem and `6xl` is 3.75rem, both at a line-height of 1. Every other step
+  in the `text` group is a whole multiple of 0.125rem and these two are too;
+  `4xl` to `5xl` is four thirds, the first gap in the group wider than any gap it
+  already had, and `5xl` to `6xl` is five fourths. They are authored as a pair
+  rather than as one step because every rung of the heading ladder is a pair, a base
+  step and one step up at `sm`, so a single step above `4xl` would have made the
+  page heading the one heading in the system that does not grow at a width.
+  
+  Both steps reach CSS and the published pack contract the way every other authored
+  step does, so `text-5xl` and `text-6xl` are utilities a consumer can compose, and
+  neither is a value a consumer has to write.
+  
+  **The heading ladder now descends from the new ceiling, one authored step per
+  level, and every level holds a step of its own.** There are exactly six authored
+  steps at or above Body, so the table lands on the floor with a distinct step at
+  every rung, where before `h4` through `h6` shared one. `h1` is at `5xl`, rising to
+  `6xl` at `sm`; `h2` is at `4xl`, rising to `5xl`; and the table descends to `lg` at
+  `h6`, which is the step Body is set at. **What a consumer sees is every section
+  title moving up one step and every page heading moving up two**: a section title
+  goes from 1.5rem to 2.25rem and from 1.875rem to 3rem at `sm`, and a page `h1` goes
+  from 1.875rem to 3rem and from 2.25rem to 3.75rem at `sm`. No call site changes,
+  because the level a Block was already passing is still what decides its size.
+  
+  **Five surfaces that render a page's own `h1` now ask the same table for its size
+  rather than naming a step.** `page-header-01`, `docs-shell`, `blog-post-page`,
+  `not-found-page` and `error-page` each wrote a fixed step into a heading that was
+  meant to be a page's top-level claim, so with the ceiling lifted they would have
+  rendered a page heading a rung or two below the section titles under it. They ask
+  `headingSizeClass`, which is what `SectionHeading` and `Cta01` already asked, and
+  `Cta01` still carries no literal.
+  
+  **Four more surfaces that resolved their own heading size, found the same way.**
+  A Block that takes a `headingLevel` and writes the size beside it forwards the level
+  and changes nothing a reader can see, which is the defect above at the scale of one
+  Block. `data-table-01` said `text-lg`, `run-console-01` said `text-base`, and both
+  moved the outline without moving the size. `run-stream-01` renders a literal `h2`
+  at `text-lg`, which was the floor of the old scale, so a live region's `h2` came
+  out below the `h3` introducing the section holding it. `/foundation/themes` said
+  `text-3xl`, which had been Display and is now the `h3` step, so that page's `h1`
+  rendered a rung below the section titles under it. All four ask `headingSizeClass`
+  now, and the three Blocks carry `text-balance` with the size they gained: the ladder
+  states weight, tracking and balance as one package and `SectionHeading` carries all
+  three at every rung, so a title lifted from 16 or 18 pixels to 24 or 36 is worse
+  unwrapped than the one it replaced.
+  
+  **The Item page's appendix heading is on the article's ladder, and asking the Block
+  ladder for it was the wrong correction.** It said `text-xl`, which put an `h2` at 20
+  pixels under the prose `h2` at 30 and below the prose `h3` at 24 above it. Asking
+  `headingSizeClass` removed the third tier and created a worse one: "API reference"
+  is a section of an article exactly as "Overview" is, so it takes the article's
+  ladder, and the Block ladder is a step and a half above it at `sm`. The Item page
+  then carried three sections at 30 pixels and an appendix at 48, and the appendix was
+  the second largest thing on the page. It is now a bare `<h2>` inside the same
+  `.prose` wrapper as the Item's own MDX body, so the article's rules size it at 30
+  pixels and it carries no class of its own: every section heading in that article is
+  a bare tag the article styles, and a heading naming its own step would be the second
+  answer to a question the article has already answered. The table stays outside
+  `.prose`, whose descendant rules would put its cells at the body step in the muted
+  colour, and the gap above it is the article's own 16 pixels rather than a second
+  region's 32.
+  
+  **The five theme names are card titles, and they compose `CardTitle` to say so.**
+  They carried `font-medium` and no size, so they rendered at 16 pixels and 500 under
+  a 60 pixel `h1`. Asking the ladder for the size would have been wrong: five themes at
+  the `h2` step is five 48 pixel headings over five cards on a page whose own claim is
+  the `h1` above them. `CardTitle` already holds the answer the library needs: a card
+  title sits at body size, and the element and the visual step are separate questions.
+  So the size stands, the tag stands at `h2` because the grid draws no section heading
+  of its own, and the weight now comes from the one Component that owns it rather than
+  from a literal. What a consumer sees is five theme names one step heavier.
+  
+  **The two Foundation readers took opposite answers, and the reason is worth more
+  than either change.** Both render inside an MDX body, which the site wraps in
+  `.prose`, and both used to carry literals, which a utility layer lets win over the
+  article's own component-layer rule: `/foundation/colors` published an `h2` at 18
+  pixels and an `h3` at 14, below the `h3` above them.
+  
+  `ColorTokens`' four headings are sections. Two divisions of an article and a
+  partition under one of them is a structure, not a list of labels, so they name no
+  step and the article decides, which is the one copy of the ladder there is.
+  
+  `TokenBrowser`'s are not sections, and dropping its literals let the wrong authority
+  decide them: every group name came out at the prose `h2`, 30 pixels, which is more
+  than twice the 14 pixels the navigation rail's own section titles are set at, on the
+  page whose whole job is being navigated. Each of those 184 names is a table's name
+  and nothing else, so they are captions: `h3` at `text-sm`, in the mono face because a
+  token key is machine notation, at the same 14 pixels and 500 as the column heads of
+  the table underneath. That is the caption `ApiTable` already renders for a compound
+  export's part names on every Item page, so this is the repository's own treatment
+  rather than a third one. One heading on the page, "Semantic contract", is a division
+  of the article rather than a label, and it keeps naming no step.
+  
+  **`Prose` walks the same ladder from one rung down, and a prose heading therefore
+  sits below a Block heading at the same level.** Its child treatments now set `h1`
+  at `4xl` and descend one authored step per level to `lg` at `h5` and `h6`,
+  which is the same scale and the same floor entered at the rung that fits the
+  reading measure: Display is 3rem, and a 42rem column is fourteen of those. The new
+  `h5` and `h6` treatments are new, so a document that reached past `h4` before now
+  has an answer rather than inheriting nothing. **The consequence is stated rather
+  than left to be found.** A Block-composed `h2` is 2.25rem and 3rem above `sm`; a
+  prose `h2` is 1.875rem and does not grow. They are 1.2 apart at the base width and
+  1.6 apart above `sm`, where they were 1.25 apart before this change, so a consumer
+  who sets a `Prose` section beside a Block section sees two tiers rather than one.
+  `DESIGN.md` under Typography, Hierarchy now says so, and says which to reach for.
+  `DocsShell` runs `Prose` at `fullWidth`, so the frame decides the width: 35rem of
+  article track at a viewport of 1216px or wider, and less below that, which makes
+  the case for entering one rung down stronger there rather than weaker.
+  
+  **`Heading`'s free `size` prop is unchanged, and this is stated rather than
+  implied.** `size` is a choice made beside the tag, for a heading the surrounding
+  document has already placed and wants attuned, and its largest arm is a step of
+  the scale rather than a rung of the ladder. Its two largest arms were not removed
+  and no new ones were added, so no consumer's call site changes and there is still
+  no second route to a page `h1` from inside the library. `search-page` and
+  `status-page` are the two surfaces that take a heading's *tag* from
+  `childLevel(headingLevel)` and its size from this prop, and they are left as they
+  are: those are labels over a list of results and over a list of incidents, and a
+  caption is not a rung.
+  
+  **`scripts/check-heading-scale.mjs` now holds three things it described but did not
+  check.** Its rule 4 claimed a table that jumps is a finding and only tested for a
+  table that rises, so a table that skipped a rung passed it: descending, reaching
+  the ceiling and flooring at or above Body, and rendering the page `h1` one gap
+  above its own `h2`, which is the defect these steps exist to remove. And the
+  literal Display step it refused on `Cta01` was written out as `text-3xl` and
+  `sm:text-4xl`, which stopped being Display the moment the ceiling moved. Both are
+  now read from the authored scale and the shipped table rather than restated, and
+  both have a staged fixture in `scripts/__tests__/heading-scale.test.mjs`. The third
+  is the Item rule below, which is new rather than a restatement.
+  
+  **The Item document's own table was the retired ladder, and it now states this
+  one.** `apps/site/items/component/layout/section/section.mdx` is the page a reader
+  is on when they ask what `as` resolves to, and it listed `h1` at `text-3xl` and
+  `h4` through `h6` all at `text-lg`: the table as it was before this change. It now
+  states the ladder the Component renders, and the sentence under it about where the
+  scale stops has been corrected with it, because a corrected table beside a stale
+  paragraph is the same disagreement one row down.
+  
+  **The gate also reads the Item document now, and that is the third copy of the
+  table.** `apps/site/items/component/layout/section/section.mdx` states the ladder
+  in its prose, and neither the declaration build nor the corpus reaches it, so when
+  the ceiling moved it kept publishing the retired table. The new rule compares it to
+  the same `HEADING_SIZE` the JSDoc is compared to, by the same cell-for-cell shape,
+  so it names no step of its own; it reads the whole Item rather than a slice, so a
+  second table in that prose is a finding; and it fails an Item that states no table
+  at all, because a comparison with no rows finds nothing to disagree with. Three
+  staged fixtures cover the three cases.
+  
+  **What the gate still does not hold is written down rather than left to be
+  discovered.** `Cta01` is named as a root because it is the one Block whose heading
+  cannot be composed from `SectionHeading` at all, so a literal step on it has no
+  table to fall back to. Beyond that file the gate cannot go, and the reason is
+  stated rather than left to be found: whether a heading a Block renders is a rung of
+  the ladder or a caption inside that Block is not decidable from source.
+  Forty-eight headings across `packages/ui/src` and `apps/site/src` name a step of
+  their own, the eleven rungs among them now ask the table, and the thirty-seven that
+  remain are captions. Two surfaces bind a caption to `headingLevel` rather than to
+  `childLevel`, so a rule reading the tag cannot sort them, and a root list holding
+  the rungs would be a list somebody maintains. That is how the `Cta01`-only rule
+  came to hold the one Block already fixed and pass over the four that were not, and
+  the count is written into `docs/quality-gates.md` so the next reader starts from it.
+  `TokenBrowser` adds one more to that population, which is the point of naming a
+  caption's step rather than inheriting it: the scan can see it, and it is below the
+  floor by arithmetic.
+  
+  **The limit of the scan that took that count is now written down too, and it is the
+  more useful half of it.** The count came from looking for a literal size utility
+  beside a heading tag, and a heading whose size it inherits names nothing: the five
+  theme names above carried no size at all, and two scans of exactly that shape passed
+  them at 16 pixels and 500. A size that is inherited is a size nobody chose, and "no
+  literal" is invisible to a scan that looks for literals, so that count has never
+  been a count of every heading that names a step, and the number nobody chose is the
+  half of it that reached a reader. What the count is good for is the arithmetic: a
+  heading it reports is a rung if the step it names is at or above the step Body is set
+  at, and a caption if it is below, so the two sort without anybody deciding which is
+  which. The remedy for what the scan cannot see is on the surfaces rather than in the
+  gate, and it is the one the token inventory now uses: a caption names its own step,
+  so it is visible to the scan and it is below the floor by definition.
+  
+  The bump is a minor in both packages rather than a patch because a new authored
+  step is a new public contract: `--text-5xl` and `--text-6xl` with their
+  `--line-height` companions enter the emitted CSS and the published pack contract,
+  and every heading on every page composed from a Block moves.
+- 1a0ba35: `BlogPostPage` refuses a post whose display date is its machine date
+  
+  Measured on `www.nanisoft.com/blog/where-the-products-stand`: the page rendered the date
+  as `2026-09-26`, the raw machine value. All four NaniSoft sites pass one raw ISO string to
+  both `date` and `dateTime`, so the reader was handed a machine value and the `datetime`
+  attribute was handed the same one.
+  
+  **The contract stands and the Page now holds it.** `date` is the words a reader sees and
+  `dateTime` is the machine value on the `time` element, and they are separate props
+  precisely so the two can differ. Formatting is a locale decision, so it belongs to
+  whoever owns the fact, and Prism renders `date` verbatim. What was missing was any way for
+  the library to notice when a caller did not do that: a prop called `date` that takes a
+  `string` is not obviously wrong, the defect is invisible to every reviewer who does not
+  open the page, and a JSDoc block is read only by whoever is integrating the library. So
+  the Page now throws when `date` and `dateTime` are the same string, naming the fix in the
+  message. `StackGrid01` refuses its own missing `ownLabel` for the same reason and by the
+  same mechanism, and a rule that is only written down is a rule four repositories read and
+  none of them are caught by.
+  
+  **The refusal is on the pair, not on the shape of either value.** A site that writes
+  `2 Sep 2026` and a site that writes `2026-09-26` both pass. What fails is handing the
+  Page no display formatting at all, and the machine value is already on the element in the
+  `datetime` attribute for every feed reader and every index, so displaying it a second
+  time is a redundancy rather than a choice.
+  
+  **`dateTime` is typed as the shape it is**, `` `${number}-${number}-${number}` ``, so a
+  formatted string passed there is a compile error rather than an attribute no reader can
+  check. `date` stays a `string`, and the reason is in the Component's JSDoc: no TypeScript
+  type separates `21 September 2026` from `2026-09-26`, which is exactly why the refusal
+  above has to exist at run time.
+  
+  **This is a breaking change and it is released as a minor.** It breaks every consumer at
+  build time, so it is a break and not an additive change, and each of the four call sites
+  below has to change in the same release:
+  
+  - `alphalens/app/blog/[[...slug]]/page.tsx`, lines 121 and 122
+  - `atlas/app/blog/[[...slug]]/page.tsx`, lines 137 and 138
+  - `landing-page/app/blog/[[...slug]]/page.tsx`, lines 119 and 120
+  - `nexus/app/blog/[[...slug]]/page.tsx`, lines 135 and 136
+  
+  Each is the same two lines, `date={page.data.date}` and `dateTime={page.data.date}`, and
+  each needs a formatted string in the first. `CONTRIBUTING.md` says a breaking change is a
+  `major`; `DESIGN.md` records the decision that a minor is the right line for a break from
+  a `0.x` version, with the reasoning that taking `1.0.0` would declare the public API stable
+  rather than describe the change. That reasoning is dated and deliberate, so the minor is
+  taken here and the disagreement with the contributing guide is recorded rather than
+  silently resolved.
+  
+  `DESIGN.md` states the rule once, in **The composition layers** beside the other Page
+  rules. Nothing else about the Page changed: same props, same elements, same `data-slot`
+  values, and it is still a server Component with no client code and no router.
+
+### Patch Changes
+
+- 1a0ba35: `Diagram` labels stay legible on a phone, and no stroke crosses one
+  
+  Two defects, both measured on the five-node architecture drawing the company
+  site renders. Its node names were drawing at 6.95 CSS pixels and its relation
+  words at 5.88 in the 342 pixels a phone leaves the drawing, and ten of the
+  twenty-five label and stroke pairs on that drawing intersected: all five node
+  names were struck through by an edge leaving their own node, and all five
+  relation words sat on their own line.
+  
+  **Labels now have a floor, and it is the drawing's own coordinate space.** Type
+  inside a scaled `<svg>` is sized in user units, so a label's rendered size is its
+  size in user units times the rendered width over the canvas. That is why the
+  canvas is fixed, and it is not the whole answer, because it has no floor in it.
+  The drawing is now never rendered narrower than 640 pixels, one user unit is
+  therefore never less than one pixel, and the smallest label the drawing sets is
+  twelve units, which is what `text-xs` resolves to. A container that cannot give
+  it that much scrolls sideways rather than letting the labels fall through it,
+  which is the arrangement `Table` already makes with seven columns and `Gantt01`
+  with a schedule of names and bars.
+  
+  The cost is stated rather than hidden: on a phone a reader sees about half the
+  drawing at a time and pans for the rest. The alternative was the whole drawing at
+  5.88-pixel type, and `DESIGN.md` records that trade under **The figure floor**.
+  Nothing above 640 pixels of container changes at all, so no desktop or tablet
+  rendering moves.
+  
+  **Strokes now stop where the ink runs out, and each label is asked on its own.**
+  A node's name is printed under its mark, so a relation drawn centre to centre ran
+  through the name under whichever node it left downward. The first version of this
+  fixed that by trimming every stroke back to the box enclosing the mark and every
+  label beside it, which is also wrong in the other direction: a relation along a
+  row never touches the name printed under its mark, so backing it off by the
+  half-width of that name detached it from the mark it connects. On three things on
+  one baseline with names at length, every end of every relation stood sixty units
+  clear of its mark. A relation is now trimmed against whichever comes first, its
+  own mark's edge plus the clearance or the far side of an individual label the
+  stroke actually runs through, so a relation leaving sideways reaches its mark and
+  one leaving downward still stops below the name in front of it. The whole line
+  between the two marks is divided once rather than each end trimmed alone, because
+  a name and a subtitle sit below their mark at two depths and a stroke arriving
+  from below runs through the first and back into the second.
+  
+  The box is computable from a server Component because every label in a drawing is
+  set in the monospaced face, where a label's width is its character count rather
+  than a measurement. That is what `DESIGN.md` records under **The ink-avoidance
+  rule**, with the reason a halo was rejected and the direction clause that the
+  first form of the rule was missing.
+  
+  **The drawing is wrapped in a container.** It carries `data-slot="diagram"` and
+  still scrolls, and the wrapper carries `data-slot="diagram-container"`, following
+  `Table`'s `table-container`. Every existing `data-slot` value, the derived or
+  passed `aria-label`, `role="img"`, and `data-unresolved-relations` are unchanged,
+  so no call site and no test that addresses the drawing by slot needs to move. The
+  Component is still a server Component with no client code.
+- 1a0ba35: `FactList` sets its values flush left, and says why there is no numeric mode
+  
+  Rendered on `www.nanisoft.com/about`: a three-row fact list where every value was set
+  `text-align: right`. The middle answer is long enough to wrap, so its second line began
+  wherever the first one ended and the column read as ragged-left, which is what a mistake
+  looks like rather than what a decision looks like.
+  
+  **Right alignment is the right answer in a column of figures, and `FactList` has no
+  figures.** That was the question to settle before changing anything, because the two
+  answers need opposite fixes. `FactList` takes `label` and `value` and nothing else: there
+  is no `numeric` prop, no `tabular-nums` anywhere in the module, no monospaced arm and no
+  per-row alignment of any kind. So nothing in it is a figure, nothing lines up on its last
+  digit, and what right alignment moved was the first letter of each answer to a different
+  place on every row. The suite asserts the absence as a fact rather than restating a prop
+  list, so a `numeric` prop added later fails there instead of quietly making the default
+  wrong for every caller that never passes it.
+  
+  The value is now `text-left`, and `text-balance` stays, because it is the same reason it
+  was there: a two-line answer should break where it breaks well rather than where the
+  measure runs out.
+  
+  A caller that genuinely wants a right-aligned column of figures is not refused anything.
+  `value` is a `ReactNode`, so the caller can pass the span it wants, and Prism holds no
+  opinion about a value it did not lay out.
+  
+  Nothing else about the Component changed: same element, same props, same `data-slot`
+  values, same server Component with no client code.
+  
+  **One thing found and not changed, because it is a different claim.** The Component's own
+  JSDoc says the term column is a fixed fraction rather than a content width, and the code
+  says otherwise: the `dt` carries `shrink-0` and no basis, so the term column is sized by
+  its content and the left edge of the value column is therefore not straight down the
+  list. That is a real mismatch between a documentation source and the thing it documents,
+  and left-aligning the value does not make it worse or better. Fixing the code to match
+  the sentence would move every fact list in four consumer repositories, so it is a decision
+  for the maintainer and not a side effect of this one. Recorded here rather than made.
+- 1a0ba35: `StackGrid01` lifts both arms of the grid to the type floors
+  
+  Measured on `nexus.nanisoft.com`: the in-house arm set its tile names at 14 pixels and
+  the line under them at 12, so a heading on this Block rendered smaller than the copy
+  around it and the tile read as a caption rather than as a tile.
+  
+  **Both arms are raised, and the reason is a floor rather than a comparison.** `DESIGN.md`
+  already states both, which is why this is a Component coming into line rather than a new
+  rule:
+  
+  - A tile name is a card title, and `CardTitle` says a card title sits at Body. Body is
+    `text-lg` in this system, 18 pixels, so a name at 14 was below it.
+  - A role and a blurb are supporting copy, and `DESIGN.md` gives supporting copy
+    `text-sm`, 14 pixels, so a line at 12 was below that too.
+  
+  The first is the floor the heading ladder stops to avoid: `lg` is the deepest authored
+  step that is not smaller than Body, precisely so that a heading never renders smaller
+  than the copy it introduces. A tile name at 14 against copy at 18 broke exactly that.
+  
+  **The two arms set the same steps in both, which is a fact and not a comparison.**
+  They already agreed here, so this was not a reconciliation and the reported arms
+  never disagreed: what agreed was below both floors. The difference the two arms are
+  supposed to carry is a claim about provenance, and it is carried in weight and ink,
+  the muted tile against the page with a `border-primary` hairline and the `md` shadow
+  step. A second group set quieter than the first would be a grid claiming the in-house
+  work matters less than the assembled parts, which is the opposite of what the group is
+  for. The assertion in the suite states the agreement as a fact so it cannot drift.
+  
+  The mono annotation over an in-house name and under a codename is left at `text-xs` on
+  purpose. That is a machine annotation in the platform monospace stack, which is what
+  `DESIGN.md` uses the mono face for, not a run of prose, and it is the only type on the
+  tile that is not prose.
+  
+  No `data-slot` changed, no prop changed, no field was added to either arm and neither
+  arm was widened, and the Block is still a server Component with no client code. The
+  tile's own height grows by the four pixels of the name plus the two of the line, which is
+  what the floors cost and not a change of rhythm: the grid was already `h-full` per row, so
+  a row of tiles is as tall as its tallest and both arms move together.
+- 1a0ba35: `SiteFooter` links are a 24 pixel target instead of a 17 pixel one
+  
+  Measured in the built exports of three consumer sites: six to eight destinations per
+  footer, every one of them 17 pixels tall (`39x17`, `30x17`, `42x17`, `33x17`, `70x17`,
+  `37x17`), with the code a reader can see at
+  `https://www.w3.org/TR/WCAG22/#target-size-minimum` asking for 24 by 24.
+  
+  **The link had no box.** A bare inline anchor is not a 17 pixel target by design; it
+  has no box at all. What a pointer aims at on one is the font's content area, and for
+  the shipped face at `text-sm` that is 16.94 pixels: fourteen pixels of type times the
+  face's own ascent and descent, times its size-adjust. Those three numbers are not a
+  guess, they are read out of the `@font-face` this package ships for `Inter Fallback`,
+  and reading them is what produced 16.94 against the 17 in the export. The social row
+  was the other shape and the other number: an `inline-flex` box, so its height is its
+  line box, 20.01 pixels.
+  
+  **The floor is paid on the box, so the link looks the same.** Both links are now
+  `flex min-h-6 items-center`: a block at least `--spacing-6`, 24 pixels, tall, with the
+  same fourteen-pixel type at the same weight in the same colour inside it. It is the
+  arrangement `mobile-nav` already uses for a stacked navigation link at the
+  coarse-pointer floor, one step lower and at every pointer rather than only on a coarse
+  one. `--spacing-6` is arithmetic on the authored spacing multiplier the way every
+  `size-*` and `h-*` in this package is, so a retune of the scale moves the floor and the
+  Block could not have pinned it.
+  
+  **No height anywhere moves.** A footer column link sat in a line box built from the
+  footer's inherited sixteen-pixel body, so each row was already 24 pixels tall before the
+  floor and each row is the same 24 after it; only the 17 pixels of target inside the row
+  grew. The footer's own height is unchanged at both widths, which is the outcome four
+  consumer pages are composed against, and the assertion that says so is in the suite.
+  
+  The 24 pixel circle exception in the criterion arguably held, because consecutive rows
+  in a footer column stand 32 pixels apart centre to centre and a 24 pixel circle on
+  either clears the other. The fix is made anyway, and `DESIGN.md` records why under
+  **The target-size floor**: a target whose size depends on the gap beside it is one edit
+  away from failing and nothing in this repository would report it.
+  
+  No `data-slot` changed, no prop changed, no call site moves, and the Block is still a
+  server Component with no client code. `DESIGN.md` states the rule once, in the section
+  beside **The coarse-pointer floor** it is deliberately not merged with.
+- 1a0ba35: `DocsShell` marks where its rails cut off, drops the rows it cannot name, and reaches a tablet
+  
+  Three defects on the one documentation screen the other NaniSoft sites import.
+  
+  **The contents rail hid a third to a half of the navigation behind an invisible
+  scroll.** The rail is capped against the viewport and scrolls inside that cap, and
+  Chrome's scrollbars are overlay scrollbars, so they appear only once the reader has
+  already scrolled. Measured in two consumers' built exports at 1280 by 680, the rail's
+  content stood at 912 and 1318 pixels in a 568 pixel box: 344 and 750 pixels of a
+  primary documentation navigation below the fold with `mask-image: none`, no
+  persistent scrollbar, no fade and no count. The last visible row was cut mid-word
+  above dead space, which reads as a rendering fault rather than as a scroll region.
+  A cap nobody can see is not a cap.
+  
+  **The affordance is a fade across the foot of each rail, and the space it covers is
+  reserved rather than borrowed.** The sticky offset moved to a wrapper that does not
+  scroll, because nothing inside a scroll container stays put while that container
+  scrolls: a gradient or a mask written into the scrollport travels with the content
+  and marks nothing. The wrapper travels, so the gradient is pinned to its foot, and
+  the `<nav>` inside keeps the cap, the independent scrolling and the whole of its
+  class contract. The rail reserves `padding-bottom` of the same height as the fade,
+  which is the half that makes it honest: at rest the gradient falls on reserved space
+  and the last row is fully legible, and only while there is more below does it fall on
+  content. Without that padding the same gradient washes the last row permanently,
+  which is the usual cost of this answer and the reason it is not optional.
+  
+  Two alternatives were rejected for stated reasons rather than passed over. A
+  persistent themed scrollbar is truthful at both ends and costs nothing to
+  legibility, but it says "there is more" without saying which way, and it needs its
+  gutter reserved in a 15rem rail so a short tree becoming a tall one does not shift
+  the content. A collapse control, and an "N more" control, both need state or a count
+  this Page cannot have: one is a client Component and the other is a measurement a
+  server Component cannot take.
+  
+  The fade costs a keyboard and a screen-reader reader nothing. It is an empty element
+  with `aria-hidden` and `pointer-events-none`, inside the `<nav>` and outside the
+  `<ul>`, so it is not a list item, it is never announced, it never takes a press and it
+  never reaches a Tab stop. The region still scrolls on its own, so the arrow keys walk
+  every entry exactly as before.
+  
+  **The Page can emit a navigation row containing nothing, and now refuses to.** An
+  entry whose `title` is the empty string rendered as
+  `<li data-slot="docs-nav-page"><span data-slot="docs-nav-label"></span></li>`: a row of
+  nothing inside a `<nav>`, which one consumer measured at 102 across 25 of its 31
+  documentation pages, because that site maps a heading whose title arrives as a React
+  element to `''`. A blank row is not a destination, and it is not a label either,
+  because a label is words. The Page now drops the entry, drops a group label it cannot
+  name while keeping the pages under that group, and drops a group that has neither
+  words nor pages. Nothing is swallowed: the rail carries the tally as
+  `data-unnamed-entries`, the same answer `Diagram` gives a relation it cannot resolve,
+  so a consumer can tell "nothing was wrong" from "the Page stopped counting".
+  
+  A blank `title` and a blank `href` are still answered differently, because they have
+  different amounts left. A page with an address and no words is a real page with one
+  unrenderable field, so losing the row costs a reader nothing while taking the screen
+  down over it would cost them everything. A page with words and no address is a row
+  whose entire content is a route that does not exist, and that is still refused by
+  name.
+  
+  **Below `lg` there was no navigation at all.** At 768 and at 1024 both rails were
+  `hidden` and the only navigation left inside the article was the two-item pager at
+  its foot, so a reader on a thirty-one document reference at tablet width had no
+  contents, no on-this-page and no way to a sibling page except Previous and Next. Each
+  tree is now also drawn behind a `<details>`, first in the document so it is what a
+  narrow reader meets before the text. `<details>` is the disclosure that needs no
+  runtime: the platform holds the expanded state, the control is in the Tab order with
+  a real expanded state, and the Page stays a server Component with no hook, no context
+  and no handler. The summary carries `navLabel` or `tocLabel`, which is the caller's
+  own word for that navigation, so the Page ships no reader-facing copy and a
+  consumer that files its documentation in another language gets the control in that
+  language by having named the region once.
+  
+  The tree is therefore in the document twice, and only one copy is displayed at any
+  width: the rail is `hidden lg:block` and the disclosures are `lg:hidden`, so the
+  other is `display: none` and is out of the accessibility tree and out of the tab
+  order rather than a second list a reader meets.
+  
+  **What did not change, and what a consumer may notice.** Every existing `data-slot`
+  value stays, so no call site and no test that addresses the Page by slot needs to
+  move; three new slots are added, `docs-rail-fade`, `docs-nav-compact` and
+  `docs-nav-disclosure`. The rail's `<nav>` now sits inside a wrapper, which is what
+  lets the fade stay put, so a consumer stylesheet reaching for it as a direct child of
+  `[data-slot="docs-rail"]` reaches the wrapper instead. `data-slot` is documented as
+  markup metadata rather than a styling API, and `Diagram` and `PulseGraph` took the
+  same wrapper for the same reason in the same release line.
+  
+  The bump is a patch rather than a minor because nothing a consumer composes through
+  widens: no prop is added, no export is added, no token and no name in the contract
+  move, and no call site changes. What changes is what the Page draws from data it
+  already accepted.
+  
+  **The one thing this leaves alone is stated rather than left to be found.** Below
+  `lg` the frame is a single column and this Page runs `Prose` at `fullWidth`, so the
+  frame decides the track: the article column is the whole container, which is 45rem at
+  768 and 61rem at 1024, against the 35rem it gets at 1216 and above. That is a wider
+  measure than the one the reading column is held to, in the band between the two
+  breakpoints, and it is a frame decision rather than a `Prose` one. A phone at 390
+  gets 21rem and is inside the measure. Capping the article track below `lg` is a
+  deliberate layout choice with two honest forms, a centred column at the measure or a
+  two-column frame from `md`, and either one changes what a narrow reader sees on
+  every documentation page in the family, so it is left to the maintainer rather than
+  taken here beside two defects that had no such choice in them.
+- 1a0ba35: `PulseGraph` labels stay legible on a phone, and no stroke crosses one
+  
+  Three defects, all measured on a four-stage pipeline the way `Diagram`'s two were
+  measured on the five-node architecture drawing the company site renders.
+  
+  **Labels now have a floor, and it is the drawing's own coordinate space.** Type
+  inside a scaled `<svg>` is sized in user units, so a label's rendered size is its
+  size in user units times the rendered width over the canvas. That is why the
+  canvas is fixed, and it is not the whole answer, because it has no floor in it. In
+  the 356 pixels a phone leaves the drawing, a stage name was rendering at 7.23 CSS
+  pixels and a node's note at 5.56, and ten user units was the smallest type the
+  whole package emitted anywhere, including inside a figure. The drawing is now
+  never rendered narrower than 640 pixels, one user unit is therefore never less
+  than one pixel, and the smallest label the drawing sets is twelve units, which is
+  what `text-xs` resolves to. A container that cannot give it that much scrolls
+  sideways rather than letting the labels fall through it, which is the arrangement
+  `Table` already makes with seven columns. Nothing above 640 pixels of container
+  changes at all, so no desktop or tablet rendering moves.
+  
+  **Connectors now stop where the ink runs out, and each label is asked on its own.**
+  A node's name is printed under its mark, so an edge drawn centre to centre ran
+  through the name and the note under whichever node it left downward. On the
+  pipeline this fix lands on, eight of the thirty-two label and connector pairs
+  intersected: the two stages nearest the top of the canvas, each with its own name
+  and its own note struck through by the two edges that met it. The first version
+  of this trimmed every connector back to the box enclosing the mark and every
+  label beside it, which fixes the crossings and detaches the drawing instead: a
+  stage's name and note both sit below its mark, so a connector along the rail
+  touches neither, and backing it off by the half-width of the widest name at the
+  node left four of the five connectors on the six-stage figure floating free of
+  both their marks, by up to fifty-five units. A connector is now trimmed against
+  whichever comes first, its own mark's edge plus the clearance or the far side of
+  an individual label it actually runs through, so all five connectors on that
+  six-stage figure touch both their marks with the clearance between them and the
+  stroke is thirty to fifty units longer, and a connector leaving a node downward
+  still stops below the name in front of it. The whole line between two marks is
+  divided once rather than each end trimmed alone, because a name and a note sit
+  below their mark at two depths and a connector arriving from below runs through
+  the first and back into the second.
+  
+  You do not have to space your nodes to avoid this, and you always had to space
+  them to keep two names from touching each other.
+  
+  **The rail no longer sits on a note.** The rail was a fixed distance up from the
+  bottom of the canvas while a node's note reached a fixed distance below its mark,
+  so the two met on one range of mark positions: a lane whose mark landed low enough
+  put its note under the rail's own stroke. The fitted area now stops above the band
+  the rail reserves, which is the rail's distance up from the bottom plus its own
+  thickness, the drawing's ink clearance, and the deepest ink a node draws. A graph
+  with no lanes has no rail, so nothing reserves the foot and the fit is unchanged.
+  
+  **The drawing is wrapped in a container.** It carries `data-slot="pulse-graph"` and
+  now scrolls, and the wrapper carries `data-slot="pulse-graph-container"`, following
+  `Table`'s `table-container` and `Diagram`'s `diagram-container`. Every existing
+  `data-slot` value, the `role="img"`, the passed `aria-label`, `data-lanes` and
+  `data-unresolved-relations` are unchanged, so no call site and no test that
+  addresses the drawing by slot needs to move. The Component is still a server
+  Component with no client code.
+  
+  `DESIGN.md` records the two rules this applies under **The figure floor** and **The
+  ink-avoidance rule**, the latter with the direction clause that the first form of
+  the trim was missing, and the geometry both Components now share is one internal
+  module rather than a second copy in each.
+- Updated dependencies [1a0ba35]
+  - @nanisoft/prism-tokens@0.16.0
+
 ## 0.15.0
 
 ### Minor Changes
