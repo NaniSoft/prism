@@ -24,7 +24,8 @@
  * the thing this repository refuses, and it is here on purpose: the second copy is
  * the consumer-facing one, and the gate is what holds them in step. Reading only
  * the map would pass a Component whose documentation promises a size it does not
- * render, which is the exact half of the defect that shipped.
+ * render, which is the exact half of the defect that shipped. Rule 10 is the same
+ * argument applied to the third copy, in the one file that holds it.
  *
  * **The steps are read out of the token SOURCE, never listed here.** Same reason
  * `check-elevation-layout.mjs` reads the container names out of `layout.tokens.json`
@@ -47,11 +48,19 @@
  *   3. the top two levels do not share a step, which is the defect itself and the
  *      one rule that has to be here for the gate to be about anything;
  *   4. the steps descend one authored step at a time until they stop, so a table
- *      that jumps, or that rises, is a finding;
+ *      that jumps, or that rises, is a finding. Both halves are checked, and the
+ *      jump half was added after the table was widened: a table that skipped a
+ *      rung descended, reached the ceiling and floored at or above Body, so it
+ *      passed this gate while rendering the page's `h1` one gap above its own
+ *      `h2`, which is the defect this whole rule exists to hold;
  *   5. the largest step the table names is the largest step the token source
  *      authors, and no level renders above the `h1`, which is how "nothing in the
- *      system goes above `4xl`" is held from the component side and how adding a
- *      level can never invert the hierarchy;
+ *      system goes above its largest authored step" is held from the component
+ *      side and how adding a level can never invert the hierarchy. The ceiling is
+ *      named here as a property rather than as a step, because the step it names
+ *      is a fact about the token source and this gate reads that rather than
+ *      restating it: a gate whose header said `4xl` would have been describing
+ *      the tree it happened to be run against rather than the rule;
  *   6. the floor is at or above the step `DESIGN.md` gives Body, so a heading at
  *      the bottom of the table never renders smaller than the copy it introduces;
  *   7. weight, tracking and balance are on the heading and not in the per-level
@@ -59,7 +68,10 @@
  *      heading;
  *   8. the JSDoc table is the code table, cell for cell;
  *   9. `DESIGN.md`'s Hierarchy gives Display one role, and it is not the section
- *      title, which is the sentence the whole defect sat in.
+ *      title, which is the sentence the whole defect sat in;
+ *  10. the Item document for `section` states the table the Component renders,
+ *      row for row, and states it once, so the published documentation site
+ *      cannot publish a ladder the library does not render.
  *
  * **Rule 3 is separate from rule 4 because a uniform table passes rule 4.** Every
  * level at one step is flat, and flat is not descending, so a rule that only asked
@@ -75,6 +87,21 @@
  * purpose: it holds the claim that made the defect possible, and it says nothing
  * about how the rest of the section is worded, so a later rewrite of the Hierarchy
  * prose does not turn this red for a reason that has nothing to do with the rule.
+ *
+ * **The third copy of the table is the Item document, and it is the copy a reader
+ * is looking at.** `apps/site/items/component/layout/section/section.mdx` states
+ * the same ladder in its prose, because that is the page someone is on when they
+ * ask what `as` resolves to, and neither the declaration build nor the corpus
+ * reaches it: the JSDoc is what those two read, so the Item table was a third copy
+ * that nothing held in step. That is this gate's own subject one file over, and it
+ * shipped the moment the ceiling moved. Rule 10 compares it to the same
+ * `HEADING_SIZE` rule 7 compares the JSDoc to, by the same cell-for-cell shape, so
+ * the rule names no step and a retune of the ladder is a retune of the table the
+ * Item is asked to agree with rather than a second ladder written out in a gate. It
+ * also reads the whole Item rather than a slice of it, so a second table appearing
+ * anywhere in the prose is a finding: two tables in one document is the thing this
+ * repository refuses, and the first version of this rule read one of them and would
+ * have passed it.
  *
  * **The one limit, stated rather than hidden.** `BODY_STEP` below is a name this
  * gate holds rather than reads, because "Body is 400 at `lg`" is a sentence in
@@ -107,23 +134,58 @@ const REPO_ROOT = path.resolve(HERE, '..')
  * One root per line, for the reason `check-elevation-layout.mjs` states: two
  * suites read these arrays out of their gates rather than typing a copy.
  *
- * The first two are files rather than trees, which `walkRoot` accepts and which
- * is what makes this gate's coverage claim falsifiable: a root that is a file that
- * was renamed resolves to nothing and fails the run rather than emptying it.
+ * All five are files rather than trees, which `walkRoot` accepts and which is what
+ * makes this gate's coverage claim falsifiable: a root that is a file that was
+ * renamed resolves to nothing and fails the run rather than emptying it.
+ *
+ * There is deliberately no tree here, and `docs/quality-gates.md` records why. The
+ * ladder cannot be applied to a Block or a Page by reading its source, because a
+ * heading a surface draws inside itself is a caption at the scale of that surface
+ * rather than a rung of the page ladder, and nothing in the source says which is
+ * which: forty-eight headings name a step of their own and thirty-seven of them are
+ * captions. `cta-01` is named because it is the one Block that cannot compose
+ * `SectionHeading` at all, not because it is the only one that resolves its own
+ * heading, and that is a narrower claim than it looks. A root that listed the rest
+ * of the rungs would be a list somebody maintains, which is the failure this gate's
+ * own subject is about.
+ *
+ * **The count above is a measurement and not an invariant, and the reason is worth
+ * more than the number.** It was taken by a scan that looks for a literal size
+ * utility beside a heading tag, and a heading whose size it inherits names nothing:
+ * no `text-*` in its class string is the same source text as a heading at exactly
+ * the step the surface it sits in happens to set. Five theme names on
+ * `/foundation/themes` carried no size at all, rendered at 16 pixels and 500 under a
+ * 60 pixel `h1`, and two scans of this kind passed them, because "no literal" is
+ * invisible to a scan that looks for literals. So a scan of this shape can only ever
+ * report headings that name a step, and a heading it reports is a rung or a caption
+ * by arithmetic: at or above the step Body is set at is a rung, below it is a
+ * caption. That is the whole of what this count is good for, and the remedy for what
+ * it cannot see is on the other side of it, in the surfaces: a caption names its own
+ * step, so it is visible to the scan and it is below the floor by definition.
  */
 const ROOTS = [
   'packages/ui/src/components/ui/section.tsx',
-  'packages/ui/src/blocks/cta-01/cta.tsx',
   'packages/tokens/src/foundation/base.tokens.json',
   'DESIGN.md',
+  'apps/site/items/component/layout/section/section.mdx',
+  'packages/ui/src/blocks/cta-01/cta.tsx',
 ]
-const EXT = /\.(tsx|json|md)$/
+const EXT = /\.(tsx|json|md|mdx)$/
 
-/** The authored text steps, read from the token source rather than listed here. */
-const BASE_TOKENS = path.join(REPO_ROOT, 'packages', 'tokens', 'src', 'foundation', 'base.tokens.json')
+/** Where each root is in `ROOTS`, named rather than indexed. */
+const SECTION_ROOT = ROOTS[0]
+const TOKENS_ROOT = ROOTS[1]
+const ITEM_ROOT = ROOTS[3]
+const CTA_ROOT = ROOTS[4]
 
 /** The document whose Hierarchy section is one of the things under test. */
 const DESIGN = path.join(REPO_ROOT, 'DESIGN.md')
+
+/** The Item page that documents the ladder in its own prose. */
+const SECTION_ITEM = path.join(REPO_ROOT, ITEM_ROOT)
+
+/** The authored text steps, read from the token source rather than listed here. */
+const BASE_TOKENS = path.join(REPO_ROOT, TOKENS_ROOT)
 
 /**
  * The step `DESIGN.md` gives Body, held rather than read.
@@ -271,15 +333,15 @@ if (BODY === undefined) {
   )
 }
 
-const sectionSource = readFileSync(path.join(REPO_ROOT, ROOTS[0]), 'utf8')
-const TABLE = codeTable(sectionSource, ROOTS[0])
-const { table: DOC, block: DOC_BLOCK } = docTable(sectionSource, ROOTS[0])
+const sectionSource = readFileSync(path.join(REPO_ROOT, SECTION_ROOT), 'utf8')
+const TABLE = codeTable(sectionSource, SECTION_ROOT)
+const { table: DOC, block: DOC_BLOCK } = docTable(sectionSource, SECTION_ROOT)
 
 /** Rule 1: every level in the outline has an entry. */
 for (const level of LEVELS) {
   if (TABLE.has(level)) continue
   failures.push(
-    `${ROOTS[0]} has no size for \`${level}\`. \`HeadingLevel\` has ${LEVELS.length} levels and the\n` +
+    `${SECTION_ROOT} has no size for \`${level}\`. \`HeadingLevel\` has ${LEVELS.length} levels and the\n` +
       `    table has ${TABLE.size}, so a level can be composed and render at nothing. Every level is a row.`,
   )
 }
@@ -290,7 +352,7 @@ for (const [level, classes] of TABLE) {
     const step = utility.replace(/^sm:/, '')
     if (step.startsWith('text-') === false) {
       failures.push(
-        `${ROOTS[0]} renders \`${level}\` at \`${utility}\`, which is not a size utility.\n` +
+        `${SECTION_ROOT} renders \`${level}\` at \`${utility}\`, which is not a size utility.\n` +
           "    The table holds sizes and nothing else; weight, tracking and balance are the heading's.",
       )
       continue
@@ -298,7 +360,7 @@ for (const [level, classes] of TABLE) {
     const name = step.slice('text-'.length)
     if (BY_NAME.has(name) === false) {
       failures.push(
-        `${ROOTS[0]} renders \`${level}\` at \`${utility}\`, naming the size \`${name}\`, which the token\n` +
+        `${SECTION_ROOT} renders \`${level}\` at \`${utility}\`, naming the size \`${name}\`, which the token\n` +
           `    source does not author. Steps this repository authors: ${[...BY_NAME.keys()].join(', ')}.`,
       )
     }
@@ -313,11 +375,11 @@ const ordered = LEVELS.filter((level) => TABLE.has(level))
  * in it is above the `h1`.
  *
  * Both halves matter and they are different claims. The first is DESIGN.md's "nothing
- * in the system goes above `4xl`" read from the component side, and the second is
- * the rule that makes adding a level safe: a level that asks for a step above the
- * page's own `h1` is a level that has inverted the hierarchy, and no authored step
- * existing above `4xl` is what used to make that unreachable by accident rather
- * than by rule.
+ * in the system goes above its largest authored step" read from the component side,
+ * and the second is the rule that makes adding a level safe: a level that asks for a
+ * step above the page's own `h1` is a level that has inverted the hierarchy, and no
+ * authored step existing above the ceiling is what used to make that unreachable by
+ * accident rather than by rule.
  */
 let tableMax = -Infinity
 for (const classes of TABLE.values()) {
@@ -328,7 +390,7 @@ for (const classes of TABLE.values()) {
 }
 if (tableMax < LARGEST.rem) {
   failures.push(
-    `${ROOTS[0]} never reaches \`${LARGEST.name}\`, the largest step the token source authors, so\n` +
+    `${SECTION_ROOT} never reaches \`${LARGEST.name}\`, the largest step the token source authors, so\n` +
       "  the page's own `h1` no longer grows at `sm`. The ceiling is a fact about the scale rather than\n" +
       '  a target, and a heading table that stops a step short of it is a retune nobody asked for.',
   )
@@ -339,9 +401,9 @@ for (const level of ordered) {
   if (rem === undefined || topLevel === undefined) continue
   if (rem <= topLevel) continue
   failures.push(
-    `${ROOTS[0]} renders \`${level}\` at ${rem}rem, above the ${topLevel}rem it renders \`h1\` at.\n` +
-      '    A level deeper than the page heading cannot be a bigger one, and nothing above `4xl` exists to\n' +
-      '    make that mistake silently.',
+    `${SECTION_ROOT} renders \`${level}\` at ${rem}rem, above the ${topLevel}rem it renders \`h1\` at.\n` +
+      `    A level deeper than the page heading cannot be a bigger one, and nothing above \`${LARGEST.name}\`\n` +
+      '    exists to make that mistake silently.',
   )
 }
 
@@ -350,14 +412,28 @@ const topStep = remOf('h1')
 const secondStep = remOf('h2')
 if (topStep !== undefined && secondStep !== undefined && topStep === secondStep) {
   failures.push(
-    `${ROOTS[0]} renders \`h1\` and \`h2\` at one step, ${topStep}rem.\n` +
+    `${SECTION_ROOT} renders \`h1\` and \`h2\` at one step, ${topStep}rem.\n` +
       '    A page h1 and the h2 sections under it would come out byte-identical, which is the defect\n' +
       '    this gate exists for and the reason the two roles were one bullet in DESIGN.md. The table has\n' +
       '    to step, and it has to step at the top rather than somewhere further down.',
   )
 }
 
-/** Rule 4: the steps descend one authored step at a time, then stop. */
+/**
+ * Rule 4: the steps descend one authored step at a time, then stop.
+ *
+ * Both halves of "one at a time" are checked, and the jump half is the one this
+ * rule did not check for its whole first life. It only asked whether the sequence
+ * fell, so a table that skipped a rung passed it: `h1` at `4xl`, `h2` at `2xl` and
+ * the rest descending one step at a time is descending, it reaches whatever the
+ * ceiling is, and it floors wherever it lands. That is the exact shape a page `h1`
+ * and its own `h2` at one fifth more apart renders, which is the defect the display
+ * steps were authored to remove, and it was reachable because the first version of
+ * this rule described the jump without testing for it. A position is an index into
+ * the authored steps rather than a rem, because the scale's gaps are a fifth, a
+ * quarter and a third in three different places and subtracting two rems is not a
+ * step.
+ */
 let flooredAt = null
 for (let i = 1; i < ordered.length; i += 1) {
   const above = remOf(ordered[i - 1])
@@ -365,9 +441,19 @@ for (let i = 1; i < ordered.length; i += 1) {
   if (below === undefined || above === undefined) continue
   if (below > above) {
     failures.push(
-      `${ROOTS[0]} renders \`${ordered[i]}\` larger than \`${ordered[i - 1]}\`, so a deeper heading is a\n` +
+      `${SECTION_ROOT} renders \`${ordered[i]}\` larger than \`${ordered[i - 1]}\`, so a deeper heading is a\n` +
         '    bigger one. A step-down table that rises is a table whose order is a typo rather than a\n' +
         '    decision, and nothing else in the tree would report it.',
+    )
+  }
+  const skipped = STEPS.filter((step) => step.rem > below && step.rem < above)
+  if (skipped.length > 0) {
+    failures.push(
+      `${SECTION_ROOT} renders \`${ordered[i]}\` at ${below}rem and \`${ordered[i - 1]}\` at ${above}rem, which\n` +
+        `    skips ${skipped.length} authored step(s) between them: ${skipped.map((s) => `\`${s.name}\``).join(', ')}.\n` +
+        '    A descending table is not the same table as a ladder, and the difference is what a reader\n' +
+        '    sees between the top two rungs. Every level steps down one authored step or holds at the\n' +
+        '    floor; nothing jumps.',
     )
   }
   if (below === above && flooredAt === null) flooredAt = ordered[i]
@@ -378,7 +464,7 @@ if (flooredAt !== null) {
   const floor = remOf(ordered[ordered.length - 1])
   if (floor !== undefined && floor < BODY.rem) {
     failures.push(
-      `${ROOTS[0]} floors at \`${flooredAt}\`, which is ${floor}rem, below the ${BODY.rem}rem DESIGN.md\n` +
+      `${SECTION_ROOT} floors at \`${flooredAt}\`, which is ${floor}rem, below the ${BODY.rem}rem DESIGN.md\n` +
         `    gives Body. A heading at the bottom of the table would render smaller than the copy it\n` +
         '    introduces and read as a caption. Raise the floor or shorten the table.',
     )
@@ -389,7 +475,7 @@ if (flooredAt !== null) {
 const headingTag = /<Heading[\s\S]{0,400}?className=\{([^}]*)\}/.exec(sectionSource)
 if (headingTag === null) {
   failures.push(
-    `${ROOTS[0]} does not give its heading a className this gate can read, so the rule about weight,\n` +
+    `${SECTION_ROOT} does not give its heading a className this gate can read, so the rule about weight,\n` +
       '  tracking and balance could not be applied.',
   )
 } else {
@@ -397,7 +483,7 @@ if (headingTag === null) {
   for (const shared of ['font-semibold', 'tracking-tight', 'text-balance']) {
     if (expression.includes(shared) === false) {
       failures.push(
-        `${ROOTS[0]} no longer puts \`${shared}\` on the heading.\n` +
+        `${SECTION_ROOT} no longer puts \`${shared}\` on the heading.\n` +
           '    It is one of the three things that survive every step of the table, and at the floor it is\n' +
           '    weight and tracking rather than size that tell a heading from body copy.',
       )
@@ -405,7 +491,7 @@ if (headingTag === null) {
   }
   if (expression.includes('headingSizeClass') === false) {
     failures.push(
-      `${ROOTS[0]} gives its heading a className that does not read the table.\n` +
+      `${SECTION_ROOT} gives its heading a className that does not read the table.\n` +
         '    The size has to come from the level it was passed, or the level stops being a typographic\n' +
         '    decision and the page is back to one size at every level.',
     )
@@ -418,7 +504,7 @@ for (const level of LEVELS) {
   const doc = DOC.get(level)
   if (doc === undefined) {
     failures.push(
-      `${ROOTS[0]} states no size for \`${level}\` in the JSDoc table on \`SectionHeading\`. The block is\n` +
+      `${SECTION_ROOT} states no size for \`${level}\` in the JSDoc table on \`SectionHeading\`. The block is\n` +
         '    the documentation source the declaration build preserves and the corpus reads, so a level\n' +
         '    the code sizes and the prose does not is a level a consumer is told nothing about.',
     )
@@ -427,7 +513,7 @@ for (const level of LEVELS) {
   if (code === undefined) continue
   if (code.join(' ') === doc.join(' ')) continue
   failures.push(
-    `${ROOTS[0]} renders \`${level}\` at \`${code.join(' ')}\` and documents it at \`${doc.join(' ')}\`.\n` +
+    `${SECTION_ROOT} renders \`${level}\` at \`${code.join(' ')}\` and documents it at \`${doc.join(' ')}\`.\n` +
       '    The two are the same table written twice and this gate is what holds them in step.',
   )
 }
@@ -449,11 +535,92 @@ if (display === null) {
   )
 }
 
-/** The one Block outside `SectionHeading`, which resolves its own heading tag. */
-const ctaSource = readFileSync(path.join(REPO_ROOT, ROOTS[1]), 'utf8')
-if (/text-3xl|sm:text-4xl/.test(ctaSource.replace(/\/\*[\s\S]*?\*\//g, ''))) {
+/**
+ * Rule 10: the Item document states the ladder the Component renders, once.
+ *
+ * Read from the whole Item rather than from a slice of it, so a second table in
+ * the prose is a finding rather than a row this gate happens to read second, and
+ * compared to `HEADING_SIZE` by the same shape rule 7 compares the JSDoc by. The
+ * step it expects is never written here: it is the table the Component renders, so
+ * a retune of the ladder is a retune of the thing the Item is asked to agree with.
+ *
+ * The zero-row case fails rather than passing. A rule that only compares rows finds
+ * nothing to disagree with in an Item that documents no ladder at all, which is the
+ * state a later edit reaches by deleting the table rather than by editing it.
+ */
+const itemSource = readFileSync(SECTION_ITEM, 'utf8')
+const ITEM_ROW = /\|\s*`(h[1-6])`\s*\|\s*`([^`]+)`\s*\|[^|]*\|\s*`([^`]+)`\s*\|/g
+const ITEM = new Map()
+for (const [, level, base, at] of itemSource.matchAll(ITEM_ROW)) {
+  const classes = `${base} ${at}`.trim().split(/\s+/)
+  const seen = ITEM.get(level)
+  if (seen !== undefined && seen.join(' ') !== classes.join(' ')) {
+    failures.push(
+      `${ITEM_ROOT} states two different ladders for \`${level}\`: \`${seen.join(' ')}\` and\n` +
+        `    \`${classes.join(' ')}\`. A table written twice in one document is the thing this gate\n` +
+        '    exists to prevent, and it is the state a reader cannot tell apart from a correct one.',
+    )
+    continue
+  }
+  ITEM.set(level, classes)
+}
+if (ITEM.size === 0) {
   failures.push(
-    `${ROOTS[1]} carries a literal Display step on its heading.\n` +
+    `${ITEM_ROOT} states no ladder table, so the page a reader reaches to find out what \`as\`\n` +
+      '  resolves to documents nothing. A comparison with no rows finds nothing to disagree with,\n' +
+      '  which is how an Item reaches this state by deleting the table rather than by editing it.',
+  )
+} else {
+  for (const level of LEVELS) {
+    const code = TABLE.get(level)
+    const doc = ITEM.get(level)
+    if (doc === undefined) {
+      failures.push(
+        `${ITEM_ROOT} documents no size for \`${level}\`, and the Component renders it at\n` +
+          `    \`${(code ?? []).join(' ')}\`. This is the page \`/components/section\` is read on, so a level the\n` +
+          '    code sizes and the prose does not is a level a consumer is told nothing about.',
+      )
+      continue
+    }
+    if (code === undefined || code.join(' ') === doc.join(' ')) continue
+    failures.push(
+      `${ITEM_ROOT} documents \`${level}\` at \`${doc.join(' ')}\` and the Component renders it at\n` +
+        `    \`${code.join(' ')}\`. The Item is a third copy of the table, and this rule is what holds it in\n` +
+        '    step with the other two rather than leaving a reader to spot the difference.',
+    )
+  }
+}
+
+/**
+ * The one Block that cannot compose `SectionHeading`, which resolves its own tag.
+ *
+ * It draws its heading on a filled panel, where this Component's muted description
+ * colour and `gap-4` are wrong, so it writes the element and used to write the size
+ * with it. The step it may not carry is read out of the table rather than written
+ * here, for the reason the whole gate reads the token source rather than listing
+ * it: a literal named in a gate is a copy of the scale, and the first version of
+ * this check named `text-3xl` and `sm:text-4xl`, which were the Display pair when
+ * it was written and are the `h3` pair now that Display has moved. It would have
+ * gone on passing over a Block that wrote the current Display step out by hand,
+ * which is the exact finding it exists for.
+ *
+ * **This is a list of one file and it is not the whole population, which is stated
+ * rather than implied.** Every Block that resolves its own heading is a candidate
+ * and most of them are captions rather than rungs, so the population cannot be
+ * read from source. What makes this one holdable is narrower than "the only one":
+ * it is the one Block whose heading cannot be composed from `SectionHeading` at
+ * all, so there is nothing for it to fall back to and its size has to come from
+ * the table. The count of Blocks that resolve a *page-level* heading and have no
+ * such excuse is in `docs/quality-gates.md`, and the limit of the scan that took
+ * that count is stated in the header above rather than here, because it is a
+ * limit of the measurement and not of this rule.
+ */
+const ctaSource = readFileSync(path.join(REPO_ROOT, CTA_ROOT), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
+const DISPLAY_STEP = (TABLE.get('h1') ?? []).filter((utility) => utility.startsWith('text-'))
+const displayLiteral = DISPLAY_STEP.find((utility) => ctaSource.includes(utility))
+if (displayLiteral !== undefined) {
+  failures.push(
+    `${CTA_ROOT} carries a literal Display step (\`${displayLiteral}\`) on its heading.\n` +
       '  It draws its heading on a filled panel and cannot compose `SectionHeading`, so it asks\n' +
       '  `headingSizeClass` for the size. A second literal here is a second answer to the same question,\n' +
       '  which is how one size reached two surfaces.',
@@ -472,24 +639,26 @@ console.log(
     `floor compared against Body at \`${BODY_STEP}\` ${BODY.rem}rem`,
 )
 console.log(
-  `${NAME}: the JSDoc table on \`SectionHeading\` states ${DOC.size} level(s), and ${relativePosix(REPO_ROOT, DESIGN)}\n` +
-    `  states the roles; both are read rather than assumed.`,
+  `${NAME}: the JSDoc table on \`SectionHeading\` states ${DOC.size} level(s), ${ITEM_ROOT} states ` +
+    `${ITEM.size}, and\n  ${relativePosix(REPO_ROOT, DESIGN)} states the roles; all three are read rather than assumed.`,
 )
+console.log()
 
 if (failures.length > 0) {
   console.error(`\n${NAME}: ${failures.length} failure(s)`)
   for (const failure of failures) console.error(`  - ${failure}`)
   console.error(
-    '\nA heading level decides a heading size, the size is a step of the authored scale, and the two\n' +
-      'copies of the table are the code and the Component\'s own JSDoc. Fix the table rather than the gate.',
+    '\nA heading level decides a heading size, the size is a step of the authored scale, and the table is\n' +
+      "written three times: the code, the Component's own JSDoc, and the Item that documents it. Fix the\n" +
+      'table rather than the gate.',
   )
   process.exit(1)
 }
 
 console.log(
   `${NAME}: every level has a step, the steps descend to a floor at or above Body, nothing is above\n` +
-    `  ${LARGEST.name}, the heading keeps its weight, tracking and balance at every level, the JSDoc\n` +
-    '  states the table the code renders, and Display holds one role.',
+    `  ${LARGEST.name}, the heading keeps its weight, tracking and balance at every level, the JSDoc and\n` +
+    '  the Item both state the table the code renders, and Display holds one role.',
 )
 
 /** The smallest authored size a level's base step resolves to, or undefined. */

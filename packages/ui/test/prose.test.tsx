@@ -46,7 +46,7 @@ describe('a run of prose', () => {
     // treatments are child selectors on the root.
     expect(root.children).toHaveLength(3)
     expect(root.children[0]?.tagName).toBe('H2')
-    expect(root.className).toContain('[&_h2]:text-2xl')
+    expect(root.className).toContain('[&_h2]:text-3xl')
     expect(root.className).toContain('[&_ul]:list-disc')
   })
 

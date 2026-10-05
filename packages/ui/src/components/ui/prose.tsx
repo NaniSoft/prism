@@ -111,6 +111,17 @@ export type ProseProps = ComponentProps<'div'> & {
  * is: the caller's own flow content.
  *
  * It is a server Component: no hook, no context and no client code.
+ *
+ * **The heading ladder here is the one `SectionHeading` walks, entered one rung
+ * down, and the reason is the measure rather than a second decision.** A run of
+ * prose is held to `--container-measure`, 42rem. The Display step is 3rem, and a
+ * 42rem column is fourteen of them, so a document title set at Display is a
+ * title broken into fragments rather than a title. So the child treatments set
+ * `h1` at `4xl` and descend one authored step per level to `lg` at `h5` and
+ * `h6`, which is the same scale, the same floor and the same rule about a
+ * heading never rendering smaller than the copy it introduces, entered at the
+ * rung that fits the column. A document and a page are therefore one hierarchy
+ * at different reading widths rather than two answers to one question.
  */
 function Prose({ children, size = 'base', fullWidth = false, className, ...props }: ProseProps) {
   return (
@@ -127,10 +138,12 @@ function Prose({ children, size = 'base', fullWidth = false, className, ...props
         '[&_a]:text-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a:hover]:underline',
         '[&_blockquote]:border-border [&_blockquote]:text-muted-foreground [&_blockquote]:border-l-2 [&_blockquote]:pl-4 [&_blockquote]:italic',
         '[&_code]:bg-muted [&_code]:text-muted-foreground [&_code]:rounded-sm [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-xs',
-        '[&_h1]:text-balance [&_h1]:text-3xl [&_h1]:font-semibold [&_h1]:tracking-tight',
-        '[&_h2]:text-balance [&_h2]:mt-2 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:tracking-tight',
-        '[&_h3]:text-balance [&_h3]:mt-2 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:tracking-tight',
-        '[&_h4]:text-balance [&_h4]:text-lg [&_h4]:font-semibold',
+        '[&_h1]:text-balance [&_h1]:text-4xl [&_h1]:font-semibold [&_h1]:tracking-tight',
+        '[&_h2]:text-balance [&_h2]:mt-2 [&_h2]:text-3xl [&_h2]:font-semibold [&_h2]:tracking-tight',
+        '[&_h3]:text-balance [&_h3]:mt-2 [&_h3]:text-2xl [&_h3]:font-semibold [&_h3]:tracking-tight',
+        '[&_h4]:text-balance [&_h4]:text-xl [&_h4]:font-semibold',
+        '[&_h5]:text-balance [&_h5]:text-lg [&_h5]:font-semibold',
+        '[&_h6]:text-balance [&_h6]:text-lg [&_h6]:font-semibold',
         '[&_hr]:bg-border [&_hr]:h-px [&_hr]:my-2',
         '[&_img]:rounded-lg',
         '[&_li]:leading-relaxed [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6',

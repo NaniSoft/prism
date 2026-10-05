@@ -150,6 +150,22 @@ export type SiteFooterProps = {
  * overrides it: Prism does not decide which destinations are external, so the
  * per-link prop wins over the default rather than the other way round.
  *
+ * **Every link this Block renders carries a 24 pixel target floor, and it is a
+ * floor on the box rather than on the type.** A link drawn as a bare inline anchor
+ * has no box at all: what a pointer aims at is the font's content area, which for
+ * the shipped face at `text-sm` is 16.94 pixels tall, and a row of six to eight of
+ * them is the densest target cluster on four sites. The fix is
+ * `flex min-h-6 items-center`, so the anchor is a block that is at least
+ * `--spacing-6` tall with the same fourteen-pixel type inside it, and the visual
+ * weight of the link is untouched. It is the same arrangement `mobile-nav` uses for
+ * a stacked link at the coarse-pointer floor, one step lower and at every pointer.
+ * `DESIGN.md` records the rule under **The target-size floor**.
+ *
+ * It changes no height anywhere. A column link sat in a line box built from the
+ * footer's inherited sixteen-pixel body, so each row was already twenty-four pixels
+ * tall before the floor and the row is the same twenty-four after it; only the
+ * seventeen pixels of target inside it grew, and a reader's eye is where it was.
+ *
  * It is a server Component. It fetches nothing, it holds no state, and it
  * imports no router: a consumer renders it from a server file and the links are
  * plain anchors the consumer's own router can intercept.
@@ -180,7 +196,7 @@ export function SiteFooter({
                       href={link.href}
                       rel={link.newTab === false ? undefined : 'noopener noreferrer'}
                       target={link.newTab === false ? undefined : '_blank'}
-                      className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2 rounded-sm text-sm font-medium transition-colors duration-fast ease-out"
+                      className="text-muted-foreground hover:text-foreground flex min-h-6 items-center gap-2 rounded-sm text-sm font-medium transition-colors duration-fast ease-out"
                     >
                       {link.icon ? (
                         <span aria-hidden className="inline-flex items-center">
@@ -207,7 +223,7 @@ export function SiteFooter({
                           href={link.href}
                           rel={link.newTab ? 'noopener noreferrer' : undefined}
                           target={link.newTab ? '_blank' : undefined}
-                          className="text-muted-foreground hover:text-foreground rounded-sm text-sm transition-colors duration-fast ease-out"
+                          className="text-muted-foreground hover:text-foreground flex min-h-6 items-center rounded-sm text-sm transition-colors duration-fast ease-out"
                         >
                           {link.label}
                         </a>

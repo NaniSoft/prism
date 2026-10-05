@@ -1,6 +1,6 @@
 import { LiveRegion } from '../../components/ui/live-region'
 import { Meter } from '../../components/ui/meter'
-import { type HeadingLevel } from '../../components/ui/section'
+import { headingSizeClass, type HeadingLevel } from '../../components/ui/section'
 import { Timeline, type TimelineEntry } from '../../components/ui/timeline'
 import { cn } from '../../lib/utils'
 
@@ -153,16 +153,29 @@ export function RunConsole01({
     >
       <header data-slot="run-console-01-header" className="flex flex-col gap-1">
         {/*
-         * The heading is a real heading rather than a styled span, at the level the
-         * caller says. A console is a region of a page, and a reader navigating by
-         * heading has to be able to find it and skip it, and neither works with a div
-         * that looks like a heading. The level was fixed at two, which answers the
-         * first half and not the second: a console opened as a panel inside a page
-         * that already has an `h2` becomes a sibling of it rather than a child, so
-         * "skip to the next heading at or below level two" walks straight past the
-         * run the reader came to read.
-         */}
-        <Heading className="text-foreground text-base font-semibold tracking-tight">{title}</Heading>
+          The heading is a real heading rather than a styled span, at the level the
+          caller says. A console is a region of a page, and a reader navigating by
+          heading has to be able to find it and skip it, and neither works with a div
+          that looks like a heading. The level was fixed at two, which answers the
+          first half and not the second: a console opened as a panel inside a page
+          that already has an `h2` becomes a sibling of it rather than a child, so
+          "skip to the next heading at or below level two" walks straight past the
+          run the reader came to read.
+
+          The size is asked of the same table the level is, for the reason the level
+          is a prop at all. It wrote `text-base` here, so the prop moved the outline
+          and left the size exactly where it was: a console composed as an `h3` and
+          one composed as an `h2` drew their titles identically, which is the
+          one-size defect at the scale of one Block rather than of a page. Weight,
+          tracking and balance come with the size, because the ladder states the
+          three as one package and a title that moved from 16 pixels to 36 is worse
+          unwrapped than the 16 pixel one it replaced.
+        */}
+        <Heading
+          className={cn('text-foreground font-semibold tracking-tight text-balance', headingSizeClass(headingLevel))}
+        >
+          {title}
+        </Heading>
         {detail === undefined ? null : (
           <p className="text-muted-foreground text-sm">{detail}</p>
         )}

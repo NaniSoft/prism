@@ -31,9 +31,9 @@ colors:
 typography:
   display:
     fontFamily: "Inter, 'Inter Fallback', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
-    fontSize: "1.875rem"
+    fontSize: "3rem"
     fontWeight: 600
-    lineHeight: 1.2
+    lineHeight: 1
     letterSpacing: "-0.025em"
   title:
     fontSize: "1.5rem"
@@ -363,10 +363,21 @@ takes the closest available weight rather than synthesising once a face exists.
 
 Text sizes are authored as size and line-height pairs: `xs` 0.75/1.333, `sm`
 0.875/1.429, `base` 1/1.5, `lg` 1.125/1.556, `xl` 1.25/1.4, `2xl` 1.5/1.333,
-`3xl` 1.875/1.2, `4xl` 2.25/1.111, and `mono` 0.625/1. Leading is authored as
+`3xl` 1.875/1.2, `4xl` 2.25/1.111, `5xl` 3/1, `6xl` 3.75/1, and `mono`
+0.625/1. Leading is authored as
 `none`, `tight`, `snug`, `normal`, `relaxed` and `loose`. Tracking is authored as
 `tighter`, `tight`, `normal`, `wide`, `wider` and `widest`. Weight is authored as
 `normal` 400, `medium` 500, `semibold` 600 and `bold` 700.
+
+Every step is a whole multiple of 0.125rem, and the two widest gaps in the group
+are the two at the top. `xl` to `2xl` is a fifth more, `2xl` to `3xl` a quarter
+more and `3xl` to `4xl` a fifth more again: those three order adjacent roles and
+they are all the scale needed while its ceiling was `4xl`. `5xl` is `4xl` times
+four thirds and `6xl` is `5xl` times five fourths, and those two are the display
+role. They are authored as a pair rather than as one step because every rung of
+the heading ladder is a pair, a base step and one step up at `sm`, so a single
+step above `4xl` would have made Display the one heading in the system that does
+not grow at a width.
 
 ### Hierarchy
 
@@ -375,23 +386,25 @@ A heading's size follows its level. The level is already on every Block as
 derived from the level rather than chosen beside it, and there is no prop that
 sets it.
 
-- **Display** (600, 1.875rem / 1.2, -0.025em): every page `h1`, and a Block
-  composed as one. It steps up to 2.25rem at `sm` and carries `text-balance`.
-  Nothing in the system goes above `4xl`, and no heading level steps above
-  Display: the `h1` is the ceiling because a page has one top-level claim.
-- **Title** (600, 1.5rem / 1.333, -0.025em): the section title, which is the
-  `h2` and therefore what almost every Block renders, at 1.875rem above `sm`. Also
-  stat values and plan prices. A card title uses `font-semibold` at the
-  inherited size.
-- **Step** (600, 1.25rem / 1.4, -0.025em): the `h3`, at 1.5rem above `sm`, which
+- **Display** (600, 3rem / 1, -0.025em): the page's own claim, which is the `h1`
+  on every page and on any Block composed as one. It steps up to 3.75rem at `sm`
+  and carries `text-balance`. Nothing in the system goes above `6xl`, and no
+  heading level steps above Display: the `h1` is the ceiling because a page has
+  one top-level claim, and a ceiling nothing reaches is not a ceiling.
+- **Title** (600, 2.25rem / 1.111, -0.025em): the `h2`, which is therefore what
+  almost every Block renders, at 3rem above `sm`. Also stat values and plan
+  prices. A card title uses `font-semibold` at the inherited size.
+- **Step** (600, 1.875rem / 1.2, -0.025em): the `h3`, at 2.25rem above `sm`, which
   is where a Block embedded inside a catalogue card or a panel lands.
-- **Floor** (600, 1.125rem / 1.556, -0.025em): `h4`, `h5` and `h6`, at 1.25rem
-  above `sm`, and this is where the scale stops. `lg` is the deepest authored step
-  that is not smaller than Body, so a heading that stepped one further would
-  render smaller than the copy it introduces. The three levels share one step and
-  do not wrap, which is the same trade `childLevel()` makes when it clamps at
-  `h6`. A heading at the floor is still a heading: weight, tracking and
-  `text-balance` carry it, not size alone.
+- **Floor** (600, 1.125rem / 1.556, -0.025em): `h6`, at 1.25rem above `sm`, and
+  this is where the scale stops. `lg` is the deepest authored step that is not
+  smaller than Body, so a heading that stepped one further would render smaller
+  than the copy it introduces. The `h5` sits one rung above it at `xl`. The
+  table has six rows and there are exactly six authored steps at or above Body,
+  so the ladder lands on the floor with a step of its own at every level, and
+  `h6` is the only place it stops rather than a place three levels share. A
+  heading at the floor is still a heading: weight, tracking and `text-balance`
+  carry it, not size alone.
 - **Body** (400, 1.125rem / 1.556): section and page descriptions, with
   `text-pretty`. Supporting copy drops to 0.875rem.
 - **Label** (500, 0.875rem / 1.429): buttons, nav links, option rows, and card
@@ -406,13 +419,44 @@ title: `Cta01` draws a centred title on a filled panel with nothing under it, so
 it resolves its own tag and asks this table for its size rather than keeping a
 second answer to the same question.
 
-**`Prose` walks the same ladder**, and it did before `SectionHeading` did. Its
-child treatments set `h1` at `3xl`, `h2` at `2xl`, `h3` at `xl` and `h4` at `lg`,
-which is this table step for step and stops where this table stops. A document
-rendered through `Prose` and a page composed from Blocks now read as one
-hierarchy. `SectionHeading` was the second answer, and it was the one every
-catalogue Item used, so the two agreed about prose and disagreed about
-everything else.
+**`Prose` walks this ladder from one rung down, and the reason is the measure
+rather than a second decision.** A run of prose is held to `--container-measure`,
+42rem. Display is 3rem, and a 42rem column is fourteen of those, so a document
+title set at Display is a title broken into fragments rather than a title. Its
+child treatments therefore set `h1` at `4xl` and descend one authored step per
+level to `lg` at `h5` and `h6`: the same scale, the same floor and the same rule
+about a heading never rendering smaller than the copy it introduces, entered at
+the rung that fits the column.
+
+**So a prose heading sits below a Block heading at the same level, by design, and
+the number is 1.6.** A Block-composed `h2` is 2.25rem, and 3rem above `sm`. A prose
+`h2` is 1.875rem and does not grow, because a reading column is already at its
+measure and a heading that grows with the viewport is a heading that is a
+different size on a different screen. The two are therefore 1.2 apart at the base
+width and 1.6 apart above `sm`, where they were 1.25 apart before Display moved. A
+page that sets a `Prose` section beside a Block section shows two tiers rather than
+one, and nothing in the tree tells a consumer which is which or which to reach for.
+Reach for `Prose` for a run of body copy and for the headings inside that copy, and
+for `SectionHeading` for a band of the page. Closing the gap would mean lifting
+`Prose` a rung, which puts Title into the reading column, and the reading column is
+the one place on a page where a heading cannot be broken across lines.
+
+**The measure is narrower still where `DocsShell` runs it, so the argument is
+stronger there and not weaker.** `DocsShell` passes `Prose fullWidth`, so the frame
+decides the width rather than the Component: 72rem of page column, less 4rem of
+gutter, a 15rem rail, a 13rem contents rail and two 2.5rem gaps leaves a 35rem
+article track, and a narrower one below 1216px. Display at 3rem is 11.7 of those,
+and a prose `h1` at 2.25rem is 15.6, which is why the article `h2` under a page `h1`
+on a docs page sits well below the `h1` above it and is meant to.
+
+**The heading level is what every page-level heading asks, and `Heading`'s `size`
+prop is not a second route to Display.** `Heading` is a free-size Component: the
+size is chosen beside the tag, for a heading the surrounding document has already
+placed and wants attuned, and its largest arm is a step of the scale rather than
+a rung of the ladder. So `page-header-01`, `docs-shell`, `blog-post-page`,
+`not-found-page` and `error-page` ask `headingSizeClass` for their page `h1`
+rather than naming a step, and a page title cannot end up one rung below the
+section titles under it.
 
 ### Named rules
 
@@ -719,6 +763,28 @@ Five were refused in the sweep, each for a stated reason and none of them quietl
   otherwise, that affordance is a misreading, so the Page carries none of them and
   the structure is read from the data. A status written into a title stays in the
   title as words: a Page does not parse a consumer's copy.
+- **A value a reader reads is the caller's to write, and a value a machine reads
+  is a separate prop for the same fact.** A Page that renders a date, a version or
+  a count has two audiences for it and one string cannot serve both: the words a
+  reader sees are formatted by whoever owns the fact, because formatting is a
+  locale decision, and the machine value rides in an attribute, because a formatted
+  string is not what a feed reader or a search engine orders by. Guessing in either
+  direction is wrong in a way the reader cannot see, which is the whole argument:
+  a wrong date in a `datetime` attribute is a wrong date in someone else's index,
+  and a raw `2026-09-26` in the reader's place is a machine value wearing a
+  sentence's clothes.
+  So the Page renders the caller's words verbatim, and **it refuses the call that
+  collapses the two into one**. That is a refusal rather than a note because a
+  JSDoc block is read by whoever is integrating the library while a `throw` runs in
+  the consumer's own build, and because the failure is invisible to every reviewer
+  who does not open the page: all four NaniSoft sites passed one raw ISO string to
+  both props, because a prop called `date` that takes a string is not obviously
+  wrong. `StackGrid01` refuses its own missing `ownLabel` for the same reason and
+  by the same mechanism, and a rule that is only written down is a rule four
+  repositories will each read and none of them will be caught by. The refusal is
+  on the pair and not on the shape of either value, so a site that writes dates as
+  `2026-09-26` is free to: what it may not do is hand the Page no formatting at all,
+  and a machine value is already on the element for every machine that wants it.
 - **The documentation tree is uneven, and the unevenness is this taxonomy read
   as folders.** A Component's documentation is filed in a folder named for its
   Category, and a Block's and a Page's is filed in a folder of its own with
@@ -860,6 +926,47 @@ entry points.
 - **Don't** add an em dash or an en dash to reader-facing copy. The dash gate
   covers this file and the other root documents.
 
+### The target-size floor
+
+The section below says what every control owes a finger at 44 pixels. This says
+what every target owes a reader at every pointer, and it is a different floor for
+a different reason, so the two do not merge.
+
+**Twenty-four by twenty-four is the floor, and it is paid on the box rather than
+on the type.** A link drawn as a bare inline anchor has no box: what a pointer aims
+at is the font's content area, which for the shipped face at `text-sm` is 16.94
+pixels, measured as the resolved size times the face's own ascent and descent and
+its size-adjust, all three read out of the `@font-face` this package ships for its
+fallback. A row of six to eight of those is the densest target cluster on four
+sites. The arrangement is `flex min-h-6 items-center`, so the anchor is a block at
+least `--spacing-6` tall with the same fourteen-pixel type inside it, and it is the
+arrangement `mobile-nav` already uses for a stacked link at the coarse-pointer
+floor, one step lower and at every pointer.
+
+**The floor can be free, and here it was.** A footer column link sat in a line box
+built from the footer's inherited sixteen-pixel body, so the row was already
+twenty-four pixels tall and paying the floor on the box changed no row height and
+no section height anywhere. That is the good case and it is worth looking for: a
+target floor paid on the box costs the page nothing, and a target floor paid on the
+type costs the page its visual weight, which is why the two are different answers
+rather than one answer with two sizes.
+
+**A target that meets the minimum only because its neighbours are far apart is not
+a target.** WCAG 2.2 SC 2.5.8 permits an undersized target when a 24 pixel circle
+centred on it misses every other target, and in a footer column at the authored
+gap that circle clears. The exception is real and this change would have been
+defensible without it. It is refused anyway, because a target whose size is a
+function of the gap beside it is one edit away from failing and nothing in the
+tree would report it, which is the same argument the figure floor makes about a
+drawing that fits its container.
+
+**The floor is held by a measurement rather than by a class string.** Nothing in
+`pnpm check` measures a target, so `site-footer.test.tsx` resolves the link's
+`display`, its `min-height` and its line box out of `dist/styles.css` and the root
+declarations in it, and asserts the box that comes back against the 24 the
+criterion names. The criterion is the one number in that test which is not read,
+because it is the criterion and not a decision this repository took.
+
 ### The coarse-pointer floor
 
 The Do list above says what every control owes a finger. This says how it is
@@ -933,6 +1040,103 @@ one-digit page link at 44 tall is 20 wide, an icon-only `Toggle` is `size-4` plu
 `px-2.5`, and a floor paid on one axis is not a floor. This is the arrangement
 `Button` states for its own sizes and the reason it states it, and it is why
 `PaginationLink`, `Toggle` and `ToggleGroupItem` all carry both halves.
+
+### The figure floor
+
+The Do list above says what every control owes a finger. This says what a drawing
+owes a reader on a phone, and it is a floor in the same sense: a figure that has
+shrunk past legibility is not a smaller figure, it is a different one.
+
+**A figure holds a legible width of its own, and the container moves under it.**
+A drawing is laid out in its own coordinate space and scales with the box it is
+given, so every label in it renders at its own size times the rendered width over
+that space. That is the right arrangement and it is not the whole answer, because
+it has no floor in it: at the 342 pixels a phone leaves a `Diagram`, its node
+names came to 6.95 pixels and its relation words to 5.88, which is a picture of a
+shape with nothing written on it. So the drawing is never rendered narrower than
+its own coordinate space, one user unit is therefore never less than one pixel,
+and the smallest label in it is `text-xs`. A container that cannot give it that
+much **scrolls sideways**, which is what `Table` does with seven columns, what
+`Gantt01` does with a schedule of names and bars, and what `Compare01`'s `table`
+form does on a phone.
+
+**This is a scroll rather than a reflow, and the reason is that a reflow is a
+different claim.** A table that restacks has stopped being a table, and a diagram
+that stacks its nodes into a column has stopped being a diagram: it no longer
+shows which thing connects to which, which is the whole of what it was for. So
+the drawing keeps its arrangement and the reader pans it. The cost is stated
+rather than argued away: on a phone the reader sees about half the drawing at a
+time and has to pan for the rest, which is a worse page than one that fits. It is
+a worse page than one that fits at 5.88-pixel type, which is the alternative this
+rule rejected, and a diagram nobody can read is not a diagram that got smaller.
+
+**A floor on a figure's own width is not a media query, and the difference is the
+whole of why this one is the right mechanism.** The floor holds at every width
+and says nothing about the reader's device. A query that switched a drawing
+between two arrangements would be claiming something about how a reader reads,
+which is a claim a Component has no standing to make and which `Compare01`
+already refuses to make for the same reason.
+
+### The ink-avoidance rule
+
+**No stroke in a figure crosses a label, and a label never sits on its own
+stroke.** Two things follow from a label being drawn beside a mark rather than
+inside it, and both used to be false. A node's name is printed under its mark, so
+a relation drawn centre to centre between two marks runs through the name under
+whichever node it leaves downward, and on the company site's five-node drawing
+five node names were struck through. And a relation's own label is offset from
+its line by its own extent measured across that line, because a label's width
+runs along a horizontal line and across a vertical one, so one constant offset
+clears the first and leaves the second sitting on its own stroke.
+
+**The way to hold it is to trim, not to halo.** A stroke is terminated where the ink
+runs out rather than knocked out behind the label with a paint-over. The
+alternative, knocking the line out behind the label with a halo, has to be filled
+with the colour of the surface the figure happens to sit on, which the Component
+is not told, and a halo filled with the wrong ground is worse than the overlap it
+was hiding.
+
+**Trim against what the segment would enter, and against nothing else.** This is the
+part the first implementation of the rule got wrong, and getting it wrong is
+invisible until somebody renders the figure. A stroke is trimmed to whichever comes
+first: the mark's own edge plus the clearance, or the far side of any **individual**
+label the segment actually runs through. The direction is the whole of it. **A label
+in a figure is usually beside or below its mark, so a stroke that does not travel
+toward it is not obstructed by it.** A name is printed under its mark and a second
+line under that, so a stroke leaving sideways runs along the mark's own centre line
+and enters neither, and it must reach its mark. Backing such a stroke off the mark
+by the half-width of the widest name at the node anyway pushed every connector on the
+company site's six-stage pipeline back by up to fifty units from a six-unit mark: a
+row of circles with short line segments floating between them, which draws the shape
+and none of the relations. So the whole rail now reaches both of its marks with only
+the clearance between, and a stroke that *does* travel toward a label still stops
+short of it.
+
+**The stroke is the segment, so the trim reads the whole line between the two
+marks.** A name and a note sit below their mark at two different depths, so a stroke
+arriving from below runs through the name, out of it, and then back into the note
+further along. Stopping where the name ends leaves the stroke sitting on the note, so
+the line between the two marks is divided once and the longest unblocked stretch of
+it is drawn. Zero label crossings and reaching the marks are therefore one rule and
+not two, and neither half is available without the other.
+
+**A Component that cannot measure text can still know a monospaced label's
+width.** This is the half that makes the rule reachable from a server Component:
+every label in a drawing is set in the monospaced face, a monospaced face has one
+advance width for every character, and so a label's width is its character count
+rather than a measurement. A label set in a proportional face would have no such
+answer, which is a limit of the rule rather than of the Component, and the reason
+the labels in a figure are monospaced in the first place.
+
+**The claim is checked as geometry, not as a class name, and it is checked as both
+halves of it.** Each figure's suite reconstructs every label's ink box, every
+mark's centre and radius and every stroke's two end points from the rendered markup
+and asserts three things: that no stroke intersects any label, that no endpoint is
+further from its mark than the ink requires, and that no endpoint is *closer* than
+the ink requires, which is the half a snapshot and the half an intersection count
+alone both pass on, because a detached connector still looks like a drawing. The
+sizes are read out of the emitted token source and the shipped stylesheet rather
+than restated, so a test cannot rot the moment the canvas or the type step moves.
 
 ## Token Contract
 

@@ -1,7 +1,12 @@
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
 import { FactList } from '../src/components/ui/fact-list'
+
+import { inheritedValue } from './sheet-reader'
 
 /**
  * A fact list is a description list, so the claims under test are the ones a
@@ -42,5 +47,61 @@ describe('a list of named facts', () => {
     const { container } = render(<FactList facts={[]} label="Release" />)
     expect(container.querySelector('[data-slot="fact-list"]')).toBeNull()
     expect(container.firstChild).toBeNull()
+  })
+})
+
+/**
+ * The three-row fact list the company site's about page renders, with the value
+ * that made the defect visible: an answer long enough to wrap, so the second line
+ * started wherever the first one ended and the column read as ragged-left.
+ */
+const ABOUT = [
+  { label: 'What it is', value: 'Atlas, digital twins; AlphaLens, market research for the Indian market; Prism, the shared design language.' },
+  { label: 'Where it runs', value: 'India, then the Gulf' },
+  { label: 'Since', value: '2023' },
+]
+
+describe('the value column of a fact list', () => {
+  it('sets every value flush left, measured through the shipped sheet', () => {
+    // The rendered alignment, resolved off the `dd` rather than read off the class
+    // string, because `text-left` on the markup and `text-align: left` in the
+    // stylesheet are two facts and the second is the one a reader sees.
+    const { container } = render(<FactList facts={ABOUT} />)
+    const values = [...container.querySelectorAll('dd')]
+
+    expect(values).toHaveLength(3)
+    for (const value of values) {
+      expect(inheritedValue(value, 'text-align', 1440), `"${value.textContent?.slice(0, 24)}"`).toBe(
+        'left',
+      )
+    }
+  })
+
+  it('has no numeric mode, so there is no column of figures for right alignment to serve', () => {
+    // Asked and answered, because the answer decides the fix: right alignment is
+    // correct in a column of figures and this Component has no way to ask for one.
+    // Read from the module rather than from a prop list here, so a `numeric` prop
+    // added later fails this rather than quietly making the default wrong for
+    // every caller that never passes it.
+    const source = readFileSync(
+      path.join(import.meta.dirname, '..', 'src', 'components', 'ui', 'fact-list.tsx'),
+      'utf8',
+    )
+    const code = source.replace(/\/\*[\s\S]*?\*\//g, '')
+
+    expect(code).not.toMatch(/tabular-nums|font-mono|text-mono|font-mono/)
+    expect(code).not.toMatch(/\bnumeric\b/)
+    // And the alignment is one decision rather than two: the only alignment the
+    // module writes is the one every value gets.
+    expect([...code.matchAll(/text-(left|right|center|justify|start|end)/g)].map((m) => m[0])).toEqual(
+      ['text-left'],
+    )
+  })
+
+  it('still balances a wrapped value, because left alignment is not the whole decision', () => {
+    const { container } = render(<FactList facts={ABOUT} />)
+    for (const value of container.querySelectorAll('dd')) {
+      expect(inheritedValue(value, 'text-wrap', 1440)).toBe('balance')
+    }
   })
 })

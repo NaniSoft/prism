@@ -25,9 +25,11 @@ const DECLARATIONS: Record<string, string> = {
   'dist/components/ui/button.d.ts': 'export declare function Button(): void\n',
   'dist/lib/utils.d.ts': 'export declare function cn(...classes: string[]): string\n',
   // The gate's INTERNAL list names every internal declaration, and it is checked in
-  // both directions, so a fixture that emits only one of the two is reporting a
+  // both directions, so a fixture that emits only one of the three is reporting a
   // boundary that is stale. That is the rule working, and the fixture follows it.
   'dist/lib/rank.d.ts': 'export declare function locate(text: string, query: string): { rank: number }\n',
+  'dist/lib/figure.d.ts':
+    'export declare function occupiedBox(at: { x: number; y: number }, mark: number): { l: number }\n',
 }
 
 const manifest = (exports: Record<string, unknown>) =>
@@ -69,9 +71,9 @@ describe('the surface gate', () => {
 
     expect(result.stderr).toBe('')
     expect(result.status).toBe(0)
-    // The counts follow the fixture, and the fixture now emits both internal
-    // declarations because the gate names both in its boundary.
-    expect(result.stdout).toContain('4 emitted declaration(s), 2 public, 2 internal')
+    // The counts follow the fixture, and the fixture now emits every internal
+    // declaration because the gate names all three in its boundary.
+    expect(result.stdout).toContain('5 emitted declaration(s), 2 public, 3 internal')
     expect(result.stdout).toContain(
       'exports["./components/*"] -> ./dist/components/ui/*.js matched 1 declaration(s)',
     )
@@ -172,13 +174,14 @@ describe('the surface gate', () => {
     expect(result.status).toBe(0)
     // The internal count and the list beside it are a stated boundary that grows as
     // the package gains internal helpers, so both are asserted as present and as
-    // naming the two that are deliberately internal, rather than pinned to a total.
+    // naming the three that are deliberately internal, rather than pinned to a total.
     // A previous version asserted 1 internal and named only utils, which failed
     // the moment a second internal declaration was added on purpose.
     expect(result.stdout).toMatch(/\d+ emitted declaration\(s\), \d+ public, \d+ internal/)
     expect(result.stdout).toContain('internal boundary asserted in both directions:')
     expect(result.stdout).toContain('dist/lib/utils.d.ts')
     expect(result.stdout).toContain('dist/lib/rank.d.ts')
+    expect(result.stdout).toContain('dist/lib/figure.d.ts')
     expect(result.stdout).toMatch(
       /exports\["\.\/components\/\*"\] -> \.\/dist\/components\/ui\/\*\.js matched [1-9]\d* declaration\(s\)/,
     )

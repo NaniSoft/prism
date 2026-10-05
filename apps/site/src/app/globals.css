@@ -88,6 +88,14 @@
  * MDX renders plain elements, so the only place their typography can live is a
  * class the article carries. Every rule here consumes a semantic utility, never
  * a raw value, and the measure comes from the authored container token.
+ *
+ * The heading ladder here is the `Prose` Component's, entered at the same rung:
+ * `h2` at `3xl`, `h3` at `2xl` and `h4` at `xl`. The site keeps the rules rather
+ * than composing the Component because MDX hands it plain tags, and it keeps
+ * them at the Component's steps because a reference site that documented one
+ * heading ladder and rendered another would be the disagreement this repository
+ * exists to end, not an exception to it. The article's own `h1` is the page
+ * heading and is set by the page, at the Display step.
  */
 @layer components {
   /*
@@ -121,8 +129,8 @@
 
   .prose h2 {
     margin-top: calc(var(--spacing) * 10);
-    font-size: var(--text-2xl);
-    line-height: var(--text-2xl--line-height);
+    font-size: var(--text-3xl);
+    line-height: var(--text-3xl--line-height);
     font-weight: 600;
     letter-spacing: var(--tracking-tight);
         color: var(--foreground);
@@ -130,8 +138,17 @@
 
   .prose h3 {
     margin-top: calc(var(--spacing) * 8);
-    font-size: var(--text-lg);
-    line-height: var(--text-lg--line-height);
+    font-size: var(--text-2xl);
+    line-height: var(--text-2xl--line-height);
+    font-weight: 600;
+    letter-spacing: var(--tracking-tight);
+    color: var(--foreground);
+  }
+
+  .prose h4 {
+    margin-top: calc(var(--spacing) * 6);
+    font-size: var(--text-xl);
+    line-height: var(--text-xl--line-height);
     font-weight: 600;
     letter-spacing: var(--tracking-tight);
     color: var(--foreground);

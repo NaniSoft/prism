@@ -16,18 +16,19 @@ it defaults to `h2` because a Block is composed rather than a page.
 The level also picks the size. There is no `size` prop, and the table below is
 what `as` resolves against.
 
-| Level | Step | Value | Above `sm` |
-| --- | --- | --- | --- |
-| `h1` | `text-3xl` | 1.875rem | 2.25rem |
-| `h2` | `text-2xl` | 1.5rem | 1.875rem |
-| `h3` | `text-xl` | 1.25rem | 1.5rem |
-| `h4` | `text-lg` | 1.125rem | 1.25rem |
-| `h5` | `text-lg` | 1.125rem | 1.25rem |
-| `h6` | `text-lg` | 1.125rem | 1.25rem |
+| Level | Step | Value | Step above `sm` | Value |
+| --- | --- | --- | --- | --- |
+| `h1` | `text-5xl` | 3rem | `sm:text-6xl` | 3.75rem |
+| `h2` | `text-4xl` | 2.25rem | `sm:text-5xl` | 3rem |
+| `h3` | `text-3xl` | 1.875rem | `sm:text-4xl` | 2.25rem |
+| `h4` | `text-2xl` | 1.5rem | `sm:text-3xl` | 1.875rem |
+| `h5` | `text-xl` | 1.25rem | `sm:text-2xl` | 1.5rem |
+| `h6` | `text-lg` | 1.125rem | `sm:text-xl` | 1.25rem |
 
-`h4` is where the scale stops. `lg` is the deepest authored step that is not
-smaller than body copy, so a heading one step further down would read as a
-caption. `h5` and `h6` hold at that step rather than wrapping.
+`h6` is where the scale stops, at `lg`. `lg` is the deepest authored step that is
+not smaller than body copy, so a heading one step further down would read as a
+caption. Every level above it holds a step of its own, and every one of them
+steps up one further step at `sm`.
 
 ## Usage
 

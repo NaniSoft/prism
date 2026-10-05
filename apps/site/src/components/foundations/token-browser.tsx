@@ -8,6 +8,37 @@ import darkTokens from '@nanisoft/prism-tokens/dist/tokens.dark.json'
  * It lists every emitted custom property: the semantic contract once, with its
  * light and dark values, and every foundation group. This is a token inventory
  * rather than a colour page, which is why it is its own foundation.
+ *
+ * **One heading here is a section and the rest are captions, and the difference is
+ * what each one names.** This renders inside an MDX body, which the page wraps in
+ * `.prose`, and that article is where the prose heading treatments live. "Semantic
+ * contract" is a division of the article, so it names no step and the article
+ * decides: a utility sits in a later cascade layer than the article's own
+ * component-layer rule, so a literal on that heading would win over the article and
+ * put a second ladder inside it. It used to carry `text-lg`, and it came out at 18
+ * pixels, below the `h3` the article sets above it.
+ *
+ * **The 184 group names are captions, and a caption is a heading at the caption
+ * step.** Each one names the table under it and nothing else, which is a table's
+ * name whatever the table holds, and this page holds 184 of them: a reader listing
+ * the headings here is looking for `spacing` or `color` and not for
+ * `color.lavender-neutral.950`, so they do not belong in the outline beside the one
+ * division of the article that does. They are `h3` at `text-sm` in the mono face,
+ * which is the caption `ApiTable` already renders for a compound export's part names
+ * on every Item page, at the same 14 pixels and the same 500 as the column heads of
+ * the table underneath. The face is the mono one because a token key is machine
+ * notation, which is what this repository sets in mono, and because it is what tells
+ * 184 keys apart from the one heading on the page that is a sentence. Dropping the
+ * literal instead, which is what this file did for a while, is what put all 185 at
+ * the article's `h2` step and left the navigation rail's own section titles at 14
+ * pixels on the page whose whole job is being navigated.
+ *
+ * **Naming the caption step is also what makes the two tellable apart.** A heading
+ * whose size is inherited names nothing, so a scan for literals cannot see it, while
+ * a heading at a step at or above the ladder's floor is a rung by arithmetic. Five
+ * theme names on `/foundation/themes` sat at 16 pixels and 500 for want of either,
+ * and two scans looking for literals passed them. A caption that says `text-sm` is
+ * visible to that scan and is below the floor by definition.
  */
 
 type Entry = { value: string; description?: string }
@@ -59,7 +90,7 @@ export function TokenBrowser() {
   return (
     <div className="flex flex-col gap-10">
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold tracking-tight">Semantic contract</h2>
+        <h2 className="font-semibold tracking-tight">Semantic contract</h2>
         <p className="text-muted-foreground text-sm">
           {semantics.length} custom properties. The names are shadcn&apos;s variable
           contract and are stable across versions.
@@ -107,7 +138,7 @@ export function TokenBrowser() {
 
       {groupNames.map((group) => (
         <section key={group} className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold tracking-tight">{group}</h2>
+          <h3 className="font-mono text-sm font-medium tracking-tight">{group}</h3>
           <div className="border-border overflow-x-auto rounded-xl border">
             <table className="w-full border-collapse text-left text-sm">
               <thead className="bg-muted/40">

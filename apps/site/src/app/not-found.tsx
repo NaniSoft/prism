@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 import { CtaLink } from '@nanisoft/prism-ui/components/cta-link'
-import { Section } from '@nanisoft/prism-ui/components/section'
+import { Section, headingSizeClass } from '@nanisoft/prism-ui/components/section'
 import { SITE_URL } from '@/lib/site'
 
 import './globals.css'
@@ -128,8 +128,10 @@ export default function NotFound() {
     <Section>
       <div className="flex max-w-measure flex-col items-start gap-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-muted-foreground font-mono text-3xl sm:text-4xl">404</h1>
-          <h2 className="text-2xl font-semibold tracking-tight">That page does not exist</h2>
+          <h1 className={`text-muted-foreground font-mono ${headingSizeClass('h1')}`}>404</h1>
+          <h2 className={`font-semibold tracking-tight ${headingSizeClass('h2')}`}>
+            That page does not exist
+          </h2>
           <p className="text-muted-foreground text-lg text-pretty">
             The address may be old, or the item may not have shipped yet. Everything the site
             publishes is one of the two links below.

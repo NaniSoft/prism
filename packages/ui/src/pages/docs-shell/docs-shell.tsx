@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { Prose } from '../../components/ui/prose'
+import { headingSizeClass } from '../../components/ui/section'
 import { Heading, Text } from '../../components/ui/typography'
 import { cn } from '../../lib/utils'
 
@@ -20,15 +21,36 @@ import { cn } from '../../lib/utils'
  * block used to make was true only of the group arm; it is now true of what the
  * Page renders, and it says which of the two is doing the work.
  *
- * `title` may be the empty string, and an entry with no words is not a page: it
- * renders as a label on the same rule that makes a group with no index a label,
- * and it is not a page the pager can reach either. A link with no accessible name
- * is announced as "link" and nothing else, which is the one thing a link in a
- * rail must never be.
+ * `title` may be the empty string, and an entry the Page cannot name is not
+ * rendered at all. It used to render as a label on the same rule that makes a
+ * group with no index a label, and that produced `<li><span></span></li>`: a
+ * row of nothing inside a `<nav>`, which one consumer measured at 102 across 25
+ * of its 31 documentation pages. A blank row is not a destination and it is not
+ * a label either, because a label is words. So the Page drops the entry and
+ * counts the drop on the rail as `data-unnamed-entries`, which is the same
+ * answer `Diagram` gives a relation it cannot resolve.
+ *
+ * **The page is not lost, and one thing is.** The address still resolves, the
+ * document still renders at it, and every link into it still works; what the rail
+ * loses is one row. The pager does lose that page, because the pager walks the
+ * same list and the row is no longer in it, so a reader who arrives at the address
+ * directly finds a document and no pager. That was already the answer before the
+ * row was dropped, and it is the cost of dropping rather than of this change:
+ * keeping it would mean publishing the nameless link a second time.
+ *
+ * **A blank `title` and a blank `href` are answered differently, and the reason
+ * is what each one has left.** A page with an address and no words is a real page
+ * with one unrenderable field, so dropping the row costs a reader nothing and
+ * taking the whole screen down over it would cost them everything. A page with
+ * words and no address is a row whose entire content is a route that does not
+ * exist, and there is nothing to render in its place, so `readTree` refuses it.
  */
 export type DocsNavPage = {
   type: 'page'
-  /** The words the reader meets. An empty string makes this a label, not a link. */
+  /**
+   * The words the reader meets. An empty or blank string names nothing, and the
+   * Page renders no row for the entry and counts the drop.
+   */
   title: string
   /** The address the page is read at. An empty string is refused, by name. */
   href: string
@@ -53,7 +75,15 @@ export type DocsNavPage = {
  */
 export type DocsNavGroup = {
   type: 'group'
-  /** The words on the label. A status inside them stays inside them. */
+  /**
+   * The words on the label. A status inside them stays inside them.
+   *
+   * An empty or blank string renders no label, and the pages under the group are
+   * still rendered: a group whose title cannot be rendered has lost a heading and
+   * not a section, so dropping the whole entry would delete pages the reader can
+   * otherwise reach. A group with no words and no children has nothing left to
+   * draw and is dropped whole.
+   */
   title: string
   /**
    * The group's own index page, where it has one. Omit it for a group that is
@@ -169,11 +199,17 @@ export type DocsShellProps = {
    * The accessible name of the rail. Required whenever `nav` is passed, because
    * it is a word a reader hears and a Page that ships no copy ships no
    * reader-facing copy either.
+   *
+   * It is also the visible word on the disclosure that stands in for the rail
+   * below `lg`, because it is already this navigation's name and a Page cannot
+   * invent a second one. A consumer that files its navigation in another language
+   * gets the control in that language by having done this once.
    */
   navLabel: string
   /**
    * The accessible name of the contents rail. Required whenever `toc` is passed,
-   * for the same reason `navLabel` is.
+   * for the same reason `navLabel` is, and the contents disclosure below `lg`
+   * carries it for the same reason too.
    */
   tocLabel: string
   /**
@@ -270,21 +306,85 @@ export type DocsShellProps = {
  * author filed it. A Page that sorted its rail would flatten the one thing the
  * three sites disagree about and cannot both be right about.
  *
- * **The rail is bounded in height.** Atlas files nineteen pages and AlphaLens
- * files twenty-seven, so the taller tree is half again as long, and an unbounded
- * rail on a tall tree is a rail that pushes the document below the fold before
- * the reader has read a line of it. The rail and the contents rail are each
- * capped against the viewport and scroll inside it, so a nineteen-page tree and a
- * twenty-seven-page tree are both a full screen and neither is a page-long
- * sidebar.
+ * **The rail is bounded in height, and the bound is what the reader has to be
+ * able to see.** Atlas files nineteen pages and AlphaLens files twenty-seven, so
+ * the taller tree is half again as long, and an unbounded rail on a tall tree is
+ * a rail that pushes the document below the fold before the reader has read a
+ * line of it. The rail and the contents rail are each capped against the viewport
+ * and scroll inside it, so a nineteen-page tree and a twenty-seven-page tree are
+ * both a full screen and neither is a page-long sidebar.
+ *
+ * **A cap the reader cannot see is a defect, and this one was invisible for 344
+ * and 750 pixels.** Measured in two consumers' built exports at 1280 by 680, the
+ * rail's content stood at 912 and 1318 pixels against a 568 pixel box, so more
+ * than half of one site's documentation navigation sat below the fold with
+ * `mask-image: none`, no scrollbar Chrome would draw until the reader scrolled,
+ * no fade and no count. Chrome's overlay scrollbars are the reason this is not
+ * caught by looking: they appear on scroll, so the first render of a rail that
+ * hides half its content is indistinguishable from a rail that has all of it, and
+ * the last visible row was cut mid-word above dead space, which reads as a
+ * rendering fault rather than as a scroll region.
+ *
+ * **The affordance is a fade across the foot of the scroll region, with the space
+ * it covers reserved rather than borrowed.** Three answers were available and the
+ * other two were rejected for stated reasons. A persistent themed scrollbar is
+ * truthful at both ends and costs nothing to legibility, and it is still here in
+ * the sense that the region is a real scroll region rather than a clipped box,
+ * but it is a single hairline whose length says "there is more" without saying
+ * which way, it needs `scrollbar-gutter` reserved in a 15rem rail to stop the
+ * content shifting when a short tree becomes a tall one, and in Chrome it is the
+ * least reliable of the three to reason about because the property that makes it
+ * persistent is the same one whose default is an overlay. A collapse control needs
+ * a disclosure whose state a server Component cannot hold. An "N more" control is
+ * copy this Page does not ship and it needs the count the Page cannot compute
+ * without measuring, which is the one thing a server Component cannot do.
+ *
+ * So the fade, and it is painted on a wrapper that does not scroll rather than on
+ * the scroll region itself: a mask or a gradient inside the scrollport moves with
+ * the content and marks nothing. The wrapper carries the sticky offset, the
+ * scroll region keeps the cap and the scrolling, and the gradient is pinned to
+ * the wrapper's foot. The region carries `padding-bottom` of the same height, and
+ * that is the half that makes it honest: at rest the gradient falls on reserved
+ * space and the last row is fully legible, and only while there is more below
+ * does it fall on content. Without the padding the same gradient washes the last
+ * row permanently, which is the usual cost of this answer and the reason the
+ * padding is not optional.
+ *
+ * **The fade is paint, and it is on the accessibility tree's terms.** It is an
+ * empty element with `aria-hidden` and `pointer-events-none`, inside the `<nav>`
+ * and outside the `<ul>`, so it is not a list item, it is not announced, it never
+ * takes a press and it never reaches a Tab stop. A keyboard reader scrolls the
+ * region with the arrow keys exactly as before and reaches every entry, and a
+ * screen-reader user is told nothing at all, which is the right answer: the cut is
+ * a fact about ink, and announcing it would put a sentence in the middle of a
+ * list of a consumer's own pages.
+ *
+ * **Below `lg` there was no navigation at all, and the fix is a native
+ * disclosure.** At 768 and at 1024 both rails were `hidden` and the only
+ * navigation left inside `<main>` was the two-item pager at the foot of the
+ * article, so a reader on a thirty-one document reference at tablet width had no
+ * contents, no on-this-page and no way to a sibling page except Previous and
+ * Next. The disclosure is `<details>` and `<summary>`, which is the one
+ * disclosure widget that needs no runtime at all: it is expanded and collapsed by
+ * the platform, it is a real control in the Tab order with a real expanded state,
+ * and adding a client boundary to a server Component to reinvent it would put
+ * bytes on every documentation page in the family to save a reader one click.
+ *
+ * The tree is rendered twice, once in each arrangement, and only one of them is
+ * in the document at any width: the rail is `hidden lg:block` and the disclosure
+ * is `lg:hidden`, so the other one is `display: none` and is out of the
+ * accessibility tree and out of the tab order rather than a second copy a reader
+ * meets. The summary carries `navLabel` or `tocLabel`, which is the caller's own
+ * word for that navigation and therefore the one word on the control that cannot
+ * be wrong in a language the consumer did not write in.
  *
  * **The frame is three columns from `lg`, and the third is the consumer's to
  * fill.** The rail is 15rem, the document takes the rest, and the contents rail
  * is 13rem. The third track exists only when `toc` is passed, because the
  * document takes the second track by auto-placement and a template that named a
  * track no child occupies would leave the document in the 15rem one. Below `lg`
- * the frame is a single column with both rails hidden, which is the arrangement
- * a phone gets.
+ * the frame is a single column: the document fills it and the two navigations sit
+ * above it behind their disclosures.
  *
  * It is a Page rather than a Block because it is a whole screen and it is the
  * screen a content pipeline targets: a route that reads one document and hands
@@ -295,7 +395,10 @@ export type DocsShellProps = {
  *
  * It is a server Component. It fetches nothing, it holds no state and it imports
  * no router, so a consumer renders it from whichever route their framework names
- * and hands it the document their pipeline produced.
+ * and hands it the document their pipeline produced. The sub-`lg` disclosure is
+ * the reason that stays true under pressure: it is the one feature on this Page
+ * that a hand would be tempted to write as a client Component, and it is written
+ * as markup instead.
  */
 export function DocsShell({
   title,
@@ -318,6 +421,8 @@ export function DocsShell({
   const rail = nav && nav.length > 0 ? nav : undefined
   const contents = toc && toc.length > 0 ? toc : undefined
   const neighbours = currentHref === undefined ? undefined : deriveNeighbours(nav ?? [], currentHref)
+  const unnamedNav = unnamedIn(nav)
+  const unnamedToc = unnamedIn(toc)
 
   return (
     <div data-slot="docs-shell" className={cn('mx-auto w-full max-w-page px-6 py-10 lg:px-8', className)}>
@@ -344,24 +449,41 @@ export function DocsShell({
           contents ? 'lg:grid lg:grid-cols-[15rem_minmax(0,1fr)_13rem]' : 'lg:grid lg:grid-cols-[15rem_minmax(0,1fr)]',
         )}
       >
+        {/*
+          The narrow arrangement, first in the document so it is what a reader at
+          768 or 1024 meets before the text rather than after it. It is
+          `lg:hidden` because the rail below is `hidden lg:block`, so exactly one
+          of the two is displayed at any width and neither is a second copy in the
+          accessibility tree.
+        */}
+        {rail || contents ? (
+          <div data-slot="docs-nav-compact" className="flex flex-col gap-4 lg:hidden">
+            {rail ? (
+              <Disclosure label={navLabel} unnamed={unnamedNav}>
+                <NavList entries={rail} currentHref={currentHref} depth={0} />
+              </Disclosure>
+            ) : null}
+            {contents ? (
+              <Disclosure label={tocLabel} unnamed={unnamedToc}>
+                <NavList entries={contents} currentHref={currentHref} depth={0} />
+              </Disclosure>
+            ) : null}
+          </div>
+        ) : null}
+
         {rail ? (
           <aside
             data-slot="docs-rail"
             className="hidden lg:col-start-1 lg:row-start-1 lg:block"
           >
-            <nav
-              aria-label={navLabel}
-              className="lg:sticky lg:top-20 lg:max-h-[calc(100svh-7rem)] lg:overflow-y-auto lg:pe-4"
-            >
-              <NavList entries={rail} currentHref={currentHref} depth={0} />
-            </nav>
+            <Rail label={navLabel} entries={rail} currentHref={currentHref} unnamed={unnamedNav} />
           </aside>
         ) : null}
 
         <article data-slot="docs-article" className="flex min-w-0 flex-col gap-8">
           {title ? (
             <header className="flex flex-col gap-3">
-              <Heading as="h1" size="3xl">
+              <Heading as="h1" className={headingSizeClass('h1')}>
                 {title}
               </Heading>
               {description ? (
@@ -393,18 +515,127 @@ export function DocsShell({
             data-slot="docs-contents"
             className="hidden lg:col-start-3 lg:row-start-1 lg:block"
           >
-            <nav
-              aria-label={tocLabel}
-              className="lg:sticky lg:top-20 lg:max-h-[calc(100svh-7rem)] lg:overflow-y-auto"
-            >
-              <NavList entries={contents} currentHref={currentHref} depth={0} />
-            </nav>
+            <Rail label={tocLabel} entries={contents} currentHref={currentHref} unnamed={unnamedToc} />
           </aside>
         ) : null}
       </div>
 
       {footer}
     </div>
+  )
+}
+
+/* ------------------------------------------------------------------ *
+ * The two rails at lg
+ * ------------------------------------------------------------------ */
+
+/**
+ * One rail: a region that scrolls inside a bound against the viewport, with the
+ * cut at its foot marked so the rows below it are discoverable.
+ *
+ * **The sticky offset is on this wrapper and not on the scroll region, and the
+ * reason is the fade.** The fade has to be pinned to the foot of the region while
+ * the region scrolls, and nothing inside a scroll container stays put while that
+ * container scrolls: a gradient or a mask written into the scrollport travels with
+ * the content and so marks nothing once the reader has scrolled. The wrapper is
+ * the element that travels, so the fade is absolutely positioned against it and
+ * the `<nav>` inside is free to be nothing but the scroll region.
+ *
+ * The cap is `100svh` less the sticky offset plus the gap under it, and `svh` is
+ * the smallest viewport height rather than the largest, which is the direction that
+ * matters here. `dvh` would grow to the full height the moment a mobile browser's
+ * URL bar retracted, and a sticky region measured against a viewport taller than
+ * the one on screen is a region whose foot is below the bottom of the screen
+ * while it is pinned, which is the one state the bound exists to prevent. `svh`
+ * is never taller than what is visible, so `top` plus `max-h` is always inside the
+ * viewport and the rail's foot always clears it. `top-20` is 5rem and the cap is
+ * the viewport less 7rem, so the foot sits 2rem above the bottom edge at every
+ * window height; a short window makes the rail shorter and does not make it
+ * taller than the space it is pinned in.
+ *
+ * `padding-bottom` is the same height as the fade, and it is what makes the fade
+ * honest. The gradient falls on the last 2rem of whatever the scrollport is
+ * showing, so with the padding reserved it falls on empty space once the reader
+ * has reached the end and on content only while there is more below. Without it
+ * the same gradient permanently washes the bottom of the last row, which is the
+ * usual cost of a fade and the reason the padding is part of the answer rather
+ * than a detail.
+ *
+ * `unnamed` is carried on the `<nav>` rather than logged, for the reason
+ * `unnamedIn` gives.
+ */
+function Rail({
+  label,
+  entries,
+  currentHref,
+  unnamed,
+}: {
+  label: string
+  entries: readonly DocsNavEntry[]
+  currentHref?: string
+  unnamed: number
+}) {
+  return (
+    <div className="relative lg:sticky lg:top-20">
+      <nav
+        aria-label={label}
+        data-unnamed-entries={unnamed}
+        className="lg:max-h-[calc(100svh-7rem)] lg:overflow-y-auto lg:pe-4 lg:pb-8"
+      >
+        <NavList entries={entries} currentHref={currentHref} depth={0} />
+      </nav>
+      {/*
+        The cut, marked. Empty, hidden from assistive technology and transparent
+        to a pointer, and it sits in the wrapper rather than inside the list, so
+        it is neither a row nor a thing a screen reader reaches. `from-background`
+        is the page ground the rail is drawn on, which is what the library's own
+        base layer puts on `<body>`; a consumer that puts the Page on a surface of
+        its own is the one arrangement where that wash is the wrong value, and it
+        is a Page that paints no surface of its own precisely so that this holds.
+      */}
+      <div
+        aria-hidden="true"
+        data-slot="docs-rail-fade"
+        className="from-background pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t to-transparent"
+      />
+    </div>
+  )
+}
+
+/**
+ * One tree behind a native disclosure, for the widths where there is no rail.
+ *
+ * `<details>` rather than a Component, and the whole argument is that it needs no
+ * runtime: the platform holds the expanded state, the control is in the Tab order
+ * with a real expanded state, and the Page stays a server Component. A Page that
+ * shipped a client disclosure for this would put JavaScript on every documentation
+ * page in the family to replace a browser feature that has been in the platform
+ * since 2018.
+ *
+ * **The summary's word is the caller's.** `navLabel` and `tocLabel` are already
+ * required props and already name these two navigations for a screen reader, so
+ * the control that opens one says the same thing the region inside it is called
+ * and the Page ships no word of its own. Nothing suppresses the browser's own
+ * disclosure marker or its own focus ring: the marker is the cheapest honest
+ * signal that the row is a disclosure, and `py-3` puts the target at 44 pixels for
+ * a coarse pointer without a variant.
+ */
+function Disclosure({
+  label,
+  unnamed,
+  children,
+}: {
+  label: string
+  unnamed: number
+  children: ReactNode
+}) {
+  return (
+    <details data-slot="docs-nav-disclosure">
+      <summary className="text-foreground cursor-pointer py-3 text-sm font-medium">{label}</summary>
+      <nav aria-label={label} data-unnamed-entries={unnamed} className="pb-4">
+        {children}
+      </nav>
+    </details>
   )
 }
 
@@ -426,6 +657,22 @@ function addressOf(href: string | undefined): string | undefined {
 }
 
 /**
+ * Whether an entry has words to be called by.
+ *
+ * Blank counts as none, for the same reason `addressOf` counts it: all three
+ * consumer adapters build a title out of whatever their content pipeline produced,
+ * and one of them maps a heading whose title arrives as a React element to the
+ * empty string. A row is rendered from a string, and a string of spaces is not a
+ * name. It is read here rather than at each use because `destinationOf` decides
+ * between a link and a label, the renderer decides between a row and nothing, and
+ * the counter decides how many rows went missing, and three answers to one
+ * question is how a fourth grows.
+ */
+function named(entry: { title: string }): boolean {
+  return entry.title.trim() !== ''
+}
+
+/**
  * The address an entry is reachable at, or `undefined` when it is not a
  * destination at all.
  *
@@ -437,7 +684,33 @@ function addressOf(href: string | undefined): string | undefined {
  * `Next` link under it.
  */
 function destinationOf(entry: DocsNavPage | DocsNavGroup): string | undefined {
-  return entry.title === '' ? undefined : addressOf(entry.href)
+  return named(entry) ? addressOf(entry.href) : undefined
+}
+
+/**
+ * How many entries in a tree the Page cannot name, and therefore did not draw.
+ *
+ * **It is counted rather than swallowed, and the place it is counted on is the
+ * rail itself.** `Diagram` answers a dropped relation the same way, with
+ * `data-unresolved-relations` on the drawing, and the argument is the same one: a
+ * row that did not draw is a fact about the caller's data, and a fact that leaves
+ * no trace is a defect the next reader has to rediscover from a screenshot. The
+ * number is on the element rather than in a console because a caller reads the
+ * element and does not read the console.
+ *
+ * Three things are counted, because three things go missing rather than two:
+ * a page with no words, which is dropped whole; a group with no words, whose
+ * label is not rendered while its pages still are; and a group with neither words
+ * nor children, which has nothing left to draw and is dropped whole.
+ */
+function unnamedIn(entries: readonly DocsNavEntry[] | undefined): number {
+  let count = 0
+  for (const entry of entries ?? []) {
+    if (entry.type === 'divider') continue
+    if (!named(entry)) count += 1
+    if (entry.type === 'group') count += unnamedIn(entry.items)
+  }
+  return count
 }
 
 /**
@@ -551,6 +824,10 @@ function NavNode({
   const href = destinationOf(entry)
 
   if (entry.type === 'group') {
+    // A group with no words and no pages has nothing left to draw, and a `<li>`
+    // holding an empty `<div>` is the same empty row the page arm used to render.
+    // Dropping it costs nothing, because there was nothing in it.
+    if (!named(entry) && entry.items.length === 0) return null
     return (
       <li data-slot="docs-nav-group">
         <div className="flex flex-col gap-1">
@@ -563,8 +840,12 @@ function NavNode({
             that resolves to nothing. `destinationOf` is the whole of that rule and
             the pager asks it the same question, so a row that is a label here is
             not a neighbour there.
+
+            A group whose title cannot be rendered draws no label at all rather than
+            an empty one, and keeps its pages: the heading went missing, not the
+            section, and the count of headings that went missing is on the rail.
           */}
-          {href === undefined ? (
+          {!named(entry) ? null : href === undefined ? (
             <span
               data-slot="docs-nav-label"
               className={cn(
@@ -596,34 +877,27 @@ function NavNode({
     )
   }
 
-  // The page arm. `href` is never empty here: `readTree` refused that above and
-  // named the entry, so what is left to decide is the words. A nameless page is
-  // the same rule as a group with no index, rendered as a label, because a link
-  // with no accessible name is announced as "link" and nothing else.
+  // The page arm, and there is one shape of it left. `readTree` refused a page
+  // with no address above and named the entry, so every page that reaches here has
+  // one, and a page with no words is not rendered at all rather than rendered as
+  // a label: a link with no accessible name is announced as "link" and nothing
+  // else, and a blank row is not a label either because a label is words.
+  if (!named(entry)) return null
   return (
     <li data-slot="docs-nav-page">
-      {href === undefined ? (
-        <span
-          data-slot="docs-nav-label"
-          className="-ms-px block border-l-2 border-transparent py-1 ps-3 text-sm text-muted-foreground"
-        >
-          {entry.title}
-        </span>
-      ) : (
-        <a
-          data-slot="docs-nav-link"
-          href={href}
-          aria-current={currentHref === href ? 'page' : undefined}
-          className={cn(
-            '-ms-px block border-l-2 py-1 ps-3 text-sm transition-colors duration-fast ease-out',
-            currentHref === href
-              ? 'text-foreground border-primary font-medium'
-              : 'text-muted-foreground hover:text-foreground border-transparent',
-          )}
-        >
-          {entry.title}
-        </a>
-      )}
+      <a
+        data-slot="docs-nav-link"
+        href={href}
+        aria-current={currentHref === href ? 'page' : undefined}
+        className={cn(
+          '-ms-px block border-l-2 py-1 ps-3 text-sm transition-colors duration-fast ease-out',
+          currentHref === href
+            ? 'text-foreground border-primary font-medium'
+            : 'text-muted-foreground hover:text-foreground border-transparent',
+        )}
+      >
+        {entry.title}
+      </a>
     </li>
   )
 }
@@ -645,11 +919,12 @@ type Neighbour = { title: string; href: string }
  * the pager to reach either. A divider contributes nothing at all.
  *
  * The row a reader can click and the row the pager can reach are decided by the
- * SAME function, `destinationOf`. A nameless entry is a label on the rail and is
- * dropped here, so one malformed row cannot be published twice: a nameless anchor
- * in the rail, and a `Next` link under it carrying the text of whichever entry
- * happened to follow, is what deriving without asking produced. The two surfaces
- * do not each get their own opinion about a row that is not a page.
+ * SAME function, `destinationOf`, and a row with no words is now dropped from the
+ * rail as well, so the two surfaces agree twice over rather than once by accident.
+ * The defect this replaced was a nameless anchor in the rail and a `Next` link
+ * under it carrying the text of whichever entry happened to follow, published
+ * from one malformed row. Deriving without asking produced the first and a
+ * separate opinion produced the second; asking once produces neither.
  */
 function flatten(entries: readonly DocsNavEntry[], into: Neighbour[] = []): Neighbour[] {
   for (const entry of entries) {

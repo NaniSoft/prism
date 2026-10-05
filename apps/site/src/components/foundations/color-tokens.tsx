@@ -10,6 +10,23 @@ import themeManifest from '@nanisoft/prism-tokens/dist/themes.json'
  * pair so the same role can be compared across modes. The foundation ramps are
  * the raw values those roles alias into. Every value is read from the emitted
  * JSON.
+ *
+ * **Every heading here is a section, so none of them names a step.** This renders
+ * inside an MDX body, which the page wraps in `.prose`, and that article is where
+ * the heading treatments live. Two divisions and a partition under one of them is an
+ * article's structure rather than a list of labels: `Semantic roles` and
+ * `Foundation ramps` are the `h2`s of `/foundation/colors` and `Base ramps` and
+ * `Theme ramps` are the `h3` under the second, which is the outline a reader
+ * navigating by heading wants and four is a number of sections a page can have.
+ *
+ * They carried `text-lg` on the `h2`s and `text-sm` on the `h3`s, and a utility
+ * sits in a later cascade layer than the article's own component-layer rule, so
+ * those two class names won: this reader's `h2` came out at 18 pixels and its `h3`
+ * at 14, below the `h3` above them and below every heading in the article around it.
+ * Dropping them lets the article decide, which is the one copy of the ladder there
+ * is. The token inventory beside this reader has the opposite problem and the
+ * opposite answer, and both are stated there: a label that names a table is a
+ * caption, and a caption names its own step so that a scan can see it.
  */
 
 type Entry = { value: string; description?: string }
@@ -51,7 +68,7 @@ export function ColorTokens() {
   return (
     <div className="flex flex-col gap-10">
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold tracking-tight">Semantic roles</h2>
+        <h2 className="font-semibold tracking-tight">Semantic roles</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {semantic.map(([key, entry]) => (
             <div key={key} className="border-border bg-card flex items-start gap-3 rounded-lg border p-3">
@@ -80,7 +97,7 @@ export function ColorTokens() {
       </section>
 
       <section className="flex flex-col gap-6">
-        <h2 className="text-lg font-semibold tracking-tight">Foundation ramps</h2>
+        <h2 className="font-semibold tracking-tight">Foundation ramps</h2>
         <p className="text-muted-foreground text-sm">
           Raw primitives. A semantic role aliases into one of these, which is what
           makes a change of pack a matter of re-pointing references.
@@ -91,7 +108,7 @@ export function ColorTokens() {
           ['Theme ramps', themeRamps],
         ].map(([title, names]) => (
           <div key={title as string} className="flex flex-col gap-4">
-            <h3 className="text-sm font-semibold tracking-tight">{title as string}</h3>
+            <h3 className="font-semibold tracking-tight">{title as string}</h3>
             <div className="flex flex-col gap-5">
               {(names as string[]).map((name) => (
                 <div key={name} className="flex flex-col gap-2">

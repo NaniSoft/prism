@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 import { CtaLink } from '../../components/ui/cta-link'
 import { Prose } from '../../components/ui/prose'
-import { Section, childLevel, type HeadingLevel } from '../../components/ui/section'
+import { Section, childLevel, headingSizeClass, type HeadingLevel } from '../../components/ui/section'
 import { Heading, Text } from '../../components/ui/typography'
 import { cn } from '../../lib/utils'
 
@@ -232,7 +232,11 @@ export function ErrorPage({
 
   /*
     The headline sits one step below the code, which is the same derivation every
-    Block uses and the reason a hardcoded `h2` would be right exactly once.
+    Block uses and the reason a hardcoded `h2` would be right exactly once. The
+    size is asked of the same table rather than passed to `Heading`'s `size`, which
+    is a step of the scale and not a rung of the ladder, so the code and the
+    headline were drawn at fixed sizes that the ladder's ceiling has since left
+    behind.
   */
   const TitleHeading = childLevel(headingLevel)
 
@@ -241,14 +245,13 @@ export function ErrorPage({
       <div data-slot="error-page-body" className="flex flex-col items-start gap-6">
         <Heading
           as={headingLevel}
-          size="4xl"
-          className="text-muted-foreground font-mono"
+          className={cn('text-muted-foreground font-mono', headingSizeClass(headingLevel))}
         >
           {code}
         </Heading>
 
         <div className="flex flex-col gap-3">
-          <Heading as={TitleHeading} size="2xl">
+          <Heading as={TitleHeading} className={headingSizeClass(TitleHeading)}>
             {title}
           </Heading>
           {description ? <Text size="lg">{description}</Text> : null}

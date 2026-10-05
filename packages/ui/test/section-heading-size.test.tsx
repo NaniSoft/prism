@@ -22,7 +22,7 @@
  *
  * **What a class-string assertion proves, and what it does not.** jsdom applies no
  * stylesheet, so nothing in this file measures a pixel and nothing in it can see
- * that 1.875rem is larger than 1.5rem. What it proves is that each Block declares
+ * that 3rem is larger than 2.25rem. What it proves is that each Block declares
  * the step its level resolves to, which is the half that drifted: before the fix
  * every level resolved to the same string, so the declaration was identical at
  * `h1` and at `h6` and no browser could have told them apart either. The values
@@ -111,8 +111,8 @@ describe('a Block forwards its heading level to the size', () => {
     render(<Hero01 headingLevel="h2" title={TITLE} />)
     const asH2 = rendered(2).className
 
-    expect(asH1).toContain('text-3xl')
-    expect(asH1).toContain('sm:text-4xl')
+    expect(asH1).toContain('text-5xl')
+    expect(asH1).toContain('sm:text-6xl')
     expect(asH2).toContain(step('h2'))
   })
 

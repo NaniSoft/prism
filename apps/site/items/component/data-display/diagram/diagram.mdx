@@ -24,6 +24,13 @@ would make the label size a function of how large a number you happened to use,
 so the same drawing would come out with unreadable labels from `0..1` fractions
 and enormous ones from `0..4000` pixels.
 
+A fixed canvas fixes the ratio and not the floor, and the drawing holds that too:
+it is never rendered narrower than its own coordinate space, so a label is never
+smaller than `text-xs`, and the container scrolls sideways rather than letting the
+labels fall below it. On a phone that means panning the drawing rather than
+reading a complete diagram at six pixels. `DESIGN.md` states both rules under The
+figure floor.
+
 A node carries a `subtitle` for the one-line role the thing plays, drawn under
 its name, and a `pack` for the hue its mark wears. Both exist because the two
 things they carry were being passed around the Component: a role description
@@ -138,3 +145,13 @@ colour and not its shape.
   a line has to be knocked out with a halo, and the halo has to be filled with
   the colour of the surface the drawing happens to sit on, which the component is
   not told.
+- No stroke crosses a label, no label sits on its own stroke, and every relation
+  reaches the marks it joins. A stroke stops where the ink runs out: at its own
+  mark's edge, or short of any individual label it would otherwise run through. A
+  node's name and its second line both sit below its mark, so a relation leaving
+  sideways runs along the mark's centre line, is stopped by neither, and reaches the
+  mark it arrives at; one leaving downward runs into both and stops below them. A
+  relation label is offset by its own width measured across its line, so it clears
+  a vertical relation as well as a horizontal one. You do not have to space your
+  nodes to avoid this; you do have to space them to keep two names from touching
+  each other, which is your positions to settle.

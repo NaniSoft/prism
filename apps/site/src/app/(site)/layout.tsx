@@ -312,6 +312,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           flex column for that one reason.
         */}
         <footer className="border-border mt-auto border-t">
+          {/*
+            These two headings are labelled facts, not rungs of the page ladder, and
+            `text-sm` beside `text-sm` body copy is why they are labelled facts. They
+            are `h2` so a reader navigating by heading can find and skip each block,
+            which an `h2` at 14 pixels satisfies: the outline says there is a section
+            and the type says it is a caption. They are the widest instance of the
+            distinction `docs/quality-gates.md` records under the heading-scale gate,
+            that a heading inside a surface the reader is not reading is a caption at
+            that surface's scale rather than a rung of the page's ladder.
+          */}
           <div className="text-muted-foreground mx-auto grid w-full max-w-page gap-8 px-6 py-12 sm:grid-cols-2 sm:gap-16">
             <div className="flex flex-col gap-2">
               <h2 className="text-foreground text-sm font-semibold tracking-tight">

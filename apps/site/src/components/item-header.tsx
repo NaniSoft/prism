@@ -1,4 +1,5 @@
 import type { CatalogKind, ComponentCategory } from '@nanisoft/prism-ui/catalog'
+import { headingSizeClass } from '@nanisoft/prism-ui/components/section'
 
 import { kindLabel } from '@/lib/kinds'
 
@@ -48,7 +49,9 @@ export function ItemHeader({
 
   return (
     <header className="border-border flex flex-col gap-3 border-b pb-8">
-      <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{name}</h1>
+      <h1 className={`font-semibold tracking-tight text-balance ${headingSizeClass('h1')}`}>
+        {name}
+      </h1>
       <div className="flex flex-wrap items-center gap-2">
         <span className={`bg-muted text-muted-foreground ${label}`}>{kindLabel(kind)}</span>
         {category ? (

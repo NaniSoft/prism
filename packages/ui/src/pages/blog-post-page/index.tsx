@@ -4,7 +4,7 @@ import { Badge } from '../../components/ui/badge'
 import { CtaLink } from '../../components/ui/cta-link'
 import { Heading, Text } from '../../components/ui/typography'
 import { Prose } from '../../components/ui/prose'
-import { Section } from '../../components/ui/section'
+import { Section, headingSizeClass } from '../../components/ui/section'
 
 /**
  * One tag on a post, or one step in the trail to the next one.
@@ -71,19 +71,26 @@ export type BlogPostPageProps = {
    */
   description?: string
   /**
-   * The publication date, already formatted for display, and the machine value
-   * for the `time` element's `dateTime`. Both are props, and the machine one is
-   * required: `dateTime` is what a reader's browser, a feed reader and a search
-   * engine use to order posts, and a formatted string is none of those.
+   * The publication date as a reader reads it: already formatted, in words, in
+   * whatever convention the publishing site writes dates in. The Page renders this
+   * string verbatim and never touches it, and **it is the caller's to format**.
+   *
+   * It is a separate prop from `dateTime` precisely so the two can differ, and
+   * passing one value to both is refused rather than rendered: see the component
+   * JSDoc below for why the Page will not show a reader a machine date.
    */
   date: string
   /**
    * The date in a machine-readable form, `YYYY-MM-DD`, carried on the `time`
    * element. Required, and deliberately not derived from `date`: parsing a
-   * formatted date back into an ISO one is a guess about a locale, and a guess
-   * in a `datetime` attribute is a wrong date in a feed.
+   * formatted date back into an ISO one is a guess about a locale, and a guess in
+   * a `datetime` attribute is a wrong date in a feed.
+   *
+   * Typed as the shape it is rather than as `string`, so a formatted string
+   * passed here is a compile error instead of a `datetime` attribute no reader can
+   * check.
    */
-  dateTime: string
+  dateTime: `${number}-${number}-${number}`
   /** Who wrote the post. A name, or a link to an author page. */
   author?: ReactNode
   /**
@@ -156,14 +163,28 @@ export type BlogPostPageProps = {
  * its frontmatter to this Page. The Page is what makes the frontmatter a
  * contract, because a field that is not a prop is a field nothing checks.
  *
- * **The date is two props.** `date` is the words a reader sees and `dateTime` is
- * the machine value on the `time` element, and they are kept apart because
- * parsing a formatted date back into an ISO one is a guess about a locale. A
- * wrong date in a `datetime` attribute is a wrong date in a feed reader and in a
- * search result, and neither reader can see the string that was wrong. This is
- * the arrangement every one of the four sites needs and none of them has, because
- * each of them formats its date in one place and has nowhere else to put the ISO
- * value.
+ * **The date is two props, and the Page will not collapse them into one.** `date`
+ * is the words a reader sees and `dateTime` is the machine value on the `time`
+ * element, and they are kept apart because parsing a formatted date back into an
+ * ISO one is a guess about a locale. A wrong date in a `datetime` attribute is a
+ * wrong date in a feed reader and in a search result, and neither reader can see
+ * the string that was wrong.
+ *
+ * The other half of that is the one this Page now refuses. A Page that renders a
+ * date has no business making a reader parse `2026-09-26`, and the Page is the
+ * only place in a site where that sentence can be enforced rather than requested,
+ * because a consumer's own pipeline is where the date is a string and Prism is
+ * where it becomes a page. So `date` is the caller's to format, and handing this
+ * Page the same string in both slots is refused at render rather than shipped:
+ * all four NaniSoft sites did exactly that, because a prop called `date` taking a
+ * string is not obviously wrong, and the defect is invisible to every reviewer who
+ * does not open the page. `StackGrid01` refuses its own missing `ownLabel` for the
+ * same reason and by the same mechanism. The refusal is on the pair, not on the
+ * shape of either value: a site whose own convention writes dates as `2026-09-26`
+ * has the machine value on the element already, in the `datetime` attribute and in
+ * every feed, so displaying it a second time is a redundancy rather than a
+ * choice, and the `description` and `footer` slots are there for anything else the
+ * page wants to say about the post.
  *
  * The body is `children` and it is held by `Prose`, not by a set of per-element
  * props. A post's body is authored somewhere else - a Markdown pipeline, a CMS -
@@ -197,11 +218,24 @@ export function BlogPostPage({
   footer,
   className,
 }: BlogPostPageProps) {
+  // The one input this Page refuses, and the reason it is a refusal rather than a
+  // note in a JSDoc block. A JSDoc block is read by whoever is integrating Prism
+  // and by an agent reading the corpus; this line runs in the four consumer
+  // repositories the next time one of them builds, which is the only place the
+  // string that was wrong could still be changed.
+  if (date === dateTime) {
+    throw new Error(
+      'BlogPostPage: `date` and `dateTime` are the same string, so the Page has been handed no ' +
+        'display formatting and would put a machine value in front of a reader. `date` is the words ' +
+        'a reader sees and `dateTime` is the machine value on the `time` element; format `date` for ' +
+        'display and pass the ISO date as `dateTime`.',
+    )
+  }
   return (
     <Section className={className}>
       <article data-slot="blog-post" className="flex flex-col gap-8">
         <header className="flex flex-col gap-4">
-          <Heading as="h1" size="3xl">
+          <Heading as="h1" className={headingSizeClass('h1')}>
             {title}
           </Heading>
           {description ? (

@@ -14,6 +14,20 @@ pipeline that runs, a fleet that is observed, a request that crosses six
 services: each is a graph, and a graph described in a sentence is a claim while
 the same graph with a marker crossing it is a demonstration.
 
+`x` and `y` are in your coordinate space and are normalised into a fixed canvas,
+so fractions, pixels or any other monotonic scale draw the same shape and keep
+their aspect ratio. A fixed canvas is deliberate, because type inside a scaled
+`<svg>` is sized in the drawing's own user units and a viewBox taken from your
+numbers would make the label size a function of how large a number you happened
+to use.
+
+A fixed canvas fixes the ratio and not the floor, and the drawing holds that too:
+it is never rendered narrower than its own coordinate space, so a label is never
+smaller than `text-xs`, and the container scrolls sideways rather than letting the
+labels fall below it. On a phone that means panning the drawing rather than
+reading a complete graph at six pixels. `DESIGN.md` states the rule under The
+figure floor.
+
 ## Usage
 
 ```tsx
@@ -76,6 +90,20 @@ same figure, still. A print stylesheet gets it too.
 - Mark one node `emphasis`. Two emphasised nodes is a mistake, not a second
   level; a figure with two focal points has none.
 - Keep node names short. A graph is read at a glance and a name that wraps
-  collides with its neighbour, which this component cannot see.
+  collides with its neighbour, which this component cannot see. A note is a label
+  too, and a server component cannot measure either one, so the band around the
+  fitted points is sized for names and notes of ordinary length rather than for
+  the longest string you might pass.
 - Use `note` for the qualifier a stage needs, such as its role or its cadence.
   It draws in the mono face under the name and is not announced.
+- No stroke crosses a label, every connector reaches the marks it joins, and the
+  rail clears every note. A connector stops where the ink runs out: at its own
+  mark's edge, or short of any individual label it would otherwise run through. A
+  stage's name and note both sit below its mark, so a connector leaving sideways
+  runs along the mark's centre line, is stopped by neither, and reaches the next
+  mark; one leaving downward runs into both and stops below them. The fitted area
+  also stops above the band the rail reserves, so a lane whose mark lands low puts
+  its note in the gap rather than on the rail's stroke. You do not have to space
+  your nodes to avoid either; you do have to space them to keep two names from
+  touching each other, which is your positions to settle. `DESIGN.md` states the
+  rule under The ink-avoidance rule.

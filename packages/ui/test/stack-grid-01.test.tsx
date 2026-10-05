@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest'
 
 import { StackGrid01 } from '../src/blocks/stack-grid-01'
 
+import { fontSizePx, lengthPx } from './sheet-reader'
+
 /**
  * The claim under test is that the two groups are two props and not one prop with
  * a flag. The difference between an assembled part and one a product built is a
@@ -86,5 +88,94 @@ describe('a part with a real product behind its name', () => {
     const tiles = container.querySelectorAll('[data-slot="stack-grid"] > ul > li')
     expect(tiles[1].textContent).toBe('PostgresStorage')
     expect(tiles[1].querySelectorAll('span')).toHaveLength(0)
+  })
+})
+
+/**
+ * The type floor of a tile, measured.
+ *
+ * **Two floors and both are read.** `text-lg` is the step `DESIGN.md` gives Body
+ * and `text-sm` is the step it gives supporting copy, and both are read out of the
+ * root declarations in the shipped stylesheet rather than written here as pixels,
+ * so a retune of the scale moves the claim rather than leaving it pinned to a
+ * number the token source no longer publishes. The first floor is the one the
+ * ladder stops to avoid: `lg` is the deepest authored step that is not smaller than
+ * Body, precisely so that a heading never renders smaller than the copy it
+ * introduces.
+ *
+ * **Both arms are asserted, and their agreement is asserted as a fact rather than
+ * as a comparison.** The two groups differ in weight and in ink and not in type: a
+ * second group set quieter than the first would be a grid claiming the in-house
+ * work matters less than the assembled parts, which is the opposite of what the
+ * group is for.
+ */
+const BODY_STEP_PX = lengthPx('var(--text-lg)') as number
+const SUPPORTING_STEP_PX = lengthPx('var(--text-sm)') as number
+
+if (BODY_STEP_PX <= 0 || SUPPORTING_STEP_PX <= 0) {
+  throw new Error(
+    'the shipped stylesheet declares no `--text-lg` or no `--text-sm`, so a tile has no floor to be ' +
+      'measured against.',
+  )
+}
+
+/** Every tile name and every line of copy in one arm, as rendered pixels. */
+function armType(container: HTMLElement, own: boolean) {
+  const grid = own
+    ? container.querySelector('[data-slot="stack-grid-own"]')!
+    : container.querySelector('[data-slot="stack-grid"] > ul')!
+  return {
+    names: [...grid.querySelectorAll('h3')].map((heading) => fontSizePx(heading, 1440)),
+    copy: [...grid.querySelectorAll('p')].map((line) => fontSizePx(line, 1440)),
+  }
+}
+
+describe('the type a tile sets, in both arms of the grid', () => {
+  it('sets a tile name at Body or above, in the in-house arm as well as the composed one', () => {
+    const { container } = render(
+      <StackGrid01 parts={PARTS} own={OWN} ownLabel="built in-house" title="How it is built" />,
+    )
+
+    for (const own of [false, true]) {
+      const arm = armType(container, own)
+      expect(arm.names, own ? 'own' : 'parts').toHaveLength(2)
+      for (const size of arm.names) expect(size, `${own ? 'own' : 'parts'} name`).toBeGreaterThanOrEqual(BODY_STEP_PX)
+    }
+  })
+
+  it('sets the line under a name at the supporting-copy floor or above, in both arms', () => {
+    const { container } = render(
+      <StackGrid01 parts={PARTS} own={OWN} ownLabel="built in-house" title="How it is built" />,
+    )
+
+    for (const own of [false, true]) {
+      const arm = armType(container, own)
+      expect(arm.copy, own ? 'own' : 'parts').toHaveLength(2)
+      for (const size of arm.copy) {
+        expect(size, `${own ? 'own' : 'parts'} copy`).toBeGreaterThanOrEqual(SUPPORTING_STEP_PX)
+      }
+    }
+  })
+
+  it('sets the two arms at the same steps, because the difference is a claim and not a volume', () => {
+    const { container } = render(
+      <StackGrid01 parts={PARTS} own={OWN} ownLabel="built in-house" title="How it is built" />,
+    )
+
+    expect(armType(container, true).names).toEqual(armType(container, false).names)
+    expect(armType(container, true).copy).toEqual(armType(container, false).copy)
+  })
+
+  it('holds the same numbers at 390, because none of the three floors is a width', () => {
+    const { container } = render(
+      <StackGrid01 parts={PARTS} own={OWN} ownLabel="built in-house" title="How it is built" />,
+    )
+
+    for (const heading of container.querySelectorAll('h3')) {
+      expect(fontSizePx(heading, 390)).toBe(fontSizePx(heading, 1440))
+    }
+    for (const line of container.querySelectorAll('p')) {
+      expect(fontSizePx(line, 390)).toBe(fontSizePx(line, 1440))
+    }
   })
 })

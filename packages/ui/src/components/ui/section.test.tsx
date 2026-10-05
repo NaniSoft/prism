@@ -34,11 +34,11 @@ describe('Section', () => {
  * The values are the authored ones, off `packages/tokens/src/foundation/base.tokens.json`.
  */
 const STEP: Record<HeadingLevel, string> = {
-  h1: 'text-3xl sm:text-4xl',
-  h2: 'text-2xl sm:text-3xl',
-  h3: 'text-xl sm:text-2xl',
-  h4: 'text-lg sm:text-xl',
-  h5: 'text-lg sm:text-xl',
+  h1: 'text-5xl sm:text-6xl',
+  h2: 'text-4xl sm:text-5xl',
+  h3: 'text-3xl sm:text-4xl',
+  h4: 'text-2xl sm:text-3xl',
+  h5: 'text-xl sm:text-2xl',
   h6: 'text-lg sm:text-xl',
 }
 
@@ -60,7 +60,7 @@ function headingAt(level: HeadingLevel): HTMLElement {
  * than it is.
  *
  * jsdom applies no stylesheet, so nothing in this file measures a pixel and
- * nothing in it can see that 1.875rem looks larger than 1.5rem. What it proves is
+ * nothing in it can see that 3rem looks larger than 2.25rem. What it proves is
  * that the Component *declares* a different authored step per level, which is the
  * half that drifted: before the fix every level rendered one string, so the
  * declaration itself was identical and no amount of browser would have separated
@@ -90,24 +90,26 @@ describe('a heading is sized by its level', () => {
     })
   }
 
-  it('steps down once per level until it floors, and floors at h4', () => {
-    // `text-lg` is the deepest authored step that is not smaller than Body, so
-    // three levels share it. Asserted as the shape of the table rather than as a
-    // count, because the count is the thing that would be re-derived by hand.
-    expect(new Set(LEVELS.map((level) => STEP[level])).size).toBe(4)
+  it('steps down once per level until it floors, and floors at h6', () => {
+    // `text-lg` is the deepest authored step that is not smaller than Body, and
+    // there are exactly six authored steps at or above it, so the ladder lands on
+    // the floor with a step of its own at every level. Asserted as the shape of the
+    // table rather than as a count, because the count is the thing that would be
+    // re-derived by hand.
+    expect(new Set(LEVELS.map((level) => STEP[level])).size).toBe(6)
     expect(STEP.h1).not.toBe(STEP.h2)
     expect(STEP.h2).not.toBe(STEP.h3)
     expect(STEP.h3).not.toBe(STEP.h4)
-    expect(STEP.h4).toBe(STEP.h5)
-    expect(STEP.h5).toBe(STEP.h6)
+    expect(STEP.h4).not.toBe(STEP.h5)
+    expect(STEP.h5).not.toBe(STEP.h6)
   })
 
-  it('puts nothing above the h1 step, so nothing goes above 4xl', () => {
+  it('puts nothing above the h1 step, so nothing goes above 6xl', () => {
     // The ceiling is a law in DESIGN.md and this is the case that holds it from
     // the other side: the answer for a page h1 is a step the authored scale
     // already has, so adding a level can never ask for one above it.
-    expect(STEP.h1).toContain('text-3xl')
-    expect(STEP.h1).toContain('sm:text-4xl')
+    expect(STEP.h1).toContain('text-5xl')
+    expect(STEP.h1).toContain('sm:text-6xl')
   })
 
   for (const level of LEVELS) {

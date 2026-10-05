@@ -90,11 +90,15 @@ function wildcardRegex(target) {
  * 3 are deliberately not applied across. Checked in both directions, so the set
  * is a stated decision a reader can argue with rather than a directory name the
  * walk happened to produce. `dist/lib/utils` is here because `cn` is the shared
- * class-merge helper no subpath exposes; adding a file under `dist/lib` means
- * either a new internal helper, which belongs in this list with a reason, or a
- * surface that is being kept off the map by accident.
+ * class-merge helper no subpath exposes, and `dist/lib/rank` because the combobox
+ * ranker is shared with no other Item and is no subpath of its own. `dist/lib/figure`
+ * is here for the same reason and the same kind of thing: the geometry a figure in
+ * this package is drawn from, shared by the Components that draw figures so that
+ * two of them cannot hold two answers to where a label's ink box is. Adding a file
+ * under `dist/lib` means either a new internal helper, which belongs in this list
+ * with a reason, or a surface that is being kept off the map by accident.
  */
-const INTERNAL = ['dist/lib/utils.d.ts', 'dist/lib/rank.d.ts']
+const INTERNAL = ['dist/lib/utils.d.ts', 'dist/lib/rank.d.ts', 'dist/lib/figure.d.ts']
 
 const publicFiles = new Set()
 const errors = []

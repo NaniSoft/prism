@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 
 import { buildCatalog, type CatalogKind } from '@nanisoft/prism-ui/catalog'
+import { headingSizeClass } from '@nanisoft/prism-ui/components/section'
 
 import { CategoryGrid } from './category-grid'
 import { CategoryNav } from './category-nav'
@@ -64,7 +65,9 @@ export function CatalogueIndex({
           split the type system already draws elsewhere on the site.
         */}
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{section.title}</h1>
+          <h1 className={`font-semibold tracking-tight ${headingSizeClass('h1')}`}>
+            {section.title}
+          </h1>
           <span className="text-muted-foreground font-mono text-sm">
             {items.length} {items.length === 1 ? 'item' : 'items'}
           </span>

@@ -135,6 +135,19 @@ export type StackGrid01Props = {
  * is a fill for a large area and never a signal, and a tile of pastel behind one
  * word is a signal a reader has to learn.
  *
+ * **The two groups set their type identically, and it is the same two steps in
+ * both.** They happened to agree on the steps and to be wrong on both of them,
+ * which is the harder defect to see: a grid whose second group is quieter than its
+ * first is a grid saying the in-house work matters less than the assembled parts,
+ * which is the opposite of what the group is for. A tile name is a card title, so
+ * it sits at Body the way `CardTitle` says a card title sits at Body, and a role
+ * and a blurb are both supporting copy at the step `DESIGN.md` gives supporting
+ * copy. Below those two floors was the measured state of both arms: names at
+ * fourteen pixels and the line under them at twelve, so a heading rendered smaller
+ * than the copy around it and the tile read as a caption rather than as a tile. The
+ * mono annotation over an in-house name and under a codename is left at `text-xs`
+ * on purpose, because that is a machine annotation and not a run of prose.
+ *
  * `ownLabel` is required when `own` is passed, because the group is a claim and
  * the claim is the caller's words. Three of the four sites write three different
  * ones, and the Block does not choose.
@@ -191,7 +204,7 @@ export function StackGrid01({
             <li key={part.name}>
               <Card className="bg-muted h-full gap-2 py-4">
                 <CardHeader className="gap-1">
-                  <CardTitle className="text-sm">
+                  <CardTitle className="text-lg">
                     <Title>{part.name}</Title>
                   </CardTitle>
                   {/*
@@ -206,7 +219,7 @@ export function StackGrid01({
                   ) : null}
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground text-pretty text-xs">{part.role}</p>
+                  <p className="text-muted-foreground text-pretty text-sm">{part.role}</p>
                 </CardContent>
               </Card>
             </li>
@@ -220,12 +233,12 @@ export function StackGrid01({
                 <Card className="border-primary shadow-md h-full gap-2 py-4">
                   <CardHeader className="gap-1">
                     <span className="text-muted-foreground font-mono text-xs">{ownLabel}</span>
-                    <CardTitle className="text-sm">
+                    <CardTitle className="text-lg">
                       <Title>{entry.name}</Title>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground text-pretty text-xs">{entry.blurb}</p>
+                    <p className="text-muted-foreground text-pretty text-sm">{entry.blurb}</p>
                   </CardContent>
                 </Card>
               </li>

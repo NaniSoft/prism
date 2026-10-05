@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
 
 import { CtaLink } from '../../components/ui/cta-link'
-import { Heading, Text } from '../../components/ui/typography'
 import { Prose } from '../../components/ui/prose'
-import { Section } from '../../components/ui/section'
+import { Section, headingSizeClass } from '../../components/ui/section'
+import { Heading, Text } from '../../components/ui/typography'
+import { cn } from '../../lib/utils'
 
 /**
  * One way out of a page that was not found.
@@ -127,11 +128,11 @@ export function NotFoundPage({
   return (
     <Section className={className}>
       <div className="flex flex-col items-start gap-6">
-        <Heading as="h1" size="4xl" className="text-muted-foreground font-mono">
+        <Heading as="h1" className={cn('text-muted-foreground font-mono', headingSizeClass('h1'))}>
           {code}
         </Heading>
         <div className="flex flex-col gap-3">
-          <Heading as="h2" size="2xl">
+          <Heading as="h2" className={headingSizeClass('h2')}>
             {title}
           </Heading>
           {description ? <Text size="lg">{description}</Text> : null}

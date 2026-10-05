@@ -17,7 +17,7 @@ import {
 import { Input } from '../../components/ui/input'
 import { Pagination, PaginationContent, PaginationItem } from '../../components/ui/pagination'
 import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover'
-import { type HeadingLevel } from '../../components/ui/section'
+import { headingSizeClass, type HeadingLevel } from '../../components/ui/section'
 import {
   Table,
   TableBody,
@@ -104,6 +104,16 @@ export type DataTable01Props = {
    * and this is a Block that a product puts inside a settings page or a drawer as
    * readily as it puts at the top of a page, where a fixed level makes the table a
    * sibling of the section it belongs to.
+   *
+   * It decides the size as well as the tag, because the Block asks
+   * `headingSizeClass` for it rather than naming a step. It wrote `text-lg` here,
+   * so a table composed as a page's `h2` and one composed as an `h3` drew their
+   * titles at the same size, which is the one-size defect inside a single Block:
+   * forwarding the level changed nothing a reader could see. The other two halves
+   * of the heading come with it, because the ladder states weight, tracking and
+   * balance as one package and `SectionHeading` carries all three at every rung: a
+   * title that moved from 18 pixels to 36 is worse unwrapped than the 18 pixel one
+   * it replaced.
    */
   headingLevel?: HeadingLevel
   /** Adds the selection column and the selection summary. */
@@ -293,7 +303,10 @@ export function DataTable01({
       {title || description ? (
         <div className="flex flex-col gap-1">
           {title ? (
-            <Heading id={headingId} className="text-lg font-semibold tracking-tight">
+            <Heading
+              id={headingId}
+              className={`font-semibold tracking-tight text-balance ${headingSizeClass(headingLevel)}`}
+            >
               {title}
             </Heading>
           ) : null}

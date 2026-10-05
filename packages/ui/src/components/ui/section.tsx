@@ -97,11 +97,11 @@ export function childLevel(level: HeadingLevel): HeadingLevel {
  * two copies in step.
  */
 const HEADING_SIZE: Record<HeadingLevel, string> = {
-  h1: 'text-3xl sm:text-4xl',
-  h2: 'text-2xl sm:text-3xl',
-  h3: 'text-xl sm:text-2xl',
-  h4: 'text-lg sm:text-xl',
-  h5: 'text-lg sm:text-xl',
+  h1: 'text-5xl sm:text-6xl',
+  h2: 'text-4xl sm:text-5xl',
+  h3: 'text-3xl sm:text-4xl',
+  h4: 'text-2xl sm:text-3xl',
+  h5: 'text-xl sm:text-2xl',
   h6: 'text-lg sm:text-xl',
 }
 
@@ -149,45 +149,47 @@ export function headingSizeClass(level: HeadingLevel): string {
  *
  * | level | step | authored value | at `sm` | authored value |
  * | --- | --- | --- | --- | --- |
- * | `h1` | `text-3xl` | 1.875rem / 1.2 | `sm:text-4xl` | 2.25rem / 1.111 |
- * | `h2` | `text-2xl` | 1.5rem / 1.333 | `sm:text-3xl` | 1.875rem / 1.2 |
- * | `h3` | `text-xl` | 1.25rem / 1.4 | `sm:text-2xl` | 1.5rem / 1.333 |
- * | `h4` | `text-lg` | 1.125rem / 1.556 | `sm:text-xl` | 1.25rem / 1.4 |
- * | `h5` | `text-lg` | 1.125rem / 1.556 | `sm:text-xl` | 1.25rem / 1.4 |
+ * | `h1` | `text-5xl` | 3rem / 1 | `sm:text-6xl` | 3.75rem / 1 |
+ * | `h2` | `text-4xl` | 2.25rem / 1.111 | `sm:text-5xl` | 3rem / 1 |
+ * | `h3` | `text-3xl` | 1.875rem / 1.2 | `sm:text-4xl` | 2.25rem / 1.111 |
+ * | `h4` | `text-2xl` | 1.5rem / 1.333 | `sm:text-3xl` | 1.875rem / 1.2 |
+ * | `h5` | `text-xl` | 1.25rem / 1.4 | `sm:text-2xl` | 1.5rem / 1.333 |
  * | `h6` | `text-lg` | 1.125rem / 1.556 | `sm:text-xl` | 1.25rem / 1.4 |
  *
- * **`h1` is Display and stays Display**, because that is the role `DESIGN.md`
- * gives it: a page's own heading is the largest thing on the page. The step above
- * it does not exist and this table does not invent one, so "nothing in the system
- * goes above `4xl`" is untouched and the authored scale in `packages/tokens` does
- * not change.
+ * **`h1` is Display and Display is the ceiling of the scale**, because that is
+ * the role `DESIGN.md` gives it: a page's own heading is the largest thing on the
+ * page. The two steps above `4xl` are authored rather than invented here, and they
+ * are authored as a pair rather than as one step, because every rung of this table
+ * is a pair: a base step and one step up at `sm`. A single new step would have made
+ * Display the one heading in the system that does not grow, which is a smaller
+ * defect than the one this table was written to remove and is still a defect.
+ * `5xl` is `4xl` times four thirds, which is the first gap in the group wider than
+ * any gap it already had, and `6xl` is `5xl` times five fourths. Nothing in the
+ * system goes above `6xl`, and no heading level steps above Display.
  *
  * **`h2` is one step below it, and `h2` is what almost every Block renders**,
  * because a Block is composed under a heading the document already owns. That is
- * the whole of the change a consumer sees: a section title moves from 1.875rem to
- * 1.5rem, and above `sm` from 2.25rem to 1.875rem.
+ * the whole of what a consumer sees: a section title moves from 1.5rem to
+ * 2.25rem, and above `sm` from 1.875rem to 3rem.
  *
- * **The floor is `h4`, and the floor is `text-lg`.** `lg` is the deepest authored
+ * **The floor is `h6`, and the floor is `text-lg`.** `lg` is the deepest authored
  * step that is not smaller than Body, and Body is 400 at 1.125rem, so a heading
  * that stepped one further would render smaller than the copy it introduces and
- * read as a caption rather than as a heading. `h5` and `h6` hold at that step and
- * do not wrap: `childLevel()` already clamps at `h6` for the same reason, and a
- * repeated size in a document that has nested a Block three deep is the cheaper
- * trade against a heading smaller than its own body. A heading at the floor is
- * still a heading: it keeps `font-semibold`, keeps `tracking-tight`, and keeps
- * `text-balance` at every step, so weight and tracking tell it apart from body
- * copy where size no longer can.
+ * read as a caption rather than as a heading. The table has six rows and the scale
+ * has exactly six steps at or above Body, so the ladder lands on the floor rather
+ * than running off the bottom of it: every level now holds a step of its own, where
+ * before `h4` through `h6` shared one. `childLevel()` clamps at `h6` for the same
+ * reason the table stops there. A heading at the floor is still a heading: it keeps
+ * `font-semibold`, keeps `tracking-tight`, and keeps `text-balance` at every step,
+ * so weight and tracking tell it apart from body copy where size no longer can.
  *
  * So a consumer gets the hierarchy by passing the level it was already passing,
  * and a Block moved from an `h2` section into an `h3` one carries its size with
  * it, which is what `headingLevel` was introduced to do.
  *
- * **`Prose` already walked this ladder**, at the same steps and stopping at the
- * same `h4`, so a document rendered through `Prose` and a page composed from
- * Blocks now read as one hierarchy rather than as two answers to one question.
- * This Component was the second answer, and it was the one every catalogue Item
- * used, which is why the disagreement was visible on every product page and not
- * on a documentation page.
+ * **`Prose` walks this ladder from one rung down**, because its measure is the
+ * reading measure rather than the page column and the Display step does not fit a
+ * 42rem column. See `Prose`.
  */
 export function SectionHeading({
   index,
@@ -224,11 +226,11 @@ export function SectionHeading({
    * entry point.
    *
    * It also picks the size, and there is no prop for the size. The table is in
-   * this Component's JSDoc above: `h1` at 1.875rem, `h2` at 1.5rem, `h3` at
-   * 1.25rem, and `h4` through `h6` at 1.125rem, each stepping up one authored
-   * step above `sm`. Passing a deeper level is therefore a typographic decision
-   * as well as an outline one, which is the point: a Block composed one level
-   * deeper should read as one level deeper.
+   * this Component's JSDoc above: `h1` at 3rem, `h2` at 2.25rem, `h3` at
+   * 1.875rem, `h4` at 1.5rem, `h5` at 1.25rem and `h6` at 1.125rem, each
+   * stepping up one authored step above `sm`. Passing a deeper level is
+   * therefore a typographic decision as well as an outline one, which is the
+   * point: a Block composed one level deeper should read as one level deeper.
    */
   as?: HeadingLevel
   /**

@@ -80,6 +80,23 @@ export type FactListProps = ComponentProps<'dl'> & {
  * wraps and a value that does not are both common and centring one of them reads
  * as an error.
  *
+ * **The value is set flush left, and the reason is the values rather than the
+ * rows.** A right-aligned value is the right answer in a column of figures, where
+ * the digits are the same width and the comparison a reader makes is between the
+ * ends of them. This Component has no numeric mode, no `tabular-nums` and no
+ * monospaced arm, so nothing here is a figure and nothing lines up on its last
+ * digit: what lines up is the first letter of each answer, and right alignment
+ * moves that edge to a different place on every row. A value long enough to wrap
+ * is the case that shows it, because the second line starts wherever the first
+ * one ended and the column reads as a mistake rather than as a decision. `text-
+ * balance` stays, because it is the same reason it was there: a two-line answer
+ * should break where it breaks well, not where the measure runs out.
+ *
+ * A fact whose value *is* a figure is not the case this loses. A caller that wants
+ * a right-aligned figure column composes it: the value is a `ReactNode`, so a
+ * caller can pass the span it wants, and Prism holds no opinion about a value it
+ * did not lay out.
+ *
  * The hairline between rows is `border-border`, so a list of facts reads as a
  * table without becoming one: no header row, because a fact has no column
  * header, and no `Table` semantics, because these are terms and their answers
@@ -111,7 +128,7 @@ function FactList({ facts, label, className, ...props }: FactListProps) {
           className="border-border flex items-start justify-between gap-6 border-b py-2 last:border-b-0"
         >
           <dt className="text-muted-foreground shrink-0 font-medium">{fact.label}</dt>
-          <dd className="text-right text-balance">
+          <dd className="text-left text-balance">
             {fact.href ? (
               <a
                 href={fact.href}

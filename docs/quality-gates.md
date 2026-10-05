@@ -366,11 +366,12 @@ a test could observe.
 the token source authors. The top two levels do not share a step. The steps
 descend one authored step at a time until they stop. The largest step anywhere in
 the table is the largest step the token source authors, which is how "nothing in
-the system goes above `4xl`" is held from the component side. The floor is at or
-above the step `DESIGN.md` gives Body. `font-semibold`, `tracking-tight` and
-`text-balance` are on the heading and not in the per-level strings. The JSDoc table
-is the code table, cell for cell. And `DESIGN.md`'s Hierarchy gives Display one
-role, and it is not the section title.
+the system goes above its largest authored step" is held from the component side.
+The floor is at or above the step `DESIGN.md` gives Body. `font-semibold`,
+`tracking-tight` and `text-balance` are on the heading and not in the per-level
+strings. The JSDoc table is the code table, cell for cell. `DESIGN.md`'s Hierarchy
+gives Display one role, and it is not the section title. And the Item document for
+`section` states the same table the Component renders, once, row for row.
 
 **Why the top-two rule is its own rule.** Every level at one step is flat, and
 flat is not descending, so a rule that only asked whether the sequence falls would
@@ -378,23 +379,62 @@ have printed a clean line over the exact defect that shipped. The staged fixture
 `scripts/__tests__/heading-scale.test.mjs` is that table, and the gate is asserted
 to fail on it.
 
-**Two copies of one table in one file, and why that is not the second copy this
-repository refuses.** The map is private and read through `headingSizeClass`; the
-markdown table is in the JSDoc, which the declaration build preserves and the
-corpus reads. Reading only the map would pass a Component whose documentation
-promises a size it does not render, which is the half of the defect that reached a
-consumer.
+**Three copies of one table, and why two of them are not the copies this repository
+refuses.** The map is private and read through `headingSizeClass`; the markdown
+table is in the JSDoc, which the declaration build preserves and the corpus reads;
+and the same table is in `apps/site/items/component/layout/section/section.mdx`,
+which is the page a reader is on when they ask what `as` resolves to. Reading only
+the map would pass a Component whose documentation promises a size it does not
+render, which is the half of the defect that reached a consumer. The Item was the
+copy with nothing holding it: it is in neither the declaration build nor the
+corpus, so when the ceiling moved it kept publishing the retired ladder three
+inches under a heading rendering the new one. The rule about it reads the whole
+Item rather than a slice, so a second table in that prose is a finding too.
 
 **What it does not hold, stated.** The step `DESIGN.md` gives Body is named in the
 gate rather than read, because "Body is 400 at `lg`" is a sentence in a document
 and not a field in the token source; its value is read from the source and printed
 on every run, so a retune of `lg` shows in the output even though the rule does not
 follow it. The rule about `DESIGN.md` reads one bullet and refuses two words in it,
-so a rewrite of the surrounding prose does not turn the gate red. And the whole
-gate reads one file, so a second surface that resolves its own heading tag is out
-of its reach unless it is named as a root; `Cta01` is the one that is, because it
-is the one that drew its own heading element, and a second literal step on it is a
-finding.
+so a rewrite of the surrounding prose does not turn the gate red.
+
+**And the one thing it cannot reach, which is a heading a Block sizes itself.** The
+ladder is held in one place: the Component's table, its JSDoc and the Item that
+documents it. `Cta01` is named as a root because it is the one Block whose heading
+cannot be composed from `SectionHeading` at all, so it has nothing to fall back to
+and a literal step on it is a second answer to a question the table has already
+answered. Beyond that one file the gate cannot go. Forty-eight headings across
+`packages/ui/src` and `apps/site/src` name a step of their own when this was
+measured; eleven of them were rungs and now ask the table, and the thirty-seven that
+remain are captions inside the surface that draws them. The line that separates the
+two is editorial: `headingLevel` is a rung and `childLevel` is a caption, which is
+what `childLevel`'s own JSDoc says the second one is for. But two surfaces bind a
+caption to `headingLevel` rather than to `childLevel`, so a rule reading the tag
+cannot sort them. A root list holding the rungs would be a list somebody maintains,
+which is how the `Cta01`-only rule came to hold the one Block already fixed and
+pass over the four that were not when the ceiling moved. So the rest is left to
+review rather than to a gate, and the count is here so that the next reader starts
+from it rather than from a grep.
+
+**And the limit of the scan that took that count, which is the more useful half of
+it.** The count was taken by looking for a literal size utility beside a heading tag,
+and a heading whose size it inherits names nothing: no `text-*` in a class string is
+the same source text as a heading at exactly the step the surface it sits in happens
+to set. Five theme names on `/foundation/themes` carried no size at all, rendered at
+16 pixels and 500 under a 60 pixel `h1`, and two scans of exactly this shape passed
+them. **A size that is inherited is a size nobody chose, and "no literal" is
+invisible to a scan that looks for literals**, so this count is a count of headings
+that name a step and nothing else. What it is good for is the arithmetic: a heading
+it reports is a rung if the step it names is at or above the step Body is set at, and
+a caption if it is below, so the rungs and the captions sort without anybody deciding
+which is which. Two more captions came from that arithmetic rather than from a scan.
+`ColorTokens` and `TokenBrowser` render inside an MDX body, and removing the literals
+they carried let the article's own ladder decide, which was right for the four
+headings in `ColorTokens` that are sections and wrong for the 185 in `TokenBrowser`
+that are not: one of those is a division of the article and 184 are the names of the
+tables under them. So the group names are captions, and a caption names its own step.
+That is what makes them visible here at all, and it is the general remedy for what
+this scan cannot see.
 
 ## The nested-control rule
 

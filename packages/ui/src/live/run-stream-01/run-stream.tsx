@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { LiveRegion } from '../../components/ui/live-region'
 import { ScrollArea } from '../../components/ui/scroll-area'
+import { headingSizeClass } from '../../components/ui/section'
 import { cn } from '../../lib/utils'
 
 /**
@@ -246,8 +247,20 @@ export function RunStream01({
             status is not a heading, and a reader meeting the same sentence as both
             the subject of a region and its state has been told the same thing twice
             and learned nothing.
+
+            The size is asked of the ladder rather than written here. This heading
+            said `text-lg`, which was the floor of the old scale and the smallest
+            step above Body, so a live region's `h2` rendered at 18 pixels while the
+            `h3` above it rendered at 30: an `h2` a reader meets below the `h3` that
+            introduces the section holding it. The tag is fixed at `h2` rather than
+            taken as a prop, so the level this asks about is this file's own decision
+            and the answer comes from the one table that decides it. Weight, tracking
+            and balance come with the size, because the ladder states the three as one
+            package and `SectionHeading` carries all three at every rung: a title
+            that moved from 18 pixels to 36 is worse unwrapped than the 18 pixel one
+            it replaced.
           */}
-          {title ? <h2 className="text-lg font-semibold tracking-tight">{title}</h2> : null}
+          {title ? <h2 className={cn('font-semibold tracking-tight text-balance', headingSizeClass('h2'))}>{title}</h2> : null}
           {description ? (
             <p className="text-muted-foreground text-pretty text-sm">{description}</p>
           ) : null}

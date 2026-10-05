@@ -62,7 +62,7 @@
   },
   "text": {
     "$type": "dimension",
-    "$description": "Type scale. Each step carries its own line-height in $extensions so the emitted `--text-*--line-height` companion is authored here, not left to Tailwind's default.",
+    "$description": "Type scale. Each step carries its own line-height in $extensions so the emitted `--text-*--line-height` companion is authored here, not left to Tailwind's default. Every step is a whole multiple of 0.125rem, and the gaps at the top of the group are the widest it authors: `4xl` to `5xl` is four thirds and `5xl` to `6xl` is five fourths, where the gaps below it are one fifth to one quarter. The two largest steps are the display role, they are the ceiling of the whole system, and `SectionHeading`'s level table is what reaches them.",
     "xs": {
       "$value": { "value": 0.75, "unit": "rem" },
       "$extensions": { "com.nanisoft.prism": { "lineHeight": 1.333 } }
@@ -94,6 +94,14 @@
     "4xl": {
       "$value": { "value": 2.25, "unit": "rem" },
       "$extensions": { "com.nanisoft.prism": { "lineHeight": 1.111 } }
+    },
+    "5xl": {
+      "$value": { "value": 3, "unit": "rem" },
+      "$extensions": { "com.nanisoft.prism": { "lineHeight": 1 } }
+    },
+    "6xl": {
+      "$value": { "value": 3.75, "unit": "rem" },
+      "$extensions": { "com.nanisoft.prism": { "lineHeight": 1 } }
     },
     "mono": {
       "$value": { "value": 0.625, "unit": "rem" },

@@ -3,6 +3,8 @@ import type { ReactNode } from 'react'
 import type { TOCItemType } from 'fumadocs-core/toc'
 import { notFound } from 'next/navigation'
 
+import { headingSizeClass } from '@nanisoft/prism-ui/components/section'
+
 import { ApiTable } from '@/components/api-table'
 import { CatalogueIndex } from '@/components/catalogue-index'
 import { DocsShell } from '@/components/docs-shell'
@@ -150,16 +152,43 @@ export default async function Page({ params }: { params: Promise<{ slug: string[
           status={data.status ?? 'stable'}
         />
 
-        {ItemBody ? (
-          <div className="prose">
-            <ItemBody components={components} />
-          </div>
-        ) : null}
+        {/*
+          One article, and the appendix heading is a section of it.
 
-        <section className="flex flex-col gap-4">
-          <h2 className="text-xl font-semibold tracking-tight">API reference</h2>
+          The heading said `text-xl`, which put an `h2` at 20 pixels under the prose
+          `h2` at 30 and below the prose `h3` at 24 above it, so the page carried
+          three heading tiers where the frame and the article carry two between them.
+          Asking `headingSizeClass` for the level it renders answered that and put it
+          on the wrong ladder: it is an `h2` of an article, so it takes the article's
+          ladder, and the Block ladder is a step and a half above it at `sm`. An
+          appendix heading at 48 pixels is the second largest thing on a page whose
+          three content sections are at 30, and the outline said so in the order the
+          reader meets it.
+
+          So it is written into the article rather than beside it. `.prose` is where
+          the site's prose ladder lives, at the steps `Prose` itself uses, and MDX
+          hands it plain tags, so a heading that belongs to the article belongs inside
+          the wrapper that owns the article's typography. It carries no class at all:
+          every section heading in this article is a bare `<h2>` the article styles,
+          and a heading that named its own step would be the second answer to a
+          question the article has already answered. `DESIGN.md` under Typography,
+          Hierarchy states that the two ladders differ by 1.6 at `sm` and which to
+          reach for, so the divergence is documented rather than left to be found.
+
+          The table stays outside `.prose`, because that wrapper's rules reach every
+          descendant and `.prose td` would put the API table's cells at `--text-base`
+          and in the muted colour, which is the article's body treatment and not a
+          table's. The `gap-4` is the article's own block rhythm, the same 16 pixels
+          `.prose > * + *` gives every other block in the body, so the appendix reads
+          as part of the article rather than as a second region under it.
+        */}
+        <div className="flex flex-col gap-4">
+          <div className="prose">
+            {ItemBody ? <ItemBody components={components} /> : null}
+            <h2>API reference</h2>
+          </div>
           <ApiTable slug={data.slug} />
-        </section>
+        </div>
       </DocsShell>
     )
   }
@@ -183,7 +212,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string[
       */}
       {data.selfTitled ? null : (
         <header className="border-border flex flex-col gap-3 border-b pb-8">
-          <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+          <h1 className={`font-semibold tracking-tight text-balance ${headingSizeClass('h1')}`}>
             {data.title}
           </h1>
           {data.description ? (

@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import themes from '@nanisoft/prism-tokens/dist/themes.json'
 import { themeTokens } from '@nanisoft/prism-tokens/dist/themes/index.js'
 
+import { CardTitle } from '@nanisoft/prism-ui/components/card'
+import { headingSizeClass } from '@nanisoft/prism-ui/components/section'
+
 import { DocsShell } from '@/components/docs-shell'
 import { flattenNav, projectNav } from '@/lib/nav'
 import { source } from '@/lib/source'
@@ -69,6 +72,32 @@ function tokenStyle(tokens: TokenMap, bg: string, fg: string) {
  * utility classes on a card resolve to that Pack in whichever Mode the site is
  * in, and the swatch values beside them are that Pack's own compiled values
  * rather than the active Pack's.
+ *
+ * **The page heading asks the ladder, and it used to name a step.** It said
+ * `text-3xl`, which was Display before the ceiling moved and is now the `h3` step,
+ * so this page's own `h1` came out a rung below the section titles a composed page
+ * draws under it. Every other route in this Section asks `headingSizeClass` for the
+ * same answer, and a page that renders its heading any other way is the one page a
+ * reader sees the difference on.
+ *
+ * **A theme name is a card title, and a card title composes `CardTitle` rather than
+ * being written out.** These five headings carried `font-medium` and no size at all,
+ * so they rendered at 16 pixels and 500: a size nobody chose, inherited from the
+ * page, and a weight `DESIGN.md` gives no heading. Two scans looking for a literal
+ * step passed them, which is the whole of what a size nobody chose looks like from
+ * the outside.
+ *
+ * The size is not the defect and asking the ladder for it would be. Five themes at
+ * the `h2` step is five 48 pixel headings over five cards, on a page whose own claim
+ * is the `h1` above them. `CardTitle` states the answer the library already holds: a
+ * card title sits at body size, and "the element and the visual step are separate
+ * questions", so the step is the inherited one and only the element is a decision.
+ * That leaves the tag, and `h2` is it: the grid draws no section heading of its own
+ * and each theme is a top-level division of the page, which is the `offset: 0`
+ * answer `test/card-title-headings.test.tsx` already asserts for a Block that opens
+ * with no section heading. So the tag was right and the weight was wrong, and the
+ * weight now comes from the one Component that owns the answer rather than from a
+ * literal here.
  */
 export default function ThemesPage() {
   const sections = projectNav(source.getPageTree())
@@ -77,7 +106,9 @@ export default function ThemesPage() {
     <DocsShell sections={sections} currentUrl={ROUTE} flat={flattenNav(sections)}>
       <div className="flex flex-col gap-10">
         <header className="flex flex-col gap-3">
-          <h1 className="text-3xl font-semibold tracking-tight">Themes</h1>
+          <h1 className={`font-semibold tracking-tight text-balance ${headingSizeClass('h1')}`}>
+            Themes
+          </h1>
           <p className="text-muted-foreground max-w-measure text-sm">
             Five pastel themes, generated from OKLCH so every ramp is perceptually even and
             the set reads as one family. Each theme is a tinted neutral plus a pastel brand
@@ -103,7 +134,9 @@ export default function ThemesPage() {
               >
                 <div className="flex flex-col gap-1">
                   <div className="flex items-baseline justify-between gap-2">
-                    <h2 className="font-medium tracking-tight">{theme.name}</h2>
+                    <CardTitle as="h2" className="tracking-tight">
+                      {theme.name}
+                    </CardTitle>
                     <span className="text-muted-foreground font-mono text-mono">
                       r {theme.radius}
                     </span>

@@ -10,6 +10,7 @@ import {
 } from '../../components/ui/breadcrumb'
 import { CtaLink } from '../../components/ui/cta-link'
 import { Separator } from '../../components/ui/separator'
+import { headingSizeClass } from '../../components/ui/section'
 import { Heading, Text, type HeadingElement } from '../../components/ui/typography'
 
 export type PageHeaderCrumb = {
@@ -172,6 +173,13 @@ export type PageHeader01Props = {
  * member and render each one as a `Button`, which is a focusable control announced
  * as a button that activates to nothing, at the top of a screen. See
  * `PageHeaderAction`.
+ *
+ * **The title's size is asked of the level rather than written here.** It used to
+ * pass `size="3xl"` to `Heading`, and `3xl` is a step of the scale rather than a
+ * rung of the ladder, so this band drew its title at one fixed size whether the
+ * caller composed it as the page's `h1` or as a section's `h2`, and at a size the
+ * ladder's ceiling had already left two steps behind. It now asks
+ * `headingSizeClass`, which is the same answer `SectionHeading` and `Cta01` ask.
  */
 export function PageHeader01({
   breadcrumbs,
@@ -243,7 +251,7 @@ export function PageHeader01({
       ) : null}
 
       <div className="flex flex-col gap-1.5">
-        <Heading as={headingLevel} size="3xl">
+        <Heading as={headingLevel} className={headingSizeClass(headingLevel)}>
           {title}
         </Heading>
         {description ? (
