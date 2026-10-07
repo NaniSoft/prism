@@ -165,21 +165,62 @@ Two rules follow from that, and both are about what may be written where:
   transparent content model. Its proof is `scripts/__tests__/nested-controls.test.mjs`.
 - **A Block rendering a control that cannot act is a finding, and the gate is the only
   reason five of them are not still shipping one.** `scripts/check-block-controls.mjs`
-  reads `packages/ui/src/blocks` and `packages/ui/src/pages` and fails on a rendered
-  `Button` or `CtaLink` carrying none of `onClick`, `type="submit"`, `type="reset"` or
-  `href`. A Block ships no behaviour, so a `<button>` it renders cannot be given a
-  handler: it is a server Component unless it says `'use client'`, and it is
-  focusable, announced as a button, and activates to nothing. Five Blocks shipped one,
-  every one at the place a reader looks first. The escape is a slot: `href` required on
-  the arm that navigates, a `ReactNode` the Block places without styling on the arm that
-  is not a link, which is `hero-01`'s `HeroLinkAction` and `HeroSlotAction`. It does
+  reads `packages/ui/src/blocks` and `packages/ui/src/pages` and classifies four
+  Components, each with the arms that make it act. `Button`: `onClick`, `type="submit"`
+  or `type="reset"`. `CtaLink`: `href`, which is required, so that arm is the
+  compiler's. `DropdownMenuItem`: `onClick`, or `render` together with `href` in the
+  element it renders as. `Switch`: `onCheckedChange`. A Block ships no behaviour, so a
+  control it renders cannot be given a handler it does not hold: it is a server
+  Component unless it says `'use client'`, and it is focusable, announced as whatever it
+  is, and activates to nothing. Five Blocks shipped one, every one at the place a reader
+  looks first. The escape is a slot: `href` required on the arm that navigates, a
+  `ReactNode` the Block places without styling on the arm that is not a control, which
+  is `hero-01`'s `HeroLinkAction` and `HeroSlotAction`. The menu item and the switch are
+  on the list because the record index's declared per-row action list slips between the
+  first two: it renders each entry as a `DropdownMenuItem` whose `onSelect` is optional,
+  and a gate that did not classify that Component could not fail on it at all. It does
   **not** read `apps/site/items`, because the documentation Demo for `Button` renders a
   `Button` with no handler and showing the control is the point; the demos are held by
-  the compiler, since a Demo passes a Block's props. Two defects in the gate's own first
-  version are recorded in `scripts/__tests__/block-controls.test.mjs`: deleting comments
-  rather than blanking them moved every line number below a JSDoc block, and matching a
-  tag's attributes with a pattern stopped at the `<` or `>` inside `=>`, `<=` and `>=`.
-  Read a tag's end by brace and paren balance.
+  the compiler, since a Demo passes a Block's props. Two limits are printed on every run
+  and are the reason a clean run is not a clean conscience: a `{...rest}` spread reads
+  as carrying no handler, and a handler forwarded from a declared optional prop reads as
+  present, because resolving it is reading a type. A Block that holds a `Collapsible` or
+  an `Accordion` itself is **not** caught either, since neither puts one of the four
+  classified Components in its source; the prohibition on that is a design rule in
+  `DESIGN.md` and an auditor checks it by looking for the absence. Two defects in the
+  gate's own first version are recorded in `scripts/__tests__/block-controls.test.mjs`:
+  deleting comments rather than blanking them moved every line number below a JSDoc
+  block, and matching a tag's attributes with a pattern stopped at the `<` or `>`
+  inside `=>`, `<=` and `>=`. Read a tag's end by brace and paren balance.
+- **The catalogue seam does not reach `packages/ui/src/lib`, and a lower seam holds the
+  specification module.** `scripts/check-catalogue.mjs` resolves its roots from
+  `src/components/ui`, `src/blocks`, `src/pages`, `src/live`, `src/catalog.ts`,
+  `registry.json` and `package.json`, so a typed declaration is invisible to it: a
+  specification type is not an Item, so it has no slug, no page, no Demo and no corpus
+  entry. `packages/ui/scripts/check-spec-unions.mjs` is the seam below that one. It
+  reads `dist/lib/spec.d.ts` and `dist/catalog.js` rather than the source, because the
+  emitted declaration is what a consumer's editor and a corpus resolve, and it holds
+  three things: every member of `FieldKind`, `ColumnKind` and `RelationKind` against
+  the roster, the three unions against one another, and every member of the
+  specification types against four refusals and three claims. A `slot` member is the
+  one exemption and it prints on every run. **It does not hold that there is one shape
+  per concept**, because a second declaration would be named differently from the
+  first and the rule that would catch it is a list somebody maintains; the run prints
+  that too, so a clean run is not read as more than it is. Its proof is
+  `scripts/__tests__/spec-unions.test.mjs`, which stages the real emitted pair with
+  one declaration replaced, and thirteen of its cases were green under every other gate
+  in this repository.
+- **`dist/lib` is where the internal helpers live and the `exports` map is the
+  boundary.** `packages/ui/scripts/check-surface.mjs` holds that boundary in both
+  directions, and a file under `dist/lib` that a published entry reaches is public
+  surface: rules 2 and 3 read it, and it is not in `INTERNAL`.
+  `dist/lib/spec.d.ts` is the one such file, published as
+  `@nanisoft/prism-ui/spec`, because a consumer cannot type a column without the
+  column specification and declaring it internal would be a false statement about the
+  surface rather than a convenience. A file under `dist/lib` that no published entry
+  reaches is internal, and either it is named in `INTERNAL` with its reason or it is a
+  finding naming it. So adding a file to `src/lib` is a decision to take in the open,
+  in that gate, where a diff shows it.
 - **Package scope and layout.** The npm scope is `@nanisoft`; the library
   packages are `@nanisoft/prism-tokens` in `packages/tokens` and
   `@nanisoft/prism-ui` in `packages/ui`, and the site is `@nanisoft/site` in

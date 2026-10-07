@@ -1,0 +1,8 @@
+{
+  "name": "nothing-chosen-01",
+  "title": "Nothing Chosen 01 - The Resting Detail Pane",
+  "description": "The state of a region that can hold a record and has none chosen yet: the caller's words, an optional sentence under them and an optional mark of the caller's choosing. It draws no action, no default sentence, no frame and no height floor, because the next step in this state is a click in the pane beside it. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": [],
+  "dependencies": []
+}

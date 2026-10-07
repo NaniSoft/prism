@@ -5758,6 +5758,41 @@
       ]
     },
     {
+      "name": "nothing-chosen-01",
+      "title": "Nothing Chosen 01 - The Resting Detail Pane",
+      "description": "The state of a region that can hold a record and has none chosen yet: the caller's words, an optional sentence under them and an optional mark of the caller's choosing. It draws no action, no default sentence, no frame and no height floor, because the next step in this state is a click in the pane beside it. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/nothing-chosen-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/nothing-chosen-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/nothing-chosen-01/nothing-chosen.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/nothing-chosen-01/nothing-chosen.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "notification-center-01",
       "title": "Notification Center 01 - A List Of Notifications With An Unread Count",
       "description": "A list of notifications where each carries a mark, a title, a body, a moment, a read state and a per item action slot, with the unread count computed from the items and the words for it handed back through a function, because three unread, three new and three since Monday are three sentences. An unread item carries a filled dot that is also a graphic with the caller own name, because a colour is not a state a screen reader can be told about, and read is derived from each item own field and never from the count. Two shapes: a page section, or a bounded panel for a shell.",

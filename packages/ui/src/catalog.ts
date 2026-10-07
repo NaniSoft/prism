@@ -214,9 +214,21 @@ export const catalog: readonly CatalogItem[] = [
     slug: 'empty-state-01',
     kind: 'block',
     category: null,
-    description: 'The state a region shows when it has nothing in it, for a first run, a filter that matched nothing, or a permission boundary.',
+    description:
+      'The state a region shows when it has nothing in it, for a first run, a narrowing that matched nothing, a region the reader emptied themselves, or a permission boundary.',
     source: 'src/blocks/empty-state-01/index.tsx',
     exports: ['EmptyState01'],
+    status: 'stable',
+  },
+  {
+    name: 'NothingChosen01',
+    slug: 'nothing-chosen-01',
+    kind: 'block',
+    category: null,
+    description:
+      'The resting detail pane: a region that can hold a record and has nothing chosen in it yet, so it draws the caller own words and no action, no frame and no height floor.',
+    source: 'src/blocks/nothing-chosen-01/index.tsx',
+    exports: ['NothingChosen01'],
     status: 'stable',
   },
   {

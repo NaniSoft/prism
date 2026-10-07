@@ -22,10 +22,12 @@
  *     printed its success line: the hole through which a published surface
  *     drifts from its source without a consumer failing first.
  *   - The internal side is a declared boundary, `INTERNAL`, compared in both
- *     directions. A new file under `dist/lib` is a finding naming it, and a
- *     declared internal declaration that is no longer emitted is a finding
- *     naming it as well. So "we chose not to check the reverse" is now "the
- *     reverse is checked, against this list, and the list is printed".
+ *     directions, and the boundary is the `exports` map rather than the directory.
+ *     A file under `dist/lib` that a published entry reaches is public surface and
+ *     rules 2 and 3 read it; one that no published entry reaches is internal, and
+ *     either it is named in `INTERNAL` with its reason or it is a finding naming
+ *     it. So "we chose not to check the reverse" is "the reverse is checked,
+ *     against this list, and the list is printed".
  *
  * Coverage is stated on every run: how many declarations were emitted, how many
  * the `exports` map reaches, how many are internal, and what the declared
@@ -63,6 +65,18 @@ function walk(dir) {
 const allDts = walk(DIST).filter((file) => file.endsWith('.d.ts'))
 const rel = (file) => toPosix(path.relative(PKG, file))
 
+/**
+ * A declaration as the `exports` map spells it, and as every other set in this file
+ * spells it: relative to the package root with no leading `./`.
+ *
+ * The map writes `./dist/index.d.ts` and the walk produces `dist/index.d.ts`, so the
+ * two had to be normalised or the public set and the internal set could not be
+ * compared. They were compared before rule 4 read the `exports` map rather than the
+ * directory, so the two spellings could not meet; now that they can, they are one
+ * spelling.
+ */
+const asDeclaration = (target) => toPosix(target).replace(/^\.\//, '')
+
 /** A condition object resolves through the first usable string target. */
 function resolveTarget(value) {
   if (typeof value === 'string') return value
@@ -94,9 +108,17 @@ function wildcardRegex(target) {
  * ranker is shared with no other Item and is no subpath of its own. `dist/lib/figure`
  * is here for the same reason and the same kind of thing: the geometry a figure in
  * this package is drawn from, shared by the Components that draw figures so that
- * two of them cannot hold two answers to where a label's ink box is. Adding a file
- * under `dist/lib` means either a new internal helper, which belongs in this list
- * with a reason, or a surface that is being kept off the map by accident.
+ * two of them cannot hold two answers to where a label's ink box is.
+ *
+ * **`dist/lib` is where the internal helpers live, and a directory is not the
+ * boundary: the `exports` map is.** A file under `dist/lib` that a published entry
+ * reaches is public surface and is read by rules 2 and 3 like any other, and the one
+ * such file is `dist/lib/spec`: a consumer cannot type a column without the column
+ * specification, so declaring it internal would be a false statement about the
+ * surface rather than a convenience. A file under `dist/lib` that no published entry
+ * reaches is internal, and it is either named in this list with its reason or it is
+ * a finding. Widening the set is a decision to take in the open, in this file, where
+ * a diff shows it.
  */
 const INTERNAL = ['dist/lib/utils.d.ts', 'dist/lib/rank.d.ts', 'dist/lib/figure.d.ts']
 
@@ -127,9 +149,9 @@ for (const [key, value] of Object.entries(exportsField)) {
     continue
   }
 
-  const declaration = target.replace(/\.js$/, '.d.ts')
+  const declaration = asDeclaration(target.replace(/\.js$/, '.d.ts'))
   if (!statSync(path.join(PKG, declaration), { throwIfNoEntry: false })) {
-    errors.push(`exports["${key}"] -> ${target} has no emitted declaration at ${declaration}`)
+    errors.push(`exports["${key}"] -> ${target} has no emitted declaration at ./${declaration}`)
     continue
   }
   publicFiles.add(declaration)
@@ -188,22 +210,30 @@ for (const file of [...publicFiles].sort()) {
 }
 
 /* 4. The internal side, in both directions, against a boundary that is printed. */
-const internalFiles = allDts.map(rel).filter((file) => file.startsWith('dist/lib/')).sort()
+const inLib = allDts.map(rel).filter((file) => file.startsWith('dist/lib/')).sort()
+const internalFiles = inLib.filter((file) => publicFiles.has(file) === false)
 
-for (const file of internalFiles) {
-  if (!INTERNAL.includes(file)) {
-    errors.push(
-      `${file}: is internal (under dist/lib) but is not declared in INTERNAL. Declare it with a ` +
-        'reason, or move it out of dist/lib so items 2 and 3 read it',
-    )
-  }
+for (const file of inLib) {
+  if (publicFiles.has(file)) continue
+  if (INTERNAL.includes(file)) continue
+  errors.push(
+    `${file}: is internal (under dist/lib) but is not declared in INTERNAL, and no published entry\n` +
+      '      reaches it. Declare it with a reason, or reach it from the exports map so items 2 and 3 read it',
+  )
 }
 
 for (const file of INTERNAL) {
-  if (!internalFiles.includes(file)) {
+  if (inLib.includes(file) === false) {
     errors.push(
       `${file}: is declared internal in INTERNAL but no declaration is emitted for it. The ` +
         'internal boundary changed; update INTERNAL in this gate rather than leaving it stale',
+    )
+    continue
+  }
+  if (publicFiles.has(file)) {
+    errors.push(
+      `${file}: is declared internal in INTERNAL and a published entry reaches it, so the boundary says\n` +
+        '      two things about one file. Remove it from INTERNAL, because the exports map is what decides',
     )
   }
 }
@@ -229,6 +259,10 @@ for (const entry of wildcards) {
 report(
   `surface: internal boundary asserted in both directions: ${INTERNAL.join(', ') || '(none declared)'}` +
     `${internalFiles.length === 0 ? ' (no internal declaration was emitted)' : ''}`,
+)
+report(
+  `surface: published under dist/lib, so the exports map and not the directory decides the boundary: ` +
+    `${inLib.filter((file) => publicFiles.has(file)).join(', ') || '(none)'}`,
 )
 const unclassified = allDts
   .map(rel)

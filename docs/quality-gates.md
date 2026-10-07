@@ -27,7 +27,7 @@ and it is the only row below whose subject is this document.
 | Package | Script | Fails the build | Reports only |
 | --- | --- | --- | --- |
 | `prism-tokens` | `scripts/check-contrast.mjs`, `scripts/check-emitted-contract.mjs`, `scripts/check-determinism.mjs` | the contrast gate's role walk, its exemption list, the mode rule and the chart-series distinctness assertion, the emitted contract (completeness, value equality, spacing arithmetic, no extras, and the mode-independent groups including the closed duration, easing and shadow sets, the closed breakpoint set, and the container group: its closed set, its two families, the single authored value coincidence, and the order of the whole-namespace close relative to the authored entries), build-twice determinism | the three advisory contrast pairs (`border`, `input` and `sidebar-border`) |
-| `prism-ui` | `scripts/validate-registry.mjs`, `scripts/check-catalogue.mjs`, `scripts/check-surface.mjs`, `scripts/check-focus-indicators.mjs`, `scripts/check-breakpoint-variants.mjs`, `scripts/check-container-namespace.mjs`, `scripts/check-pack-boundary.mjs`, `scripts/check-vector-ink.mjs`, `scripts/check-client-budget.mjs`, `scripts/check-theme-resolution.mjs`, `scripts/check-boot-budget.mjs`, `scripts/check-item-docs.mjs`, `scripts/check-block-copy.mjs`, `scripts/check-item-category.mjs`, `scripts/check-block-imports.mjs`, `scripts/check-gate-kit.mjs`, `scripts/check-typeface.mjs`, `scripts/check-variant-ink.mjs` | surface scan, registry validator (registry and published file list), the three-way catalogue comparison, the focus-indicator class-string scan across every shipped source file, the breakpoint-variant rule, the container-namespace rule over the built stylesheet, the pack-boundary law, the vector-ink contract, the theme-resolution equivalence table, the boot-path byte ceiling, a JSDoc block on every catalogue Item, a Block and a Page shipping no copy or an accessible name, the closed set of seven Categories and the absence of one on a Block or a Page, the modules a Block and a Page may not import, the face a token names against the `@font-face` rules and binaries the package ships, the metric-adjusted fallback and the licence beside it, the consumer gate kit's registry and published surface, the component and axe suites, and a variant that sets its own fill setting its own ink | per-item client-JavaScript measurement |
+| `prism-ui` | `scripts/validate-registry.mjs`, `scripts/check-catalogue.mjs`, `scripts/check-surface.mjs`, `scripts/check-focus-indicators.mjs`, `scripts/check-breakpoint-variants.mjs`, `scripts/check-container-namespace.mjs`, `scripts/check-pack-boundary.mjs`, `scripts/check-vector-ink.mjs`, `scripts/check-client-budget.mjs`, `scripts/check-theme-resolution.mjs`, `scripts/check-boot-budget.mjs`, `scripts/check-item-docs.mjs`, `scripts/check-block-copy.mjs`, `scripts/check-item-category.mjs`, `scripts/check-block-imports.mjs`, `scripts/check-spec-unions.mjs`, `scripts/check-gate-kit.mjs`, `scripts/check-typeface.mjs`, `scripts/check-variant-ink.mjs` | surface scan, registry validator (registry and published file list), the three-way catalogue comparison, the focus-indicator class-string scan across every shipped source file, the breakpoint-variant rule, the container-namespace rule over the built stylesheet, the pack-boundary law, the vector-ink contract, the theme-resolution equivalence table, the boot-path byte ceiling, a JSDoc block on every catalogue Item, a Block and a Page shipping no copy or an accessible name, the closed set of seven Categories and the absence of one on a Block or a Page, the modules a Block and a Page may not import, the closed unions of the specification module against the Component roster and the refusals on a specification's members, the face a token names against the `@font-face` rules and binaries the package ships, the metric-adjusted fallback and the licence beside it, the consumer gate kit's registry and published surface, the component and axe suites, and a variant that sets its own fill setting its own ink | per-item client-JavaScript measurement |
 | `prism-llms` | `scripts/check.mjs` | corpus drift, per-item mirror and store coverage, the store type round-trip, the declared output list | none |
 | `prism-mcp-server` | `test/registration.test.ts` and the bundled-data hash | the protocol round-trip suite, the registered tool list equals the package's declared `TOOL_ORDER` with every tool served from the bundled corpus, the bundled `data.json` hash | corpus freshness stamp (`scripts/stamp-built.mjs`) |
 | repository root | `scripts/check-dashes.mjs`, `scripts/check-elevation-layout.mjs`, `scripts/check-heading-scale.mjs`, `scripts/check-motion.mjs`, `scripts/check-nested-controls.mjs`, `scripts/check-block-controls.mjs`, `scripts/check-encoding.mjs`, `scripts/check-no-legacy-line.mjs`, `scripts/check-gate-table.mjs`, `scripts/validate-changesets.mjs` | the dash gate, the elevation and layout gate, the heading-scale gate, the motion gate, the nested-control rule, the block-control rule, the encoding gate, the retired-line gate, the gate-table gate, the changeset validator | none |
@@ -495,6 +495,150 @@ would redden it, and every case runs the gate as a process against a staged tree
 no test has to dirty the repository to see the gate react. The shipped tree has no
 genuine finding.
 
+## The block-control rule
+
+`scripts/check-block-controls.mjs` reads the JSX in `packages/ui/src/blocks` and
+`packages/ui/src/pages` and fails on a control a Block renders that nothing can
+activate. A Block ships no behaviour: it fetches nothing, imports no router and owns
+no application state, so a handler it renders has to be one the caller passed in, and
+a server Component cannot be given one at all. A `<button>` a Block renders with
+nothing attached is focusable, announced as a button, and does nothing when pressed.
+Five Blocks shipped one, and every one of them did so at the place a reader looks
+first: the primary action of a hero, of a page header and of a pricing card.
+
+**Four Components are classified, each with the arms that make it act, and each arm
+is stated rather than inferred.**
+
+- `Button`: `onClick`, or `type="submit"` or `type="reset"`. The form arm is the
+  browser's own activation rather than the Block's, and it is narrowed to those two
+  values because naming the type is not a behaviour: a rule that accepted any `type`
+  would have passed both of the shipped defects.
+- `CtaLink`: `href`, which is required, so that arm is the compiler's rather than the
+  gate's. It is listed so the coverage line can say what was read.
+- `DropdownMenuItem`: `onClick`, or `render` together with `href` in the element it
+  renders as. The second arm is a pair rather than one word because the Component
+  takes no `href` of its own: `render` alone would accept `render={<span />}`, which
+  navigates to nothing, and a bare `href` would accept a `data-href` as a destination
+  because a hyphen is a word boundary.
+- `Switch`: `onCheckedChange`, and nothing else. A switch does not navigate, and it is
+  meaningless without the handler, because the state it changes is the consumer's own
+  setting rather than anything a Block holds.
+
+**The hole this widening closed is the reason the menu item is on the list.** The
+shipped record index takes `rowActions`, a list of action objects whose `onSelect` is
+optional, and renders each entry as a menu row, so a caller who passes a label and no
+handler gets a row that sits in the menu's keyboard order, is announced as a menu
+item, and activates to nothing. The gate classified two Components at that point and
+neither of them is a menu row, so every gate in this repository was green while it
+shipped. A gate that cannot see a Component cannot fail on it, and the clean run was
+the absence of a check rather than the presence of a correct one.
+
+**Two limits are printed on every run, and a clean run is not more than that.** A
+`{...rest}` spread inside a rendered control is read as carrying no handler, and a
+handler forwarded from a declared optional prop reads as present, because resolving
+whether the caller passed it is reading a type rather than a file. The second is why
+the shipped `rowActions` list is still a finding for a reader and not for this run:
+the `onSelect` behind the attribute is invisible here, and removing the declared list
+is the authoring work that closes it.
+
+**A Block that holds a disclosure itself is not caught, and that is stated rather
+than discovered.** `Collapsible` and `Accordion` put none of the four classified
+Components in a Block's source, so a Block rendering one with a `defaultOpen` and no
+change handler is still state a Block holds and this run reads it as clean. Widening
+to the menu item and the switch did not close this and was not meant to: a
+disclosure's activation lives inside `Collapsible` rather than on an attribute of the
+row that opens it, so there is no arm to read, and a rule guessing at one would report
+the Blocks that compose `Collapsible` correctly. The prohibition is a design rule in
+`DESIGN.md` and an auditor checks it by looking for the absence.
+
+**The proof is `scripts/__tests__/block-controls.test.mjs`, not a run.** Seven cases
+must fire and twelve must stay green, each named for the rule whose removal would
+redden it, and every case runs the gate as a process against a staged tree. The four
+cases added for the widened classification are the ones that prove the widening
+happened: each was green under the previous version of the gate and is red under this
+one, which is the only thing that distinguishes a widened rule from a widened
+comment.
+
+## The specification unions
+
+`packages/ui/scripts/check-spec-unions.mjs` holds the closed unions of the shared
+specification module against the Component roster, and holds what a specification may
+not carry against the refusals `DESIGN.md` records by name. It is the gate the
+catalogue seam cannot be, and the reason is structural rather than a gap somebody
+noticed late.
+
+**A specification type is not an Item, so the catalogue seam cannot reach it.**
+`FieldSpec`, `ColumnSpec`, `RelationSpec`, `MetricSpec` and `EventSpec` have no slug,
+no kind, no documentation page, no Demo and no corpus entry.
+`check-catalogue.mjs` resolves its roots from `src/components/ui`, `src/blocks`,
+`src/pages`, `src/live`, `src/catalog.ts`, `registry.json` and `package.json`, and
+not one of them reaches `src/lib`. The item documentation gate holds a JSDoc block on
+an Item's own export, the site content gate holds a page and a Demo, and the corpus
+drift gate holds per-item coverage: none of them has a subject here. So a union
+member naming a control this package does not ship would pass every gate in this
+repository, be published through `@nanisoft/prism-ui/spec`, and reach a consumer with
+no way to draw it.
+
+**The seam is therefore the emitted declaration, which is the one a consumer reads.**
+`dist/lib/spec.d.ts` is what the declaration build wrote, JSDoc preserved, and it is
+what a consumer's editor and a corpus both resolve. `dist/catalog.js` is the emitted
+roster, so the comparison is against the list the package actually ships rather than
+against a list somebody keeps beside it. The two roots failing to resolve is the
+common case of a package that has not been built, and it fails the run naming that,
+because "0 findings over a missing declaration" is the claim this gate replaces.
+
+**Seven rules, and each is one a decision in `DESIGN.md` states by name.**
+
+| Rule | What it fails on | The decision it holds |
+| --- | --- | --- |
+| `unknown-member` | a union member the roster does not hold | a closed union is legitimate only when every member is a Component or a collection arrangement this package already ships |
+| `overlapping-union` | a member two of the three unions both claim | a field is an input, a column is a cell and a relation is a collection, so a member in both lets a caller ask for one where the other belongs |
+| `duplicate-member` | a member one union claims twice | a vocabulary with two answers to one question is the defect the module exists to end |
+| `forbidden-member` | a member named a validator, a rule, a schema or a pattern | validation is the consumer's entirely, and `required` stays because requiredness is a rendering fact and an HTML fact rather than a rule |
+| `asserted-claim` | a member named immutability, retention, or a time axis | a Block has no authority over the store behind it, and a trail draws a moment and never a length |
+| `event-vocabulary` | a `kind` on `EventSpec` | no enumeration of what a consumer's product calls a thing that happened is this package's to publish |
+| `relation-depth` | a member of `RelationSpec` whose own type names `RelationSpec` | the bound is one ring and it belongs in the type rather than in a convention somebody is asked to remember |
+
+The two rules that apply to a member rather than to a union are applied to every type
+alias in the declaration, exported or not, because the declaration build puts the
+shell every field shares in a local alias and a reader that took only the exported
+names would hold the arms and not the members all of them carry.
+
+**One exemption, and it is printed on every run.** `slot` is the arm each of the
+three unions carries for the caller's own control, cell or arrangement. It names no
+Component by construction and it is the escape the findings point at, so it is exempt
+by name, with the count each union carries printed beside it. It is one word rather
+than a rule because a wider exemption would be a second vocabulary.
+
+**The negative control that makes the clean run mean something.** The run asserts
+that every union and every specification it was configured to read was found, so a
+module that emptied itself or a declaration build that stopped emitting it fails
+rather than checking fewer things and saying so in the shape of a pass. It also
+fails when a configured union declares no string literal member, because a closed
+union is what makes it closed and an alias that is not one would otherwise read as a
+union with nothing in it.
+
+**The proof is `scripts/__tests__/spec-unions.test.mjs`, not a run.** Thirteen cases
+must fire and seven must stay green, each named for the rule whose removal would
+redden it, and every case stages the real emitted declaration and the real emitted
+roster with one declaration replaced. The thirteen include shapes that were green
+under every gate in this repository while they stood, and the sharpest of them is the
+name `DESIGN.md` itself writes when it names the cell vocabulary: `Text`, which this
+package ships as `Typography`. It is in the proof rather than only in this paragraph
+because a gate that has never been red is not evidence of anything.
+
+**Two things it does not read, and both are scope decisions.**
+
+The first is the source. The emitted declaration is the seam, and a gate reading both
+would be two gates that could disagree about which one shipped. The second is the law
+that there is **one shape per concept**. A second declaration of the field, column,
+relation, metric or event shape would be named differently from the first, so the
+rule that would catch it is a hand maintained list, and a hand maintained list is the
+shape this document already refuses: it is how the heading gate came to hold `Cta01`
+alone and pass over the four Blocks it had not reached. That law is held by the
+authoring and by review, the run prints that it is not gated, and a clean run is
+therefore not evidence of it.
+
 ## The container-namespace gates
 
 The container namespace needed two gates for the reason the breakpoint namespace
@@ -852,6 +996,14 @@ free of these defects.
   declaration wins a cascade, and a control that answers focus with a fill rather
   than a ring is an exclusion rather than a finding, so the three declared
   exclusions in `EXCLUSIONS` are the whole of what it will not report.
+- No gate holds that there is **one shape per concept**. The specification module is
+  the case: `check-spec-unions.mjs` holds its closed unions against the roster and
+  holds what a specification may not carry, and it cannot hold that a second
+  declaration of the field, column, relation, metric or event shape does not exist
+  somewhere else in the tree under another name. That rule would be a hand
+  maintained list, and this document records why that shape is refused twice above.
+  It is held by the authoring and by review, the gate prints that it is not gated, and
+  a passing run says nothing about it.
 - No gate reads an Item document against the component it documents, and the one
   exception is the exception that shows why. `check-heading-scale.mjs` holds the
   ladder in `apps/site/items/component/layout/section/section.mdx` against the
