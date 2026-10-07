@@ -15,6 +15,15 @@ export { Cta01 } from './cta-01'
 export { PageHeader01 } from './page-header-01'
 export type { PageHeader01Props, PageHeaderAction, PageHeaderLinkAction, PageHeaderSlotAction, PageHeaderCrumb } from './page-header-01'
 export { DataTable01 } from './data-table-01'
+export { RecordForm01 } from './record-form-01'
+export type { RecordForm01Props, RecordForm01Issue } from './record-form-01'
+export { RecordDetail01 } from './record-detail-01'
+export type {
+  RecordDetail01Props,
+  RecordDetail01Field,
+  RecordDetail01Relation,
+  RecordDetail01RelationEmpty,
+} from './record-detail-01'
 export { SettingsPanel01 } from './settings-panel-01'
 export { AuthForm01 } from './auth-form-01'
 export { AppShell01 } from './app-shell-01'

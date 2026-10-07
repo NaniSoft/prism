@@ -192,8 +192,17 @@ export type FieldKind =
 export type FieldSpec =
   /** A run of text, with the rows it is drawn at. */
   | (FieldCommon & { kind: 'Textarea'; rows?: number })
-  /** An amount in the consumer's currency. */
-  | (FieldCommon & { kind: 'MoneyField' })
+  /**
+   * An amount in the consumer's currency.
+   *
+   * `currency` is required because `MoneyField` is meaningless without it, and
+   * the two are the one piece of per-kind rendering data this arm carries rather
+   * than deriving: which currency an amount is in is the consumer's fact and not
+   * a value Prism could read off a locale. `locale` is optional because it has a
+   * platform answer, and the caller who holds a market states the one their
+   * product writes in.
+   */
+  | (FieldCommon & { kind: 'MoneyField'; currency: string; locale?: string })
   /** A one time code, with the digits it has. */
   | (FieldCommon & { kind: 'OneTimeCode'; length?: number })
   /** One choice from a list, with the choices themselves. */
@@ -428,12 +437,11 @@ export type RelationSpec = {
 }
 
 /**
- * One figure over a population, as typed data.
+ * What every metric carries, whatever series or destination it names.
  *
- * **A metric is a reading taken over a population this package never saw, which is
- * what makes it a typed value of its own rather than a field with another name.** A
- * balance on one row is a field and a total owed across every account is a metric.
- * Nothing in a metric belongs to one record, and there is no record to open.
+ * Held separately from `MetricSpec` because the two pairs below are a union rather
+ * than a pair of optional members, and an intersection of an object with a union is
+ * how a shape says "these two travel together" in TypeScript.
  *
  * `value` is a node rather than a number, in the consumer's units and their own
  * formatting, because a figure the consumer composed is one this package cannot print.
@@ -442,9 +450,55 @@ export type RelationSpec = {
  * `(value: number) => string` callback the `Metric` Component takes, and the reason
  * is the same one that keeps the whole module serialisable: a function is not data an
  * agent can read out of a document, and a delta of `0.12` is twelve percent, twelve
- * cents or twelve milliseconds. `series` is the readings behind the shape, and
- * `seriesLabel` names them, because a shape with no name is not announced and two
- * shapes in a row of four cannot be told apart.
+ * cents or twelve milliseconds. It stays optional even beside `delta`, because a delta
+ * with no formatter is a reading this package prints as the number it was handed.
+ */
+type MetricFields = {
+  /** The figure's own key, stable, and never the words of the label. */
+  key: string
+  /** What the figure is, required because a figure with nothing saying so is a guess. */
+  label: ReactNode
+  /** The figure itself, in the consumer's units and their own formatting. */
+  value: ReactNode
+  /** The change, as a number whose sign is the direction. */
+  delta?: number
+  /** The change in the consumer's own words, printed as passed wherever it is set. */
+  deltaFormat?: ReactNode
+  /** The period, the source or the caveat that matters this week. */
+  hint?: ReactNode
+}
+
+/**
+ * The readings behind the shape, together with the name they are read by.
+ *
+ * **A union, because the pair travels together and a reader should be able to see
+ * it.** One arm sets a series and requires its name, the other forbids both, so a
+ * series with no label is held by the type rather than by a runtime check the reader
+ * cannot see. `Sparkline` gives the reason the name is required: a shape with no name
+ * is not announced, and two shapes in a row of four cannot be told apart.
+ */
+type MetricSeries =
+  | { series?: undefined; seriesLabel?: undefined }
+  | { series: readonly number[]; seriesLabel: string }
+
+/**
+ * A destination for the figure, together with the words it is named in.
+ *
+ * A union for the reason `MetricSeries` is one: a link whose only words are the
+ * figure itself tells a reader nothing about what following it does, so the words
+ * are required wherever the destination is set.
+ */
+type MetricDestination =
+  | { href?: undefined; hrefLabel?: undefined }
+  | { href: string; hrefLabel: ReactNode }
+
+/**
+ * One figure over a population, as typed data.
+ *
+ * **A metric is a reading taken over a population this package never saw, which is
+ * what makes it a typed value of its own rather than a field with another name.** A
+ * balance on one row is a field and a total owed across every account is a metric.
+ * Nothing in a metric belongs to one record, and there is no record to open.
  *
  * **Trend is the caller's, and there is no `period` member.** A comparison needs a
  * period and the period is the consumer's fact: a billing screen's month is not a
@@ -458,28 +512,7 @@ export type RelationSpec = {
  * `href` the caller passes. A total computed over the figures a caller happened to
  * hand is a number that is false the moment the population is larger than the page.
  */
-export type MetricSpec = {
-  /** The figure's own key, stable, and never the words of the label. */
-  key: string
-  /** What the figure is, required because a figure with nothing saying so is a guess. */
-  label: ReactNode
-  /** The figure itself, in the consumer's units and their own formatting. */
-  value: ReactNode
-  /** The change, as a number whose sign is the direction. */
-  delta?: number
-  /** The change in the consumer's own words, required wherever `delta` is set. */
-  deltaFormat?: ReactNode
-  /** The period, the source or the caveat that matters this week. */
-  hint?: ReactNode
-  /** The readings behind the shape, in the order they happened. */
-  series?: readonly number[]
-  /** The name of that series, required wherever `series` is set. */
-  seriesLabel?: string
-  /** A destination for the figure, which is the only drill down there is. */
-  href?: string
-  /** The words that destination is named in, required wherever `href` is set. */
-  hrefLabel?: ReactNode
-}
+export type MetricSpec = MetricFields & MetricSeries & MetricDestination
 
 /**
  * One dated, attributed occurrence, as typed data.

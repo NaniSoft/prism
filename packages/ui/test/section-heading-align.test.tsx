@@ -885,7 +885,7 @@ const HEADINGS: Array<{
     render: () => (
       <Dashboard01
         title={TITLE}
-        metrics={[{ label: 'One label', value: '1' }]}
+        metrics={[{ key: 'one', label: 'One label', value: '1' }]}
         panels={[{ id: 'first', title: 'First panel', children: <p>One sentence.</p> }]}
       />
     ),

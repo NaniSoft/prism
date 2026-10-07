@@ -1003,6 +1003,28 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'RecordForm01',
+    slug: 'record-form-01',
+    kind: 'block',
+    category: null,
+    description:
+      'A create and edit form rendered whole from a typed, ordered field specification, with grouped fields, an issue list keyed by field, one or two columns and a save union of three arms.',
+    source: 'src/blocks/record-form-01/index.tsx',
+    exports: ['RecordForm01'],
+    status: 'stable',
+  },
+  {
+    name: 'RecordDetail01',
+    slug: 'record-detail-01',
+    kind: 'block',
+    category: null,
+    description:
+      'One record in full: its identity, the facts the caller declares, the content the caller composes, the actions the caller writes beside the record, and its relationships as one ordered list on one frame, each drawn open one ring deep with the empty words the caller names when it has none.',
+    source: 'src/blocks/record-detail-01/index.tsx',
+    exports: ['RecordDetail01'],
+    status: 'stable',
+  },
+  {
     name: 'SettingsPanel01',
     slug: 'settings-panel-01',
     kind: 'block',

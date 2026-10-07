@@ -1,0 +1,118 @@
+---
+slug: blocks/record-form-01
+title: RecordForm01
+---
+
+## Overview
+
+RecordForm01 is the record write form: a create or edit screen rendered whole
+from a typed, ordered field specification. It takes groups of fields, draws
+Prism's own controls inside one shell, and hands the form's values to the caller
+at submit. It fetches nothing, keeps no application state and decides nothing
+about whether a value is valid.
+
+The fields arrive as typed data from `@nanisoft/prism-ui/spec`: a list of
+`FieldSpecGroup`, each an optional heading, an optional description and an
+ordered list of `FieldSpec`. A field carries a stable `key`, a required `label`,
+a required `kind` drawn from Prism's own input vocabulary, and optional help,
+hint, placeholder, disabled flag and starting value. A control this package does
+not ship is the `slot` arm, and the Block still draws the label, the help and
+the error around the caller's node.
+
+The error state is an issue list keyed by field. An entry names a field's `key`
+and a message in the product's own words, and the message is drawn under the
+control that owns it. A message about the submission rather than about a control
+is `submitError`: it names no field and marks at most one.
+
+Where the submission goes is a union of three arms, and the compiler holds it:
+
+| Arm | What it means |
+| --- | --- |
+| `action` | The form posts to a URL the caller names. |
+| `onSubmit` | The form's own element is handed to a function. |
+| `submit` | The caller places their own control, unstyled, in the footer. |
+
+The Block composes these components:
+
+| Part | Component | Role |
+| --- | --- | --- |
+| Shell | Field, Label, FieldDescription, FieldError | the label, help and error around every control |
+| Texts | Input, Textarea, NumberField, MoneyField, SearchField, PasswordField, OneTimeCode | text and secret fields |
+| Choices | Select, NativeSelect, Combobox, MultiCombobox, ToggleGroup, RadioGroup, ChoiceCard | one or many choices |
+| Dates and ranges | Calendar, DatePicker, Slider, RangeField | a moment and a span |
+| Settings | Switch, Checkbox, Toggle | an on or off value |
+| Files and rows | Dropzone, FileUpload, ImageListField, RepeatableRows | what the reader brings or builds |
+
+## Usage
+
+```tsx
+import { RecordForm01 } from '@nanisoft/prism-ui/blocks/record-form-01'
+import type { FieldSpecGroup } from '@nanisoft/prism-ui/spec'
+
+const groups: readonly FieldSpecGroup[] = [
+  {
+    id: 'identity',
+    label: 'Identity',
+    fields: [
+      { key: 'name', label: 'Workspace name', kind: 'Input', required: true },
+      {
+        key: 'plan',
+        label: 'Plan',
+        kind: 'Select',
+        options: [
+          { value: 'team', label: 'Team' },
+          { value: 'business', label: 'Business' },
+        ],
+      },
+    ],
+  },
+]
+
+<RecordForm01
+  title="New workspace"
+  groups={groups}
+  columns={2}
+  issues={issues}
+  submitLabel="Create workspace"
+  onSubmit={(form) => save(new FormData(form))}
+/>
+```
+
+<ComponentDemo slug="record-form-01" />
+
+## Guidelines
+
+### When to use
+
+Use RecordForm01 for a screen whose job is to create or edit one record and whose
+fields are Prism's own controls. It earns its space when the fields group under
+headings, when a control's value arrives from a request or from the record, and
+when the same screen serves both create and edit.
+
+### When not to use
+
+Do not use it for a form whose fields belong to a process rather than a record.
+A form that draws one group at a time, puts a rail above them and asks whether a
+step may be left forwards is `RecordWizard01`, not this Block.
+
+Do not use it when the fields are a filter bar or a settings row inside another
+region. Compose `Form`, `Field` and the controls directly.
+
+### Best practices
+
+- Give every field a `key` that is the value's own key and never the words of
+  the label. The issue list and the form's `FormData` are keyed by it.
+- Leave validation to the consumer. The specification carries no rule, and the
+  Block never checks a value against anything.
+- Pass `columns={2}` only when every field reads as a pair. Two is the only
+  multi-column form layout in which a label stays above its control.
+- Reach for the `slot` arm for a control Prism does not ship rather than growing
+  the union for one screen.
+- Own the fetch at the call site. The Block hands the values over and does
+  nothing else with them.
+
+### Content guidelines
+
+- A field label is a short noun: "Workspace name", "Seats".
+- Help text is a sentence the reader must have; hint text is one they might.
+- An issue message says what to do next, in the product's own words.

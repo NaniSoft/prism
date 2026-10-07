@@ -1604,6 +1604,19 @@ of other records, and a metric names a reading over a population, so a union
 carrying two of them would let a caller ask for a field where a metric belongs and
 receive a labelled input under a figure.
 
+**The metric summary Block is the first consumer of that type, and the expansion is
+recorded here rather than left to the code.** `Dashboard01.metrics` is a
+`MetricSpec[]` from `@nanisoft/prism-ui/spec`, so the row a consumer composes on an
+overview is the same shape it composes on a project dashboard and a summary panel,
+and its own `Dashboard01Metric` is an alias of the shared type rather than a second
+declaration of it. This is the expand step of an expand-contract sequence: the other
+four figure owners (`ProjectDashboard01Figure`, `ChartCard01Reading`, `Trend01Item`
+and `Stat`) are migrated in later batches and their superseded local declarations are
+deleted by a contract ticket, so the count of disagreeing shapes falls across releases
+rather than in one breaking step. The alias keeps the old name resolvable until then,
+and a reader seeing one shape named twice should read the second name as a synonym on
+its way out rather than as a vocabulary.
+
 **What it carries, and each field is here for the reason its twin in the other
 three specifications is.** `key`, stable and never the words of the label, because
 it is what the caller's values and any future change to the row are keyed by, and a

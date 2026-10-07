@@ -5,40 +5,79 @@ title: DataTable01
 
 ## Overview
 
-DataTable01 is a table section for a paged collection: a toolbar, a search
-field, a filter popover, optional row selection, a per-row action menu and
-pagination. It renders the rows it is given and reports every interaction
-through a callback.
+DataTable01 is the record index: a table section for a paged collection, with a
+toolbar, a search field, a filter popover, grouping, row selection, a per-row
+overflow menu, and pagination. It renders the rows it is given and reports every
+interaction through a callback.
+
+The columns arrive as typed data, a `ColumnSpec` from
+`@nanisoft/prism-ui/spec`, naming Prism's own cell vocabulary rather than a render
+function per column. `key`, `header` and `kind` are required on each one. The row
+value at the column's key is the cell's content: a single-node kind draws it as
+that Component's child, a structured kind takes it as that Component's props, and
+the `slot` kind draws it as the caller's own node inside the header, alignment and
+sort affordance the block draws.
+
+The block owns one piece of state, the selection set, and only the set of keys the
+caller has already fetched. It fetches nothing, sorts nothing, filters nothing and
+slices nothing. `getRowId` is required, because a row's position moves under
+sorting, filtering and paging and an index-keyed selection would act on the wrong
+records.
+
+Per-row actions are a node per row: `renderRowActions` returns the caller's own
+menu or link, and the block draws the trailing cell and nothing inside it. A row
+action that navigates is written as the `render` element a `DropdownMenuItem`
+already takes, so the anchor is the control and there is one tab stop for one
+action. The block owns none of the menu's behaviour.
+
+Grouping is a key on a row, not a second arrangement. `groupBy` returns the key a
+row belongs to and `groupLabel` names the heading the block draws above each run
+of rows that shares one. A heading is a row in the same body as any other, and it
+is not a record: it is never in the selection set, in the count or in what the
+page's select-all covers.
 
 The block composes these components:
 
 | Part | Component | Role |
 | --- | --- | --- |
 | Toolbar | Input, Button, DropdownMenu, Popover | search, filters, column visibility |
-| Grid | Table, Checkbox | the rows, with an optional selection column |
-| Row menu | DropdownMenu | the actions for one row |
+| Batch bar | the block's frame, Button | the count, the caller's controls and the dismiss |
+| Grid | Table, Checkbox, TableSort | the rows, the headings, the selection column and the sort affordance |
+| Cells | Typography, Price, RelativeTime, Status, Badge, Avatar, TagGroup, Checklist, Diff, Mark, Kbd, CodeBlock | the cell vocabulary |
+| Announcement | LiveRegion | the count, politely |
 | Paging | Pagination, Button | the page window and the step controls |
-
-The block owns no data and does no filtering, sorting or fetching. The page
-number, the search text, the filter values and the selected ids are controlled
-props, so a server page or a client cache drives it by the same contract. When a
-controlled prop is omitted, that interaction falls back to internal state.
 
 ## Usage
 
 ```tsx
 import { DataTable01 } from '@nanisoft/prism-ui/blocks/data-table-01'
+import type { ColumnSpec } from '@nanisoft/prism-ui/spec'
+
+const columns: readonly ColumnSpec[] = [
+  { key: 'name', header: 'Account', kind: 'Typography' },
+  { key: 'status', header: 'Status', kind: 'Badge' },
+  { key: 'seats', header: 'Seats', kind: 'Typography', align: 'end' },
+]
 
 <DataTable01
-  columns={[
-    { id: 'name', header: 'Account', cell: (row) => String(row.name) },
-    { id: 'status', header: 'Status', cell: (row) => String(row.status) },
-  ]}
+  columns={columns}
   rows={pageRows}
   getRowId={(row) => String(row.id)}
   selectable
   selectedIds={selected}
   onSelectedIdsChange={setSelected}
+  batchActions={<Button onClick={archiveSelected}>Archive</Button>}
+  groupBy={(row) => row.plan}
+  groupLabel={(plan) => plan}
+  renderRowActions={(row) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger aria-label={`Actions for ${row.name}`}>...</DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {/* The row navigates, so the anchor is the row and not a link inside it. */}
+        <DropdownMenuItem render={<a href={`/accounts/${row.id}`} />}>View account</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )}
   page={page}
   pageCount={pageCount}
   onPageChange={setPage}
@@ -61,25 +100,36 @@ of search, filters or row selection.
 Do not use it for fewer than a dozen rows with no paging. A plain `Table` with a
 heading is lighter and reads the same.
 
-Do not hide the page's primary action in the row menu. Keep the main action on
-the screen and reserve the menu for secondary commands.
+Do not hide the page's primary action in the row node. Keep the main action on
+the screen and reserve the trailing cell for secondary commands.
 
 ### Best practices
 
 - Own the data at the call site. Filter and page there, and pass only the
-  current page in, so the table stays a view rather than a state store.
-- Give every row a stable `getRowId`. An index-based id loses the selection
-  when the page changes.
-- Pass `headingLevel` when the table is inside a section that already has a heading.
-  It defaults to `h2` and the Block draws no `Section` of its own.
-- Pass `caption` when the table needs a name that is not the Block title. A
-  `<caption>` is the strongest of the three ways to name a table and the caller own
-  words are the right ones; without it the table is named by the heading through a
-  reference, and with no `title` either it is unnamed.
-- Pass every string in `labels`, and reset the page to one when the search or a
-  filter changes.
+  current page in, so the index stays a view rather than a state store.
+- Give every row a stable `getRowId`. An index-based id loses the selection when
+  the page changes or the rows are sorted.
+- Pass `onSelectedIdsChange` whenever the index is selectable, even if you do not
+  use the value: it is how the split beside the index reacts, in one line, without
+  either pane knowing the other.
+- Write the selection summary so that the visible count and the announced count
+  are the same words. The block speaks that string, and never a list of labels.
+- Pass `headingLevel` when the table is inside a section that already has a
+  heading. It defaults to `h2` and the block draws no `Section` of its own.
+- Pass `caption` when the table needs a name that is not the block title.
+- Give every row's `renderRowActions` a node that acts: a `CtaLink` that
+  navigates, or a `DropdownMenu` whose rows carry their own handler or a
+  `render` element with an `href`.
+- Pass `groupBy` and `groupLabel` to draw a grouped body, and keep rows that
+  share a key adjacent: the block never reorders them, so a run of rows with one
+  key is one group. A heading is not a record and is never counted.
+- Report `selectionScope={{ scope: 'filter', count }}` when the reader has
+  selected every record matching the current filter. The count is yours, and the
+  block announces it rather than the number of rows on screen, because the
+  population is one it never fetched.
 
 ### Content guidelines
 
 - A column header is a short noun: "Account", "Seats".
 - A row action is a verb phrase: "View details", "Rename", "Delete".
+- The per-row checkbox name names the record: `Select Northwind`, not `Select row`.

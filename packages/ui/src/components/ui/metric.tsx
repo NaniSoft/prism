@@ -69,9 +69,11 @@ export interface MetricProps extends Omit<ComponentProps<'div'>, 'children'> {
    * Component that guessed would be claiming a caller's units. The fallback is
    * the number itself, so a caller who passes a fraction and no formatter gets
    * `0.12` printed, which is honest and usually not what was wanted. Pass the
-   * formatter.
+   * formatter. The return is a `ReactNode` rather than a string, because a caller
+   * that already composed the words carries them as one and a plain string is the
+   * same value.
    */
-  deltaFormat?: (value: number) => string
+  deltaFormat?: (value: number) => ReactNode
   /**
    * The line under the label, for whatever the caller wants said about the
    * figure: the period it covers, the source it came from, the caveat that

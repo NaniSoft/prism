@@ -16,6 +16,7 @@ import {
   type HeadingLevel,
 } from '../../components/ui/section'
 import { Sparkline } from '../../components/ui/sparkline'
+import type { MetricSpec } from '../../lib/spec'
 import { cn } from '../../lib/utils'
 
 /**
@@ -33,63 +34,20 @@ import { cn } from '../../lib/utils'
 export type Dashboard01Span = 'full' | 'half' | 'third'
 
 /**
- * One figure at the top of an overview, and the four optional things a figure
- * comes with.
+ * The name this Block used to carry for its own figure shape, kept exported while
+ * the shared specification reaches the other four figure owners.
  *
- * `label` and `value` are the two that make a figure a figure. The rest are
- * annotation, and a metric with no annotation renders the two it has rather than a
- * card with a line of empty space where the annotation would have been, which is
- * the rule every optional field on this type follows.
+ * **It is a synonym rather than a second declaration, and this is the expand step.**
+ * `MetricSpec` in `@nanisoft/prism-ui/spec` is the one shape a metric now takes, and
+ * this alias exists so a name that was exported continues to resolve until the
+ * contract ticket deletes the superseded local declarations. A second figure shape
+ * beside the shared one would be the sixth disagreement the specification module was
+ * created to end, so this declares nothing of its own.
  *
- * `deltaFormat` is here for the reason `Metric` refuses to guess: a delta of `0.12`
- * is twelve percent, twelve cents or twelve milliseconds, and a Component that
- * attached a percent sign to it would be claiming a caller's units. The cost of the
- * refusal is that a caller who passes a fraction and no formatter gets `0.12`
- * printed, which is honest and almost never what was wanted, so the formatter is a
- * prop here and the alternative was a Block guessing on every consumer's behalf.
+ * @deprecated Pass a `MetricSpec` from `@nanisoft/prism-ui/spec`. This alias is
+ * removed by the ticket that migrates the other four figure owners.
  */
-export type Dashboard01Metric = {
-  /** What the figure measures, read under the figure rather than above it. */
-  label: string
-  /** The figure itself, in the caller's own units and the caller's own formatting. */
-  value: ReactNode
-  /**
-   * The change against the previous reading, where the sign is the direction.
-   *
-   * A `number` and not an object with a `direction`, for the reason `Metric` states
-   * in full: a number has exactly one sign, and a shape with both lets a caller put
-   * a rising mark on a falling reading.
-   */
-  delta?: number
-  /** The words for the delta, given the number. See the note on this type. */
-  deltaFormat?: (value: number) => string
-  /** The line under the label: the period, the source, the caveat that matters. */
-  hint?: ReactNode
-  /** The readings behind the figure, drawn small beside it. See `sparklineLabel`. */
-  sparkline?: number[]
-  /**
-   * The name of the series the sparkline draws, and the only thing a screen reader
-   * reads before the numbers.
-   *
-   * Required whenever `sparkline` is set, and the pair is checked together rather
-   * than left to the Component. `Sparkline` needs a name for the same reason `Chart`
-   * does: two sparklines in a row of four are two pictures a reader cannot tell
-   * apart, and a picture with no name is not announced and not linkable. Requiring
-   * it at the Block's own boundary rather than letting the Component throw means the
-   * diagnostic names the field the caller has to add.
-   */
-  sparklineLabel?: string
-  /** Where the figure is kept. Its presence makes the tile carry a link. */
-  href?: string
-  /**
-   * The words on the link, and required whenever `href` is.
-   *
-   * A link whose only words are the figure itself tells a reader nothing about what
-   * following it does, and the same rule holds in every Block in this package that
-   * draws a link.
-   */
-  hrefLabel?: string
-}
+export type Dashboard01Metric = MetricSpec
 
 /**
  * One panel in the grid: an identifier, how much width it takes, and the caller's
@@ -151,13 +109,22 @@ export type Dashboard01Props = {
    */
   header?: ReactNode
   /**
-   * The figures along the top, in the order a reader should meet them.
+   * The figures along the top, as the shared `MetricSpec` typed data, in the order
+   * a reader should meet them.
+   *
+   * **It is the shared specification and not a shape of this Block's own.** `key`,
+   * `label` and `value` are required on each figure, `delta` is a number whose sign
+   * is the direction, `deltaFormat` is the caller's own words for that change,
+   * `hint` carries the period or the caveat, and a `series` and an `href` each
+   * travel with the label or the words they cannot be read without. The type is
+   * published as `@nanisoft/prism-ui/spec` so the words a caller learns on this row
+   * are the words on every other figure surface.
    *
    * Order is the caller's because it is a claim about what matters first. A row
    * that sorted itself by size or by name would be making that claim on the
    * caller's behalf, and on a dashboard the claim is the whole point.
    */
-  metrics?: Dashboard01Metric[]
+  metrics?: MetricSpec[]
   /** The panels, in the order a reader should meet them. See `Dashboard01Panel`. */
   panels?: Dashboard01Panel[]
   /**
@@ -204,27 +171,29 @@ const SPAN: Record<Dashboard01Span, string> = {
  * The refusals, as checks, so a tile that would render a control nobody can name is
  * a diagnostic in a console rather than a rendered link.
  *
- * The pair rule is the same one `Changelog01` and `ContentGrid01` make: a link whose
- * only words are the figure's own value tells a reader nothing about what following
- * it does, and an accessible name that is an address is punctuation rather than a
- * name. The sparkline's label is checked here rather than left to the Component
- * because the Component's own message names a Component's field, and a caller who
- * wired a dashboard up would rather be told which of their own props to add.
+ * **The type already holds both pairs, and these checks exist for the caller the
+ * type never saw.** `MetricSpec` requires a destination's words wherever it has a
+ * destination and a series name wherever it has a series, so a typed caller cannot
+ * reach either diagnostic. A JavaScript caller can, and the cost of reaching one is
+ * a tile that draws a link with no words or a shape no reader can announce, so the
+ * same rule is stated once more where a runtime value can be read: the pair rule is
+ * the one `Changelog01` and `ContentGrid01` make, and the series name is the one
+ * `Sparkline` gives in full.
  */
-function assertMetrics(metrics: readonly Dashboard01Metric[]): void {
+function assertMetrics(metrics: readonly MetricSpec[]): void {
   for (const metric of metrics) {
     if ((metric.href === undefined) !== (metric.hrefLabel === undefined)) {
       throw new Error(
-        `Dashboard01: the metric "${metric.label}" declares one of href and hrefLabel without the other, so the ` +
+        `Dashboard01: the metric "${metric.key}" declares one of href and hrefLabel without the other, so the ` +
           'tile would carry a link with no words on it, or a name with no link beside it. Pass the words that say ' +
           'what following it does, or omit the href.',
       )
     }
-    if (metric.sparkline !== undefined && metric.sparklineLabel === undefined) {
+    if ((metric.series === undefined) !== (metric.seriesLabel === undefined)) {
       throw new Error(
-        `Dashboard01: the metric "${metric.label}" passes a sparkline with no sparklineLabel, so the figure would ` +
-          'be a picture with no name, which a screen reader cannot announce and two sparklines in one row cannot be ' +
-          'told apart. Pass the series name in the words the product uses.',
+        `Dashboard01: the metric "${metric.key}" declares one of series and seriesLabel without the other, so the ` +
+          'figure would be a picture with no name, which a screen reader cannot announce and two shapes in one row ' +
+          'cannot be told apart. Pass the series name in the words the product uses, or omit the series.',
       )
     }
   }
@@ -246,17 +215,20 @@ function assertMetrics(metrics: readonly Dashboard01Metric[]): void {
  * Prism happened to put first. So `panels` is a list with a width on each entry and
  * this Block's only remaining opinion is the six-track grid they are placed on.
  *
- * **The figures are `Metric` and `Sparkline`, and a dashboard that hand-drew its own
- * metric row would be a second implementation of a Component whose whole argument is
- * that the direction is derived rather than declared.** `Metric`'s delta is a
- * `number` and the sign is the direction, so a rising mark cannot be drawn on a
- * falling reading; a Block that took `{ value, direction }` could, and the mistake
- * would be invisible in review and visible to every reader of that dashboard. It
- * also puts the label under the value, which is the arrangement a dashboard row
- * wants, because a row is scanned by its figures and settled by its names. And
- * `Sparkline` draws the numbers behind its shape as a table in the document, so a
- * metric row of six costs six tables in the accessibility tree rather than six
- * pictures nobody can query. The cost is stated rather than implied: a sparkline
+ * **The figures are typed by the shared `MetricSpec` and drawn by `Metric` and
+ * `Sparkline`, and a dashboard that hand-drew its own metric row would be a second
+ * implementation of a Component whose whole argument is that the direction is derived
+ * rather than declared.** The row is a list of the same specification every other
+ * figure surface takes, published as `@nanisoft/prism-ui/spec`, so a consumer that
+ * learned the shape here exports it unchanged to a project dashboard and a summary
+ * panel. `Metric`'s delta is a `number` and the sign is the direction, so a rising
+ * mark cannot be drawn on a falling reading; a Block that took `{ value, direction }`
+ * could, and the mistake would be invisible in review and visible to every reader of
+ * that dashboard. It also puts the label under the value, which is the arrangement a
+ * dashboard row wants, because a row is scanned by its figures and settled by its
+ * names. And `Sparkline` draws the numbers behind its shape as a table in the
+ * document, so a metric row of six costs six tables in the accessibility tree rather
+ * than six pictures nobody can query. The cost is stated rather than implied: a series
  * needs a name and a series that is not flat, and a caller who passes an empty array
  * or a series of one repeated value gets `Sparkline`'s own refusal, which is the
  * right place for it.
@@ -384,51 +356,56 @@ export function Dashboard01({
               data-slot="dashboard-01-metrics"
               className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
             >
-              {metrics.map((metric) => (
-                <Card
-                  key={metric.label}
-                  data-slot="dashboard-01-metric"
-                  data-metric={metric.label}
-                  className="gap-4 py-5"
-                >
-                  <CardContent className="flex flex-col gap-3">
-                    <Metric
-                      value={metric.value}
-                      label={metric.label}
-                      delta={metric.delta}
-                      deltaFormat={metric.deltaFormat}
-                      hint={metric.hint}
-                    />
-                    {metric.sparkline === undefined ? null : (
-                      <div data-slot="dashboard-01-sparkline" className="flex">
-                        {/*
-                          Pushed to the trailing edge so the sparklines in a row line
-                          up with each other, which is what makes the row read as one
-                          band of figures rather than four tiles with pictures at
-                          four different offsets.
+              {metrics.map((metric) => {
+                // The delta's words are the caller's own node, and `Metric` takes a
+                // formatter, so the node is placed through one. A delta with no words
+                // is left to `Metric`, which prints the number the caller passed.
+                const deltaWords = metric.deltaFormat
+                return (
+                  <Card
+                    key={metric.key}
+                    data-slot="dashboard-01-metric"
+                    data-metric={metric.key}
+                    className="gap-4 py-5"
+                  >
+                    <CardContent className="flex flex-col gap-3">
+                      <Metric
+                        value={metric.value}
+                        label={metric.label}
+                        delta={metric.delta}
+                        deltaFormat={deltaWords === undefined ? undefined : () => deltaWords}
+                        hint={metric.hint}
+                      />
+                      {metric.series === undefined ? null : (
+                        <div data-slot="dashboard-01-sparkline" className="flex">
+                          {/*
+                            Pushed to the trailing edge so the sparklines in a row line
+                            up with each other, which is what makes the row read as one
+                            band of figures rather than four tiles with pictures at
+                            four different offsets. The label is not optional here:
+                            `MetricSpec` requires a series name wherever a series is
+                            set, so the type has already refused the one case the cast
+                            used to stand in for.
+                          */}
+                          <Sparkline
+                            values={metric.series}
+                            label={metric.seriesLabel}
+                            className="ms-auto"
+                          />
+                        </div>
+                      )}
+                    </CardContent>
 
-                          The cast is because the check above the return has already
-                          refused a sparkline with no label, and TypeScript cannot see
-                          across a function boundary that a throw happened.
-                        */}
-                        <Sparkline
-                          values={metric.sparkline}
-                          label={metric.sparklineLabel as string}
-                          className="ms-auto"
-                        />
-                      </div>
+                    {metric.href === undefined ? null : (
+                      <CardFooter data-slot="dashboard-01-metric-link" className="justify-end">
+                        <CtaLink href={metric.href} variant="ghost" size="sm">
+                          {metric.hrefLabel}
+                        </CtaLink>
+                      </CardFooter>
                     )}
-                  </CardContent>
-
-                  {metric.href === undefined ? null : (
-                    <CardFooter data-slot="dashboard-01-metric-link" className="justify-end">
-                      <CtaLink href={metric.href} variant="ghost" size="sm">
-                        {metric.hrefLabel}
-                      </CtaLink>
-                    </CardFooter>
-                  )}
-                </Card>
-              ))}
+                  </Card>
+                )
+              })}
             </div>
           ) : null}
 

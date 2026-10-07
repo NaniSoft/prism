@@ -6660,6 +6660,116 @@
       ]
     },
     {
+      "name": "record-detail-01",
+      "title": "Record Detail 01 - One Record And Its Relationships",
+      "description": "One record in full: its identity, the facts the caller declares, the content the caller composes, the actions the caller writes beside the record, and its relationships as one ordered list on one frame. Every relation is drawn open in a collection arrangement this package already ships, one ring deep, with the empty words the caller names when it has none. Server Component, and it takes no total, no count and no sum.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "section",
+        "table",
+        "list-panel",
+        "timeline",
+        "avatar-group",
+        "cta-link",
+        "empty-state-01"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/record-detail-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/record-detail-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/record-detail-01/record-detail.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/record-detail-01/record-detail.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "record-form-01",
+      "title": "Record Form 01 - Field Specification",
+      "description": "A create and edit form rendered whole from a typed, ordered field specification, with grouped fields, an issue list keyed by field, one or two columns and a save union of three arms.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "button",
+        "calendar",
+        "checkbox",
+        "choice-card",
+        "combobox",
+        "date-picker",
+        "dropzone",
+        "field",
+        "file-upload",
+        "image-list-field",
+        "input",
+        "label",
+        "money-field",
+        "multi-combobox",
+        "native-select",
+        "number-field",
+        "one-time-code",
+        "password-field",
+        "radio-group",
+        "range-field",
+        "repeatable-rows",
+        "search-field",
+        "section",
+        "select",
+        "slider",
+        "switch",
+        "textarea",
+        "toggle",
+        "toggle-group"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/record-form-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/record-form-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/record-form-01/record-form.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/record-form-01/record-form.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "reset-password-01",
       "title": "Reset Password 01 - The Screen Most Of Its Life Is Expired",
       "description": "A new secret with a reveal control named in the caller's own language, a repeat that is not compared for the caller, a strength note that is the caller's own function of what has been typed, one submit control, an announced status region, and an expired arm that takes the form away rather than letting a reader type into it only to be refused. Whether the two entries match is the product's validation and the words beside the mismatch are its too, so this Block draws no comparison and no sentence. Every string is passed in as a prop.",
