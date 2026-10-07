@@ -3,6 +3,6 @@
   "title": "Project Dashboard 01 - One Overview, Composed Of Panels",
   "description": "One project's overview: a row of figures and a grid of titled panels whose spans the caller declares. Every panel is a slot, because what a project overview leads with is a fact about the project. The Block owns the grid, the spans and the figures row and nothing else, and every string and number is the caller's. Server Component.",
   "categories": ["application"],
-  "registryDependencies": ["section", "card", "metric", "status"],
+  "registryDependencies": ["section", "card", "metric", "status", "sparkline", "cta-link"],
   "dependencies": []
 }

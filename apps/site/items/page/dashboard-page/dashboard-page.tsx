@@ -80,9 +80,9 @@ export default function DashboardPageDemo() {
         title: 'Delivery',
         headingLevel: 'h2',
         stats: [
-          { label: 'Active accounts', value: '1,284', delta: 12, hint: 'vs last month' },
-          { label: 'On track', value: '47.2%', delta: -3, hint: 'vs last month' },
-          { label: 'Open issues', value: '138' },
+          { key: 'accounts', label: 'Active accounts', value: '1,284', delta: 12, deltaFormat: '12 more than last month', hint: 'vs last month' },
+          { key: 'on-track', label: 'On track', value: '47.2%', delta: -3, deltaFormat: '3 points lower', hint: 'vs last month' },
+          { key: 'issues', label: 'Open issues', value: '138' },
         ],
       }}
       table={{

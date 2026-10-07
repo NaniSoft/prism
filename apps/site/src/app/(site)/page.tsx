@@ -4,7 +4,8 @@ import { buildCatalog } from '@nanisoft/prism-ui/catalog'
 import { PulseGraph, type PulseNode, type PulseRelation } from '@nanisoft/prism-ui/components/pulse-graph'
 import { Hero01 } from '@nanisoft/prism-ui/blocks/hero-01'
 import { InstrumentPanel01 } from '@nanisoft/prism-ui/blocks/instrument-panel-01'
-import { Stats01, type Stat } from '@nanisoft/prism-ui/blocks/stats-01'
+import { Stats01 } from '@nanisoft/prism-ui/blocks/stats-01'
+import type { MetricSpec } from '@nanisoft/prism-ui/spec'
 import { PackBand } from '@/components/landing/pack-band'
 import { Principles } from '@/components/landing/principles'
 
@@ -24,11 +25,11 @@ const catalogue = buildCatalog()
 const countOf = (kind: (typeof catalogue)[number]['kind']) =>
   catalogue.filter((item) => item.kind === kind).length
 
-const STATS: Stat[] = [
-  { label: 'Components', value: String(countOf('component')), hint: 'across seven role categories' },
-  { label: 'Blocks', value: String(countOf('block')), hint: 'composed sections that take content as props' },
-  { label: 'Packs', value: '6', hint: 'one base and five pastels' },
-  { label: 'Modes', value: '2', hint: 'light and dark, selected independently' },
+const STATS: MetricSpec[] = [
+  { key: 'components', label: 'Components', value: String(countOf('component')), hint: 'across seven role categories' },
+  { key: 'blocks', label: 'Blocks', value: String(countOf('block')), hint: 'composed sections that take content as props' },
+  { key: 'packs', label: 'Packs', value: '6', hint: 'one base and five pastels' },
+  { key: 'modes', label: 'Modes', value: '2', hint: 'light and dark, selected independently' },
 ]
 
 /**

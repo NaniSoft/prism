@@ -8,8 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from '../../components/ui/card'
+import { CtaLink } from '../../components/ui/cta-link'
 import { Metric } from '../../components/ui/metric'
 import { childLevel, type HeadingLevel } from '../../components/ui/section'
+import { Sparkline } from '../../components/ui/sparkline'
+import type { MetricSpec } from '../../lib/spec'
 import { cn } from '../../lib/utils'
 
 /**
@@ -32,24 +35,25 @@ import { cn } from '../../lib/utils'
 export type ChartCard01Span = 'full' | 'half' | 'third'
 
 /**
- * One figure the card states about what the figure shows.
+ * The name this Block used to carry for its own reading shape, kept exported while
+ * the shared specification reaches the four figure owners.
  *
- * A node and not a number for the reason `Metric` gives: a caller's figure is often a
- * value it formatted itself, and a number prop would make it either ship that as a
- * string outside the Component or lose the unit it belongs to. `deltaFormat` is here
- * for the same reason: Prism formats the delta and nothing else, and a delta of `0.12`
- * is twelve percent, twelve cents or twelve milliseconds.
+ * **It is a synonym rather than a second declaration, and this is the migrate step.**
+ * `MetricSpec` in `@nanisoft/prism-ui/spec` is the one shape a reading now takes, and
+ * this alias exists so a name that was exported continues to resolve until the
+ * contract ticket deletes the superseded local declarations. A second reading shape
+ * beside the shared one would be the sixth disagreement the specification module was
+ * created to end, so this declares nothing of its own.
+ *
+ * The reason the old type gave for its own shape is kept where it belongs: the
+ * reading line states the figures the card knows about the figure it draws, and that
+ * the value is the caller's own node in the caller's own units. Both are properties
+ * of the shared shape rather than reasons for a local one.
+ *
+ * @deprecated Pass a `MetricSpec` from `@nanisoft/prism-ui/spec`. This alias is
+ * removed by the ticket that migrates the four figure owners.
  */
-export type ChartCard01Reading = {
-  /** What the figure measures, read under the figure rather than above it. */
-  label: string
-  /** The figure itself, in the caller's own units and the caller's own formatting. */
-  value: ReactNode
-  /** The change against the previous reading, where the sign is the direction. */
-  delta?: number
-  /** The words for the delta, given the number. See the note on this type. */
-  deltaFormat?: (value: number) => string
-}
+export type ChartCard01Reading = MetricSpec
 
 /**
  * The props a ChartCard01 takes. Every string is a prop and the Block ships none.
@@ -83,8 +87,19 @@ export type ChartCard01Props = {
    * here, which is the only reason the swatch and the mark cannot disagree.
    */
   legend?: ReactNode
-  /** The figures this card states about what the figure shows. */
-  reading?: ChartCard01Reading[]
+  /**
+   * The figures this card states about what the figure shows, as the shared
+   * `MetricSpec` typed data.
+   *
+   * **The shared specification and not a shape of this Block's own.** `key`,
+   * `label` and `value` are required on each reading, `delta` is a number whose sign
+   * is the direction, `deltaFormat` is the caller's own words for that change,
+   * `hint` carries the period or the caveat, and a `series` and an `href` each travel
+   * with the label or the words they cannot be read without. The type is published as
+   * `@nanisoft/prism-ui/spec`, so the words a caller learns on a summary are the
+   * words on this card.
+   */
+  reading?: MetricSpec[]
   /** The controls that act on the figure: a range, a segment, a download. */
   actions?: ReactNode
   /** The band under the figure, for the line that qualifies it. */
@@ -115,6 +130,37 @@ const SPAN: Record<ChartCard01Span, string> = {
   full: '',
   half: 'lg:col-span-3',
   third: 'lg:col-span-2',
+}
+
+/**
+ * The refusals, as checks, so a reading that would render a link nobody can name is
+ * a diagnostic in a console rather than a rendered link.
+ *
+ * **The type already holds both pairs, and these checks exist for the caller the
+ * type never saw.** `MetricSpec` requires a destination's words wherever it has a
+ * destination and a series name wherever it has a series, so a typed caller cannot
+ * reach either diagnostic. A JavaScript caller can, and the cost of reaching one is
+ * a reading that draws a link with no words or a shape no reader can announce, so
+ * the same rule is stated once more where a runtime value can be read: the pair rule
+ * is the one `Dashboard01` makes.
+ */
+function assertMetrics(metrics: readonly MetricSpec[]): void {
+  for (const metric of metrics) {
+    if ((metric.href === undefined) !== (metric.hrefLabel === undefined)) {
+      throw new Error(
+        `ChartCard01: the reading "${metric.key}" declares one of href and hrefLabel without the other, so the ` +
+          'reading would carry a link with no words on it, or a name with no link beside it. Pass the words that say ' +
+          'what following it does, or omit the href.',
+      )
+    }
+    if ((metric.series === undefined) !== (metric.seriesLabel === undefined)) {
+      throw new Error(
+        `ChartCard01: the reading "${metric.key}" declares one of series and seriesLabel without the other, so the ` +
+          'figure would be a picture with no name, which a screen reader cannot announce and two shapes in one row ' +
+          'cannot be told apart. Pass the series name in the words the product uses, or omit the series.',
+      )
+    }
+  }
 }
 
 /**
@@ -152,6 +198,15 @@ const SPAN: Record<ChartCard01Span, string> = {
  * so a card composed one level deeper carries its outline with it instead of
  * announcing three siblings of the section that introduces them.
  *
+ * **The readings are the shared `MetricSpec` and not a shape of this Block's own, so
+ * a figure declared for a summary is the same figure here.** Each reading carries a
+ * stable `key` that is never the words of the label, a required `label` and `value`,
+ * a `delta` whose sign is the direction, an optional `deltaFormat` carrying the
+ * caller's own words for the change, an optional `hint` for the period or the
+ * caveat, and an optional `series` and `href` with their names. A delta with no
+ * formatter prints the number the caller passed and one with a formatter prints the
+ * caller's words, which is the disagreement this migration closes.
+ *
  * **The readings sit in a flex row that wraps, and they share the width rather than
  * holding a fixed one.** The measurement that decides it: a `third` card at the
  * 72rem container is about 22rem wide, so three readings across it are about 7rem
@@ -188,6 +243,8 @@ export function ChartCard01({
   // One step below the heading that introduces this card, so the card's own title
   // nests under the section rather than beside it.
   const Title = childLevel(headingLevel)
+
+  if (reading.length > 0) assertMetrics(reading)
 
   return (
     <div data-slot="chart-card-01" data-span={span} className={cn(SPAN[span], className)}>
@@ -231,16 +288,42 @@ export function ChartCard01({
               data-slot="chart-card-01-reading"
               className="border-border flex flex-wrap items-end gap-x-6 gap-y-3 border-t pt-4"
             >
-              {reading.map((entry) => (
-                <div key={entry.label} className="min-w-0 flex-1">
-                  <Metric
-                    value={entry.value}
-                    label={entry.label}
-                    delta={entry.delta}
-                    deltaFormat={entry.deltaFormat}
-                  />
-                </div>
-              ))}
+              {reading.map((metric) => {
+                // The delta's words are the caller's own node, and `Metric` takes a
+                // formatter, so the node is placed through one. A delta with no words
+                // is left to `Metric`, which prints the number the caller passed.
+                const deltaWords = metric.deltaFormat
+                return (
+                  <div
+                    key={metric.key}
+                    data-slot="chart-card-01-reading-item"
+                    data-metric={metric.key}
+                    className="flex min-w-0 flex-1 flex-col gap-3"
+                  >
+                    <Metric
+                      value={metric.value}
+                      label={metric.label}
+                      delta={metric.delta}
+                      deltaFormat={deltaWords === undefined ? undefined : () => deltaWords}
+                      hint={metric.hint}
+                    />
+                    {metric.series === undefined ? null : (
+                      <div data-slot="chart-card-01-reading-sparkline" className="flex">
+                        <Sparkline
+                          values={metric.series}
+                          label={metric.seriesLabel}
+                          className="ms-auto"
+                        />
+                      </div>
+                    )}
+                    {metric.href === undefined ? null : (
+                      <CtaLink href={metric.href} variant="ghost" size="sm">
+                        {metric.hrefLabel}
+                      </CtaLink>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           )}
         </CardContent>

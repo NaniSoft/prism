@@ -4,10 +4,9 @@ import type { ReactNode } from 'react'
 import { useId, useState } from 'react'
 
 import { Button } from '../../components/ui/button'
-import { Field, FieldDescription, FieldLabel } from '../../components/ui/field'
-import { Input } from '../../components/ui/input'
+import { Field, FieldDescription } from '../../components/ui/field'
+import { Label } from '../../components/ui/label'
 import { LiveRegion } from '../../components/ui/live-region'
-import { NativeSelect } from '../../components/ui/native-select'
 import {
   Section,
   SectionHeading,
@@ -15,106 +14,16 @@ import {
   type HeadingLevel,
 } from '../../components/ui/section'
 import { Steps, type Step } from '../../components/ui/steps'
-import { Textarea } from '../../components/ui/textarea'
+import {
+  CHOICE_KINDS,
+  fieldText,
+  renderControl,
+  serialize,
+  SELF_LABELLED,
+  type FieldContext,
+} from '../../lib/field-render'
+import type { FieldKind, FieldSpec } from '../../lib/spec'
 import { cn } from '../../lib/utils'
-
-/**
- * The five controls a provisioning run can ask a reader to fill in.
- *
- * A closed set, and the closure is the point, for the reason `ContactField`
- * gives at full length: the controls are this Block's, so the field declaration is
- * data and Prism supplies none of it. A run that is committed in three steps and
- * four that is committed in one want the same Component, and a provisioning
- * question that needs a date picker or a file, or a set of radio buttons whose
- * options each carry their own description, is a caller's own surface composed
- * beside this one rather than a sixth arm here. The cost is named rather than
- * hidden: a consumer whose step needs a control Prism does not draw cannot reach
- * it through this type, and the answer is a step with no fields plus the control
- * the caller composes into `actions`.
- */
-export type ProvisioningFieldType = 'text' | 'email' | 'number' | 'select' | 'textarea'
-
-/**
- * One choice in a `select` field, and nothing else.
- *
- * A native `<option>` holds text and nothing more, which is the whole reason a
- * provisioning step's select is a `NativeSelect` rather than the Base UI one. The
- * two values are a string and its label, so a caller who needs a description
- * beside an option, a count, or anything nested is reaching for a control the
- * platform cannot render, and this Block does not pretend otherwise.
- */
-export type ProvisioningOption = {
-  /** What the run records for this choice, which is a key and not a sentence. */
-  value: string
-  /** The words the reader sees, in the product's own language. */
-  label: string
-}
-
-/**
- * What every provisioning field carries, whichever control it draws.
- *
- * `required` is a boolean rather than an optional prop because there is no third
- * state worth having: a field is one the reader must fill or one they may leave,
- * and `required?: boolean` leaves a caller who passed nothing unable to say which
- * of the two they meant.
- *
- * The field's value is not here. A run collects what the reader typed and hands
- * the whole record over at the commit, so there is nothing for a caller to hold
- * between two steps: a step is mounted, filled and unmounted, and the values
- * travel in the Block's own state, which is why this is a client Component.
- */
-type ProvisioningFieldBase = {
-  /** The caller's key for this field, and the key the value arrives under. */
-  id: string
-  /** The field's visible name, and the accessible name its control announces. */
-  label: string
-  /** Whether the reader may commit the run without filling it. */
-  required: boolean
-  /**
-   * A line under the control, announced with it.
-   *
-   * A node, because the honest line is sometimes not one sentence: a caller's
-   * hint, a link to the thing being asked about, a piece of the page's own copy.
-   * It is wired to the control through `aria-describedby` rather than drawn as a
-   * footnote, so a screen reader hears what this field is for as they reach it.
-   */
-  description?: ReactNode
-  /** What the control shows while it is empty. A hint, not a name. */
-  placeholder?: string
-  /** The platform's own autofill hint for this field. */
-  autoComplete?: string
-}
-
-/**
- * One field of the caller's run, and the control it draws.
- *
- * **A union and not one type with an optional `options`, and that is the shape
- * of the whole argument in this Block.** A run's fields are the caller's
- * declaration and not this package's opinion about what a reader may be asked,
- * and the one place that shows is the select: a select with no options is a
- * control with nothing in it, which is a question no reader can answer and looks
- * answered only because the control is there and focusable. A `options?: string[]`
- * on one type would typecheck the defect and leave only a diagnostic at run time
- * to catch it, which is one gate too late. The union is the same mechanism
- * `HeroAction` uses for the same reason: the shape that requires something
- * declares it, and the shape that forbids it says so in the type rather than in
- * prose.
- *
- * The cost of the union is that a caller building a field list generically, from
- * data, has to narrow before it can type the result, and the answer to that is a
- * narrowing function in the caller's own code rather than a looser type here.
- */
-export type ProvisioningField =
-  | (ProvisioningFieldBase & {
-      type: 'select'
-      /** The choices, in the order the reader should meet them. */
-      options: readonly ProvisioningOption[]
-    })
-  | (ProvisioningFieldBase & {
-      type: 'text' | 'email' | 'number' | 'textarea'
-      /** A select with no options is a question nobody can answer, so it is not one here. */
-      options?: never
-    })
 
 /**
  * One step of a run: what it is called, what happens there, and what the reader is
@@ -143,12 +52,15 @@ export type ProvisioningStep = {
   /**
    * What the reader is asked for on this step, in the order they should meet it.
    *
-   * A list and not a fixed set, for the reason `Contact01` states in full: a
-   * provisioning run with a fixed set of fields is a run that decides what a reader
-   * may be asked, and the decision is invisible in a review because the rendered
-   * form looks complete.
+   * The shared `FieldSpec`, so a step's fields use the vocabulary a record write
+   * form uses: a stable `key`, a required `label` and a required `kind` drawn from
+   * Prism's own controls, with the options a choice carries under that kind and a
+   * `slot` arm for a control this package does not ship. A list and not a fixed
+   * set, for the reason `Contact01` states in full: a provisioning run with a
+   * fixed set of fields is a run that decides what a reader may be asked, and the
+   * decision is invisible in a review because the rendered form looks complete.
    */
-  fields: readonly ProvisioningField[]
+  fields: readonly FieldSpec[]
 }
 
 /**
@@ -348,17 +260,20 @@ function assertRun(
 
   for (const step of steps) {
     for (const field of step.fields) {
-      if (blank(field.label)) {
+      if (blank(typeof field.label === 'string' ? field.label : undefined)) {
         throw new Error(
-          `Provisioning01: the field "${field.id}" on the step "${step.id}" declares no label, so the ` +
+          `Provisioning01: the field "${field.key}" on the step "${step.id}" declares no label, so the ` +
             'control would be announced with no name and two fields on this run would be announced ' +
             'identically. Every control this Block draws is named by its label, so there is no fallback.',
         )
       }
 
-      if (field.type === 'select' && blankList(field.options)) {
+      if (
+        CHOICE_KINDS.has(field.kind) &&
+        blankList((field as { options?: readonly unknown[] }).options)
+      ) {
         throw new Error(
-          `Provisioning01: the field "${field.id}" on the step "${step.id}" is a select and passes no ` +
+          `Provisioning01: the field "${field.key}" on the step "${step.id}" is a choice and passes no ` +
             'options, so it would render a control with nothing in it, which is a question no reader can ' +
             'answer. Pass the choices, or declare the field as a text field and check the answer in your ' +
             'own handler.',
@@ -501,7 +416,8 @@ export function Provisioning01({
 }: Provisioning01Props) {
   const generated = useId()
   const [at, setAt] = useState(() => stepAt(steps, initial))
-  const [values, setValues] = useState<ProvisioningValue>({})
+  const [values, setValues] = useState<Record<string, unknown>>({})
+  const setValue = (key: string, value: unknown) => setValues((held) => ({ ...held, [key]: value }))
 
   assertRun(steps, backLabel, nextLabel, confirmLabel)
 
@@ -557,7 +473,11 @@ export function Provisioning01({
           className="flex w-full max-w-measure flex-col gap-6"
           onSubmit={(event) => {
             event.preventDefault()
-            onConfirm(values)
+            onConfirm(
+              Object.fromEntries(
+                Object.entries(values).map(([key, value]) => [key, serialize(value)]),
+              ) as ProvisioningValue,
+            )
           }}
         >
           {/*
@@ -581,68 +501,37 @@ export function Provisioning01({
 
           {step.fields.length === 0 ? null : (
             <div data-slot="provisioning-01-fields" className="flex flex-col gap-4">
-              {step.fields.map((field) => {
-                const controlId = `${generated}-${field.id}`
-                const descriptionId = `${controlId}-description`
+              {step.fields.map((field, fieldIndex) => {
+                const id = `${generated}-${index}-${fieldIndex}`
+                const labelId = `${id}-label`
+                const helpId = field.help === undefined ? undefined : `${id}-help`
+                const kind = field.kind.toLowerCase() as Lowercase<FieldKind>
+                const ctx: FieldContext = {
+                  id,
+                  labelId,
+                  describedBy: helpId,
+                  invalid: false,
+                  text: fieldText(field),
+                  values,
+                  setValue,
+                  controlled: true,
+                }
 
                 return (
-                  <Field key={field.id} data-slot="provisioning-01-field" data-field={field.type}>
-                    <FieldLabel htmlFor={controlId}>{field.label}</FieldLabel>
-
-                    {field.type === 'textarea' ? (
-                      <Textarea
-                        id={controlId}
-                        name={field.id}
-                        rows={4}
-                        placeholder={field.placeholder}
+                  <Field key={field.key} data-slot="provisioning-01-field" data-field={field.kind}>
+                    {SELF_LABELLED.has(kind) ? null : (
+                      <Label
+                        id={labelId}
+                        htmlFor={id}
                         required={field.required}
-                        value={values[field.id] ?? ''}
-                        onChange={(event) =>
-                          setValues((held) => ({ ...held, [field.id]: event.target.value }))
-                        }
-                        aria-describedby={
-                          field.description === undefined ? undefined : descriptionId
-                        }
-                      />
-                    ) : field.type === 'select' ? (
-                      <NativeSelect
-                        id={controlId}
-                        name={field.id}
-                        required={field.required}
-                        value={values[field.id] ?? ''}
-                        onChange={(event) =>
-                          setValues((held) => ({ ...held, [field.id]: event.target.value }))
-                        }
-                        aria-describedby={
-                          field.description === undefined ? undefined : descriptionId
-                        }
+                        disabled={field.disabled}
                       >
-                        {field.options.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </NativeSelect>
-                    ) : (
-                      <Input
-                        id={controlId}
-                        name={field.id}
-                        type={field.type}
-                        placeholder={field.placeholder}
-                        autoComplete={field.autoComplete}
-                        required={field.required}
-                        value={values[field.id] ?? ''}
-                        onChange={(event) =>
-                          setValues((held) => ({ ...held, [field.id]: event.target.value }))
-                        }
-                        aria-describedby={
-                          field.description === undefined ? undefined : descriptionId
-                        }
-                      />
+                        {field.label}
+                      </Label>
                     )}
-
-                    {field.description === undefined ? null : (
-                      <FieldDescription id={descriptionId}>{field.description}</FieldDescription>
+                    {renderControl(field, ctx)}
+                    {field.help === undefined ? null : (
+                      <FieldDescription id={helpId}>{field.help}</FieldDescription>
                     )}
                   </Field>
                 )

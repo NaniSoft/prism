@@ -12,9 +12,11 @@ is identical. A sequence of steps, each with its own fields, a back, a next, and
 commit at the end. What is provisioned is not a parcel.
 
 The fields are the caller's declaration, not this package's opinion about what a
-reader may be asked. Prism names the five control types it can draw and supplies no
-fields, so a run that asks for a licence key, a region and a maintenance window is
-three fields and a select.
+reader may be asked, and they arrive as the shared `FieldSpec`: a stable `key`, a
+required `label` and a required `kind` drawn from Prism's own controls, with the
+options a choice carries under that kind and a `slot` arm for a control this
+package does not ship. A run that asks for a licence key, a region and a
+maintenance window is three fields and a choice.
 
 ## The rail is not a control, and that is the decision
 
@@ -47,11 +49,11 @@ export function ProvisionAnEstate() {
           id: 'target',
           name: 'The estate',
           fields: [
-            { id: 'name', label: 'Estate name', type: 'text', required: true },
+            { key: 'name', label: 'Estate name', kind: 'Input', required: true },
             {
-              id: 'region',
+              key: 'region',
               label: 'Region',
-              type: 'select',
+              kind: 'NativeSelect',
               required: true,
               options: [
                 { value: 'eu-west-2', label: 'London' },
@@ -64,8 +66,8 @@ export function ProvisionAnEstate() {
           id: 'access',
           name: 'Access',
           fields: [
-            { id: 'owner', label: 'Owner address', type: 'email', required: true },
-            { id: 'notes', label: 'Anything we should know', type: 'textarea' },
+            { key: 'owner', label: 'Owner address', kind: 'Input', required: true },
+            { key: 'notes', label: 'Anything we should know', kind: 'Textarea' },
           ],
         },
         {
@@ -128,8 +130,8 @@ has two Blocks, not one form with a strange field.
 
 - Write a step name as the thing the step is about, in four words or fewer. The
   rail is scanned.
-- Write a field `description` as what the field is for, not as a restatement of the
-  label. It is announced with the control.
+- Write a field `help` as what the field is for, not as a restatement of the label.
+  It is announced with the control.
 - Write `terms` for what the last press actually creates and what it costs. It is
   the one sentence a reader can read before something happens.
 - Write each `status.message` as a fact about the run, including the bad outcomes.

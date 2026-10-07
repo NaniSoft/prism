@@ -21,9 +21,13 @@ reader cannot query, so the numbers are also rendered as a table. A Block that
 hand-rolled either would be a second implementation, and it would be the one
 without the table.
 
-Three props are required by a diagnostic rather than by a type, because the Block
-cannot know the words: `deltaLabel` on any row with a `delta`, `seriesLabel` on any
-row with a `series`, and `hrefLabel` on any row with an `href`.
+The rows are the shared `MetricSpec`, published as `@nanisoft/prism-ui/spec`, so a
+row here and a figure on a summary are one shape. `MetricSpec` holds the two pairs
+by type: a `series` set without its `seriesLabel`, or a destination set without its
+`hrefLabel`, does not compile. `deltaFormat` stays optional, because a delta with no
+formatter prints the number the caller passed and one with a formatter prints the
+caller's own words. The Block mints no period and derives no rate of change, so the
+words for the comparison are yours.
 
 ## Usage
 
@@ -37,22 +41,23 @@ import { Trend01 } from '@nanisoft/prism-ui/blocks/trend-01'
   limit={5}
   items={[
     {
-      id: 'throughput',
+      key: 'throughput',
       label: 'Rows loaded per hour',
       value: '18.4k',
       delta: 12.4,
-      deltaLabel: (d) => `up ${d.toFixed(1)} percent on last week`,
+      deltaFormat: 'up 12.4 percent on last week',
+      hint: 'vs last week',
       series: [14.1, 15.2, 15.0, 16.8, 18.4],
       seriesLabel: 'Rows loaded per hour, the last five readings',
       href: '/estate/throughput',
       hrefLabel: 'Read the series',
     },
     {
-      id: 'coverage',
+      key: 'coverage',
       label: 'Sites under observation',
       value: '11',
       delta: 3,
-      deltaLabel: (d) => `${d} more than last week`,
+      deltaFormat: '3 more than last week',
     },
   ]}
 />
@@ -84,9 +89,8 @@ time, and a side-by-side of two series is a `Chart`.
 
 - Rank in your own data and pass the array in that order. There is no `sort` prop
   because the Block cannot see what you are ranking by.
-- Pass `deltaLabel` on every row that has a `delta`. A signed number printed
-  beside a figure is a number with an arithmetic symbol on it, and a screen reader
-  reads that as a formula.
+- Pass `deltaFormat` on a row that has a `delta`. Without it `metric` prints the
+  bare number the caller passed, which is honest and almost never what was wanted.
 - Pass `seriesLabel` on every row that has a `series`. A column of unnamed
   pictures is a column of shapes a reader has to guess the meaning of.
 - Compose the series' values in your own units. Do not pre-normalise them into
@@ -99,5 +103,5 @@ time, and a side-by-side of two series is a `Chart`.
 - `label` is what a reader would call the thing in conversation, in a few words.
 - `seriesLabel` says what the readings are and over what period. "Rows loaded per
   hour, the last five readings" rather than "Trend".
-- `deltaLabel` is a sentence, not a format. Write the one your readers would say.
+- `deltaFormat` is a sentence, not a format. Write the one your readers would say.
 - `hrefLabel` says what following it gets you. A destination is not a label.

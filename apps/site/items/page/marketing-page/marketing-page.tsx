@@ -62,10 +62,10 @@ export default function MarketingPageDemo() {
         eyebrow: 'Preview',
         title: 'Section heading',
         stats: [
-          { label: 'First metric', value: '1,284', delta: 12, hint: 'vs last month' },
-          { label: 'Second metric', value: '47.2%', delta: -3, hint: 'vs last month' },
-          { label: 'Third metric', value: '2.4d', delta: 0, hint: 'vs last quarter' },
-          { label: 'Fourth metric', value: '138' },
+          { key: 'first', label: 'First metric', value: '1,284', delta: 12, deltaFormat: '12 more than last month', hint: 'vs last month' },
+          { key: 'second', label: 'Second metric', value: '47.2%', delta: -3, deltaFormat: '3 points lower', hint: 'vs last month' },
+          { key: 'third', label: 'Third metric', value: '2.4d', delta: 0, hint: 'vs last quarter' },
+          { key: 'fourth', label: 'Fourth metric', value: '138' },
         ],
       }}
       pricing={{

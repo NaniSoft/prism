@@ -1560,21 +1560,20 @@ and the reason is a disagreement a reader would see rather than a difference in
 subject matter.** `Trend01` is a ranked list of readings with a shape beside each
 one, which is a list rather than a summary, so it stays where it is and a summary
 whose figures want their shape beside them composes it into a panel. `Stats01` is
-the same job as the `metrics` row with less of it declared: its `delta` is
-documented as a percentage change and the Block appends a percent sign to the
-number, which is the one guess `Metric` refuses to make for the reason its own
-JSDoc gives, and it carries no series, so the trend the archetype names has
-nowhere to go. `ProjectDashboard01` declares its figure type separately and says on
-purpose that a dashboard figure and a detail header field are different claims,
-which is a sound reason, and the same reason the record index section gave for
-declaring its own column type; the consequence is what settles it. Its figure type
-has no `deltaFormat`, and the Block's own JSDoc admits the result: a figure with a
-delta and no formatter prints the number itself, which is honest and usually not
-what was wanted. So the same consumer, reading two dashboards built out of this
-package, sees a formatted change on one screen and a bare `0.12` on another, and
-nothing in the tree reports it. The disposition of those two Items is the
-authoring ticket's work, as `IssueDetail01`'s is in the record detail section. What
-is settled here is that neither of them is evidence for a third.
+the same job as the `metrics` row with less of it declared, so it stays where it is
+too: its `delta` was once documented as a percentage change and the Block appended a
+percent sign to the number, which is the one guess `Metric` refuses to make for the
+reason its own JSDoc gives, and it carried no series, so the trend the archetype
+names had nowhere to go. `ProjectDashboard01` declared its figure row separately and
+said on purpose that a dashboard figure and a detail header field are different
+claims, which is a sound reason, and the same reason the record index section gave
+for declaring its own column type; its own figure type had no `deltaFormat`, and the
+Block's own JSDoc admitted the result: a figure with a delta and no formatter prints
+the number itself, which is honest and usually not what was wanted. So the same
+consumer, reading two dashboards built out of this package, saw a formatted change on
+one screen and a bare `0.12` on another, and nothing in the tree reported it. The
+migration batch closed all four disagreements by moving every one of them onto
+`MetricSpec`, and what is settled here is that none of them was evidence for a third.
 
 **A metric is a figure about a population, which is what makes it a typed value of
 its own rather than a field with a different name.** Issue 148 settled that Prism
@@ -1609,13 +1608,15 @@ recorded here rather than left to the code.** `Dashboard01.metrics` is a
 `MetricSpec[]` from `@nanisoft/prism-ui/spec`, so the row a consumer composes on an
 overview is the same shape it composes on a project dashboard and a summary panel,
 and its own `Dashboard01Metric` is an alias of the shared type rather than a second
-declaration of it. This is the expand step of an expand-contract sequence: the other
+declaration of it. This is the migrate step of an expand-contract sequence: the other
 four figure owners (`ProjectDashboard01Figure`, `ChartCard01Reading`, `Trend01Item`
-and `Stat`) are migrated in later batches and their superseded local declarations are
-deleted by a contract ticket, so the count of disagreeing shapes falls across releases
-rather than in one breaking step. The alias keeps the old name resolvable until then,
-and a reader seeing one shape named twice should read the second name as a synonym on
-its way out rather than as a vocabulary.
+and `Stat`) now take `MetricSpec` too, and each of their local declarations is an
+alias of the shared type rather than a second declaration of it, so the count of
+disagreeing shapes in use is one. The aliases keep the old names resolvable until a
+contract ticket deletes them, and a reader seeing one shape named twice should read
+the second name as a synonym on its way out rather than as a vocabulary. `ChartGroup01`,
+which composes the chart card, and the page fixtures were updated at their call sites
+so no in-tree caller remains on a superseded name.
 
 **What it carries, and each field is here for the reason its twin in the other
 three specifications is.** `key`, stable and never the words of the label, because
@@ -1649,9 +1650,9 @@ billing screen's month is not a trading screen's week, and there is no derived r
 of change, no growth percentage and no period over period arithmetic over the
 series the caller passed, because each of those is a second arithmetic Prism would
 be doing over a population it never fetched. The words for the period go where the
-caller's words go, in `deltaFormat` and in `hint`, which is the reason `Trend01`
-makes `deltaLabel` required rather than guessing which of three sentences about one
-number the caller meant.
+caller's words go, in `deltaFormat` and in `hint`, which is the reason the migration
+makes the words for the change the caller's rather than guessing which of three
+sentences about one number the caller meant.
 
 **The screen form is a composition and it stays one.** `AppShell01` for the frame,
 `PageHeader01` for the claim and this Block for the figures and the panels is the
@@ -2375,9 +2376,11 @@ disposition `IssueDetail01` and `AuditLog01` are held to above. Two things are
 settled about its source as it stands. It declares its own field type,
 `SettingsPanelField`, a union of `text`, `textarea`, `switch` and `select` with a
 value handler per member, which is the shape issue 152 replaced with `FieldSpec`,
-`FieldSpecGroup` and `FieldKind`, and it is the sixth such declaration in this
-package beside `AuthFormField`, `ContactField`, `ProvisioningField`, `SignupField`
-and `IssueDetail01Field`. Its union has no `slot` arm either, so a control this
+`FieldSpecGroup` and `FieldKind`, and it is one of the two such declarations left
+in this package beside `IssueDetail01Field`: the credential, contact, provisioning
+and account creation forms have since moved onto the shared specification, so this
+is a finding against a widening rather than the last of five copies. Its union has
+no `slot` arm either, so a control this
 package does not ship has nowhere to go in a settings region. And its
 `secondaryAction` is declared `{ label: string; onClick?: () => void }` and
 rendered as a `Button` with an optional handler, so a caller who passes a label

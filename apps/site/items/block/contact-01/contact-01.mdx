@@ -19,58 +19,70 @@ spends a week on discovery calls. A form that cannot ask for a budget guarantees
 the reply nobody wanted, because the reader has already told the sender what they can
 afford and the send has nowhere to put it.
 
-So `fields` is a prop list of the caller's own, and Prism names the five control
-types it can draw and supplies no fields at all.
+So `groups` is a prop list of the caller's own, in the shared field specification,
+and Prism supplies no fields at all.
 
 | Prop | Why it cannot be optional |
 | --- | --- |
-| `fields` | A Component that decides what a reader may say is a Component making a claim about the caller's product. |
+| `groups` | A Component that decides what a reader may say is a Component making a claim about the caller's product. |
 | `onSubmit` | A Block that collects a message and then has nowhere to put it is a form that takes a personal datum and discards it silently. |
 | `submitLabel` | The label on a submit control is a sentence in the caller's product, not a word. |
 | `address.emailLabel` | A mailto link announced as the address itself is unreadable as a sentence and cannot be copied. |
 
-## The five control types, and nothing else
+## The shared field specification
 
-`text`, `email`, `tel`, `textarea` and `select`, drawn from `Input`, `Textarea` and
-`NativeSelect`. `ContactField` is a union, so `options` is required inside the
-select arm and forbidden beside the other four. A select with no options is a
-question no reader can answer, and it looks answered only because the control is
-there and focusable.
+The fields arrive as an ordered list of `FieldSpecGroup`, the same type a record
+write form takes: a stable `key`, a required `label`, a required `kind` drawn from
+Prism's own input vocabulary, and optional help, hint, placeholder, autofill hint,
+disabled flag and starting value. A choice carries its options under its kind
+rather than in a shape of this Block's own, and a control this package does not
+ship is the `slot` arm, drawn inside the label, help and error the Block still
+draws.
 
-`NativeSelect` is the platform's own element rather than the popup one, which is
-what a form inside a page already being submitted wants. The honest limit is that an
-`<option>` holds text and nothing more, so a caller who needs a description, a count
-or anything nested beside a choice is reaching for a control the platform cannot
-render.
+A field whose value is absent renders empty rather than absent, and requiredness is
+a rendering fact: the Block draws the mark and sets the attribute and never checks a
+value against it. An issue keyed by a field's `key` is drawn under that control; a
+message about the submission rather than about a control is the caller's `status`,
+which names no field.
+
+The honest limit of the `NativeSelect` kind is unchanged: an `<option>` holds text
+and nothing more, so a caller who needs a description, a count or anything nested
+beside a choice reaches for a `Combobox` or the `slot` arm rather than a second
+Block.
 
 ## Usage
 
 ```tsx
 import { useState } from 'react'
-import { Contact01, type ContactField } from '@nanisoft/prism-ui/blocks/contact-01'
+import { Contact01 } from '@nanisoft/prism-ui/blocks/contact-01'
+import type { FieldSpecGroup } from '@nanisoft/prism-ui/spec'
 
-const FIELDS: ContactField[] = [
-  { id: 'name', type: 'text', label: 'Your name', required: true, autoComplete: 'name' },
-  { id: 'email', type: 'email', label: 'Email address', required: true, autoComplete: 'email' },
+const GROUPS: readonly FieldSpecGroup[] = [
   {
-    id: 'order',
-    type: 'text',
-    label: 'Order number',
-    required: false,
-    description: 'Only if you are writing about an order.',
-  },
-  {
-    id: 'topic',
-    type: 'select',
-    label: 'What is this about?',
-    required: true,
-    options: [
-      { value: 'sales', label: 'Buying' },
-      { value: 'support', label: 'Something is broken' },
-      { value: 'press', label: 'Writing about you' },
+    fields: [
+      { key: 'name', kind: 'Input', label: 'Your name', required: true, autoComplete: 'name' },
+      { key: 'email', kind: 'Input', label: 'Email address', required: true, autoComplete: 'email' },
+      {
+        key: 'order',
+        kind: 'Input',
+        label: 'Order number',
+        required: false,
+        help: 'Only if you are writing about an order.',
+      },
+      {
+        key: 'topic',
+        kind: 'NativeSelect',
+        label: 'What is this about?',
+        required: true,
+        options: [
+          { value: 'sales', label: 'Buying' },
+          { value: 'support', label: 'Something is broken' },
+          { value: 'press', label: 'Writing about you' },
+        ],
+      },
+      { key: 'message', kind: 'Textarea', rows: 4, label: 'What would you like to say?', required: true },
     ],
   },
-  { id: 'message', type: 'textarea', label: 'What would you like to say?', required: true },
 ]
 
 export function Contact() {
@@ -82,7 +94,7 @@ export function Contact() {
       eyebrow="Nexus"
       title="Write to us"
       description="A person reads every one of these, usually within a working day."
-      fields={FIELDS}
+      groups={GROUPS}
       submitLabel="Send"
       consent="We use what you send to answer you and nothing else."
       address={{
@@ -153,11 +165,13 @@ wants to write, and the address is for the reader who wants to know where you ar
 
 ### Best practices
 
-- Read `value` by your own field ids. The record that arrives is shaped like the
+- Read `value` by your own field `key`s. The record that arrives is shaped like the
   declaration that produced it, so a field renamed in one place is renamed in one
   place.
 - Pass `autoComplete` on the fields the browser can fill. A reader on a phone
   retyping an address they have typed before is a reader who abandons.
+- Reach for the `slot` arm for a control Prism does not ship rather than growing a
+  second Block. The field keeps the label, help and error the Block draws.
 - Distinguish delivered from held in your own words. They are two different facts
   and a reader deserves to know which one happened.
 - Never make `onSubmit` optional in your own wrapper. The type is what stops a

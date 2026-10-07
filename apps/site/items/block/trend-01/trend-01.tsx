@@ -1,4 +1,5 @@
-import { Trend01, type Trend01Item } from '@nanisoft/prism-ui/blocks/trend-01'
+import { Trend01 } from '@nanisoft/prism-ui/blocks/trend-01'
+import type { MetricSpec } from '@nanisoft/prism-ui/spec'
 
 /**
  * Five rows, and the shapes of row rather than five ideal rows.
@@ -11,45 +12,46 @@ import { Trend01, type Trend01Item } from '@nanisoft/prism-ui/blocks/trend-01'
  * list is. The fifth is a falling reading, so the direction mark is the other
  * one.
  */
-const ITEMS: Trend01Item[] = [
+const ITEMS: MetricSpec[] = [
   {
-    id: 'throughput',
+    key: 'throughput',
     label: 'Rows loaded per hour',
     value: '18.4k',
     delta: 12.4,
-    deltaLabel: (change) => `up ${change.toFixed(1)} percent on last week`,
+    deltaFormat: 'up 12.4 percent on last week',
+    hint: 'vs last week',
     series: [14.1, 15.2, 15.0, 16.8, 17.4, 18.4],
     seriesLabel: 'Rows loaded per hour, the last six readings',
     href: '/estate/throughput',
     hrefLabel: 'Read the series',
   },
   {
-    id: 'coverage',
+    key: 'coverage',
     label: 'Sites under observation',
     value: '11',
     delta: 3,
-    deltaLabel: (change) => `${change} more than last week`,
+    deltaFormat: '3 more than last week',
     series: [6, 6, 8, 8, 9, 11],
     seriesLabel: 'Sites under observation, by month',
   },
   {
-    id: 'backlog',
+    key: 'backlog',
     label: 'Findings closed by an agent',
     value: '412',
     series: [180, 240, 260, 320, 380, 412],
     seriesLabel: 'Findings closed by an agent, by month',
   },
   {
-    id: 'coverage-target',
+    key: 'coverage-target',
     label: 'Estate coverage against the floor',
     value: '1.08x',
   },
   {
-    id: 'rebuild-time',
+    key: 'rebuild-time',
     label: 'Median estate rebuild',
     value: '26m',
     delta: -4.5,
-    deltaLabel: (change) => `${Math.abs(change)} minutes faster than last week`,
+    deltaFormat: '4.5 minutes faster than last week',
     series: [34, 32, 33, 29, 28, 26],
     seriesLabel: 'Median estate rebuild in minutes, the last six readings',
   },

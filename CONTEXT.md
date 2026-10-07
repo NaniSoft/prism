@@ -97,9 +97,9 @@ name becomes a catalogue name only where a ticket authors the Item.
 _Avoid_: screen, view, page type, screen type, pattern, template, category.
 
 **Field specification**:
-The typed, ordered description of the fields a record write form Block renders,
-composed of a stable key, a label, a kind drawn from Prism's own input
-Components, requiredness and help, gathered into ordered groups. Prism owns its
+The typed, ordered description of the fields a form Block renders, composed of a
+stable key, a label, a kind drawn from Prism's own input Components, requiredness
+and help, gathered into ordered groups. Prism owns its
 shape and its vocabulary; the consumer owns the values, the errors and the
 fetch. It carries no rule and no renderer, because validation is the consumer's
 and a control Prism does not ship arrives as a slot inside a field Prism still

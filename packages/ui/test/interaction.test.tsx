@@ -18,7 +18,7 @@ import { MarketingPage } from '../src/pages/marketing-page'
 import { SettingsPage } from '../src/pages/settings-page'
 
 const features = [{ icon: Star, title: 'Tokens', body: 'One source for every value.' }]
-const stats = [{ label: 'Users', value: '1,204' }]
+const stats = [{ key: 'users', label: 'Users', value: '1,204' }]
 const plans = [{ id: 'free', name: 'Free', price: '$0', features: ['One project'], action: { label: 'Start', href: '/signup' } }]
 const shell = { navigation: <a href="/">Home</a>, navigationLabel: 'Main' }
 
@@ -52,7 +52,7 @@ const table = {
 
 const form = {
   title: 'Sign in',
-  fields: [{ id: 'email', label: 'Email' }],
+  groups: [{ fields: [{ key: 'email', label: 'Email', kind: 'Input' as const }] }],
   submitLabel: 'Sign in',
 }
 

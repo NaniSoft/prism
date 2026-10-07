@@ -41,10 +41,33 @@ export default function ProjectDashboard01Demo() {
       state="blocked"
       stateLabel="Blocked on a credential"
       figures={[
-        { label: 'Tables moved', value: '31 of 48', delta: 12 },
-        { label: 'Rows rewritten', value: '418,204', delta: 8 },
-        { label: 'Open blockers', value: '1', delta: -1 },
-        { label: 'Days left', value: '17' },
+        {
+          key: 'tables',
+          label: 'Tables moved',
+          value: '31 of 48',
+          delta: 12,
+          deltaFormat: '12 more than last week',
+          hint: 'vs last week',
+        },
+        {
+          key: 'rows',
+          label: 'Rows rewritten',
+          value: '418,204',
+          delta: 8,
+          deltaFormat: '8 more than last week',
+          series: [18, 24, 31, 29, 44, 12],
+          seriesLabel: 'Rows rewritten, the last six days',
+        },
+        {
+          key: 'blockers',
+          label: 'Open blockers',
+          value: '1',
+          delta: -1,
+          deltaFormat: '1 fewer than last week',
+          href: '/projects/what-is-left/blockers',
+          hrefLabel: 'Open the blockers',
+        },
+        { key: 'days', label: 'Days left', value: '17' },
       ]}
       panels={[
         {

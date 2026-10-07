@@ -119,8 +119,20 @@ function wildcardRegex(target) {
  * reaches is internal, and it is either named in this list with its reason or it is
  * a finding. Widening the set is a decision to take in the open, in this file, where
  * a diff shows it.
+ *
+ * `dist/lib/field-render` is here because the control a field draws and the shell it
+ * carries are shared by every Block that takes the field specification, and no
+ * consumer imports the renderer: a consumer types a field with `FieldSpec` and hands
+ * it to a Block, so the drawing is the inside of those Items. Publishing it would be
+ * a second way to draw one field and the surface the module was created to keep at
+ * one.
  */
-const INTERNAL = ['dist/lib/utils.d.ts', 'dist/lib/rank.d.ts', 'dist/lib/figure.d.ts']
+const INTERNAL = [
+  'dist/lib/utils.d.ts',
+  'dist/lib/rank.d.ts',
+  'dist/lib/figure.d.ts',
+  'dist/lib/field-render.d.ts',
+]
 
 const publicFiles = new Set()
 const errors = []

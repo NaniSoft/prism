@@ -79,50 +79,54 @@ export default function Signup01Demo() {
         eyebrow="Nexus"
         title="Create an account that may run an estate"
         description="The account acts on your behalf, so it is created with the estate in mind rather than as a shop."
-        fields={[
+        groups={[
           {
-            id: 'name',
-            type: 'text',
-            label: 'Your name',
-            required: true,
-            autoComplete: 'name',
-            placeholder: 'Jide Abara',
-          },
-          {
-            id: 'email',
-            type: 'email',
-            label: 'Work email',
-            required: true,
-            autoComplete: 'email',
-            placeholder: 'you@nanisoft.example',
-            description: 'The account is keyed on this, and the invitation goes there.',
-          },
-          {
-            id: 'workspace',
-            type: 'text',
-            label: 'Workspace name',
-            required: false,
-            description: 'Optional. Every run this account starts is scoped to one workspace.',
-          },
-          {
-            id: 'sector',
-            type: 'select',
-            label: 'What the estate is',
-            required: true,
-            options: [
-              { value: 'pipeline', label: 'A pipeline' },
-              { value: 'market', label: 'A market' },
-              { value: 'estate', label: 'An estate' },
-              { value: 'agents', label: 'A fleet of agents' },
+            fields: [
+              {
+                key: 'name',
+                kind: 'Input',
+                label: 'Your name',
+                required: true,
+                autoComplete: 'name',
+                placeholder: 'Jide Abara',
+              },
+              {
+                key: 'email',
+                kind: 'Input',
+                label: 'Work email',
+                required: true,
+                autoComplete: 'email',
+                placeholder: 'you@nanisoft.example',
+                help: 'The account is keyed on this, and the invitation goes there.',
+              },
+              {
+                key: 'workspace',
+                kind: 'Input',
+                label: 'Workspace name',
+                required: false,
+                help: 'Optional. Every run this account starts is scoped to one workspace.',
+              },
+              {
+                key: 'sector',
+                kind: 'NativeSelect',
+                label: 'What the estate is',
+                required: true,
+                options: [
+                  { value: 'pipeline', label: 'A pipeline' },
+                  { value: 'market', label: 'A market' },
+                  { value: 'estate', label: 'An estate' },
+                  { value: 'agents', label: 'A fleet of agents' },
+                ],
+              },
+              {
+                key: 'phone',
+                kind: 'Input',
+                label: 'Phone',
+                required: false,
+                autoComplete: 'tel',
+                help: 'Only used when a capture fails and somebody has to call.',
+              },
             ],
-          },
-          {
-            id: 'phone',
-            type: 'tel',
-            label: 'Phone',
-            required: false,
-            autoComplete: 'tel',
-            description: 'Only used when a capture fails and somebody has to call.',
           },
         ]}
         password={{

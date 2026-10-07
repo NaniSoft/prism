@@ -1,8 +1,8 @@
 {
   "name": "stats-01",
-  "title": "Stats 01 - KPI Row With Trend",
-  "description": "A four-up KPI row with optional directional deltas. Every metric is passed in; the block ships no sample data.",
+  "title": "Stats 01 - KPI Row On The Shared Metric Specification",
+  "description": "A four-up KPI row whose figures are the shared metric specification: each figure carries a stable key, a required label and value, an optional delta whose sign is the direction, an optional formatter for the caller's own words, an optional hint for the period, and an optional series and destination with their names. Every figure is passed in; the block ships no sample data and appends no unit of its own. Server Component.",
   "categories": ["application"],
-  "registryDependencies": ["card"],
-  "dependencies": ["lucide-react"]
+  "registryDependencies": ["section", "card", "metric", "sparkline", "cta-link"],
+  "dependencies": []
 }

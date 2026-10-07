@@ -5,12 +5,13 @@ import type { ReactNode } from 'react'
 import {
   Contact01,
   type Contact01Status,
-  type ContactField,
   type ContactValue,
 } from '../../blocks/contact-01'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { CtaLink } from '../../components/ui/cta-link'
 import { Section, SectionHeading, childLevel, type HeadingLevel } from '../../components/ui/section'
+import { FieldKindName } from '../../lib/field-render'
+import type { FieldSpec } from '../../lib/spec'
 import { cn } from '../../lib/utils'
 
 /**
@@ -31,16 +32,16 @@ export type ContactPageOption = {
 /**
  * One declared field of the contact form.
  *
- * **Flat, on purpose, where `ContactField` is a union.** A consumer's form data is
+ * **Flat, on purpose, where `FieldSpec` is a union.** A consumer's form data is
  * flat: a record read out of a content type, a CMS entry or a JSON file has one
  * shape with an optional `options` key, and a caller that had to narrow their own
  * record before they could hand it to a page would be doing the Block's type work
- * at every call site. So the union is built once, inside this module, and the one
- * shape it cannot build is refused here with a message that names the Page's own
- * prop. That is `AboutPage`'s arrangement for the same pair of link fields, and the
- * cost is the same: a caller who wants the compile error rather than the thrown one
- * types their fields against `ContactField` and passes the result here, which
- * works because the two are structurally the same.
+ * at every call site. So the flat record is converted to the shared specification
+ * once, inside this module, and the one shape it cannot build is refused here with
+ * a message that names the Page's own prop. That is `AboutPage`'s arrangement for
+ * the same pair of link fields, and the cost is the same: a caller who wants the
+ * compile error rather than the thrown one types their fields as `FieldSpec` and
+ * composes `Contact01` directly.
  */
 export type ContactPageField = {
   /** The caller's key for this field, and the key the value arrives under. */
@@ -228,17 +229,28 @@ export type ContactPageProps = {
  * and letting the Block's own diagnostic fire three frames down, which names the
  * Block rather than the prop the caller passed.
  */
-function asContactField(field: ContactPageField): ContactField {
+function asContactField(field: ContactPageField): FieldSpec {
   const shared = {
-    id: field.id,
+    key: field.id,
     label: field.label,
     required: field.required,
-    description: field.description,
+    help: field.description,
     placeholder: field.placeholder,
     autoComplete: field.autoComplete,
   }
 
-  if (field.type !== 'select') return { ...shared, type: field.type }
+  if (field.type === 'textarea') return { ...shared, kind: FieldKindName.textarea, rows: 4 }
+
+  /*
+    `text`, `email` and `tel` all draw Prism's `Input`, which is the control this
+    package ships for a run of characters; the platform's own `type` attributes are
+    not part of the shared vocabulary, so asking for an email is asking for an
+    `Input` with the `autoComplete` hint a password manager reads. `inputMode` and
+    `type` are the platform's, and the caller who needs a numeric keypad reaches for
+    the `NumberField` kind on the Block directly rather than through this Page's
+    flat prop.
+  */
+  if (field.type !== 'select') return { ...shared, kind: FieldKindName.input }
 
   const options = field.options ?? []
   if (options.length === 0) {
@@ -250,7 +262,7 @@ function asContactField(field: ContactPageField): ContactField {
     )
   }
 
-  return { ...shared, type: 'select', options: options.map((option) => ({ ...option })) }
+  return { ...shared, kind: FieldKindName.nativeSelect, options: options.map((option) => ({ ...option })) }
 }
 
 /**
@@ -387,7 +399,7 @@ export function ContactPage({
       <Contact01
         title={form.title}
         description={form.description}
-        fields={fields.map(asContactField)}
+        groups={[{ fields: fields.map(asContactField) }]}
         onSubmit={onSubmit}
         submitLabel={submitLabel}
         consent={consent}

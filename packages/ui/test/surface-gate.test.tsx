@@ -25,11 +25,13 @@ const DECLARATIONS: Record<string, string> = {
   'dist/components/ui/button.d.ts': 'export declare function Button(): void\n',
   'dist/lib/utils.d.ts': 'export declare function cn(...classes: string[]): string\n',
   // The gate's INTERNAL list names every internal declaration, and it is checked in
-  // both directions, so a fixture that emits only one of the three is reporting a
+  // both directions, so a fixture that emits only some of them is reporting a
   // boundary that is stale. That is the rule working, and the fixture follows it.
   'dist/lib/rank.d.ts': 'export declare function locate(text: string, query: string): { rank: number }\n',
   'dist/lib/figure.d.ts':
     'export declare function occupiedBox(at: { x: number; y: number }, mark: number): { l: number }\n',
+  'dist/lib/field-render.d.ts':
+    'export declare function renderControl(field: unknown, ctx: unknown): unknown\n',
 }
 
 const manifest = (exports: Record<string, unknown>) =>
@@ -72,8 +74,8 @@ describe('the surface gate', () => {
     expect(result.stderr).toBe('')
     expect(result.status).toBe(0)
     // The counts follow the fixture, and the fixture now emits every internal
-    // declaration because the gate names all three in its boundary.
-    expect(result.stdout).toContain('5 emitted declaration(s), 2 public, 3 internal')
+    // declaration because the gate names all four in its boundary.
+    expect(result.stdout).toContain('6 emitted declaration(s), 2 public, 4 internal')
     expect(result.stdout).toContain(
       'exports["./components/*"] -> ./dist/components/ui/*.js matched 1 declaration(s)',
     )
@@ -180,7 +182,7 @@ describe('the surface gate', () => {
 
     expect(result.status).toBe(0)
     expect(result.stderr).toBe('')
-    expect(result.stdout).toContain('6 emitted declaration(s), 3 public, 3 internal')
+    expect(result.stdout).toContain('7 emitted declaration(s), 3 public, 4 internal')
     expect(result.stdout).toContain(
       'published under dist/lib, so the exports map and not the directory decides the boundary: dist/lib/spec.d.ts',
     )
@@ -218,7 +220,7 @@ describe('the surface gate', () => {
     expect(result.status).toBe(0)
     // The internal count and the list beside it are a stated boundary that grows as
     // the package gains internal helpers, so both are asserted as present and as
-    // naming the three that are deliberately internal, rather than pinned to a total.
+    // naming the four that are deliberately internal, rather than pinned to a total.
     // A previous version asserted 1 internal and named only utils, which failed
     // the moment a second internal declaration was added on purpose.
     expect(result.stdout).toMatch(/\d+ emitted declaration\(s\), \d+ public, \d+ internal/)
@@ -226,6 +228,7 @@ describe('the surface gate', () => {
     expect(result.stdout).toContain('dist/lib/utils.d.ts')
     expect(result.stdout).toContain('dist/lib/rank.d.ts')
     expect(result.stdout).toContain('dist/lib/figure.d.ts')
+    expect(result.stdout).toContain('dist/lib/field-render.d.ts')
     // The specification module is published out of the same directory, and this is
     // the line that says so rather than leaving a reader to infer it from a count.
     expect(result.stdout).toContain('dist/lib/spec.d.ts')

@@ -93,6 +93,16 @@ type FieldCommon = {
    * `help` does not.
    */
   placeholder?: string
+  /**
+   * The platform's own autofill hint, for the controls the platform fills.
+   *
+   * It is here because it is the one piece of per-control rendering data a
+   * credential or contact form cannot do without and no other member can hold:
+   * `email` on an address field is what lets a password manager and a phone
+   * keyboard fill a form, and a Block that dropped it would render the same
+   * control with a worse experience and nothing on screen to say so.
+   */
+  autoComplete?: string
   /** Marks a field the reader cannot fill today, rather than one that does not apply. */
   disabled?: boolean
   /**

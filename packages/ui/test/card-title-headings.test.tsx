@@ -119,7 +119,7 @@ const authForm = (headingLevel?: HeadingLevel) => (
     {...(headingLevel ? { headingLevel } : {})}
     title="Sign in"
     submitLabel="Sign in"
-    fields={[{ id: 'email', label: 'Email', type: 'email' }]}
+    groups={[{ fields: [{ key: 'email', label: 'Email', kind: 'Input' }] }]}
   />
 )
 
@@ -139,7 +139,7 @@ const authPage = (headingLevel?: HeadingLevel) => (
     form={{
       title: 'Sign in',
       submitLabel: 'Sign in',
-      fields: [{ id: 'email', label: 'Email', type: 'email' }],
+      groups: [{ fields: [{ key: 'email', label: 'Email', kind: 'Input' }] }],
     }}
     aside={{ title: 'New here', description: 'An account takes a moment.' }}
   />
@@ -354,7 +354,7 @@ const provisioning = (headingLevel?: HeadingLevel) => (
     {...(headingLevel ? { headingLevel } : {})}
     title="Section heading"
     steps={[
-      { id: 'first', name: 'First step', fields: [{ id: 'name', label: 'Name', type: 'text', required: true }] },
+      { id: 'first', name: 'First step', fields: [{ key: 'name', label: 'Name', kind: 'Input', required: true }] },
       { id: 'second', name: 'Second step', fields: [] },
     ]}
     backLabel="Back"
