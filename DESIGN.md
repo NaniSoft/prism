@@ -1103,7 +1103,7 @@ expression. Prism renders the error state the consumer passes and decides nothin
 
 **The record index archetype is one Item, and it is the Item that already ships: `DataTable01` widens, and no new Item appears beside it.** The job-identity test above gives one sentence for that, and the sentence is the whole of the answer. Every one of the thirty five in-scope screens is one job, a person scanning rows and acting on them, and what separates one screen from another is which columns, which keys, which filters and which sort key it carries, which is issue 148's typed-data ruling read at the archetype layer rather than a decision taken here. So this is a widening, it is not a second Item, and no `-02` is earned by it, because nothing in these thirty five is a second arrangement of one job that a reader chooses between on purpose.
 
-**The arrangement that would have forced a second Item is the split, and it already has one.** Issue 149 gave the split to a composition Block that holds no selection, the section above records that the index pane inside it is this same Item at a narrower width, and issue 167 settled that the split does not collapse at a narrow viewport and that which pane survives is the caller's composition. A Block that draws an index pane beside a detail pane and knows nothing about either is the arrangement, and it is already authored as one, so it does not fork the index. This is worth stating plainly because it is the question a reader arrives with: the split is where a second Item was expected and the answer is that the second Item already exists and holds no state.
+**The arrangement that would have forced a second Item is the split, and it is authored as `IndexDetail01`.** Issue 149 gave the split to a composition Block that holds no selection, the section above records that the index pane inside it is this same Item at a narrower width, and issue 167 settled that the split does not collapse at a narrow viewport and that which pane survives is the caller's composition. A Block that draws an index pane beside a detail pane and knows nothing about either is the arrangement, and it is `IndexDetail01`, so it does not fork the index. This is worth stating plainly because it is the question a reader arrives with, and because an earlier version of this paragraph said the Block was already authored while the roster counted from source held no such Item: the decision was settled and the tree did not carry it, which is the second list the catalogue discipline exists to prevent. The roster now holds the Block, and the statement is true of the tree.
 
 **Three of the thirty five name an arrangement rather than this job, and each is measured against its own archetype's Item rather than folded in here.** A catalogue compared as pictures rather than as rows, a set of renewals laid out as a calendar, and a grid whose cells are edited in place are three of the arrangements the naming section names as saying two jobs: a browsable set, a date view, and an edit surface. A grid edited in place is a write, and this Block's whole contract is that it draws the rows it was handed and reports what a reader asked for, so a screen that wants to type into a cell has not found a record index with one more prop. Each of the three returns as a fresh candidate when its own archetype is authored, and none of them widens this Item. The dated figure stays where the survey holds it; this section is about the Item's interface and not about the count.
 
@@ -1585,16 +1585,16 @@ figure with the comparison the caller made beside it. It is not a field, because
 nothing in it belongs to one record, and it is not a record, because there is no
 record to open and no address to put one in.
 
-**`MetricSpec` is warranted, and the evidence is a count.** Five shapes are declared
-today across this package: `Dashboard01Metric`, `ProjectDashboard01Figure`,
-`ChartCard01Reading`, `Trend01Item` and `Stat`. Five declarations of one typed value
-is the failure each of the three specifications in `packages/ui/src/lib/` was
-created to prevent, and it is not hypothetical here, because the five already
-disagree about whether a delta is a number or a percentage, about `deltaFormat`,
-about `hint`, and about whether a series and its name are part of a figure at all.
-The type belongs in that module beside `FieldSpec`, `ColumnSpec` and
-`RelationSpec`, for the reason the module gives: the first version of a shared type
-living inside the Block that happened to need it first makes a leaf depend on a
+**`MetricSpec` is warranted, and the evidence was a count.** Five shapes were
+declared across this package at the start of the consolidation: `Dashboard01Metric`,
+`ProjectDashboard01Figure`, `ChartCard01Reading`, `Trend01Item` and `Stat`. Five
+declarations of one typed value is the failure each of the three specifications in
+`packages/ui/src/lib/` was created to prevent, and it was not hypothetical here,
+because the five already disagree about whether a delta is a number or a percentage,
+about `deltaFormat`, about `hint`, and about whether a series and its name are part
+of a figure at all. The type belongs in that module beside `FieldSpec`, `ColumnSpec`
+and `RelationSpec`, for the reason the module gives: the first version of a shared
+type living inside the Block that happened to need it first makes a leaf depend on a
 composite, and a consumer who learns one shape on a summary is owed the same shape
 on a project dashboard. It is a fourth specification and not a fourth union, and
 the reason is the one `RelationSpec` gives for itself: a field names a control a
@@ -1603,20 +1603,16 @@ of other records, and a metric names a reading over a population, so a union
 carrying two of them would let a caller ask for a field where a metric belongs and
 receive a labelled input under a figure.
 
-**The metric summary Block is the first consumer of that type, and the expansion is
-recorded here rather than left to the code.** `Dashboard01.metrics` is a
-`MetricSpec[]` from `@nanisoft/prism-ui/spec`, so the row a consumer composes on an
-overview is the same shape it composes on a project dashboard and a summary panel,
-and its own `Dashboard01Metric` is an alias of the shared type rather than a second
-declaration of it. This is the migrate step of an expand-contract sequence: the other
-four figure owners (`ProjectDashboard01Figure`, `ChartCard01Reading`, `Trend01Item`
-and `Stat`) now take `MetricSpec` too, and each of their local declarations is an
-alias of the shared type rather than a second declaration of it, so the count of
-disagreeing shapes in use is one. The aliases keep the old names resolvable until a
-contract ticket deletes them, and a reader seeing one shape named twice should read
-the second name as a synonym on its way out rather than as a vocabulary. `ChartGroup01`,
-which composes the chart card, and the page fixtures were updated at their call sites
-so no in-tree caller remains on a superseded name.
+**The metric consolidation is an expand-contract sequence and it is now closed.**
+`Dashboard01.metrics` was the first row to take `MetricSpec`, then the other four
+figure owners (`ProjectDashboard01Figure`, `ChartCard01Reading`, `Trend01Item` and
+`Stat`) took it too, each keeping its local declaration as an alias of the shared
+type so an old name resolved while its callers moved. The contract step then deleted
+every one of the five superseded declarations, once a search of the whole tree found
+no caller left, so `MetricSpec` is the one shape a figure in this package is declared
+with and the names above are gone from the published interface. `ChartGroup01`, which
+composes the chart card, and the page fixtures were updated at their call sites, so no
+in-tree caller remains on a superseded name.
 
 **What it carries, and each field is here for the reason its twin in the other
 three specifications is.** `key`, stable and never the words of the label, because

@@ -18,6 +18,17 @@ options a choice carries under that kind and a `slot` arm for a control this
 package does not ship. A run that asks for a licence key, a region and a
 maintenance window is three fields and a choice.
 
+## The step shape stays here
+
+`ProvisioningStep` is declared with this Block and is not migrated onto a shared
+specification. A step is a name, a description and the fields a reader fills on
+that step, and it is the inside of one Item rather than a shape two Items would
+each declare. A declared stage has not happened, so the event specification would
+put a moment and an actor on it that it does not have, and there is no second
+Block a caller would hand a step to, so migrating it would be authoring work that
+adds nothing a consumer composes. It is a value the caller builds each step from,
+and it stays where it is.
+
 ## The rail is not a control, and that is the decision
 
 A multi-step form whose reader can jump to step four is a form that can submit an

@@ -22,6 +22,22 @@ The thread renders in the order the caller passes it and the Block never sorts. 
 order a Block imposed is a claim about which record came first, and a conversation
 in the wrong order reads as a conversation in that order.
 
+## Deprecated
+
+IssueDetail01 is deprecated in favour of `RecordDetail01`. It is the same job under
+a name that is wrong the moment the record is an invoice, an order or a
+subscription, and a name that has to be wrong about nine tenths of its uses is a
+name that fails the test that its name survives being wrong. The Item still renders
+and is still supported for now, but nothing new should be started on it.
+
+A consumer composing a record detail today composes `RecordDetail01`, which takes
+the record's identity, the facts you declare, your own content and its
+relationships as one ordered list, and draws the same screen over any record. This
+Item's own field declaration stays with it: it is a label and a value node a reader
+is entitled to be told about a record rather than an input, so it is not migrated
+onto the shared field specification, and its removal rides whatever eventually
+removes the Item.
+
 ## Usage
 
 ```tsx
@@ -59,6 +75,10 @@ import { IssueDetail01, type IssueDetail01Props } from '@nanisoft/prism-ui/block
 ## Guidelines
 
 ### When to use
+
+Use it only to keep an existing screen rendering. It still works and is still
+supported for now, but it is deprecated, so new work composes `RecordDetail01` and
+draws the same screen under a name that survives whatever the record is called.
 
 Use it for one issue, on a page of its own. The title is the section heading, so a
 page that composes it under an `h1` wants `headingLevel="h1"` and a card that

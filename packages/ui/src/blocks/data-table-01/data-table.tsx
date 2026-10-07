@@ -377,6 +377,33 @@ function renderCell(column: ColumnSpec, row: DataTableRow): ReactNode {
  * consumer. `getRowId` is required, because a row's position moves under sorting,
  * filtering and paging and an index-keyed selection would act on the wrong records.
  *
+ * **It is also the log and the event stream, drawing event rows from the shared event
+ * specification.** A consumer composing a delivery log or a console events screen
+ * passes the same `EventSpec` values an activity trail takes, and draws columns from
+ * them: the sending process in `actor`, the event type in `action`, the endpoint in
+ * `target`, the payload in a `CodeBlock` cell the caller composes, and the response
+ * status in a `Status` cell the caller composes rather than declared as a member,
+ * because the event specification has no kind and no severity. A log is a different
+ * job from the trail on the arrangement signal: it gains a filter region the trail
+ * does not draw, a second axis on which entries are compared, and a page boundary in
+ * place of a silent limit, and every one of those belongs to this Block rather than
+ * to a rail. So a screen that wants the events of one record composes
+ * `ActivityFeed01`, a screen that wants to find one entry among many composes this
+ * Block, and there is no second log Item beside it.
+ *
+ * **The Block composes no disclosure.** Seeing one entry in full is a destination the
+ * caller names with its required words, expanding a payload in place is the caller's
+ * own `Collapsible` placed in a `slot` cell, and taking an identifier away is the
+ * caller's own control composed beside a code block. A control whose handler arrives
+ * through a spread of unknown shape reads as carrying no handler, so the escape for a
+ * per-entry action is the `renderRowActions` node rather than a spread.
+ *
+ * **It draws no retention window, no archive, no purge, no legal hold and no export**,
+ * and no immutability mark, no time axis, no live tail, no aggregate over the
+ * population and no command of its own. A filter is a narrowing the caller passed and
+ * the Block states nothing about what is behind it. Row selection exists so the caller
+ * can drive a command against its own store.
+ *
  * **It holds the selection set it was given, and reports every change.** This is the
  * one piece of state a block in this repository keeps, and it is scoped by what the
  * state is: a set of keys the caller passed for the page about to be drawn. Nothing

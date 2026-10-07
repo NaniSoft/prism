@@ -1,6 +1,9 @@
 'use client'
 
+import { useState } from 'react'
+
 import { SettingsPage } from '@nanisoft/prism-ui/pages/settings-page'
+import type { FieldSpecGroup } from '@nanisoft/prism-ui/spec'
 
 const LINKS = [
   { href: '#general', label: 'General', current: false },
@@ -8,8 +11,71 @@ const LINKS = [
   { href: '#members', label: 'Members', current: false },
 ]
 
-/** The settings page, with a grouped form per tab. */
+const GENERAL: readonly FieldSpecGroup[] = [
+  {
+    id: 'identity',
+    label: 'Identity',
+    fields: [
+      {
+        key: 'settings-workspace-name',
+        label: 'Workspace name',
+        kind: 'Input',
+        defaultValue: 'Northwind',
+      },
+      {
+        key: 'settings-workspace-description',
+        label: 'Description',
+        kind: 'Textarea',
+        rows: 3,
+        placeholder: 'What does this workspace do?',
+      },
+      {
+        key: 'settings-workspace-region',
+        label: 'Data region',
+        kind: 'Select',
+        placeholder: 'Choose a region',
+        options: [
+          { value: 'eu-west', label: 'Europe West' },
+          { value: 'us-east', label: 'US East' },
+        ],
+      },
+    ],
+  },
+]
+
+const NOTIFICATIONS: readonly FieldSpecGroup[] = [
+  {
+    id: 'email',
+    label: 'Email',
+    fields: [
+      {
+        key: 'settings-weekly-digest',
+        label: 'Weekly digest',
+        kind: 'Switch',
+        help: 'A summary of activity every Monday.',
+        defaultValue: true,
+      },
+      {
+        key: 'settings-mention-alerts',
+        label: 'Mention alerts',
+        kind: 'Switch',
+        help: 'Notify me when someone mentions my name.',
+      },
+    ],
+  },
+]
+
+/** The settings page, with a grouped shared-specification form per tab. */
 export default function SettingsPageDemo() {
+  const [values, setValues] = useState<Record<string, unknown>>({
+    'settings-workspace-name': 'Northwind',
+    'settings-workspace-region': 'eu-west',
+    'settings-weekly-digest': true,
+  })
+
+  const change = (key: string, value: unknown) =>
+    setValues((held) => ({ ...held, [key]: value }))
+
   return (
     <SettingsPage
       shell={{
@@ -46,40 +112,12 @@ export default function SettingsPageDemo() {
           panel: {
             title: 'General',
             description: 'Shown to everyone you collaborate with.',
+            groups: GENERAL,
+            values,
+            onValueChange: change,
             submitLabel: 'Save changes',
-            secondaryAction: { label: 'Cancel' },
-            sections: [
-              {
-                id: 'identity',
-                title: 'Identity',
-                fields: [
-                  {
-                    kind: 'text',
-                    id: 'settings-workspace-name',
-                    label: 'Workspace name',
-                    defaultValue: 'Northwind',
-                  },
-                  {
-                    kind: 'textarea',
-                    id: 'settings-workspace-description',
-                    label: 'Description',
-                    placeholder: 'What does this workspace do?',
-                    rows: 3,
-                  },
-                  {
-                    kind: 'select',
-                    id: 'settings-workspace-region',
-                    label: 'Data region',
-                    placeholder: 'Choose a region',
-                    defaultValue: 'eu-west',
-                    options: [
-                      { label: 'Europe West', value: 'eu-west' },
-                      { label: 'US East', value: 'us-east' },
-                    ],
-                  },
-                ],
-              },
-            ],
+            onSubmit: () => undefined,
+            footerStart: <a href="#general">Cancel</a>,
           },
         },
         {
@@ -88,28 +126,11 @@ export default function SettingsPageDemo() {
           panel: {
             title: 'Notifications',
             description: 'Choose what the workspace sends and when.',
+            groups: NOTIFICATIONS,
+            values,
+            onValueChange: change,
             submitLabel: 'Save changes',
-            sections: [
-              {
-                id: 'email',
-                title: 'Email',
-                fields: [
-                  {
-                    kind: 'switch',
-                    id: 'settings-weekly-digest',
-                    label: 'Weekly digest',
-                    description: 'A summary of activity every Monday.',
-                    defaultChecked: true,
-                  },
-                  {
-                    kind: 'switch',
-                    id: 'settings-mention-alerts',
-                    label: 'Mention alerts',
-                    description: 'Notify me when someone mentions my name.',
-                  },
-                ],
-              },
-            ],
+            onSubmit: () => undefined,
           },
         },
       ]}

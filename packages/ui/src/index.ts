@@ -203,6 +203,10 @@ export type {
   RecordDetail01Relation,
   RecordDetail01RelationEmpty,
 } from './blocks/record-detail-01'
+export { RecordWizard01 } from './blocks/record-wizard-01'
+export type { RecordWizard01Props } from './blocks/record-wizard-01'
+export { IndexDetail01 } from './blocks/index-detail-01'
+export type { IndexDetail01Props } from './blocks/index-detail-01'
 export { SettingsPanel01 } from './blocks/settings-panel-01'
 export { AuthForm01 } from './blocks/auth-form-01'
 export { AppShell01 } from './blocks/app-shell-01'

@@ -1,0 +1,82 @@
+---
+slug: blocks/index-detail-01
+title: IndexDetail01
+---
+
+## Overview
+
+IndexDetail01 is the master and detail split: an index pane beside a detail pane.
+It takes two nodes, places them on two tracks, and holds no selection of its own.
+The index pane is where a reader scans and clicks; the detail pane is the answer to
+the click. Nothing in the Block connects the two.
+
+The split holds no selection state at all. Selection, routing and which record is
+open belong to the consumer, because Prism never imports a router. The index
+reports every selection change through its own callback, and reacting to it is the
+caller's own read of that callback and a pass of the record it wants into `detail`:
+
+```tsx
+const [open, setOpen] = useState<string | null>(null)
+const record = records.find((entry) => entry.id === open) ?? null
+
+<IndexDetail01
+  index={<DataTable01 rows={rows} onSelectedIdsChange={(ids) => setOpen(ids[0] ?? null)} ... />}
+  detail={record ? <RecordDetail01 title={record.name} ... /> : <NothingChosen01 title="Select a record" />}
+/>
+```
+
+The tracks hold their ratio at every selection state, so clicking a row does not
+move the list out from under the cursor. The Block ships no default sentence, no
+frame of its own and no loading mark, because it cannot know whether it is at rest.
+The detail slot is required: a record that is gone, one this reader may not see and
+one whose fetch failed are three causes sharing one address and three different
+sentences, so whether the pane is drawn at all is the caller's answer.
+
+The split does not collapse at a narrow viewport. Which pane survives is the
+caller's composition rather than a media query deciding a shape, so the narrow
+arrangement is one the caller writes: the index alone under `AppShell01`, and the
+record as its own screen.
+
+## Usage
+
+```tsx
+import { IndexDetail01 } from '@nanisoft/prism-ui/blocks/index-detail-01'
+
+<IndexDetail01 index={indexPane} detail={detailPane} />
+```
+
+<ComponentDemo slug="index-detail-01" />
+
+## Guidelines
+
+### When to use
+
+Use it when a reader picks one record from a list and reads it without leaving the
+list behind. A mailbox, an invoice register, a project list with its detail beside
+it.
+
+### When not to use
+
+Do not use it when the reader should leave the list to read the record. A record
+that is its own screen composes `AppShell01`, `PageHeader01` and `RecordDetail01`.
+
+Do not use it to decide which pane is shown at a narrow width. That is a composition
+the caller writes; the split renders two panes at every width.
+
+### Best practices
+
+- Hold the selection in the caller. Pass the chosen record into `detail` and let the
+  index report the change.
+- Put the caller's own `NothingChosen01` in `detail` at rest, or nothing at all. The
+  Block ships no fallback.
+- Make the index denser when you want it louder. Do not widen its track; a track
+  that changes ratio moves the list under the hand that clicked it.
+- Compose the index from `DataTable01` and the detail from `RecordDetail01`. Both
+  are Blocks the split places and styles nothing inside.
+
+### Content guidelines
+
+- The resting pane says what to do next, in the product's own words: "Select an
+  invoice", "Choose a customer".
+- A record that cannot be rendered says why, in the caller's own tone and with the
+  caller's own route out.

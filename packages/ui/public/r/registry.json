@@ -5062,6 +5062,41 @@
       ]
     },
     {
+      "name": "index-detail-01",
+      "title": "Index Detail 01 - The Master and Detail Split",
+      "description": "An index pane beside a detail pane, holding no selection of its own and connecting the two panes in no way. The tracks hold their ratio at every selection state, the detail slot is a required node, and the split does not collapse at a narrow viewport because which pane survives is the caller's composition.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/index-detail-01/index-detail.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/index-detail-01/index-detail.tsx"
+        },
+        {
+          "path": "src/blocks/index-detail-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/index-detail-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "industries-01",
       "title": "Industries 01 - Sectors As A Grid, List Or Tabs",
       "description": "The sectors a product serves, each a name, a one-line problem and a link into the work, as a grid of tiles, a list of rows or a set of tabs. The grid is the default because hiding answers behind a control is opt-in.",
@@ -6774,6 +6809,71 @@
       ]
     },
     {
+      "name": "record-wizard-01",
+      "title": "Record Wizard 01 - The Multi-Step Write Form",
+      "description": "The multi-step record write form: one group of fields at a time above the shipped rail, driven entirely by the consumer's controlled step index and controlled values. It renders no back control, no forward control and no rail of its own, declares no submission arm of its own, and leaves an issue naming a key off the current step undrawn.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "calendar",
+        "checkbox",
+        "choice-card",
+        "combobox",
+        "date-picker",
+        "dropzone",
+        "field",
+        "file-upload",
+        "form-wizard",
+        "image-list-field",
+        "input",
+        "label",
+        "money-field",
+        "multi-combobox",
+        "native-select",
+        "number-field",
+        "one-time-code",
+        "password-field",
+        "radio-group",
+        "range-field",
+        "repeatable-rows",
+        "search-field",
+        "select",
+        "slider",
+        "switch",
+        "textarea",
+        "toggle",
+        "toggle-group"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/record-wizard-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/record-wizard-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/record-wizard-01/record-wizard.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/record-wizard-01/record-wizard.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "reset-password-01",
       "title": "Reset Password 01 - The Screen Most Of Its Life Is Expired",
       "description": "A new secret with a reveal control named in the caller's own language, a repeat that is not compared for the caller, a strength note that is the caller's own function of what has been typed, one submit control, an announced status region, and an expired arm that takes the form away rather than letting a reader type into it only to be refused. Whether the two entries match is the product's validation and the words beside the mismatch are its too, so this Block draws no comparison and no sentence. Every string is passed in as a prop.",
@@ -7105,21 +7205,42 @@
     },
     {
       "name": "settings-panel-01",
-      "title": "Settings Panel 01 - Grouped Form",
-      "description": "A settings form grouped into sections of text, select and switch fields. Labels, options and value handlers are all passed in as props.",
+      "title": "Settings Panel 01 - The Shared Field Specification",
+      "description": "A settings region rendered from the shared field specification, measured against the record write form Block: grouped fields in a card, a slot arm for a control this package does not ship, a caller-written node beside the save, and a save union that includes the absence of a save for a setting that applies on change.",
       "type": "registry:block",
       "categories": [
         "application"
       ],
       "registryDependencies": [
-        "card",
-        "field",
-        "input",
-        "textarea",
-        "switch",
-        "select",
         "button",
-        "separator"
+        "calendar",
+        "card",
+        "checkbox",
+        "choice-card",
+        "combobox",
+        "date-picker",
+        "dropzone",
+        "field",
+        "file-upload",
+        "image-list-field",
+        "input",
+        "label",
+        "money-field",
+        "multi-combobox",
+        "native-select",
+        "number-field",
+        "one-time-code",
+        "password-field",
+        "radio-group",
+        "range-field",
+        "repeatable-rows",
+        "search-field",
+        "select",
+        "slider",
+        "switch",
+        "textarea",
+        "toggle",
+        "toggle-group"
       ],
       "dependencies": [
         "clsx",

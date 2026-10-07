@@ -34,22 +34,6 @@ import { cn } from '../../lib/utils'
 export type Dashboard01Span = 'full' | 'half' | 'third'
 
 /**
- * The name this Block used to carry for its own figure shape, kept exported while
- * the shared specification reaches the other four figure owners.
- *
- * **It is a synonym rather than a second declaration, and this is the expand step.**
- * `MetricSpec` in `@nanisoft/prism-ui/spec` is the one shape a metric now takes, and
- * this alias exists so a name that was exported continues to resolve until the
- * contract ticket deletes the superseded local declarations. A second figure shape
- * beside the shared one would be the sixth disagreement the specification module was
- * created to end, so this declares nothing of its own.
- *
- * @deprecated Pass a `MetricSpec` from `@nanisoft/prism-ui/spec`. This alias is
- * removed by the ticket that migrates the other four figure owners.
- */
-export type Dashboard01Metric = MetricSpec
-
-/**
  * One panel in the grid: an identifier, how much width it takes, and the caller's
  * own content.
  *

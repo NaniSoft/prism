@@ -36,6 +36,36 @@ of rows that shares one. A heading is a row in the same body as any other, and i
 is not a record: it is never in the selection set, in the count or in what the
 page's select-all covers.
 
+## The log and the event stream
+
+The record index is also where a delivery log or a console events screen is drawn.
+The row type is the shared event specification, `EventSpec` from
+`@nanisoft/prism-ui/spec`, and the columns are drawn from it: the sending process in
+`actor`, the event type in `action`, the endpoint in `target`, the payload in a
+`CodeBlock` cell you compose, and the response status in a `Status` cell you compose
+rather than declared as a member, because the event specification names no kind and
+no severity. A caller needing a status composes it into the cell, exactly as a
+caller needing a word the specification has no field for composes a node into
+`detail`.
+
+A log is a different job from the activity trail on the arrangement signal. It gains
+a filter region the trail does not draw, a second axis on which entries are
+compared, and a page boundary in place of a silent limit, and each of those belongs
+to this Block rather than to a rail. So a screen that wants the events of one record
+composes `ActivityFeed01`, and a screen that wants to find one entry among many
+composes this Block. There is no second log Item beside it, and no second event
+shape: the specification is the row type.
+
+The Block composes no disclosure anywhere. Seeing one entry in full is a destination
+you name with its required words, expanding a payload in place is your own
+`Collapsible` placed in a `slot` column, and taking an identifier away is your own
+control composed beside a code block. A control whose handler arrives through a
+spread of unknown shape reads as carrying no handler, so a per-row action is the
+`renderRowActions` node rather than a spread. The Block draws no retention window,
+no archive, no purge, no legal hold and no export, and no immutability mark, no time
+axis, no live tail and no aggregate over the population: those are properties of a
+store rather than of a drawing.
+
 The block composes these components:
 
 | Part | Component | Role |
@@ -99,6 +129,10 @@ of search, filters or row selection.
 
 Do not use it for fewer than a dozen rows with no paging. A plain `Table` with a
 heading is lighter and reads the same.
+
+Do not use it for a single record's own events. That is `ActivityFeed01`, whose only
+spatial claim is order; a log's filter region, comparison axis and page boundary
+belong here, and the trail does not widen for them.
 
 Do not hide the page's primary action in the row node. Keep the main action on
 the screen and reserve the trailing cell for secondary commands.

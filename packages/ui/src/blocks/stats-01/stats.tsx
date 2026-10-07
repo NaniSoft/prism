@@ -6,31 +6,6 @@ import { Sparkline } from '../../components/ui/sparkline'
 import type { MetricSpec } from '../../lib/spec'
 
 /**
- * The name this Block used to carry for its own statistic shape, kept exported
- * while the shared specification reaches the four figure owners.
- *
- * **It is a synonym rather than a second declaration, and this is the migrate
- * step.** `MetricSpec` in `@nanisoft/prism-ui/spec` is the one shape a figure now
- * takes, and this alias exists so a name that was exported continues to resolve
- * until the contract ticket deletes the superseded local declarations. A second
- * statistic shape beside the shared one would be the sixth disagreement the
- * specification module was created to end, so this declares nothing of its own.
- *
- * **The old declaration was the guess this migration removes.** A `Stat` was
- * documented as a percentage change and the Block appended a percent sign to the
- * number, which is the one guess `Metric` refuses to make: a delta of `0.12` is
- * twelve percent, twelve cents or twelve milliseconds. It also had nowhere to put a
- * series, so the trend a metric summary names could not travel with a figure here.
- * A `Stat` now takes a `deltaFormat` for the caller's own words and a `series` with
- * its label, so the same consumer stops seeing a formatted change on one screen and
- * a bare number on another.
- *
- * @deprecated Pass a `MetricSpec` from `@nanisoft/prism-ui/spec`. This alias is
- * removed by the ticket that migrates the four figure owners.
- */
-export type Stat = MetricSpec
-
-/**
  * The props a Stats01 takes. Every string and every figure is a prop and the Block
  * ships none.
  */

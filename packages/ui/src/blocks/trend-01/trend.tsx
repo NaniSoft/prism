@@ -8,27 +8,6 @@ import type { MetricSpec } from '../../lib/spec'
 import { cn } from '../../lib/utils'
 
 /**
- * The name this Block used to carry for its own reading shape, kept exported while
- * the shared specification reaches the four figure owners.
- *
- * **It is a synonym rather than a second declaration, and this is the migrate step.**
- * `MetricSpec` in `@nanisoft/prism-ui/spec` is the one shape a reading now takes, and
- * this alias exists so a name that was exported continues to resolve until the
- * contract ticket deletes the superseded local declarations. A second reading shape
- * beside the shared one would be the sixth disagreement the specification module was
- * created to end, so this declares nothing of its own.
- *
- * **The shape of a row is unchanged by the migration.** A trend row is still
- * heterogeneous by nature: some of the things a list tracks have a series behind them
- * and some have only a reading, some moved and some did not, and every member except
- * `key`, `label` and `value` stays optional for that reason.
- *
- * @deprecated Pass a `MetricSpec` from `@nanisoft/prism-ui/spec`. This alias is
- * removed by the ticket that migrates the four figure owners.
- */
-export type Trend01Item = MetricSpec
-
-/**
  * The refusals, as checks, so an item that would render a link nobody can name is a
  * diagnostic in a console rather than a rendered link.
  *

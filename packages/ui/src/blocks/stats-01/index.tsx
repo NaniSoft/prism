@@ -3,9 +3,7 @@
  * caller that builds a `MetricSpec[]` has to be able to name the type it is building.
  * A Block whose prop types are only reachable through inference is a Block whose
  * callers annotate their arrays as `any`, which is the point at which a rename stops
- * being caught by the compiler. `Stat` is a deprecated alias of `MetricSpec` from
- * `@nanisoft/prism-ui/spec`, kept resolvable while the other figure owners are
- * migrated; new code types its row with `MetricSpec` directly.
+ * being caught by the compiler.
  */
 export { Stats01, default } from './stats'
-export type { Stat, Stats01Props } from './stats'
+export type { Stats01Props } from './stats'

@@ -338,6 +338,16 @@ function Relation({ relation, level }: { relation: RecordDetail01Relation; level
  * undo, and no second pane. It is a server Component: no hook beyond `useId`, no
  * state and no client code, so a consumer that passes a client action inside a
  * slot pays for the action and not for the frame.
+ *
+ * **It is measured against `IssueDetail01`, which is deprecated in its favour.** An
+ * issue detail and a record detail are the same job: a key in the mono face, a state
+ * as a tone beside the caller's own words, declared facts, a body and a thread in the
+ * caller's order. The issue detail's name is wrong the moment the record is an invoice
+ * or a subscription, and a name that has to be wrong about nine tenths of its uses is
+ * a name that fails the test that its name survives being wrong, so that Item is
+ * deprecated rather than merged or replaced. A reader arriving at either Item arrives
+ * at the same answer: a record drawn in full is this Block, whatever the product calls
+ * its records.
  */
 export function RecordDetail01({
   title,

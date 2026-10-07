@@ -32,10 +32,17 @@ for a level it does not own.
 
 ## One panel, one submit
 
-`SettingsPanel01` takes `sections`, and each section is a group with an `id` the
-group heading is labelled by. That is what lets a deep link land on a group and what
-lets a reader jump between them with a heading list, so the groups are real headings
-and not bold text.
+`SettingsPanel01` takes `groups` from the shared field specification, and each group
+is a `FieldSpecGroup` with an `id` the group heading is labelled by. That is what
+lets a deep link land on a group and what lets a reader jump between them with a
+heading list, so the groups are real headings and not bold text. A field is a
+`FieldSpec`, the same field a record write form takes, and a control this package
+does not ship is the `slot` arm.
+
+The values are the caller's, and the change handler is where a setting leaves. A
+region that applies on change passes an `onValueChange` that applies the mutation
+and no save arm, so the panel draws no footer. A region that saves explicitly passes
+a save arm and a `submitLabel`.
 
 Fields are `Field` plus `Label` plus one control, and the control is chosen by what
 is being edited rather than by what is convenient:
@@ -53,6 +60,11 @@ the page's own section heading.
 
 A panel with one field changed and a `Save` button is a page that can lose work. If
 the panel holds a single control, change it where it sits and give the panel no
-footer at all: `SettingsPanel01` renders no footer when `submitLabel` and
-`secondaryAction` are both absent. That is the honest state for a toggle, and it is
-the one most often got wrong.
+footer at all: `SettingsPanel01` renders no footer when it is passed no save arm and
+no `footerStart`. That is the honest state for a toggle, and it is the one most
+often got wrong.
+
+The Block ships no revert control, because a setting that applies on change has no
+moment at which the value is refused. A caller that wants a rule before the mutation
+runs it itself, and a caller that wants a way back keeps the previous value and
+offers it in its own control.

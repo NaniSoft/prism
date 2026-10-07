@@ -127,9 +127,11 @@ const settingsPanel = (headingLevel?: HeadingLevel) => (
   <SettingsPanel01
     {...(headingLevel ? { headingLevel } : {})}
     title="Workspace settings"
-    sections={[
-      { id: 'general', title: 'General', fields: [{ id: 'name', label: 'Name', kind: 'text' }] },
+    groups={[
+      { id: 'general', label: 'General', fields: [{ key: 'name', label: 'Name', kind: 'Input' }] },
     ]}
+    values={{}}
+    onValueChange={() => {}}
   />
 )
 

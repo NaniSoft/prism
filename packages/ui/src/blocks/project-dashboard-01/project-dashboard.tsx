@@ -43,28 +43,6 @@ function toneOf(state: string): StatusTone {
 }
 
 /**
- * The name this Block used to carry for its own figure shape, kept exported while
- * the shared specification reaches the four figure owners.
- *
- * **It is a synonym rather than a second declaration, and this is the migrate step.**
- * `MetricSpec` in `@nanisoft/prism-ui/spec` is the one shape a figure now takes, and
- * this alias exists so a name that was exported continues to resolve until the
- * contract ticket deletes the superseded local declarations. A second figure shape
- * beside the shared one would be the sixth disagreement the specification module was
- * created to end, so this declares nothing of its own.
- *
- * **The reason this Block once gave for declaring its own figure type is kept where
- * it belongs.** A dashboard figure and a detail header field are different claims
- * about a screen, which is why this Block keeps its own name, kind and arrangement;
- * that was always an argument for a shared shape and a separate screen rather than
- * for a second declaration of the shape.
- *
- * @deprecated Pass a `MetricSpec` from `@nanisoft/prism-ui/spec`. This alias is
- * removed by the ticket that migrates the four figure owners.
- */
-export type ProjectDashboard01Figure = MetricSpec
-
-/**
  * How much of the grid one panel takes.
  *
  * Three, and the set is a fraction of the row rather than a width in pixels: a

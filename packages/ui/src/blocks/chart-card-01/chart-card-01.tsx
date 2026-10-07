@@ -35,27 +35,6 @@ import { cn } from '../../lib/utils'
 export type ChartCard01Span = 'full' | 'half' | 'third'
 
 /**
- * The name this Block used to carry for its own reading shape, kept exported while
- * the shared specification reaches the four figure owners.
- *
- * **It is a synonym rather than a second declaration, and this is the migrate step.**
- * `MetricSpec` in `@nanisoft/prism-ui/spec` is the one shape a reading now takes, and
- * this alias exists so a name that was exported continues to resolve until the
- * contract ticket deletes the superseded local declarations. A second reading shape
- * beside the shared one would be the sixth disagreement the specification module was
- * created to end, so this declares nothing of its own.
- *
- * The reason the old type gave for its own shape is kept where it belongs: the
- * reading line states the figures the card knows about the figure it draws, and that
- * the value is the caller's own node in the caller's own units. Both are properties
- * of the shared shape rather than reasons for a local one.
- *
- * @deprecated Pass a `MetricSpec` from `@nanisoft/prism-ui/spec`. This alias is
- * removed by the ticket that migrates the four figure owners.
- */
-export type ChartCard01Reading = MetricSpec
-
-/**
  * The props a ChartCard01 takes. Every string is a prop and the Block ships none.
  */
 export type ChartCard01Props = {

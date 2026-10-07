@@ -64,9 +64,11 @@ const form = {
 // realistic copy here: a settings page names its panel for what the panel holds.
 const panel = {
   title: 'Preferences',
-  sections: [
-    { id: 'profile', title: 'Profile', fields: [{ kind: 'text' as const, id: 'name', label: 'Name' }] },
+  groups: [
+    { id: 'profile', label: 'Profile', fields: [{ kind: 'Input' as const, key: 'name', label: 'Name' }] },
   ],
+  values: {} as Record<string, unknown>,
+  onValueChange: () => {},
 }
 
 describe('Block smoke tests', () => {

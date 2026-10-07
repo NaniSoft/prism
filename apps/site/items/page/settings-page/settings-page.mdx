@@ -19,9 +19,9 @@ The page composes these parts:
 | Forms | SettingsPanel01 | the grouped and saved form for one tab |
 
 A tab that carries `panel` renders `SettingsPanel01`: a titled card with grouped
-sections, a save footer and one submit. A tab that carries `content` renders the
-node as-is, which suits a read-only summary or a view that is not a form. Sections,
-fields, options and labels are all props, and the page fetches nothing.
+fields from the shared specification and a save footer. A tab that carries `content`
+renders the node as-is, which suits a read-only summary or a view that is not a
+form. Groups, fields, values and labels are all props, and the page fetches nothing.
 
 ## Usage
 
@@ -40,7 +40,14 @@ import { SettingsPage } from '@nanisoft/prism-ui/pages/settings-page'
     {
       value: 'general',
       label: 'General',
-      panel: { title: 'General', submitLabel: 'Save changes', sections: generalSections },
+      panel: {
+        title: 'General',
+        groups: generalGroups,
+        values,
+        onValueChange: change,
+        submitLabel: 'Save changes',
+        onSubmit: save,
+      },
     },
     { value: 'members', label: 'Members', content: <MembersTable /> },
   ]}
@@ -70,9 +77,11 @@ on one page, not behind a tab.
 
 - Keep one save per panel. A mixed model, where some fields save and others apply
   immediately, makes the footer's promise unclear.
-- Give every field a stable `id`, so the label is linked to the control.
-- Use `content` for a read-only group. A panel with no `submitLabel` renders no
-  footer, which is the honest shape for a view that does not save.
+- Give every field a stable `key`, so the label is linked to the control and the
+  caller's values are keyed by it.
+- Use `content` for a read-only group. A panel passed no save arm and no
+  `footerStart` renders no footer, which is the honest shape for a view that does
+  not save.
 - Set `defaultValue` to the group a reader is most likely to want, rather than
   relying on the first tab by luck.
 - Pass the same navigation node to both the rail and the sheet, and keep its ids

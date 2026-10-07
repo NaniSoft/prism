@@ -819,7 +819,7 @@ const HEADINGS: Array<{
     render: () => (
       <ActivityFeed01
         title={TITLE}
-        events={[{ id: 'first', actor: 'A person', action: 'did a thing', at: '2026-09-30' }]}
+        events={[{ key: 'first', actor: 'A person', action: 'did a thing', at: '2026-09-30' }]}
         empty="Nothing has happened yet."
       />
     ),

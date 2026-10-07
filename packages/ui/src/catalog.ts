@@ -1025,6 +1025,28 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'RecordWizard01',
+    slug: 'record-wizard-01',
+    kind: 'block',
+    category: null,
+    description:
+      'A multi-step record write form: one group of fields at a time above the shipped rail, driven by the consumer controlled step index and controlled values, with no submission arm of its own.',
+    source: 'src/blocks/record-wizard-01/index.tsx',
+    exports: ['RecordWizard01'],
+    status: 'stable',
+  },
+  {
+    name: 'IndexDetail01',
+    slug: 'index-detail-01',
+    kind: 'block',
+    category: null,
+    description:
+      'A composition Block rendering an index pane beside a detail pane, holding no selection of its own and connecting the two panes in no way.',
+    source: 'src/blocks/index-detail-01/index.tsx',
+    exports: ['IndexDetail01'],
+    status: 'stable',
+  },
+  {
     name: 'SettingsPanel01',
     slug: 'settings-panel-01',
     kind: 'block',
@@ -2131,10 +2153,10 @@ export const catalog: readonly CatalogItem[] = [
     kind: 'block',
     category: null,
     description:
-      'One issue: its key in the mono face, its state, the fields the caller declares, the body, the thread in the caller order, and slots for the editor, controls and aside.',
+      'Deprecated: one issue in full. The record detail Block, RecordDetail01, draws the same screen under a name that survives whatever the record is called. This Item still renders and is still supported, but nothing new should be started on it.',
     source: 'src/blocks/issue-detail-01/index.tsx',
     exports: ['IssueDetail01'],
-    status: 'stable',
+    status: 'deprecated',
   },
   {
     name: 'NotificationCenter01',

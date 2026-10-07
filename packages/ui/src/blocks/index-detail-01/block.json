@@ -1,0 +1,8 @@
+{
+  "name": "index-detail-01",
+  "title": "Index Detail 01 - The Master and Detail Split",
+  "description": "An index pane beside a detail pane, holding no selection of its own and connecting the two panes in no way. The tracks hold their ratio at every selection state, the detail slot is a required node, and the split does not collapse at a narrow viewport because which pane survives is the caller's composition.",
+  "categories": ["application"],
+  "registryDependencies": [],
+  "dependencies": []
+}

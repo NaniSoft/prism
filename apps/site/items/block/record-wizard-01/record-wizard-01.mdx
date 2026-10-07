@@ -1,0 +1,117 @@
+---
+slug: blocks/record-wizard-01
+title: RecordWizard01
+---
+
+## Overview
+
+RecordWizard01 is the multi-step record write form: one group of fields at a time
+above the rail the package already ships, driven entirely by the consumer's
+controlled step index and controlled values. It is the write form's second
+arrangement rather than a prop on it: a wizard draws one group at a time, puts a
+rail above them, and asks whether a step may be left forwards, and one Item could
+not draw both without gaining the rail, the partition and that decision.
+
+The steps are `FieldSpecGroup` values from `@nanisoft/prism-ui/spec`, each with a
+stable `id` and a `label` that is a `string`. A group's heading is a real heading,
+and the same string is the rail label, so the two are one word rather than two kept
+in step by a caller. The fields are the same `FieldSpec` fields a record write form
+takes, including the `slot` arm, so the vocabulary a consumer learns on one is the
+vocabulary on the other.
+
+The step is the consumer's. `current` is controlled and `onStepChange` is required,
+so the Block draws the step it was handed and no reachability at all: no completed
+mark beyond the one the shipped rail already derives from the index, no disabled
+step, no skipped step and no count of what has been answered. An index the
+specification does not contain draws the nearest real step rather than nothing.
+
+Back, the forward control and the rail are `FormWizard`'s. This Block renders none
+of them, declares no submission arm of its own, and leaves an issue naming a key
+that is not on the step being drawn undrawn, without moving the reader.
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { RecordWizard01 } from '@nanisoft/prism-ui/blocks/record-wizard-01'
+import type { FieldSpecGroup } from '@nanisoft/prism-ui/spec'
+
+const STEPS: readonly FieldSpecGroup[] = [
+  {
+    id: 'identity',
+    label: 'Identity',
+    fields: [{ key: 'name', label: 'Workspace name', kind: 'Input' }],
+  },
+  {
+    id: 'billing',
+    label: 'Billing',
+    fields: [{ key: 'seats', label: 'Seats', kind: 'NumberField', defaultValue: 5 }],
+  },
+]
+
+export function Wizard() {
+  const [step, setStep] = useState(0)
+  const [values, setValues] = useState<Record<string, unknown>>({})
+  return (
+    <RecordWizard01
+      steps={STEPS}
+      current={step}
+      onStepChange={(index, direction) => {
+        if (direction === 'forward' && step === STEPS.length - 1) return save(values)
+        setStep(index)
+      }}
+      values={values}
+      onValueChange={(key, value) => setValues((held) => ({ ...held, [key]: value }))}
+      backLabel="Back"
+      nextLabel="Next"
+      finishLabel="Create"
+      blockedLabel="Before you continue"
+      progressLabel="New workspace steps"
+      issueLabel={(field) => field}
+      instructionsLabel="Going back is always allowed."
+    />
+  )
+}
+```
+
+<ComponentDemo slug="record-wizard-01" />
+
+## Guidelines
+
+### When to use
+
+Use RecordWizard01 when a record has more fields than one screen can hold and the
+fields fall into an order a reader must pass through. It earns its space when the
+process has a rail a reader can read position from, and when the consumer wants to
+rule on whether a step may be left forwards.
+
+### When not to use
+
+Do not use it when the record's fields fit one screen. That is `record-form-01`, and
+a wizard over three fields is a rail and two extra keypresses for no reader gain.
+
+Do not use it for a run that commits infrastructure or a checkout. That is a
+consumer of this Block's own controls and fields, or a Block that commits a
+different thing.
+
+### Best practices
+
+- Hold the step index outside the Block and pass it in `current`. The Block draws the
+  index it was handed and never decides reachability.
+- Keep every field controlled and own the values. Only the current step's fields are
+  in the document, so the values are yours from the first keystroke.
+- Leave validation to the consumer and pass issues keyed by field. A message
+  off the current step is left undrawn and the reader is not moved.
+- Give every step a stable `id` and a one-word `label`, so the rail and the heading
+  are one string.
+- Do not expect the Block to save a draft between visits or resume one. It fetches
+  nothing.
+
+### Content guidelines
+
+- A step `label` is one word that survives a narrow rail column.
+- A step `description` is one line saying what the step asks for.
+- Back, next and finish are three different words: the last press is not a
+  continuation.

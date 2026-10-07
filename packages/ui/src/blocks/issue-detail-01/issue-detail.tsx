@@ -421,6 +421,24 @@ function initialsOf(name: string): string {
  * than hidden: there is no announce hook either, so a caller whose product posts
  * optimistically and then reports a failure composes their own `LiveRegion` beside
  * the form.
+ *
+ * **Deprecated in favour of `RecordDetail01`, and not merged into it.** This Block is
+ * the same job as the record detail Block under a name that is wrong the moment the
+ * record is an invoice, an order or a subscription: a name that has to be wrong about
+ * nine tenths of its uses is a name that fails the test that its name survives being
+ * wrong, so the disposition is a deprecation rather than a second Block. Two Items
+ * that both draw one record in full is a second list, and the record detail Block is
+ * the one that carries no subject matter in its name. This Item still renders and is
+ * still supported for now, but nothing new should be started on it. The field
+ * declaration on this Block is not migrated onto the shared field specification in
+ * this change: it is a label and a value node a reader is entitled to be told about a
+ * record rather than an input, and its removal rides whatever eventually removes the
+ * Item. A consumer composing a record detail today composes `RecordDetail01`, which
+ * takes the record's identity, its declared facts, the caller's own content and its
+ * relationships as one ordered list, and draws the same screen over any record.
+ *
+ * @deprecated Use `RecordDetail01` from `@nanisoft/prism-ui/blocks/record-detail-01`.
+ * This Item still renders, but nothing new should be started on it.
  */
 export function IssueDetail01({
   issue,
