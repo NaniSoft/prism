@@ -1,0 +1,173 @@
+---
+slug: live/message-thread-01
+title: MessageThread01
+---
+
+## Overview
+
+MessageThread01 draws the message thread of a conversation, receiving messages as
+they arrive.
+
+**This is the `live` Kind's second family.** A conversation is `live` because its
+content changes over time without a navigation event, and a chat that cannot stream
+is not a chat. So this surface owns a subscription and the bounded window behind
+it, exactly as the run log does.
+
+**Prism owns the surface, the consumer owns the transport.** `subscribe` is a
+function you supply and a function it tears down. There is no socket in the module,
+no endpoint, no retry policy, no persistence and no provider to mount, so a
+WebSocket, an `EventSource`, a polling timer and a test's own array are all the same
+shape to this surface. Nothing here knows which one it got.
+
+**The content is a message list with ordered parts.** A message has a stable
+identity, a sender and an ordered list of parts, and a part is text, a tool call, a
+reasoning block, a citation or an attachment. An event list is refused, because an
+occurrence is not a message; a turn list is refused, because a turn is a derived
+grouping the transport does not preserve. The message and part vocabulary lives
+with the surface, beside `RunEvent` and `ToolCall`.
+
+## Usage
+
+```tsx
+import { MessageThread01, type ChatMessage } from '@nanisoft/prism-ui/live/message-thread-01'
+
+function Conversation({ threadId, token }: { threadId: string; token: string }) {
+  return (
+    <MessageThread01
+      // Yours to build: a WebSocket, an EventSource, a poll, or an array in a test.
+      subscribe={(emit) => {
+        const socket = new WebSocket(`/threads/${threadId}?token=${token}`)
+        socket.addEventListener('message', (message) => emit(JSON.parse(message.data) as ChatMessage))
+        return () => socket.close()
+      }}
+      resubscribeKey={threadId}
+      status="running"
+      statusLabel="Answering"
+      title="Run 41c9"
+      messagesLabel="Messages in this conversation"
+      emptyLabel="Nothing has been said yet."
+      liveLabel="New message"
+    />
+  )
+}
+```
+
+The run controls are composed **beside** the thread, never inside it:
+
+```tsx
+import { PromptComposer } from '@nanisoft/prism-ui/components/prompt-composer'
+
+<PromptComposer
+  label="What should the agent do?"
+  state={state}
+  text={text}
+  onTextChange={setText}
+  onSubmit={send}
+  onStop={stop}
+  onRetry={retry}
+  sendLabel="Send"
+  stopLabel="Stop generating"
+  retryLabel="Try again"
+  attachLabel="Attach"
+  onAttach={openPicker}
+  attachments={attachments}
+  onRemoveAttachment={remove}
+  removeAttachmentLabel={(name) => `Remove ${name}`}
+/>
+```
+
+<ComponentDemo slug="message-thread-01" />
+
+## Props
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `subscribe` | `MessageSubscribe` | required | Called once with an emitter. Must return an unsubscribe. |
+| `messagesLabel` | `string` | required | The accessible name of the scrolling region. |
+| `initial` | `readonly ChatMessage[]` | `[]` | Messages already known, oldest first. Read when the thread opens, not on every render. |
+| `resubscribeKey` | `string \| number` | none | Which thread this is. Changing it clears the thread, reseeds it and opens a new subscription. |
+| `status` | `RunStatus` | none | `queued`, `running`, `waiting`, `done` or `failed`. |
+| `statusLabel` | `string` | none | The word beside the status. |
+| `title` | `string` | none | The surface's heading. |
+| `eyebrow` | `string` | none | Optional label above the heading. |
+| `description` | `string` | none | One or two sentences under the heading. |
+| `emptyLabel` | `string` | none | What the surface says when it holds no messages. |
+| `liveLabel` | `string` | none | Names the announcements, for assistive technology. |
+| `limit` | `number` | `200` | How many messages to hold. Older messages fall off the top. |
+| `paused` | `boolean` | `false` | Whether the surface opens paused. The control owns it after the first press. |
+| `pauseControl` | `boolean` | none | Draws the pause control, and requires both labels below. |
+| `pauseLabel` | `string` | with `pauseControl` | The words on the control while the thread is receiving. |
+| `resumeLabel` | `string` | with `pauseControl` | The words on the control while it is paused. |
+| `className` | `string` | none | Merged onto the surface element. |
+
+## The message and its parts
+
+A message is `{ id, sender, senderLabel?, at, parts }`. `id` is stable across
+deliveries, so a transport that reports the same message again as more parts arrive
+updates one message rather than appending a second. `sender` is one of `user`,
+`assistant`, `system` or `tool`, and `senderLabel` is your own word for it. `at` is
+your epoch milliseconds and the only value the surface orders by.
+
+A part is one of:
+
+- `{ kind: 'text'; text }` for a run of words.
+- `{ kind: 'reasoning'; label; text }`, shown collapsed under your `label`.
+- `{ kind: 'tool'; call }`, where `call` is a `ToolCall` drawn through
+  `ToolLedger01`'s own row.
+- `{ kind: 'citation'; label; href; detail? }` for a labelled destination.
+- `{ kind: 'attachment'; name; href?; preview? }`, where `preview` is your own node
+  for media this package already draws elsewhere.
+
+## The four decisions inside it
+
+**The four things the Kind already names are reused rather than answered twice.** A
+tool-call part is drawn through `ToolLedger01`'s own row, so there is no second
+tool-call shape. The status tiers are the ones `RunStatus` already publishes. The run
+controls are `PromptComposer`'s send, stop, retry and attach, composed beside this
+surface. The one surface it does not reuse is `RunStream01`, because a run's log is a
+sequence of occurrences and a conversation is a sequence of messages.
+
+**Prism holds a bounded window and promises no resumption.** The durable buffer that
+outlives a mount is yours, because Prism ships no permanent client runtime and
+cannot assume a server framework. The seam is `initial` and `resubscribeKey`: a
+surface opened mid-thread is seeded from your own record, a reconnect is a new key
+over a fresh seed, and the surface promises no resumption so it cannot fail to keep
+one.
+
+**Messages are kept sorted by `at`, not by arrival.** A reconnect can deliver an
+older message after a newer one, so sorting on arrival would put a thread's own
+history out of order in exactly the case where a reader is most likely to be
+watching. Ties break on `id`, so the order is total.
+
+**The only control is the pause control, and it pauses the surface and never the
+run.** A paused thread drops what arrives rather than queueing it, and it does not
+close your subscription, because you may be sharing one socket with a `RunStream01`
+beside it. Send, stop, retry and attach are not here: they are `PromptComposer`'s,
+which is a client Component with real handlers, so this surface never draws a
+control it cannot act on.
+
+## Accessibility
+
+- The messages are one `<ol>` and each message's parts are another, so the order is
+  in the document rather than in the styling.
+- The scrolling region is **named**, and `messagesLabel` is required rather than
+  defaulted: a scroll region with no name is announced as a group of focusable
+  nothing.
+- New messages are announced once, politely, and the thread is not a live region.
+  Announcing a growing list would make a screen reader read the whole thread again
+  on every arrival, which is the failure a live region on a list guarantees.
+  `LiveRegion` carries the newest message's first readable part alone.
+- The sender's mark is `aria-hidden` and the `data-sender` carries it for a test, so
+  the mark is decoration rather than announced as a character. Pass `senderLabel`
+  when a reader who cannot see the mark needs the sender named.
+- Each message's timestamp is a `<time>` with a machine-readable `datetime`.
+- The pause control is a `Button` with `aria-pressed`, and its words move with its
+  state.
+
+## Choosing between this and RunStream01
+
+`RunStream01` is a run's event log: a sequence of occurrences, each one a sentence
+you wrote, which a reader follows to see what an agent is doing. This is a
+conversation: a sequence of messages a reader reads and answers, each with an
+ordered set of parts. Reach for the log to follow a run, and for this to hold a
+conversation. The two compose on one screen when a reader is doing both.

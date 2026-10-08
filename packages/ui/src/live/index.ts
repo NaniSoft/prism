@@ -37,3 +37,23 @@ export type {
  * index module, so an Item and its barrel line cannot come apart. */
 export { ToolLedger01 } from './tool-ledger-01'
 export type { ToolLedger01Props, ToolCall, ToolCallState, ToolSubscribe } from './tool-ledger-01'
+
+/*
+ * The Kind's second family. A conversation is `live` because its content changes
+ * over time without a navigation event, and the message thread is the surface
+ * that receives it. It reuses the Kind's status tiers and the ledger's own row
+ * rather than minting a second answer to either. */
+export { MessageThread01 } from './message-thread-01'
+export type {
+  MessageThread01Props,
+  ChatMessage,
+  MessageSender,
+  MessagePart,
+  MessageTextPart,
+  MessageReasoningPart,
+  MessageToolPart,
+  MessageCitationPart,
+  MessageAttachmentPart,
+  MessageSubscribe,
+} from './message-thread-01'
+

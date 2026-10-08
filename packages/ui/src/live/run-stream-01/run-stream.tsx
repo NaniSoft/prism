@@ -6,6 +6,7 @@ import { LiveRegion } from '../../components/ui/live-region'
 import { ScrollArea } from '../../components/ui/scroll-area'
 import { headingSizeClass } from '../../components/ui/section'
 import { cn } from '../../lib/utils'
+import { STATUS_INK, type RunStatus } from '../status'
 
 /**
  * Who produced an event, as a closed set.
@@ -32,7 +33,7 @@ export type RunEvent = {
 }
 
 /** Where a run has got to. The tiers are Prism's; the words beside them are the caller's. */
-export type RunStatus = 'queued' | 'running' | 'waiting' | 'done' | 'failed'
+export type { RunStatus }
 
 /**
  * How the surface receives events.
@@ -115,14 +116,6 @@ const ROLE_MARK: Record<RunEventRole, string> = {
   tool: '▸',
   system: '·',
   error: '×',
-}
-
-const STATUS_INK: Record<RunStatus, string> = {
-  queued: 'text-muted-foreground',
-  running: 'text-foreground',
-  waiting: 'text-warning',
-  done: 'text-success',
-  failed: 'text-destructive',
 }
 
 /** The one source of truth for order, so a late event with an earlier `at` sorts there. */

@@ -67,6 +67,34 @@ Not searched: `description`, which is a `ReactNode` and matching it would mean w
 your markup for words, and `href`, because a reader does not remember a colleague by
 URL.
 
+## A per-member control
+
+Some directories need a control per member rather than only a destination: a plugin list
+whose every row has an enable, a model list with a favourite, a room list with a booking.
+`renderMemberAction` takes a function from a member to a `ReactNode`, and the Block
+places that node at the member's trailing edge, in both the card and the row
+arrangements, and draws nothing of its own where it is not passed.
+
+```tsx
+<Directory01
+  // ...
+  renderMemberAction={(member) => (
+    <Switch
+      aria-label={`Enable ${member.name}`}
+      checked={enabled[member.id] === true}
+      onCheckedChange={(checked) => setEnabled({ ...enabled, [member.id]: checked })}
+    />
+  )}
+/>
+```
+
+**The control and its handler are yours, and that is why the prop is a node rather than
+a flag.** `scripts/check-block-controls.mjs` fails a Block that renders a `Switch`
+without its `onCheckedChange`, and a Block ships no behaviour and so cannot supply one.
+The node is the same escape the record index's per-row actions take, so a plugin list is
+a directory with an enable rather than the record index, which would bring a selection
+set, a batch bar and a sort it never uses.
+
 ## Usage
 
 ```tsx
@@ -166,6 +194,9 @@ every other member on the page will look the same to a reader scanning the colum
 - Pass an empty summary on the first paint. `search-field` draws the result region only
   once `resultSummary` is passed, and a region that appears together with its first
   content is the one case a live region is least reliable about.
+- Reach for `renderMemberAction` when a member carries a control rather than only a
+  destination. The handler is yours, the node is placed without styling, and a member
+  with an enable is still a member of a browse rather than a row of a working list.
 - Wrap the section in your own `search` region if the page really does have one search.
 
 ### Content guidelines

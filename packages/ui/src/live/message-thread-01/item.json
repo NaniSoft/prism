@@ -1,0 +1,8 @@
+{
+  "name": "message-thread-01",
+  "title": "Message Thread 01 - A Conversation That Arrives",
+  "description": "The message thread of a conversation, receiving messages as they arrive over a subscription the consumer supplies. The live Kind's second family: a message list with ordered parts, where the run log is a list of occurrences. Prism owns the thread, the message and part vocabulary, the status tiers and the tool-call row; the consumer owns the socket, the transport, the persistence and the durable resumption buffer. Every string is passed in as a prop.",
+  "categories": ["data-display"],
+  "registryDependencies": ["button", "live-region", "scroll-area"],
+  "dependencies": []
+}

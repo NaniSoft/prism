@@ -2640,7 +2640,15 @@ declines.
   `FieldSpec` fields, and the shape is a list of them. Whether that form is a new
   Block or the record write form Block over a specification is authoring work
   and not this decision; what is settled is that it is declarative content and
-  never a canvas.
+  never a canvas. **The authoring ticket measured it and settled it as the record
+  write form over a field specification, so no new Block is authored.**
+  `RecordForm01` over a `FieldSpecGroup` already renders an ordered declaration
+  of typed entries: the entries are `FieldSpec` fields in the caller's own
+  words, they are drawn in the declared order and never re-sorted, they are
+  grouped under headings, and the form carries an issue list keyed by field and a
+  save union of three arms. An automation is exactly that, so the answer is a
+  negative result recorded rather than an Item, and no canvas affordance, node,
+  step or edge specification appears either way.
 - **The three workflow screens are two editing surfaces and one rehearsal.** The
   builders are the consumer's editor, with `Diagram` for the graph it reads and
   `ProcessFlow01` for the ordinal plan the rehearsal surface section already
@@ -2666,9 +2674,9 @@ declines.
 
 **Which of the eleven is the canvas and which is the surrounding editor: none is
 a Prism canvas, and the surrounding editor is the consumer's.** Prism owns the
-node drawing (`Diagram`), the ordinal plan (`ProcessFlow01`), the inspector and
-the parameters as `FieldSpec`, the set as `DataTable01` and the live state as the
-two live Items. Everything that makes the screen an editor, which is the palette,
+  node drawing (`Diagram`), the ordinal plan (`ProcessFlow01`), the inspector and
+  the parameters as `FieldSpec`, the set as `DataTable01` and the live state as the
+  two live surfaces a run is drawn from. Everything that makes the screen an editor, which is the palette,
 the toolbar, the drag, the viewport, the history and the panel wiring, is the
 consumer's application, and a consumer using Prism composes the frame from
 `AppShell01` and `PageHeader01` and places the drawing and the forms inside it.
@@ -2828,7 +2836,7 @@ rather than needing a reader is that the row a trace is made of already has an
 owner**: the step that is a tool call is `ToolLedger01`'s own row, which issue 197
 gave to the conversation as a message part, and the step that is an occurrence is
 `RunStream01`'s event. A third tool-call shape, a trace Block or a `trace-page`
-would each be a second answer to a question the two live Items already answer, so
+would each be a second answer to a question the run's two live surfaces already answer, so
 none is authored, and the frame and the claim are `AppShell01` and `PageHeader01`
 composed by the consumer.
 
@@ -2856,7 +2864,7 @@ specification is added and no fifth Kind appears.
 
 **No word is added to `CONTEXT.md`.** "Document workspace" and "research workspace" are survey archetype names, and an archetype is survey scaffolding rather than an Item name. "Document", "version", "comment" and "source" are each a product's word for its own record, in the shape of "issue", "invoice" and "order". And "section status" and "group route" name the two `DocsShell` rules this section declines to relax, which is a fact about another Page rather than a word the library uses.
 
-**Where the authoring work lands: one catalogue entry for the new Page and nothing else.** `catalog.ts`, the registry and every specification module are untouched here; the authoring ticket adds the Page under the name it settles and composes `Prose`, `RecordDetail01`, `ActivityFeed01`, `DataTable01`, `MemberList01` and `Compare01` as they ship. No new specification, no new Block beside the Page and no fifth Kind.
+**Where the authoring work lands: one catalogue entry for the new Page and nothing else.** `catalog.ts`, the registry and every specification module are untouched here; the authoring ticket adds the Page under the name it settles and composes `Prose`, `RecordDetail01`, `ActivityFeed01`, `DataTable01`, `MemberList01` and `Compare01` as they ship. No new specification, no new Block beside the Page and no fifth Kind. The name the authoring ticket settled is `DocumentPage`, at `@nanisoft/prism-ui/pages/document-page`, and its regions are a union by arrangement rather than by subject matter: an `activity` region is `ActivityFeed01`, a `table` region is `DataTable01`, a `members` region is `MemberList01` and a `comparison` region is `Compare01`, so a version list, a comment thread, a source list, an output list and an evidence matrix are one Page under different content.
 
 ### What a media review surface is, and why it is several jobs
 
@@ -4204,7 +4212,10 @@ Recorded as facts. None of these is fixed in this document.
   and search over old threads is a read over the consumer's store rather than a
   live surface. The one exception is the screen where a run waits for a person to
   decide, which is an approval queue, a Workflow, and not this family at all. The
-  Item's own name is authored by the build ticket and is not minted here.
+  Item is `MessageThread01`, settled by the build ticket under the naming law: the
+  surface draws a message thread, so the name is the thing it draws rather than the
+  archetype it belongs to, and it is the third `live` Item beside `RunStream01` and
+  `ToolLedger01`.
 
   **The boundary, as a list.** Prism owns the message-thread surface, the
   vocabulary of a message and its ordered parts, the status tiers, the run

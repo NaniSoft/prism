@@ -35,6 +35,19 @@ export type {
 
 
 /*
+ * The document and research workspace. A Page authored beside `DocsShell`, so
+ * neither of that Page's two rules is relaxed: a section stays a label and not a
+ * control, and a group with no index stays a label and not a route. It composes
+ * settled Items and mints no document, version, comment or source type. */
+export { DocumentPage } from './document-page'
+export type {
+  DocumentPageProps,
+  DocumentPageDocument,
+  DocumentPageRegion,
+} from './document-page'
+
+
+/*
  * the ten screens the 2026-09 expansion added.
  * Derived by the maintainer rather than authored: each entry is read out of the Item own
  * index module, so an Item and its barrel line cannot come apart. */

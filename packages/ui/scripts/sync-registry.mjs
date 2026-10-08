@@ -69,6 +69,30 @@ const SHARED = [
   },
 ]
 
+/**
+ * The modules the `live` Kind shares between its surfaces, shipped with every live
+ * item.
+ *
+ * `status.ts` is the Kind's one set of status tiers and `tool-call-row.tsx` is
+ * `ToolLedger01`'s own row, which the message thread draws a tool-call part
+ * through. A live surface imports them by a relative path, so the item that does
+ * not ship them would install a file that imports a module the consumer's project
+ * does not have. They are emitted for a live item and not for a Block: a Block has
+ * no subscription and no status tier, so shipping them there would be dead weight.
+ */
+const LIVE_SHARED = [
+  {
+    path: 'src/live/status.ts',
+    type: 'registry:component',
+    target: 'components/live/status.ts',
+  },
+  {
+    path: 'src/live/tool-call-row.tsx',
+    type: 'registry:component',
+    target: 'components/live/tool-call-row.tsx',
+  },
+]
+
 async function isDirectory(p) {
   return (await stat(p)).isDirectory()
 }
@@ -203,17 +227,20 @@ for (const { root, type, meta: metaName } of [
     const ownDeps = []
     for (const file of own) ownDeps.push(...(await npmDependencies(path.join(dir, file))))
     // SHARED entries carry a path relative to the package root, not to the Item's
-    // own directory, so they join the scan for a Block and not for a Page or a
-    // live surface. A live surface ships `SHARED` too, because it is the only
-    // client entry point and the shared client files are what it depends on.
+    // own directory. A live surface ships `LIVE_SHARED` beside them: the Kind's own
+    // status tiers and the ledger's row, which a live item imports by a relative
+    // path and which would otherwise reach a consumer's project as an import of a
+    // module the item did not install.
+    const liveShared = root === 'live' ? LIVE_SHARED : []
     if (root === 'blocks' || root === 'live') {
       for (const shared of SHARED) ownDeps.push(...(await npmDependencies(path.join(PKG, shared.path))))
     }
+    for (const shared of liveShared) ownDeps.push(...(await npmDependencies(path.join(PKG, shared.path))))
     const deps = dependenciesFor([...ownDeps, ...(meta.dependencies ?? [])])
 
     // Dedupe: a Block that also owns section.tsx must not ship it twice.
     const seen = new Set()
-    const all = [...files, ...SHARED, UTILS].filter((file) => {
+    const all = [...files, ...SHARED, ...liveShared, UTILS].filter((file) => {
       if (seen.has(file.path)) return false
       seen.add(file.path)
       return true

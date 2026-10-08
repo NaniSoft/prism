@@ -271,7 +271,7 @@ export type Directory01Props = {
    */
   empty: ReactNode
   /**
-   * The caller's own line about what the query found.
+   * The result line, written the way four products write it.
    *
    * A function and not a node, because the count a reader reads is a sentence whose
    * word order and noun inflection belong to their language, and a Block that composed
@@ -281,6 +281,27 @@ export type Directory01Props = {
    * paint.
    */
   summary?: (matches: number) => ReactNode
+  /**
+   * The caller's own control for one member, placed without styling at the member's
+   * trailing edge.
+   *
+   * A node per member rather than one node for the directory, because what a caller
+   * puts here acts on the member it sits beside: a plugin's enable is a `Switch`
+   * whose `onCheckedChange` names that plugin, and one node reused across fifty
+   * members could not. It is a function in the shape `DataTable01`'s
+   * `renderRowActions` already takes, so the two per-row action shapes in this
+   * package are one shape and not two.
+   *
+   * **The Block draws no control of its own here, and that is the whole reason the
+   * prop is a node.** `scripts/check-block-controls.mjs` classifies `Switch` and
+   * fails a Block that renders one without its handler, and a Block ships no
+   * behaviour and so cannot supply one. So a member's action arrives as the caller's
+   * own node, holding the caller's own control and its own handler, and the Block
+   * places it in the member's trailing edge in both arrangements and draws nothing
+   * where it is not passed. Until a directory wants one of these, this is absent and
+   * a member is a name, a role, the tags and a destination.
+   */
+  renderMemberAction?: (member: Directory01Member) => ReactNode
   /**
    * How the set is drawn.
    *
@@ -433,6 +454,7 @@ export function Directory01({
   categories,
   empty,
   summary,
+  renderMemberAction,
   variant = 'cards',
   headingLevel = 'h2',
   className,
@@ -619,7 +641,7 @@ export function Directory01({
                             )}
                           </CardHeader>
 
-                          <CardFooter>
+                          <CardFooter className="gap-2">
                             {/*
                               The link, and the reason it is an `outline` control at
                               the card's trailing edge rather than a quiet one under
@@ -634,6 +656,22 @@ export function Directory01({
                             <CtaLink href={member.href} variant="outline" size="sm">
                               {member.hrefLabel}
                             </CtaLink>
+
+                            {/*
+                              The caller's own node, in the same trailing band and the
+                              same shape in both arrangements. The Block places it and
+                              draws nothing where it is not passed, so a member's
+                              enable is the caller's `Switch` with its own handler
+                              rather than a control this Block cannot act on.
+                            */}
+                            {renderMemberAction === undefined ? null : (
+                              <span
+                                data-slot="directory-01-member-action"
+                                className="flex items-center"
+                              >
+                                {renderMemberAction(member)}
+                              </span>
+                            )}
                           </CardFooter>
                         </Card>
                       </li>
@@ -713,6 +751,15 @@ export function Directory01({
                         >
                           {member.hrefLabel}
                         </CtaLink>
+
+                        {renderMemberAction === undefined ? null : (
+                          <span
+                            data-slot="directory-01-member-action"
+                            className="flex shrink-0 items-center"
+                          >
+                            {renderMemberAction(member)}
+                          </span>
+                        )}
                       </li>
                     ))}
                   </ul>

@@ -205,8 +205,22 @@ const WORK_PARENT = path.join(PKG, '.turbo')
  * decision for the maintainer, and this file does not make it. 300 is bought
  * headroom, stated as such, so that work is not blocked by a number nobody has
  * looked at.
+ *
+ * ### 300 to 320, 2026-10, and the live Kind's second family
+ *
+ * The `live` Kind gained its second family: `MessageThread01`, the message-thread
+ * surface, whose own per-item figure is 10.9 KB. The deduplicated bundle moved by
+ * about 1.7 KB rather than by that figure, because the thread reuses `ScrollArea`,
+ * `LiveRegion` and `ToolLedger01`'s own row, all of which the bundle already
+ * carried for the run log and the ledger, and its own code is the part that was
+ * not there before. So the measurement is 300.2 KB and the ceiling moves to 320,
+ * about six percent of headroom, which is the same "bought headroom" this comment
+ * has recorded for every previous move. The prediction two sections up was that the
+ * next batch of client work would breach the figure and that it would be answered
+ * by moving it; that is what happened, and the honest thing is to say so rather
+ * than to trim the surface to fit a number.
  */
-const CEILING = 300 * 1024
+const CEILING = 320 * 1024
 
 /**
  * Ticket 19 section 5, in KB: the Components, and their per-item budgets.
@@ -289,6 +303,16 @@ const BUDGETS = {
    * moves by the surface's own weight and not by that.
    */
   'tool-ledger': 11,
+  /**
+   * The third live surface, and the second family of the Kind. It carries the
+   * message and part vocabulary, the merge that keeps one message per `id` when a
+   * message is reported again, the sort on `at`, and the same `LiveRegion` and
+   * `ScrollArea` the other two share. It also composes the ledger's own row for a
+   * tool-call part rather than a second tool-call shape, so its own weight is the
+   * thread around that row. Budgeted a little over the measured figure for the
+   * reason the two above are.
+   */
+  'message-thread': 14,
   /**
    * The five client Components of the 2026-09 component sweep, each set a
    * kilobyte or two above what it measures. Every figure here is a measurement
