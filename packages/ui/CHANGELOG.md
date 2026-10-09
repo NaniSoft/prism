@@ -1,5 +1,759 @@
 # @nanisoft/prism-ui
 
+## 1.0.0
+
+### Major Changes
+
+- dbc8a65: Every superseded figure declaration is deleted
+  
+  The five local declarations of a reading over a population are gone from the
+  published interface, and `MetricSpec` from `@nanisoft/prism-ui/spec` is the one
+  shape a figure is declared with in this package. The expand step made each of the
+  five an alias of the shared type so an old name resolved while its callers moved;
+  this is the contract step, and it deletes every one of them now that a search of
+  the whole tree, the documentation and the corpus finds no caller left. Deleted:
+  
+  - `Dashboard01Metric`, from `@nanisoft/prism-ui/blocks/dashboard-01`.
+  - `ProjectDashboard01Figure`, from `@nanisoft/prism-ui/blocks/project-dashboard-01`.
+  - `ChartCard01Reading`, from `@nanisoft/prism-ui/blocks/chart-card-01`.
+  - `Trend01Item`, from `@nanisoft/prism-ui/blocks/trend-01`.
+  - `Stat`, from `@nanisoft/prism-ui/blocks/stats-01`.
+  
+  `Dashboard01`, `ProjectDashboard01`, `ChartCard01`, `Trend01` and `Stats01` keep
+  their own names, kinds and arrangements; only the shape is shared, because a shape
+  is shared and a screen is not. This is the close of the metric expand-contract
+  sequence, and the count of declarations describing a reading over a population in
+  this package is one.
+  
+  The process stage shape, `ProvisioningStep`, stays declared with `Provisioning01`
+  and is not migrated. It is the inside of one Item rather than a shape two Items
+  would each declare, and a declared stage has not happened, so it is not migrated
+  onto the event specification either.
+  
+  # Migration
+  
+  - Replace every use of `Dashboard01Metric`, `ProjectDashboard01Figure`,
+    `ChartCard01Reading`, `Trend01Item` and `Stat` with `MetricSpec`, imported from
+    `@nanisoft/prism-ui/spec`.
+  - The shape is unchanged, so the migration is a rename of the type reference. A
+    figure or row still carries `key`, `label` and `value`, and the optional `delta`,
+    `deltaFormat`, `hint`, `series` with `seriesLabel`, and `href` with `hrefLabel`.
+  - A build that reports one of the five names as missing is reporting a name that
+    was deleted here rather than an exported entry that moved.
+- e9e73d6: Four forms take the shared field specification
+  
+  `AuthForm01`, `Contact01`, `Provisioning01` and `Signup01` now take the same
+  `FieldSpec` and `FieldSpecGroup` a record write form takes, so the vocabulary a
+  consumer learns on one screen is the vocabulary on all five. Each Block's own
+  field declaration goes from the published interface, and a control Prism does not
+  ship arrives as the `slot` arm of `FieldKind` rather than as a property on a
+  per-Block type.
+  
+  - **`AuthForm01`**: `fields: AuthFormField[]` becomes `groups: readonly
+    FieldSpecGroup[]`. The controlled `value` and `onChange` on a field go, because
+    the specification is data and holds no callback; the Block is uncontrolled and
+    the caller reads the values out of the form element. `error` becomes
+    `submitError`, and `errorId` becomes an entry in the new `issues` list keyed by
+    field. `AuthFormField` is removed and `AuthForm01Issue` is added.
+  - **`Contact01`**: `fields: ContactField[]` becomes `groups: readonly
+    FieldSpecGroup[]`, and a new `issues` list draws a message under a field.
+    `ContactField` and `Contact01Option` are removed and `Contact01Issue` is added.
+  - **`Provisioning01`**: a step's `fields: readonly ProvisioningField[]` becomes
+    `fields: readonly FieldSpec[]`. `ProvisioningField`, `ProvisioningFieldType` and
+    `ProvisioningOption` are removed; `ProvisioningStep`, `ProvisioningValue` and
+    `Provisioning01Status` are unchanged.
+  - **`Signup01`**: `fields: readonly SignupField[]` becomes `groups: readonly
+    FieldSpecGroup[]`. `SignupField` and `SignupOption` are removed; the `password`
+    arrangement, `SignupValue`, `Signup01Password`, `Signup01Reading`,
+    `Signup01Status` and `Signup01SignIn` are unchanged.
+  
+  `FieldCommon` gains an optional `autoComplete`, the platform's autofill hint, once
+  for every screen rather than in a second declaration per Block. Requiredness stays
+  a rendering fact and an HTML attribute; no specification carries a rule.
+  
+  # Migration
+  
+  Replace a field list with groups of `FieldSpec` from `@nanisoft/prism-ui/spec`:
+  
+  - Rename a field's `id` to `key`, its `type` to a `kind` naming a Prism control
+    (`'text'`, `'email'` and `'tel'` become `'Input'`, `'password'` becomes
+    `'PasswordField'`, `'textarea'` becomes `'Textarea'`, `'select'` becomes
+    `'NativeSelect'`), and its `description` to `help`.
+  - Move a choice's `options` under its kind, unchanged in shape.
+  - Wrap the list in one or more `{ fields: [...] }` groups and pass it as `groups`.
+  - Pass a control Prism does not ship as `{ kind: 'slot', control: <your control /> }`.
+  - On `AuthForm01`, replace `error` with `submitError` and, where you marked a
+    field, pass `issues={[{ field: key, message }]}` instead of `errorId`.
+  - Read `onSubmit` values by each field's `key`. `AuthForm01` is uncontrolled: read
+    `new FormData(event.currentTarget)` rather than a controlled `value`/`onChange`.
+  - Pass `autoComplete` on the fields a password manager or a phone keyboard fills.
+- dbc8a65: The activity trail takes the shared event specification
+  
+  `ActivityFeed01.events` is now an `EventSpec[]` from `@nanisoft/prism-ui/spec`
+  rather than the Block's own `ActivityFeed01Event`, and that local type is gone from
+  the published interface. The trail is the activity feed Block widened, so no new
+  Item appears beside it: a shipment's chain of events, an issue's whole history and a
+  transaction's trail are record details, and the trail's own entry declaration is the
+  one declaration of a dated attributed occurrence every Block in this package takes.
+  
+  An entry carries a stable `key` that is never the words of a label, a moment printed
+  exactly as the caller passed it with the machine value on the element, a required
+  `actor` and `action`, an optional `target`, an optional `detail` node, a `tone` whose
+  `toneLabel` is required wherever the tone is set, and a destination whose words are
+  required wherever it is set.
+  
+  The specification names no vocabulary of what happened: there is no `kind`, because
+  a closed union is legitimate only when its members are Components this package
+  ships, and a caller needing one puts the word in `action` or composes a status into
+  `detail`. Immutability is a rendering fact and nothing more, so there is no
+  `immutable` prop, no seal glyph and no verification mark. A trail draws a moment and
+  never a length, so there is no scale, no range and no axis, and the Block owns no
+  retention window, archive, purge, legal hold, export or as-of clock.
+  
+  # Migration
+  
+  - Replace `ActivityFeed01Event` with `EventSpec`, imported from
+    `@nanisoft/prism-ui/spec`, on the `events` prop.
+  - Rename each entry's `id` to `key`.
+  - Move the tone's label to `toneLabel` wherever `tone` is set.
+  - Remove any `kind`, `immutable`, seal, verification, scale, range, axis or
+    retention member: the specification does not carry them and does not accept them.
+    Put a happened- word in `action`, and compose a status into `detail`.
+- dbc8a65: The settings panel takes the shared field specification
+  
+  `SettingsPanel01` now takes the same `FieldSpec`, `FieldSpecGroup` and `FieldKind`
+  a record write form takes, and its own field declaration, `SettingsPanelField`, is
+  gone from the published interface. The archetype is answered by the record write
+  form Block and earns no Item of its own: the difference between a form and a setting
+  is about what sits behind the surface, not about the surface.
+  
+  Two things change in the props, and the second is breaking.
+  
+  - `sections` is now `groups`, and a field is a `FieldSpec` with a stable `key`, a
+    required `label` and a required `kind`. The `slot` arm means a control this
+    package does not ship has somewhere to go, and a field's shell stays Prism's
+    either way.
+  - `secondaryAction` is gone. That position is now `footerStart`, a node the caller
+    wrote, placed without styling. A caller who passed a label and no function could
+    previously produce a focusable control that activated to nothing; a `CtaLink` with
+    its required `href` cannot.
+  
+  `submitLabel` is now one arm of a save union: `action`, `onSubmit` or `submit`, each
+  forbidding the others, exactly as the write form takes them. A region that applies
+  on change passes `values` and an `onValueChange` that applies the mutation, and no
+  save arm at all, and the Block draws no footer. Whether a setting leaves on change,
+  on blur or at a save is the caller's own handler and the caller's own submission
+  arm, and no prop here decides it.
+  
+  The Block renders no revert control, no reset to defaults control and no storage of
+  any kind, and it draws no tab strip and no rail.
+  
+  # Migration
+  
+  - Rename the `sections` prop to `groups`, and pass each field as a `FieldSpec` with
+    a stable `key`, a required `label` and a required `kind`, imported from
+    `@nanisoft/prism-ui/spec`. A control this package does not ship goes in the
+    `slot` arm.
+  - Replace `secondaryAction` with `footerStart`, a node you write, placed without
+    styling. A label with no function no longer compiles into a control that does
+    nothing.
+  - Replace `submitLabel` with one arm of the save union: `action` for a destination,
+    `onSubmit` for a handler, or `submit` for a node you write. The three forbid one
+    another. A region that applies on change passes `values` and `onValueChange` and
+    no save arm, and draws no footer.
+  - Remove any use of `SettingsPanelField`; it is gone from the published interface.
+
+### Minor Changes
+
+- f11799a: Add `emptied-by-reader` to `EMPTY_REASONS`, for a region the reader emptied
+  
+  `EmptyState01` takes a fourth reason beside the three it takes today: a region
+  whose records were there and that this reader's own earlier action moved every one
+  of them out of. A bin, an archive or a recycle view a reader has just cleared is
+  the case it exists for.
+  
+  **A member on a published union, not a new Block and not a catalogue row.** The
+  existing `EmptyReason` type gains its fourth member and the changeset says so
+  because a consumer's own code that enumerates the union now has one more case to
+  handle. `EMPTY_REASONS` is published through
+  `@nanisoft/prism-ui/blocks/empty-state-01` beside the Block, and `catalog.ts`
+  holds the same number of rows it held before, because a union member is a value on
+  an existing exported type rather than an Item: it has no slug, no page, no Demo
+  and no corpus entry of its own.
+  
+  **It is a fourth reason rather than a fourth Block because it is a statement about
+  a collection, which is what the other three are.** Each of them answers what
+  happened to the set the region would have drawn, so the frame they share stays
+  true of all four: there is nothing here to read, and the frame makes no claim
+  about why. A bin the reader emptied has nothing readable beside it, so the shared
+  frame is honest there. That is the whole difference from `NothingChosen01`, which
+  is a statement about a reader's pointer at a record and whose records are all
+  still there: it draws no frame, it is a separate Block, and the two arguments
+  argue the same line from opposite sides.
+  
+  **Two of the four are the reader's own doing and they are not the same doing.**
+  `no-match` hides rows out of a set that is still there, so clearing it brings them
+  back. `emptied-by-reader` is a record gone from the live set rather than hidden in
+  it, and the reader put it there. Every saved view a caller builds out of the filter
+  values it holds is already `no-match` whenever it comes back empty; a trash view
+  is the one that differs in kind, because it fetches a different collection rather
+  than narrowing this one. So the two members differ in exactly the fact a reader
+  must be told honestly, and one sentence for both would tell a reader who has
+  deleted everything that their own search found nothing. Both are named in the
+  JSDoc on the union, which the emitted declarations preserve and the corpus reads.
+  
+  **It renders no control, and the Block already had that arm.** The reason takes
+  the caller's `title` and an optional `body` and nothing else, because a reader who
+  has deleted nothing has nothing to restore and the records a restore would bring
+  back are the caller's own nodes in the index around this region. `EmptyState01`
+  has never rendered an action without an `actionLabel`, so the member adds no
+  render branch, no prop and no gate exemption: `scripts/check-block-controls.mjs`
+  is green on the source exactly as it was, and the one control in it is still the
+  `Button` behind that label.
+  
+  It carries no ink either, for the reason the Block gives: nothing is broken,
+  nothing is missing, and nobody is blocked. `REASON_INK` is unchanged, so the only
+  reason drawn in `muted-foreground` is still the permission boundary.
+- e9e73d6: Four more figure owners take the shared metric specification
+  
+  `ChartCard01`, `ProjectDashboard01`, `Stats01` and `Trend01` now take the same
+  `MetricSpec` the metric summary takes, so a figure a consumer declares on one of
+  these surfaces is the same figure it declares on the others. This is the migrate
+  step of a breaking consolidation: five shapes are declared across this package
+  for a reading over a population, and they disagree about whether a delta is a
+  number or a percentage, about `deltaFormat`, about `hint`, and about whether a
+  series and a destination are part of a figure at all. This release moves the four
+  remaining owners onto `MetricSpec`, so one shape is left in use. Their superseded
+  local declarations stay exported as deprecated aliases until the contract ticket
+  deletes them, so an existing name continues to resolve.
+  
+  **The shape every one of the four now takes.** A stable `key` that is never the
+  words of the label, a required `label` (a `ReactNode`) and `value` (the caller's
+  own node), a `delta` whose sign is the direction, an optional `deltaFormat` (the
+  caller's own words for the change, a `ReactNode` rather than a callback), an
+  optional `hint` for the period or the caveat, and an optional `series` with its
+  `seriesLabel` and an optional `href` with its `hrefLabel`. The two pairs are held
+  by the type: a series set without its name, or a destination set without its
+  words, does not compile.
+  
+  **What changes per Block, and the arm that replaces each prop that goes.**
+  
+  - **`ChartCard01`**: `ChartCard01Reading` becomes an alias of `MetricSpec`. A
+    reading's `deltaFormat` is now the caller's own words rather than a `(value:
+    number) => string` callback, so pass a node, and `key` is now required. The
+    reading line draws the series and the destination too.
+  - **`ProjectDashboard01`**: `ProjectDashboard01Figure` becomes an alias of
+    `MetricSpec`, `key` is now required, and a figure can now carry `deltaFormat`,
+    `hint`, `series` and `href`. The bare `0.12` a delta without a formatter used to
+    print is now a decision rather than a drift.
+  - **`Stats01`**: `Stat` becomes an alias of `MetricSpec`, `key` is now required,
+    and a delta no longer has a percent sign appended to it. A delta with no
+    formatter prints the number the caller passed, and a delta with a formatter
+    prints the caller's own words.
+  - **`Trend01`**: `Trend01Item` becomes an alias of `MetricSpec`, a row's `id`
+    becomes `key`, and `deltaLabel` becomes the `deltaFormat` node. A row can now
+    carry a series and a destination, and a delta with no formatter prints the
+    number rather than making the Block throw.
+  
+  **What is kept, and what is still not owned.** Each Block keeps its own name,
+  kind and arrangement. `ChartGroup01`, the page fixtures and the site landing page
+  were updated at their call sites, because this package resolves the shared type
+  through the component package. No Block performs aggregation, derives a rate of
+  change, owns a period, a unit, a threshold, a target, a severity or a freshness
+  state, and none draws a period switcher, a comparison toggle or an export. A
+  metric's period stays the caller's own words, carried by `deltaFormat` and `hint`.
+  
+  `@nanisoft/prism-ui/spec` is the type to import: `MetricSpec`, from
+  `@nanisoft/prism-ui/spec`, replaces `ChartCard01Reading`, `ProjectDashboard01Figure`,
+  `Stat` and `Trend01Item` at every call site.
+- f11799a: Add `@nanisoft/prism-ui/spec`: one shared specification module, and the gate for it
+  
+  This adds published surface and changes no existing one. Nothing you compose
+  differs today; what changes is that five screens worth of declared content now
+  have one declaration each instead of several that disagree, and that the
+  declarations are held by a gate rather than by review.
+  
+  **The five specifications.** `FieldSpec` and `FieldSpecGroup` describe the fields
+  a write form, a wizard or a settings region renders, in the order the array is
+  written. `ColumnSpec` describes a column of a record index. `RelationSpec`
+  describes one relationship of a record, one ring deep. `MetricSpec` describes a
+  figure taken over a population. `EventSpec` describes one dated, attributed
+  occurrence. Every one of them is plain serialisable data: no validator, no
+  constraint object, no schema, no pattern, no callback. That is what lets an agent
+  read one out of a document, and it is why validation is yours entirely.
+  
+  **Three closed unions, and the one arm that is an escape rather than a catch-all.**
+  `FieldKind` names the input Components this package ships, `ColumnKind` the
+  reading Components, `RelationKind` the collection arrangements already drawn. Each
+  carries a `slot` member for the control, cell or arrangement you draw yourself, and
+  Prism still draws the shell around it: the label, the help, the error, the header,
+  the alignment, the frame. A `props` bag would have been the alternative and would
+  have put the hole back.
+  
+  **What is deliberately absent, so that you are not waiting for it.** A
+  specification carries no rule and no validator, because a Block ships no behaviour
+  and evaluating a rule is behaviour; `required` stays, and it is the mark and the
+  HTML attribute rather than a check. A metric carries no period, because a
+  comparison needs a period and a billing screen's month is not a trading screen's
+  week: the words for it go in `deltaFormat` and `hint`, in your own units. An event
+  carries no `kind`, no immutability, no retention window and no time axis, because
+  no enumeration of what your product calls a thing that happened is ours to publish
+  and because a drawing has no authority over the store behind it. A relation holds
+  members and never another relation; a descendant is reached by a link you pass.
+  
+  **The gate.** `packages/ui/scripts/check-spec-unions.mjs` reads the emitted
+  declarations rather than the source, because that is the seam your editor
+  resolves. It fails when a union member names something this package does not
+  ship, when two of the three unions claim the same member, when a specification
+  grows a validator, a rule, a schema, a pattern, an immutability claim, a retention
+  window or a time axis, when an event grows a `kind`, and when a relation holds a
+  relation. Before it existed, every one of those was accepted by every gate in the
+  repository, because a specification type is not an Item and no catalogue gate reads
+  the module at all.
+  
+  **One thing it does not hold, so you know what a green run means.** It does not
+  hold that there is one shape per concept: a second declaration of the field, column,
+  relation, metric or event shape would be named differently from the first, and the
+  rule that would catch it would be a list somebody maintains. That is held by review.
+  
+  **The surface gate's internal boundary moved with it, in one direction only.**
+  `packages/ui/src/lib/` is where the internal helpers live, but the `exports` map is
+  what decides: a declaration under it that a published entry reaches is public
+  surface and the surface gate reads it, and one that no entry reaches is still
+  internal and still has to be declared. `dist/lib/spec.d.ts` is the first such file.
+  Nothing under `dist/lib` was declared internal and then undeclared, and no published
+  subpath was removed.
+- caee732: `Directory01` gains a per-member node
+  
+  `Directory01` takes a new `renderMemberAction` prop: a function from a member to a
+  `ReactNode` the Block places at the member's trailing edge, in both the card and the
+  row arrangements, and draws nothing of its own where it is not passed.
+  
+  **The control and its handler are the caller's, and that is why it is a node.** A
+  directory is a browse, so a plugin or model row's enable is a property of a member
+  rather than a command on a selection, and `scripts/check-block-controls.mjs`
+  classifies `Switch` and fails a Block that renders one without its handler. A Block
+  ships no behaviour and so cannot supply one, so the enable arrives as the caller's
+  own node, in the shape `DataTable01`'s `renderRowActions` already takes.
+  
+  No new Item and no new catalogue entry: the change is a prop on an Item that ships,
+  with its JSDoc, its Demo and its test.
+- caee732: `DocumentPage`, the document and research workspace
+  
+  A new Page arrives at `@nanisoft/prism-ui/pages/document-page`. It draws one
+  document read in full, its body held to the reading measure, and one or more
+  regions beside it.
+  
+  **It is authored beside `DocsShell`, and neither of that Page's two rules is
+  relaxed.** A section stays a label and not a control, and a group with no index
+  stays a label and not a route, because both are statements about a documentation
+  site's navigation tree and this workspace never asks that question. A status
+  belongs to a region of one document, and a route is the document's own contents.
+  No consumer of `DocsShell` is affected.
+  
+  **One Page draws all seven screens.** The document is `RecordDetail01` and the
+  body is `Prose`; a version list is an `activity` region, a source or output list
+  is a `table` region, a comment thread is a `members` or a `table` region, and the
+  evidence comparison matrix is a `comparison` region drawn by `Compare01`. The
+  region union is by arrangement and not by subject matter, so the Page mints no
+  document, version, comment or source type and ships no sentence. The editor, the
+  fetch, the retention, the share, the export and the permission are the consumer's.
+  
+  The Page ships with a catalogue entry, a JSDoc block, an Item page and a Demo, a
+  corpus and store entry, a composition test and an accessibility test over its
+  heading structure and named regions.
+- f11799a: Add `NothingChosen01`, the resting state of a detail pane
+  
+  `NothingChosen01` draws a region that can hold a record and has none chosen in it
+  yet: the caller's words, an optional sentence under them, and an optional mark of
+  the caller's choosing. It is a new Block beside `EmptyState01` rather than a fourth
+  reason on it, and the difference is the shape of the claim rather than a matter of
+  taste.
+  
+  The three reasons `EmptyState01` takes are all statements about a collection:
+  nothing ever existed in it, the reader's own filter emptied it, or this reader may
+  not see it. The dashed frame and the height floor those three share assert
+  something that follows from all three together: there is nothing here to read.
+  Nothing chosen is not that. No collection has been emptied, filtered or hidden, the
+  records are in the index a few centimetres away, and what is missing is the
+  reader's pointer at one of them. A fourth arm would have had to keep that frame
+  honest while a readable region sat next to it, which is the failure the separate
+  Block exists rather than to commit.
+  
+  So the Block ships no reason value, because one cause is not a choice a caller
+  makes; no default sentence and no fallback, because the words are entirely yours;
+  no frame, for the reason above; and no action. That last one is not an omission. A
+  Block ships no behaviour, so a control here would be either one this Block cannot
+  wire or a second copy of an affordance the index beside it already draws for the
+  same reader, and `scripts/check-block-controls.mjs` has nothing to catch in a
+  source that contains no control.
+  
+  It also declares no height floor. A pane in a grid is already as tall as its
+  neighbour, so a `min-h` authored here would be a second answer to a question the
+  split's tracks have already answered. What the Block does is fill the height it is
+  given and centre itself in it.
+  
+  Two things it inherits rather than re-derives: the icon is a slot drawn
+  `aria-hidden`, because a mark a screen reader reads is a second announcement of
+  something the words already say, and the title is a `<p>` rather than a heading,
+  because the pane outlives its contents and an outline entry that vanishes on the
+  first click is an entry a reader navigating by heading cannot follow.
+  
+  The split's tracks hold their ratio at every selection state, so the list never
+  moves out from under the hand that clicked it. What changes is content, and a
+  caller who wants the index louder makes the index denser, which is the index's own
+  decision to take.
+- dbc8a65: The issue detail Block is deprecated in favour of the record detail Block
+  
+  `IssueDetail01` is deprecated, not merged and not deleted. It is the same job as
+  `RecordDetail01` under a name that is wrong the moment the record is an invoice, an
+  order or a subscription, and a name that has to be wrong about nine tenths of its
+  uses is a name that fails the test that its name survives being wrong. The Item
+  still renders and is still supported for now, but nothing new should be started on
+  it, and a consumer composing a record detail today composes `RecordDetail01`.
+  
+  **The published interface is unchanged.** This release marks the Item and changes
+  its JSDoc and its documentation; no export is removed, renamed or re-shaped, so a
+  consumer already composing `IssueDetail01` keeps composing it and can read the
+  release without moving. `IssueDetail01` and its four types stay exported from
+  `@nanisoft/prism-ui/blocks/issue-detail-01`. Its own field declaration stays with
+  it and is not migrated onto the shared field specification, because it is a label
+  and a value node a reader is entitled to be told about a record rather than an
+  input.
+  
+  The catalogue entry carries the `deprecated` status, so the Item page shows a
+  deprecated mark, and the Item page and the record detail Block's documentation each
+  name the other, so a reader arriving at either arrives at the answer.
+- dbc8a65: Add `IndexDetail01`, the master and detail split
+  
+  `IndexDetail01` is a composition Block that renders an index pane beside a detail
+  pane and holds no selection state at all. Selection, routing and which record is
+  open belong to the consumer, because Prism never imports a router. Nothing in the
+  Block connects the two panes: the index reports every selection change through its
+  own callback, and reacting to it is the caller's own read of that callback and a
+  pass of the record it wants into `detail`.
+  
+  The tracks hold their ratio at every selection state, so clicking a row does not
+  move the list out from under the hand that clicked it. The pane before anything is
+  selected holds what the caller placed, or nothing at all, so the Block ships no
+  fallback sentence, no frame of its own and no loading mark. The detail slot is a
+  required node, because a record that is gone, one this reader may not see and one
+  whose fetch failed are three causes sharing one address and three different
+  sentences.
+  
+  The split does not collapse at a narrow viewport. Which pane survives is the
+  caller's composition rather than a media query deciding a shape, so the narrow
+  arrangement is one the caller writes. The Block renders no control of its own.
+  
+  This change also corrects the record index section of the design document, which
+  claimed the split was already authored while the roster counted from source held no
+  such Item.
+- caee732: `MessageThread01`, the live Kind's second family
+  
+  A new `live` Item, the message-thread surface, arrives at
+  `@nanisoft/prism-ui/live/message-thread-01`. It renders a conversation whose
+  messages arrive over a `subscribe` function the consumer supplies and it opens no
+  connection of its own, so a WebSocket, an `EventSource`, a polling timer and a test
+  array are all the same shape to it.
+  
+  **A message list with ordered parts, and not an event list or a turn list.** A
+  message has a stable identity, a sender and an ordered list of parts, and a part is
+  text, a tool call, a reasoning block, a citation or an attachment. The message and
+  part vocabulary lives with the surface, beside `RunEvent` and `ToolCall`, and is
+  deliberately outside the shared specification module, so no sixth specification
+  member and no `CONTEXT.md` word is added.
+  
+  **It reuses what the Kind already names rather than minting a second answer.** A
+  tool-call part is drawn through `ToolLedger01`'s own row, so there is no second
+  tool-call shape. The status tiers are `RunStatus`, published once and shared by both
+  live surfaces. The run controls are `PromptComposer`'s send, stop, retry and attach,
+  composed beside the thread rather than a second set drawn inside it. The one surface
+  it does not reuse is `RunStream01`, because a run's log is a sequence of occurrences
+  and a conversation is a sequence of messages.
+  
+  **Prism holds a bounded in-memory window and promises no resumption.** The durable
+  resumption buffer that outlives a mount is the consumer's, through the same `initial`
+  and `resubscribeKey` seam `RunStream01` already documents: a surface opened
+  mid-thread is seeded from the consumer's own record, and a reconnect is a new key
+  over a fresh seed. The surface sorts by `at` with a tie on `id`, bounds its window,
+  announces a growing list once rather than reading it whole on every arrival, and
+  holds no control it cannot act on.
+  
+  The Item ships with a catalogue entry, a JSDoc block, an Item page and a Demo, a
+  corpus and store entry, and a boundary test in the shape of the `RunStream01` one.
+- 1079d02: The metric summary Block takes the shared metric specification
+  
+  `Dashboard01.metrics` is now a `MetricSpec[]` from `@nanisoft/prism-ui/spec`
+  rather than the Block's own figure shape. This is the first step of a breaking
+  consolidation: five metric shapes are declared across this package today and they
+  already disagree about whether a delta is a number or a percentage, about
+  `deltaFormat`, about `hint` and about whether a series and its name are part of a
+  figure at all. `MetricSpec` is the one shape, and this release makes the metric
+  summary Block the first surface to take it. The other four owners are migrated in
+  later batches, so this is one Block wider rather than five replaced at once.
+  
+  **What a figure is now.** Every entry is a `MetricSpec`: a stable `key` that is
+  never the words of the label, a required `label` and `value`, a `delta` whose sign
+  is the direction, an optional `deltaFormat` carrying the caller's own words for
+  that change, an optional `hint` for the period or the caveat, and an optional
+  `series` with its `seriesLabel` and an optional `href` with its `hrefLabel`. The
+  two pairs are held by the type: a series set without its name, or a destination set
+  without its words, does not compile.
+  
+  **What changes for a consumer.** `label` is now a `ReactNode`, so a caller that
+  passed a string passes the same string and a caller that passed a node keeps it.
+  `deltaFormat` is the caller's own words rather than a `(value: number) => string`
+  callback, so `deltaFormat: (v) => String(Math.abs(v))` becomes
+  `deltaFormat: '3 fewer than yesterday'` and the direction mark still comes from the
+  sign of `delta`. `sparkline` and `sparklineLabel` are now `series` and
+  `seriesLabel`, and `key` is now required. `Metric` takes the words as a node when
+  the Block hands them over, so a delta with a formatter prints the caller's words
+  and a delta without one prints the number the caller passed.
+  
+  **`Dashboard01Metric` is kept as an alias** of `MetricSpec` so an existing name
+  resolves while the other four figure owners are migrated. It is a synonym on its
+  way out, not a second shape, and a later contract release removes it alongside the
+  superseded `ProjectDashboard01Figure`, `ChartCard01Reading`, `Trend01Item` and
+  `Stat`.
+  
+  **Nothing else is owned.** The Block still performs no aggregation, owns no period,
+  no unit, no threshold, no target, no severity and no freshness, and draws no period
+  switcher, no comparison toggle and no export.
+- dbc8a65: Add `RecordWizard01`, the multi-step record write form
+  
+  `RecordWizard01` is the write form's second arrangement rather than a prop on the
+  plain form. A wizard draws one group of fields at a time above a rail and asks a
+  decision the plain form never asks, which is whether a step may be left forwards, so
+  it earns its own name: it is a property of how many fields a record has, not one of
+  two renderings a consumer picks between on purpose.
+  
+  The step is the consumer's. `current` is controlled and `onStepChange` is required,
+  and the Block draws the step it was handed and no reachability at all. The
+  specification is per step, and a step is a `FieldSpecGroup` from
+  `@nanisoft/prism-ui/spec` with a stable `id` and a string `label`, so nothing new is
+  declared in order to hold the steps and a group's heading and its rail label are one
+  word. One specification sliced by a caller grouping is refused.
+  
+  Every field on the stepped arm is controlled and carries the consumer's value and
+  change handler, so the values are the consumer's from the first keystroke. Back, the
+  forward control and the rail are `FormWizard`'s, and this Block renders none of
+  them, declares no submission arm of its own, and leaves an issue naming a key that
+  is not on the step being drawn undrawn without moving the reader.
+- 1079d02: The record detail draws one record and its relationships
+  
+  `RecordDetail01` is a new Block: one record in full, its relationships drawn open
+  as one ordered list, and its own actions beside its identity. It is a Block rather
+  than a Page because the frame and the claim belong to a caller and a Page owns no
+  URL, so a detail Page would have to own the selection the consumer holds. It is
+  authored beside `Summary01` and `QuickView01` rather than by widening either,
+  because a summary exists to add up and a quick view is a transient dialog.
+  
+  **Relationships are one declared list on one frame, not a card per relation.**
+  Each entry is a `RelationSpec` from `@nanisoft/prism-ui/spec` plus the words its
+  own empty frame needs, drawn in the declared order under one heading level inside
+  one bounded frame with one rule between them. The `kind` names a collection
+  arrangement this package already draws: `Table`, `ListPanel`, `Timeline`,
+  `AvatarGroup` or the caller's own `slot`. **Depth is one, and the bound is in the
+  type**: a relation's members never name `RelationSpec`, so a related record with
+  its own related records is a graph the consumer walks, reached by the caller's
+  `href` rather than by depth. The Block composes no disclosure anywhere.
+  
+  **The record's actions are one optional node, placed in the record's own band.**
+  The Block renders no control of its own, there is no declared action union and no
+  destination arm, and the confirmation for a destructive action is the caller's own
+  `AlertDialog` composed around their control in the same slot. **A relation with no
+  members draws `EmptyState01` at a reason the caller names**, in the relation's own
+  frame, because a customer with no invoices is a collection that is empty and
+  `NothingChosen01` is a statement about a reader's pointer at the index beside the
+  pane, which this Block cannot be in. **The Block takes no total, no count and no
+  sum**: a relation's `count` is the caller's own string and is never derived from
+  the members, and a screen that wants a figure composes `Summary01` or `Stats01`
+  into the Block's `children`.
+- 1079d02: The record index groups by a key on a row and announces the two selection scopes differently
+  
+  `DataTable01` widens again rather than adding an Item, and the roster does not
+  change: a grouped index is the same job with a `groupBy` on a row, not a second
+  arrangement, so no `-02` is earned.
+  
+  **Grouping is a key on a row.** `groupBy` takes a row and returns the key it
+  belongs to, or `undefined` for an ungrouped row, and `groupLabel` names the
+  heading the Block draws above each run of rows that shares one. The two are a
+  single arm: `groupLabel` is required wherever `groupBy` is set, because a heading
+  with no words is a blank row. The Block never reorders the rows it was handed, so
+  same-key rows must arrive adjacent and a run of them is one group. A group heading
+  is a row in the same body as any other, and it is not a record: it is never in
+  the selection set, never in the count and never in what the header's page scope
+  covers, so forty headings over four hundred rows select four hundred records and
+  say so.
+  
+  **The two selection scopes are announced differently, and the filter scope's
+  number is the caller's.** `selectionScope` is new and is a union. Its page arm is
+  the default and the Block speaks `labels.selectedCount` over the keys it holds.
+  Its filter arm reports that the whole matching population is selected and carries
+  a required `count` from the caller, and the Block speaks
+  `labels.selectedAllMatching(count)` rather than printing the page as if it were
+  the total. The Block owns no control that selects a population it cannot see: the
+  caller selects in its own store and reports the scope here.
+  
+  **What is new on the surface:**
+  
+  - `groupBy` and `groupLabel`, together, for a grouped body.
+  - `selectionScope`, a `DataTable01SelectionScope` union, for the page or the
+    filter scope.
+  - `selectedAllMatching`, a required `labels` member: the summary and announced
+    sentence for the filter scope. `selectedCount` is now the page-scope sentence,
+    and it should say the page.
+  
+  The per-row prop that went and the node that replaced it are named in the record
+  index selection entry in this release: `rowActions`, a declared list of action
+  objects with an optional handler, is gone, and `renderRowActions`, a node per row,
+  replace it, so a row that looks like a command and carries none cannot be built.
+- 1079d02: The record index draws typed columns and holds the selection set it was given
+  
+  `DataTable01` widens rather than adding an Item, and the roster does not change:
+  every one of the in-scope screens is one job, a reader scanning rows and acting on
+  them, differing only in its columns, its keys, its filters and its sort key. No
+  `-02` is earned by it.
+  
+  **The columns are typed data now, and the callback is gone.** `columns` is a
+  `readonly ColumnSpec[]` from `@nanisoft/prism-ui/spec` rather than an array of
+  `{ id, header, cell }`. `key`, `header` and `kind` are required on each column,
+  because a column a reader reaches without a name is a column every row announces
+  as untitled, and `kind` is drawn from Prism's own cell vocabulary rather than from
+  an HTML attribute. The row value at the column's key is the cell's content: a
+  single-node kind draws it as that Component's child, a structured kind takes it as
+  that Component's props, and the `slot` kind draws it as your own node inside the
+  header, alignment and sort affordance the Block draws. `DataTableColumn` and
+  `DataTableRowAction` are removed with it.
+  
+  **Selection is required whenever the index is selectable.** `getRowId` is required
+  on the Block, because sorting, filtering, paging and deleting all move a row's
+  index and an index-keyed selection silently changes which records a batch action
+  acts on. `onSelectedIdsChange` is required on the selectable arm and `batchActions`
+  with it; the Block holds the set on its uncontrolled arm and reports every change
+  through the one callback, so mirroring the set is one line and ignoring it is zero.
+  
+  **What is new on the surface:**
+  
+  - `columns`, now `ColumnSpec[]`. `sortable` draws `TableSort` and reports the next
+    direction through the new `sort` and `onSortChange`.
+  - `getRowId`, now required.
+  - `onSelectedIdsChange`, required on the selectable arm.
+  - `batchActions`, required on the selectable arm: one `ReactNode` the Block places
+    in a bar that mounts only while the set is non-empty and displaces the filter
+    controls. The Block draws the count and the dismiss and no command of its own.
+  - `renderRowActions`, replacing `rowActions`. A node per row rather than a declared
+    action list whose handler was optional, so a row that looks like a command and
+    carries none cannot be built.
+  - `sort` and `onSortChange`, for the ordered column.
+  - `selectRow` is now `(row) => string` so every checkbox names its record,
+    `selectedCount` is the count the live region speaks, and `clearedSelection` and
+    `dismissSelection` join it. `sort` is the words for the next direction.
+  
+  **One polite live region carries the count**, never an assertive one, mounted while
+  there is an announcement; it speaks the count rather than a list of labels, and it
+  speaks the emptying as its own sentence rather than a count of zero. The visible
+  summary and the announced number are the same string.
+  
+  **Nothing else is owned.** The Block fetches nothing, sorts nothing, filters
+  nothing and slices nothing, owns no action, no aggregate, no address and no second
+  pane. The detail pane reacts through your read of `onSelectedIdsChange`; no bridge
+  is built between the two.
+- 1079d02: The record write form renders a field specification whole
+  
+  `RecordForm01` is a new Block: a create or edit screen rendered from a typed,
+  ordered field specification. It takes `FieldSpecGroup[]` from
+  `@nanisoft/prism-ui/spec` and draws Prism's own controls, each inside one shell of
+  label, help and error. Every field carries a stable `key`, a required `label`, a
+  required `kind` and optional help, hint, placeholder, disabled flag and starting
+  value; a control the package does not ship is the `slot` arm, and the Block still
+  draws the shell around the caller's node.
+  
+  **The error state is an issue list keyed by field**, the shape `FormDialog` and
+  `FormWizard` already publish, and a message about the submission rather than about
+  a control is `submitError`, which names no field. **The save union has three arms**
+  and the compiler holds it: `action` posts to a URL, `onSubmit` hands over the
+  form's element, and `submit` is a slot for the caller's own control. The save
+  control is `type="submit"` inside the `<form>` the Block renders. **Layout is
+  derived**: `columns` is `1 | 2` at the form level, one column again at the narrow
+  breakpoint, and there is no per-field layout prop and no slot per region.
+  
+  **One piece of per-kind rendering data is added.** The `MoneyField` arm of
+  `FieldSpec` gains a required `currency` and an optional `locale`, because an
+  amount is meaningless without the currency it is in and no locale can supply it.
+  Nothing else in the shared module changes, and the module stays plain serialisable
+  data with no rule, no validator and no callback on it.
+
+### Patch Changes
+
+- f11799a: The gate that holds a Block's controls now reads the menu row and the switch
+  
+  **No published surface changed.** Nothing in this entry is a prop, a Component or a
+  behaviour you compose differently: the change is to `scripts/check-block-controls.mjs`,
+  which is a repository gate and is not in the published tarball. It is here because the
+  law it holds reaches a consumer as the shape their own Block has to take, and a
+  consumer reading the changelog should be able to find that law without reading this
+  repository.
+  
+  That gate classified `Button` and `CtaLink`, and neither of them is a menu row. The
+  shipped record index takes a declared list of per-row actions whose handler is
+  optional and renders each entry as a `DropdownMenuItem`, so a caller who passes a
+  label and no handler gets a row that sits in the menu's keyboard order, is announced
+  as a menu item, and activates to nothing. The gate could not see that Component, so
+  every gate in the repository was green while it shipped, and a clean run was the
+  absence of a check rather than the presence of a correct one.
+  
+  Four Components are classified now, each with the arms that make it act:
+  
+  - `Button`: `onClick`, `type="submit"`, `type="reset"`. Unchanged.
+  - `CtaLink`: `href`, which is required, so that arm is the compiler's. Unchanged.
+  - `DropdownMenuItem`: `onClick`, or `render` together with `href` in the element it
+    renders as. Both words rather than either one, because `render={<span />}`
+    navigates to nothing and a bare `href` would accept a `data-href` as a destination.
+  - `Switch`: `onCheckedChange`, and nothing else. A switch does not navigate and is
+    meaningless without the handler, because the state it changes is the consumer's
+    setting rather than anything a Block holds.
+  
+  Every `DropdownMenuItem` and every `Switch` the tree renders already carries one of
+  those arms, so nothing shipped failed and no Block moved. What the widening buys is
+  the next one: a menu row or a switch a Block renders with nothing behind it is a
+  finding naming the file and the line, where yesterday it was invisible.
+  
+  **Two limits are printed on every run and neither is new.** A `{...rest}` spread
+  inside a rendered control reads as carrying no handler, and a handler forwarded from a
+  declared optional prop reads as present, because resolving whether the caller passed
+  it is reading a type rather than a file. The second is why the shipped row action list
+  is still a finding for a reader and not for this gate: the optional handler behind the
+  attribute is invisible to a source scan. Removing that declared list is the authoring
+  work, and this gate is what makes the next one of them fail the run.
+  
+  **A Block that holds a disclosure itself is still not caught, and that gap was left
+  open on purpose.** `Collapsible` and `Accordion` put none of the four classified
+  Components in a Block's source, so a Block rendering one with a `defaultOpen` and no
+  change handler reads as clean while the state is still state a Block holds. A
+  disclosure's activation lives inside the disclosure rather than on an attribute of the
+  row that opens it, so there is no arm for this gate to read, and a rule that inferred
+  one would report the Blocks that compose `Collapsible` correctly. The prohibition
+  stays a design rule in `DESIGN.md`, an auditor checks it by looking for the absence,
+  and the run prints that it is not a finding so a clean run is not read as more than it
+  is.
+- dbc8a65: The log and event stream is the record index drawing event rows
+  
+  A delivery log or a console events screen is the record index, `DataTable01`,
+  drawing rows from the shared event specification, `EventSpec`. No Item, Kind or
+  Page is added: a log gains a filter region, a second axis on which entries are
+  compared and a page boundary, and every one of those already belongs to the record
+  index rather than to a rail. The row type is the shared event specification, and no
+  sixth event shape is minted for a log or a console.
+  
+  A screen that wants the events of one record composes `ActivityFeed01`; a screen
+  that wants to find one entry among many composes `DataTable01`. The Block composes
+  no disclosure: seeing one entry in full is a destination the caller names with its
+  required words, expanding a payload in place is the caller's own `Collapsible`
+  placed in a `slot` cell, and taking an identifier away is the caller's own control
+  beside a code block. No prop changed; this release adds the Item documentation, the
+  Demo and the JSDoc that record the arrangement.
+
 ## 0.16.1
 
 ### Patch Changes
