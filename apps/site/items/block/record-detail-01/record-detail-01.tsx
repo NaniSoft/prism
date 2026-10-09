@@ -13,9 +13,13 @@ import {
  *
  * The members of a `Table` relation are the caller's own row nodes, of a
  * `ListPanel` relation the caller's own list rows, of a `Timeline` relation
- * `TimelineEntry` values, and of an `AvatarGroup` relation people. That is what
- * the shared `RelationSpec`'s deliberately weakest member type buys: the
- * arrangement decides what a member is.
+ * `TimelineEntry` values, of an `ActivityFeed01` relation `EventSpec` values, and
+ * of an `AvatarGroup` relation people. That is what the shared `RelationSpec`'s
+ * deliberately weakest member type buys: the arrangement decides what a member is.
+ *
+ * `ActivityFeed01` and `Timeline` are two different arms: the trail carries a
+ * moment per occurrence and no length, while the instrument carries a duration and
+ * a state per step.
  */
 const RELATIONS: readonly RecordDetail01Relation[] = [
   {
@@ -57,17 +61,55 @@ const RELATIONS: readonly RecordDetail01Relation[] = [
   {
     key: 'activity',
     label: 'Activity',
-    kind: 'Timeline',
+    kind: 'ActivityFeed01',
+    href: '/subscriptions/sub-4821/history',
+    hrefLabel: 'Open the full history',
     count: 'Last 30 days',
     members: [
-      { id: 'renewed', title: 'Subscription renewed', state: 'done' },
-      { id: 'seats', title: 'Seats increased to 24', state: 'done' },
-      { id: 'card', title: 'Payment method updated', state: 'done' },
+      {
+        key: 'renewed',
+        at: '2026-10-01',
+        actor: 'Northwind Traders',
+        action: 'renewed the subscription',
+        target: 'SUB-4821',
+        tone: 'success',
+        toneLabel: 'Renewed',
+      },
+      {
+        key: 'seats',
+        at: '2026-09-14',
+        actor: 'Ada Lovelace',
+        action: 'increased seats to',
+        target: '24',
+      },
+      {
+        key: 'card',
+        at: '2026-09-02',
+        actor: 'Grace Hopper',
+        action: 'updated the payment method',
+      },
     ],
     empty: {
       reason: 'first-run',
       title: 'Nothing has happened yet',
       body: 'Renewals, seat changes and payment updates appear here.',
+    },
+  },
+  {
+    key: 'runs',
+    label: 'Recent billing runs',
+    kind: 'Timeline',
+    count: 'Last 4 runs',
+    members: [
+      { id: 'run-4', title: 'Billing run for October', state: 'done', duration: 1840 },
+      { id: 'run-3', title: 'Billing run for September', state: 'done', duration: 2210 },
+      { id: 'run-2', title: 'Retry after card decline', state: 'failed', duration: 640 },
+      { id: 'run-1', title: 'Billing run for August', state: 'done', duration: 1980 },
+    ],
+    empty: {
+      reason: 'first-run',
+      title: 'No billing runs yet',
+      body: 'The first run happens on the next billing date.',
     },
   },
   {
@@ -111,7 +153,7 @@ export default function RecordDetail01Demo() {
     <RecordDetail01
       eyebrow="SUB-4821"
       title="Northwind subscription"
-      description="A monthly subscription billed to Northwind Traders, with three relationships and one empty collection."
+      description="A monthly subscription billed to Northwind Traders, with four relationships and one empty collection."
       headingLevel="h3"
       fields={[
         { id: 'plan', label: 'Plan', value: 'Scale' },

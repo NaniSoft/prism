@@ -67,6 +67,7 @@ export default function MessageThread01Demo() {
           sender: 'assistant',
           senderLabel: 'Agent',
           at: tick(),
+          meta: 'gpt-class, 4.1s, $0.012',
           parts: [
             { kind: 'reasoning', label: 'How I worked it out', text: 'Compare the two arrival logs and find the gap.' },
             {
@@ -113,6 +114,7 @@ export default function MessageThread01Demo() {
             sender: 'assistant',
             senderLabel: 'Agent',
             at: OPENED,
+            meta: 'gpt-class, 1.9s, $0.004',
             parts: [{ kind: 'text', text: 'Ask me about any run and I will trace where its time went.' }],
           },
         ]}

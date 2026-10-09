@@ -208,6 +208,33 @@ describe('a growing list is not announced on every arrival', () => {
   })
 })
 
+describe('a per-message metadata node is the caller own', () => {
+  it('draws the caller meta in the message header, beside the sender and the time', () => {
+    const { view } = harness([
+      {
+        id: 'a',
+        sender: 'assistant',
+        senderLabel: 'Agent',
+        at: at(0),
+        meta: <span>gpt-class, 0.4s, $0.02</span>,
+        parts: [{ kind: 'text', text: 'Intake' }],
+      },
+    ])
+    render(view)
+    const meta = document.querySelector('[data-slot="thread-message-meta"]')
+    expect(meta?.textContent).toBe('gpt-class, 0.4s, $0.02')
+    // It is metadata about the message rather than content in it, so it sits in
+    // the header beside the time and never among the parts.
+    expect(meta?.previousElementSibling?.tagName).toBe('TIME')
+  })
+
+  it('draws no meta region for a message that carries none', () => {
+    const { view } = harness([message('a', 0, 'Intake')])
+    render(view)
+    expect(document.querySelector('[data-slot="thread-message-meta"]')).toBeNull()
+  })
+})
+
 describe('the parts are the message vocabulary the Kind owns', () => {
   it('draws a tool part through the ledger own row', () => {
     const { view } = harness([

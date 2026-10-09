@@ -3540,7 +3540,7 @@
     {
       "name": "calendar-01",
       "title": "Calendar 01 - A Month Grid Of Scheduled Items",
-      "description": "A month of scheduled work: the published mini-calendar for the month, the locale, the weekday headings and the paging, and the caller's items grouped under the days they fall on. The cap of three items a day exists because a month grid with nine items on one day is a month grid nobody can read, and the overflow line is always drawn and always in the caller's own words, because a day that looks complete and is not is the one failure a calendar may not have. The tone is the Status tone and the words beside it are required. Every string is passed in as a prop.",
+      "description": "A month of scheduled work: the published mini-calendar for the month, the locale, the weekday headings and the paging, and the caller's items grouped under the days they fall on. The cap of three items a day exists because a month grid with nine items on one day is a month grid nobody can read, and the overflow line is always drawn and always in the caller's own words, because a day that looks complete and is not is the one failure a calendar may not have. The tone is the Status tone and the words beside it are required. A move is the caller's, so an item carries a per-item handle node the caller wires to their own drag model and the Block owns no drag, no drop and no move callback. Every string is passed in as a prop.",
       "type": "registry:block",
       "categories": [
         "application"
@@ -3608,6 +3608,49 @@
           "path": "src/blocks/capacity-01/index.tsx",
           "type": "registry:component",
           "target": "components/blocks/capacity-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "card-index-01",
+      "title": "Card Index 01 - The Record Index As Pictures",
+      "description": "The record index as a grid of picture cards a reader compares and acts on: the caller composes each card's picture, name and price and its per card actions, and the Block owns the arrangement, the selection set, the count it announces and the batch bar. It holds the record index's own selection and announcement contract, including the page and filter scope distinction, and it fetches, sorts, filters and slices nothing. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "button",
+        "checkbox",
+        "live-region",
+        "pagination",
+        "section"
+      ],
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/card-index-01/card-index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/card-index-01/card-index.tsx"
+        },
+        {
+          "path": "src/blocks/card-index-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/card-index-01/index.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",
@@ -6795,6 +6838,72 @@
           "path": "src/blocks/record-form-01/record-form.tsx",
           "type": "registry:component",
           "target": "components/blocks/record-form-01/record-form.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "record-grid-01",
+      "title": "Record Grid 01 - Many Records Edited In Place",
+      "description": "A grid of records whose cells are controls, drawn from the shared field specification so a column is a label and a field kind rather than a second vocabulary. The Block holds the in-progress values, reports every edit as the row identity and the column key, and never checks a value against a rule. It fetches nothing, sorts nothing and pages nothing.",
+      "type": "registry:block",
+      "categories": [
+        "application"
+      ],
+      "registryDependencies": [
+        "calendar",
+        "checkbox",
+        "choice-card",
+        "combobox",
+        "date-picker",
+        "dropzone",
+        "field",
+        "file-upload",
+        "image-list-field",
+        "input",
+        "label",
+        "money-field",
+        "multi-combobox",
+        "native-select",
+        "number-field",
+        "one-time-code",
+        "password-field",
+        "radio-group",
+        "range-field",
+        "repeatable-rows",
+        "search-field",
+        "section",
+        "select",
+        "slider",
+        "switch",
+        "table",
+        "textarea",
+        "toggle",
+        "toggle-group"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/record-grid-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/record-grid-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/record-grid-01/record-grid.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/record-grid-01/record-grid.tsx"
         },
         {
           "path": "src/components/ui/section.tsx",

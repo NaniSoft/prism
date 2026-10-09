@@ -1,0 +1,124 @@
+---
+slug: blocks/record-grid-01
+title: RecordGrid01
+---
+
+## Overview
+
+RecordGrid01 draws many records as a grid whose cells are controls, and reports
+every edit as the row identity and the column key. It is a write: the reader types
+into a cell and the Block reports the change, rather than the read-only index which
+draws the rows it was handed and reports a sort, a filter, a page or a selection.
+
+Its columns are the shared field specification. A column's `label` is its header and
+its `kind` is the control drawn under it, so a grid column and a write form field
+are one declaration and the words a consumer learns on a form are the words on a
+grid.
+
+## Why it takes the field specification
+
+A cell that writes is a control, and the only vocabulary this package publishes for
+a control is `FieldSpec`. `ColumnKind` is the vocabulary for a value a reader reads,
+and `scripts/check-spec-unions.mjs` holds the two disjoint: a cell that writes named
+on `ColumnKind` would either draw a field Component inside the index's table or name
+something no Component answers to, and the gate reports both. So the write grid
+takes the field union, and needing to is the gate saying the job is a different one
+from the index. That is why this is its own Item rather than a wider `DataTable01`.
+
+## It holds the in-progress values and reports every change
+
+The grid seeds each cell from the caller's own row value and redraws from the
+reader's edit once one is made. It fetches nothing, sorts nothing, filters nothing
+and pages nothing, and it never derives a value from application state. Every edit
+is reported the moment it is made; what to do with it is the caller's. There is no
+save button, no delete and no bulk action, because the Block owns no command.
+
+The controls are the ones this package ships, drawn by the same renderer a form
+uses. The arms that hold a value and report a change through the shared context are
+the editable ones; an arm that submits through a form element it owns rather than
+reporting through the context is drawn and reaches no report, which is the honest
+limit of a Block that ships no form of its own.
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { RecordGrid01, type RecordGrid01Change, type RecordGrid01Labels } from '@nanisoft/prism-ui/blocks/record-grid-01'
+import type { FieldSpec } from '@nanisoft/prism-ui/spec'
+
+const COLUMNS: readonly FieldSpec[] = [
+  { key: 'title', label: 'Issue', kind: 'Input' },
+  {
+    key: 'status',
+    label: 'Status',
+    kind: 'NativeSelect',
+    options: [
+      { value: 'todo', label: 'To do' },
+      { value: 'done', label: 'Done' },
+    ],
+  },
+  { key: 'estimate', label: 'Estimate', kind: 'NumberField' },
+]
+
+const ROWS = [
+  { key: 'ISSUE-221', title: 'Close the coverage gaps', status: 'todo', estimate: 5 },
+]
+
+const LABELS: RecordGrid01Labels = { empty: 'No issues match the current filter.' }
+
+export function Spreadsheet() {
+  const [last, setLast] = useState<RecordGrid01Change | null>(null)
+  return (
+    <RecordGrid01
+      title="Issues"
+      columns={COLUMNS}
+      rows={ROWS}
+      getRowId={(row) => String(row.key)}
+      onCellChange={setLast}
+      labels={LABELS}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="record-grid-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where many records share the same few fields and a reader changes them one
+cell at a time: a bulk edit of issues, a price list, a small spreadsheet.
+
+### When not to use
+
+Do not use it to read a set. That is `data-table-01`, and a cell here is a control
+rather than a value.
+
+Do not use it for one record. That is a write form, `record-form-01`, where a field
+has its label, its help and its error around it rather than a column header above it.
+
+Do not use it for a set whose arrangement is a board, a calendar or a split. Each of
+those is its own Item.
+
+### Best practices
+
+- Validate on your side and keep the rule there. The Block draws a `required` mark
+  and sets the attribute, and it never checks a value against it.
+- Mirror the edits in your own state in `onCellChange`, and batch them yourself if
+  the store wants one call.
+- Keep the columns to the fields a reader is actually changing. A grid of twelve
+  columns is a grid a reader scrolls sideways.
+- Put a save control in your own composition, in your own copy, rather than asking
+  the Block to hold a draft.
+
+### Content guidelines
+
+- A `label` is the column's header and is also the control's assistive-technology
+  name where the Component does not carry its own.
+- A choice column passes its `options`, because a control with no options is a
+  control that draws nothing to choose.
+- A column's `key` is the value's own key and never the words of its label, because
+  it is what your rows and your change reports are keyed by.

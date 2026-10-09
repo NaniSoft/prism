@@ -370,14 +370,14 @@ export type ColumnSpec = {
 }
 
 /**
- * The collection arrangements a relationship is drawn in: the four this package can
+ * The collection arrangements a relationship is drawn in: the five this package can
  * already draw, and the one arm for a section it cannot.
  *
- * A set of rows, a set of rows in a panel, a run of dated occurrences and a set of
- * people. Those are the arrangements Prism ships components for, which is what makes
- * this union closed on the same grounds the field's is: every member names something
- * this package already draws, and a caller chooses between Prism's arrangements
- * rather than describing one.
+ * A set of rows, a set of rows in a panel, a run with durations and states, a run of
+ * dated occurrences and a set of people. Those are the arrangements Prism ships
+ * components for, which is what makes this union closed on the same grounds the
+ * field's is: every member names something this package already draws, and a caller
+ * chooses between Prism's arrangements rather than describing one.
  *
  * **It is not a slot per region, and the answer is why.** Every surveyed screen that
  * wanted one relationship per card turned a detail into a grid of equal panels, each
@@ -397,8 +397,19 @@ export type RelationKind =
   | 'Table'
   /** A set of rows in a panel, which is a panel rather than a page. */
   | 'ListPanel'
-  /** A run of dated occurrences drawn down one column, whose only spatial claim is order. */
+  /** A run with durations and states, drawn to scale, which is an instrument. */
   | 'Timeline'
+  /**
+   * A run of dated occurrences drawn down one column, whose only spatial claim is
+   * order, which is what a record's event history is.
+   *
+   * **It is a different arm from `Timeline` and not a widening of it.** A `Timeline`
+   * draws a run with a duration and a state per step, which is an instrument; this
+   * draws dated occurrences, which is a trail. Adding `at` to `TimelineEntry` would
+   * make one Component carry both a moment and a duration, which is the second
+   * answer to a question that already has one.
+   */
+  | 'ActivityFeed01'
   /** A set of people, drawn as their faces and their names. */
   | 'AvatarGroup'
   /** The caller's own arrangement, placed by the caller and drawn open. */
