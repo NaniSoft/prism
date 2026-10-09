@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/button'
 import { LiveRegion } from '../../components/ui/live-region'
 import { ScrollArea } from '../../components/ui/scroll-area'
 import { cn } from '../../lib/utils'
+import { ToolCallRow } from '../tool-call-row'
 
 /**
  * Where a tool call has got to, as a closed set of five.
@@ -300,39 +301,6 @@ function seedOf(calls: readonly ToolCall[], limit: number): Pick<LedgerRun, 'row
   return { rows: rows.slice(dropped), dropped }
 }
 
-/**
- * The ink each state is stated in, and the tick beside it.
- *
- * The tick is the state's own first letter rather than a glyph this file invented,
- * so there is nothing to translate and nothing to learn twice: `f` is the failed
- * call in every locale, and it is a letter rather than a shape, so it survives a
- * monochrome render and a screen at 200 per cent the way a hairline does not.
- *
- * `queued` and `cancelled` share the muted ink, and the letters are what tell them
- * apart. That is the same trade `Status` makes and states: a wider palette on a
- * surface a reader scans is a wider set of colours they have to learn, and the
- * cost of a shared ink is one letter.
- */
-const STATE_INK: Record<ToolCallState, string> = {
-  queued: 'text-muted-foreground',
-  running: 'text-foreground',
-  succeeded: 'text-success',
-  failed: 'text-destructive',
-  cancelled: 'text-muted-foreground',
-}
-
-/** The tick each state draws, so the five are told apart without relying on colour. */
-const STATE_MARK: Record<ToolCallState, string> = {
-  queued: 'q',
-  running: 'r',
-  succeeded: 's',
-  failed: 'f',
-  cancelled: 'c',
-}
-
-/** The clock a row reads, in UTC, because the surface holds no locale to format in. */
-const clockOf = (at: number): string => new Date(at).toISOString().slice(11, 19)
-
 /** One call merged into the ledger, and what fell off the top doing it. */
 function merge(rows: readonly LedgerRow[], call: ToolCall, limit: number): Pick<LedgerRun, 'rows' | 'dropped'> {
   const at = rows.findIndex((row) => row.call.id === call.id)
@@ -566,104 +534,16 @@ export function ToolLedger01({
       ) : (
         <ScrollArea label={label} className="max-h-96">
           <ol data-slot="tool-ledger-calls" className="flex flex-col">
-            {rows.map((row) => {
-              const { call } = row
-              // The difference between two sightings of the same call, and only when
-              // there are two. The sentence is the consumer's, the arithmetic is one
-              // subtraction of the consumer's own timestamps, and there is no clock
-              // in this file.
-              const elapsed = call.at - row.openedAt
-              const duration =
-                elapsed > 0 && call.durationLabel !== undefined
-                  ? call.durationLabel(elapsed, { id: call.id, name: call.name })
-                  : null
-              return (
-                <li
-                  key={call.id}
-                  data-slot="tool-ledger-call"
-                  data-state={call.state}
-                  className="border-border flex flex-col gap-1 border-b py-3 last:border-b-0"
-                >
-                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                    {/*
-                      * The tick and the clock, both decoration beside the words: the
-                      * tick names the state for a reader who can see it and the clock
-                      * is the same fact as the `datetime` on the `time` element, so
-                      * neither is announced as a character.
-                      */}
-                    <span
-                      aria-hidden="true"
-                      className={cn('font-mono text-xs', STATE_INK[call.state])}
-                    >
-                      {STATE_MARK[call.state]}
-                    </span>
-                    <time
-                      dateTime={new Date(row.openedAt).toISOString()}
-                      className="text-muted-foreground font-mono text-xs tabular-nums"
-                    >
-                      {clockOf(row.openedAt)}
-                    </time>
-
-                    <span className="text-foreground text-sm font-medium">{call.name}</span>
-
-                    {call.spanLabel ? (
-                      <span
-                        data-slot="tool-ledger-span"
-                        className="border-border text-muted-foreground rounded border px-1 font-mono text-xs"
-                      >
-                        {call.spanLabel}
-                      </span>
-                    ) : null}
-
-                    {duration === null ? null : (
-                      <span
-                        data-slot="tool-ledger-duration"
-                        className="text-muted-foreground ml-auto font-mono text-xs tabular-nums"
-                      >
-                        {duration}
-                      </span>
-                    )}
-                  </div>
-
-                  {call.argumentsText === undefined ? null : (
-                    <span
-                      data-slot="tool-ledger-arguments"
-                      className="text-muted-foreground font-mono text-xs break-words"
-                    >
-                      {call.argumentsText}
-                    </span>
-                  )}
-
-                  {call.resultText === undefined ? null : (
-                    <span
-                      data-slot="tool-ledger-result"
-                      className="text-muted-foreground text-pretty text-xs"
-                    >
-                      {call.resultText}
-                    </span>
-                  )}
-
-                  {call.errorText === undefined ? null : (
-                    <span
-                      data-slot="tool-ledger-error"
-                      className="text-destructive text-pretty text-xs"
-                    >
-                      {call.errorText}
-                    </span>
-                  )}
-
-                  {call.link === undefined ? null : (
-                    <a
-                      data-slot="tool-ledger-link"
-                      href={call.link.href}
-                      className="text-foreground self-start rounded-sm text-xs underline-offset-4 hover:underline"
-                    >
-                      {call.link.label}
-                    </a>
-                  )}
-                </li>
-              )
-            })}
+            {rows.map((row) => (
+              <li
+                key={row.call.id}
+                data-slot="tool-ledger-call"
+                data-state={row.call.state}
+                className="border-border flex flex-col gap-1 border-b py-3 last:border-b-0"
+              >
+                <ToolCallRow call={row.call} openedAt={row.openedAt} />
+              </li>
+            ))}
           </ol>
         </ScrollArea>
       )}

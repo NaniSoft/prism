@@ -1,0 +1,148 @@
+---
+slug: pages/document-page
+title: DocumentPage
+---
+
+## Overview
+
+DocumentPage is a whole document screen: one document read in full, its body held to
+the reading measure, and one or more regions beside it.
+
+**It is authored beside `DocsShell`, and neither of that Page's two rules is relaxed.**
+`DocsShell` states that a section is a label and not a control, and that a group with no
+index is a label and not a route. Both are statements about a documentation site's
+navigation tree, where a section is a topic a reader may reach in any order. This
+workspace never asks that question: a status belongs to a region of one document and is
+drawn by the Block that draws the region, and a route is the document's own contents. So
+the two are separate Items, no consumer of `DocsShell` is affected, and this Page owns
+the document's `h1` because a route renders it for a document and nothing frames it.
+
+**One Page draws all seven screens, because the difference between the six document
+variants and the research workspace is content rather than structure.** The record is
+the same thing in every one of them: an authored document with a title, a body and a set
+of things attached to it. What separates them is which region is open beside the body, so
+a version list, a comment thread, a source list, an output list and an evidence matrix
+are regions of one Page rather than six Items.
+
+## Usage
+
+```tsx
+import { DocumentPage, type DocumentPageRegion } from '@nanisoft/prism-ui/pages/document-page'
+
+const REGIONS: readonly DocumentPageRegion[] = [
+  {
+    key: 'sources',
+    block: 'table',
+    props: {
+      title: 'Sources',
+      columns: SOURCE_COLUMNS,
+      rows: SOURCE_ROWS,
+      getRowId: (row) => String(row.id),
+      pageCount: 1,
+      labels: SOURCE_LABELS,
+    },
+  },
+  {
+    key: 'versions',
+    block: 'activity',
+    props: { title: 'Versions', events: VERSIONS, empty: 'No version yet.' },
+  },
+]
+
+<DocumentPage
+  document={{
+    eyebrow: 'DOC-4821',
+    title: 'Northbound timetable review',
+    description: 'Where the northbound service loses four minutes.',
+    fields: [{ id: 'status', label: 'Status', value: 'In review' }],
+    body: <p>The body, authored wherever you author it.</p>,
+  }}
+  regions={REGIONS}
+/>
+```
+
+<ComponentDemo slug="document-page" />
+
+## The regions
+
+A region names the arrangement that draws it and not what a product calls the thing. The
+union is by arrangement, because a `version`, a `comment` and a `source` are each a
+product's own word for its own record, and a member naming one of them on a Prism type
+would promise that every consumer's document holds those things.
+
+| `block` | Drawn by | Use it for |
+| --- | --- | --- |
+| `activity` | `ActivityFeed01` | A version list or a dated run of occurrences. |
+| `table` | `DataTable01` | A source list, an output list, or a comment thread with columns. |
+| `members` | `MemberList01` | A comment thread of people. |
+| `comparison` | `Compare01` | The evidence comparison matrix of the research workspace. |
+
+A source list and an output list are both a `table` with your own columns and your own
+per-row destination, so they are two regions of one Page rather than two Items. The
+evidence matrix is a `comparison` region: it is not a relation, because a relation is a
+collection of records and a matrix is a comparison of two, and it earns no Item of its
+own.
+
+## Props
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `document` | `DocumentPageDocument` | required | The document read in full, with its body. It is the props of `RecordDetail01` minus `headingLevel` and `children`, plus `body`. |
+| `regions` | `readonly DocumentPageRegion[]` | `[]` | The regions beside the body, in order. Omit it for a document that is only its body. |
+| `className` | `string` | none | Merged onto the page element. |
+
+The document's own props are `title`, `eyebrow`, `description`, `fields`, `actions`,
+`relations` and the new `body`. The Page gives the document the `h1` and wraps `body` in
+`Prose`, so the measure and the block rhythm are the system's and the words are yours.
+
+## Guidelines
+
+### When to use
+
+Use DocumentPage as the body of the route that renders one document: a long authored
+document with a body and things attached to it. It is what a route renders for a
+document, and it owns the document's `h1`.
+
+Use it for every document variant. A version list, a comment thread, a source list, an
+output list and a research workspace with an evidence matrix are one Page under different
+regions.
+
+### When not to use
+
+Do not use it for a documentation site. A documentation set is a navigation tree with one
+document at the measure, and that is `DocsShell`. This Page has no rail and no pager,
+because a document workspace is one document rather than a site.
+
+Do not use it for a single record with no attached things. That is `RecordDetail01`, which
+this Page composes; a Page with no regions is the record detail inside a page frame.
+
+### Best practices
+
+- **Name the region by its arrangement, not by the product's word.** A version list and a
+  source list are both records; which Block draws the region is the only thing the union
+  decides, and the words stay yours.
+- **Reach for `table` when the region is compared across entries.** A source list a reader
+  scans by column is the record index, and `table` is the region for it.
+- **Reach for `comparison` only for the evidence matrix.** It is `Compare01`, so it lays
+  out two arms judged on one set of axes and states no verdict. Prism is not entitled to a
+  verdict, and the absence is the feature.
+- **Keep the document's facts in `fields`.** A document is a record, so what a reader is
+  entitled to be told about it is the record's declared facts rather than a region.
+- **Put the body in `body`, not in a region.** The Page holds it to the reading measure;
+  a region is a section beside the body and not the body itself.
+- **Own the editor, the fetch, the retention, the share, the export and the
+  permission.** The Page draws the reading surface and the regions; an annotation
+  anchored to a passage, a version created, a comment resolved and a document sent are all
+  behaviour and all yours.
+
+### Content guidelines
+
+- Write the eyebrow as the document's own key or type. It is drawn in the mono face,
+  because it is what a reader pastes into a search box and cites in a review.
+- Write the description as what the document covers, not as a slogan. It is the line under
+  the title that tells a reader whether they are in the right document.
+- Write a region's title as the section's own name, and let the Block draw it as the
+  section heading. The Page sets every region one level under the document's `h1`, so the
+  outline cannot be flattened.
+- Write the body as plain elements. `Prose` styles a paragraph, a heading, a list, a table
+  and a code block, so you write the document and Prism draws the rhythm.

@@ -2729,6 +2729,17 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'MessageThread01',
+    slug: 'message-thread-01',
+    kind: 'live',
+    category: null,
+    description:
+      'The message thread of a conversation, receiving messages over a subscription the consumer supplies: a list of messages with ordered parts, where the event log is a list of occurrences.',
+    source: 'src/live/message-thread-01/index.tsx',
+    exports: ['MessageThread01'],
+    status: 'stable',
+  },
+  {
     name: 'PackSwitcher',
     slug: 'pack-switcher',
     kind: 'component',
@@ -3066,6 +3077,17 @@ export const catalog: readonly CatalogItem[] = [
     description: 'A field that holds a currency amount as a number and shows it as the reader\'s market writes it.',
     source: 'src/components/ui/money-field.tsx',
     exports: ['MoneyField'],
+    status: 'stable',
+  },
+  {
+    name: 'DocumentPage',
+    slug: 'document-page',
+    kind: 'page',
+    category: null,
+    description:
+      'A whole document screen: the document read in full as a record with its body held to the reading measure, and one or more regions beside it drawn by the settled Blocks. A version list, a comment thread, a source list, an output list and an evidence comparison matrix are regions of this one Page rather than six Items.',
+    source: 'src/pages/document-page/index.tsx',
+    exports: ['DocumentPage'],
     status: 'stable',
   },
 ]

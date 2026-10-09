@@ -2365,30 +2365,23 @@ already says Prism owns the shape while the consumer owns the values, so this
 section adds nothing to it.
 
 **Where the authoring work lands: no catalogue entry, no new Item, no new prop and
-no new Kind, and two findings inside `SettingsPanel01` that an authoring ticket
-has to fix.** `SettingsPanel01` is measured against the record write form Block
-rather than merged into it or kept beside it on its own terms, which is the
-disposition `IssueDetail01` and `AuditLog01` are held to above. Two things are
-settled about its source as it stands. It declares its own field type,
-`SettingsPanelField`, a union of `text`, `textarea`, `switch` and `select` with a
-value handler per member, which is the shape issue 152 replaced with `FieldSpec`,
-`FieldSpecGroup` and `FieldKind`, and it is one of the two such declarations left
-in this package beside `IssueDetail01Field`: the credential, contact, provisioning
-and account creation forms have since moved onto the shared specification, so this
-is a finding against a widening rather than the last of five copies. Its union has
-no `slot` arm either, so a control this
-package does not ship has nowhere to go in a settings region. And its
-`secondaryAction` is declared `{ label: string; onClick?: () => void }` and
-rendered as a `Button` with an optional handler, so a caller who passes a label
-and no function gets a focusable control, announced as a button, that activates
-to nothing. **`scripts/check-block-controls.mjs` does not catch that and the
-reason is its own stated limit rather than a gap to be closed here**: it reads
-the rendered Component's attributes, `onClick` is one of the three arms it treats
-as actionable, and the word is present whether or not the value behind it is
-`undefined`. So it is held by this paragraph and by the authoring of the widening,
-and a reader auditing it should look for the absence of an optional handler rather
-than for a clean run. The archetype table keeps its row and its count, for the
-  reason the saved task view and rehearsal sections give.
+no new Kind, and the two findings this paragraph once recorded are discharged.**
+`SettingsPanel01` is measured against the record write form Block rather than
+merged into it or kept beside it on its own terms, which is the disposition
+`IssueDetail01` and `AuditLog01` are held to above. It was found declaring its own
+field type, `SettingsPanelField`, a union of `text`, `textarea`, `switch` and
+`select` with no `slot` arm, and rendering a `secondaryAction` as a `Button` with
+an optional handler. **It no longer does either, and the interface as it now
+stands is the one this section argued for.** `groups` is `readonly
+FieldSpecGroup[]`, the shared `FieldSpec`, `FieldSpecGroup` and `FieldKind` the
+write form takes, so a control this package does not ship arrives through the
+`slot` arm and the Block still draws the label, the help and the error around it.
+The former `secondaryAction` is gone, and what replaced it is `footerStart`, a
+`ReactNode` the caller wrote and the Block places: a `CtaLink` with its required
+`href`, or a control the caller wired, so there is no label-with-no-handler for
+`scripts/check-block-controls.mjs` to miss. Its own JSDoc states the same
+interface, and the archetype table keeps its row and its count, for the reason the
+saved task view and rehearsal sections give.
 
 ### What a credential and secret lifecycle is, and why the archetype earns no Item
 
@@ -2550,6 +2543,413 @@ log section gave for `event-log-01` and the saved view section for `today-page`:
 the name was a candidate for an Item and there is no Item. The archetype table
 above keeps every row it has and no count moves, because this was never a row in
 it.
+
+### What the operator profile, the settings screens and the secret surface come to
+
+**The operator profile is the write form over the reader's own record, confirmed
+against `RecordForm01` as it stands.** A profile is a record, the reader is its
+owner, and the surface is the record write form section's Block over a
+`FieldSpecGroup`: the fields are the shape and the vocabulary, and the reader's own
+values and the caller's fetch are the consumer's. It earns no `profile-page`, for
+the reason the settings section gives for every region and the record index gives
+for a record's own name. Its difference from a create screen is whether values
+arrive, which is a prop rather than a second Item.
+
+**Project settings, organisation settings and a governance region are one settings
+region, and `SettingsPanel01` as it now stands draws it.** The scope, whether a
+setting is the organisation's, the project's or the reader's, is not a fact the
+surface can read and is the consumer's words, which the settings section already
+says. The governance screen's permission matrix is `PermissionMatrix01` as it
+ships, measured against the region rather than folded into it, because a matrix of
+roles against permissions is an arrangement the grouped fields do not have. Nothing
+here earns an Item.
+
+**Integrations is `SettingsIntegrations01` as it ships, and it is the Item the
+secret question is weighed against first.** It already carries the four states,
+and `needs-attention` is the one that makes it worth shipping: a connected system
+that wants something from a reader is a state with its own words and its own
+per-state action, which arrives through the `action` slot and not as a variant. A
+connection the product holds and can read back is what this Block draws, so no
+second integrations Item and no secret surface appears beside it.
+
+**The secret surface is refused, weighed against `SettingsIntegrations01`, and the
+negative result is the honest one.** The difference is the direction the value
+travels. An integration is a connection the product holds and can read back at any
+time; a secret is minted by the store, handed to one reader at one moment, and the
+correct behaviour is that nobody holds it again. A surface for it would be the one
+place in this package whose input is a value its caller is required to destroy, and
+every mechanism Prism uses to hold a value across renders is the mechanism that
+would keep it alive. So the once-only moment is a `CodeBlock` with the caller's
+copy control in its `actions` slot, the metadata is the record write form over
+fields (`name`, scope, expiry), and the listing is the record index, exactly as the
+credential and secret lifecycle section settles. There is no `api-key-01`, no
+reveal control, no mask and no member of any union a secret would go in. No word is
+added to `CONTEXT.md`, and no catalogue entry, prop or Kind appears.
+
+### What a node canvas is, and why Prism owns the drawing and not the canvas
+
+**Prism does not own a two-dimensional canvas, and the Component that already
+draws one shape of it states the reason better than this section can.** `Diagram`
+takes `DiagramNode[]` and `DiagramRelation[]` and returns an SVG image. It is a
+server Component with no client code, no hook and no mode, and
+`check-client-budget.mjs` keeps it off the client roster. Its own JSDoc is where
+the ruling sits: the whole reason it is a Component and a canvas was not is that
+a canvas paints pixels it has already resolved, and a resolved value does not
+move when the pack beneath it does. A canvas is a two-dimensional editing
+surface, and its identity is not the nodes it draws but the model that draws
+them: a viewport that pans and zooms, a pointer that drags, a hit test, a
+marquee, a keyboard nudge, a snapping rule and a history that undoes each of
+them. Every one of those is behaviour, Prism ships no behaviour, and no Kind
+here holds it. Component, Block and Page are handed what they draw, and the
+fourth Kind, `live`, is a surface whose content changes over time without a
+navigation event, which an editing model is not. So the canvas is an application
+the consumer writes, and Prism owns the drawing a canvas would put in its frame.
+
+**A node and an edge are already typed data, and no new specification is minted
+for either.** A node is `DiagramNode`: a stable `id`, a `name`, an optional
+`subtitle`, an `x` and a `y` in the caller's own monotonic space, an optional
+`emphasis` and an optional `pack`. An edge is `DiagramRelation`: a `from` and a
+`to` naming node ids, a `label` and an optional `indirect`. Those two are the
+whole of the graph's content shape, they are the consumer's to fill, and the
+drawing normalises their positions rather than computing them. **What is not
+added is a `NodeSpec`, a `StepSpec` or an `EdgeSpec`**, for the reason the
+rehearsal surface section already gives when it refuses a step specification: a
+step's kind is the vocabulary of whatever application declared it, so a member
+on a Prism type would promise that every consumer's steps are these. **The
+sharpest sub-question in this territory is a step with a declared input and
+output contract, and the answer is that a contract is not a node.** An input a
+reader fills is `FieldSpec`, and a value a reader reads is the read vocabulary
+the column and field specifications already carry, so a declared contract is the
+existing specifications reused and never a fifth shape beside them. A contract
+between two steps is content the consumer declares and the read-only drawing
+shows; it is not a reason to mint a graph type.
+
+**The eleven surveyed screens are not eleven Items, and none of them is a Prism
+canvas.** They decompose, and each half already has an answer or belongs to the
+consumer's own editor. The survey itself raised the counter-case, that a
+canvas-free node list such as `ProcessFlow01` already is might be enough for the
+workflow and agent surfaces; the honest resolution is that it is enough for the
+reading half of all of them and that the editing half is an application Prism
+declines.
+
+- **The two automation screens are the counter-case this ticket names, and they
+  resolve against a canvas by not being one.** An automation is a trigger, an
+  optional condition and a consequence, which is an ordered declaration of a few
+  typed entries in the caller's own words, and the survey's own row says a canvas
+  is overkill for them. It is a small declarative form: the entries are
+  `FieldSpec` fields, and the shape is a list of them. Whether that form is a new
+  Block or the record write form Block over a specification is authoring work
+  and not this decision; what is settled is that it is declarative content and
+  never a canvas. **The authoring ticket measured it and settled it as the record
+  write form over a field specification, so no new Block is authored.**
+  `RecordForm01` over a `FieldSpecGroup` already renders an ordered declaration
+  of typed entries: the entries are `FieldSpec` fields in the caller's own
+  words, they are drawn in the declared order and never re-sorted, they are
+  grouped under headings, and the form carries an issue list keyed by field and a
+  save union of three arms. An automation is exactly that, so the answer is a
+  negative result recorded rather than an Item, and no canvas affordance, node,
+  step or edge specification appears either way.
+- **The three workflow screens are two editing surfaces and one rehearsal.** The
+  builders are the consumer's editor, with `Diagram` for the graph it reads and
+  `ProcessFlow01` for the ordinal plan the rehearsal surface section already
+  assigns to it, and the typed input and output between steps is the contract
+  answered above. The rehearsal screen is that section's settled composition:
+  `ProcessFlow01` for the plan, a record write form for the parameters and the
+  caller's own run control.
+- **The agent builder, the subagent canvas and the mixed agent canvas are one
+  reading and one drawing.** The reading is a record: an agent's configuration
+  is a record detail or a record write form over `FieldSpec`, and its delegation,
+  or its mixed deterministic and model-driven steps, is a graph of named things
+  and the relations between them, which is `Diagram`. The editing is the
+  consumer's.
+- **The skills workspace is a capability set, which is an index or an ordered
+  declaration and not a canvas**, and the testing half is the consumer's own run.
+- **The agent factory is a definition and a batch**: the definition is a record
+  write form and the produced agents are a record index.
+- **The agent workspace pairs configuration with live state, and both halves
+  already have answers.** The configuration is the write form, and the live state
+  is the `live` Kind's own surface, where a run's log is `RunStream01` and a tool
+  call is `ToolLedger01`, with the consumer owning the socket, the transport and
+  the persistence exactly as the live material rules.
+
+**Which of the eleven is the canvas and which is the surrounding editor: none is
+a Prism canvas, and the surrounding editor is the consumer's.** Prism owns the
+  node drawing (`Diagram`), the ordinal plan (`ProcessFlow01`), the inspector and
+  the parameters as `FieldSpec`, the set as `DataTable01` and the live state as the
+  two live surfaces a run is drawn from. Everything that makes the screen an editor, which is the palette,
+the toolbar, the drag, the viewport, the history and the panel wiring, is the
+consumer's application, and a consumer using Prism composes the frame from
+`AppShell01` and `PageHeader01` and places the drawing and the forms inside it.
+
+**Undo, selection and viewport are the consumer's, entirely, and the record
+index's exception is not a precedent for them.** The admin map ruled that the
+record index owns row selection as the one narrow exception to the no-behaviour
+rule, and the reason it could is the reason a canvas cannot: the index's
+selection is a set of keys the caller passed, it is a rendering fact over those
+keys, and nothing in it reaches past the page the caller drew. A canvas's
+selection is none of those. It is the identity of what is under an editing focus,
+it lives in a coordinate space, and it is inseparable from the viewport that maps
+that space to the screen and from the history that undoes both. Undo is a stack
+of past states of the consumer's own document, selection is which object is being
+edited, and viewport is a transform over a space Prism does not hold, so each is
+application state and each is the consumer's. Granting all three would not be the
+index's narrow exception but a second Kind wearing a Component's clothes, and the
+four Kinds remain four.
+
+**What Prism does not own is stated as a list, for the reason the sections above
+state theirs.** It owns no viewport: no pan, no zoom, no transform and no
+coordinate space. It owns no interaction model: no drag, no drop, no marquee, no
+hit test, no snapping, no alignment guide, no auto-layout and no keyboard nudge.
+It owns no undo or redo, and no history stack behind them. It owns no editing
+selection: no selected node, no selected edge, no set of either and no coordinate
+to report. It owns no layout algorithm, because positions are the caller's and
+the drawing normalises them. It owns no persistence: no document, no autosave, no
+draft, no revision and no version history for the graph. It owns no execution,
+and the rehearsal surface section already refuses this for all of these screens:
+Prism never executes, never schedules and never fetches. It owns no container the
+consumer writes into, so the two read-only shapes, `Diagram` and `ProcessFlow01`,
+are pictures and never surfaces. And it owns no fifth Kind, because a canvas is an
+application rather than a content shape.
+
+**No word is added to `CONTEXT.md`, and no Kind is added either.** The word
+canvas would enter the vocabulary as a thing Prism declines, in the shape of
+batch action, retention, archive and aggregation. Node and edge are already
+`Diagram`'s own type vocabulary and not glossary words. And because no fifth Kind
+appears, there is nothing for the glossary to name.
+
+**Where the authoring work lands: no catalogue entry, no new Item, no new prop,
+no new specification and no new Kind.** `Diagram` and `ProcessFlow01` are
+measured as the read-only shapes and neither widens. `catalog.ts` is untouched.
+The only authoring work this territory might produce is the small declarative
+automation form, and a ticket that authors it measures it against this ruling
+rather than against a canvas.
+
+### What the agent studio composes, and what it does not own
+
+**Every screen in the studio is a record, a settings region or a settled live surface, and the studio earns no Item.** The seven in-scope screens are agent 1, agent configuration, agent workspace, agent factory 1, skill 1, skills manager and skills workspace. Applying the job-identity test to the set answers the three questions the ticket asks and leaves no name minted: an agent is a record, a skill is a record, the factory is a definition and a batch, and the workspace is the pairing the live material already settled. **No `agent-detail-page`, `agent-batch-page`, `agent-config-01`, `skill-detail-page`, `skill-list-page` or `skill-workspace-page` is authored**, because each was a candidate for an Item and there is no Item.
+
+**An agent is a record, so agent 1 is `RecordDetail01` and no new Item appears beside it.** The survey's own words for the row settle the archetype: everything about one agent, its configuration and its record, and an agent record is what an auditor asks for. That is a record read in full, which is the job `RecordDetail01` already draws from `catalog.ts`: a `title`, an `eyebrow`, a `description`, declared `fields`, composed `children`, the caller's `actions` and one ordered `relations` list. Nothing in its interface is agent-shaped, because a record that is an agent is a record whose fields and relations the consumer filled. The record's configuration is the region below, its runs are `live` below, and its skills are a relation whose members are skill records below, so the reading half is the record detail and the drawing half is the consumer's, exactly as the node canvas section settled for the agent builder, the subagent canvas and the mixed agent canvas. A name carrying the product's word for its record is the failure `RecordDetail01` was authored to end, so the survey's `agent-detail-page` is answered as not a name.
+
+**Agent configuration is a settings region, a `FieldSpecGroup` over the record write form Block, and it earns no Item for the reason issue 161 gives.** The screen sets what an agent is allowed to do, which is grouped settings: a group is a heading and an optional description, a field carries a stable `key`, a required `label` and a `kind` from Prism's own input vocabulary, and the `slot` arm carries a control this package does not ship. `SettingsPanel01` is the shipped card arrangement of that specification and `RecordForm01` is its single-form arrangement, both taking the same `FieldSpecGroup` and neither minting an agent shape. **What the region owns is the shape and the vocabulary of the fields.** What it does not own is the policy: the allow-list, the scopes, the tool and skill permissions, the quota and the rule about what the agent may reach are the consumer's store, their values are the caller's and their enforcement is the caller's, for the reason the credential section gives, and Prism has no member a policy would go in. The three save arms and the on-change arm are issues 152 and 161 unchanged. A matrix of roles against permissions is a different shape from grouped settings, and it is `PermissionMatrix01` as it ships, measured against this ruling rather than folded into the region.
+
+**The factory is a definition and a batch, and it is more than a batch action on the index, which the job-identity test says in one comparison.** Could `DataTable01` draw both the produced-agents screen and the factory? It could not, and the signal is the arrangement one: the factory gains a definition region the plain index does not have. So the factory is two settled jobs composed. The produced set is the record index, and the produce command is its `batchActions` node, which issue 156 already built: the region is the Item's and the controls are the caller's, so the produce control is a `ReactNode` the consumer wrote and it reaches the consumer's own function, because a Block ships no behaviour. The definition is `RecordForm01` over the specification the survey calls a definition. **So the half the ticket asks whether is already answered is the batch action, and the half that is more than it is the definition, which is also answered.** `agent-batch-page` is answered as not a name.
+
+**The difference between an agent record and its live state is real, it is the `live` Kind's own boundary, and it introduces no agent-specific Item.** Configuration is read-mostly: it changes on a save or on a navigation, which every Kind but `live` can express. The live state changes over time without a navigation event, which is the definition exactly, and its surfaces are the two the Kind already ships, a run's log as `RunStream01` and a tool call as `ToolLedger01`, with the consumer owning the socket, the transport, the persistence and the durable buffer and Prism owning only the bounded in-memory window, which is issue 197's ruling unchanged. **Agent workspace is the pairing, and the pairing is a composition rather than an Item**: the configuration half is the write form, the live half is the two live Items, and the frame and the claim are `AppShell01` and `PageHeader01`. Nothing agent-specific is left over. There is no agent run, agent stream, agent status or agent console beside the ones the Kind already names, and a second one would be the second answer to a question the run controls and the live tiers already answer, which issue 197 refused by name.
+
+**A skill is a record, its presence on an agent is a relation, and the governance of what an agent may do is the agent's configuration, which is the answer issue 212 is blocked on.** Applying the job-identity test to the three capability screens returns the ordinary record shapes. `skill 1` sees one capability in full, what it does and what it costs, which is `RecordDetail01`: a title, the facts, a cost composed as a `MetricSpec` or a spec table, and the agents that hold it as one relation. `skills manager` sees every capability and turns it on and off, which is the record index: a state column in the `columns` specification and a per-row control the caller wrote, for the reason issue 156 gives for every command, so the enable control is a `Switch` the consumer wired rather than one Prism draws, and turning a set on or off is the caller's `batchActions` node. Creating or editing a capability is the write form over `FieldSpecGroup`, the same region agent configuration is. **The relation and the region are the same record seen from the agent's side**, so a capability is declared once as a record and appears on an agent as a `RelationSpec` member and in the configuration as a field whose value the caller owns. The security boundary is not a shape: the allow-list and its enforcement are the consumer's store, exactly as agent configuration's policy is, and Prism draws the fields and enforces nothing. `skills workspace` composes the set, which is the index or an ordered declaration, with the consumer's own test beside it, which is what issue 200 already settled.
+
+**What the agent studio does not own is stated as a list, for the reason the sections above state theirs.** It owns no policy: no allow-list, no scope, no permission rule, no quota and no enforcement, because a policy is a fact about a store Prism never fetched. It owns no production, so the factory spawns nothing, schedules nothing and fetches nothing, and the produce command is the consumer's own function behind a node the caller wrote. It owns no execution, which the rehearsal surface section already refuses for every surface here: no `onRun`, no start, no retry, no progress that advances, no clock and no countdown. It owns no socket, no transport, no persistence and no durable buffer, for issue 197's reasons. It owns no canvas, no viewport, no drag, no history and no editing selection, for issue 200's reasons. It owns no skill implementation, no capability execution and no cost accounting beyond the figures the caller composes. And it adds no fifth Kind, no catalogue entry, no new specification, no new prop and no new Item, because every screen is a record, a settings region or a settled live surface.
+
+**No word is added to `CONTEXT.md`, and the reason is the one the sections above give.** "Agent", "skill" and "capability" are each a product's word for its own record, in the shape of "issue", "invoice" and "order", and a glossary entry giving Prism one of them would be a word for something it draws none of. "Factory" names a batch a caller runs and a Block deliberately does not own, which is the entry shape the record index section refused for "batch action". "Live state" is already the `live` Kind, and the glossary already holds `Kind`. And "governance" would enter as a property of the consumer's policy that Prism declines to enforce, which is the shape "retention" and "aggregate" were refused for.
+
+**Where the authoring work lands: no catalogue entry, no new Item, no new prop and no new Kind.** A consumer with any of the seven screens writes `AppShell01` and `PageHeader01` for the frame and the claim, `RecordDetail01` for an agent or a skill, `SettingsPanel01` or `RecordForm01` over `FieldSpecGroup` for the configuration and the factory definition, `DataTable01` with the caller's `columns`, `batchActions` and per-row nodes for the manager and the produced set, and `RunStream01` and `ToolLedger01` for the live state. `Diagram` and `ProcessFlow01` remain the drawing shapes, for the reasons issue 200 gives. `catalog.ts` is untouched, and the produced set and the governor's list are the same index at two scopes rather than two Items.
+
+### What governs what an agent may do, and how a per-row enable reaches a handler
+
+**The governance half of the studio is answered by the section above, and the finding of this decision is that nothing is left for it to author.** A skill is a record, its presence on an agent is a `RelationSpec` member, and the policy over what the agent may do is the agent's configuration, a `FieldSpecGroup` over the record write form Block. That section settles the shape. This one records the two things it left implicit: what a per-row enable reaches, and whether "what an agent may do" is a settings region, a matrix or a relation.
+
+**The per-row enable reaches the handler as the record index's own per-row node, which is why it does not trip `scripts/check-block-controls.mjs`.** The gate classifies four Components and `Switch` is one, and its acting arm is `onCheckedChange`, so a `Switch` a Block renders without a handler is a finding. `DataTable01` therefore cannot draw the enable itself: it places a `ReactNode` the caller wrote, holding the caller's own `Switch` with its own `onCheckedChange`, exactly as the plugins paragraph records for `Directory01` and as the record index section already states for every per-row action. The enable arrives wired and the Block draws nothing in its place. Where the change is a command over the set rather than a control on one row, it is the index's `batchActions` node, which issue 156 already built.
+
+**What an agent may do is the agent's configuration region, and it is neither a matrix nor a relation.** It is a settings region because the allow-list, the scopes, the tool and skill permissions and the quota are grouped fields: the fields are the shape and the vocabulary, and their values and their enforcement are the consumer's store, exactly as the agent studio and credential sections state, so Prism draws the fields and enforces nothing. It is not a relation, because a relation names a collection of records the agent holds, which is a skill's presence on the agent, and a grant about behaviour is not a collection. And it is not a matrix by default, because a matrix of roles against permissions is the one arrangement grouped fields cannot draw. Where the consumer's grant is that matrix it is `PermissionMatrix01` as it ships, measured against the region rather than folded into it, which the operator and governance section already settles. So the three are distinct and each is decided: the capability set is a `RelationSpec`, the permission is the configuration region, and a roles-against-permissions grid is `PermissionMatrix01` and not a fourth shape.
+
+**No word is added to `CONTEXT.md`, and the reason is the one the agent studio section gives.** "Governance" names a property of the consumer's policy that Prism declines to enforce, in the shape "retention" and "aggregate" were refused for, and "capability" and "skill" are a product's words for its own record. `catalog.ts` is untouched, no specification is added, no new prop appears and no fifth Kind is introduced.
+
+### What the agent studio is assembled from, screen by screen
+
+**Every studio screen is an existing Item or a settled composition of existing Items, so the studio earns no Item and mints no name.** The reasoning is in the agent studio section above and is not restated here; this section is the assembly a consumer reads and it answers the composing question rather than re-deciding the questions already settled. The seven in-scope screens assemble as follows.
+
+- **Agent 1** is `RecordDetail01`, with the agent's facts as the caller's `fields` and its skills as the caller's `relations`.
+- **Agent configuration** is `SettingsPanel01` or `RecordForm01` over a `FieldSpecGroup`, which is also the region the governance above is set in.
+- **Agent workspace** pairs that write form with `RunStream01` for a run's log and `ToolLedger01` for a tool call.
+- **Agent factory 1** is `RecordForm01` for the definition and `DataTable01` for the produced set, with the produce command as the index's `batchActions` node.
+- **Skill 1** is `RecordDetail01`, with the capability's cost as a `MetricSpec` or a specification table.
+- **Skills manager** is `DataTable01` with the caller's `columns`, a caller-wired per-row `Switch` and `batchActions`.
+- **Skills workspace** is `DataTable01`, or an ordered declaration, with the consumer's own test beside it.
+
+**All seven sit inside `AppShell01` and `PageHeader01`, and the frame and the claim are the consumer's.** The palette, the toolbar, the panel wiring and the live socket are the consumer's application, exactly as the node canvas section settles for the studio's canvases.
+
+**No screen needs a composition that no single Block provides, so there is no candidate for one more Item.** The factory is a definition form and a produced set, which are two settled jobs composed and not one shared arrangement; the workspace is the write form and the two live Items, which is the pairing the live Kind already settles; and the manager is the record index with the per-row and batch nodes the index already has. The one place a shared composition could be argued is a definition form over a produced set, and the job-identity test refuses it: `DataTable01` would gain a definition region the plain index does not have, while `RecordForm01` gains nothing the write form does not already draw. So the studio is entirely composition, and **no catalogue entry, no new Item, no new specification, no new prop and no fifth Kind appears.**
+
+**No word is added to `CONTEXT.md`.** "Studio", "manager", "workspace" and "factory" are a product's words for its own screens or for a batch a caller runs, in the shape the agent studio section refuses, and an archetype name is survey scaffolding rather than an Item name. `catalog.ts` is untouched.
+
+### What the composer is, and what a saved request and a tokenizer are
+
+**The composer is not a Block and there is no request specification. It is `PromptComposer`, a Component the package already ships, and the archetype is a composition around it.** The job-identity test asks whether one Item could draw the eight screens, taking different content, without gaining a region, a decision or an arrangement the others do not have. The centre already exists and is one Component with a controlled request lifecycle, and what separates the eight screens is not content but what sits beside that centre: the tray of attachments, the list of capabilities, the choice of a model, the saved requests, the panel the field is placed in and the controls it carries. A `composer-01` Block taking a request specification would re-declare the `text`, the `attachments`, the five-phase `state` and the five callbacks that `PromptComposer` already takes, which is the second answer to one question the naming section refuses. So no `composer-01` is authored and no request specification is added. The survey assigned these rows to Block; the Item that actually ships is a Component, and the Kind column of a survey row is not evidence, as the naming section already states.
+
+**The eight screens are answered by composition, one at a time.** Composer 1, a request started and answered, is `PromptComposer` itself. Composer 2, attachments, is already on it: `attachments`, `onAttach`, `onRemoveAttachment` and `removeAttachmentLabel` ship on the Component today, and a tray row is the Component's own list. Composer 3, the tools a model may call, is a list of the consumer's own capabilities drawn beside the field, which is a `RelationSpec` or a small record list and never a control, because a Block that drew a control it cannot act on is the finding `scripts/check-block-controls.mjs` exists for. Composer 4, a chosen model, is one choice from a set, so it is a `Select` or a `Combobox` the consumer composes, and the chosen model is consumer state that seeds nothing in Prism. Composer 5, saved requests, is the record the next paragraph settles. Composer 6, the composer in a side panel, is `PromptComposer` placed inside `Sheet`, `Drawer` or the split `AppShell01` already draws. Composer 7, the response controls, is the same Component's own `onStop` and `onRetry`, and there is no second response control, because issue 197 already ruled that stop and retry are these two callbacks.
+
+**Stop and retry reach an action without tripping the block control gate, because they are `PromptComposer`'s own controls on a client Component and never a control a Block draws unwired.** `scripts/check-block-controls.mjs` reads `packages/ui/src/blocks` and `packages/ui/src/pages` and classifies four Components, and `PromptComposer` is none of them. A Block or a Page that composes the composer hands it the caller's `onStop` and `onRetry` through the Component's own props, which is the division the live material already states: the control and its handler arrive together, and no Prism surface renders a decision it cannot take.
+
+**A saved request is a record, and Prism mints no `SavedRequestSpec`.** A saved request is a named request body the consumer stores and fetches, and its whole shape is a name and a request. Prism owns the shape of a record and of its list, which is the `ColumnSpec` list the record index already draws, and the consumer owns the values, the store and the fetch. Choosing one seeds `PromptComposer`'s `text`, and the choosing is the consumer's, because the master and detail split holds no selection and a composer holds no request it was not handed as a prop. A saved request therefore earns no Item and no type: it is a record drawn by an index Prism already ships, and its values are the consumer's.
+
+**The tokenizer is a display of a count the consumer computed, never a counter, and it earns no Item.** Prism never fetches and holds no model, so it cannot count a model's tokens, and a count that needs a tokenizer call is the consumer's fact. What the screen needs is the display of that count and of the breakdown that explains it, and both are values the caller computed. So the tokenizer is not a Component that counts and it is not a second kind of thing: it is the caller's figure drawn with the display Items this package already ships, and the rule is that Prism draws a number it was handed and never one it produced. The survey's "and why" is the same answer, a breakdown the caller computed and Prism draws.
+
+**No word is added to `CONTEXT.md`.** Composer names `PromptComposer`, an Item the glossary's `Component` already covers. Saved request is a product's word for its own record, and tokenizer names a computation the consumer owns, which is the shape retention and governance were refused for. A glossary entry for either would give Prism a unit it has none of.
+
+### What Prism ships for a run history, an approval queue and a cost ledger
+
+**Prism ships prose for all three and authors no Item for any of them, and the approval gate specifically earns no Block.** The recorded ruling is that the three are Workflows rather than the `live` Kind, because each is a read-mostly record that changes as a run completes or as a person decides. The inherited law that a log and an audit surface are `DataTable01` widened settles the first two, and the third is the same index over the caller's pending rows, so the whole question is answered without a new Item and without the fourth Kind becoming the answer to the agent problem by this door, which is the purpose issue 203 states.
+
+**A run history is `DataTable01` widened.** A run is a record and the history is the index over runs, with a status column and a per-row destination into the run, all of it the caller's `columns` and per-row nodes. Opening one finished run is not a new surface: it is the tool-call ledger's own row and the event log drawn from the consumer's stored rows rather than from a subscription, which is `ToolLedger01` and `RunStream01` read in their read-mostly use and seeded from the record, exactly as issue 197's `initial` seam already states.
+
+**A cost ledger is `DataTable01` widened, with the figures composed above it.** Cost is the consumer's own derivation, because no provider read publishes a cost, so a total is a `MetricSpec` the caller computed and composed beside the table rather than a figure Prism calculates. The ledger is the table plus the caller's metrics and nothing more.
+
+**An approval queue is `DataTable01` widened, and the approval gate is the consumer's composition rather than a Prism surface.** The pending approvals are the caller's rows: the tool, its arguments, what asked and when. The gate, the one place a person acts rather than reads, is composed from Items that already ship, a `Dialog` or `AlertDialog` for the decision and, where a protocol carries a schema for the answer and the decision needs typed input, the write form over `FieldSpecGroup` for the fields. The decision itself is the consumer's own nodes: the dialog's action nodes and the index's per-row nodes carry the handlers, which is how the record index's per-row actions already work. So there is no unwired control to gate, because Prism draws no approve control and the decision never crosses into a Block that cannot hold it. A Block for the approval gate is refused for exactly that reason: it would be the surface issue 203 asks whether to author, and the argument against it is that a Block cannot act.
+
+**The expiry question is answered by naming it as the consumer's, and the survey is the reason.** Prism defines no expiry, no timeout and no default decision for an unanswered approval, and it does not own the pending approval's lifetime at all. The survey read six systems and found that every one waits indefinitely and none defines an expiry, so there is no precedent to copy and no provider fact to draw. The durable lifetime of a pending approval is the consumer's store, which is the same boundary the live material draws for the socket and the buffer, and a policy that expires one is the consumer's product decision rather than a Prism default.
+
+**No word is added to `CONTEXT.md`.** Run history, approval queue, cost ledger and approval gate are each a product's name for its own records or a Workflow Prism documents and never ships, and the glossary holds `Kind` rather than a surface name for each use. A term would make one of them look like a unit Prism has, which is the state issue 203 exists to prevent. `catalog.ts` is untouched, no specification is added and no fifth Kind appears.
+
+### What the run review surface is: evaluations, response review and a trace
+
+**Two of the five screens are the log and the run history already settled, and this
+section does not re-open them.** An api request and a batch job are records, and a
+set of them is the record index the log section already widened: `DataTable01` over
+`EventSpec` rows, with the request's or the job's own fields as the caller's
+`columns`. A batch job's schedule facts are the rehearsal surface section's
+composition rather than a type, so when it next runs is a `RelativeTime`, whether
+it is healthy is a caller supplied `Status`, and what it did last time is
+`ActivityFeed01` or the index over `EventSpec`. Nothing here mints `request-log-01`
+or `batch-job-page`.
+
+**Evaluations and response review are two jobs, and the signal that decides it is
+which way the judgement travels.** In an evaluation the judgement already exists: a
+scorer ran over a set of cases and left a score, so the screen states a figure over
+a population, which is the record index over scored cases with the aggregate above
+it as a `MetricSpec`. In response review the judgement does not exist yet: the
+reader opens a sample of real outputs and decides, so the screen is the index over
+the sample with the verdict as a per-row node the caller wired, one output read in
+full as `RecordDetail01`, and a structured verdict as the write form over
+`FieldSpecGroup`. Reading a verdict and writing one are the reader's two decisions,
+and a surface that asks one does not ask the other, so neither is a `-02` of the
+other and neither earns an Item: `evaluation-run-page` and `response-review-page`
+are both answered as not names.
+
+**A trace is the tool-call ledger read differently and the run log read differently,
+composed, and it is not a different Block and not a surface of its own.** The ledger
+is `ToolLedger01` and the log is `RunStream01`, and the trace is those two drawn
+from the caller's own stored rows rather than from a subscription, seeded through
+the `initial` seam issue 203 already named. Where the run is still in flight the
+same two Items are the `live` surfaces the Kind ships, so the trace and the run are
+one drawing read at two moments rather than two Items. **What makes it settled now
+rather than needing a reader is that the row a trace is made of already has an
+owner**: the step that is a tool call is `ToolLedger01`'s own row, which issue 197
+gave to the conversation as a message part, and the step that is an occurrence is
+`RunStream01`'s event. A third tool-call shape, a trace Block or a `trace-page`
+would each be a second answer to a question the run's two live surfaces already answer, so
+none is authored, and the frame and the claim are `AppShell01` and `PageHeader01`
+composed by the consumer.
+
+**No word is added to `CONTEXT.md`, and the reason is the one the section above
+gives.** "Evaluation", "response review" and "trace" are each a product's name for
+its own records, and a glossary entry giving Prism one of them would be a word for a
+surface it draws none of, in the shape the run history, the approval queue and the
+cost ledger were refused. "Score" names a figure the consumer computed, and "trace"
+names a reading of two Items that already ship. `catalog.ts` is untouched, no
+specification is added and no fifth Kind appears.
+
+### What a document and research workspace is, and why it is not the docs shell
+
+**The document workspace is a Page authored beside `DocsShell`, and the two rules `DocsShell` states stay exactly as they are.** `DocsShell` states that a section is a label and not a control, so it carries no status, no badge, no count, no collapse and no sort, and that a group with no index is a label and not a route. Both are statements about a documentation site's navigation tree, where a section is a topic a reader may reach in any order and a group is a heading over topics rather than a destination. The workspace's two apparent conflicts are not that question. A status in a document workspace is a state of a region of one document, and it belongs to the Block that draws the region rather than to a navigation label. A route in a document workspace is the document's own contents, a heading that links to the passage under it, and that is the document's own anchoring rather than a navigation group. So the workspace never asks the question `DocsShell` answers, and reusing the Page would have to delete a rule three consumer sites rely on in order to serve a screen none of them asked for. The job-identity test returns two jobs on the arrangement signal: `DocsShell` is a site's tree with one document at the measure, and a workspace is one document with its own regions, which is a shape `DocsShell` cannot draw without gaining a region and a decision it does not have.
+
+**The workspace is a whole screen and nothing frames it, so it is a Page, and it is a separate Item rather than a second use of the `DocsShell` name.** It owns the document's `h1`, it is what a route renders for a document, and its regions are not separable from the body, which is the whole-screen test's condition for a Page and the same reasoning that made `DocsShell` a Page rather than a Block. It is authored beside `DocsShell` and not by widening it, because two Items drawing one whole screen for two jobs is the second answer the composition layers refuse. The catalogue entry is the authoring ticket's work and not this section's, and no consumer of `DocsShell` is affected, because the Page is a new name rather than a changed rule.
+
+**One Page draws all seven screens, because the difference between the six document variants and the research workspace is content rather than structure.** The record is the same thing in every one of them, an authored document with a title, a body and a set of things attached to it, and what separates the six is which region is open beside the body: a version list, a comment thread, a source list, an output list, or the deliverable alone. None of those is a region, a decision or an arrangement the others lack, so the six are one Page under different content and the survey's six candidate names collapse to the one name the authoring ticket settles. The research workspace is the same Page with an evidence region and a conclusion, which is content as well, so it does not become a second Item. The survey assigned all seven rows to Components (Page), and the Kind column of a survey row is not evidence; here it agrees with the arrangement, and the reason it agrees is that a document workspace owns its own `h1` and is a route's whole screen.
+
+**The Page composes settled Items and mints no document, version, comment or source type.** The document read in full with its declared facts and its history is `RecordDetail01`, for the reason the admin map authored it: a document is a record, its body is the caller's `Prose`, and its attached things are the caller's relations. A version list is a dated run of events, which is `ActivityFeed01`, or a set of records, which is `DataTable01`; a comment thread is a set of records or a set of people, which is `DataTable01` or `MemberList01`; a source list and an output list are sets of records, which is `DataTable01`, with the caller's per-row destination into the source or the artefact. The Page is the arrangement that places the document and one or more of those regions, and it ships none of their words. **The editor is the consumer's**, exactly as the canvas's editing model is: an annotation anchored to a passage, a version created, a comment resolved and a document sent are all behaviour, and the Page draws the reading surface and the regions the caller hands it.
+
+**The comparison matrix is `Compare01` and earns no Item, and it is a region of the research workspace rather than one of its relations.** `Compare01` already draws several things judged on the same axes, which is the matrix's whole job, so the screen is a composition of a settled Block and not a new name. It is not a `RelationSpec` relation, and the reason is in the relation union's own boundary: a relation is one collection arrangement Prism can draw as part of a record, and a matrix is not a collection of records but a comparison of two, so a member for it would promise that every consumer's comparison is this one. It is composed as the research workspace's evidence region, beside the evidence set the sources are, and that is where it belongs rather than in the catalogue as a second Item for one screen.
+
+**What the workspace does not own is stated as a list, for the reason the sections above state theirs.** It owns no editor: no annotation anchored to a passage, no version created, no comment resolved and no document sent, which are all behaviour and all the consumer's. It fetches nothing, so it holds no document, no version history and no source; the caller hands it the body and the regions. It owns no retention, no archive and no recovery, which are properties of the consumer's store. It owns no share and no export, which are actions on a stored document. It owns no permission, because who may read or comment is the consumer's store. It mints no document, version, comment or source type, and it ships no sentence, because a workspace whose regions carried Prism's words would be a workspace of Prism's documents.
+
+**No word is added to `CONTEXT.md`.** "Document workspace" and "research workspace" are survey archetype names, and an archetype is survey scaffolding rather than an Item name. "Document", "version", "comment" and "source" are each a product's word for its own record, in the shape of "issue", "invoice" and "order". And "section status" and "group route" name the two `DocsShell` rules this section declines to relax, which is a fact about another Page rather than a word the library uses.
+
+**Where the authoring work lands: one catalogue entry for the new Page and nothing else.** `catalog.ts`, the registry and every specification module are untouched here; the authoring ticket adds the Page under the name it settles and composes `Prose`, `RecordDetail01`, `ActivityFeed01`, `DataTable01`, `MemberList01` and `Compare01` as they ship. No new specification, no new Block beside the Page and no fifth Kind. The name the authoring ticket settled is `DocumentPage`, at `@nanisoft/prism-ui/pages/document-page`, and its regions are a union by arrangement rather than by subject matter: an `activity` region is `ActivityFeed01`, a `table` region is `DataTable01`, a `members` region is `MemberList01` and a `comparison` region is `Compare01`, so a version list, a comment thread, a source list, an output list and an evidence matrix are one Page under different content.
+
+### What a media review surface is, and why it is several jobs
+
+**Judging produced media is several jobs rather than one surface, and Prism authors no media review Item.** The four in-scope screens do not share a record: a still, a set of video takes, a mobile viewport of a form and an ingested source are four different things. They do not share a reader's decision: inspect one image, choose between takes, frame a form at phone width and point at a video to work from are four decisions. And what separates them is structural rather than a matter of content, which is the signal that makes them different jobs under the job-identity test. So no single Item draws them, and each screen is answered by composition, for the reason the conversation's screens and the canvas's screens are answered by composition rather than by a new name.
+
+**Visual inspection is the record index over the caller's assets, and looking closely is a settled Component.** A product that judges what it produced has a set of assets, and a set of records with a state column, a media cell and a per-row verdict is the index this package already draws: the thumbnail is the `slot` arm of `ColumnKind`, the verdict is a per-row node the caller wrote, and a reader who wants a closer look gets `Lightbox` or `ImageZoom`. Where the set is browsed as pictures rather than as rows, `Gallery01` is the settled Block for it. So no new Item appears and the media cell is the slot the column union already publishes.
+
+**Video variations is the index over takes plus a single choice the consumer holds.** Playback is `VideoPlayer`, which ships, and the takes are records, so the set is the index; comparing two of them is the caller's paired arrangement, which is the same layout the conversation's branch-compare screen was ruled to be. The decision between takes is not a set and not a batch action. It is one choice among alternatives, so it is consumer state drawn with a settled single-select control, `RadioGroup`, `ChoiceCard` or `ToggleGroup`, exactly as the composer's chosen model is consumer state. **So the media review surface owns no selection**, and the difference from the record index's selection is a difference of kind: the index's is a set of keys held by the Block because the count it announces is a rendering fact over that set, while this is one winner among variants, which the consumer holds and Prism never acts on. A second Prism-owned selection over media would be a second Kind of selection and would bridge a tick to a choice, which the record index's own section refuses.
+
+**The mobile screen workspace is a frame, not a surface, and a frame is `AspectRatio`.** Framing a form at a phone's width inside a desktop page is a fixed ratio around whatever region the caller places, and `AspectRatio` is the shipped Component for exactly that; the device chrome around it is the caller's own. So the survey's `device-frame-01` is refused as a second answer to `AspectRatio`, and the screen is a layout rather than an Item.
+
+**YouTube content is source ingest, and ingest is a composition.** A video the user pointed at is a source: `VideoPlayer` draws it, the caller's extracted transcript is `Prose` or a `DataTable01` of lines, and a timestamp is an `EventSpec` occurrence. The retrieval, the transcription and the extraction are the consumer's, because a Block never fetches, so the screen is those settled Items composed and no new name. **A source is a record**, drawn by the Items that already draw records, and it mints no media-source type.
+
+**What a media review surface would have owned and does not is stated as a list.** It owns no selection, for the reason above. It owns no playback, which is `VideoPlayer`'s, and no frame, which is `AspectRatio`'s. It owns no judgement: whether a take is good is the consumer's call, drawn through the per-row or single-select control the caller wired. It owns no media store, no transcoding, no thumbnail generation and no ingest, because all four are the consumer's data and behaviour. It owns no comparison of its own, which is `Compare01` or a caller's paired arrangement. And it mints no media type, because an asset and a take are records.
+
+**No word is added to `CONTEXT.md`.** "Media review" is a survey archetype name and an archetype is survey scaffolding rather than an Item name. "Variant", "take", "still" and "asset" are each a product's word for its own record. And "selection" is already the record index's own, held and announced there, which is the word this section takes care not to reuse for a single choice the consumer owns.
+
+**Where the authoring work lands: nothing.** Every screen composes Items that ship today, `DataTable01`, `Gallery01`, `Lightbox`, `ImageZoom`, `VideoPlayer`, `AspectRatio`, `Compare01`, `RadioGroup`, `ChoiceCard`, `ToggleGroup`, `Prose` and `EventSpec`, with the caller's own cells and nodes. `catalog.ts` is untouched, no specification is added and no fifth Kind appears.
+
+### What a model directory, a credit balance and a plugin list are
+
+**A model catalog is a directory index and not a record index, and that is the job-identity test's answer rather than the survey's.** The reader's decision in a catalog is which model is for what, which is a browse; the reader's decision in a record index is which rows to act on, which is work. Could `DataTable01` draw the catalog? It would gain a selection set, a sort, a filter region, a page boundary and a batch bar that a catalog never uses, and it would still be missing the arrangement the catalog is for, which is a set of groups of things with a summary of what each is. Could `Directory01` draw the record index? It has no selection, no batch bar, no sort and no per-row command, so it cannot. Two jobs, and the catalog is the one the directory index draws, so `Directory01` widens and no Item is authored beside it. The survey assigned the catalog to the directory index, and here the survey agrees with the test rather than the test bending to the survey: a model's members are its name, its provider as the role, its capabilities as the tags and its own detail as the destination, which is the member shape `Directory01` already takes.
+
+**Model details is the record detail the admin map authored, and no model-shaped Item appears beside it.** A model read in full is a record: `RecordDetail01` draws the title, the caller's declared fields, the composed children and the caller's actions. Its price is a `MetricSpec` or a specification table the caller composed, its benchmarks are a chart relation, and the agents and products that use it are a `RelationSpec` relation. Nothing in the detail is model-shaped, because a record that is a model is a record whose fields and relations the consumer filled, and a name carrying the product's word for its record is the failure `RecordDetail01` was authored to end. So the survey's `model-detail-page` is answered as not a name.
+
+**The usage and cost screens are the admin map's metric summary and chart concern, and none of them earns an Item.** The admin map settled that a figure about a population is a `MetricSpec` composed on a summary and that usage and cost are drawn as charts. So model pricing is a set of models with a money column, which is the record index, or `Compare01` where two models are judged on one set of axes; model benchmarks are `ChartGroup01` or `ChartCard01`; usage insights and model usage are the same charts sliced by the caller's dimension, with the aggregate as a `MetricSpec`; and billing is the metric summary plus the record index over the caller's charges. Cost is the consumer's own derivation, as the run history and cost ledger section already states, because no provider read publishes a cost, so every figure is a number the caller computed and Prism draws.
+
+**A prepaid credit balance is a metric and not a Block.** A balance is one figure about one account, which is exactly what `MetricSpec` declares and what the metric summary draws, so the screen is the balance as a metric composed with the consumption history beside it. Where the balance is drawn against the amount purchased it is a proportion, and the settled Item for a proportion against a total is `Capacity01`, whose whole job is the remaining figure and the state it is in. So the balance earns no Block of its own: a Block whose job is one number is a metric wearing a Block's name, and where the number is drawn as a proportion the capacity table already draws it. **The balance is a figure Prism draws and never one it computes**, which is the rule every figure in this package already follows.
+
+**Plugins is a directory index with a per-row enable, and the enable reaches a handler as the caller's own node.** The survey put plugins in the directory index and the job is to browse what can extend the product; the enable is a property of a member rather than a command on a selection, so the directory keeps its job and does not become a working list. But `scripts/check-block-controls.mjs` reads `packages/ui/src/blocks` and classifies `Switch`, so a `Switch` a Block renders without a handler is a finding, and the directory index therefore cannot draw the toggle itself. The enable arrives as a per-member `ReactNode` the caller wrote, holding the caller's `Switch` with its own `onCheckedChange`, and the Block places it and draws nothing in its place. That is the escape the gate documents, a node rather than a spread, and it is the same shape the record index's per-row actions already take. **The authoring consequence is a per-member node on `Directory01`**, which this decision names and the authoring ticket adds; until it is added, a plugin list with a per-row enable is the record index, whose per-row node already exists, and that is a legitimate substitute rather than a defect.
+
+**No word is added to `CONTEXT.md`.** "Model catalog", "model detail", "pricing", "benchmark", "usage", "credit", "billing" and "plugin" are each a product's word for its own record or its own figure, and a glossary entry giving Prism one of them would be a word for something it draws none of. "Directory index" is a survey archetype name and an archetype is survey scaffolding rather than an Item name. And "balance" names a figure the consumer owns and Prism only draws, which is the shape "aggregate" and "retention" were refused for.
+
+**Where the authoring work lands: one per-member node on `Directory01` and no catalogue entry.** `RecordDetail01`, `Directory01`, `Capacity01`, `Compare01`, `ChartGroup01`, `ChartCard01`, `Dashboard01`, `DataTable01` and `MetricSpec` are all composed as they ship; the model catalog widens the directory index, the model detail is the record detail, and no new Item, specification, prop or Kind appears except the directory index's per-member node, which is authoring work this decision names. `catalog.ts` is untouched here.
+
+### What the long tail of one-off screens is, and why none earns an Item
+
+**Three of the six are issue 205's media review composition and are excluded here
+rather than re-ruled.** A mobile screen workspace is `AspectRatio` framing the
+caller's region, not `device-frame-01`; video variations is the index over takes
+with `VideoPlayer` and one consumer-held choice among alternatives, which is a
+settled single-select and not the index's own selection; and youtube content is
+source ingest, `VideoPlayer` with the caller's transcript as `Prose` or an index
+and a timestamp as an `EventSpec` occurrence. The commerce copilot panel is issue
+210's in-context copilot, `PromptComposer` over the live thread inside
+`AppShell01`'s split or a `Sheet`, so it is a layout and not a new surface. **No
+screen here is a model catalog, a credit balance or a plugin list, so issue 206
+reaches none of them and none is excluded on its account.** The tail this section
+rules on is therefore the audio playground and the incidents page.
+
+**The audio playground is the rehearsal surface's sibling and inherits its
+ruling.** "Try a voice or sound capability without building for it" is the same job
+as the delivery simulator one section over: a parameter form over `FieldSpec`, the
+caller's own run control as a node, and the result drawn by the Item that draws the
+media. The survey's nearest Item is `PromptComposer`, and that is a match on the
+word try rather than on the job, because a playback control is not a request
+lifecycle. One screen is not a vocabulary, so there is no `playground-01`, no
+`ParameterSpec` and no second composer: a consumer writes the write form for the
+parameters, places their own play control beside it and draws the result with the
+media Items.
+
+**The incidents page is a record detail and a dated relation, and it earns no
+Item.** An incident is a record: what broke is the caller's `Prose` or `fields`,
+how badly is a caller supplied `Status` and a `MetricSpec` the consumer computed,
+and since when is a moment drawn by `RelativeTime` with the machine value on the
+element. The incident's own timeline is a dated attributed run, which is an
+`EventSpec` relation drawn by `ActivityFeed01` or read across by an index. So the
+page is `AppShell01`, `PageHeader01` and `RecordDetail01`, and the survey's nearest
+Item `StatusLedger01` is answered as not a name: a ledger of statuses is the index
+over `EventSpec` rows, not a Block for one incident. **The duration from start to
+resolution is a subtraction over two moments the caller holds, refused as a time
+axis and composed as a `MetricSpec` rather than computed in the surface.**
+
+**The negative result is the ruling, and it is worth recording rather than leaving
+the tail open a second time.** No Item is authored for either screen, `catalog.ts`
+is untouched, no specification is added and no fifth Kind appears. If a second
+screen later wants either shape, it is measured against this ruling and not against
+the gap, exactly as a screen excluded by scope returns as a fresh candidate.
+
+**No word is added to `CONTEXT.md`.** "Playground" and "incident" are each a
+product's word for its own screen or record, and a glossary entry giving Prism one
+of them would be a word for something it draws none of, which is the shape "batch
+action", "retention" and "aggregate" were refused for. A media source is a record
+drawn by the Items that already draw records, and a status ledger is the index, so
+neither names a unit Prism has.
 
 ### Categories
 
@@ -3727,10 +4127,12 @@ Recorded as facts. None of these is fixed in this document.
   keyed on `ItemKind` rather than a chain ending in a default, so a fourth Kind is a
   compile error instead of a silent mislabel.
 
-  **What is left is a name and a build, and the name is the decision.** The Kind
-  itself is no longer blocked. The working title `live` is still not settled, for
-  the reason given below, and that is a question for a person rather than for a
-  gate.
+  **What is left is a name and a build, and the name is now settled.** The Kind
+  itself is no longer blocked. This document first recorded the working title as
+  unsettled and left it to a person rather than to a gate; that decision has been
+  taken on the record, and the fourth Kind keeps the working title `live`. The
+  reason is the naming-risk argument below, which is the paragraph that carries
+  the decision.
 
   **The decision's own contents are incomplete.** The four things named above are
   the things that change while a run is in flight, and that is what makes them
@@ -3766,7 +4168,219 @@ Recorded as facts. None of these is fixed in this document.
   exists to serve already use, so an agent reading the corpus is reading a word it
   has met. A name chosen to avoid a theoretical confusion with a labelled field
   would be a word the reader has to learn, which is the opposite of what a Kind is
-  for. Issue 112 carried the question; this is the answer and the reasoning.
+  for. Issue 112 carried the question and issue 198 took the decision on the
+  record; this is the answer and the reasoning.
+
+  **The four Kind names are not one grammatical class, and that is a decision
+  rather than an oversight.** `component`, `block` and `page` are nouns naming an
+  artefact; `live` is an adjective naming a property of a surface. A reader who
+  wanted the four to parse as a set would have to replace the adjective, and the
+  two candidates a rename would reach for are the ones already refused: `stream`
+  for naming an implementation and `console` for naming a use case. The test a
+  catalogue name answers is whether it says what the thing does, and `live`
+  answers that more directly than the three nouns answer it for themselves,
+  because what a `live` surface does is change without a navigation event. What
+  holds the set together is the discriminator rather than the grammar: `kind` is
+  a labelled field carrying one of four closed values, and a consumer switches
+  over the value rather than parsing the word.
+- **A conversation is `live`, and it is the Kind's second family.** The Section H
+  thread that gains a message while the reader watches is the surface the
+  definition names: its content changes over time without a navigation event, and
+  a chat that cannot stream is not a chat. The admin map's six-screen conversation
+  archetype is a different thing and is not reopened. Those screens are a record
+  index over threads, read on arrival, and they stay a Block; an archetype is
+  assigned Block or Page and never `live`, so the archetype is not being given a
+  fourth Kind. What the admin map deferred by name, the thread that grows while
+  the reader watches, is a `live` Item and the second family decided here.
+  Transport-agnosticism does not forbid the answer, because `RunStream01` already
+  settled how it is kept: the consumer hands the surface a `subscribe` function
+  and Prism opens no connection, so no socket, no endpoint and no protocol is
+  named in the library. The promise the answer does bend is that no permanent
+  client runtime reaches a consumer, and it is bent the same way and for the same
+  reason the event log bends it: a surface that receives messages owns the
+  subscription that delivers them. The alternative, a Page over threads that
+  re-renders on navigation, is refused because it can only express a settled
+  transcript, and the same record already rules a settled read-mostly transcript
+  a Workflow.
+
+  **The screens are not twenty four Items.** The streaming thread is one `live`
+  Item, and the screens that carry it are data instances of it composed with Items
+  that already ship: the composer is `PromptComposer`; a request shown as
+  structured data, a step of a tool call made visible, reasoning collapsed, media
+  in the thread, citations, a copied or exported answer and a branch compared are
+  the same message list under different content parts or a different arrangement;
+  and search over old threads is a read over the consumer's store rather than a
+  live surface. The one exception is the screen where a run waits for a person to
+  decide, which is an approval queue, a Workflow, and not this family at all. The
+  Item is `MessageThread01`, settled by the build ticket under the naming law: the
+  surface draws a message thread, so the name is the thing it draws rather than the
+  archetype it belongs to, and it is the third `live` Item beside `RunStream01` and
+  `ToolLedger01`.
+
+  **The boundary, as a list.** Prism owns the message-thread surface, the
+  vocabulary of a message and its ordered parts, the status tiers, the run
+  controls, and the tool-call ledger's own row. The consumer owns the socket, the
+  transport, the persistence, the `subscribe` function the surface is handed, the
+  order the transport delivers, and every word and value the thread draws. That is
+  the division `RunStream01` and `ToolLedger01` already state, read at a thread
+  rather than at a run.
+
+  **The durable buffer is the consumer's, and the resumption finding is answered
+  by refusing the claim rather than by moving the buffer up into the package.**
+  The survey's sharpest result is that rendering can be separated from transport
+  and resumption cannot: every product read that resumes a stream keeps a durable
+  buffer below the surface, and the four keep it in four different places, a
+  provider, a platform runtime, the application, or not at all. Prism cannot be a
+  fifth answer, because it ships no permanent client runtime and cannot assume a
+  server framework: there is no cache it could name, no platform object it could
+  be and no store it could reach. So Prism owns only the bounded window a mounted
+  surface holds in memory, and the consumer owns the durable buffer that outlives
+  it. The seam is the one `RunStream01` already documents, `initial` and
+  `resubscribeKey`: a surface opened mid-thread is seeded from the consumer's own
+  record, a reconnect is a new key over a fresh seed, and the surface promises no
+  resumption so it cannot fail to keep one. Ordering after a reconnect is inside
+  that refusal. The order key belongs to the transport, as it does in every source
+  read, and the surface's sort on `at` with a tie on `id` is the same defensive
+  total order `RunStream01` states within its own window rather than a second
+  source of truth.
+
+  **A message list is the content, and neither an event list nor a turn list is
+  taken.** A message has an identity, a sender and an ordered list of parts, and a
+  part is text, a tool call, a reasoning block, a citation or an attachment. That
+  is the shape every surveyed stream converges on, and it is the one that holds
+  several tool calls in one message without a second key. An event list is refused
+  because an occurrence is not a message: a message is an artifact a reader reads
+  and addresses, the flat `RunEvent` the Kind already publishes is the run log's
+  own vocabulary and is deliberately outside `EventSpec`, and a message forced
+  into it would either widen the run's row for every consumer or mint a second
+  parallel shape. A turn list is refused because a turn is a derived grouping of a
+  request and its answers, the transport does not preserve it as a unit, and the
+  ordering of a stream after a reconnect is unsettled in every source read, so a
+  surface that grouped by turn would impose a structure the consumer's data may
+  not have. Prism owns the shape and the vocabulary of a message and its parts;
+  the consumer owns the messages and every string in them. The message vocabulary
+  lives with the surface under `packages/ui/src/live`, beside `RunEvent` and
+  `ToolCall`, and is deliberately not a sixth member of the shared specification
+  module, for the reason `RunEvent` is not a member of `EventSpec`: the live Kind
+  owns its own vocabulary and a read-mostly trail has no part in it.
+
+  **The four things the Kind already names are reused, and what is new is one
+  thing.** The tool-call ledger is `ToolLedger01`, and a tool call inside a
+  message is drawn through that Item's own row rather than a second tool-call
+  shape. The status tiers are the ones the Kind already publishes, and the
+  conversation draws a run's state from them rather than minting a status
+  vocabulary for a chat. The run controls are `PromptComposer`, which already owns
+  send, stop, retry and attach over a request lifecycle, and the conversation
+  reaches for it rather than for a second set of controls. The event log surface
+  is `RunStream01`, and it is the one of the four a conversation does not reuse,
+  because a run's log is a sequence of occurrences and a conversation is a
+  sequence of messages, so the message-thread surface and its part vocabulary is
+  the whole of what is genuinely new. **The likeliest error is a second run
+  control or a second status tier**, and both are refused: a stop, a retry or a
+  state word invented for the conversation would be a second answer to a question
+  the run controls and the live tiers already answer, and two answers that agree
+  today are a catalogue drifting a second list.
+
+  **Stop, retry, pause, resume and approve, and how each reaches an action.**
+  `scripts/check-block-controls.mjs` reads `packages/ui/src/blocks` and
+  `packages/ui/src/pages`, and it does not read `packages/ui/src/live`, because a
+  live surface is a client Component that holds a subscription and is expected to
+  hold a handler, exactly as `RunStream01` and `ToolLedger01` already do. So each
+  of the five is consistent with the run controls rather than an exception to the
+  gate. Stop and retry are `PromptComposer`'s own controls, wired to the caller's
+  `onStop` and `onRetry` as they ship today. Pause and resume are
+  `ToolLedger01`'s pause control, which pauses the surface and never the run,
+  because the survey found that a client cleanup is not a stop in every source
+  that separates the two. Approve is not the conversation's control at all:
+  approving belongs to the approval queue, which is a Workflow, and this surface
+  does not draw it. Where a settled thread is composed outside `src/live` as a
+  Block or a Page, none of the five is an unwired `Button`: the client surface
+  holds stop, retry, pause and resume, and a decision there is a `CtaLink` with
+  its required `href` or a `slot` the consumer fills, which is the escape the gate
+  already documents. The conversation never asks a Block to hold a control it
+  cannot act on, because the controls are on the client surface and they are the
+  run controls that already exist.
+
+  **What the conversation does not own.** The socket, the transport and the
+  persistence, which every live Item leaves to the consumer. The durable
+  resumption buffer and everything that survives an unmount. The canonical order
+  of the stream, for the reason above. Retention, archive, purge, legal hold and
+  export, which are properties of the consumer's store rather than of a drawing.
+  Search and sharing. Branching and regeneration, which no source read settled.
+  Authentication and authorization, because a paused or resumed state is not
+  authenticated by being serialized and the reader is the consumer's to
+  authenticate. And per-turn cost and latency, because no provider read publishes
+  either: a cost needs a pricing table and a latency needs a clock the provider
+  response does not carry, so both are the consumer's own derivation, and the
+  surface draws only the model and token facts a provider actually states.
+
+  **The negative result was available and is not taken, and the reason is recorded
+  so the answer is not read as momentum.** If a conversation could honestly be a
+  Page that re-renders on navigation, the honest ruling would be that Page, and
+  this document permits it. It cannot: the defining interaction of a conversation
+  is a message arriving while the reader watches, which is the exact thing the
+  other three Kinds cannot express, and a thread that changed only on navigation
+  is a settled transcript, which the same record already rules a Workflow. So the
+  answer is `live`, taken because the surface meets the definition rather than to
+  justify the Kind. The Kind was built because a run already needed it, and the
+  conversation joins it because it shares the definition.
+
+  **No word is added to `CONTEXT.md` for this, for the test the glossary sets
+  itself.** A term earns an entry when the library uses it repeatedly across Kinds
+  and surfaces. "Conversation" is an archetype, and an archetype is survey
+  scaffolding rather than an Item name. "Message" and "part" are type names in the
+  surface's own module rather than words a reader of the design system uses. And
+  "family" is already used throughout this document as a grouping and is not a
+  unit. `live` and `Kind` are already in the glossary, and a second family adds a
+  member to a Kind rather than a word to the vocabulary.
+
+- **The 24 conversation screens are classified, and not one of them mints an Item.**
+  Applying the recorded `live` decision screen by screen, rather than re-deciding
+  it, gives four buckets, and the twenty-fourth screen is the last of them. This is
+  issue 210 carrying issue 197 through the set.
+
+  - **The conversation surface itself, one `live` Item under different content
+    parts and arrangements.** Conversation 1 reads and continues; 2 shows the
+    request as a structured part; 3 shows a per-step tool call as a part drawn by
+    `ToolLedger01`'s own row; 4 shows reasoning collapsed as a part; 5 shows images
+    and files in the thread as attachment parts, with media drawn by the Items that
+    already draw media; 8 shows inline citations as a part; 13 shows the model per
+    turn as per-message metadata the consumer sets; 18 shows live progress, which
+    is the status tier the Kind already publishes; 22 pauses and resumes through
+    `ToolLedger01`'s pause control, which pauses the surface and never the run; and
+    17, the thread beside a document, and 23, a branch compared, are layouts of the
+    surface rather than new surfaces.
+  - **The composer.** Conversation 7, editable before send, is `PromptComposer`,
+    and conversation 1's continuation is the same control. Conversation 19,
+    stoppable, and 20, a retry that keeps context, are not separate screens at all:
+    they are `PromptComposer`'s `onStop` and `onRetry`, the run controls issue 197
+    placed there, and the context a retry keeps is the consumer's, as the composer
+    section states.
+  - **A record detail or an index, not a surface.** Conversation 9, searchable, is
+    a read over the consumer's store and the record index over threads the admin
+    map already made a Block; it changes on a query rather than over time. Opening
+    one of those threads read on its own is a settled record rather than this
+    surface, which is the Workflow the recorded decision already names.
+  - **The consumer's, named rather than authored.** Conversation 6, branching, and
+    the branch 23 compares, rest on the consumer's data model, as issue 197 ruled.
+    Conversations 10, copy out, 11, share, and 12, export, are actions on the
+    stored thread, and retention, archive, purge and export are properties of the
+    consumer's store. Conversations 14, cost per turn, and 15, latency per turn,
+    are the consumer's own derivation, because no provider read publishes either.
+    And conversation 21, step approval, is the approval queue issue 203 settles, a
+    Workflow, which this surface does not draw.
+  - **The last one.** The in-context copilot, the survey's commerce copilot, is the
+    same surface placed beside the work: `PromptComposer` over the live thread
+    inside `AppShell01`'s split or a `Sheet`, so it is a layout and not a new Item.
+
+  **The dark reading surface is not a screen at all.** Conversation 16 asks for
+  the thread on a surface suited to long reading, and that is the `dark` Mode,
+  which every surface already resolves, so the screen re-themes and nothing is
+  authored for it. Nothing in the list re-opens issue 197: the message list, its
+  ordered parts, the status tiers and the run controls are Prism's, and the
+  socket, the transport, the order the transport delivers, the durable buffer,
+  search, sharing, branching and regeneration, export, and per-turn cost and
+  latency remain the consumer's.
 - **Patterns and Templates are built. Workflows are decided and not built.**
   They are documentation, not surface: no npm subpath, no registry item, and
   `CATALOG_KINDS` unchanged. A Patterns Section is a **prose** Section beside

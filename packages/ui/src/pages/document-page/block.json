@@ -1,0 +1,7 @@
+{
+  "name": "document-page",
+  "title": "Document Page - A Document Read In Full, With Its Regions",
+  "description": "A whole document screen: the document read in full as a record, its body held to the reading measure, and one or more regions beside it drawn by the settled Blocks. A version list, a comment thread, a source list, an output list and an evidence comparison matrix are regions of this one Page rather than six Items. Every word, column, member and arm is passed in as a prop.",
+  "categories": ["application"],
+  "dependencies": []
+}

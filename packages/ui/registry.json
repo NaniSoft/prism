@@ -8455,6 +8455,41 @@
       ]
     },
     {
+      "name": "document-page",
+      "title": "Document Page - A Document Read In Full, With Its Regions",
+      "description": "A whole document screen: the document read in full as a record, its body held to the reading measure, and one or more regions beside it drawn by the settled Blocks. A version list, a comment thread, a source list, an output list and an evidence comparison matrix are regions of this one Page rather than six Items. Every word, column, member and arm is passed in as a prop.",
+      "type": "registry:page",
+      "categories": [
+        "application"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/pages/document-page/document-page.tsx",
+          "type": "registry:component",
+          "target": "components/pages/document-page/document-page.tsx"
+        },
+        {
+          "path": "src/pages/document-page/index.tsx",
+          "type": "registry:component",
+          "target": "components/pages/document-page/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "error-page",
       "title": "Error Page - Code, Sentence, Retry And Ways Out",
       "description": "A complete failure screen, and the sibling of the not-found screen: the status code as the page's own h1, one sentence about what happened, the retry drawn first because the request may well succeed again, and the ways out as native links. Every string and every destination is passed in as a prop, and the retry is the caller's own client control.",
@@ -8725,6 +8760,56 @@
       ]
     },
     {
+      "name": "message-thread-01",
+      "title": "Message Thread 01 - A Conversation That Arrives",
+      "description": "The message thread of a conversation, receiving messages as they arrive over a subscription the consumer supplies. The live Kind's second family: a message list with ordered parts, where the run log is a list of occurrences. Prism owns the thread, the message and part vocabulary, the status tiers and the tool-call row; the consumer owns the socket, the transport, the persistence and the durable resumption buffer. Every string is passed in as a prop.",
+      "type": "registry:block",
+      "categories": [
+        "data-display"
+      ],
+      "registryDependencies": [
+        "button",
+        "live-region",
+        "scroll-area"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/live/message-thread-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/live/message-thread-01/index.tsx"
+        },
+        {
+          "path": "src/live/message-thread-01/message-thread.tsx",
+          "type": "registry:component",
+          "target": "components/live/message-thread-01/message-thread.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/live/status.ts",
+          "type": "registry:component",
+          "target": "components/live/status.ts"
+        },
+        {
+          "path": "src/live/tool-call-row.tsx",
+          "type": "registry:component",
+          "target": "components/live/tool-call-row.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "run-stream-01",
       "title": "Run Stream 01 - An Event Log That Arrives",
       "description": "The event log of a run, receiving events as they arrive over a subscription the consumer supplies. The first client surface in the package, and the reason the live Kind exists. Prism owns the log, the roles and the status tiers; the consumer owns the socket, the transport and the persistence. Every string is passed in as a prop.",
@@ -8755,6 +8840,16 @@
           "path": "src/components/ui/section.tsx",
           "type": "registry:component",
           "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/live/status.ts",
+          "type": "registry:component",
+          "target": "components/live/status.ts"
+        },
+        {
+          "path": "src/live/tool-call-row.tsx",
+          "type": "registry:component",
+          "target": "components/live/tool-call-row.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -8795,6 +8890,16 @@
           "path": "src/components/ui/section.tsx",
           "type": "registry:component",
           "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/live/status.ts",
+          "type": "registry:component",
+          "target": "components/live/status.ts"
+        },
+        {
+          "path": "src/live/tool-call-row.tsx",
+          "type": "registry:component",
+          "target": "components/live/tool-call-row.tsx"
         },
         {
           "path": "src/lib/utils.ts",

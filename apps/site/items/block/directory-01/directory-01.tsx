@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 
+import { Switch } from '@nanisoft/prism-ui/components/switch'
 import { Directory01, type Directory01Category } from '@nanisoft/prism-ui/blocks/directory-01'
 
 /**
@@ -119,6 +120,40 @@ const CATEGORIES: Directory01Category[] = [
 ]
 
 /**
+ * A set of extensions, each with its own enable.
+ *
+ * This is the shape the per-member node exists for: a directory is a browse, so
+ * the enable is a property of a member rather than a command on a selection, and
+ * the `Switch` and its handler are the caller's. The Block places the node and
+ * draws nothing in its place.
+ */
+const PLUGINS: Directory01Category[] = [
+  {
+    id: 'installed',
+    title: 'Installed',
+    description: 'The extensions this workspace has added, and whether each is on.',
+    members: [
+      {
+        id: 'linear',
+        name: 'Linear',
+        role: 'Issue tracking',
+        href: '/overview',
+        hrefLabel: 'Open the Linear connection',
+        tags: [{ id: 'issues', label: 'Issues' }],
+      },
+      {
+        id: 'figma',
+        name: 'Figma',
+        role: 'Design handoff',
+        href: '/overview',
+        hrefLabel: 'Open the Figma connection',
+        tags: [{ id: 'design', label: 'Design' }],
+      },
+    ],
+  },
+]
+
+/**
  * The result line, written the way four products write it.
  *
  * It returns null for a count of zero, so the live region is in the document from the
@@ -133,6 +168,7 @@ function summary(matches: number): React.ReactNode {
 
 export default function Directory01Demo() {
   const [query, setQuery] = useState('')
+  const [enabled, setEnabled] = useState<Record<string, boolean>>({ linear: true })
 
   return (
     <div className="flex flex-col gap-16">
@@ -184,6 +220,28 @@ export default function Directory01Demo() {
         clearLabel="Clear the search"
         categories={[]}
         empty="Nobody is in this directory yet. The first person you add is the first card here."
+      />
+
+      <Directory01
+        headingLevel="h3"
+        eyebrow="Preview"
+        title="A plugin list with a per-member enable"
+        description="The enable is the caller's own Switch with its own handler, placed as a per-member node. The Block draws no control of its own in its place, so a directory never ships a toggle that cannot act."
+        value=""
+        onValueChange={() => {}}
+        label="Search the plugins"
+        clearLabel="Clear the search"
+        categories={PLUGINS}
+        empty="No plugin matches that."
+        renderMemberAction={(member) => (
+          <Switch
+            aria-label={`Enable ${member.name}`}
+            checked={enabled[member.id] === true}
+            onCheckedChange={(checked) =>
+              setEnabled((current) => ({ ...current, [member.id]: checked }))
+            }
+          />
+        )}
       />
     </div>
   )
