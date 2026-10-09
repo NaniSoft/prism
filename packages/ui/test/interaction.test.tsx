@@ -18,7 +18,7 @@ import { MarketingPage } from '../src/pages/marketing-page'
 import { SettingsPage } from '../src/pages/settings-page'
 
 const features = [{ icon: Star, title: 'Tokens', body: 'One source for every value.' }]
-const stats = [{ label: 'Users', value: '1,204' }]
+const stats = [{ key: 'users', label: 'Users', value: '1,204' }]
 const plans = [{ id: 'free', name: 'Free', price: '$0', features: ['One project'], action: { label: 'Start', href: '/signup' } }]
 const shell = { navigation: <a href="/">Home</a>, navigationLabel: 'Main' }
 
@@ -29,17 +29,21 @@ const tableLabels: DataTable01Labels = {
   columns: 'Columns',
   viewColumns: 'View columns',
   selectAll: 'Select all rows',
-  selectRow: 'Select row',
+  selectRow: (row) => `Select ${String(row.name)}`,
   rowActions: 'Row actions',
+  sort: (column, direction) => `Sort ${column} ${direction}`,
+  selectedCount: (count) => `${count} selected`,
+  selectedAllMatching: (count) => `All ${count} matching selected`,
+  clearedSelection: 'Selection cleared',
+  dismissSelection: 'Clear selection',
   previous: 'Previous page',
   next: 'Next page',
   page: (page) => `Page ${page}`,
-  selectedCount: (count) => `${count} selected`,
   empty: 'No rows',
 }
 
 const table = {
-  columns: [{ id: 'name', header: 'Name', cell: (row: Record<string, unknown>) => String(row.name) }],
+  columns: [{ key: 'name', header: 'Name', kind: 'slot' as const }],
   rows: [{ id: '1', name: 'Ada' }],
   getRowId: (row: Record<string, unknown>) => String(row.id),
   pageCount: 1,
@@ -48,7 +52,7 @@ const table = {
 
 const form = {
   title: 'Sign in',
-  fields: [{ id: 'email', label: 'Email' }],
+  groups: [{ fields: [{ key: 'email', label: 'Email', kind: 'Input' as const }] }],
   submitLabel: 'Sign in',
 }
 
@@ -60,9 +64,11 @@ const form = {
 // realistic copy here: a settings page names its panel for what the panel holds.
 const panel = {
   title: 'Preferences',
-  sections: [
-    { id: 'profile', title: 'Profile', fields: [{ kind: 'text' as const, id: 'name', label: 'Name' }] },
+  groups: [
+    { id: 'profile', label: 'Profile', fields: [{ kind: 'Input' as const, key: 'name', label: 'Name' }] },
   ],
+  values: {} as Record<string, unknown>,
+  onValueChange: () => {},
 }
 
 describe('Block smoke tests', () => {

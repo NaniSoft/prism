@@ -86,6 +86,37 @@ navigation event**, which is the one thing the other three cannot express: they 
 rendered from props, and props arrive when the caller says so.
 _Avoid_: type, category, layer.
 
+**Archetype**:
+A recurring screen shape, named by its interaction rather than by its subject
+matter, such as a record index or a record detail. An archetype is not an Item
+and never carries a Kind of its own: the whole-screen test in `DESIGN.md` assigns
+it to Block, to Page, or to both, and the assignment is a decision about one
+catalogue Item rather than about the archetype. The archetype names in
+`docs/admin-screen-survey.md` are survey scaffolding and are not Item names; a
+name becomes a catalogue name only where a ticket authors the Item.
+_Avoid_: screen, view, page type, screen type, pattern, template, category.
+
+**Field specification**:
+The typed, ordered description of the fields a form Block renders, composed of a
+stable key, a label, a kind drawn from Prism's own input Components, requiredness
+and help, gathered into ordered groups. Prism owns its
+shape and its vocabulary; the consumer owns the values, the errors and the
+fetch. It carries no rule and no renderer, because validation is the consumer's
+and a control Prism does not ship arrives as a slot inside a field Prism still
+draws.
+_Avoid_: field set, field list, schema, form definition, field config, field
+  descriptor.
+
+**Nothing chosen**:
+The state of a region that is present, capable of holding a record and empty
+because no selection exists yet: the fourth kind of empty state, drawn by
+`NothingChosen01`. It is not a reason on `EmptyState01`, because every one of that
+Block's reasons is a statement about a collection and this one is a statement
+about a reader. Prism owns the name and the Block; the consumer owns the words,
+the choice and whether a pane in this state is ever drawn, because the split that
+holds the pane holds no selection and therefore cannot know it is in it.
+_Avoid_: empty detail, empty pane, placeholder, no selection, unselected, idle.
+
 **Category**:
 One of the seven role groups a Component is assigned to: Call to action, Forms
 and inputs, Feedback, Layout, Data display, Typography and Miscellaneous. A

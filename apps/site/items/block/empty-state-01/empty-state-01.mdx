@@ -11,13 +11,14 @@ passed in as a prop.
 
 **The design decision is the required `reason` prop, and it is why this is a Block
 rather than a Component.** An empty state looks like one thing, which is why it
-gets written by hand in every product that has one, and it is actually three
+gets written by hand in every product that has one, and it is actually four
 things that want different words and different actions:
 
 | Reason | What is true | The action is |
 | --- | --- | --- |
 | `first-run` | nothing has ever existed here | make the first one |
-| `no-match` | things exist and the reader's own filter removed all of them | widen or clear the filter |
+| `no-match` | things exist and the reader's own narrowing removed all of them | widen or clear the narrowing |
+| `emptied-by-reader` | things existed and this reader's own earlier action moved every one of them out | nothing here; restore lives in the index around this region |
 | `not-permitted` | things exist and this reader may not see them | ask for access, or change context |
 
 A component with a `title` and a `body` and an `action` cannot express that
@@ -26,7 +27,16 @@ of them gets it wrong: a permission boundary offering "Create your first
 project", or a first-run state that says "No results found". Naming the reason
 forces the decision into the open, and gives the Block something to enforce.
 
-The set is closed at three and a fourth such as `error` or `loading` is
+The middle two are both the reader's own doing and they are not the same doing.
+A narrowing hides rows out of a set that is still there, so clearing it brings
+them back. A deletion removed the records from the live set, and only the caller
+can bring them back. So a saved view built out of filter values the caller holds
+is `no-match` whenever it comes back empty, and a trash view is
+`emptied-by-reader`. Those are genuinely different states a reader is in, and one
+sentence for both would tell a reader who has deleted everything that their own
+search found nothing.
+
+The set is closed at four and a fifth such as `error` or `loading` is
 deliberately absent. Those are states the surrounding surface already owns: a
 region that is erroring has an `Alert` and a region that is loading has a
 `Spinner`. A Block that drew them would give a consumer two places to put the
@@ -56,6 +66,14 @@ import { EmptyState01 } from '@nanisoft/prism-ui/blocks/empty-state-01'
   onAction={resetFilters}
 />
 
+// Things existed and this reader's own earlier action moved all of them out of
+// this region, so there is no next step inside it at all.
+<EmptyState01
+  reason="emptied-by-reader"
+  title="Nothing left to restore"
+  body="Deleted invoices are still in the bin."
+/>
+
 // A permission boundary has no next step, so it gets no button at all.
 <EmptyState01
   reason="not-permitted"
@@ -77,10 +95,19 @@ to be empty is not a state, it is the absence of a feature.
 Use `first-run` the first time a reader arrives at a region they have never used.
 It is the one reason where the action creates.
 
-Use `no-match` when the reader's own filter or search removed everything. It is
-the most common of the three and the one most often written as `first-run` by
-mistake, which is how a reader who has four thousand invoices is told they have
-none.
+Use `no-match` when the reader's own narrowing, filter or search removed
+everything. It is the most common of the four and the one most often written as
+`first-run` by mistake, which is how a reader who has four thousand invoices is
+told they have none.
+
+Use `emptied-by-reader` when records did live in this region and this reader's
+own earlier action moved every one of them out: a bin, an archive or a recycle
+view the reader has just cleared. It is the reason that must not offer a create
+action, because there is no first one to make, and the reason it must not offer
+a restore action either, since the records a restore would bring back are the
+caller's own nodes and belong to the index around this region. It is also the
+reason most easily written as `no-match`, which is false: nothing was filtered,
+because the records are not on this side to be filtered.
 
 Use `not-permitted` when the content exists and this reader may not see it. It is
 the reason that must not offer a create action, and the reason the frame is not
@@ -103,19 +130,27 @@ inside.
 Do not use it inside a control, a row or a cell. This is a region. A table with
 no rows is not a table with an empty state in it.
 
+Do not use it for a detail pane that has records a reader has not chosen from
+yet. That is `NothingChosen01`, and the reason is the frame rather than the
+wording: every reason here is a statement about a collection, so the dashed edge
+says there is nothing here to read, and beside a full index that claim is false
+whatever the headline happens to say.
+
 ### Best practices
 
-- Say which of the three it is, every time. The cost of naming it is one word and
+- Say which of the four it is, every time. The cost of naming it is one word and
   the cost of guessing is a reader invited to create a thing that already exists.
-- Give a permission boundary no action if the reader has no route. A button the
-  reader cannot use is worse than no button, and inventing one is the failure
-  this Block is shaped to prevent.
+- Give a permission boundary no action if the reader has no route, and give a bin
+  the reader emptied no action because the next step is in another region. A
+  button the reader cannot use is worse than no button, and inventing one is the
+  failure this Block is shaped to prevent.
 - Keep the headline to what is not here and the body to what to do about it. A
   headline that explains and a body that repeats gives a reader scanning the
   headline nothing to scan.
 - Pass the mark as a slot rather than accepting Prism's. The shape that means
   "nothing here yet" and the shape that means "you cannot see this" are different
-  shapes, and a Block that picked one would be wrong for two of its three reasons.
+  shapes, and a Block that picked one would be wrong for several of its four
+  reasons.
 - Put everything else in the surrounding surface. One action is the next step;
   three actions is a form in a region that has nothing to submit.
 - Do not let a heading go here. The empty state is replaced by content that will
@@ -133,5 +168,8 @@ no rows is not a table with an empty state in it.
 - Name the reason's action for what it does: "Clear the filters", not "Reset".
   "Create your first invoice" and "Create an invoice" are different buttons and
   only one of them is true on a first run.
+- For `emptied-by-reader`, say what happened rather than what to do next, because
+  the next step is in another region. "Nothing left to restore" is honest;
+  "Restore all" promises a control this region does not have.
 - Do not apologise in an empty state. "Oops, something went wrong" describes a
   failure, and the region is not in a failure.

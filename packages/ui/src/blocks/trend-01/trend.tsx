@@ -4,66 +4,38 @@ import { CtaLink } from '../../components/ui/cta-link'
 import { Metric } from '../../components/ui/metric'
 import { Section, SectionHeading, type HeadingLevel } from '../../components/ui/section'
 import { Sparkline } from '../../components/ui/sparkline'
+import type { MetricSpec } from '../../lib/spec'
 import { cn } from '../../lib/utils'
 
 /**
- * One row of a trend list: a name, what it is at now, how it moved, and a shape
- * beside it.
+ * The refusals, as checks, so an item that would render a link nobody can name is a
+ * diagnostic in a console rather than a rendered link.
  *
- * Every field except `id` and `label` is optional because a trend list is
- * heterogeneous by nature. Some of the things a list tracks have a series behind
- * them and some have only a reading, some moved and some did not, and a shape
- * that made every field required would be a list where two thirds of every row is
- * an empty cell drawn as a placeholder.
+ * **The type already holds both pairs, and these checks exist for the caller the
+ * type never saw.** `MetricSpec` requires a destination's words wherever it has a
+ * destination and a series name wherever it has a series, so a typed caller cannot
+ * reach either diagnostic. A JavaScript caller can, and the cost of reaching one is a
+ * row that draws a link with no words or a shape no reader can announce, so the same
+ * rule is stated once more where a runtime value can be read: the pair rule is the
+ * one `Dashboard01` makes.
  */
-export type Trend01Item = {
-  /** A stable key for the row. */
-  id: string
-  /**
-   * The name of the thing being tracked, as a reader would name it in
-   * conversation. It is the label the metric carries, and it is the last thing
-   * read on the row because the figure and the direction come first.
-   */
-  label: string
-  /**
-   * The current reading, already formatted by the caller.
-   *
-   * A `ReactNode` and not a `number`, for the reason `MetricProps.value` gives:
-   * a caller's figure is often a value it formatted itself, with its own grouped
-   * thousands, its own currency and its own unit, and a `number` here would push
-   * that formatting onto every call site twice. Prism takes the node and formats
-   * nothing.
-   */
-  value: ReactNode
-  /**
-   * The change against the previous reading, as a number whose sign is the
-   * direction. See `MetricDelta` on the Component.
-   */
-  delta?: number
-  /**
-   * The words for that change, given the number. Required whenever `delta` is
-   * set, and the Block throws without it. See the Component JSDoc for the full
-   * argument.
-   */
-  deltaLabel?: (delta: number) => string
-  /**
-   * The readings behind the current one, oldest first, in the caller's own units.
-   *
-   * Raw magnitudes rather than percentages of a maximum, which is the contract
-   * `Sparkline` states: a caller that pre-normalises has two chances to get the
-   * shape wrong, and a series drawn against an axis nobody can see is a picture
-   * of somebody's arithmetic.
-   */
-  series?: number[]
-  /**
-   * The name of that series, and the only thing a screen reader reads from the
-   * shape. Required whenever `series` is set, and the Block throws without it.
-   */
-  seriesLabel?: string
-  /** Where the row goes. Rendered as a native anchor, so the destination is real. */
-  href?: string
-  /** The words on that link. Required whenever `href` is set. */
-  hrefLabel?: string
+function assertMetrics(items: readonly MetricSpec[]): void {
+  for (const metric of items) {
+    if ((metric.href === undefined) !== (metric.hrefLabel === undefined)) {
+      throw new Error(
+        `Trend01: the item "${metric.key}" declares one of href and hrefLabel without the other, so the ` +
+          'row would carry a link with no words on it, or a name with no link beside it. Pass the words that say ' +
+          'what following it does, or omit the href.',
+      )
+    }
+    if ((metric.series === undefined) !== (metric.seriesLabel === undefined)) {
+      throw new Error(
+        `Trend01: the item "${metric.key}" declares one of series and seriesLabel without the other, so the ` +
+          'shape beside the figure would be a picture with no name, which a screen reader cannot announce. Pass ' +
+          'the series name in the words the product uses, or omit the series.',
+      )
+    }
+  }
 }
 
 /**
@@ -85,8 +57,13 @@ export type Trend01Props = {
   /**
    * The rows, in the order a reader should meet them. See the Component JSDoc
    * for why the Block does not sort them.
+   *
+   * Each row is the shared `MetricSpec`: a stable `key` that is never the words of
+   * the label, a required `label` and `value`, a `delta` whose sign is the
+   * direction, an optional `deltaFormat` for the caller's own words, an optional
+   * `hint`, and an optional `series` and `href` with the names they travel with.
    */
-  items: readonly Trend01Item[]
+  items: readonly MetricSpec[]
   /**
    * How many rows to render. Defaults to the whole set.
    *
@@ -141,19 +118,25 @@ export type Trend01Props = {
  * implementation would be the one without the table, because the table is the part
  * nobody draws by hand and it is the part that matters.
  *
- * **`deltaLabel` is required whenever any row carries a `delta`, and the reason
- * is that the Block cannot know which of three sentences the caller means.**
- * "up 12 percent", "+12%" and "12 higher than last week" are three sentences
- * about one number, and they are not formats of one another: the first is a
- * phrase with a unit, the second is a signed figure for a reader who is already
- * looking at a number, and the third is a comparison against a named period that
- * a reader who cannot see the period will misread as a comparison against
- * whatever they assumed. Worse, the fallback a Block would reach for is the worst
- * of the three, because a bare "+12" printed beside a figure is a number with an
- * arithmetic symbol on it, and a screen reader reads that as a formula rather
- * than as a change. So the prop is required and the Block throws without it
- * rather than printing the sign itself, and the cost of the throw is that a
- * caller who genuinely has no unit has to write the formatter that says so.
+ * **The rows are the shared `MetricSpec`, so a row here and a figure on a summary
+ * are one shape rather than two that disagree.** Each row carries a stable `key`
+ * that is never the words of the label, a required `label` and `value`, an optional
+ * `delta` whose sign is the direction, an optional `deltaFormat` carrying the
+ * caller's own words for the change, an optional `hint` for the period or the
+ * caveat, and an optional `series` and `href` each travelling with the name it
+ * cannot be read without. This closes the absence that put this Block in the
+ * migration: a reading now has a place for a series and for a destination, so the
+ * trend a metric summary names has somewhere to go when the two sit on one screen.
+ *
+ * **The words for the change stay the caller's, and the Block mints no period and
+ * no arithmetic.** `deltaFormat` is the caller's own node rather than a formatter
+ * this Block could write, because "up 12 percent", "+12%" and "12 higher than last
+ * week" are three sentences about one number and no single fallback is right for
+ * all three. A delta with a formatter prints the caller's words and one without
+ * prints the number the caller passed, which is `Metric`'s own contract. There is
+ * no period member, no derived rate of change and no period-over-period arithmetic
+ * over the series the caller passed, because each of those is a second arithmetic
+ * this package would be doing over a population it never fetched.
  *
  * **`seriesLabel` is required whenever any row carries a `series`, for the reason
  * the `Sparkline` JSDoc gives in full: a figure with no name is not announced
@@ -197,28 +180,7 @@ export function Trend01({
   headingLevel = 'h2',
   className,
 }: Trend01Props) {
-  for (const item of items) {
-    if (item.delta !== undefined && !item.deltaLabel) {
-      throw new Error(
-        'Trend01: an item carries a delta with no deltaLabel, so the change would print as a signed ' +
-          'number beside a figure, which a screen reader reads as a formula. Pass the words for the ' +
-          'change, or drop the delta and let the row carry the reading alone.',
-      )
-    }
-    if (item.series !== undefined && !item.seriesLabel) {
-      throw new Error(
-        'Trend01: an item carries a series with no seriesLabel, so the shape beside the figure would be ' +
-          'an unnamed picture. A figure with no name is not announced. Pass what the series is.',
-      )
-    }
-    if (item.href !== undefined && !item.hrefLabel) {
-      throw new Error(
-        'Trend01: an item carries an href with no hrefLabel, so the link would be announced by its ' +
-          'destination alone. A space name is a name, and the sentence saying that following the link ' +
-          'is a thing you can do belongs to the caller.',
-      )
-    }
-  }
+  assertMetrics(items)
 
   const shown = items.slice(0, limit ?? items.length)
 
@@ -254,8 +216,9 @@ export function Trend01({
       <ol data-slot="trend-list" className={cn('flex flex-col', className)}>
         {shown.map((item, index) => (
           <li
-            key={item.id}
+            key={item.key}
             data-slot="trend-row"
+            data-metric={item.key}
             data-has-series={item.series === undefined ? undefined : true}
             className="border-border flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b py-4 first:border-t"
           >
@@ -278,26 +241,28 @@ export function Trend01({
               value={item.value}
               label={item.label}
               delta={item.delta}
-              deltaFormat={item.deltaLabel}
+              deltaFormat={
+                item.deltaFormat === undefined ? undefined : () => item.deltaFormat
+              }
+              hint={item.hint}
             />
 
             {item.series !== undefined || item.href !== undefined ? (
               <div data-slot="trend-row-end" className="flex shrink-0 items-center gap-4">
                 {/*
-                  Both pairs are narrowed rather than asserted. The diagnostics
-                  above have already refused a series with no name and a link with
-                  no words, so these two conditions cannot be false here, and
-                  spelling them out means the type system reads the same rule the
-                  runtime does instead of a non-null assertion standing in for it.
+                  Both pairs are held by `MetricSpec`: a series is declared with its
+                  name and a destination with its words, so the type system reads the
+                  same rule the runtime does instead of a non-null assertion standing
+                  in for it.
                 */}
-                {item.series !== undefined && item.seriesLabel !== undefined ? (
+                {item.series === undefined ? null : (
                   <Sparkline values={item.series} label={item.seriesLabel} />
-                ) : null}
-                {item.href !== undefined && item.hrefLabel !== undefined ? (
+                )}
+                {item.href === undefined ? null : (
                   <CtaLink href={item.href} size="sm" variant="ghost">
                     {item.hrefLabel}
                   </CtaLink>
-                ) : null}
+                )}
               </div>
             ) : null}
           </li>

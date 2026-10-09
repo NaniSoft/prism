@@ -301,7 +301,7 @@ const HEADINGS: Array<{
     item: 'Stats01',
     rendersUnderneath: true,
     align: LEFT,
-    render: () => <Stats01 title={TITLE} stats={[{ label: 'One label', value: '1' }]} />,
+    render: () => <Stats01 title={TITLE} stats={[{ key: 'one', label: 'One label', value: '1' }]} />,
   },
   {
     item: 'About01',
@@ -679,7 +679,7 @@ const HEADINGS: Array<{
     render: () => (
       <Contact01
         title={TITLE}
-        fields={[{ id: 'name', type: 'text', label: 'Your name', required: true }]}
+        groups={[{ fields: [{ key: 'name', kind: 'Input', label: 'Your name', required: true }] }]}
         submitLabel="Send"
         onSubmit={() => {}}
       />
@@ -742,7 +742,7 @@ const HEADINGS: Array<{
     rendersUnderneath: true,
     align: LEFT,
     render: () => (
-      <Trend01 title={TITLE} items={[{ id: 'first', label: 'First row', value: '1' }]} />
+      <Trend01 title={TITLE} items={[{ key: 'first', label: 'First row', value: '1' }]} />
     ),
   },
   {
@@ -819,7 +819,7 @@ const HEADINGS: Array<{
     render: () => (
       <ActivityFeed01
         title={TITLE}
-        events={[{ id: 'first', actor: 'A person', action: 'did a thing', at: '2026-09-30' }]}
+        events={[{ key: 'first', actor: 'A person', action: 'did a thing', at: '2026-09-30' }]}
         empty="Nothing has happened yet."
       />
     ),
@@ -885,7 +885,7 @@ const HEADINGS: Array<{
     render: () => (
       <Dashboard01
         title={TITLE}
-        metrics={[{ label: 'One label', value: '1' }]}
+        metrics={[{ key: 'one', label: 'One label', value: '1' }]}
         panels={[{ id: 'first', title: 'First panel', children: <p>One sentence.</p> }]}
       />
     ),
@@ -1423,7 +1423,7 @@ const HEADINGS: Array<{
       <Provisioning01
         title={TITLE}
         steps={[
-          { id: 'first', name: 'First step', fields: [{ id: 'name', label: 'Name', type: 'text', required: true }] },
+          { id: 'first', name: 'First step', fields: [{ key: 'name', label: 'Name', kind: 'Input', required: true }] },
           { id: 'second', name: 'Second step', fields: [] },
         ]}
         backLabel="Back"
@@ -1463,7 +1463,7 @@ const HEADINGS: Array<{
       <Signup01
         title={TITLE}
         onSubmit={() => {}}
-        fields={[{ id: 'email', type: 'email', label: 'Work email', required: true }]}
+        groups={[{ fields: [{ key: 'email', kind: 'Input', label: 'Work email', required: true }] }]}
         password={{
           label: 'Secret phrase',
           revealLabel: 'Show the secret phrase',

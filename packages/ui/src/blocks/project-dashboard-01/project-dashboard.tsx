@@ -1,9 +1,12 @@
 import type { ReactNode } from 'react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
+import { CtaLink } from '../../components/ui/cta-link'
 import { Metric } from '../../components/ui/metric'
 import { Section, SectionHeading, childLevel, type HeadingLevel } from '../../components/ui/section'
+import { Sparkline } from '../../components/ui/sparkline'
 import { Status, type StatusTone } from '../../components/ui/status'
+import type { MetricSpec } from '../../lib/spec'
 import { cn } from '../../lib/utils'
 
 /**
@@ -40,28 +43,6 @@ function toneOf(state: string): StatusTone {
 }
 
 /**
- * One figure in the row across the top.
- *
- * The same three fields `Project01` takes for its figures, declared separately
- * rather than imported for the reason `ProcessFlow01` gives on `ProcessStage`: a
- * dashboard and a detail header are different claims, and a caller composing one has
- * no reason to take the other's type, and sharing the declaration would invite a
- * caller to widen a dashboard figure by reaching for a detail field. The field names
- * are still the same on purpose, so a consumer with a project model has one model.
- */
-export type ProjectDashboard01Figure = {
-  /** What the figure measures, read under it. */
-  label: string
-  /** The figure itself, already formatted by the caller. */
-  value: ReactNode
-  /**
-   * The change against the previous reading, as a number whose sign is the
-   * direction. See `MetricDelta` on the Component.
-   */
-  delta?: number
-}
-
-/**
  * How much of the grid one panel takes.
  *
  * Three, and the set is a fraction of the row rather than a width in pixels: a
@@ -86,6 +67,37 @@ const SPAN: Record<ProjectDashboard01Span, string> = {
   full: 'lg:col-span-6',
   half: 'lg:col-span-3',
   third: 'lg:col-span-2',
+}
+
+/**
+ * The refusals, as checks, so a tile that would render a link nobody can name is a
+ * diagnostic in a console rather than a rendered link.
+ *
+ * **The type already holds both pairs, and these checks exist for the caller the
+ * type never saw.** `MetricSpec` requires a destination's words wherever it has a
+ * destination and a series name wherever it has a series, so a typed caller cannot
+ * reach either diagnostic. A JavaScript caller can, and the cost of reaching one is
+ * a figure that draws a link with no words or a shape no reader can announce, so the
+ * same rule is stated once more where a runtime value can be read: the pair rule is
+ * the one `Dashboard01` makes.
+ */
+function assertMetrics(metrics: readonly MetricSpec[]): void {
+  for (const metric of metrics) {
+    if ((metric.href === undefined) !== (metric.hrefLabel === undefined)) {
+      throw new Error(
+        `ProjectDashboard01: the figure "${metric.key}" declares one of href and hrefLabel without the other, so the ` +
+          'figure would carry a link with no words on it, or a name with no link beside it. Pass the words that say ' +
+          'what following it does, or omit the href.',
+      )
+    }
+    if ((metric.series === undefined) !== (metric.seriesLabel === undefined)) {
+      throw new Error(
+        `ProjectDashboard01: the figure "${metric.key}" declares one of series and seriesLabel without the other, so the ` +
+          'figure would be a picture with no name, which a screen reader cannot announce and two shapes in one row ' +
+          'cannot be told apart. Pass the series name in the words the product uses, or omit the series.',
+      )
+    }
+  }
 }
 
 /**
@@ -173,8 +185,18 @@ export type ProjectDashboard01Props = {
   state?: string
   /** The words for that state. Required whenever `state` is given. */
   stateLabel?: string
-  /** The figures, in the order a reader should meet them. */
-  figures?: ProjectDashboard01Figure[]
+  /**
+   * The figures, in the order a reader should meet them.
+   *
+   * **The shared `MetricSpec` and not a shape of this Block's own.** `key`,
+   * `label` and `value` are required on each figure, `delta` is a number whose sign
+   * is the direction, `deltaFormat` is the caller's own words for that change,
+   * `hint` carries the period or the caveat, and a `series` and an `href` each travel
+   * with the label or the words they cannot be read without. The type is published as
+   * `@nanisoft/prism-ui/spec`, so the words a caller learns here are the words on
+   * every other figure surface.
+   */
+  figures?: MetricSpec[]
   /**
    * The panels, in the order a reader should meet them.
    *
@@ -230,10 +252,14 @@ export type ProjectDashboard01Props = {
  * composed one is not. `Status` owns the dot and the arrangement that matters most on
  * a dashboard: the dot is `aria-hidden` and the words carry the state, so a reader
  * who cannot separate the tones still reads which is which, and a row of states
- * never becomes a row of colours. The one thing `Metric` cannot do is print a delta
- * it has no unit for, so a figure with a `delta` and no formatter prints the number
- * itself, which is honest and usually not what was wanted; the caller's answer is to
- * put the whole change in `value` as a node they formatted.
+ * never becomes a row of colours. The figures are the shared `MetricSpec` and not
+ * this Block's own shape, so a figure declared for this row is the same figure a
+ * metric summary takes, and the formatter travels with it: a figure with a `delta`
+ * and no formatter prints the number the caller passed, which is honest and usually
+ * not what was wanted, and a figure with a formatter prints the caller's own words.
+ * That is the disagreement this migration closes, because the same consumer reading
+ * two dashboards built out of this package now sees one shape rather than a formatted
+ * change on one screen and a bare `0.12` on another.
  *
  * **A panel's title is a heading one step below the section, derived rather than
  * written, and a panel with no title draws no heading at all.** A dashboard is
@@ -274,6 +300,8 @@ export function ProjectDashboard01({
 
   const Title = childLevel(headingLevel)
 
+  if (figures !== undefined && figures.length > 0) assertMetrics(figures)
+
   return (
     <Section data-slot="project-dashboard-01" className={cn(className)}>
       <div data-slot="project-dashboard-head" className="flex flex-col gap-6">
@@ -297,15 +325,38 @@ export function ProjectDashboard01({
           data-slot="project-dashboard-figures"
           className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
         >
-          {figures.map((figure) => (
-            <Metric
-              key={figure.label}
-              data-slot="project-dashboard-figure"
-              value={figure.value}
-              label={figure.label}
-              delta={figure.delta}
-            />
-          ))}
+          {figures.map((metric) => {
+            // The delta's words are the caller's own node, and `Metric` takes a
+            // formatter, so the node is placed through one. A delta with no words is
+            // left to `Metric`, which prints the number the caller passed.
+            const deltaWords = metric.deltaFormat
+            return (
+              <div
+                key={metric.key}
+                data-slot="project-dashboard-figure"
+                data-metric={metric.key}
+                className="flex flex-col gap-3"
+              >
+                <Metric
+                  value={metric.value}
+                  label={metric.label}
+                  delta={metric.delta}
+                  deltaFormat={deltaWords === undefined ? undefined : () => deltaWords}
+                  hint={metric.hint}
+                />
+                {metric.series === undefined ? null : (
+                  <div data-slot="project-dashboard-sparkline" className="flex">
+                    <Sparkline values={metric.series} label={metric.seriesLabel} className="ms-auto" />
+                  </div>
+                )}
+                {metric.href === undefined ? null : (
+                  <CtaLink href={metric.href} variant="ghost" size="sm">
+                    {metric.hrefLabel}
+                  </CtaLink>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
 

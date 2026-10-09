@@ -5,13 +5,20 @@ title: Stats01
 
 ## Overview
 
-Stats01 is a row of key figures. Each stat carries a label, a value, and
-optionally a delta and a hint. The delta renders a direction and a percentage;
-the hint names the period it compares against.
+Stats01 is a row of key figures whose entries are the shared `MetricSpec`, published
+as `@nanisoft/prism-ui/spec`. Each entry carries a stable `key` that is never the
+words of the label, a required `label` and `value`, an optional `delta` whose sign is
+the direction, an optional `deltaFormat` for the caller's own words, an optional
+`hint` for the period it compares against, and an optional `series` and `href` with
+the names they travel with. The direction mark is derived from the sign of `delta`,
+and no unit is appended to a delta the Block does not know the units of: a delta with
+no formatter prints the number the caller passed, and one with a formatter prints the
+caller's own words.
 
 Every number is a prop. The block previously carried invented figures and a
 hardcoded heading, which meant a consumer who installed it shipped fabricated
-metrics into their own dashboard.
+metrics into their own dashboard. It also appended a percent sign to every delta,
+which was the guess this migration removes.
 
 ## Usage
 
@@ -22,9 +29,23 @@ import { Stats01 } from '@nanisoft/prism-ui/blocks/stats-01'
   eyebrow="This month"
   title="Delivery"
   stats={[
-    { label: 'Active projects', value: '1,284', delta: 12, hint: 'vs last month' },
-    { label: 'On track', value: '47.2%', delta: -3, hint: 'vs last month' },
-    { label: 'Open issues', value: '138' },
+    {
+      key: 'active',
+      label: 'Active projects',
+      value: '1,284',
+      delta: 12,
+      deltaFormat: '12 more than last month',
+      hint: 'vs last month',
+    },
+    {
+      key: 'on-track',
+      label: 'On track',
+      value: '47.2%',
+      delta: -3,
+      deltaFormat: '3 points lower than last month',
+      hint: 'vs last month',
+    },
+    { key: 'open', label: 'Open issues', value: '138' },
   ]}
 />
 ```
@@ -43,19 +64,21 @@ glance. It works best when the figures share a unit and a period.
 Do not use it for a single figure. One stat in a four-column grid leaves an
 awkward empty row and overstates the number's importance.
 
-Do not use it for figures that need a trend over time. A delta is a comparison
-between two points, not a series; use a chart for a series.
+Do not use it when the shape is the point. A stat can carry a small `series` drawn
+as a sparkline, but a reader who came for the shape wants a chart with room for it.
 
 Do not use it when the numbers do not share a period. Mixing "this month" with
 "this quarter" in one row invites a false comparison.
 
 ### Best practices
 
-- Give every delta a hint. A percentage with no period is unreadable, because
-  the reader cannot tell what it compares against.
-- Omit `delta` rather than passing `0` when a figure has no meaningful change.
-  A zero delta renders a neutral marker, which is correct only when the value
-  truly held.
+- Pass `deltaFormat` for a delta measured in a unit. Without it `metric` prints the
+  bare number the caller passed, which is honest and almost never what was wanted.
+- Give the hint a period. A change with no period is unreadable, because the reader
+  cannot tell what it compares against.
+- Omit `delta` rather than passing `0` when a figure has no meaningful change. A zero
+  delta draws no direction mark, and a reading that did not move is a claim the data
+  has to make.
 - Keep the label short and the value exact. The reader is scanning, not reading.
 - Use three or four stats. Two fits, one does not.
 

@@ -2,28 +2,31 @@
 
 import { useState } from 'react'
 
-import { ActivityFeed01, type ActivityFeed01Event } from '@nanisoft/prism-ui/blocks/activity-feed-01'
+import { ActivityFeed01 } from '@nanisoft/prism-ui/blocks/activity-feed-01'
 import { RelativeTime } from '@nanisoft/prism-ui/components/relative-time'
+import type { EventSpec } from '@nanisoft/prism-ui/spec'
 
 /**
- * The feed, grouped by day, with the four cases worth showing at once.
+ * The feed, grouped by day, with the cases worth showing at once.
  *
- * The first event is the linked one, so the caller own words on a destination are
- * visible rather than asserted. The second is in a different day, so the grouping
- * has more than one heading in it. The third has no target, which is the real case
- * for a sign-in and the one a reader has to be able to read. The fourth is a
- * selectable row with a tone, so the mark beside it is visible. The last carries a
- * composed `relative-time` reading, which is the arrangement the Block's own note
- * points at: Prism prints the machine value and the caller prints the sentence.
+ * The entries are the shared `EventSpec`, so this Demo teaches the one shape a
+ * caller passes to every occurrence surface. The first event is the linked one, so
+ * the caller's own words on a destination are visible rather than asserted. The
+ * second is in a different day, so the grouping has more than one heading in it. The
+ * third has no target, which is the real case for a sign-in. The fourth is a
+ * selectable row with a tone and its words beside it. The last carries a composed
+ * `relative-time` reading, which is the arrangement the Block's own note points at:
+ * Prism prints the machine value and the caller prints the sentence.
  */
-const EVENTS: ActivityFeed01Event[] = [
+const EVENTS: EventSpec[] = [
   {
-    id: 'release',
+    key: 'release',
     actor: 'Ada',
     action: 'published a release for',
     target: 'nexus-api',
     at: '2026-09-30T08:14:00.000Z',
     tone: 'success',
+    toneLabel: 'succeeded',
     detail: (
       <RelativeTime
         date="2026-09-30T08:14:00.000Z"
@@ -37,20 +40,21 @@ const EVENTS: ActivityFeed01Event[] = [
     hrefLabel: 'Read the release note',
   },
   {
-    id: 'rebuild',
+    key: 'rebuild',
     actor: 'Nightly',
     action: 'finished',
     target: 'ledger rebuild',
     at: '2026-09-30T04:02:00.000Z',
   },
-  { id: 'signin', actor: 'Bo', action: 'signed in', at: '2026-09-29T21:40:00.000Z' },
+  { key: 'signin', actor: 'Bo', action: 'signed in', at: '2026-09-29T21:40:00.000Z' },
   {
-    id: 'rotate',
+    key: 'rotate',
     actor: 'Cleo',
     action: 'rotated the key for',
     target: 'nexus-api',
     at: '2026-09-29T18:05:00.000Z',
     tone: 'warning',
+    toneLabel: 'needs review',
   },
 ]
 
@@ -65,7 +69,7 @@ export default function ActivityFeed01Demo() {
   return (
     <div className="flex max-w-measure flex-col gap-4">
       <p className="text-muted-foreground text-sm">
-        The rows are buttons, so activating one reports its id here. The last one in
+        The rows are buttons, so activating one reports its key here. The last one in
         each day is a plain record, and the first carries a link with its own words.
       </p>
       <p className="text-muted-foreground text-sm">

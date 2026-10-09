@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
 
 import { Section, SectionHeading, type HeadingLevel } from '../../components/ui/section'
+import type { MetricSpec } from '../../lib/spec'
 import { cn } from '../../lib/utils'
-import { ChartCard01, type ChartCard01Reading } from '../chart-card-01/chart-card-01'
+import { ChartCard01 } from '../chart-card-01/chart-card-01'
 
 /**
  * One card in the grid: a title, a figure, and everything the card carries around it.
@@ -35,8 +36,8 @@ export type ChartGroup01Card = {
   figure: ReactNode
   /** The key for the figure, wherever the caller wants it. */
   legend?: ReactNode
-  /** The figures this card states about what the figure shows. */
-  reading?: ChartCard01Reading[]
+  /** The figures this card states about what the figure shows. See `MetricSpec`. */
+  reading?: MetricSpec[]
   /** The controls that act on the figure: a range, a segment, a download. */
   actions?: ReactNode
 }

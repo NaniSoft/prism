@@ -9,6 +9,16 @@ ChartCard01 is a titled panel holding one figure, the key for it, the controls t
 act on it, and the figures the card states about it. It is the panel
 `chart-group-01` composes, and it is usable on its own inside a caller's own grid.
 
+The readings are the shared `MetricSpec` drawn by `Metric` and `Sparkline`.
+`MetricSpec` is the shared specification published as `@nanisoft/prism-ui/spec`, so a
+figure declared for a chart card is the same figure a metric summary or a project
+dashboard takes. Each reading carries a stable `key` that is never the words of the
+label, a required `label` and `value`, a `delta` whose sign is the direction, an
+optional `deltaFormat` for the caller's own words, an optional `hint` for the period
+or the caveat, and an optional `series` whose `seriesLabel` travels with it and an
+optional `href` whose `hrefLabel` travels with it. A delta with no formatter prints
+the number the caller passed; one with a formatter prints the caller's words.
+
 It is a `Card` and not a `Section`, because a `Section` owns the container and the
 72rem measure, and a panel that owns a container cannot be a grid item in somebody
 else's.
@@ -68,7 +78,19 @@ export function RequestsCard() {
         />
       }
       legend={<ChartLegend series={SERIES} />}
-      reading={[{ label: 'Peak day', value: '150', delta: 6, deltaFormat: (v) => `${v}` }]}
+      reading={[
+        {
+          key: 'peak',
+          label: 'Peak day',
+          value: '150',
+          delta: 6,
+          deltaFormat: '6 more than the week before',
+          hint: 'vs last week',
+          series: [120, 132, 141, 128, 150],
+          seriesLabel: 'Requests on the peak day, the last five days',
+        },
+        { key: 'total', label: 'Total', value: '2,280' },
+      ]}
       footer="The dip on Wednesday is the maintenance window."
     />
   )

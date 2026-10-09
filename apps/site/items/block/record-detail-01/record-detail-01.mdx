@@ -1,0 +1,158 @@
+---
+slug: blocks/record-detail-01
+title: RecordDetail01
+---
+
+## Overview
+
+RecordDetail01 is one record in full: its identity, the facts you declare, your own
+content composed under them, the controls that act on the record, and its
+relationships drawn open as one ordered list.
+
+It is a Block rather than a Page, and it is handed the record. A Page owns no URL,
+so a Page that knew which record it shows would have to be told, and being told
+which record it shows is selection state, which the consumer holds. So this Block
+fetches nothing, reads nothing by key and defaults to no record. Whether it is
+drawn at all is your answer, because a record that is gone, one this reader may
+not see and one whose fetch failed are three causes sharing one address and three
+different sentences.
+
+## Relationships are one list on one frame
+
+Each relationship is a `RelationSpec` from `@nanisoft/prism-ui/spec`, plus the
+words its own empty frame needs. They are drawn in the order you declare, under
+one heading level, inside one bounded frame with one rule between them, so a
+record with four relationships and a record with one read the same way. The
+alternative, a card per relation, turns a detail into a grid of equal panels that
+happen to share a parent.
+
+`kind` names a collection arrangement this package already draws:
+
+| Kind | Members are | Drawn by |
+| --- | --- | --- |
+| `Table` | your own row nodes | `Table` and `TableBody` |
+| `ListPanel` | your own list rows | `ListPanel` and a `ul` |
+| `Timeline` | `TimelineEntry` values | `Timeline` |
+| `AvatarGroup` | `{ name, src }` values | `AvatarGroup` |
+| `slot` | your own nodes, in order | a plain container |
+
+Every relation is drawn open. A relation a reader should have to ask for is the
+`slot` member, placed by you, rather than a collapsed one, because a disclosure is
+a control and a control in a Block is a defect the block controls gate exists to
+catch.
+
+## Depth is one
+
+A relation's `members` are the caller's own typed data and never another
+relation, so the bound is in the type rather than in a convention. A related
+record with its own related records is a graph you walk: a member carries your own
+`href` when it should open, and the destination is your route.
+
+## The actions are yours
+
+The record's own controls arrive as one optional `actions` node, placed in the
+record's own band beside its identity. What the screen can do to itself belongs to
+`PageHeader01`; what can be done to this record belongs beside the record, and a
+detail in a split pane has no page header above it. The Block renders no control
+of its own, so the confirmation for a destructive action is your own
+`AlertDialog` composed around your control in the same slot.
+
+## A figure is composed inside, not kept here
+
+The Block takes no total, no count and no sum. A relation's `count` is your own
+string and is never derived from the members, because a count computed over the
+members a Block was handed is false the moment the collection is larger than the
+page. When a screen wants a figure, compose `Summary01` or `Stats01` into the
+`children` slot. A record write form is `RecordForm01` composed beside or below
+this Block, never a mode of it.
+
+## It replaces the issue detail Block
+
+RecordDetail01 is measured against `IssueDetail01`, which is deprecated in its
+favour. The two draw the same job: a key in the mono face, a state as a tone beside
+your own words, the facts you declare, a body and a thread in your order. The issue
+detail's name is wrong the moment the record is an invoice, an order or a
+subscription, so it is deprecated rather than kept beside this Block, and nothing is
+authored beside this Block on the strength of a product calling its records
+something in particular.
+
+A consumer whose records are not called issues draws the same screen here: put the
+record's key in `eyebrow`, its state as a `Status` in `fields`, its body and its
+thread in `children`, and its controls in `actions`. The Demo below is one such
+record, a subscription, drawn without a subject matter in the Block's name.
+
+## Usage
+
+```tsx
+import { RecordDetail01 } from '@nanisoft/prism-ui/blocks/record-detail-01'
+import type { RecordDetail01Relation } from '@nanisoft/prism-ui/blocks/record-detail-01'
+
+const relations: readonly RecordDetail01Relation[] = [
+  {
+    key: 'invoices',
+    label: 'Invoices',
+    kind: 'Table',
+    count: '18 issued',
+    members: [/* your own TableRow nodes */],
+    empty: { reason: 'first-run', title: 'No invoices yet' },
+  },
+  {
+    key: 'activity',
+    label: 'Activity',
+    kind: 'Timeline',
+    members: [{ id: 'renewed', title: 'Subscription renewed', state: 'done' }],
+    empty: { reason: 'first-run', title: 'Nothing has happened yet' },
+  },
+]
+
+<RecordDetail01
+  eyebrow="SUB-4821"
+  title="Northwind subscription"
+  fields={[{ id: 'plan', label: 'Plan', value: 'Scale' }]}
+  actions={<CtaLink href="/subscriptions/sub-4821/edit">Edit record</CtaLink>}
+  relations={relations}
+/>
+```
+
+<ComponentDemo slug="record-detail-01" />
+
+## Guidelines
+
+### When to use
+
+Use RecordDetail01 for a screen whose job is to show one record and what is
+attached to it. It is the same Block at full width under a shell, in a drawer, and
+in the detail pane of a split beside the index it belongs with.
+
+### When not to use
+
+Do not use it to add up. A set of priced lines and their total is `Summary01`, and
+you compose it into the `children` slot rather than widening this Block.
+
+Do not use it as a transient panel. A surface a reader opens and closes with a
+close control is `QuickView01`, whose law is that nothing it shows may live only
+inside it. A record detail is the opposite: it is not transient, it has no close
+control, and everything it shows is allowed to live only there.
+
+Do not use it to write. A create or edit form is `RecordForm01`, composed beside
+or below this Block.
+
+### Best practices
+
+- Put the record's own key or type in `eyebrow`. It is drawn in the mono face,
+  because an identifier is machine notation.
+- Declare `fields` rather than hardcoding facts, and declare only the facts a
+  reader is entitled to be told. What a record is made of is your claim.
+- Give every relation a stable `key` and your own `count` string. Never derive a
+  count from the members you pass.
+- Give every relation `empty` words. A customer with no invoices and a project
+  with no people are different sentences, and only your product knows which it is.
+- Place actions as your own node. If an action destroys something, compose an
+  `AlertDialog` around your control in the same slot.
+
+### Content guidelines
+
+- Write a `label` as a short noun naming the collection: "Invoices", "People with
+  access".
+- Write an empty `title` as what is not here, and `body` as what to do about it.
+- Write a relation `count` as your own sentence, such as "18 issued, 2 open".

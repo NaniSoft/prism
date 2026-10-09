@@ -3,11 +3,32 @@
 import { useState } from 'react'
 
 import { AuthPage } from '@nanisoft/prism-ui/pages/auth-page'
+import type { FieldSpecGroup } from '@nanisoft/prism-ui/spec'
 
-/** The auth page, with a controlled form and a supporting card. */
+const GROUPS: readonly FieldSpecGroup[] = [
+  {
+    fields: [
+      {
+        key: 'auth-page-email',
+        label: 'Email',
+        kind: 'Input',
+        autoComplete: 'email',
+        placeholder: 'you@example.com',
+        required: true,
+      },
+      {
+        key: 'auth-page-password',
+        label: 'Password',
+        kind: 'PasswordField',
+        autoComplete: 'current-password',
+        required: true,
+      },
+    ],
+  },
+]
+
+/** The auth page, with an uncontrolled credential form and a supporting card. */
 export default function AuthPageDemo() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [error, setError] = useState<string>()
 
   return (
@@ -15,35 +36,16 @@ export default function AuthPageDemo() {
       form={{
         title: 'Sign in',
         description: 'Welcome back. Enter your details to continue.',
-        error,
+        submitError: error,
         submitLabel: 'Sign in',
-        fields: [
-          {
-            id: 'auth-page-email',
-            label: 'Email',
-            type: 'email',
-            autoComplete: 'email',
-            placeholder: 'you@example.com',
-            value: email,
-            onChange: setEmail,
-            required: true,
-          },
-          {
-            id: 'auth-page-password',
-            label: 'Password',
-            type: 'password',
-            autoComplete: 'current-password',
-            value: password,
-            onChange: setPassword,
-            required: true,
-          },
-        ],
+        groups: GROUPS,
         remember: { id: 'auth-page-remember', label: 'Remember me for 30 days' },
         onSubmit: (event) => {
           event.preventDefault()
-          setError(
-            email && password ? undefined : 'Enter your email and password to continue.',
-          )
+          const data = new FormData(event.currentTarget)
+          const email = String(data.get('auth-page-email') ?? '').trim()
+          const password = String(data.get('auth-page-password') ?? '')
+          setError(email && password ? undefined : 'Enter your email and password to continue.')
         },
       }}
       aside={{

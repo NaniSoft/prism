@@ -2,7 +2,10 @@
 
 import { useState } from 'react'
 
+import { Button } from '@nanisoft/prism-ui/components/button'
+import { CtaLink } from '@nanisoft/prism-ui/components/cta-link'
 import { DashboardPage } from '@nanisoft/prism-ui/pages/dashboard-page'
+import type { ColumnSpec } from '@nanisoft/prism-ui/spec'
 
 const LINKS = [
   { href: '#dashboard', label: 'Dashboard', current: true },
@@ -77,31 +80,35 @@ export default function DashboardPageDemo() {
         title: 'Delivery',
         headingLevel: 'h2',
         stats: [
-          { label: 'Active accounts', value: '1,284', delta: 12, hint: 'vs last month' },
-          { label: 'On track', value: '47.2%', delta: -3, hint: 'vs last month' },
-          { label: 'Open issues', value: '138' },
+          { key: 'accounts', label: 'Active accounts', value: '1,284', delta: 12, deltaFormat: '12 more than last month', hint: 'vs last month' },
+          { key: 'on-track', label: 'On track', value: '47.2%', delta: -3, deltaFormat: '3 points lower', hint: 'vs last month' },
+          { key: 'issues', label: 'Open issues', value: '138' },
         ],
       }}
       table={{
         title: 'Accounts',
         description: 'Every workspace you can manage.',
         columns: [
-          { id: 'name', header: 'Account', label: 'Account', cell: (row) => String(row.name) },
-          { id: 'plan', header: 'Plan', label: 'Plan', cell: (row) => String(row.plan) },
-          { id: 'status', header: 'Status', label: 'Status', cell: (row) => String(row.status) },
-          {
-            id: 'seats',
-            header: 'Seats',
-            label: 'Seats',
-            className: 'text-right',
-            cell: (row) => String(row.seats),
-          },
-        ],
+          { key: 'name', header: 'Account', kind: 'Typography' },
+          { key: 'plan', header: 'Plan', kind: 'Badge' },
+          { key: 'status', header: 'Status', kind: 'Badge' },
+          { key: 'seats', header: 'Seats', kind: 'Typography', align: 'end' },
+        ] satisfies readonly ColumnSpec[],
         rows: pageRows,
         getRowId: (row) => String(row.id),
         selectable: true,
         selectedIds: selected,
         onSelectedIdsChange: setSelected,
+        batchActions: (
+          <Button size="sm" onClick={() => setSelected([])}>
+            Archive selected
+          </Button>
+        ),
+        renderRowActions: (row) => (
+          <CtaLink href={`#account-${String(row.id)}`} size="sm" variant="ghost">
+            View
+          </CtaLink>
+        ),
         searchValue: query,
         onSearchChange: (value) => {
           setQuery(value)
@@ -125,11 +132,6 @@ export default function DashboardPageDemo() {
         page,
         pageCount,
         onPageChange: setPage,
-        rowActions: () => [
-          { label: 'View details' },
-          { label: 'Rename' },
-          { label: 'Delete', variant: 'destructive' },
-        ],
         labels: {
           search: 'Search accounts',
           filters: 'Filters',
@@ -137,12 +139,16 @@ export default function DashboardPageDemo() {
           columns: 'Columns',
           viewColumns: 'View',
           selectAll: 'Select every account on this page',
-          selectRow: 'Select this account',
+          selectRow: (row) => `Select ${String(row.name)}`,
           rowActions: 'Account actions',
+          sort: (column, direction) => `Sort by ${column}, ${direction}`,
+          selectedCount: (count) => `${count} selected`,
+          selectedAllMatching: (count) => `All ${count} matching accounts selected`,
+          clearedSelection: 'No accounts selected',
+          dismissSelection: 'Clear selection',
           previous: 'Previous',
           next: 'Next',
           page: (value) => `Go to page ${value}`,
-          selectedCount: (count) => `${count} selected`,
           empty: 'No accounts match the current search and filters.',
         },
       }}

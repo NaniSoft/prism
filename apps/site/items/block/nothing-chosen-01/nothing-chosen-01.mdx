@@ -1,0 +1,134 @@
+---
+slug: blocks/nothing-chosen-01
+title: NothingChosen01
+---
+
+## Overview
+
+NothingChosen01 is the state of a region that can hold a record and has none
+chosen in it yet: the caller's words, an optional sentence under them, and an
+optional mark of the caller's choosing. It draws no action, no default sentence,
+no frame and no height floor.
+
+**It is a statement about a reader's pointer, and that is why it is a Block beside
+EmptyState01 rather than a reason on it.** The four reasons EmptyState01
+takes are answers to one question: what happened to the collection this region
+would have drawn? Nothing has ever existed in it, the reader's own narrowing
+emptied it, the reader's own earlier action moved every record out of it, or this
+reader may not see it. Each is a statement about a set, and the frame
+those four share is the assertion that follows from them together: there is
+nothing here to read.
+
+Nothing chosen is not that. No collection has been emptied, narrowed or hidden,
+the records are in the index a few centimetres to the left, and what is missing is
+the reader's pointer at one of them. A reason here would have to keep that frame
+honest by claiming this region has nothing to read while a readable region sits
+next to it, which is the failure a separate Block exists rather than to commit.
+
+The newest of those four shows the line most sharply, because a region the reader
+emptied has the same frame and the opposite neighbourhood. A bin a reader has just
+cleared has no readable neighbour, so the shared frame is honest there and the
+reason belongs on EmptyState01 beside the other three. This pane has a full index
+beside it, so the same frame would be a claim the reader can watch fail.
+
+| | What is true | What the frame claims |
+| --- | --- | --- |
+| `first-run` | nothing has ever existed in the collection | there is nothing here to read |
+| `no-match` | things exist and the reader's own narrowing removed them | there is nothing here to read |
+| `emptied-by-reader` | things existed and this reader's own action moved them out | there is nothing here to read |
+| `not-permitted` | things exist and this reader may not see them | there is nothing here to read |
+| `NothingChosen01` | nothing is chosen, and the index beside it is full | nothing, because it draws no frame |
+
+**A union with one member the caller must still name is a constant with a type,
+and that is the shortest statement of the difference.** The `reason` prop exists so
+a caller chooses between causes that want different words and different actions.
+Here there is one cause, it is not a choice, and every caller would pass the same
+member, so the arm would encode a fact rather than describe a decision. This Block
+therefore declares no reason, and a reader can tell by looking at the catalogue
+that a fourth empty state exists without reading a union member.
+
+## Usage
+
+```tsx
+import { NothingChosen01 } from '@nanisoft/prism-ui/blocks/nothing-chosen-01'
+
+// The resting pane of a split, beside an index that is full.
+<div className="grid gap-4 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+  <InvoiceIndex rows={invoices} onSelectedIdsChange={setSelected} />
+  {selected === null ? (
+    <NothingChosen01
+      title="Select an invoice"
+      body="Choose one from the list to see its lines, its history and who it is for."
+    />
+  ) : (
+    <InvoiceDetail invoice={selected} />
+  )}
+</div>
+
+// The mark is a slot, so the shape is the product's own and it is never read aloud.
+<NothingChosen01 title="No customer chosen" icon={<UserRound />} />
+```
+
+<ComponentDemo slug="nothing-chosen-01" />
+
+## Guidelines
+
+### When to use
+
+Use it for the pane that shows the record a reader has chosen from the index beside
+it, before they have chosen one. The region has to be one that is capable of
+holding a record, or the state does not exist.
+
+Use it wherever the caller's arrangement has no separate screen for the record. The
+narrow arrangement, where the record is its own page and the index is its own
+screen, has no detail pane and therefore no empty one, which is the cheapest way
+out of this state available anywhere.
+
+### When not to use
+
+Do not use it for an empty collection. That is EmptyState01, and the difference is
+the whole point: a narrowing that matched nothing, or a bin the reader emptied
+themselves, has made the region genuinely empty, and nothing chosen has not.
+
+Do not use it for a record that cannot be rendered. A selection pointing at a
+record the consumer cannot load has three causes that want three different
+sentences, and every empty reason would be false except not-permitted, which is
+already the caller's answer: draw EmptyState01 at that reason, or an Alert, in the
+caller's own words.
+
+Do not use it for a region with nothing in it on the reader's first arrival. A
+detail pane that was never capable of holding anything is not a state a reader is
+in, it is the absence of a feature.
+
+### Best practices
+
+- Write the words as an instruction about the other pane, not about this one.
+  "Select an invoice" names what is beside it and what to do; "Nothing here" is
+  false, because there is a full list a few centimetres away.
+- Do not offer an action in it. The next step is a click in the index, and a
+  button here is either a control this Block cannot wire or a second copy of an
+  affordance the index already draws for the same reader.
+- Do not widen the index to make the pane go. Tracks hold their ratio at every
+  selection state, so a split that resizes when a row is clicked moves the list
+  out from under the hand that clicked it. What changes is content, and forty rows
+  beside one sentence is not a competition.
+- Pass the mark as a slot rather than accepting Prism's. The shape that means
+  "choose something" is a claim about the product's records, and four products
+  calling their records four different things would each be handed an icon wrong
+  for the other three.
+- Keep the tracks' ratio. The split does not collapse at a narrow viewport and
+  which pane survives is the caller's composition, because which pane has
+  something in it is selection state and a Block that holds none cannot read it.
+
+### Content guidelines
+
+- Write the title as what the reader does next. It is read first and it is the
+  only thing guaranteed to be read.
+- Use the body for what the pane will show, not for reassurance. "Nothing is wrong"
+  in an empty pane is a claim about a product this Block cannot see.
+- Do not apologise. Nothing is broken, nothing is missing and nobody is blocked; a
+  reader who has not chosen a record yet is at the beginning of a decision, not
+  looking at a failure.
+- Do not let a heading go here. The pane outlives its contents, so an outline
+  entry would vanish on the first click and a reader navigating by heading would
+  follow it to where it no longer exists.

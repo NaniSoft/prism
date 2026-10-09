@@ -85,6 +85,45 @@ search budget, the client-JavaScript budget and the rest read this repository's
 own tree. They are not cross-repository laws and moving them would put a build
 step in four sites' module graphs.
 
+## The published changes of this effort, and the test applied
+
+The admin-screen effort widened a large part of the published interface: the
+specification module and its five types, four forms and a settings region onto the
+field specification, four figure owners onto the metric specification, the record
+index onto typed columns and a per-row node, a record detail and a split and an
+unrestricted empty state, and the deprecation of the issue detail Block. Each was a
+candidate for a new law here, and each was decided rather than assumed, because a
+law added for a mistake a compiler already names is a law that ships to spend a
+release repeating what the consumer's own build already said.
+
+The test is the one above, narrowed to a published widening: **a widening earns a
+law here only when its violation is silent in a consumer's own repository in the
+way every law in the kit is silent, where nothing throws, nothing fails to compile
+and nothing on screen says the build is wrong, and only when the violation is a
+fact about the consumer's repository that a program there has to read.** The kit
+reads a consumer's stylesheet half, its pack map, its routes, its pin and its
+hidden states. Where the compiler is the thing that names the mistake, the
+compiler is the gate, and it runs in the consumer's own build before any Prism
+program does.
+
+| the published change | the ruling | why |
+| --- | --- | --- |
+| the five specification types and their three closed unions, the vocabulary a consumer now declares content with | no law | every member of `FieldKind`, `ColumnKind` and `RelationKind` is a string literal on a published union, and every member the five specifications refuse is refused by the compiler, so a consumer who breaks it gets a type error in its own build. The one pairing no type holds, a relation `href` without its `hrefLabel`, is a fact about the declaration this repository emits, which is the seam `check-spec-unions.mjs` reads, and not a program a consumer runs over its own tree. |
+| the record write form's save union of three arms, and the setting region's copy of it | no law | each arm forbids the other two in the type, so the compiler holds it: a caller who passes two arms, or none where one is required, gets a type error. The union is the gate. |
+| the record index's typed columns, its required row identity and selection callback, its batch node, its `selectionScope` count, its `groupBy` with its label, and its per-row node | no law | the typed columns, the required `getRowId`, the required `onSelectedIdsChange` and `batchActions` on the selectable arm, the `selectionScope` union carrying the filter `count`, and the `groupBy` and `groupLabel` union are each held by the compiler. The per-row `renderRowActions` node is the consumer's own composition, so a dead control inside it is the consumer's own data to hold; the law that a control must act is held for Prism's Blocks by `scripts/check-block-controls.mjs`, and the kit does not read how a consumer composes a Component. |
+| the settings panel's retirement of its own field declaration, and its `sections` to `groups` and `secondaryAction` to `footerStart` | no law | `SettingsPanelField` is gone and the two old props no longer resolve, so the consumer's build names the mistake. |
+| the four field declaration retirements and the Blocks whose props changed with them | no law | `AuthFormField`, `ContactField`, `ProvisioningField` and `SignupField` are gone and their Blocks take the shared field specification, so every old name and every old prop shape is a compile error. |
+| the five metric migrations and the contract that deleted the superseded declarations | no law | `Dashboard01Metric`, `ProjectDashboard01Figure`, `ChartCard01Reading`, `Trend01Item` and `Stat` are gone and `MetricSpec` replaces them, so a consumer using any old name fails to compile, and a series without its label or a destination without its words is rejected by the type. |
+| the activity trail and the audit log on the shared event specification | no law | `ActivityFeed01Event` is gone and `EventSpec` replaces it, so an entry's old `id` or a refused `kind` is a compile error, and the tone and destination pairs are checked by the Block at render rather than passed silently. |
+| the deprecation of `IssueDetail01` in favour of `RecordDetail01` | no law | the export still resolves and renders, so there is no violation to fail on. A deprecation is a JSDoc tag and a catalogue status that a reader acts on and a build cannot, and a gate over it would fail a consumer whose screen works, which is the opposite of what a law is for. |
+| the new record detail, split, unrestricted empty state and write form Blocks, and the fourth reason on the empty state union | no law | each is additive and typed. A consumer that enumerates `EMPTY_REASONS` gains a fourth member its own exhaustive handling already covers at compile time, and nothing else on the surface changed. |
+| the repository gate that now classifies four controls | no law | no published surface changed: it is `scripts/check-block-controls.mjs`, a program of this repository, and the law it holds already reaches a consumer as the shape of its own Block. |
+
+No law was added, so the kit is unchanged: the same gates and the same laws, and
+no consumer is asked to move. A published change after this one runs this same
+test in its own pull request, and when the answer is a law it lands here once, as
+the failure message of a gate. The test is a rule rather than an event.
+
 ## The residual, stated rather than hidden
 
 - The kit reads text, not a cascade. It cannot resolve which rule wins.

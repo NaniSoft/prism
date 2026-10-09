@@ -214,9 +214,21 @@ export const catalog: readonly CatalogItem[] = [
     slug: 'empty-state-01',
     kind: 'block',
     category: null,
-    description: 'The state a region shows when it has nothing in it, for a first run, a filter that matched nothing, or a permission boundary.',
+    description:
+      'The state a region shows when it has nothing in it, for a first run, a narrowing that matched nothing, a region the reader emptied themselves, or a permission boundary.',
     source: 'src/blocks/empty-state-01/index.tsx',
     exports: ['EmptyState01'],
+    status: 'stable',
+  },
+  {
+    name: 'NothingChosen01',
+    slug: 'nothing-chosen-01',
+    kind: 'block',
+    category: null,
+    description:
+      'The resting detail pane: a region that can hold a record and has nothing chosen in it yet, so it draws the caller own words and no action, no frame and no height floor.',
+    source: 'src/blocks/nothing-chosen-01/index.tsx',
+    exports: ['NothingChosen01'],
     status: 'stable',
   },
   {
@@ -988,6 +1000,50 @@ export const catalog: readonly CatalogItem[] = [
     description: 'A table section with a toolbar, filters, row selection and pagination.',
     source: 'src/blocks/data-table-01/index.tsx',
     exports: ['DataTable01'],
+    status: 'stable',
+  },
+  {
+    name: 'RecordForm01',
+    slug: 'record-form-01',
+    kind: 'block',
+    category: null,
+    description:
+      'A create and edit form rendered whole from a typed, ordered field specification, with grouped fields, an issue list keyed by field, one or two columns and a save union of three arms.',
+    source: 'src/blocks/record-form-01/index.tsx',
+    exports: ['RecordForm01'],
+    status: 'stable',
+  },
+  {
+    name: 'RecordDetail01',
+    slug: 'record-detail-01',
+    kind: 'block',
+    category: null,
+    description:
+      'One record in full: its identity, the facts the caller declares, the content the caller composes, the actions the caller writes beside the record, and its relationships as one ordered list on one frame, each drawn open one ring deep with the empty words the caller names when it has none.',
+    source: 'src/blocks/record-detail-01/index.tsx',
+    exports: ['RecordDetail01'],
+    status: 'stable',
+  },
+  {
+    name: 'RecordWizard01',
+    slug: 'record-wizard-01',
+    kind: 'block',
+    category: null,
+    description:
+      'A multi-step record write form: one group of fields at a time above the shipped rail, driven by the consumer controlled step index and controlled values, with no submission arm of its own.',
+    source: 'src/blocks/record-wizard-01/index.tsx',
+    exports: ['RecordWizard01'],
+    status: 'stable',
+  },
+  {
+    name: 'IndexDetail01',
+    slug: 'index-detail-01',
+    kind: 'block',
+    category: null,
+    description:
+      'A composition Block rendering an index pane beside a detail pane, holding no selection of its own and connecting the two panes in no way.',
+    source: 'src/blocks/index-detail-01/index.tsx',
+    exports: ['IndexDetail01'],
     status: 'stable',
   },
   {
@@ -2097,10 +2153,10 @@ export const catalog: readonly CatalogItem[] = [
     kind: 'block',
     category: null,
     description:
-      'One issue: its key in the mono face, its state, the fields the caller declares, the body, the thread in the caller order, and slots for the editor, controls and aside.',
+      'Deprecated: one issue in full. The record detail Block, RecordDetail01, draws the same screen under a name that survives whatever the record is called. This Item still renders and is still supported, but nothing new should be started on it.',
     source: 'src/blocks/issue-detail-01/index.tsx',
     exports: ['IssueDetail01'],
-    status: 'stable',
+    status: 'deprecated',
   },
   {
     name: 'NotificationCenter01',

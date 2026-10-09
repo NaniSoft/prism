@@ -12,8 +12,15 @@
  * nothing left to watch the gate react to. Every case below is therefore a shape
  * that really existed in this repository within the hour: the inert arm of an action
  * union, an action whose type had no destination member at all, a required `cta`
- * string rendered as a button, and a control declared by its accessible name and its
- * state with no handler behind either. Read as history rather than as fixtures.
+ * string rendered as a button, a control declared by its accessible name and its
+ * state with no handler behind either, and a row's declared action list rendered as
+ * menu rows. Read as history rather than as fixtures.
+ *
+ * **The two cases added for the widened classification are the ones that prove the
+ * widening happened.** A gate that stopped classifying the menu item would pass the
+ * staged record index shape silently, so each of them is a case that was green under
+ * the previous version of this gate and has to be red under this one. That is the
+ * only evidence that distinguishes a widened rule from a widened comment.
  *
  * Every case runs the gate as a process against a staged tree, never against the
  * repository, for the reason `no-legacy-line.test.mjs` gives: a test that had to
@@ -132,6 +139,80 @@ const FIRES = [
     // and a rule that accepted any `type` would have passed both shipped defects.
     says: ['<Button> is rendered with nothing that makes it act', `${PAGE}:4`],
   },
+  {
+    name: "the shipped record index's declared per-row action list, which is what the widening exists to catch",
+    file: BLOCK,
+    source: [
+      'export function Probe({ rowActions }: { rowActions: DataTableRowAction[] }) {',
+      '  return (',
+      '    <DropdownMenu>',
+      '      <DropdownMenuTrigger aria-label="Row actions">',
+      '        <MoreHorizontal aria-hidden />',
+      '      </DropdownMenuTrigger>',
+      '      <DropdownMenuContent align="end">',
+      '        {rowActions.map((action, index) => (',
+      '          <DropdownMenuItem key={index} variant={action.variant}>',
+      '            {action.label}',
+      '          </DropdownMenuItem>',
+      '        ))}',
+      '      </DropdownMenuContent>',
+      '    </DropdownMenu>',
+      '  )',
+      '}',
+    ].join('\n'),
+    // The shape is the shipped `rowActions` with the handler arm gone, which is what a
+    // caller who declares a label and no handler is left with. Under the previous
+    // classification this run was green, which is the whole of the gate hole.
+    says: ['<DropdownMenuItem> is rendered with nothing that makes it act', `${BLOCK}:9`],
+  },
+  {
+    name: 'a menu row whose only attribute is its label, which is what a reader is announced and cannot activate',
+    file: BLOCK,
+    source: [
+      'export function Probe({ label }: { label: string }) {',
+      '  return (',
+      '    <DropdownMenuContent align="end">',
+      '      <DropdownMenuItem inset>{label}</DropdownMenuItem>',
+      '    </DropdownMenuContent>',
+      '  )',
+      '}',
+    ].join('\n'),
+    says: ['<DropdownMenuItem> is rendered with nothing that makes it act', `${BLOCK}:4`],
+  },
+  {
+    name: 'a menu row rendered as an element that is not a destination, which navigates to nothing',
+    file: BLOCK,
+    source: [
+      'export function Probe({ label, id }: { label: string; id: string }) {',
+      '  return (',
+      '    <DropdownMenuContent align="end">',
+      '      <DropdownMenuItem render={<span data-id={id} />}>{label}</DropdownMenuItem>',
+      '    </DropdownMenuContent>',
+      '  )',
+      '}',
+    ].join('\n'),
+    // `render` alone is not the arm. `render={<span/>}` is the same inert row written
+    // in the shape the Component offers, and a rule that accepted the bare word would
+    // pass it while the reader still gets a focusable menu row that does nothing.
+    says: ['<DropdownMenuItem> is rendered with nothing that makes it act', `${BLOCK}:4`],
+  },
+  {
+    name: 'a switch a Block renders with nothing behind it, which is a control a reader can flip',
+    file: BLOCK,
+    source: [
+      'export function Probe({ notifications }: { notifications: boolean }) {',
+      '  return (',
+      '    <Field className="flex-row items-center justify-between gap-4">',
+      '      <FieldLabel htmlFor="notifications">Notifications</FieldLabel>',
+      '      <Switch id="notifications" checked={notifications} />',
+      '    </Field>',
+      '  )',
+      '}',
+    ].join('\n'),
+    // The settings-panel row with the change handler removed, which is the shape the
+    // settings section describes as a row that both navigates and is changed.
+    says: ['<Switch> is rendered with nothing that makes it act', `${BLOCK}:5`],
+  },
 ]
 
 /** The shapes that must stay green, each with the rule whose removal would redden it. */
@@ -200,6 +281,91 @@ const SILENT = [
     ].join('\n'),
   },
   {
+    name: 'a menu row carrying its own selection handler, which is what a client Block does',
+    rule: 'the onClick arm on a DropdownMenuItem',
+    file: BLOCK,
+    source: [
+      'export function Probe({ onRemove }: { onRemove: () => void }) {',
+      '  return (',
+      '    <DropdownMenuContent align="end">',
+      '      <DropdownMenuItem variant="destructive" onClick={onRemove}>',
+      '        Delete',
+      '      </DropdownMenuItem>',
+      '    </DropdownMenuContent>',
+      '  )',
+      '}',
+    ].join('\n'),
+  },
+  {
+    name: 'a menu row rendered as the anchor it navigates to, which is the shape sites-menu ships',
+    rule: 'the render-plus-href arm, which is both words rather than either one',
+    file: BLOCK,
+    source: [
+      'export function Probe({ href, label }: { href: string; label: string }) {',
+      '  return (',
+      '    <DropdownMenuContent align="end">',
+      '      <DropdownMenuItem',
+      '        render={<a href={href} target="_blank" rel="noopener noreferrer" />}',
+      '      >',
+      '        {label}',
+      '      </DropdownMenuItem>',
+      '    </DropdownMenuContent>',
+      '  )',
+      '}',
+    ].join('\n'),
+  },
+  {
+    name: 'a menu row whose render element is a link behind a comparison, which a pattern match would truncate',
+    rule: 'the balanced tag reader, which is why the `=>` inside the render element does not end the tag',
+    file: BLOCK,
+    source: [
+      'export function Probe({ ids }: { ids: string[] }) {',
+      '  return (',
+      '    <DropdownMenuContent align="end">',
+      '      <DropdownMenuItem',
+      '        variant="destructive"',
+      '        render={<a href={`/rows/${ids.length >= 2 ? "many" : "one"}`} />}',
+      '      >',
+      '        Open',
+      '      </DropdownMenuItem>',
+      '    </DropdownMenuContent>',
+      '  )',
+      '}',
+    ].join('\n'),
+  },
+  {
+    name: 'a switch carrying the change handler it is meaningless without, which is every switch in the tree',
+    rule: 'the onCheckedChange arm',
+    file: BLOCK,
+    source: [
+      'export function Probe({ on, onToggle }: { on: boolean; onToggle: (next: boolean) => void }) {',
+      '  return (',
+      '    <Field className="flex-row items-center justify-between gap-4">',
+      '      <FieldLabel htmlFor="notifications">Notifications</FieldLabel>',
+      '      <Switch id="notifications" checked={on} onCheckedChange={onToggle} />',
+      '    </Field>',
+      '  )',
+      '}',
+    ].join('\n'),
+  },
+  {
+    name: 'a switch whose handler body holds an arrow and a conditional, which a pattern match would truncate',
+    rule: 'the balanced tag reader, which is why `=>` and `>=` do not end a tag',
+    file: BLOCK,
+    source: [
+      'export function Probe({ on, count, onToggle }: { on: boolean; count: number; onToggle: (next: boolean) => void }) {',
+      '  return (',
+      '    <Switch',
+      '      id="notifications"',
+      '      checked={on}',
+      '      disabled={count >= 10}',
+      '      onCheckedChange={(next) => onToggle(next)}',
+      '    />',
+      '  )',
+      '}',
+    ].join('\n'),
+  },
+  {
     name: 'a slot, which is the escape the finding points at',
     rule: 'nothing: this is the shape the gate is asking for',
     file: BLOCK,
@@ -256,12 +422,15 @@ test('the gate passes over the repository it is checked into', () => {
   const result = run(REPO)
   assert.equal(result.status, 0, result.stderr)
   assert.match(result.stdout, /0 finding\(s\)/)
-  // The negative control that makes the clean run mean something: both Components in
-  // the table were classified, and neither printed the "stated and unused" note. A run
-  // that reported `Button: 0` would mean the pattern had stopped matching, which is
-  // indistinguishable from a rule that was deleted.
-  assert.match(result.stdout, /action control, Button: [1-9]\d*/)
-  assert.match(result.stdout, /action control, CtaLink: [1-9]\d*/)
+  // The negative control that makes the clean run mean something: every classified
+  // Component was matched, and none printed the "stated and unused" note. A run that
+  // reported `Button: 0` would mean the pattern had stopped matching, which is
+  // indistinguishable from a rule that was deleted, and a run that printed the note
+  // for `DropdownMenuItem` would mean the widened classification is not reaching the
+  // Blocks it was widened for.
+  for (const component of ['Button', 'CtaLink', 'DropdownMenuItem', 'Switch']) {
+    assert.match(result.stdout, new RegExp(`action control, ${component}: [1-9]\\d*`))
+  }
   assert.doesNotMatch(result.stdout, /stated and unused rather than removed/)
 })
 

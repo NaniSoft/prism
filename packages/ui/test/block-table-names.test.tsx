@@ -45,16 +45,20 @@ const LABELS: DataTable01Labels = {
   columns: 'Columns',
   viewColumns: 'View columns',
   selectAll: 'Select all',
-  selectRow: 'Select row',
+  selectRow: (row) => `Select ${String(row.name)}`,
   rowActions: 'Row actions',
+  sort: (column, direction) => `Sort ${column} ${direction}`,
+  selectedCount: (count) => `${count} selected`,
+  selectedAllMatching: (count) => `All ${count} matching selected`,
+  clearedSelection: 'Selection cleared',
+  dismissSelection: 'Clear selection',
   previous: 'Previous page',
   next: 'Next page',
   page: (page) => `Page ${page}`,
-  selectedCount: (count) => `${count} selected`,
   empty: 'No members',
 }
 
-const COLUMNS = [{ id: 'name', header: 'Name', cell: (row: Record<string, unknown>) => String(row.name) }]
+const COLUMNS = [{ key: 'name', header: 'Name', kind: 'slot' as const }]
 
 describe('a Block table, end to end', () => {
   it('is named by the caller own caption when one is given', () => {

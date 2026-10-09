@@ -1,98 +1,41 @@
 'use client'
 
 import type { FormEvent, ReactNode } from 'react'
-import { useId } from 'react'
+import { useId, useState } from 'react'
 
 import { Button } from '../../components/ui/button'
 import { CtaLink } from '../../components/ui/cta-link'
-import { Field, FieldDescription, FieldLabel } from '../../components/ui/field'
-import { Input } from '../../components/ui/input'
+import { Field, FieldDescription, FieldError, FieldGroup } from '../../components/ui/field'
+import { Label } from '../../components/ui/label'
 import { LiveRegion } from '../../components/ui/live-region'
-import { NativeSelect } from '../../components/ui/native-select'
 import { Section, SectionHeading, type HeadingLevel } from '../../components/ui/section'
-import { Textarea } from '../../components/ui/textarea'
+import {
+  CHOICE_KINDS,
+  fieldText,
+  NEEDS_HIDDEN,
+  renderControl,
+  serialize,
+  SELF_LABELLED,
+  type FieldContext,
+} from '../../lib/field-render'
+import type { FieldKind, FieldSpec, FieldSpecGroup } from '../../lib/spec'
 import { cn } from '../../lib/utils'
 
 /**
- * One choice in a `select` field, and nothing else.
+ * One thing wrong with the form, in the caller's own words.
  *
- * A native `<option>` holds text and nothing more, which is the whole reason a
- * contact form's select is a `NativeSelect` rather than the Base UI one. The two
- * values are a string and its label, so a caller who needs a description beside an
- * option, a count, or anything nested is reaching for a control the platform
- * cannot render, and `Contact01` does not pretend otherwise: it names
- * `NativeSelect`'s own argument in its JSDoc and stops there.
+ * `field` is the `key` of the field the message belongs to, and the key rather
+ * than the label because it is what the caller's values and the form's own
+ * `FormData` are keyed by: a message matched by a label's words breaks the moment
+ * the label is translated. The shape is the one the dialog, the wizard and the
+ * write form already publish, so this Block mints no fifth spelling of an issue.
  */
-export type Contact01Option = {
-  /** What the form submits for this choice, which is a key and not a sentence. */
-  value: string
-  /** The words the reader sees, in the product's own language. */
-  label: string
+export type Contact01Issue = {
+  /** The `key` of the field this message belongs to. */
+  field: string
+  /** The message, in the product's own words. */
+  message: string
 }
-
-/**
- * What every contact field carries, whichever control it draws.
- *
- * `required` is a boolean rather than an optional prop because there is no third
- * state worth having: a field is one the reader must fill or one they may leave,
- * and a `required?: boolean` leaves a caller who passed nothing unable to say which
- * of the two they meant. A field is a data declaration and nothing else, and the
- * two arms below differ only in which control is drawn and in the one property
- * that control needs and the other has no use for.
- */
-type ContactFieldBase = {
-  /** The caller's key for this field, and the key the value arrives under. */
-  id: string
-  /** The field's visible name, and the accessible name its control announces. */
-  label: string
-  /** Whether the reader may submit the form without filling it. */
-  required: boolean
-  /**
-   * A line under the control, announced with it.
-   *
-   * A node, because the honest line is sometimes not one sentence: a caller's
-   * hint, a link to the thing being asked about, a piece of the page's own copy.
-   * It is wired to the control through `aria-describedby` rather than drawn as a
-   * footnote, so a screen reader hears what this field is for as they reach it.
-   */
-  description?: ReactNode
-  /** What the control shows while it is empty. A hint, not a name. */
-  placeholder?: string
-  /** The platform's own autofill hint for this field. */
-  autoComplete?: string
-}
-
-/**
- * One field of the caller's form, and the control it draws.
- *
- * **A union and not one type with an optional `options`, and that is the shape of
- * the whole argument in this Block.** A contact form's fields are the caller's
- * declaration, not this package's opinion about what a reader may be asked, and
- * the one place that shows is the select: a select with no options is a control
- * with nothing in it, which is a question no reader can answer, so `options` is
- * required inside the select arm and forbidden beside the other four. A
- * `options?: string[]` on one type would typecheck the defect and only the
- * diagnostic at run time would catch it, which is one gate too late. The union is
- * the same mechanism `HeroAction` uses for the same reason: the shape that
- * requires something declares it, and the shape that forbids it says so in the
- * type rather than in prose.
- *
- * The cost of the union is that a caller who wants to build a field list
- * generically, from data, has to narrow before it can type the result, and the
- * answer to that is a narrowing function in the caller's own code rather than a
- * looser type here.
- */
-export type ContactField =
-  | (ContactFieldBase & {
-      type: 'select'
-      /** The choices, in the order the reader should meet them. */
-      options: Contact01Option[]
-    })
-  | (ContactFieldBase & {
-      type: 'text' | 'email' | 'tel' | 'textarea'
-      /** A select with no options is a question nobody can answer, so it is not one here. */
-      options?: never
-    })
 
 /**
  * Where a reader can reach a person, and the one address this Block links.
@@ -179,7 +122,7 @@ export type Contact01Props = {
    */
   onSubmit: (value: ContactValue) => void
   /**
-   * The fields, in the order the reader should meet them.
+   * The fields, grouped and ordered, as the shared field specification.
    *
    * **Required, and this list is the whole design rather than a convenience.** A
    * contact form Component with a fixed set of fields is a Component that decides
@@ -189,15 +132,23 @@ export type Contact01Props = {
    * be abandoned and retried through a support channel, a form that cannot ask for
    * a company size sends a one-line hello to a sales team that then spends a week
    * on discovery calls, and a form that cannot ask for a budget guarantees the
-   * reply nobody wanted. So Prism names the five control types it can draw and
-   * supplies no fields: a contact desk that asks for a tax number, a preferred
-   * contact window and three product interests is three fields of the caller's own
-   * vocabulary and a select, and Prism composes all of them. The cost is stated
-   * rather than hidden: a consumer that wants a second column for a subset of its
-   * fields composes two `Contact01`s or reaches for a `Page`, because this Block
-   * draws one column in the order the list gives.
+   * reply nobody wanted. The fields arrive as `FieldSpecGroup`, which is the same
+   * type a record write form takes, so the vocabulary a consumer learns on one
+   * screen is the vocabulary here, and a control this package does not ship is the
+   * `slot` arm rather than a second Block. The cost is stated rather than hidden: a
+   * consumer that wants a second column for a subset of its fields composes two
+   * `Contact01`s or reaches for a `Page`, because this Block draws one column in
+   * the order the list gives.
    */
-  fields: ContactField[]
+  groups: readonly FieldSpecGroup[]
+  /**
+   * The issues to draw, keyed by field. Drawn under the control that owns them.
+   *
+   * An entry names a field's `key` and a message in the product's own words, and
+   * a control's issue is drawn under that control. A message about the submission
+   * rather than about a control is the caller's `status`, which names no field.
+   */
+  issues?: readonly Contact01Issue[]
   /** The label on the one control that submits. */
   submitLabel: string
   /**
@@ -272,24 +223,34 @@ function blankList(value: readonly unknown[] | undefined): boolean {
  *
  * Both reach a developer in a console rather than a reader, which is what makes
  * them refusals rather than copy: the message says what was passed and what to
- * pass instead, and neither of those sentences is ever shown to a reader.
+ * pass instead, and neither of those sentences is ever shown to a reader. The
+ * type catches both for a TypeScript caller, and the check is here for the
+ * JavaScript caller and for the value that came out of a database with the
+ * type's guarantee already gone.
  */
-function assertField(field: ContactField): void {
-  if (blank(field.label)) {
-    throw new Error(
-      `Contact01: the field "${field.id}" declares no label, so the control would be announced with no name and ` +
-        'two fields on this page would be announced identically. Every control this Block draws is named by its ' +
-        'label, so there is no fallback to fall back to.',
-    )
-  }
+function assertGroups(groups: readonly FieldSpecGroup[]): void {
+  for (const group of groups) {
+    for (const field of group.fields) {
+      if (blank(typeof field.label === 'string' ? field.label : undefined)) {
+        throw new Error(
+          `Contact01: the field "${field.key}" declares no label, so the control would be announced with no name and ` +
+            'two fields on this page would be announced identically. Every control this Block draws is named by its ' +
+            'label, so there is no fallback to fall back to.',
+        )
+      }
 
-  if (field.type === 'select' && blankList(field.options)) {
-    throw new Error(
-      `Contact01: the field "${field.id}" is a select and passes no options, so it would render a control with ` +
-        'nothing in it, which is a question no reader can answer and looks answered only because the control is ' +
-        'there and focusable. Pass the choices, or declare the field as a text field and check the answer in your ' +
-        'own handler.',
-    )
+      if (
+        CHOICE_KINDS.has(field.kind) &&
+        blankList((field as { options?: readonly unknown[] }).options)
+      ) {
+        throw new Error(
+          `Contact01: the field "${field.key}" is a choice and passes no options, so it would render a control with ` +
+            'nothing in it, which is a question no reader can answer and looks answered only because the control is ' +
+            'there and focusable. Pass the choices, or declare the field as a text field and check the answer in your ' +
+            'own handler.',
+        )
+      }
+    }
   }
 }
 
@@ -398,7 +359,8 @@ export function Contact01({
   title,
   description,
   onSubmit,
-  fields,
+  groups,
+  issues,
   submitLabel,
   consent,
   address,
@@ -409,23 +371,29 @@ export function Contact01({
 }: Contact01Props) {
   const generated = useId()
   const sending = status?.state === 'sending'
+  const [values, setValues] = useState<Record<string, unknown>>({})
+  const setValue = (key: string, value: unknown) =>
+    setValues((previous) => ({ ...previous, [key]: value }))
 
-  for (const field of fields) assertField(field)
+  assertGroups(groups)
+  const fields = groups.flatMap((group) => group.fields)
 
   /*
    * The values are read out of the form rather than out of any prop, because a
    * contact form is uncontrolled by nature: there are as many fields as the caller
-   * declared and no state to hold them in. The keys are the caller's own `id`s, so
-   * the record that arrives is shaped like the declaration that produced it, and a
-   * caller that renames a field in one place renames it in one place.
+   * declared and no state to hold them in. The keys are the caller's own field
+   * `key`s, so the record that arrives is shaped like the declaration that produced
+   * it, and a caller that renames a field in one place renames it in one place. The
+   * handful of Prism controls the platform will not submit on their own hold their
+   * value here and carry a hidden input under the field's key.
    */
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const read = new FormData(event.currentTarget)
     const next: ContactValue = {}
     for (const field of fields) {
-      const one = read.get(field.id)
-      if (typeof one === 'string') next[field.id] = one
+      const one = read.get(field.key)
+      if (typeof one === 'string') next[field.key] = one
     }
     onSubmit(next)
   }
@@ -454,63 +422,88 @@ export function Contact01({
             onSubmit={handleSubmit}
             className="flex w-full max-w-measure flex-col gap-4"
           >
-            {fields.map((field) => {
-              const controlId = `${generated}-${field.id}`
-              const descriptionId = `${controlId}-description`
+            {groups.map((group, groupIndex) => (
+              <FieldGroup
+                key={group.id ?? groupIndex}
+                data-slot="contact-01-group"
+                className="flex flex-col gap-4"
+              >
+                {group.label === undefined ? null : (
+                  <p
+                    data-slot="contact-01-group-label"
+                    className="text-foreground text-sm font-medium"
+                  >
+                    {group.label}
+                  </p>
+                )}
+                {group.description === undefined ? null : (
+                  <p
+                    data-slot="contact-01-group-description"
+                    className="text-muted-foreground text-sm"
+                  >
+                    {group.description}
+                  </p>
+                )}
+                {group.fields.map((field, fieldIndex) => {
+                  const id = `${generated}-${groupIndex}-${fieldIndex}`
+                  const labelId = `${id}-label`
+                  const helpId = field.help === undefined ? undefined : `${id}-help`
+                  const fieldIssues = (issues ?? []).filter((issue) => issue.field === field.key)
+                  const errorId = fieldIssues.length > 0 ? `${id}-error` : undefined
+                  const describedBy =
+                    helpId === undefined
+                      ? errorId
+                      : errorId === undefined
+                        ? helpId
+                        : `${helpId} ${errorId}`
+                  const kind = field.kind.toLowerCase() as Lowercase<FieldKind>
+                  const ctx: FieldContext = {
+                    id,
+                    labelId,
+                    describedBy,
+                    invalid: fieldIssues.length > 0,
+                    text: fieldText(field),
+                    values,
+                    setValue,
+                  }
 
-              return (
-                <Field key={field.id} data-slot="contact-01-field" data-field={field.type}>
-                  <FieldLabel htmlFor={controlId}>{field.label}</FieldLabel>
-
-                  {field.type === 'textarea' ? (
-                    <Textarea
-                      id={controlId}
-                      name={field.id}
-                      rows={4}
-                      placeholder={field.placeholder}
-                      required={field.required}
-                      aria-describedby={field.description === undefined ? undefined : descriptionId}
-                    />
-                  ) : field.type === 'select' ? (
-                    <NativeSelect
-                      id={controlId}
-                      name={field.id}
-                      required={field.required}
-                      aria-describedby={field.description === undefined ? undefined : descriptionId}
-                    >
-                      {field.options.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </NativeSelect>
-                  ) : (
-                    <Input
-                      id={controlId}
-                      name={field.id}
-                      type={field.type}
-                      placeholder={field.placeholder}
-                      autoComplete={field.autoComplete}
-                      required={field.required}
-                      aria-describedby={field.description === undefined ? undefined : descriptionId}
-                    />
-                  )}
-
-                  {/*
-                   * The description is wired to the control rather than drawn under
-                   * the row, so what a sighted reader reads under the field and what
-                   * a screen reader announces with it are the same sentence. The id
-                   * is derived from the control's own, which is also the id a
-                   * `FieldError` would take if a caller were composing this row
-                   * themselves; see the JSDoc for why this Block draws no error of
-                   * its own.
-                   */}
-                  {field.description === undefined ? null : (
-                    <FieldDescription id={descriptionId}>{field.description}</FieldDescription>
-                  )}
-                </Field>
-              )
-            })}
+                  return (
+                    <Field key={field.key} data-slot="contact-01-field" data-field={field.kind}>
+                      {SELF_LABELLED.has(kind) ? null : (
+                        <Label
+                          id={labelId}
+                          htmlFor={id}
+                          required={field.required}
+                          disabled={field.disabled}
+                        >
+                          {field.label}
+                        </Label>
+                      )}
+                      {renderControl(field, ctx)}
+                      {NEEDS_HIDDEN.has(kind) ? (
+                        <input
+                          type="hidden"
+                          name={field.key}
+                          value={serialize(values[field.key] ?? field.defaultValue)}
+                        />
+                      ) : null}
+                      {field.help === undefined ? null : (
+                        <FieldDescription id={helpId}>{field.help}</FieldDescription>
+                      )}
+                      {fieldIssues.length === 0 ? null : (
+                        <FieldError id={errorId}>
+                          {fieldIssues.map((issue, issueIndex) => (
+                            <span key={issueIndex} data-slot="contact-01-issue">
+                              {issue.message}
+                            </span>
+                          ))}
+                        </FieldError>
+                      )}
+                    </Field>
+                  )
+                })}
+              </FieldGroup>
+            ))}
 
             {consent === undefined ? null : (
               <p data-slot="contact-01-consent" className="text-muted-foreground text-sm">

@@ -360,12 +360,18 @@ test('the real repository passes, and prints every historical-record discharge',
   // edit to MIGRATION.md's banner failed it, which is the brittleness the
   // repository argues against elsewhere for exactly this reason.
   assert.match(result.stdout, /MIGRATION\.md:\d+\s+\[vendor-name\]\s+DISCHARGED by convention `migration-note`/)
-  // Two files are skipped as historical records. The migration note is one. The
-  // licensing review under `docs/history` is the other, and it names the retired
-  // line because a review of the terms governing a third-party component product
-  // is about that product rather than about Prism. The count is asserted rather
-  // than derived so that a file added here has to be a decision.
-  assert.match(result.stdout, /2 file\(s\) skipped as historical record\(s\)/)
+  // Three files are skipped as historical records. The migration note is one.
+  // The licensing review under `docs/history` is a second, and it names the
+  // retired line because a review of the terms governing a third-party component
+  // product is about that product rather than about Prism. The entity form and
+  // split survey is the third: a dated, cited, one-time reading of how other
+  // systems solve the two shapes, which is the same kind of record as the
+  // licensing review and is filed beside it for the same reason. It was written
+  // under `docs/research` and failed the gate there with 18 findings, so its
+  // home is the convention rather than a rewrite of prose that loses the
+  // comparison. The count is asserted rather than derived so that a file added
+  // here has to be a decision, and making this one is the reason it reads three.
+  assert.match(result.stdout, /3 file\(s\) skipped as historical record\(s\)/)
   assert.match(result.stdout, /read as a graph, never grepped: pnpm-lock\.yaml/)
 })
 

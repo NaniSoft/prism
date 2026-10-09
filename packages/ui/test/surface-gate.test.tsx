@@ -25,11 +25,13 @@ const DECLARATIONS: Record<string, string> = {
   'dist/components/ui/button.d.ts': 'export declare function Button(): void\n',
   'dist/lib/utils.d.ts': 'export declare function cn(...classes: string[]): string\n',
   // The gate's INTERNAL list names every internal declaration, and it is checked in
-  // both directions, so a fixture that emits only one of the three is reporting a
+  // both directions, so a fixture that emits only some of them is reporting a
   // boundary that is stale. That is the rule working, and the fixture follows it.
   'dist/lib/rank.d.ts': 'export declare function locate(text: string, query: string): { rank: number }\n',
   'dist/lib/figure.d.ts':
     'export declare function occupiedBox(at: { x: number; y: number }, mark: number): { l: number }\n',
+  'dist/lib/field-render.d.ts':
+    'export declare function renderControl(field: unknown, ctx: unknown): unknown\n',
 }
 
 const manifest = (exports: Record<string, unknown>) =>
@@ -72,8 +74,8 @@ describe('the surface gate', () => {
     expect(result.stderr).toBe('')
     expect(result.status).toBe(0)
     // The counts follow the fixture, and the fixture now emits every internal
-    // declaration because the gate names all three in its boundary.
-    expect(result.stdout).toContain('5 emitted declaration(s), 2 public, 3 internal')
+    // declaration because the gate names all four in its boundary.
+    expect(result.stdout).toContain('6 emitted declaration(s), 2 public, 4 internal')
     expect(result.stdout).toContain(
       'exports["./components/*"] -> ./dist/components/ui/*.js matched 1 declaration(s)',
     )
@@ -167,6 +169,50 @@ describe('the surface gate', () => {
     expect(result.stderr).toContain('dist has no emitted declarations; run the build before this gate')
   })
 
+  it('reads a declaration under dist/lib that a published entry reaches, and calls it public', () => {
+    // The boundary is the `exports` map and not the directory. A consumer cannot
+    // type a column without the column specification, so the specification
+    // declaration lives beside the internal helpers in `src/lib` and is published;
+    // treating the directory as the boundary would have called it internal and made
+    // rules 2 and 3 skip the one file on that subpath a consumer reads.
+    const result = run(
+      { ...BASE_EXPORTS, './spec': { types: './dist/lib/spec.d.ts', default: './dist/lib/spec.js' } },
+      { ...DECLARATIONS, 'dist/lib/spec.d.ts': 'export type FieldSpec = { key: string }\n' },
+    )
+
+    expect(result.status).toBe(0)
+    expect(result.stderr).toBe('')
+    expect(result.stdout).toContain('7 emitted declaration(s), 3 public, 4 internal')
+    expect(result.stdout).toContain(
+      'published under dist/lib, so the exports map and not the directory decides the boundary: dist/lib/spec.d.ts',
+    )
+  })
+
+  it('fails a declared internal file a published entry now reaches, naming the contradiction', () => {
+    const result = run(
+      { ...BASE_EXPORTS, './rank': { types: './dist/lib/rank.d.ts', default: './dist/lib/rank.js' } },
+      DECLARATIONS,
+    )
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain(
+      'dist/lib/rank.d.ts: is declared internal in INTERNAL and a published entry reaches it',
+    )
+    expect(result.stderr).toContain('the boundary says')
+  })
+
+  it('still fails a variant recipe on a declaration under dist/lib that a published entry reaches', () => {
+    // The same case one layer down: if the boundary were still the directory, this
+    // subpath would be skipped by rules 2 and 3 and the recipe would ship.
+    const result = run(
+      { ...BASE_EXPORTS, './spec': { types: './dist/lib/spec.d.ts', default: './dist/lib/spec.js' } },
+      { ...DECLARATIONS, 'dist/lib/spec.d.ts': 'export declare const fieldVariants: Record<string, string>\n' },
+    )
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('dist/lib/spec.d.ts: exports the internal variant recipe "fieldVariants"')
+  })
+
   it('states its coverage on the real package', () => {
     const result = spawnSync(process.execPath, [GATE], { cwd: REPO, encoding: 'utf8' })
 
@@ -174,7 +220,7 @@ describe('the surface gate', () => {
     expect(result.status).toBe(0)
     // The internal count and the list beside it are a stated boundary that grows as
     // the package gains internal helpers, so both are asserted as present and as
-    // naming the three that are deliberately internal, rather than pinned to a total.
+    // naming the four that are deliberately internal, rather than pinned to a total.
     // A previous version asserted 1 internal and named only utils, which failed
     // the moment a second internal declaration was added on purpose.
     expect(result.stdout).toMatch(/\d+ emitted declaration\(s\), \d+ public, \d+ internal/)
@@ -182,6 +228,10 @@ describe('the surface gate', () => {
     expect(result.stdout).toContain('dist/lib/utils.d.ts')
     expect(result.stdout).toContain('dist/lib/rank.d.ts')
     expect(result.stdout).toContain('dist/lib/figure.d.ts')
+    expect(result.stdout).toContain('dist/lib/field-render.d.ts')
+    // The specification module is published out of the same directory, and this is
+    // the line that says so rather than leaving a reader to infer it from a count.
+    expect(result.stdout).toContain('dist/lib/spec.d.ts')
     expect(result.stdout).toMatch(
       /exports\["\.\/components\/\*"\] -> \.\/dist\/components\/ui\/\*\.js matched [1-9]\d* declaration\(s\)/,
     )

@@ -4,36 +4,57 @@ import { Button } from '../../components/ui/button'
 import { cn } from '../../lib/utils'
 
 /**
- * The three reasons a region has nothing in it.
+ * The four reasons a region has nothing in it.
  *
- * **Three, and the set is closed because the three want different words and
+ * **Four, and the set is closed at four because the four want different words and
  * different actions, so a consumer who cannot say which one they have writes
  * "No data".** That is the whole failure this Block exists to prevent, and it is
- * a failure rather than a style preference because the three are answers to three
- * different questions and the reader acts on each one differently:
+ * a failure rather than a style preference because all four answer one question
+ * and the reader acts on each answer differently. The question is what happened
+ * to the collection this region would have drawn:
  *
  * - `first-run` - nothing has ever existed here. The reader is not blocked, they
  *   are at the beginning, and the action is to *make the first one*. A sentence
  *   that says nothing is available and an action that creates is the whole state.
- * - `no-match` - things exist and the reader's own filter removed all of them.
+ * - `no-match` - things exist and the reader's own narrowing removed all of them.
  *   The reader is not at the beginning and nothing is missing; the action is to
- *   *widen or clear the filter*, and offering to create something here invents
+ *   *widen or clear the narrowing*, and offering to create something here invents
  *   work the reader does not need.
+ * - `emptied-by-reader` - things existed here and this reader's own earlier action
+ *   moved every one of them out of it. The reader is not at the beginning either,
+ *   and nothing is missing or hidden: this is a bin the reader has just cleared.
+ *   There is no action *in this region*, because a reader who has deleted nothing
+ *   has nothing to restore, and restoring is a per row command and a batch action
+ *   in the surrounding surface, on the caller's own nodes.
  * - `not-permitted` - things exist and this reader may not see them. The action
  *   is to *ask for access or change context*, and a create action here is a lie
  *   about what the reader can do, which is worse than no action at all.
  *
- * A fourth such as `error` or `loading` is deliberately absent: those are states
+ * **Two of the four are the reader's own doing, and a narrowing and a deletion are
+ * not the same doing, so they are two members rather than one.** `no-match` hides
+ * rows out of a set that is still there, so clearing it brings them back;
+ * `emptied-by-reader` is a record that is gone from the live set rather than hidden
+ * in it, and the reader put it there. Every saved view a caller builds out of the
+ * filter values it holds is already `no-match` and wants no member of its own,
+ * because a view that matches nothing is a narrowing that came back empty. A trash
+ * view is the one that differs in kind rather than in content: it is a different
+ * collection the caller chose to fetch rather than a narrowing of this one. So the
+ * two differ in exactly the fact a reader must be told honestly, which is whether
+ * the records are still there behind the narrowing or gone and only the caller can
+ * bring them back. One sentence for both would tell a reader who has deleted
+ * everything that their own search found nothing.
+ *
+ * **A fifth such as `error` or `loading` is deliberately absent:** those are states
  * the surrounding surface already owns, and a region that is erroring has an
  * `Alert` and a region that is loading has a `Spinner`. A Block that drew them
  * would give a consumer two places to put the same fact.
  *
  * @see EMPTY_REASONS
  */
-export const EMPTY_REASONS = ['first-run', 'no-match', 'not-permitted'] as const
+export const EMPTY_REASONS = ['first-run', 'no-match', 'emptied-by-reader', 'not-permitted'] as const
 
 /**
- * One of the three reasons a region has nothing in it.
+ * One of the four reasons a region has nothing in it.
  *
  * The reason is a machine value and never reader-facing text. The words are the
  * consumer's: two products call the same state "Nothing here yet" and "Your
@@ -42,21 +63,24 @@ export const EMPTY_REASONS = ['first-run', 'no-match', 'not-permitted'] as const
 export type EmptyReason = (typeof EMPTY_REASONS)[number]
 
 /**
- * The one thing that differs between the three frames.
+ * The one thing that differs between the four frames.
  *
  * **The frame is shared and the difference is an ink, and that is a decision
- * about honesty rather than about looks.** All three get the same dashed edge and
- * the same floor under them, because all three mean *there is nothing here to
+ * about honesty rather than about looks.** All four get the same dashed edge and
+ * the same floor under them, because all four mean *there is nothing here to
  * read*. What they must not share is a claim about why, and a tint or a border
  * hue would be one: a region drawn in a warning colour tells the reader their
- * filter, or their permissions, is a problem, and in the second case it is not.
+ * filter, their own deletions, or their permissions are a problem, and in the last
+ * two cases it is not.
  *
  * So only `not-permitted` carries an ink, and it is `muted-foreground` rather
  * than a destructive tone. A permission boundary is not a failure, and painting
  * it red teaches a reader to ignore red for the things that are urgent. The
  * distinction the reader actually needs is *you cannot see this* against *this is
  * broken*, and the words carry it; the frame says only that the region is empty,
- * which is true of all three.
+ * which is true of all four. `emptied-by-reader` carries no ink for the same
+ * reason: a reader who emptied a bin did it themselves, nothing is broken, nobody
+ * is blocked, and nothing is missing that the caller cannot restore.
  */
 const REASON_INK: Partial<Record<EmptyReason, string>> = {
   'not-permitted': 'text-muted-foreground',
@@ -72,12 +96,15 @@ const REASON_INK: Partial<Record<EmptyReason, string>> = {
  */
 export type EmptyState01Props = {
   /**
-   * Which of the three situations this is. Required rather than defaulted,
+   * Which of the four situations this is. Required rather than defaulted,
    * because the default would be the one that hides the bug: a Block that
    * defaulted to `first-run` would render a create action beside a permission
    * boundary, and a Block that defaulted to `no-match` would tell every reader
    * their own filter removed something on their first visit. Making the caller
-   * name the reason is what stops either from happening quietly.
+   * name the reason is what stops either from happening quietly, and it is what
+   * separates the two the reader emptied themselves: passing `no-match` beside a
+   * bin the reader just cleared says their search found nothing in it, which is
+   * false, because nothing there was there to be filtered.
    */
   reason: EmptyReason
   /**
@@ -96,11 +123,15 @@ export type EmptyState01Props = {
    * The label of the one action, in the product's own words.
    *
    * Optional, and its absence is a legitimate state rather than a gap: a region
-   * a reader cannot act on - a permission boundary, an archived-only view, a
-   * feature that is switched off for their plan - has no next step, and inventing
-   * one is how an empty state ends up offering a reader a button that cannot
-   * help them. `reason` does not require it either, because the same rule applies
-   * across the three: the action exists when the reader has something to do.
+   * a reader cannot act on - a permission boundary, a bin the reader has just
+   * emptied, an archived-only view, a feature that is switched off for their plan
+   * - has no next step *in this region*, and inventing one is how an empty state
+   * ends up offering a reader a button that cannot help them. `reason` does not
+   * require it either, because the same rule applies across the four: the action
+   * exists when the reader has something to do here. For `emptied-by-reader` the
+   * next step is elsewhere by construction, since the records to restore are the
+   * caller's own nodes and their restore command belongs to the index around this
+   * region.
    */
   actionLabel?: string
   /**
@@ -115,7 +146,7 @@ export type EmptyState01Props = {
    * A slot and not an icon the Block picks, because the mark that means "nothing
    * here yet" and the mark that means "you cannot see this" are different marks,
    * and a Block that chose one would give four products an icon that is wrong for
-   * one of the three reasons. It is `aria-hidden` wherever a consumer puts it: the
+   * one of the four reasons. It is `aria-hidden` wherever a consumer puts it: the
    * reason is carried by the words, and an icon a screen reader reads is a second
    * announcement of the same sentence.
    */
@@ -133,12 +164,13 @@ export type EmptyState01Props = {
  *
  * **The design decision is the `reason` prop, and it is the reason this is a Block
  * rather than a Component.** An empty state looks like one thing, which is why it
- * has been written by hand in every product that has one, and it is actually three
+ * has been written by hand in every product that has one, and it is actually four
  * things that need different words and different actions. A component with a
  * `title` and a `body` and an `action` cannot express the difference, so every
  * consumer re-decides it in their own words and at least one of them gets it
- * wrong: a permission boundary that offers "Create your first project", or a
- * first-run state that says "No results found". Naming the reason forces the
+ * wrong: a permission boundary that offers "Create your first project", a
+ * first-run state that says "No results found", or a bin the reader has just
+ * emptied that says their filter matched nothing. Naming the reason forces the
  * decision into the open and gives the Block something to enforce.
  *
  * **A Block and not a Component because it is a composition of five decisions
@@ -160,7 +192,17 @@ export type EmptyState01Props = {
  * actions is a form, and a form in a region that has nothing in it is a form with
  * nothing to submit. One action is the next step; the rest belong in the
  * surrounding surface, where the reader can see them without this region
- * competing.
+ * competing. `emptied-by-reader` is the case where there is provably no next step
+ * in the region at all, because the records a reader could restore are not in it.
+ *
+ * **All four are statements about a collection, and that is what keeps the fourth
+ * one here rather than beside `NothingChosen01`.** Each answers what happened to
+ * the set this region would have drawn, so the frame the four share stays true of
+ * all four: there is nothing here to read. A bin the reader emptied has no
+ * readable neighbour to make that frame a lie beside it, because everything it
+ * would have drawn is gone. `NothingChosen01` is the opposite claim in a region
+ * whose records are all still there, which is why it is a Block of its own and
+ * not a fifth reason here; `DESIGN.md` holds that argument in full.
  *
  * It is a server Component. It holds no state and imports no client code, so a
  * consumer that passes a client action inside it pays for the action and not for

@@ -1,0 +1,8 @@
+{
+  "name": "record-detail-01",
+  "title": "Record Detail 01 - One Record And Its Relationships",
+  "description": "One record in full: its identity, the facts the caller declares, the content the caller composes, the actions the caller writes beside the record, and its relationships as one ordered list on one frame. Every relation is drawn open in a collection arrangement this package already ships, one ring deep, with the empty words the caller names when it has none. Server Component, and it takes no total, no count and no sum.",
+  "categories": ["application"],
+  "registryDependencies": ["section", "table", "list-panel", "timeline", "avatar-group", "cta-link", "empty-state-01"],
+  "dependencies": []
+}

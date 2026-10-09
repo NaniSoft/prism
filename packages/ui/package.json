@@ -64,6 +64,10 @@
       "types": "./dist/catalog.d.ts",
       "default": "./dist/catalog.js"
     },
+    "./spec": {
+      "types": "./dist/lib/spec.d.ts",
+      "default": "./dist/lib/spec.js"
+    },
     "./styles.css": "./dist/styles.css",
     "./gates": {
       "default": "./gates/index.mjs"
@@ -96,7 +100,7 @@
     "sync": "node scripts/sync-registry.mjs",
     "validate": "node scripts/validate-registry.mjs",
     "build": "node scripts/build.mjs && pnpm sync && pnpm validate && node scripts/check-catalogue.mjs && shadcn build && node scripts/check-surface.mjs && node scripts/check-focus-indicators.mjs && node scripts/check-item-docs.mjs && node scripts/check-block-copy.mjs && node scripts/check-item-category.mjs && node scripts/check-block-imports.mjs",
-    "check": "node scripts/validate-registry.mjs && node scripts/check-catalogue.mjs && node scripts/check-surface.mjs && node scripts/check-focus-indicators.mjs && node scripts/check-breakpoint-variants.mjs && node scripts/check-container-namespace.mjs && node scripts/check-pack-boundary.mjs && node scripts/check-vector-ink.mjs && node scripts/check-client-budget.mjs && node scripts/check-theme-resolution.mjs && node scripts/check-boot-budget.mjs && node scripts/check-item-docs.mjs && node scripts/check-block-copy.mjs && node scripts/check-item-category.mjs && node scripts/check-block-imports.mjs && node scripts/check-gate-kit.mjs && node scripts/check-typeface.mjs && node scripts/check-variant-ink.mjs",
+    "check": "node scripts/validate-registry.mjs && node scripts/check-catalogue.mjs && node scripts/check-surface.mjs && node scripts/check-focus-indicators.mjs && node scripts/check-breakpoint-variants.mjs && node scripts/check-container-namespace.mjs && node scripts/check-pack-boundary.mjs && node scripts/check-vector-ink.mjs && node scripts/check-client-budget.mjs && node scripts/check-theme-resolution.mjs && node scripts/check-boot-budget.mjs && node scripts/check-item-docs.mjs && node scripts/check-block-copy.mjs && node scripts/check-item-category.mjs && node scripts/check-block-imports.mjs && node scripts/check-spec-unions.mjs && node scripts/check-gate-kit.mjs && node scripts/check-typeface.mjs && node scripts/check-variant-ink.mjs",
     "check:gate-kit": "node scripts/check-gate-kit.mjs",
     "check:vector-ink": "node scripts/check-vector-ink.mjs",
     "check:client-budget": "node scripts/check-client-budget.mjs",
@@ -111,6 +115,7 @@
     "check:block-copy": "node scripts/check-block-copy.mjs",
     "check:item-category": "node scripts/check-item-category.mjs",
     "check:block-imports": "node scripts/check-block-imports.mjs",
+    "check:spec-unions": "node scripts/check-spec-unions.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "prepack": "node ../../scripts/stage-package-files.mjs",

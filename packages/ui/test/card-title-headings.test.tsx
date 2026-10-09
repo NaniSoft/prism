@@ -119,7 +119,7 @@ const authForm = (headingLevel?: HeadingLevel) => (
     {...(headingLevel ? { headingLevel } : {})}
     title="Sign in"
     submitLabel="Sign in"
-    fields={[{ id: 'email', label: 'Email', type: 'email' }]}
+    groups={[{ fields: [{ key: 'email', label: 'Email', kind: 'Input' }] }]}
   />
 )
 
@@ -127,9 +127,11 @@ const settingsPanel = (headingLevel?: HeadingLevel) => (
   <SettingsPanel01
     {...(headingLevel ? { headingLevel } : {})}
     title="Workspace settings"
-    sections={[
-      { id: 'general', title: 'General', fields: [{ id: 'name', label: 'Name', kind: 'text' }] },
+    groups={[
+      { id: 'general', label: 'General', fields: [{ key: 'name', label: 'Name', kind: 'Input' }] },
     ]}
+    values={{}}
+    onValueChange={() => {}}
   />
 )
 
@@ -139,7 +141,7 @@ const authPage = (headingLevel?: HeadingLevel) => (
     form={{
       title: 'Sign in',
       submitLabel: 'Sign in',
-      fields: [{ id: 'email', label: 'Email', type: 'email' }],
+      groups: [{ fields: [{ key: 'email', label: 'Email', kind: 'Input' }] }],
     }}
     aside={{ title: 'New here', description: 'An account takes a moment.' }}
   />
@@ -236,7 +238,7 @@ const dashboard = (headingLevel?: HeadingLevel) => (
   <Dashboard01
     {...(headingLevel ? { headingLevel } : {})}
     title="Section heading"
-    metrics={[{ label: 'One label', value: '1' }]}
+    metrics={[{ key: 'one', label: 'One label', value: '1' }]}
     panels={[{ id: 'first', title: 'First panel', children: <p>One sentence.</p> }]}
   />
 )
@@ -354,7 +356,7 @@ const provisioning = (headingLevel?: HeadingLevel) => (
     {...(headingLevel ? { headingLevel } : {})}
     title="Section heading"
     steps={[
-      { id: 'first', name: 'First step', fields: [{ id: 'name', label: 'Name', type: 'text', required: true }] },
+      { id: 'first', name: 'First step', fields: [{ key: 'name', label: 'Name', kind: 'Input', required: true }] },
       { id: 'second', name: 'Second step', fields: [] },
     ]}
     backLabel="Back"

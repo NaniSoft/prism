@@ -40,8 +40,8 @@ const CARDS: ChartGroup01Card[] = [
     ),
     legend: <ChartLegend series={REQUESTS} />,
     reading: [
-      { label: 'Peak day', value: '150', delta: 6, deltaFormat: (value) => `${value}` },
-      { label: 'Total', value: '2,280' },
+      { key: 'peak', label: 'Peak day', value: '150', delta: 6, deltaFormat: '6 more than the week before', hint: 'vs last week' },
+      { key: 'total', label: 'Total', value: '2,280' },
     ],
     actions: <Button size="sm" variant="ghost">Last week</Button>,
   },
@@ -50,14 +50,14 @@ const CARDS: ChartGroup01Card[] = [
     title: 'Latency',
     description: 'Milliseconds at the ninety fifth percentile.',
     figure: <Chart variant="line" label="Latency at the ninety fifth percentile" labels={DAYS} series={LATENCY} />,
-    reading: [{ label: 'Worst day', value: '511ms', delta: -43, deltaFormat: (value) => `${Math.abs(value)}ms` }],
+    reading: [{ key: 'worst', label: 'Worst day', value: '511ms', delta: -43, deltaFormat: '43ms faster' }],
   },
   {
     id: 'errors',
     title: 'Errors',
     description: 'Responses in the five hundreds.',
     figure: <Chart variant="bar" label="Server errors per day" labels={DAYS} series={ERRORS} />,
-    reading: [{ label: 'Total', value: '13' }],
+    reading: [{ key: 'total', label: 'Total', value: '13' }],
   },
 ]
 

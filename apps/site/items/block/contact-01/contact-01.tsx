@@ -3,7 +3,8 @@
 import { useState } from 'react'
 
 import { Button } from '@nanisoft/prism-ui/components/button'
-import { Contact01, type ContactField } from '@nanisoft/prism-ui/blocks/contact-01'
+import { Contact01 } from '@nanisoft/prism-ui/blocks/contact-01'
+import type { FieldSpecGroup } from '@nanisoft/prism-ui/spec'
 
 /**
  * The declared field list, with the field the fixed set of four would not have had.
@@ -12,44 +13,49 @@ import { Contact01, type ContactField } from '@nanisoft/prism-ui/blocks/contact-
  * in one file. A contact form Component with four fields of its own would render
  * exactly the same picture and would have thrown away the two facts a reader came
  * here to give, and the sentence the reader then gets back is the one that was
- * assembled without them.
+ * assembled without them. The fields are the shared specification, so a choice
+ * carries its options under the `NativeSelect` kind.
  */
-const FIELDS: ContactField[] = [
-  { id: 'name', type: 'text', label: 'Your name', required: true, autoComplete: 'name' },
-  { id: 'email', type: 'email', label: 'Email address', required: true, autoComplete: 'email' },
+const GROUPS: readonly FieldSpecGroup[] = [
   {
-    id: 'order',
-    type: 'text',
-    label: 'Order number',
-    required: false,
-    description: 'Only if you are writing about an order.',
-    placeholder: 'NX-0000',
-  },
-  {
-    id: 'topic',
-    type: 'select',
-    label: 'What is this about?',
-    required: true,
-    options: [
-      { value: 'sales', label: 'Buying' },
-      { value: 'support', label: 'Something is broken' },
-      { value: 'press', label: 'Writing about you' },
+    fields: [
+      { key: 'name', kind: 'Input', label: 'Your name', required: true, autoComplete: 'name' },
+      { key: 'email', kind: 'Input', label: 'Email address', required: true, autoComplete: 'email' },
+      {
+        key: 'order',
+        kind: 'Input',
+        label: 'Order number',
+        required: false,
+        help: 'Only if you are writing about an order.',
+        placeholder: 'NX-0000',
+      },
+      {
+        key: 'topic',
+        kind: 'NativeSelect',
+        label: 'What is this about?',
+        required: true,
+        options: [
+          { value: 'sales', label: 'Buying' },
+          { value: 'support', label: 'Something is broken' },
+          { value: 'press', label: 'Writing about you' },
+        ],
+      },
+      {
+        key: 'budget',
+        kind: 'NativeSelect',
+        label: 'Budget range',
+        required: false,
+        help: 'A range is enough. It decides who reads this first.',
+        options: [
+          { value: 'under-5k', label: 'Under 5,000' },
+          { value: '5k-25k', label: '5,000 to 25,000' },
+          { value: 'over-25k', label: 'Over 25,000' },
+          { value: 'unknown', label: 'I do not know yet' },
+        ],
+      },
+      { key: 'message', kind: 'Textarea', rows: 4, label: 'What would you like to say?', required: true },
     ],
   },
-  {
-    id: 'budget',
-    type: 'select',
-    label: 'Budget range',
-    required: false,
-    description: 'A range is enough. It decides who reads this first.',
-    options: [
-      { value: 'under-5k', label: 'Under 5,000' },
-      { value: '5k-25k', label: '5,000 to 25,000' },
-      { value: 'over-25k', label: 'Over 25,000' },
-      { value: 'unknown', label: 'I do not know yet' },
-    ],
-  },
-  { id: 'message', type: 'textarea', label: 'What would you like to say?', required: true },
 ]
 
 /** The address, with the label a mailto link needs to be readable as a sentence. */
@@ -139,7 +145,7 @@ export default function Contact01Demo() {
         eyebrow="Nexus"
         title="Write to us"
         description="A person reads every one of these, usually within a working day."
-        fields={FIELDS}
+        groups={GROUPS}
         submitLabel="Send"
         consent="We use what you send to answer you and nothing else. We do not add you to a list."
         address={ADDRESS}

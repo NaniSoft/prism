@@ -6,95 +6,21 @@ import { useId, useState } from 'react'
 import { Button } from '../../components/ui/button'
 import { Card } from '../../components/ui/card'
 import { CtaLink } from '../../components/ui/cta-link'
-import { Field, FieldDescription, FieldGroup, FieldLabel } from '../../components/ui/field'
-import { Input } from '../../components/ui/input'
+import { Field, FieldDescription, FieldGroup } from '../../components/ui/field'
+import { Label } from '../../components/ui/label'
 import { LiveRegion } from '../../components/ui/live-region'
-import { NativeSelect } from '../../components/ui/native-select'
 import { PasswordField } from '../../components/ui/password-field'
 import { Progress } from '../../components/ui/progress'
 import { Section, SectionHeading, type HeadingLevel } from '../../components/ui/section'
+import {
+  CHOICE_KINDS,
+  fieldText,
+  renderControl,
+  SELF_LABELLED,
+  type FieldContext,
+} from '../../lib/field-render'
+import type { FieldKind, FieldSpecGroup } from '../../lib/spec'
 import { cn } from '../../lib/utils'
-
-/**
- * One choice in a `select` field, and nothing else.
- *
- * A native `<option>` holds text and nothing more, which is the whole reason an
- * account form's select is a `NativeSelect` rather than the Base UI one. The two
- * values are a string and its label, so a caller who needs a description beside an
- * option, a count, or anything nested is reaching for a control the platform cannot
- * render, and `Signup01` does not pretend otherwise: it names `NativeSelect`'s own
- * argument in its JSDoc and stops there.
- */
-export type SignupOption = {
-  /** What the form submits for this choice, which is a key and not a sentence. */
-  value: string
-  /** The words the reader sees, in the product's own language. */
-  label: string
-}
-
-/**
- * What every account field carries, whichever control it draws.
- *
- * `required` is a boolean rather than an optional prop because there is no third
- * state worth having: a field is one the reader must fill or one they may leave, and
- * a `required?: boolean` leaves a caller who passed nothing unable to say which of
- * the two they meant. A field is a data declaration and nothing else, and the two
- * arms below differ only in which control is drawn and in the one property that
- * control needs and the other has no use for.
- */
-type SignupFieldBase = {
-  /** The caller's key for this field, and the key the value arrives under. */
-  id: string
-  /** The field's visible name, and the accessible name its control announces. */
-  label: string
-  /** Whether the reader may submit the form without filling it. */
-  required: boolean
-  /**
-   * A line under the control, announced with it rather than printed under the row.
-   *
-   * A node, because the honest line in this position is often not one sentence: a
-   * caller's hint, a link to the document that says why a field is being asked for,
-   * a piece of the page's own copy. It is wired to the control through
-   * `aria-describedby`, so a screen reader hears what this field is for as the reader
-   * reaches it rather than as a footnote they have to go back for.
-   */
-  description?: ReactNode
-  /** What the control shows while it is empty. A hint, not a name. */
-  placeholder?: string
-  /** The platform's own autofill hint for this field. */
-  autoComplete?: string
-}
-
-/**
- * One field of the caller's account form, and the control it draws.
- *
- * **A union and not one type with an optional `options`, and that is the shape of
- * the whole argument in this Block.** An account form's fields are the caller's
- * declaration, not this package's opinion about what a person may be asked, and the
- * one place that shows is the select: a select with no options is a control with
- * nothing in it, which is a question no reader can answer, so `options` is required
- * inside the select arm and forbidden beside the other three. A `options?: string[]`
- * on one type would typecheck the defect and only the diagnostic at run time would
- * catch it, which is one gate too late. The union is the same mechanism
- * `ContactField` uses for the same reason: the shape that requires something declares
- * it, and the shape that forbids it says so in the type rather than in prose.
- *
- * The cost of the union is that a caller who wants to build a field list
- * generically, from a schema, has to narrow before it can type the result, and the
- * answer to that is a narrowing function in the caller's own code rather than a
- * looser type here.
- */
-export type SignupField =
-  | (SignupFieldBase & {
-      type: 'select'
-      /** The choices, in the order the reader should meet them. */
-      options: readonly SignupOption[]
-    })
-  | (SignupFieldBase & {
-      type: 'text' | 'email' | 'tel'
-      /** A select with no options is a question nobody can answer, so it is not one here. */
-      options?: never
-    })
 
 /**
  * One reading of the secret the reader is typing, in the caller's own words and on
@@ -262,7 +188,7 @@ export type Signup01Props = {
    */
   onSubmit: (value: SignupValue) => void
   /**
-   * The fields, in the order the reader should meet them.
+   * The fields, grouped and ordered, as the shared field specification.
    *
    * **Required, and this list is the whole design rather than a convenience.** An
    * account form with a fixed set of fields is a form that decides what a person may
@@ -272,13 +198,14 @@ export type Signup01Props = {
    * where every entity is scoped to one, a form that cannot ask for a job title
    * guarantees a sales team three weeks of discovery calls, and a form that cannot
    * ask which estate somebody is observing sends a half a dozen accounts onto a
-   * queue that belongs to one. So `fields` is the caller's declaration, Prism names
-   * the four controls it can draw and supplies no field at all. The cost is stated
-   * rather than hidden: one column in the order the list gives, so a consumer that
-   * wants a two-column form for a subset composes two of these or reaches for a
-   * `Page`.
+   * queue that belongs to one. The fields arrive as `FieldSpecGroup`, the same type
+   * a record write form takes, so the vocabulary a consumer learns on one screen is
+   * the vocabulary here and a control this package does not ship is the `slot` arm.
+   * The cost is stated rather than hidden: one column in the order the list gives,
+   * so a consumer that wants a two-column form for a subset composes two of these
+   * or reaches for a `Page`.
    */
-  fields: readonly SignupField[]
+  groups: readonly FieldSpecGroup[]
   /** The secret, and the caller's own reading of it. See `Signup01Password`. */
   password: Signup01Password
   /**
@@ -363,27 +290,32 @@ function blank(value: string | undefined): boolean {
  * reader is watching while they choose it.
  */
 function assertSignup(input: {
-  fields: readonly SignupField[]
+  groups: readonly FieldSpecGroup[]
   password: Signup01Password
   signIn: Signup01SignIn | undefined
 }): void {
-  const { fields, password, signIn } = input
+  const { groups, password, signIn } = input
 
-  for (const field of fields) {
-    if (blank(field.label)) {
-      throw new Error(
-        `Signup01: the field "${field.id}" declares no label, so its control would be announced with no name ` +
-          'and two fields on this page would be announced identically. Every control this Block draws is named ' +
-          'by its label, so there is no fallback to fall back to.',
-      )
-    }
-    if (field.type === 'select' && (field.options === undefined || field.options.length === 0)) {
-      throw new Error(
-        `Signup01: the field "${field.id}" is a select and passes no options, so it would render a control ` +
-          'with nothing in it, which is a question no reader can answer and looks answered only because the ' +
-          'control is there and focusable. Pass the choices, or declare the field as a text field and check the ' +
-          'answer in your own handler.',
-      )
+  for (const group of groups) {
+    for (const field of group.fields) {
+      if (blank(typeof field.label === 'string' ? field.label : undefined)) {
+        throw new Error(
+          `Signup01: the field "${field.key}" declares no label, so its control would be announced with no name ` +
+            'and two fields on this page would be announced identically. Every control this Block draws is named ' +
+            'by its label, so there is no fallback to fall back to.',
+        )
+      }
+      if (
+        CHOICE_KINDS.has(field.kind) &&
+        ((field as { options?: readonly unknown[] }).options?.length ?? 0) === 0
+      ) {
+        throw new Error(
+          `Signup01: the field "${field.key}" is a choice and passes no options, so it would render a control ` +
+            'with nothing in it, which is a question no reader can answer and looks answered only because the ' +
+            'control is there and focusable. Pass the choices, or declare the field as a text field and check the ' +
+            'answer in your own handler.',
+        )
+      }
     }
   }
 
@@ -509,7 +441,7 @@ export function Signup01({
   title,
   description,
   onSubmit,
-  fields,
+  groups,
   password,
   terms,
   submitLabel,
@@ -519,7 +451,7 @@ export function Signup01({
   headingLevel = 'h2',
   className,
 }: Signup01Props) {
-  assertSignup({ fields, password, signIn })
+  assertSignup({ groups, password, signIn })
 
   const generated = useId()
   const working = submitting || status?.state === 'working'
@@ -541,8 +473,11 @@ export function Signup01({
     if (done) setTyped(EMPTY_SIGNUP)
   }
 
-  const setField = (id: string) => (value: string) =>
-    setTyped((was) => ({ ...was, fields: { ...was.fields, [id]: value } }))
+  const setField = (id: string) => (value: unknown) =>
+    setTyped((was) => ({
+      ...was,
+      fields: { ...was.fields, [id]: value === undefined || value === null ? '' : String(value) },
+    }))
 
   const setSecret = (value: string) => setTyped((was) => ({ ...was, password: value }))
 
@@ -571,78 +506,62 @@ export function Signup01({
             className="flex w-full flex-col gap-5"
           >
             <FieldGroup data-slot="signup-01-fields">
-              {fields.map((field) => {
-                const controlId = `${generated}-${field.id}`
-                const descriptionId = `${controlId}-description`
+              {groups.map((group, groupIndex) => (
+                <FieldGroup
+                  key={group.id ?? groupIndex}
+                  data-slot="signup-01-group"
+                  className="flex flex-col gap-5"
+                >
+                  {group.label === undefined ? null : (
+                    <p data-slot="signup-01-group-label" className="text-foreground text-sm font-medium">
+                      {group.label}
+                    </p>
+                  )}
+                  {group.description === undefined ? null : (
+                    <p
+                      data-slot="signup-01-group-description"
+                      className="text-muted-foreground text-sm"
+                    >
+                      {group.description}
+                    </p>
+                  )}
+                  {group.fields.map((field, fieldIndex) => {
+                    const id = `${generated}-${groupIndex}-${fieldIndex}`
+                    const labelId = `${id}-label`
+                    const helpId = field.help === undefined ? undefined : `${id}-help`
+                    const kind = field.kind.toLowerCase() as Lowercase<FieldKind>
+                    const ctx: FieldContext = {
+                      id,
+                      labelId,
+                      describedBy: helpId,
+                      invalid: false,
+                      text: fieldText(field),
+                      values: typed.fields,
+                      setValue: (key, value) => setField(key)(value),
+                      controlled: true,
+                    }
 
-                return (
-                  <Field
-                    key={field.id}
-                    data-slot="signup-01-field"
-                    data-field={field.type}
-                  >
-                    <FieldLabel htmlFor={controlId}>{field.label}</FieldLabel>
-
-                    {/*
-                      The four controls, and the select is the platform's own. A
-                      registration form is submitted from JavaScript on four of the four
-                      consumer sites, and a custom select would still have to submit a
-                      value through a hidden input, so the platform's control is the
-                      honest one: it submits itself, it opens the mobile picker a
-                      reader on a phone expects, and it is the control their password
-                      manager already knows how to fill. The cost is stated rather than
-                      hidden: a native `<option>` holds text and nothing else, so a
-                      caller who needs a description beside a choice is reaching for a
-                      control this Block cannot draw.
-                    */}
-                    {field.type === 'select' ? (
-                      <NativeSelect
-                        id={controlId}
-                        name={field.id}
-                        value={typed.fields[field.id] ?? ''}
-                        onChange={(event) => setField(field.id)(event.target.value)}
-                        required={field.required}
-                        aria-describedby={
-                          field.description === undefined ? undefined : descriptionId
-                        }
-                      >
-                        {field.options.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </NativeSelect>
-                    ) : (
-                      <Input
-                        id={controlId}
-                        name={field.id}
-                        type={field.type}
-                        placeholder={field.placeholder}
-                        autoComplete={field.autoComplete}
-                        value={typed.fields[field.id] ?? ''}
-                        onChange={(event) => setField(field.id)(event.target.value)}
-                        required={field.required}
-                        aria-describedby={
-                          field.description === undefined ? undefined : descriptionId
-                        }
-                      />
-                    )}
-
-                    {/*
-                      The description is wired to the control rather than drawn under
-                      the row, so what a sighted reader reads under the field and what a
-                      screen reader announces with it are the same sentence. The id is
-                      derived from the control's own, which is also the id a
-                      `FieldError` would take if a caller were composing this row
-                      themselves; see the JSDoc for why this Block draws no error of
-                      its own.
-                    */}
-                    {field.description === undefined ? null : (
-                      <FieldDescription id={descriptionId}>{field.description}</FieldDescription>
-                    )}
-                  </Field>
-                )
-              })}
+                    return (
+                      <Field key={field.key} data-slot="signup-01-field" data-field={field.kind}>
+                        {SELF_LABELLED.has(kind) ? null : (
+                          <Label
+                            id={labelId}
+                            htmlFor={id}
+                            required={field.required}
+                            disabled={field.disabled}
+                          >
+                            {field.label}
+                          </Label>
+                        )}
+                        {renderControl(field, ctx)}
+                        {field.help === undefined ? null : (
+                          <FieldDescription id={helpId}>{field.help}</FieldDescription>
+                        )}
+                      </Field>
+                    )
+                  })}
+                </FieldGroup>
+              ))}
 
               {/*
                 The secret, and it is `PasswordField` rather than an `Input` with a

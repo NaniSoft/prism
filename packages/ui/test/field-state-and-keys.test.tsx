@@ -131,9 +131,13 @@ describe('the Button', () => {
   })
 })
 
-const AUTH_FIELDS = [
-  { id: 'email', label: 'Email', type: 'email' as const, description: 'Work address' },
-  { id: 'password', label: 'Password', type: 'password' as const },
+const AUTH_GROUPS = [
+  {
+    fields: [
+      { key: 'email', label: 'Email', kind: 'Input' as const, autoComplete: 'email', help: 'Work address' },
+      { key: 'password', label: 'Password', kind: 'PasswordField' as const },
+    ],
+  },
 ]
 
 describe('the Auth form', () => {
@@ -142,8 +146,8 @@ describe('the Auth form', () => {
       <AuthForm01
         title="Sign in"
         submitLabel="Sign in"
-        error="Those credentials do not match"
-        fields={AUTH_FIELDS}
+        submitError="Those credentials do not match"
+        groups={AUTH_GROUPS}
       />,
     )
 
@@ -155,16 +159,14 @@ describe('the Auth form', () => {
     }
   })
 
-  it('marks only the field the caller named', () => {
+  it('marks only the field the caller named in the issue list', () => {
     render(
       <AuthForm01
         title="Sign in"
         submitLabel="Sign in"
-        error="Enter an email address"
-        fields={AUTH_FIELDS.map((field) => ({
-          ...field,
-          errorId: field.id === 'email' ? 'email' : undefined,
-        }))}
+        submitError="Enter an email address"
+        issues={[{ field: 'email', message: 'Enter an email address' }]}
+        groups={AUTH_GROUPS}
       />,
     )
 
@@ -173,14 +175,14 @@ describe('the Auth form', () => {
     expect(screen.getByLabelText('Password').hasAttribute('aria-invalid')).toBe(false)
   })
 
-  it('points each field at its own description', () => {
-    render(<AuthForm01 title="Sign in" submitLabel="Sign in" fields={AUTH_FIELDS} />)
+  it('points each field at its own help', () => {
+    render(<AuthForm01 title="Sign in" submitLabel="Sign in" groups={AUTH_GROUPS} />)
 
     const email = screen.getByLabelText('Email')
     const describedBy = email.getAttribute('aria-describedby')
     expect(describedBy).not.toBeNull()
     expect(document.getElementById(describedBy as string)?.textContent).toBe('Work address')
-    // The field with no description writes no reference, rather than an empty one.
+    // The field with no help writes no reference, rather than an empty one.
     expect(screen.getByLabelText('Password').hasAttribute('aria-describedby')).toBe(false)
   })
 })

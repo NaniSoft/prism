@@ -7,8 +7,10 @@ title: AuthPage
 
 AuthPage is a complete authentication screen. It composes a sign-in form with an
 optional supporting card, and it owns the centering, the breakpoint and the
-fallback column only. The form carries the credentials, the error slot and the
-submit; the card carries product context beside it.
+fallback column only. The form carries the credentials, the submission message and
+the submit; the card carries product context beside it. The credential fields are
+the shared `FieldSpecGroup` from `@nanisoft/prism-ui/spec`, so the vocabulary is the
+one a record write form takes.
 
 The page composes these parts:
 
@@ -18,7 +20,7 @@ The page composes these parts:
 | Support | Card | an optional surface beside the form for context or reassurance |
 | Footer | footer | a line under the form, such as a legal note or a link |
 
-Every field, label, handler, error and supporting string is a prop. The page
+Every field, label, handler, message and supporting string is a prop. The page
 fetches nothing and imports no router, so the consumer owns the request and the
 links. When no `aside` is passed the layout is one centered column; with one it
 is a two-column split from the large breakpoint up, and the card falls below the
@@ -33,9 +35,9 @@ import { AuthPage } from '@nanisoft/prism-ui/pages/auth-page'
   form={{
     title: 'Sign in',
     description: 'Welcome back.',
-    error,
+    submitError,
     submitLabel: 'Sign in',
-    fields: credentialFields,
+    groups: credentialGroups,
     remember: { id: 'remember', label: 'Remember me for 30 days' },
     onSubmit: handleSubmit,
   }}
@@ -66,10 +68,11 @@ belongs on a marketing route the reader saw before signing in.
 
 ### Best practices
 
-- Set `type`, `autoComplete` and `required` on every field. Browsers use them to
-  fill and validate, so the typing is the whole reason the field is typed.
-- Keep the error to one sentence and mark the failed fields. AuthForm01 sets
-  `aria-invalid` when an error is present, so the form and the message agree.
+- Give every field a `kind` naming a Prism control and set `autoComplete` and
+  `required`. A password manager and a phone keyboard both read the autofill hint.
+- Keep the submission message to one sentence and mark no field with it. A message
+  about one control is an entry in `issues`, which marks only that field; bad
+  credentials, a locked account and a rate limit are things no field is wrong about.
 - Disable the submit control while a request is in flight and pass `pendingLabel`,
   so the reader sees that work is happening.
 - Omit `aside` when there is nothing true to say. An empty card is worse than a

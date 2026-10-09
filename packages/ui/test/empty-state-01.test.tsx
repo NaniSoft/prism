@@ -19,7 +19,7 @@ import { EmptyState01, EMPTY_REASONS } from '../src/blocks/empty-state-01/empty-
  * throw that reaches a console is the one place this Block is allowed words.
  */
 describe('the Empty state Block', () => {
-  it('carries the reason on the root, so a consumer can target the three states', () => {
+  it('carries the reason on the root, so a consumer can target the four states', () => {
     for (const reason of EMPTY_REASONS) {
       const { container, unmount } = render(
         <EmptyState01 reason={reason} title="No invoices" />,
@@ -34,12 +34,56 @@ describe('the Empty state Block', () => {
     }
   })
 
-  it('closes the reason set at three, because each one wants a different action', () => {
-    // The failure this prevents is a fourth reason such as `error` or `loading`,
+  it('closes the reason set at four, because each one wants a different action', () => {
+    // The failure this prevents is a fifth reason such as `error` or `loading`,
     // which are states the surrounding surface already owns. A region that is
     // erroring has an Alert and a region that is loading has a Spinner, and a
     // Block that drew them would give a consumer two places for one fact.
-    expect([...EMPTY_REASONS]).toEqual(['first-run', 'no-match', 'not-permitted'])
+    //
+    // The order is the taxonomy's own: what happened to the collection, with the
+    // two the reader did themselves next to each other and the one that is not
+    // their fault last.
+    expect([...EMPTY_REASONS]).toEqual([
+      'first-run',
+      'no-match',
+      'emptied-by-reader',
+      'not-permitted',
+    ])
+  })
+
+  it('keeps a reader-empty bin on no ink, because nothing there is broken', () => {
+    const { container } = render(
+      <EmptyState01 reason="emptied-by-reader" title="The bin is empty" />,
+    )
+
+    // The fourth reason is a statement about a collection like the other three, so
+    // it takes the same frame. The one ink in this Block belongs to
+    // `not-permitted`, because a permission boundary is a fact about the reader
+    // rather than about the set. A reader who emptied a bin did it themselves and
+    // nothing is wrong, so a warning colour here would teach the reader to read
+    // the frame as a fault.
+    const className =
+      container.querySelector('[data-slot="empty-state"]')?.getAttribute('class') ?? ''
+    expect(className).toContain('border-dashed')
+    expect(className).not.toContain('text-muted-foreground')
+  })
+
+  it('renders no control for a bin the reader emptied, because the next step is elsewhere', () => {
+    const { container } = render(
+      <EmptyState01
+        reason="emptied-by-reader"
+        title="Nothing left to restore"
+        body="Deleted records come back from a view you can switch to."
+      />,
+    )
+
+    // The absence is the claim. A reader who has deleted nothing has nothing to
+    // restore inside this region, and the records a restore would bring back are
+    // the caller's own nodes in the index around this one. A control here would be
+    // either a button this Block cannot wire or a second copy of the affordance
+    // the surrounding index already draws.
+    expect(screen.queryByRole('button')).toBeNull()
+    expect(container.querySelector('[data-slot="empty-state-action"]')).toBeNull()
   })
 
   it('keeps its headline out of the document outline, because it is replaced by content', () => {

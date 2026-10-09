@@ -5,44 +5,70 @@ title: SettingsPanel01
 
 ## Overview
 
-SettingsPanel01 is a settings form grouped into named sections. The card holds
-the title and description, each section holds a heading and its fields, and the
-footer holds the save and cancel controls, with a rule between sections.
+SettingsPanel01 is a settings region rendered from the shared field specification,
+in a card. It is measured against the record write form Block rather than merged
+into it or kept beside it on its own terms: a setting changes behaviour and is often
+no record at all, but that difference is about what sits behind the surface, not
+about the surface, which is fields in groups with labels and help.
 
-The block composes these components:
+The groups are `FieldSpecGroup` values from `@nanisoft/prism-ui/spec`, and each
+field is a `FieldSpec`: a stable `key`, a required `label`, a required `kind` drawn
+from Prism's own input vocabulary, and the options a choice carries under that kind.
+A control this package does not ship is the `slot` arm, and the Block still draws
+the label, the help and the error around the caller's node.
 
-| Part | Component | Role |
-| --- | --- | --- |
-| Surface | Card, Separator | the panel and the rule between sections |
-| Fields | Field, Input, Textarea | labelled text controls |
-| Choices | Select, Switch | one-of-many and on-or-off fields |
-| Footer | Button | the save and secondary actions |
+The values are the caller's and the change handler is where a setting leaves. A
+region that applies on change passes an `onValueChange` that applies the mutation; a
+region that saves explicitly passes one that updates its own state and a save arm.
+The save is a union of three arms: `action` posts the form to a URL, `onSubmit`
+hands the form's own element to a function, and `submit` is a slot holding the
+caller's own control. An on-change region passes none of the three and draws no
+footer.
 
-A field is a small object that describes one control: its `kind`, its label, an
-optional description and its value handlers. The block owns no values and no
-copy. Omitting `submitLabel` renders no footer, the right shape for a read-only
-view.
+The Block renders no revert control, no reset to defaults control and no storage of
+any kind. A setting that applies on change has no moment at which the value is
+refused, so the caller keeps the previous value itself or reports the failure in its
+own `Alert`, `Toast` or `LiveRegion`. A revert control is refused twice over: a
+Block ships no behaviour, and it holds no previous value to revert to.
+
+It draws no tab strip and no rail. A tabbed settings screen is a composition of the
+shell, the page header, the tabs and this Block, which `SettingsPage` already ships,
+and a rail is the shell's own or the consumer's own links beside the regions.
 
 ## Usage
 
 ```tsx
-import { SettingsPanel01 } from '@nanisoft/prism-ui/blocks/settings-panel-01'
+'use client'
 
-<SettingsPanel01
-  title="Workspace settings"
-  description="Manage how this workspace behaves for everyone on the team."
-  submitLabel="Save changes"
-  sections={[
-    {
-      id: 'general',
-      title: 'General',
-      fields: [
-        { kind: 'text', id: 'name', label: 'Workspace name', defaultValue: 'Northwind' },
-        { kind: 'switch', id: 'digest', label: 'Weekly digest', defaultChecked: true },
-      ],
-    },
-  ]}
-/>
+import { useState } from 'react'
+import { SettingsPanel01 } from '@nanisoft/prism-ui/blocks/settings-panel-01'
+import type { FieldSpecGroup } from '@nanisoft/prism-ui/spec'
+
+const GROUPS: readonly FieldSpecGroup[] = [
+  {
+    id: 'general',
+    label: 'General',
+    fields: [
+      { key: 'name', label: 'Workspace name', kind: 'Input', defaultValue: 'Northwind' },
+      { key: 'digest', label: 'Weekly digest', kind: 'Switch', defaultValue: true },
+    ],
+  },
+]
+
+export function Settings() {
+  const [values, setValues] = useState<Record<string, unknown>>({})
+  return (
+    <SettingsPanel01
+      title="Workspace settings"
+      groups={GROUPS}
+      values={values}
+      onValueChange={(key, value) => setValues((held) => ({ ...held, [key]: value }))}
+      submitLabel="Save changes"
+      onSubmit={() => save(values)}
+      footerStart={<a href="#">Cancel</a>}
+    />
+  )
+}
 ```
 
 <ComponentDemo slug="settings-panel-01" />
@@ -51,29 +77,33 @@ import { SettingsPanel01 } from '@nanisoft/prism-ui/blocks/settings-panel-01'
 
 ### When to use
 
-Use SettingsPanel01 when a screen changes several settings that share one save.
-It works when the groups are stable and a reader scans them top to bottom.
+Use SettingsPanel01 when a screen changes several settings that share one save, or
+when a set of settings applies on change and shares one region. It works when the
+groups are stable and a reader scans them top to bottom.
 
 ### When not to use
 
-Do not use it for a single setting. One field in a card is a heavier frame than
-the choice deserves; put the control in the page.
+Do not use it for a single setting. One field in a card is a heavier frame than the
+choice deserves; put the control in the page.
 
-Do not use it when each change should apply immediately with no save. A switch
-inside a saved form reads as applied; use standalone switches with their own
-handler instead.
+Do not use it to move between settings regions. That is a tab strip or a rail the
+consumer composes, not a prop here.
 
 ### Best practices
 
-- Give every field a stable `id`, so the label is linked to the control.
-- Keep one save per panel. A mixed model, where some fields save and others do
-  not, makes the footer's promise unclear.
-- Put the consequential choice first in its section, so a reader does not hunt
-  for the setting that matters most.
-- Disable the submit control while a save is in flight.
+- Give every field a stable `key`, so the issue list and the caller's values are
+  keyed by it and never by the words of the label.
+- Own the values and decide when they leave. Pass an `onValueChange` that applies
+  the mutation for an on-change setting, or hold them and pass a save arm.
+- Pass a node for the secondary action, not a label. A `CtaLink` with its required
+  `href` reaches a destination; a control with no handler is a control that does
+  nothing.
+- Reach for the `slot` arm for a control Prism does not ship rather than growing the
+  union for one screen.
+- Leave validation to the caller and pass issues keyed by field.
 
 ### Content guidelines
 
-- A section title is one or two words in sentence case: "General",
-  "Notifications".
+- A group label is one or two words in sentence case: "General", "Notifications".
 - A field label is a short noun phrase and does not end in a colon.
+- Help text is a sentence the reader must have.

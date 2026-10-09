@@ -36,8 +36,23 @@ export default function ChartCard01Demo() {
       }
       legend={<ChartLegend series={SERIES} />}
       reading={[
-        { label: 'Peak day', value: '150', delta: 6, deltaFormat: (value) => `${value}` },
-        { label: 'Total', value: '2,280' },
+        {
+          key: 'peak',
+          label: 'Peak day',
+          value: '150',
+          delta: 6,
+          deltaFormat: '6 more than the week before',
+          hint: 'vs last week',
+          series: [120, 132, 141, 128, 150],
+          seriesLabel: 'Requests on the peak day, the last five days',
+        },
+        {
+          key: 'total',
+          label: 'Total',
+          value: '2,280',
+          href: '/analytics/requests',
+          hrefLabel: 'Open the request series',
+        },
       ]}
       actions={<Button size="sm" variant="ghost">Last week</Button>}
       footer="The dip on Wednesday is the maintenance window."

@@ -32,7 +32,8 @@ import { cn } from '../../lib/utils'
  * One role a member can hold, as the caller names it.
  *
  * The option list is the caller's rather than a `Role` union in this module, and
- * the argument is the same one `SettingsPanel01`'s `options` makes: the set of
+ * the argument is the same one the shared field specification's choice options
+ * make: the set of
  * roles a workspace has is that workspace's own fact, it changes with its plan
  * and with its commercial agreements, and a Block that shipped a list would
  * install a permission model into every consumer's settings page.

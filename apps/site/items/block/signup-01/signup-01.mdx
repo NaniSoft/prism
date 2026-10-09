@@ -26,11 +26,14 @@ for a workspace name sends a free agent into a product where every entity is sco
 one, and a form that cannot ask which estate somebody is observing sends half a dozen
 accounts onto a queue that belongs to one person.
 
-So `fields` is your declaration, Prism names the four controls it can draw and supplies
-no field at all. The cost is stated rather than hidden: one column in the order the list
-gives, so a consumer that wants a two-column form composes two of these or reaches for
-a Page. A `select` requires its `options` in the type and forbids them everywhere else,
-so a select with nothing in it is caught by the compiler rather than by a diagnostic.
+So `groups` is your declaration in the shared field specification, the same type a
+record write form takes: a stable `key`, a required `label` and a required `kind`
+drawn from Prism's own controls, with the options a choice carries under that kind and
+a `slot` arm for a control this package does not ship. The cost is stated rather than
+hidden: one column in the order the list gives, so a consumer that wants a two-column
+form composes two of these or reaches for a Page. A choice requires its `options` in
+the type and forbids them everywhere else, so a select with nothing in it is caught by
+the compiler rather than by a diagnostic.
 
 ## The reading is a function, and that is the whole argument
 
@@ -118,18 +121,22 @@ export function CreateAccount() {
       eyebrow="Nexus"
       title="Create an account that may run an estate"
       description="The account acts on your behalf, so it is created with the estate in mind rather than as a shop."
-      fields={[
-        { id: 'name', type: 'text', label: 'Your name', required: true, autoComplete: 'name' },
-        { id: 'email', type: 'email', label: 'Work email', required: true, autoComplete: 'email' },
+      groups={[
         {
-          id: 'sector',
-          type: 'select',
-          label: 'What the estate is',
-          required: true,
-          options: [
-            { value: 'pipeline', label: 'A pipeline' },
-            { value: 'market', label: 'A market' },
-            { value: 'estate', label: 'An estate' },
+          fields: [
+            { key: 'name', kind: 'Input', label: 'Your name', required: true, autoComplete: 'name' },
+            { key: 'email', kind: 'Input', label: 'Work email', required: true, autoComplete: 'email' },
+            {
+              key: 'sector',
+              kind: 'NativeSelect',
+              label: 'What the estate is',
+              required: true,
+              options: [
+                { value: 'pipeline', label: 'A pipeline' },
+                { value: 'market', label: 'A market' },
+                { value: 'estate', label: 'An estate' },
+              ],
+            },
           ],
         },
       ]}
@@ -195,12 +202,12 @@ Do not use it for an invitation. An accepted invitation is a control on a row an
 form, and `invite-user-01` is the shape for it.
 
 Do not expect the Block to check that your fields are the right shape. It forwards
-`type` and `required` to the platform and reads nothing back, so the sentence saying a
-name is not a name is the browser's or yours.
+`required` and the autofill hint to the platform and reads nothing back, so the sentence
+saying a name is not a name is the browser's or yours.
 
 ### Best practices
 
-- Keep the declared field ids stable. They are the keys your `onSubmit` receives, and
+- Keep the declared field `key`s stable. They are the keys your `onSubmit` receives, and
   renaming one renames it in one place, which is the whole benefit of a declared list.
 - Give the platform hints on the fields a password manager keys on: `email`, `name`,
   `tel`, `new-password` for the secret, which this Block already passes.

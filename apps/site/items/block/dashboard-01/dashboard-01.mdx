@@ -9,11 +9,20 @@ Dashboard01 is an overview screen, and the composition is the caller's. It takes
 header slot for their own `PageHeader01`, a row of figures, a grid of panels each of
 which declares how much width it takes, and an optional narrow rail at the right.
 
-The figures are drawn on `metric` and `sparkline`, and the panels are `card`. A
-dashboard that hand-drew its own metric row would be a second implementation of a
-Component whose whole argument is that the delta's direction is derived from the
-sign of a number rather than declared beside it, which is exactly the mistake a
-reader sees and a type checker does not.
+The figures are `MetricSpec` typed data drawn on `metric` and `sparkline`, and the
+panels are `card`. `MetricSpec` is the shared specification published as
+`@nanisoft/prism-ui/spec`, so a figure declared for this row is the same figure a
+project dashboard or a summary panel takes. A dashboard that hand-drew its own metric
+row would be a second implementation of a Component whose whole argument is that the
+delta's direction is derived from the sign of a number rather than declared beside
+it, which is exactly the mistake a reader sees and a type checker does not.
+
+Each figure carries a stable `key` that is never the words of the label, a required
+`label` and `value`, a `delta` whose sign is the direction, an optional
+`deltaFormat` for the caller's own words, an optional `hint` for the period or the
+caveat, and an optional `series` whose `seriesLabel` travels with it and an optional
+`href` whose `hrefLabel` travels with it. The last two are held by the type: a
+series set without its name or a destination set without its words does not compile.
 
 ## The composition is the design
 
@@ -60,19 +69,20 @@ export function PipelineOverview() {
       }
       metrics={[
         {
+          key: 'queued',
           label: 'Runs queued',
           value: '12',
           delta: -3,
-          deltaFormat: (value) => `${value}`,
+          deltaFormat: '3 fewer than yesterday',
           hint: 'vs yesterday',
-          sparkline: [4, 6, 5, 9, 8, 12, 11],
-          sparklineLabel: 'Runs queued over the last week',
+          series: [4, 6, 5, 9, 8, 12, 11],
+          seriesLabel: 'Runs queued over the last week',
           href: '/runs?state=queued',
           hrefLabel: 'Open the queue',
         },
-        { label: 'Succeeded', value: '1,284', delta: 41, deltaFormat: (v) => `${v}` },
-        { label: 'Failed', value: '3', delta: 1, deltaFormat: (v) => `${v}` },
-        { label: 'Median duration', value: '42s', hint: 'last hour' },
+        { key: 'succeeded', label: 'Succeeded', value: '1,284', delta: 41, deltaFormat: '41 more' },
+        { key: 'failed', label: 'Failed', value: '3', delta: 1 },
+        { key: 'median', label: 'Median duration', value: '42s', hint: 'last hour' },
       ]}
       panels={[
         {
@@ -130,9 +140,9 @@ measurement is in the table above and it is the cost of the narrow column.
 - Pass `page-header-01` into `header` rather than passing a title twice. The header
   is a composition your product has already made, and Prism drawing a second one
   beside it is two headers.
-- Validate the panel set at build time. The Block throws on a metric with an `href`
-  and no `hrefLabel`, and on a sparkline with no name, and a build that runs this is
-  a build that fails before a reader sees the gap.
+- A series and a destination are held by the type. A `series` without its
+  `seriesLabel`, or an `href` without its `hrefLabel`, does not compile, because a
+  shape with no name is not announced and a link with no words names nothing.
 - Fill the rail with one thing. A rail holding a queue and a watchlist and a set of
   links has stopped being a rail.
 

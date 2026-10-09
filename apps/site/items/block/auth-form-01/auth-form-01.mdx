@@ -5,39 +5,60 @@ title: AuthForm01
 
 ## Overview
 
-AuthForm01 is a sign-in card: a title, a supporting line, an error slot, the
-credential fields, an optional remember row and the submit control.
+AuthForm01 is a sign-in card: a title, a supporting line, an optional submission
+message, the credential fields, an optional remember row and the submit control.
+
+The credential fields arrive as the shared field specification from
+`@nanisoft/prism-ui/spec`: an ordered list of `FieldSpecGroup`, each with an
+optional heading and an ordered list of `FieldSpec`. A field carries a stable
+`key`, a required `label` and a required `kind` drawn from Prism's own input
+vocabulary, with optional help, hint, placeholder, autofill hint, disabled flag
+and starting value. A login, a registration and a password recovery are one Block,
+so nothing forks here: asking for an email draws the `Input` this package ships
+and asking for a password draws its `PasswordField`, and a control this package
+does not ship is the `slot` arm. The Block is uncontrolled, so the caller reads
+the values out of the form element at submit.
 
 The block composes these components:
 
 | Part | Component | Role |
 | --- | --- | --- |
 | Surface | Card | the panel that centres the form |
-| Fields | Field, Input | labelled email and password controls |
+| Fields | Field, Label, the shared renderer | a labelled control for every field kind |
 | Choices | Checkbox | the remember-me row |
-| Feedback | Alert | the error message above the fields |
+| Feedback | Alert, FieldError | the submission message and the per-field issues |
 | Submit | Button | the one action on the card |
 
-The block owns no credentials and makes no request. Each field value and the
-submit handler come from the consumer, and the error line is a prop, so the
-consumer's validation decides when it appears.
+The block owns no credentials and makes no request. The submit handler comes from
+the consumer, and a submission message is a prop, so the consumer's validation
+decides when it appears.
 
 ## Usage
 
 ```tsx
 import { AuthForm01 } from '@nanisoft/prism-ui/blocks/auth-form-01'
+import type { FieldSpecGroup } from '@nanisoft/prism-ui/spec'
+
+const groups: readonly FieldSpecGroup[] = [
+  {
+    fields: [
+      { key: 'email', label: 'Email', kind: 'Input', autoComplete: 'email', required: true },
+      { key: 'password', label: 'Password', kind: 'PasswordField', required: true },
+    ],
+  },
+]
 
 <AuthForm01
   title="Sign in"
   description="Welcome back. Enter your details to continue."
-  error={error}
+  submitError={error}
   submitLabel="Sign in"
-  fields={[
-    { id: 'email', label: 'Email', type: 'email', value: email, onChange: setEmail, required: true },
-    { id: 'password', label: 'Password', type: 'password', value: password, onChange: setPassword, required: true },
-  ]}
+  groups={groups}
   remember={{ id: 'remember', label: 'Remember me for 30 days' }}
-  onSubmit={handleSubmit}
+  onSubmit={(event) => {
+    event.preventDefault()
+    submit(new FormData(event.currentTarget))
+  }}
 />
 ```
 
@@ -47,33 +68,32 @@ import { AuthForm01 } from '@nanisoft/prism-ui/blocks/auth-form-01'
 
 ### When to use
 
-Use AuthForm01 for a sign-in or a similar single-step credential screen. It
-works when the screen exists to collect one email and one secret and send them
-somewhere.
+Use AuthForm01 for a sign-in, a registration or a password recovery: one centred
+credential form, drawn from a declared field list. It works when the screen exists
+to collect credentials and send them somewhere.
 
 ### When not to use
 
-Do not use it for registration, password reset or profile editing. Those have
-different field sets; compose a form from the same parts.
+Do not use it for profile editing or for a record write. Those have a different
+job, and the record write form already takes the same field specification.
 
-Do not use it for an account picker or single sign-on landing; that is a
-different shape, and `footer` is not the place for it.
+Do not use it for an account picker or single sign-on landing; that is a different
+shape, and `footer` is not the place for it.
 
 ### Best practices
 
-- Set `type`, `autoComplete` and `required` on every field. Browsers use them to
-  fill and validate, so the typing is the whole reason the field is typed.
-- Keep the error to one sentence and name the field it is about, with that field's
-  `errorId`. The Alert names the problem; `aria-invalid` on the named input is what a
-  screen reader announces. Leave `errorId` off every field when the message is about
-  the submission rather than about one control, which is what bad credentials, a
-  locked account and a rate limit all are. A field left unmarked is correct, and
-  marking all of them tells a reader that the answers they got right are wrong.
-- Give a field a `description` when it needs one. It is drawn under the field and
-  the field refers to it, so the sentence reaches a reader who lands on the input
-  rather than only a reader who reads down the page.
-- Disable the submit control while `pending` and pass `pendingLabel`, so the
-  reader sees that work is happening.
+- Give every field a `key` that is the value's own key and never the words of the
+  label. The form's `FormData` is keyed by it.
+- Set `autoComplete` on every field the platform can fill. A password manager and a
+  phone keyboard both read it.
+- Keep the submission message to one sentence and mark no field with it. A message
+  about one control is an entry in `issues`, which marks only that field; bad
+  credentials, a locked account and a rate limit are things no field is wrong
+  about, so marking two fields tells a reader their correct answers are wrong.
+- Reach for the `slot` arm for a control Prism does not ship rather than growing
+  the union for one screen.
+- Disable the submit control while `pending` and pass `pendingLabel`, so the reader
+  sees that work is happening.
 
 ### Content guidelines
 
