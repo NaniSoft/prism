@@ -61,6 +61,20 @@ export type CalendarItem = {
    * what activating it does, which is the same defect `Download01` refuses.
    */
   hrefLabel?: string
+  /**
+   * The caller's own control for one item, drawn at the leading edge of its row.
+   *
+   * It exists for the one interaction a date view has that this Block does not
+   * own: a move. Rescheduling an item onto another day is a drag with a drop
+   * target, a new order, a write and a conflict, and all four are the consumer's,
+   * exactly as `Kanban01` leaves a board's drag to a control the caller writes into
+   * a card slot. So the Block places this node and the caller wires it to whatever
+   * owns their schedule: it draws no drag, reports no move and holds no order,
+   * because a drag is behaviour a Block does not hold and a move is a write to a
+   * store this package never sees. A handle a reader can hear carries its own
+   * words, and the Block adds none.
+   */
+  handle?: ReactNode
 }
 
 /**
@@ -282,6 +296,20 @@ type Day = { at: Date; items: CalendarItem[] }
  * rejected alternative was to print the tone's name as a fallback, and that is the
  * defect `check-block-copy.mjs` exists to end.
  *
+ * **A move is the caller's, and the Block exposes a per-item node rather than a
+ * move callback.** Rescheduling an item onto another day is the one interaction a
+ * date view has that this Block does not own: a drag with a drop target, a new
+ * order, a write and a conflict, and every one of the four is the consumer's,
+ * exactly as `Kanban01` leaves a board's drag to a control the caller writes into
+ * a card. So a `CalendarItem` carries a `handle`, a node the caller fills with
+ * their own control and wires to whatever owns their schedule, and the Block
+ * places it and nothing more. The rejected alternative is an `onMove` the Block
+ * wires to a drop target, and it is refused for the reason the kanban refuses a
+ * drag: it would make the Block own an order, a target and a write, and the
+ * conflict two reschedules create is a case this package has no answer for. The
+ * cost is named: a caller who wants a move writes the drag itself, and the Block
+ * gives it a place to attach rather than a model to adopt.
+ *
  * **A day is a heading one level below the section, and the items are not
  * headings at all.** A month is a set of days and the days are the things a reader
  * navigates to, so they are headings at `childLevel(headingLevel)` and moving this
@@ -436,6 +464,11 @@ export function Calendar01({
                           data-state={item.state}
                           className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1"
                         >
+                          {item.handle === undefined ? null : (
+                            <span data-slot="calendar-01-handle" className="shrink-0">
+                              {item.handle}
+                            </span>
+                          )}
                           {activatorOf(item, onSelect)}
 
                           {item.state === undefined || item.stateLabel === undefined ? null : (

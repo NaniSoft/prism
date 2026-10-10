@@ -47,6 +47,18 @@ words, by a required `overflowLabel`. A cap that hides items with no overflow
 control is a silent loss, and it is the one failure a calendar may not have: it
 would look finished when it is not.
 
+## Moving an item is the caller's
+
+A date view has one interaction a month grid does not: a move. Rescheduling an
+item onto another day is a drag with a drop target, a new order, a write and a
+conflict, and every one of the four is yours, so the Block exposes a per-item
+`handle` node rather than a move callback. You fill it with your own control and
+wire it to whatever owns your schedule, exactly as `Kanban01` leaves a board's
+drag to a control you write into a card. The Block places the node and nothing
+more: it draws no drag, reports no move and holds no order, because a drag is
+behaviour a Block does not hold and a move is a write to a store this package
+never sees.
+
 ## Usage
 
 ```tsx
@@ -119,6 +131,9 @@ the opposite of what a month grid is for.
   empty list beside the grid already says so.
 - Raise `maxPerDay` for a month of single-item days. The overflow line stops
   appearing on its own.
+- Attach your own drag to an item's `handle` rather than asking for a move
+  callback. The Block holds no order and no drop target, so the move is your own
+  write to your own array.
 
 ### Content guidelines
 

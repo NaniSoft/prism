@@ -1,0 +1,147 @@
+---
+slug: blocks/card-index-01
+title: CardIndex01
+---
+
+## Overview
+
+CardIndex01 is the record index drawn as a grid of picture cards. It is the
+index's second arrangement: the reader's job is the same one the table serves,
+deciding which record to act on, and what changes is the arrangement, because the
+records are compared as pictures rather than across columns.
+
+Each card is the caller's own composition. The Block places a picture area, the
+name and the price through `renderCard`, and per card actions through
+`renderCardActions`, and it owns the arrangement around them: the grid, the
+selection set, the count it announces and the batch bar.
+
+## It shares the record index contract
+
+CardIndex01 declares the same `selectable` union `DataTable01` declares, and it
+holds the same kinds of state for the same reasons. The set of selected keys is
+the caller's to mirror or ignore, the header carries the same three-state
+control, one polite live region carries the count, and the batch bar mounts only
+while the set is non-empty with the caller's `batchActions` node and the Block's
+own dismiss.
+
+The page and filter scope distinction is the same one: a selection of the cards on
+screen is announced with `labels.selectedCount`, and a selection the caller reports
+as the whole matching population through `selectionScope` is announced with
+`labels.selectedAllMatching` and the caller's own number, never the count of the
+cards on screen.
+
+## The caller composes the card, the Block owns the arrangement
+
+A picture, a name and a price are three different value shapes, and the read
+vocabulary this package publishes (`ColumnSpec` and `ColumnKind`) describes a value
+read in a table rather than the anatomy of a card. So the card body is one node per
+record, exactly as a per card action is, and the Block owns the part that makes
+this an index rather than a list of pictures: the grid, the selection, the count,
+the batch bar and the page boundary.
+
+## What it does not own
+
+It fetches nothing, sorts nothing, filters nothing and slices nothing: it draws the
+page it was handed and reports what a reader asked for. It owns no action, batch or
+per card, so it owns no confirmation dialog, no toast and no undo. It owns no
+aggregate about the population, and no navigation and no address. A filter region
+above the cards is the caller's own composition, which is why the filter scope arm
+exists rather than a filter toolbar.
+
+## Usage
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { CardIndex01, type CardIndex01Labels, type CardIndex01Row } from '@nanisoft/prism-ui/blocks/card-index-01'
+import { Price } from '@nanisoft/prism-ui/components/price'
+import { Text } from '@nanisoft/prism-ui/components/typography'
+
+const ROWS: CardIndex01Row[] = [
+  { key: 'p-1', name: 'Aran Crew', price: 12800 },
+  { key: 'p-2', name: 'Linen Camp', price: 9600 },
+]
+
+const LABELS: CardIndex01Labels = {
+  selectAll: 'Select every product on this page',
+  selectCard: (row) => `Select ${String(row.name)}`,
+  cardActions: 'Product actions',
+  selectedCount: (count) => `${count} selected on this page`,
+  selectedAllMatching: (count) => `All ${count} matching products selected`,
+  clearedSelection: 'No products selected',
+  dismissSelection: 'Clear selection',
+  previous: 'Previous',
+  next: 'Next',
+  page: (value) => `Go to page ${value}`,
+  empty: 'No products match the current search.',
+}
+
+export function Catalogue() {
+  const [selected, setSelected] = useState<string[]>([])
+  return (
+    <CardIndex01
+      title="Catalogue"
+      rows={ROWS}
+      getRowId={(row) => String(row.key)}
+      renderCard={(row) => (
+        <div className="flex flex-col gap-2">
+          <Text as="span" className="font-medium">{String(row.name)}</Text>
+          <Price amount={Number(row.price)} currency="USD" />
+        </div>
+      )}
+      selectable
+      selectedIds={selected}
+      onSelectedIdsChange={setSelected}
+      batchActions={null}
+      pageCount={1}
+      labels={LABELS}
+    />
+  )
+}
+```
+
+<ComponentDemo slug="card-index-01" />
+
+## Guidelines
+
+### When to use
+
+Use it where a reader compares records by looking at them rather than by reading a
+column, and where each record's own picture is the thing being compared. A
+catalogue of apparel, a set of listings, a shelf.
+
+### When not to use
+
+Do not use it for records a reader compares across columns. That is
+`data-table-01`, where the same value in one row can be read against the same value
+in the next. A picture arrangement trades that comparison away for the one a
+picture makes.
+
+Do not use it for a set that is browsed rather than acted on. That is
+`directory-01`, and its cards carry a name, a role and one link rather than a price
+and a batch set.
+
+Do not use it for one card in full. That is a record detail, and a grid is a set of
+records rather than one.
+
+### Best practices
+
+- Keep the card's own content short. A card that wraps to the height of a phone is
+  a card a reader stops comparing.
+- Put the card's controls in `renderCardActions`, not inside `renderCard`, so the
+  selection tick, the card's content and the card's own controls stay three regions
+  a reader reaches separately.
+- Mirror the selection in your own state when a batch action needs it. Pass
+  `selectedIds` and write one line in `onSelectedIdsChange`.
+- Report a filter-wide selection through `selectionScope`, and pass the count you
+  already hold rather than the number of cards on screen.
+
+### Content guidelines
+
+- A picture is a picture: pass a real image or a meaningful placeholder, and keep
+  the plate's own text out of the alt if the name beside it already says it.
+- A price is the consumer's own formatting, in the consumer's own currency. Pass
+  the amount in minor units and the currency code, or a `format` function.
+- A `selectCard` name must name the record this card's checkbox ticks, because a
+  checkbox announced identically on every card is one no reader can tell apart.

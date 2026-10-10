@@ -1003,6 +1003,28 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'CardIndex01',
+    slug: 'card-index-01',
+    kind: 'block',
+    category: null,
+    description:
+      'The record index as a grid of picture cards, with the caller composing each card and the Block owning the selection set, the announced count, the batch bar and the page and filter scope distinction.',
+    source: 'src/blocks/card-index-01/index.tsx',
+    exports: ['CardIndex01'],
+    status: 'stable',
+  },
+  {
+    name: 'RecordGrid01',
+    slug: 'record-grid-01',
+    kind: 'block',
+    category: null,
+    description:
+      'A grid of records whose cells are edited in place, drawn from the shared field specification, holding the in-progress values and reporting every edit as the row identity and the column key.',
+    source: 'src/blocks/record-grid-01/index.tsx',
+    exports: ['RecordGrid01'],
+    status: 'stable',
+  },
+  {
     name: 'RecordForm01',
     slug: 'record-form-01',
     kind: 'block',

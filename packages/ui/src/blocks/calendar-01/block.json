@@ -1,7 +1,7 @@
 {
   "name": "calendar-01",
   "title": "Calendar 01 - A Month Grid Of Scheduled Items",
-  "description": "A month of scheduled work: the published mini-calendar for the month, the locale, the weekday headings and the paging, and the caller's items grouped under the days they fall on. The cap of three items a day exists because a month grid with nine items on one day is a month grid nobody can read, and the overflow line is always drawn and always in the caller's own words, because a day that looks complete and is not is the one failure a calendar may not have. The tone is the Status tone and the words beside it are required. Every string is passed in as a prop.",
+  "description": "A month of scheduled work: the published mini-calendar for the month, the locale, the weekday headings and the paging, and the caller's items grouped under the days they fall on. The cap of three items a day exists because a month grid with nine items on one day is a month grid nobody can read, and the overflow line is always drawn and always in the caller's own words, because a day that looks complete and is not is the one failure a calendar may not have. The tone is the Status tone and the words beside it are required. A move is the caller's, so an item carries a per-item handle node the caller wires to their own drag model and the Block owns no drag, no drop and no move callback. Every string is passed in as a prop.",
   "categories": ["application"],
   "registryDependencies": ["button", "cta-link", "mini-calendar", "section", "status"],
   "dependencies": []

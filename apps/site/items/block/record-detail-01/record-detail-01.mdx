@@ -32,9 +32,17 @@ happen to share a parent.
 | --- | --- | --- |
 | `Table` | your own row nodes | `Table` and `TableBody` |
 | `ListPanel` | your own list rows | `ListPanel` and a `ul` |
-| `Timeline` | `TimelineEntry` values | `Timeline` |
+| `Timeline` | `TimelineEntry` values, with a duration and a state | `Timeline` |
+| `ActivityFeed01` | `EventSpec` values, with a moment and an actor | `ActivityFeed01` |
 | `AvatarGroup` | `{ name, src }` values | `AvatarGroup` |
 | `slot` | your own nodes, in order | a plain container |
+
+`Timeline` and `ActivityFeed01` are two different arms and not one carried twice.
+A `Timeline` draws a run with a duration and a state per step, which is an
+instrument. `ActivityFeed01` draws dated occurrences, which is a trail, and a
+record's event history is that trail. So a history is a `ActivityFeed01` relation,
+and there is no `at` on `TimelineEntry`, because one Component carrying both a
+moment and a duration would be a second answer to a question that already has one.
 
 Every relation is drawn open. A relation a reader should have to ask for is the
 `slot` member, placed by you, rather than a collapsed one, because a disclosure is
@@ -99,8 +107,10 @@ const relations: readonly RecordDetail01Relation[] = [
   {
     key: 'activity',
     label: 'Activity',
-    kind: 'Timeline',
-    members: [{ id: 'renewed', title: 'Subscription renewed', state: 'done' }],
+    kind: 'ActivityFeed01',
+    members: [
+      { key: 'renewed', at: '2026-10-01', actor: 'Northwind', action: 'renewed the subscription' },
+    ],
     empty: { reason: 'first-run', title: 'Nothing has happened yet' },
   },
 ]

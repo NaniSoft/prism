@@ -6,8 +6,9 @@ import { ListPanel } from '../../components/ui/list-panel'
 import { Section, SectionHeading, childLevel, headingSizeClass, type HeadingLevel } from '../../components/ui/section'
 import { Table, TableBody } from '../../components/ui/table'
 import { Timeline, type TimelineEntry } from '../../components/ui/timeline'
-import type { RelationKind, RelationSpec } from '../../lib/spec'
+import type { EventSpec, RelationKind, RelationSpec } from '../../lib/spec'
 import { cn } from '../../lib/utils'
+import { ActivityFeed01 } from '../activity-feed-01'
 import { EmptyState01, type EmptyReason } from '../empty-state-01'
 
 /**
@@ -175,19 +176,30 @@ export type RecordDetail01Props = {
  *
  * The map covers every member of `RelationKind`, so a kind added to the union
  * fails the compiler here until it is drawn. Each arrangement is one of the
- * Components this package already ships, and each takes the relation's `members`
- * as the shape that Component already declares: a `Table` relation's members are
+ * Items this package already ships, and each takes the relation's `members`
+ * as the shape that Item already declares: a `Table` relation's members are
  * the caller's own row nodes, drawn in a `TableBody`; a `ListPanel` relation's
  * members are the caller's own list rows; a `Timeline` relation's members are
- * `TimelineEntry` values; an `AvatarGroup` relation's members are `{ name, src }`
- * values; and a `slot` relation's members are the caller's own nodes, placed in
- * the order given. The cast is the same one `DataTable01` makes for a cell, and
- * for the same reason: the specification is the weakest type in the module on
- * purpose, and the arrangement is the thing that knows what a member is.
+ * `TimelineEntry` values, which carry a duration and a state; an
+ * `ActivityFeed01` relation's members are `EventSpec` values, which carry a
+ * moment and an actor, so a record's event history is drawn as a dated trail
+ * and never as an instrument; an `AvatarGroup` relation's members are
+ * `{ name, src }` values; and a `slot` relation's members are the caller's own
+ * nodes, placed in the order given. The cast is the same one `DataTable01`
+ * makes for a cell, and for the same reason: the specification is the weakest
+ * type in the module on purpose, and the arrangement is the thing that knows
+ * what a member is.
+ *
+ * The trail is drawn by the client Block `ActivityFeed01`, so the frame stays a
+ * server Component and only the trail is a client island. Its own section padding
+ * is dropped here because the relation already draws the heading, the count and
+ * the frame around it, and its required `empty` is the relation's own empty words,
+ * which a relation with no members never reaches because it draws `EmptyState01`
+ * instead.
  */
 const ARRANGEMENT: Record<
   Lowercase<RelationKind>,
-  (members: readonly unknown[], context: { label: string; labelledBy: string }) => ReactNode
+  (members: readonly unknown[], context: { label: string; labelledBy: string; empty: ReactNode }) => ReactNode
 > = {
   table: (members, { labelledBy }) => (
     <Table aria-labelledby={labelledBy}>
@@ -203,6 +215,9 @@ const ARRANGEMENT: Record<
   ),
   timeline: (members, { label }) => (
     <Timeline entries={members as unknown as TimelineEntry[]} label={label} />
+  ),
+  activityfeed01: (members, { empty }) => (
+    <ActivityFeed01 events={members as unknown as EventSpec[]} empty={empty} className="py-0" />
   ),
   avatargroup: (members) => (
     <AvatarGroup avatars={members as unknown as { src?: string; name: string }[]} />
@@ -267,7 +282,11 @@ function Relation({ relation, level }: { relation: RecordDetail01Relation; level
           onAction={relation.empty.onAction}
         />
       ) : (
-        arrangement(relation.members, { label: labelText, labelledBy: headingId })
+        arrangement(relation.members, {
+          label: labelText,
+          labelledBy: headingId,
+          empty: relation.empty.title,
+        })
       )}
     </section>
   )
@@ -335,9 +354,10 @@ function Relation({ relation, level }: { relation: RecordDetail01Relation; level
  *
  * It owns no selection, fetch, ordering, paging or filtering of its relations,
  * no navigation and no address, no edit state, no confirmation, toast, retry or
- * undo, and no second pane. It is a server Component: no hook beyond `useId`, no
- * state and no client code, so a consumer that passes a client action inside a
- * slot pays for the action and not for the frame.
+ * undo, and no second pane. It is a server Component: no hook beyond `useId` and
+ * no state of its own, so a consumer that passes a client action inside a slot
+ * pays for the action and not for the frame. The trail relation is the one client
+ * island, because a dated occurrence is drawn by the client `ActivityFeed01`.
  *
  * **It is measured against `IssueDetail01`, which is deprecated in its favour.** An
  * issue detail and a record detail are the same job: a key in the mono face, a state

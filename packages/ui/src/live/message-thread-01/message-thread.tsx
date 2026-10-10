@@ -103,11 +103,11 @@ export type MessagePart =
 /**
  * One message, as the surface receives it.
  *
- * A message has a stable identity, a sender and an ordered list of parts. The
- * `id` is stable across deliveries, so a transport that reports the same message
- * again as more parts arrive updates one message rather than appending a second.
- * `at` is the consumer's own epoch milliseconds and the only value the surface
- * orders by.
+ * A message has a stable identity, a sender, an optional metadata node and an
+ * ordered list of parts. The `id` is stable across deliveries, so a transport that
+ * reports the same message again as more parts arrive updates one message rather
+ * than appending a second. `at` is the consumer's own epoch milliseconds and the
+ * only value the surface orders by.
  */
 export type ChatMessage = {
   /** Stable across deliveries, so a re-reported message updates in place. */
@@ -118,6 +118,21 @@ export type ChatMessage = {
   senderLabel?: string
   /** Epoch milliseconds, used for order. */
   at: number
+  /**
+   * The caller's own per-message metadata, drawn in the message's header.
+   *
+   * A message carries one node of the caller's choosing beside the sender and the
+   * time: the model a provider stated for the turn, a token count it reported, and
+   * the cost or the latency the caller derived. It is a node rather than a set of
+   * Prism fields because the last two are the consumer's own derivation, which the
+   * conversation decision in `DESIGN.md` rules: no provider read publishes a cost
+   * or a latency, so the surface draws only what the caller hands it and states no
+   * model, no count and no figure for itself. The parts are content a reader reads
+   * as the message; this is metadata about the message and sits above its parts.
+   *
+   * It is the same `meta` shape `ItemEntry` takes, read at the message.
+   */
+  meta?: ReactNode
   /** The message's parts, in the order they are drawn and never re-sorted. */
   parts: readonly MessagePart[]
 }
@@ -294,6 +309,15 @@ function announcementOf(message: ChatMessage): string | undefined {
  * structure the consumer's data may not have. The message and part vocabulary lives
  * here, beside `RunEvent` and `ToolCall`, and is deliberately not a member of the
  * shared specification module.
+ *
+ * **Per-message metadata is the caller's own node.** The model a provider stated
+ * for a turn, a token count it reported, and the cost and the latency a consumer
+ * derived are metadata about a message rather than content a reader reads as it, so
+ * a message carries an optional `meta` the surface draws in its header beside the
+ * sender and the time. It is a node, and deliberately not a set of Prism fields:
+ * cost and latency are the consumer's own derivation, because no provider read
+ * publishes either, so the surface draws what it was handed and states no figure
+ * for itself. This is the `ItemEntry.meta` shape read at the message.
  *
  * **The four things the Kind already names are reused rather than answered twice.**
  * A tool-call part is drawn through `ToolLedger01`'s own row, so there is no second
@@ -500,6 +524,11 @@ export function MessageThread01({
                   >
                     {clockOf(message.at)}
                   </time>
+                  {message.meta === undefined ? null : (
+                    <span data-slot="thread-message-meta" className="text-muted-foreground text-xs">
+                      {message.meta}
+                    </span>
+                  )}
                 </div>
 
                 <ol data-slot="message-parts" className="flex flex-col gap-2">

@@ -1,0 +1,8 @@
+{
+  "name": "card-index-01",
+  "title": "Card Index 01 - The Record Index As Pictures",
+  "description": "The record index as a grid of picture cards a reader compares and acts on: the caller composes each card's picture, name and price and its per card actions, and the Block owns the arrangement, the selection set, the count it announces and the batch bar. It holds the record index's own selection and announcement contract, including the page and filter scope distinction, and it fetches, sorts, filters and slices nothing. Every string is passed in as a prop.",
+  "categories": ["application"],
+  "registryDependencies": ["button", "checkbox", "live-region", "pagination", "section"],
+  "dependencies": ["lucide-react"]
+}
