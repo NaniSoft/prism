@@ -1,5 +1,80 @@
 # @nanisoft/prism-ui
 
+## 1.1.0
+
+### Minor Changes
+
+- ad69fa2: A message carries the caller's per-message metadata
+  
+  `ChatMessage` gains an optional `meta: ReactNode`, drawn in the message's header
+  beside the sender and the time. It carries the caller's own per-message metadata:
+  the model a provider stated for a turn, a token count it reported, and the cost or
+  the latency the caller derived. It is a node and not a set of Prism fields because
+  no provider read publishes a cost or a latency, so the surface states no model, no
+  count, no cost and no latency for itself and draws only what the caller hands it.
+  The parts stay the way content is carried. The roster does not change: no new Item,
+  Kind, Page or catalogue entry appears.
+- ad69fa2: The date view takes a per-item move control
+  
+  `Calendar01` exposes a per-item `handle`, a node the caller fills with their own
+  control and wires to whatever owns their schedule. It exists for the one
+  interaction a date view has that the Block does not own: a reschedule, which is a
+  drag with a drop target, a new order, a write and a conflict, every one of them the
+  consumer's. The Block places the node at the leading edge of the item's row and
+  owns nothing beyond it: no drag, no drop, no order and no move callback, which is
+  the arrangement `Kanban01` already takes for a board's drag.
+  
+  A `CalendarItem` gains an optional `handle: ReactNode`; `Calendar01`'s props are
+  otherwise unchanged. The roster does not change: no new Item, Kind, Page or
+  catalogue entry appears.
+- ad69fa2: The index gains a picture arrangement and a write grid
+  
+  Two coverage gaps in the record-index territory are closed by authoring two Blocks
+  rather than by widening a union, and each is the arrangement `DESIGN.md` already
+  named as forcing a second Item.
+  
+  **`CardIndex01` is the record index as pictures.** It draws a set of records as a
+  grid of cards rather than as rows, with the caller composing each card's picture,
+  name and price through `renderCard` and its per card actions through
+  `renderCardActions`. It shares the record index's selection and announcement
+  contract, which ticket 166 made the law for the index family: the same `selectable`
+  union, the same held set of keys, the same three-state header control, the same
+  single polite live region carrying a count, the same batch bar around the caller's
+  own `batchActions` node, and the same `selectionScope` distinguishing a page-wide
+  selection from a filter-wide one. It fetches, sorts, filters and slices nothing.
+  
+  **`RecordGrid01` is a grid edited in place.** Its columns are the shared
+  `FieldSpec`, because a cell that writes is a control and the only vocabulary this
+  package publishes for a control is the field specification; `ColumnKind` is the
+  vocabulary for a value a reader reads and is held disjoint from it. The Block seeds
+  each cell from the caller's row, holds the in-progress values so a cell redraws as
+  it is typed, and reports every edit through a required `onCellChange` as the row
+  identity and the column key. It fetches nothing, sorts nothing and pages nothing,
+  and it owns no command.
+  
+  **Why `ColumnKind` was not widened.** The obvious alternative was an editable cell
+  arm on `ColumnKind` plus a change callback. That arm would name a field Component
+  (`Input`, `Select` and their kin), which is a member of `FieldKind`, and
+  `scripts/check-spec-unions.mjs` reports it as an `overlapping-union` between the
+  read union and the write union, in the same run that would otherwise pass. The
+  disjointness the gate protects is exactly the fact that a cell that writes is a
+  different job from a cell that reads, so the answer is a new Item that takes the
+  field union rather than a wider column union.
+- ad69fa2: The record detail draws a dated trail as one of its relations
+  
+  `RelationKind` gains the `ActivityFeed01` arm, so a record's event history is a
+  first-class relation drawn over `EventSpec` values rather than the generic `slot`
+  arm. The union previously offered only `Timeline`, whose `TimelineEntry` carries a
+  `duration` and a `state` and no `at`, so a record's dated occurrences had no
+  relation to draw them. A `Timeline` is an instrument and a trail is not, so the fix
+  is a new arm and not a moment on `TimelineEntry`: one Component carrying both a
+  moment and a duration would be a second answer to a question that already has one.
+  
+  `RecordDetail01` draws the arm with the shared `ActivityFeed01` Block, exactly as
+  it draws the other arms, and its relations are unchanged otherwise. The roster does
+  not change: this widens an existing union and an existing Block, and no new Item,
+  Kind, Page or catalogue entry appears.
+
 ## 1.0.0
 
 ### Major Changes
