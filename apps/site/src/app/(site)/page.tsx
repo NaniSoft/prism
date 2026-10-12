@@ -8,6 +8,7 @@ import { Stats01 } from '@nanisoft/prism-ui/blocks/stats-01'
 import type { MetricSpec } from '@nanisoft/prism-ui/spec'
 import { PackBand } from '@/components/landing/pack-band'
 import { Principles } from '@/components/landing/principles'
+import { PrismLogo } from '@/components/logo'
 
 /**
  * The marketing landing.
@@ -91,6 +92,7 @@ export default function HomePage() {
             stateLabel="live"
             caption="The token pipeline as four stages on one rail."
             footnote="A figure that shows a system running is the one thing Prism animates, and it reads the same with every animation stopped."
+            actions={<PrismLogo size={22} className="text-muted-foreground block" />}
           >
             {/*
               The figure keeps a readable minimum width and the panel scrolls it,

@@ -76,6 +76,22 @@ const SECTIONS = ['Overview', 'Foundation', 'Content', 'Patterns', 'Components',
  */
 const CARD_LINE = 'A token pipeline, a React library, and the documentation for both.'
 
+/**
+ * The mark, as the card draws it: the beam and its refraction through the chart
+ * colours, painted as literals and embedded as a data URI, because the renderer
+ * paints a bitmap and cannot resolve cascade classes.
+ */
+const MARK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="150" height="150" fill="none">
+  <g stroke-linecap="round">
+    <path d="M4 16 L13 16" stroke="#171717" stroke-width="2.5"/>
+    <path d="M15 14 L28 8" stroke="#6366f1" stroke-width="2.5"/>
+    <path d="M15 16 L28 16" stroke="#14b8a6" stroke-width="2.5"/>
+    <path d="M15 18 L28 24" stroke="#f59e0b" stroke-width="2.5"/>
+    <path d="M13 12 L15 20 L13 20 Z" fill="#4338ca" stroke="none"/>
+  </g>
+</svg>`
+const MARK_URI = `data:image/svg+xml;base64,${Buffer.from(MARK_SVG).toString('base64')}`
+
 export default function OpengraphImage() {
   return new ImageResponse(
     (
@@ -93,8 +109,11 @@ export default function OpengraphImage() {
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          <div style={{ display: 'flex', fontSize: 26, letterSpacing: 2, color: MUTED }}>
-            NANISOFT DESIGN SYSTEM
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', fontSize: 26, letterSpacing: 2, color: MUTED }}>
+              NANISOFT DESIGN SYSTEM
+            </div>
+            <img src={MARK_URI} width={120} height={120} />
           </div>
           <div style={{ display: 'flex', fontSize: 76, fontWeight: 600, letterSpacing: -2, lineHeight: 1.05 }}>
             {SITE_NAME}
