@@ -93,6 +93,8 @@ const THEMES = [
   { id: 'lavender', hue: 305, neutralC: 0.012, brandC: 0.125 },
   { id: 'sky', hue: 245, neutralC: 0.011, brandC: 0.115 },
   { id: 'peach', hue: 55, neutralC: 0.012, brandC: 0.125 },
+  { id: 'cyan', hue: 215, neutralC: 0.011, brandC: 0.115 },
+  { id: 'gold', hue: 80, neutralC: 0.012, brandC: 0.125 },
 ]
 
 /* ── Emit ─────────────────────────────────────────────────────────────────── */

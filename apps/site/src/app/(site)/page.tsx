@@ -22,13 +22,15 @@ import { Principles } from '@/components/landing/principles'
  * that only the author of the landing page believed.
  */
 const catalogue = buildCatalog()
+import themes from '@nanisoft/prism-tokens/dist/themes.json'
+
 const countOf = (kind: (typeof catalogue)[number]['kind']) =>
   catalogue.filter((item) => item.kind === kind).length
 
 const STATS: MetricSpec[] = [
   { key: 'components', label: 'Components', value: String(countOf('component')), hint: 'across seven role categories' },
   { key: 'blocks', label: 'Blocks', value: String(countOf('block')), hint: 'composed sections that take content as props' },
-  { key: 'packs', label: 'Packs', value: '6', hint: 'one base and five pastels' },
+  { key: 'packs', label: 'Packs', value: String(1 + themes.length), hint: 'the neutral base and the pastels' },
   { key: 'modes', label: 'Modes', value: '2', hint: 'light and dark, selected independently' },
 ]
 
@@ -76,7 +78,7 @@ export default function HomePage() {
       <Hero01
         headingLevel="h1"
         eyebrow="NaniSoft design system"
-        title="One design system, composed without CSS"
+        title="One design language. Many expressions."
         description="A token pipeline, a React library you compose, and documentation read from the build rather than retyped from it."
         actions={[
           { label: 'Read the quickstart', href: '/overview/quickstart' },
@@ -145,7 +147,7 @@ export default function HomePage() {
 
       <PackBand
         headingLevel="h2"
-        title="Six packs, one contract"
+        title="Eight packs, one contract"
         description="A pack re-points the semantic tokens rather than replacing them, so the component package is published once and the theme is chosen at runtime. Every pack below is drawn in its own values, on the page you are reading."
         action={{ label: 'See the packs', href: '/foundation/themes' }}
       />

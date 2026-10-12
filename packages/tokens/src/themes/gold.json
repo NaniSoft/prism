@@ -1,0 +1,5 @@
+{
+  "$description": "Soft gold. The research hue of the family: warm, luminous, and considered. Sits at the roomiest radius in the set, beside Peach.",
+  "name": "Gold",
+  "radius": { "value": 1, "unit": "rem" }
+}

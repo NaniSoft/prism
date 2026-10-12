@@ -9,7 +9,7 @@ import {
 import { PrismProvider, usePrismTheme } from '@nanisoft/prism-ui/provider'
 
 /**
- * The six packs Prism ships, in the words this page uses for them.
+ * The packs Prism ships, in the words this page uses for them.
  *
  * They are the Demo's own list and not a default the Component carries, which is
  * the point the documentation is making: a pack id has no display name in the
@@ -24,6 +24,8 @@ const PACKS = [
   { id: 'lavender', name: 'Lavender', description: 'Soft violet, the most saturated.' },
   { id: 'sky', name: 'Sky', description: 'Crisp blue, the smallest radius.' },
   { id: 'peach', name: 'Peach', description: 'Soft orange, the roundest corners.' },
+  { id: 'cyan', name: 'Cyan', description: 'Soft cyan, the factory hue, crisp like Sky.' },
+  { id: 'gold', name: 'Gold', description: 'Soft gold, the research hue, round like Peach.' },
 ] satisfies readonly PackSwitcherPack[]
 
 /**
@@ -58,7 +60,7 @@ function Appearance() {
  * generated from the same id as the selection, so the two cannot disagree about
  * which pack is active.
  *
- * The second row offers three of the six packs rather than all of them, which is
+ * The second row offers three of the packs rather than all of them, which is
  * a caller's list and never a default, and it passes no descriptions and
  * `showModes={false}`, which is what a compact chooser in a site header looks like.
  * The cost of both omissions is visible: a reader choosing a pack from three names

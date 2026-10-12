@@ -15,7 +15,7 @@ import themes from '@nanisoft/prism-tokens/dist/themes.json'
  * with nothing selected and no JavaScript involved.
  *
  * **The base pack is on this band, and it is the honest entry.** `themes.json`
- * carries the five pastels only; `default` is the absence of a `data-pack`
+ * carries the pastels only; `default` is the absence of a `data-pack`
  * attribute, which is how the token build expresses it, so it is added here
  * rather than skipped. A row of five pastel fills with no neutral in it reads as
  * a theme gallery, and the neutral is the one a reader is most likely to be

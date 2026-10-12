@@ -7,13 +7,14 @@
  * and a bar whose control names live in three files is a bar where a reader finds
  * "Search" in one place and "No matches." in another.
  *
- * **Prism's own pack is `default`, and that is not a gap in the directory.** The
- * other four sites draw this one with `peach`, and this site draws itself with no
- * pack at all. Both are the same fact seen from two sides: `prism.nanisoft.com`
- * renders its document on the neutral base pack, so Prism owns no hue of its own,
- * and a mark drawn with no pack is the one case `ProductMark` draws as the full
- * spectrum. A site that claimed a pack here would be claiming one its own stylesheet
- * does not emit.
+ * **Prism's own ground is `lavender`, and its mark still owns no hue.** The two
+ * facts answer different questions. The ground is this site's expression: the
+ * system's violet end, the one hue in the family that means Prism itself, and the
+ * stylesheet emits every pack so claiming one here claims nothing the CSS cannot
+ * resolve. The mark is the system's signature: a `ProductMark` drawn with no pack
+ * is the one case that renders as the full spectrum, because the system owns every
+ * hue the products wear. Ground violet, mark spectrum: the site wears one colour
+ * and signs with all of them.
  *
  * **The default mode is light, and it was light before this module existed.** The
  * switcher this bar replaced defaulted to light, and a bar that changed the first
@@ -30,8 +31,8 @@ import type { Mode, PackId } from '@nanisoft/prism-ui/theming'
 
 import { TOP_NAV } from './nav'
 
-/** The pack a reader who has never chosen gets. The neutral one, and this site's own. */
-export const DEFAULT_PACK: PackId = 'default'
+/** The pack a reader who has never chosen gets. This site's violet expression. */
+export const DEFAULT_PACK: PackId = 'lavender'
 
 /** The mode a reader who has never chosen gets. */
 export const DEFAULT_MODE: Mode = 'light'
@@ -42,9 +43,9 @@ export const NAV = TOP_NAV
 /** The family's five sites, and the set the bar's sites menu moves between. */
 export const SITES: readonly SwitcherProduct[] = [
   { id: 'www', name: 'NaniSoft', pack: 'sky', href: 'https://www.nanisoft.com' },
-  { id: 'nexus', name: 'Nexus', pack: 'lavender', href: 'https://nexus.nanisoft.com' },
+  { id: 'nexus', name: 'Nexus', pack: 'cyan', href: 'https://nexus.nanisoft.com' },
   { id: 'atlas', name: 'Atlas', pack: 'mint', href: 'https://atlas.nanisoft.com' },
-  { id: 'alphalens', name: 'AlphaLens', pack: 'blush', href: 'https://alphalens.nanisoft.com' },
+  { id: 'alphalens', name: 'AlphaLens', pack: 'gold', href: 'https://alphalens.nanisoft.com' },
   { id: 'prism', name: 'Prism', href: '/' },
 ]
 

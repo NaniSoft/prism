@@ -26,10 +26,10 @@ import { SITE_NAME } from '@/lib/site'
  * base pack's values and produce a card that shows the neutral pack while the
  * rest of the design system is built to show that the palette is switchable. The
  * card is therefore the base pack's own values written out: `background` is its
- * `background`, `foreground` is its `foreground`, and the two brand chips are
- * two of the five pastels' `primary`, because a card for a pastel design system
- * that shows only grey is a card that has hidden the one fact about it a reader
- * cannot get from the text.
+ * `background`, `foreground` is its `foreground`, and the chips are the seven
+ * pastels' `primary`, because a card for a pastel design system that shows only
+ * grey is a card that has hidden the one fact about it a reader cannot get from
+ * the text.
  *
  * The size is the one Open Graph accepts for a large card, and the content is
  * laid out at those pixel dimensions rather than at rems, because the canvas is a
@@ -59,6 +59,8 @@ const LAVENDER = '#bc97e7'
 const MINT = '#73bf88'
 const SKY = '#6cb2eb'
 const PEACH = '#e4965e'
+const CYAN = '#46bcd6'
+const GOLD = '#d2a24b'
 
 const SECTIONS = ['Overview', 'Foundation', 'Content', 'Patterns', 'Components', 'Blocks', 'Pages']
 
@@ -119,7 +121,7 @@ export default function OpengraphImage() {
             ))}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            {[BLUSH, LAVENDER, MINT, SKY, PEACH].map((colour) => (
+            {[BLUSH, LAVENDER, MINT, SKY, PEACH, CYAN, GOLD].map((colour) => (
               <div
                 key={colour}
                 style={{ display: 'flex', width: 32, height: 32, borderRadius: 16, background: colour }}

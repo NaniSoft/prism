@@ -1,0 +1,5 @@
+{
+  "$description": "Soft cyan. The factory hue of the family: cool, quick, and precise. Shares the crispest radius in the set with Sky.",
+  "name": "Cyan",
+  "radius": { "value": 0.5, "unit": "rem" }
+}

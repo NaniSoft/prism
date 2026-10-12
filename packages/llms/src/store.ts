@@ -118,7 +118,7 @@ export const STORE_SECTION_TITLES: Record<StoreSection, string> = {
   patterns: 'Patterns',
   changelogs: 'Changelogs',
 }
-export const STORE_PACKS = ['default', 'blush', 'mint', 'lavender', 'sky', 'peach'] as const
+export const STORE_PACKS = ['default', 'blush', 'mint', 'lavender', 'sky', 'peach', 'cyan', 'gold'] as const
 export const STORE_MODES = ['light', 'dark'] as const
 export const STORE_SCALE_GROUPS = [
   'motion',

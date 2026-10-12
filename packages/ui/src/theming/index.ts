@@ -9,7 +9,7 @@
  * and mode are the whole API.
  */
 
-export const PACKS = ['default', 'blush', 'mint', 'lavender', 'sky', 'peach'] as const
+export const PACKS = ['default', 'blush', 'mint', 'lavender', 'sky', 'peach', 'cyan', 'gold'] as const
 export type PackId = (typeof PACKS)[number]
 
 export const MODES = ['light', 'dark'] as const

@@ -141,7 +141,7 @@
   line-gap-override: 0%;
 }
 
-/* Semantic variables: the shadcn-compatible neutral default and the five packs. */
+/* Semantic variables: the shadcn-compatible neutral default and the seven packs. */
 @import '@nanisoft/prism-tokens/dist/light.css';
 @import '@nanisoft/prism-tokens/dist/dark.css';
 @import '@nanisoft/prism-tokens/dist/themes/blush/light.css';
@@ -154,6 +154,10 @@
 @import '@nanisoft/prism-tokens/dist/themes/sky/dark.css';
 @import '@nanisoft/prism-tokens/dist/themes/peach/light.css';
 @import '@nanisoft/prism-tokens/dist/themes/peach/dark.css';
+@import '@nanisoft/prism-tokens/dist/themes/cyan/light.css';
+@import '@nanisoft/prism-tokens/dist/themes/cyan/dark.css';
+@import '@nanisoft/prism-tokens/dist/themes/gold/light.css';
+@import '@nanisoft/prism-tokens/dist/themes/gold/dark.css';
 
 /* The `@theme inline`/`@theme static` bindings that generate semantic utilities. */
 @import '@nanisoft/prism-tokens/dist/theme.css';

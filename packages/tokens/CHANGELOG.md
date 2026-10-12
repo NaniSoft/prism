@@ -1,5 +1,27 @@
 # @nanisoft/prism-tokens
 
+## 1.2.0
+
+### Minor Changes
+
+- Two new packs: Cyan and Gold
+  
+  The family's product map asked for two hues the palette did not carry, and a
+  product's ground is a fact about the system rather than about the site that
+  wears it, so the hues arrive here instead of as consumer overrides.
+  
+  `cyan` is the Nexus pack: pastel cyan-blue, generated at hue 215 in OKLCH with
+  the same perceptually even lightness ramp as the other five, at the crispest
+  radius in the set (0.5rem) beside Sky. `gold` is the AlphaLens pack: pastel
+  amber-gold at hue 80, at the roomiest radius (1rem) beside Peach. Both carry
+  the full shadcn-compatible contract, tinted neutrals at the family's chroma,
+  and pass the contrast gate at 38/38 required pairs in both modes.
+  
+  `PACKS` in the theming module and `STORE_PACKS` in the llms corpus carry the
+  two new ids, so a consumer's ground-pack validation and every agent reading
+  the corpus see the same vocabulary. Peach returns to reserved. The published
+  pack count is now seven pastels plus the neutral default.
+
 ## 0.16.0
 
 ### Minor Changes
