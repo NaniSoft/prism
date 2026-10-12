@@ -186,9 +186,9 @@ describe('the bar of a product site', () => {
     const menu = await screen.findByRole('menu')
     // One pack active at a time out of a known set, so a radio group and not a list
     // of commands: a reader who opens the chooser is told which pack is in use,
-    // which a row of six commands would not tell them.
+    // which a row of eight commands would not tell them.
     const choices = within(menu).getAllByRole('menuitemradio')
-    expect(choices.length).toBe(6)
+    expect(choices.length).toBe(8)
     expect(within(menu).getByRole('menuitemradio', { checked: true })).toHaveTextContent('Lavender')
 
     // The swatch is a pack boundary carrying `bg-primary`, not a literal read from

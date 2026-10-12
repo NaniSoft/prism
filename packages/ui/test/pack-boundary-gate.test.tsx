@@ -153,7 +153,7 @@ describe('the pack-boundary gate', () => {
     expect(result.status, result.stdout + result.stderr).toBe(0)
     // The coverage line is the falsifiable part: a reader can see that rule 2 read
     // every pack and found the axis it claims to check.
-    expect(result.stdout).toMatch(/per-pack axes this run read, from 5 pack\(s\): colour plus --radius/)
+    expect(result.stdout).toMatch(/per-pack axes this run read, from 7 pack\(s\): colour plus --radius/)
     expect(result.stdout).toMatch(/pack-relative, so a boundary moves them: \S+/)
     // The honest limit, printed on the passing run rather than left in a comment.
     expect(result.stdout).toMatch(/not a cascade resolution/)

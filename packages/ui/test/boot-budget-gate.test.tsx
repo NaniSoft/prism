@@ -96,7 +96,7 @@ describe('the boot-budget gate', () => {
     expect(result.stdout).toMatch(/measured emission:\s+\d+ B/)
     expect(result.stdout).toMatch(/migration clause:\s+\d+ B/)
     expect(result.stdout).toMatch(/non-migration part:\s+\d+ B/)
-    expect(result.stdout).toMatch(/pinned base:\s+820 B/)
+    expect(result.stdout).toMatch(/pinned base:\s+834 B/)
     expect(result.stdout).toMatch(/non-migration drift:\s+\+?0 B against the pinned base/)
     expect(result.stdout).toMatch(/ceiling:\s+\d+ B\s+\(pinned base \+ 2 x clause\)/)
   })
@@ -109,7 +109,7 @@ describe('the boot-budget gate', () => {
     expect(result.status).toBe(1)
     expect(result.stderr).toContain('over the')
     expect(result.stderr).toContain('ceiling by')
-    expect(result.stderr).toContain('against a 820 B base')
+    expect(result.stderr).toContain('against a 834 B base')
   })
 
   it('absorbs a growth of less than one migration generation, whatever it is spent on', () => {
