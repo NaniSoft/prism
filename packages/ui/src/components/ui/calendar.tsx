@@ -159,7 +159,12 @@ const DAY_CELL =
   // was added to it, and the fuller grid kept the 36px cell that is the same cell at
   // a different size. A month grid is the densest control in the package and the one
   // most worked with a thumb, so it is the last place the floor can be argued about.
-  'text-foreground hover:bg-accent hover:text-accent-foreground flex h-9 w-full cursor-pointer items-center justify-center rounded-md text-sm tabular-nums outline-none transition-colors duration-fast ease-out pointer-coarse:h-11 focus-visible:ring-ring focus-visible:ring-[3px]'
+  //
+  // The cell is centred by the table, not by a `flex` utility: a `display: flex` on
+  // a `<th>` or a `<td>` takes the cell out of the table's column layout, and the
+  // month drew as one stacked column at four times its height before the utility
+  // came off.
+  'text-foreground hover:bg-accent hover:text-accent-foreground h-9 cursor-pointer rounded-md p-0 align-middle text-center text-sm tabular-nums outline-none transition-colors duration-fast ease-out pointer-coarse:h-11 focus-visible:ring-ring focus-visible:ring-[3px]'
 
 /**
  * The two paging controls.
@@ -443,7 +448,7 @@ function Calendar({
                   key={`${weekday}-${column}`}
                   scope="col"
                   data-slot="calendar-weekday"
-                  className="text-muted-foreground flex h-8 items-center justify-center text-xs font-medium"
+                  className="text-muted-foreground h-8 p-0 align-middle text-center text-xs font-medium"
                 >
                   {weekday}
                 </th>

@@ -103,7 +103,6 @@ const ROOTS = [
   'CONTEXT.md',
   'AGENTS.md',
   'CONTRIBUTING.md',
-  'MIGRATION.md',
   'THIRD-PARTY-NOTICES.md',
   // the published package documents
   'packages/tokens/CHANGELOG.md',

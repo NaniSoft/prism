@@ -5,6 +5,8 @@ out/
 .turbo/
 *.tsbuildinfo
 .source/
+.github/
+.agents/
 
 .env
 .env.local

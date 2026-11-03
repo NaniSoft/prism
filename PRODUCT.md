@@ -1,5 +1,11 @@
 # Product
 
+<!-- impeccable:product-schema 1 -->
+
+## Platform
+
+web
+
 ## Positioning
 
 Prism is where NaniSoft products start: a design system whose token pipeline,
@@ -28,6 +34,10 @@ downstream code own a style, a token or an animation, it is out of scope.
   value and emits the shadcn-compatible CSS variable contract. Colour, radius,
   typography, spacing, motion, elevation, breakpoints and containers all
   originate there.
+- A pack system over that foundation: the neutral base pack `default` and the
+  seven pastels Blush, Mint, Lavender, Sky, Peach, Cyan and Gold. A consumer
+  chooses a pack and a mode, never a token value, and a pack carries product
+  identity: cyan for Nexus, gold for AlphaLens, lavender for Prism's own site.
 - A React component library (`@nanisoft/prism-ui`) of Components, Blocks and
   Pages over Base UI and Tailwind 4, published with one precompiled stylesheet
   and no consumer tooling requirement.
@@ -35,6 +45,10 @@ downstream code own a style, a token or an animation, it is out of scope.
   project the same checked catalogue.
 - A read-only MCP server (`@nanisoft/prism-mcp-server`) served from the same
   Worker as the site.
+- A consumer gate kit (`@nanisoft/prism-ui/gates`): the laws that govern a
+  consumer's repository ship inside the component package and run there, so a
+  rule lands once in Prism and reaches every consumer repository in one
+  release, where it cannot be declined.
 
 ## What it refuses to be
 
@@ -79,10 +93,3 @@ downstream code own a style, a token or an animation, it is out of scope.
    can read and verify.
 6. **Decisions are recorded.** The constitution documents carry the reasoning,
    and a pull request that changes a rule changes the document with it.
-
-## Evidence
-
-The previous public system lives at `github.com/NaniSoft/prism` as an untouched
-archive; its prose is carried over as content, and its implementation is not.
-What this repository still owes the consumer is the cutover, which `MIGRATION.md`
-drafts.

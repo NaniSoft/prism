@@ -7,7 +7,7 @@ import { SearchEntry } from './search-entry'
 import { SitesMenu } from './sites-menu'
 import { ThemeMenu, type ThemePack } from './theme-menu'
 import type { SwitcherProduct } from '../../components/ui/product-switcher'
-import type { MobileNavLink } from './mobile-nav'
+import type { MobileNavEntry } from './mobile-nav'
 import { MobileNav } from './mobile-nav'
 import { PrismProvider } from '../../provider/provider'
 
@@ -16,7 +16,7 @@ export type NavbarControlsProps = {
   /** The product whose mark heads the mobile panel. */
   product: { id: string; name: string; pack?: PackId | null }
   /** The site's own destinations, for the panel below the row's threshold. */
-  nav: readonly MobileNavLink[]
+  nav: readonly MobileNavEntry[]
   /** The accessible name of the panel and of its trigger. */
   navLabel: string
   /** The set of sites, or nothing for a site that is the only one. */

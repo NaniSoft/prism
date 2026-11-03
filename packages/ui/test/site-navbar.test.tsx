@@ -230,6 +230,97 @@ describe('the bar of a product site', () => {
 })
 
 /**
+ * A row with more destinations than the row has room for clubs them into
+ * groups, and a group is the one control in the row: everything else around it
+ * stays a server-rendered anchor.
+ *
+ * The claims under test are the ones a consumer inherits: that the group's
+ * destinations are real anchors rather than rows that only look like links,
+ * that the place the reader is on is on the row even with the menu shut, and
+ * that the panel below the row's threshold lists every destination flat rather
+ * than behind a second disclosure.
+ */
+describe('a grouped navigation in the bar', () => {
+  const GROUP = {
+    label: 'Catalogue',
+    children: [
+      { label: 'Components', href: '/components' },
+      { label: 'Blocks', href: '/blocks' },
+    ],
+  }
+
+  function barWithGroup(currentPath?: string) {
+    return render(
+      <SiteNavbar
+        product={PRODUCT}
+        defaultPack="lavender"
+        defaultMode="light"
+        navLabel={COPY.nav}
+        mobileLabels={{ open: COPY.menuOpen, close: COPY.menuClose }}
+        currentPath={currentPath}
+        nav={[{ label: 'Docs', href: '/docs' }, GROUP]}
+      />,
+    )
+  }
+
+  it('renders the group as one trigger whose menu lists real links', async () => {
+    const user = userEvent.setup()
+    barWithGroup()
+
+    // The group is not a destination, so it is a button: a reader who expects a
+    // menu from it is told it is one, and a reader who expects a link is not
+    // offered one that goes nowhere.
+    await user.click(screen.getByRole('button', { name: 'Catalogue' }))
+
+    const menu = await screen.findByRole('menu')
+    const links = [...menu.querySelectorAll('a')]
+    expect(links.map((link) => link.getAttribute('href'))).toEqual(['/components', '/blocks'])
+    expect(screen.queryByRole('link', { name: 'Catalogue' })).toBeNull()
+  })
+
+  it('carries the reader\'s place on the row, and names it inside the menu', async () => {
+    const user = userEvent.setup()
+    barWithGroup('/components/button')
+
+    // The trigger is filled when the reader is inside the group, so where they
+    // are is on the row with the menu shut. A fill is not an announcement, so
+    // the trigger does not carry aria-current: it is a button, not the page.
+    const trigger = screen.getByRole('button', { name: 'Catalogue' })
+    expect(trigger.getAttribute('data-current')).toBe('true')
+
+    await user.click(trigger)
+    const menu = await screen.findByRole('menu')
+    // The page itself is named on the destination that holds it, which is the
+    // announcement a screen reader makes of where the reader is.
+    expect(menu.querySelector('a[href="/components"]')).toHaveAttribute('aria-current', 'page')
+    expect(menu.querySelector('a[href="/blocks"]')).not.toHaveAttribute('aria-current')
+  })
+
+  it('marks a Section link for the page it holds, not only for its landing page', () => {
+    // `/docs/button` is inside Docs, and a reader on it is in Docs: the mark
+    // reads the route as a place rather than as a string. The boundary is the
+    // slash, so a segment that prefixes another Section's never claims it.
+    barWithGroup('/docs/button')
+    expect(screen.getByRole('link', { name: 'Docs' })).toHaveAttribute('aria-current', 'page')
+  })
+
+  it('lists the group flat in the panel, as a label above its links', async () => {
+    const user = userEvent.setup()
+    barWithGroup('/blocks')
+
+    await user.click(screen.getByRole('button', { name: COPY.menuOpen }))
+
+    // The panel is not short of room the way the row is, so the same group is a
+    // named run of the list rather than a second thing to open: every
+    // destination is one disclosure deep, never two.
+    const panel = await screen.findByRole('group', { name: 'Catalogue' })
+    const links = [...panel.querySelectorAll('a')]
+    expect(links.map((link) => (link.textContent ?? '').trim())).toEqual(['Components', 'Blocks'])
+    expect(links[1]).toHaveAttribute('aria-current', 'page')
+  })
+})
+
+/**
  * The two claims about the bar's own surface that a consumer inherits and cannot
  * see from the source.
  *

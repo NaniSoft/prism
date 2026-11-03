@@ -194,19 +194,30 @@ function PulseSeries({
         hairline rather than a solid band: a solid band at this width would hide
         the columns it is supposed to be pointing at, which is the opposite of
         what a reticle is for.
+
+        The wash is one column slot wide and the line runs down its centre, so
+        at every instant the wash covers exactly the column the line is
+        crossing. The outer group parks that centre on the plot's left edge and
+        the animation travels `roomX`, which is `slot` per column, so the line
+        enters at the edge of the first column's field and leaves at the edge of
+        the last one's, and its opacity ramps are spent on the margins beside
+        the end columns rather than on the end columns themselves. Both shapes
+        stop at the baseline rather than above it, because a wash that stops
+        short of the axis while its own line reaches it is a reticle floating
+        free of the thing it reads.
       */}
       {scan ? (
-        <g data-slot="pulse-series-scan" aria-hidden>
+        <g data-slot="pulse-series-scan" aria-hidden transform={`translate(${PADDING} 0)`}>
           <g
             className="prism-ambient-scan"
-            style={{ '--ambient-scan-distance': `${roomX + slot}px` } as CSSProperties}
+            style={{ '--ambient-scan-distance': `${roomX}px` } as CSSProperties}
           >
             <rect
               data-slot="pulse-series-scan-wash"
-              x={PADDING - slot}
+              x={-slot / 2}
               y={PADDING_TOP - 12}
               width={slot}
-              height={roomY + 12}
+              height={baselineY - PADDING_TOP + 12}
               className="fill-brand-ink/10"
             />
             <line

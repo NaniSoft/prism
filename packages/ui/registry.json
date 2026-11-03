@@ -7666,6 +7666,11 @@
           "target": "components/blocks/site-navbar/mode-toggle.tsx"
         },
         {
+          "path": "src/blocks/site-navbar/nav-menu.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/site-navbar/nav-menu.tsx"
+        },
+        {
           "path": "src/blocks/site-navbar/navbar-controls.tsx",
           "type": "registry:component",
           "target": "components/blocks/site-navbar/navbar-controls.tsx"

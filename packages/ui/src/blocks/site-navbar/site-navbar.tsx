@@ -6,6 +6,7 @@ import type { SearchDialogMessages } from '../../components/ui/search-dialog'
 import { cn } from '../../lib/utils'
 import type { Mode, PackId } from '../../theming'
 import { NavbarControls } from './navbar-controls'
+import { NavMenu } from './nav-menu'
 import type { ThemePack } from './theme-menu'
 
 /**
@@ -35,7 +36,43 @@ export type SiteNavLink = {
    * external: a cross-origin destination is not by itself a reason to open a tab.
    */
   newTab?: boolean
+  /** Forbidden: a destination carrying children is a `SiteNavGroup`, not a link. */
+  children?: never
 }
+
+/**
+ * A group of destinations in the bar's own navigation, rendered as one trigger
+ * that opens a menu of them.
+ *
+ * The group is a place in the row rather than a route: it carries no `href`, and
+ * a caller whose group has an index page of its own lists that page among the
+ * `children` rather than on the group, so nothing is inventing a route. That is
+ * the same shape the site's own sidebar holds a folder to, and for the same
+ * reason: a group is where destinations live, not one.
+ *
+ * **A group hides its destinations until it is opened**, on the row above the
+ * panel threshold and nowhere else. The bar's narrow-viewport panel lists every
+ * destination flat, so a reader below the threshold meets no group at all, and a
+ * caller who cannot afford to hide a route behind a click leaves it out of a
+ * group: the search index, the sitemap and the page's own links are outside the
+ * bar and unaffected either way.
+ */
+export type SiteNavGroup = {
+  /** The word on the trigger, which is the group's own name. */
+  label: string
+  /** The destinations behind the trigger, in the order a reader should meet them. */
+  children: readonly SiteNavLink[]
+  /**
+   * Marks the group as holding the page the reader is on, for a caller that
+   * composes the bar per page and marks each entry itself. A caller that passes
+   * `currentPath` leaves this off and the bar resolves it against the group's
+   * children.
+   */
+  current?: boolean
+}
+
+/** One entry in the bar's own navigation: a link, or a group of them. */
+export type SiteNavEntry = SiteNavLink | SiteNavGroup
 
 /** The search the bar offers, which is a URL rather than an index. */
 export type SiteNavSearch = {
@@ -108,8 +145,13 @@ export type SiteNavbarProps = {
    * control whose icon is a guess until it is pressed once.
    */
   defaultMode: Mode
-  /** This site's own destinations. Omit for a bar that carries only the lockup. */
-  nav?: readonly SiteNavLink[]
+  /**
+   * This site's own destinations: links, groups of links, or both in the order
+   * a reader should meet them. A link renders as itself; a group renders as one
+   * trigger opening its children as a menu. Omit for a bar that carries only
+   * the lockup.
+   */
+  nav?: readonly SiteNavEntry[]
   /**
    * The accessible name of the site's navigation. Required, and required rather
    * than defaulted because it is a word a reader hears: a Block that ships no copy
@@ -244,12 +286,14 @@ export type SiteNavbarProps = {
  * with no release. This package ships no `will-change` anywhere, and the bar is not
  * the place to start one.
  *
- * **It is a server Component with one client island inside it.** The lockup and the
- * navigation are rendered on the server and ship no JavaScript; the controls are a
- * single boundary, because a control's state is a reader's state. A site that
- * passes no `search`, `sites`, `theme`, `mode` or `nav` renders the whole bar on the
- * server and ships none, which is the arrangement a static site wants and the reason
- * those props are optional rather than required.
+ * **It is a server Component whose client islands are the ones a reader opens.** The
+ * lockup and the row's links are rendered on the server and ship no JavaScript; the
+ * controls are a single boundary, because a control's state is a reader's state, and
+ * a group in the navigation adds one island of its own for the same reason. A site
+ * that passes no `search`, `sites`, `theme`, `mode` or `nav`, and groups none of
+ * its destinations, renders the whole bar on the server and ships none, which is
+ * the arrangement a static site wants and the reason those props are optional
+ * rather than required.
  */
 export function SiteNavbar({
   product,
@@ -270,9 +314,31 @@ export function SiteNavbar({
   sticky = true,
   className,
 }: SiteNavbarProps) {
-  const links = nav ?? []
-  const isCurrent = (link: SiteNavLink): boolean =>
-    link.current ?? (currentPath !== undefined && link.href === currentPath)
+  const entries = nav ?? []
+
+  /*
+   * The current mark reads the route as a place rather than as a string, so a
+   * reader on a page inside a destination is still on it: `/components/button`
+   * marks Components on the row, which is the question a reader asking "where
+   * am I" is asking. The boundary is the slash, so a Section whose segment is a
+   * prefix of another's (`/content` beside a hypothetical `/content-x`) never
+   * claims the other's pages.
+   */
+  const under = (href: string): boolean =>
+    currentPath !== undefined && (currentPath === href || currentPath.startsWith(`${href}/`))
+
+  const leafCurrent = (link: SiteNavLink): boolean => link.current ?? under(link.href)
+
+  /**
+   * A group is current when the reader is on it or inside any of its children.
+   * A group is told apart from a link by `href`, which a link must carry and a
+   * group must not, so the narrowing is on the one key the two never share.
+   */
+  const entryCurrent = (entry: SiteNavEntry): boolean =>
+    entry.current ??
+    ('href' in entry
+      ? under(entry.href)
+      : entry.children.some((child) => leafCurrent(child)))
 
   return (
     <header
@@ -297,30 +363,54 @@ export function SiteNavbar({
           <ProductMark id={product.id} name={product.name} pack={product.pack} size="sm" />
         </a>
 
-        {links.length > 0 ? (
+        {entries.length > 0 ? (
           <nav aria-label={navLabel} className="hidden items-center lg:flex">
-            {links.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                aria-current={isCurrent(link) ? 'page' : undefined}
-                rel={link.newTab ? 'noopener noreferrer' : undefined}
-                target={link.newTab ? '_blank' : undefined}
-                className={
-                  isCurrent(link)
-                    ? 'bg-accent text-accent-foreground focus-visible:border-ring focus-visible:ring-ring rounded-md px-2 py-1.5 text-sm font-medium transition-colors focus-visible:ring-[3px] focus-visible:outline-none'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-ring rounded-md px-2 py-1.5 text-sm font-medium transition-colors focus-visible:ring-[3px] focus-visible:outline-none'
-                }
-              >
-                {link.label}
-              </a>
-            ))}
+            {entries.map((entry) =>
+              /*
+               * A group is the one control in the row, because it is the one
+               * entry that is a place rather than a destination, and its menu is
+               * a client island for the same reason the controls cluster is:
+               * whether it is open is a reader's state. The links around it stay
+               * server-rendered anchors, so a bar whose row is all links still
+               * ships a navigation with no JavaScript in it.
+               */
+              'href' in entry ? (
+                <a
+                  key={entry.href}
+                  href={entry.href}
+                  aria-current={entryCurrent(entry) ? 'page' : undefined}
+                  rel={entry.newTab ? 'noopener noreferrer' : undefined}
+                  target={entry.newTab ? '_blank' : undefined}
+                  className={
+                    entryCurrent(entry)
+                      ? 'bg-accent text-accent-foreground focus-visible:border-ring focus-visible:ring-ring rounded-md px-2 py-1.5 text-sm font-medium transition-colors focus-visible:ring-[3px] focus-visible:outline-none'
+                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-ring rounded-md px-2 py-1.5 text-sm font-medium transition-colors focus-visible:ring-[3px] focus-visible:outline-none'
+                  }
+                >
+                  {entry.label}
+                </a>
+              ) : (
+                <NavMenu
+                  key={entry.label}
+                  label={entry.label}
+                  current={entryCurrent(entry)}
+                  links={entry.children.map((child) => ({ ...child, current: leafCurrent(child) }))}
+                />
+              ),
+            )}
           </nav>
         ) : null}
 
         <NavbarControls
           product={product}
-          nav={links.map((link) => ({ ...link, current: isCurrent(link) }))}
+          nav={entries.map((entry) =>
+            'href' in entry
+              ? { ...entry, current: entryCurrent(entry) }
+              : {
+                  label: entry.label,
+                  children: entry.children.map((child) => ({ ...child, current: leafCurrent(child) })),
+                },
+          )}
           navLabel={navLabel}
           sites={sites}
           currentSiteId={currentSiteId}

@@ -245,12 +245,19 @@ function pushEntries(out: FlatNav[], entries: NavEntry[]): void {
 }
 
 /**
- * The header's top-level row: the seven Sections and nothing else.
+ * The header's top-level row: the prose Sections as links, the catalogue
+ * Sections clubbed under one group, and nothing else.
  *
  * The list used to be written out by hand, which made the header the one
  * navigation a Section could be missing from without anything noticing, and it
  * is now derived so a Section that exists is a Section a reader can reach from
- * the header.
+ * the header. The clubbing is derived too, from the manifest's own `prose`
+ * flag: a catalogue Section is a collection of many Items and the five of them
+ * beside four bodies of knowledge was a row a reader scanned word by word
+ * rather than recognised at a glance, so every run of catalogue Sections is one
+ * group placed where the run sits in the manifest's reading order. A Section
+ * added tomorrow is a link or a group member by its own declaration, and no
+ * second list exists to keep in step with the first.
  *
  * **The landing page keeps no entry.** The row labelled `/` "Overview", which
  * collided with the Overview Section, and the header already renders the
@@ -263,7 +270,57 @@ function pushEntries(out: FlatNav[], entries: NavEntry[]): void {
  * Section's index links it. What the row shows is the shape of the whole
  * documentation, and a reader is not a Section, so it is not a peer of one.
  */
-export const TOP_NAV = SECTIONS.map((section) => ({
-  href: `/${section.segment}`,
-  label: section.title,
-}))
+
+/** A link in the header's row, which is a Section a reader walks to directly. */
+export type TopNavLeaf = { href: string; label: string }
+
+/**
+ * A group in the header's row, which is a run of catalogue Sections under the
+ * one name the vocabulary already gives them. A group carries no route of its
+ * own: "Catalogue" is a place in the row, not a page.
+ */
+export type TopNavGroup = { label: string; children: readonly TopNavLeaf[] }
+
+/** One entry in the header's row: a Section, or a run of catalogue Sections. */
+export type TopNavEntry = TopNavLeaf | TopNavGroup
+
+/** The one word the catalogue Sections are clubbed under, which is the manifest's own term for them. */
+const CATALOGUE = 'Catalogue'
+
+export const TOP_NAV: readonly TopNavEntry[] = (() => {
+  const row: TopNavEntry[] = []
+  for (const section of SECTIONS) {
+    const leaf = { href: `/${section.segment}`, label: section.title }
+    if (section.prose) {
+      row.push(leaf)
+      continue
+    }
+    // A catalogue Section joins the group beside it rather than starting a
+    // second one, so a manifest that interleaves the two kinds keeps the row's
+    // group count at the number of runs rather than the number of Sections.
+    const last = row[row.length - 1]
+    if (last && 'children' in last) last.children = [...last.children, leaf]
+    else row.push({ label: CATALOGUE, children: [leaf] })
+  }
+  return row
+})()
+
+/**
+ * Every entry in the header's row, flattened in reading order.
+ *
+ * The panel below the row's threshold lists every destination flat, and the
+ * tests that hold the row to the manifest hold it over this list, so the
+ * flatten is stated once here rather than re-derived at each place that reads
+ * it. The group's own label is not a route and appears nowhere in it.
+ */
+export function flattenTopNav(): { href: string; label: string }[] {
+  const out: { href: string; label: string }[] = []
+  for (const entry of TOP_NAV) {
+    if ('children' in entry) {
+      for (const child of entry.children) out.push({ href: child.href, label: child.label })
+    } else {
+      out.push({ href: entry.href, label: entry.label })
+    }
+  }
+  return out
+}

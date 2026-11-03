@@ -1,6 +1,6 @@
 import { expect, test, type Page, type TestInfo } from '@playwright/test'
 
-import { TOP_NAV } from '../src/lib/nav'
+import { flattenTopNav } from '../src/lib/nav'
 
 /**
  * Does the header fit, and is the right affordance on screen.
@@ -163,7 +163,12 @@ test('the panel carries every Section below lg, so the row moving cost no route'
     // false failure about a regression that never happened. A Section that cannot
     // reach a reader is the harm this lane exists for, so the assertion has to be
     // about the roster rather than about the roster as it was once.
-    expect(links, `the panel at ${width}px`).toEqual(TOP_NAV.map((item) => item.label))
+    //
+    // The panel lists the row flattened: a group is a label above its links
+    // rather than a second thing to open, so the roster the panel owes a reader
+    // is every Section, in reading order, with the group's own name on no
+    // anchor of its own.
+    expect(links, `the panel at ${width}px`).toEqual(flattenTopNav().map((item) => item.label))
     // The horizontal row is rendered but not on screen, so a reader is never
     // looking at two lists of Sections at once.
     expect(await page.locator('header nav[aria-label="Main"]').first().isVisible()).toBe(false)

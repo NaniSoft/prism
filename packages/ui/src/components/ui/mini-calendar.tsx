@@ -424,7 +424,7 @@ function MiniCalendar({
                 scope="col"
                 abbr={heading.long}
                 data-slot="mini-calendar-weekday"
-                className="text-muted-foreground flex h-8 items-center justify-center text-xs font-medium"
+                className="text-muted-foreground h-8 p-0 align-middle text-center text-xs font-medium"
               >
                 {heading.short}
               </th>

@@ -16,6 +16,12 @@ colors:
   blush-primary: "#ec88a0"
   blush-primary-foreground: "#330313"
   blush-foreground: "#322c2d"
+  cyan-primary: "#46bcd6"
+  cyan-primary-foreground: "#001c23"
+  cyan-foreground: "#2a2f30"
+  gold-primary: "#d2a24b"
+  gold-primary-foreground: "#231600"
+  gold-foreground: "#302d29"
   lavender-primary: "#bc97e7"
   lavender-primary-foreground: "#210c33"
   lavender-foreground: "#2f2d31"
@@ -36,9 +42,9 @@ typography:
     lineHeight: 1
     letterSpacing: "-0.025em"
   title:
-    fontSize: "1.5rem"
+    fontSize: "2.25rem"
     fontWeight: 600
-    lineHeight: 1.333
+    lineHeight: 1.111
     letterSpacing: "-0.025em"
   body:
     fontSize: "1.125rem"
@@ -149,7 +155,7 @@ Prism is NaniSoft's design system. It is one design language expressed through a
 token pipeline, a React component library, a documentation site, and a
 machine-readable agent surface. This document describes the system as built and
 the visual and structural rules the rest of the repository is accountable to. It
-is written for this repository, not adapted from the old one.
+is written for this repository.
 
 **The constraint.** Semantic token names are emitted verbatim as CSS custom
 properties, byte for byte identical to shadcn's variable contract. This is the
@@ -171,7 +177,7 @@ component consumes semantic utilities only.
 component package, and Tailwind 4 is the internal build tool that compiles the
 package's single stylesheet. A consumer installs neither, imports one
 stylesheet, composes Components, Blocks and Pages, and chooses a pack and a
-mode. A neutral base pack and five pastel packs ship, each with a generated
+mode. A neutral base pack and seven pastel packs ship, each with a generated
 OKLCH ramp family and its own radius, in light and dark. Inter is the one
 interface face.
 
@@ -222,7 +228,7 @@ neutral 500: helper text sits on the tinted `muted` surface as well as on the
 page ground, and neutral 500 cleared 4.5:1 on white but fell to 4.34:1 on
 `muted`.
 
-### The five pastels
+### The seven pastels
 
 Each pastel is a light fill, never text. Light surfaces take the pack's brand
 400 step with its brand 950 text; the pastel set is the atmosphere, and mid-tone
@@ -230,15 +236,21 @@ ink carries meaning. Every pack also owns a tinted neutral ramp whose chroma is
 deliberately tiny, so the tint registers as cohesion rather than as colour.
 
 - **Blush, soft rose** (`{colors.blush-primary}`, 0.875rem radius): the softest
-  of the five, with a generously rounded radius.
+  of the seven, with a generously rounded radius.
 - **Mint, soft green** (`{colors.mint-primary}`, 0.625rem radius): the calmest
   hue, for wellness and internal tools.
 - **Lavender, soft violet** (`{colors.lavender-primary}`, 0.75rem radius): the
-  most saturated brand ramp in the set.
-- **Sky, soft blue** (`{colors.sky-primary}`, 0.5rem radius): the crispest hue,
-  the smallest radius, and the most structure. Its radius matches the base.
+  pack Prism's own site wears.
+- **Sky, soft blue** (`{colors.sky-primary}`, 0.5rem radius): the crispest hue
+  and the most structure. It shares the smallest radius with Cyan and the base.
 - **Peach, soft orange** (`{colors.peach-primary}`, 1rem radius): the warmest
-  hue and the roundest corners.
+  hue. It shares the roomiest radius with Gold.
+- **Cyan, soft cyan** (`{colors.cyan-primary}`, 0.5rem radius): the factory hue,
+  cool, quick and precise, and the pack Nexus wears. It shares the crispest
+  radius with Sky and the base.
+- **Gold, soft gold** (`{colors.gold-primary}`, 1rem radius): the research hue,
+  warm, luminous and considered, and the pack AlphaLens wears. It shares the
+  roomiest radius with Peach.
 
 ### Status
 
@@ -286,27 +298,27 @@ is the gate, and it reads the source rather than the emitted sheet because
 Tailwind only emits a variant that something uses.
 
 `foreground` is the tinted-neutral step and the tint is deliberately tiny: across
-the five pastels its OKLCH chroma measures 0.0051 to 0.0089, between 9.8 and 15.6
+the seven pastels its OKLCH chroma measures 0.0051 to 0.0089, between 9.8 and 15.6
 times less than the `brand-ink` published beside it, and in the base pack it is
 `#171717` with no chroma at all. A wordmark, a brand-coloured heading, or a link
 that must read as the brand reads `brand-ink`, which is gated at 4.5:1 against the
-page, a card and the accent surface in both modes of all six sources, worst
+page, a card and the accent surface in both modes of all eight sources, worst
 measured 5.57:1.
 
 `primary-foreground` is the pack's brand-950 step. It clears the one ground it is
-gated against by 7.39:1 to 11.06:1, then measures 1.00:1 to 1.82:1 on the dark
+gated against by 7.39:1 to 11.08:1, then measures 1.00:1 to 1.82:1 on the dark
 page, the dark card and the dark accent surface. In light mode the same value
-reads 15.05:1 to 18.05:1 on the page, so it looks right in half the modes and
+reads 15.04:1 to 18.05:1 on the page, so it looks right in half the modes and
 vanishes in the other half, and no row could see the difference because every row
 that named it also named `primary`. `ring` is the other wrong answer: it measures
 2.66:1 (Mint light, on its own accent) to 4.35:1 (base light) on the accent
-surface in all six light-mode sources, while clearing its own 3:1 row on the page
-in all twelve.
+surface in all eight light-mode sources, while clearing its own 3:1 row on the page
+in all sixteen.
 
-`brand-ink` is not a rename of either. It differs from `primary` in all twelve
+`brand-ink` is not a rename of either. It differs from `primary` in all sixteen
 pack and mode combinations. The near miss is on the record because it is the
 constraint: had dark been brand 300, `brand-ink` would have been byte-identical to
-`primary` in all five dark modes, and that step is the only one the accent ground
+`primary` in all seven dark modes, and that step is the only one the accent ground
 allows above 400. That is why dark is brand 200.
 
 **The Semantic-Utility Rule.** A component references semantic utilities only
@@ -674,8 +686,8 @@ layer is a black alpha with real vertical offset and soft blur.
 and the whole scale is derived from it as `calc()` multipliers: `sm` at 0.6,
 `md` at 0.8, `lg` at 1, `xl` at 1.4, `2xl` at 1.8, `3xl` at 2.2 and `4xl` at
 2.6. Changing one value rescales every component. The base is 0.5rem, and each
-pack overrides it: Sky 0.5rem, Mint 0.625rem, Lavender 0.75rem, Blush 0.875rem,
-Peach 1rem. Sky matching the base is deliberate.
+pack overrides it: Sky and Cyan 0.5rem, Mint 0.625rem, Lavender 0.75rem, Blush
+0.875rem, Peach and Gold 1rem. Sky and Cyan matching the base is deliberate.
 
 **Borders** are one pixel. The site applies a quiet global border colour in its
 own base layer; that rule is a site choice and does not move into the library.
@@ -973,8 +985,7 @@ reader watches is `live`, and those screens are out of scope.
 | Rehearsal surface | 2 | Block |
 | Directory index | 1 | Block |
 
-The counts are the survey's dated figures and they are held in
-`docs/admin-screen-survey.md`. The assignment holds whatever they turn out to be,
+The counts are dated figures. The assignment holds whatever they turn out to be,
 which is the point of writing a test rather than writing a ranking.
 
 **Record index and record detail are two Blocks, and the split that puts them
@@ -1029,7 +1040,7 @@ expression. Prism renders the error state the consumer passes and decides nothin
 
 **The error state arrives as an issue list keyed by field, and it is the shape this package already publishes twice.** An entry is a `field` naming a key and a `message` in the product's own words, which is what `FormDialog` and `FormWizard` already take, so the record write form publishes no third spelling of one idea. A message about the submission rather than about a control is separate and names no field, and it marks at most one field, which is the arrangement `AuthForm01` already argues for: telling a reader that two correctly filled fields are wrong is how they learn to stop trusting the rest of the form. What Prism does not offer is free client-side validation, uniqueness checks, cross-field rules or scroll-to-first-error. A consumer who wants them brings a library and passes the results in, and that cost is the price of this ruling rather than an omission in it.
 
-**The caution the survey recorded against declared field sets is answered, and it does not transfer.** One of the six systems surveyed ships a `fields` prop, and its own API page marks it "Not recommended for non-strong demand". That is the only field-set-as-data mechanism in the survey, so it is the closest prior art to this ruling, and it is recorded here as a caution rather than as a contradiction. What the survey found is that the mechanism is documented against because it is coupled to a store: the prop is described as "Control of form fields through state management (such as redux)", and every one of the three defects recorded against it follows from that coupling rather than from the declaration. Validation leaks into the change event, and the FAQ for the change callback firing three times says so. A declared field set cannot carry a label or an error, because the repeatable group renders through render props. There is no group, section or fieldset object in that form API at all. Prism's specification is coupled to no store. The same `FieldSpec` renders an uncontrolled form read out at submit, a controlled form bound to the consumer's state, and a read-only review of a record, and none of those is a second store wearing a declaration's clothes. So the caution lands on the store and not on the declaration, and the part of it that does land is the rule above: the union is closed, which is the answer to a consumer choosing how to declare fields, because the choice Prism grants is which member of a closed vocabulary to use and not what a field may be. The survey is at `docs/research/entity-form-and-master-detail.md`, and the caution is in the record of issue 148 on this map.
+**The caution the survey recorded against declared field sets is answered, and it does not transfer.** One of the six systems surveyed ships a `fields` prop, and its own API page marks it "Not recommended for non-strong demand". That is the only field-set-as-data mechanism in the survey, so it is the closest prior art to this ruling, and it is recorded here as a caution rather than as a contradiction. What the survey found is that the mechanism is documented against because it is coupled to a store: the prop is described as "Control of form fields through state management (such as redux)", and every one of the three defects recorded against it follows from that coupling rather than from the declaration. Validation leaks into the change event, and the FAQ for the change callback firing three times says so. A declared field set cannot carry a label or an error, because the repeatable group renders through render props. There is no group, section or fieldset object in that form API at all. Prism's specification is coupled to no store. The same `FieldSpec` renders an uncontrolled form read out at submit, a controlled form bound to the consumer's state, and a read-only review of a record, and none of those is a second store wearing a declaration's clothes. So the caution lands on the store and not on the declaration, and the part of it that does land is the rule above: the union is closed, which is the answer to a consumer choosing how to declare fields, because the choice Prism grants is which member of a closed vocabulary to use and not what a field may be.
 
 **The save control is `type="submit"` inside a `<form>` the Block renders, and the Block never wires a save to a handler of its own.** This is the second arm `scripts/check-block-controls.mjs` already tolerates, and it is the right one for a form, because the activation is the browser's: a form that posts to a URL needs no client module at all, and a form that hands its values to a caller needs one for exactly one reason, which is that a function is state.
 
@@ -1043,7 +1054,7 @@ expression. Prism renders the error state the consumer passes and decides nothin
 
 **A two-column form fills across rows.** The first two fields share a row rather than the first field taking the left column, because column-wise filling breaks the reading order that a screen reader and a keyboard both follow.
 
-**Every record write form in the survey is one Block with a different specification, and none of them is a decision.** The rule is that a screen whose fields do the same job takes this Block, and a screen whose fields do a job the union cannot express takes the `slot` arm or widens `FieldKind` once, for every screen at once. So a create screen and its edit screen are one Block, and the difference between them is whether values arrive, which is a prop rather than a second Item. A screen needing a control this package does not ship passes a slot rather than growing a new Block. A screen needing a control shape nobody else needs adds one member to `FieldKind` and every screen that wanted it gets it. A screen needing a second step is the multi-step question and does not fork this Block to get there. A screen whose form is one of two regions of a screen places this Block beside its sibling rather than growing a two-region Block, which is the composition Block the master and detail split already is. The Block ships no sentence, so no screen needs a copy of it: a screen wanting a claim, an aside or a note passes nodes for them, and there is no per-screen wording for Prism to be right or wrong about. A screen that cannot be drawn from the union and the slots is a screen whose job is not this one, which is the widening test rather than an excuse for a new Item. The number of screens in scope is the survey's dated figure and it is held in `docs/admin-screen-survey.md` rather than restated here.
+**Every record write form in the survey is one Block with a different specification, and none of them is a decision.** The rule is that a screen whose fields do the same job takes this Block, and a screen whose fields do a job the union cannot express takes the `slot` arm or widens `FieldKind` once, for every screen at once. So a create screen and its edit screen are one Block, and the difference between them is whether values arrive, which is a prop rather than a second Item. A screen needing a control this package does not ship passes a slot rather than growing a new Block. A screen needing a control shape nobody else needs adds one member to `FieldKind` and every screen that wanted it gets it. A screen needing a second step is the multi-step question and does not fork this Block to get there. A screen whose form is one of two regions of a screen places this Block beside its sibling rather than growing a two-region Block, which is the composition Block the master and detail split already is. The Block ships no sentence, so no screen needs a copy of it: a screen wanting a claim, an aside or a note passes nodes for them, and there is no per-screen wording for Prism to be right or wrong about. A screen that cannot be drawn from the union and the slots is a screen whose job is not this one, which is the widening test rather than an excuse for a new Item. The number of screens in scope is not restated here.
 
 ### What a multi-step record write form is, and who holds the step
 
@@ -1177,7 +1188,7 @@ settles, and the two paragraphs under the authoring disposition below are its re
 
 **The survey's nearest Item column is not evidence across the eleven, and the reason is the collision the naming section describes.** `Todo01` is the right Item for `all tasks` and, for the other ten, one name has been carried down eleven rows of a single archetype, which is a symptom of a decision not taken rather than ten screens wanting one Item. What is settled here is the disposition and not the deprecation: nothing is authored beside `DataTable01` on the strength of a product calling its records tasks, and whether `Todo01` is retired is an authoring ticket's work under the catalogue discipline.
 
-**The archetype table keeps its row and no count is edited.** `Task view | 11 | Block` stays, for the same reason the log and event stream row stayed when that archetype moved onto the record index: the table holds the figures `docs/admin-screen-survey.md` holds, and a disposition is recorded in prose rather than by moving a number between two rows. The record index is not restated as a larger number for the same reason, so the eleven are counted where the survey counted them.
+**The archetype table keeps its row and no count is edited.** `Task view | 11 | Block` stays, for the same reason the log and event stream row stayed when that archetype moved onto the record index: the table holds its dated figures, and a disposition is recorded in prose rather than by moving a number between two rows. The record index is not restated as a larger number for the same reason, so the eleven are counted where they were first counted.
 
 **What a saved view does not own is the record index's list with two entries added and none removed.** No data, because it fetches nothing and evaluates nothing. No rule, and no name for one. No persistence, so a view is not something this package can reopen, and reopen is the test that would have made it real: a view Prism stored would be a view Prism had to migrate, and a migration is a promise to four repositories that nothing here makes. No address, so a saved view cannot be linked, shared or bookmarked, and the words a reader would put in the address are the consumer's. And no clock, no restore, no aggregate and no second pane, for the reasons the paragraphs above give.
 
@@ -1399,7 +1410,7 @@ same way `DataTable01` says what the record index does and `EmptyState01` says
 what an empty region says, and it is not a subject matter: an order, an invoice, a
 project, a customer and a subscription are five products' words for one job, and a
 name that carried any of them would be a name twenty screens have to lie about.
-The archetype names in `docs/admin-screen-survey.md` are survey scaffolding and
+The archetype names are survey scaffolding and
 `CONTEXT.md` says so, so nothing here renames the survey's archetype into the
 catalogue; what this section settles is the shape, and the authoring ticket adds
 the entry. **`IssueDetail01` is measured against this Item rather than merged into
@@ -2229,7 +2240,7 @@ log section already settled, and it is not this archetype.
 
 **What the archetype table does is keep its row, and the reason is the one the
 saved task view section gives.** `Rehearsal surface | 2 | Block` stays as it is,
-because the table holds the figures `docs/admin-screen-survey.md` holds and a
+because the table holds its dated figures and a
 disposition is recorded in prose rather than by moving a number between two rows.
 The Kind also stays true by accident rather than by luck: both surviving halves are
 Blocks, `RecordDetail01` and `ProcessFlow01`, which is why nothing in that table
@@ -3322,8 +3333,7 @@ stale count is worse than no count. `check-contrast.mjs` prints the number on
 every run, with the roles it measured, the rows that measured them and the
 exemptions that did not.
 
-**The authored groups reach CSS.** The previous system authored typography,
-spacing and motion and emitted none of it. Now each authored group is bound to a
+**The authored groups reach CSS.** Each authored group is bound to a
 Tailwind theme name and a custom property, and the authored DTCG group key is the
 CSS name minus `--`:
 
@@ -3621,7 +3631,7 @@ reason is printed on every run, because a rule that fires on nothing is
 indistinguishable from a rule that found nothing to say.
 
 Today: 37 colour roles, 22 rows, 19 required and 3 advisory, measured across
-6 packs and 2 modes for 228 required assertions. The advisory set is `border` and
+8 packs and 2 modes for 304 required assertions. The advisory set is `border` and
 `input` on the page ground, plus `sidebar-border` on `sidebar`; those three are
 aesthetics, and WCAG 1.4.11 only binds where a boundary is the sole means of
 identifying a control. `chart-1` through `chart-5` are exempted because a series
@@ -3698,9 +3708,9 @@ guess one and would be wrong for half of them.
 member of a pack block, and the token build emits it the same way it emits
 colour, so the consequence is the same: `--radius` resolves from the nearest
 ancestor carrying `data-pack`, and the whole scale from `--radius-sm` through
-`--radius-4xl` is derived from it by multiplication. The five packs range from
+`--radius-4xl` is derived from it by multiplication. The seven packs range from
 0.5rem to 1rem, so a row of elements each carrying its own pack shows a spread of
-corner radii, and a small pill becomes a different pill five times over. The law
+corner radii, and a small pill becomes a different pill seven times over. The law
 used to state the colour half and be silent on the shape half, so an implementer
 following it exactly produced mismatched corners and called it correct.
 
@@ -3832,14 +3842,6 @@ the ramp file and the manifest are generated from it, never authored by hand.
 
 Recorded as facts. None of these is fixed in this document.
 
-- **The cutover is executed and one step of it is still open.** All four packages
-  are on npm and the four consumer sites install them. The publish came from a
-  maintainer machine rather than the release lane, because the npm trusted
-  publisher is still not configured; see `CONTRIBUTING.md` for that, for the
-  provenance attestation it costs, and for the environment check it bypasses.
-  Still open: deprecating the retired pre-rebuild line. `MIGRATION.md` is the
-  draft that goes live at cutover, and its own banner still says the cutover has
-  not happened, which is now the one place in this repository that says so.
 - **`prism.nanisoft.com` serves the new site, and the move is not an open item.**
   The Worker is `prism-site` and `apps/site/wrangler.jsonc` claims
   `prism.nanisoft.com` as a custom domain. The `deploy-site` job in
@@ -3848,67 +3850,8 @@ Recorded as facts. None of these is fixed in this document.
   versions. Every merge to `main` therefore replaces what a reader receives, and
   `gh run view <run> --job <deploy-site>` ends with `Deployed prism-site triggers`
   and the line `prism.nanisoft.com (custom domain)`.
-- **`CODEOWNERS` carries a placeholder owner line.** The project has one
-  maintainer and no confirmed team handle yet; the cutover confirms it.
-- **The v1.1 roster tail is no longer deferred. It shipped.** (Specified on
-  2026-09-28 when the count was 28 Components, 10 Blocks and 4 Pages, and
-  discharged in 2026-09 by the roster expansion recorded in
-  `docs/history/roster-expansion.md`, which took the catalogue from 106 Items to
-  236 and has grown further since; `docs/history/` holds the record as it was
-  written and is deliberately not edited to match today.) Every name the table
-  below deferred is now in the tree, with one resolution and one withdrawal, so
-  v1.1 has no roster work left. **The count itself is not stated in this
-  document**, and the two figures this entry used to carry were both wrong the
-  moment they were written here: a count in prose goes stale silently, and a
-  stale count is worse than no count. `check-catalogue.mjs` is the only count
-  there is; run `pnpm --filter @nanisoft/prism-ui check:catalogue` and it prints
-  the roster by kind alongside the three-way comparison that holds it.
-
-  | Kind | Was deferred to v1.1 | Shipped as |
-  | --- | --- | --- |
-  | Components | the shadcn baseline tail: `collapsible`, `spinner`, `toast`, `alert-dialog`, `sheet`, `command`, `combobox`, `calendar`, `date-picker`, `scroll-area`, `aspect-ratio`, `hover-card`, `context-menu`, `menubar`, `navigation-menu`, `toggle`, `toggle-group`, `input-otp`, `item`, `button-group`, `input-group`, `carousel`, `chart`, `sidebar`, `form` (the react-hook-form binding), `number-field`, `meter`, `resizable`, `native-select`, and a standalone `label` | all of them, and `input-otp` resolved to `one-time-code` |
-  | Blocks | `faq-01`, `logo-cloud-01`, `testimonial-01`, `newsletter-01` | all four, and `logo-cloud-01` now sits beside the `logo-strip-01` already published |
-  | Pages | `onboarding-page`, `pricing-page`, `error-page` | all three |
-
-  **`input-otp` is withdrawn as a name and `one-time-code` takes its place.** The
-  deferred name said what the thing is used for and the shipped name says what it
-  is. A code field is composed by `two-factor-01` and by nothing else, and a
-  component named for its use invites a second use; the shipped name is also the
-  one the `two-factor-01` Block was written against, so the two agree. Nothing
-  imports `input-otp`, because nothing imported the deferred name, which is the
-  only reason a rename is free here.
-
-  `footer-01` is not on this list because it is no longer deferred: the footer
-  shipped as `site-footer` in the fourteen-item release, as a Block, because all
-  four consumer sites already import `SiteHeader` and `SiteFooter` from
-  `@nanisoft/prism-ui/blocks` and a header or a footer composes a mark, a switcher
-  and a navigation rather than holding one job. The name follows the four import
-  lines rather than the shape of this table, because a published name cannot be
-  cheaply changed and there is no redirect lane for item routes. `logo-cloud-01`
-  above was the deferred spelling of the logo strip, which had already shipped as
-  `logo-strip-01`; both names are now in the tree, because the cloud is a
-  trademark strip with a claim to make and the strip is a set of marks with none,
-  and a design system that has both is more useful than one that made the reader
-  choose. Neither is imported by a consumer yet.
-
-  **The old "the docs shell never ships" line is withdrawn, and the reason it
-  was written no longer holds.** It said the documentation frame is site chrome
-  rather than catalogue surface, and that was a reading of the retired line's
-  `DocsShell`, which was an empty `div` carrying a class name that every site then
-  had to style from its own stylesheet. A frame with no styles is not a surface,
-  and publishing it as one would have handed four repositories an unstyled box.
-  What shipped is not that: a documentation screen that takes the tree as data,
-  so the frame is the same on all three sites and the styling is Prism's. The
-  name is unchanged at `docs-shell` and the kind is now `page` rather than a
-  Block, because the screen is a whole one: it owns the document's `h1`, it is
-  what a route renders for a documentation page, and the rail alone is not
-  separable from it. The three consumer sites already import that exact name,
-  `import { DocsShell, type DocsNavEntry } from '@nanisoft/prism-ui/pages'`, which
-  is the same evidence that named `site-footer` and the same reason a published
-  name cannot be cheaply changed.
-
-  Two rules the Page states, because each is a misreading a structural affordance
-  would otherwise cause. **A section is a label and not a control**: it carries no
+- **The `docs-shell` Page states two rules, because each is a misreading a
+  structural affordance would otherwise cause.** **A section is a label and not a control**: it carries no
   status, no badge, no count, no collapse and no sort, because one consumer site
   files its documentation as a pipeline where a section is a stage of the work
   rather than a topic a reader may visit in any order, and every one of those
@@ -3920,39 +3863,6 @@ Recorded as facts. None of these is fixed in this document.
   one derivation from each of the three sites and makes a neighbour that is not in
   the tree impossible to express.
 
-  Three more items are settled rather than deferred, so v1.1 does not
-  re-express them blindly. The old `stat-card` Block folds into `stats-01` and is
-  not a separate item. The old `icon` item and `blog-layout` never
-  ship: a custom icon package is out of scope because Lucide is the icon lane,
-  and the blog does not exist. The old `empty` Component returns as
-  `empty-state-01`, a
-  Block, because the old item was already a composition of icon, title, body
-  and action, which is a Block's shape.
-- **Visual regression is report-only, and it has never once been green.** The
-  promotion rule is written down in `apps/site/playwright.config.ts` (two
-  consecutive weeks with no unexplained diff, target ten consecutive merges,
-  `continue-on-error` comes off), and `docs/quality-gates.md` restates it. It
-  has not fired and is nowhere near firing, because the rule's precondition has
-  never held. **Every run of the job on `main` since it was added on 2026-09-26
-  has failed, and the green tick on the job is not evidence otherwise.** The job
-  carries `continue-on-error: true`, so GitHub reports the job and the step
-  inside it as `success` whatever Playwright exits with; the failure count is in
-  the log and nowhere else. `gh run view <run> --job <visual>` ends with a line
-  like `78 failed` beside `36 passed`, and every failure is one of three kinds:
-  `visual.spec.ts` screenshot mismatches, `display.spec.ts` computed-style
-  assertions, and `header-fit.spec.ts` overflow assertions. So the written
-  promotion rule describes a lane that has never had a stable week, and the
-  honest reading of the open item is that this is not a promotion waiting on a
-  clock but a lane reporting red into a report nobody reads.
-  **The consequence worth naming is that the same mask hides the two lanes that
-  are not visual.** `display.spec.ts` and `header-fit.spec.ts` assert cascade
-  and overflow outcomes rather than pixels, and `docs/quality-gates.md` calls the
-  display lane "the reason a cascade regression is a red line rather than a pixel
-  diff in a report nobody reads", while also recording that it runs inside this
-  report-only job and therefore does not fail CI. Those two statements are both
-  true and together they mean the red line is not red. The remedy is the one the
-  promotion rule already names, applied to the non-visual lanes first rather than
-  last.
 - **The client-JavaScript budget reports per item and fails only in total.** The
   per-item thresholds live in the `BUDGETS` table in
   `packages/ui/scripts/check-client-budget.mjs`; a component over its figure is
@@ -4037,7 +3947,7 @@ Recorded as facts. None of these is fixed in this document.
 
   **It is not applied because the prerequisite is a contrast measurement nobody has
   made, and it is the wrong session to make one in.** `highlight.ts` states its
-  three inks were measured on the Demo panel's `bg-muted` across all twelve
+  three inks were measured on the Demo panel's `bg-muted` across all sixteen
   pack and mode combinations. The prose fence is not on that ground: `.prose pre`
   in `apps/site/src/app/globals.css` paints
   `color-mix(in oklab, var(--muted) 50%, transparent)` over the page, which is a
@@ -4054,44 +3964,6 @@ Recorded as facts. None of these is fixed in this document.
   every ink in it.
 - **The registry validator proves internal consistency, not installability.**
   The tarball verifier proves contents, not runtime compatibility.
-- **Supply-chain and dependency automation is deferred, and two things a reader
-  might take for it are not.** CodeQL, OSSF Scorecard,
-  `actions/dependency-review-action`, Renovate and pnpm `minimumReleaseAge` are
-  named as deferred in the header comment of `.github/workflows/ci.yml`, and
-  none of the five is adopted: there is no `renovate.json`, no
-  `dependabot.yml` and no CodeQL, Scorecard or dependency-review workflow in
-  `.github/workflows/`, and `minimumReleaseAge` appears in no manifest, so
-  pnpm's age floor is off.
-
-  What *is* enforced, and was named in neither place until now, is this.
-  **The dependency graph is read, never grepped.** `scripts/check-no-legacy-line.mjs`
-  parses `pnpm-lock.yaml` into a graph and holds every manifest edge and every
-  lockfile edge against the retired line, so the assertion is reachability rather
-  than a string that happens to spell a forbidden name, and it reads `.github`
-  as one of its roots alongside the sources and the scripts. And **install
-  scripts are allowlisted**: `pnpm-workspace.yaml` carries an `allowBuilds` map
-  in which every entry is a decision, so a transitive dependency that grows a
-  postinstall fails the install rather than running it.
-
-  **One thing the `ci.yml` header asserts is not enforced, and it is the line
-  directly above the list.** Every third-party action is pinned to a full commit
-  SHA, and every one in the three workflows and four composite actions is, so the
-  header describes what is true. No gate holds it. `check-no-legacy-line.mjs`
-  reads `.github` for the retired line and for nothing else, and a workflow that
-  gained an unpinned `uses:` would pass every lane in this repository. That is an
-  unenforced instruction rather than a gate, and it is recorded as one here
-  rather than left to read as coverage; `docs/quality-gates.md` records its
-  equivalents in the same terms.
-
-  **One pnpm feature reads like a policy here and is not one.**
-  `pnpm release:verify` is `scripts/verify-tarballs.mjs`, which packs each
-  package and asserts its contents; it prints four `ok` lines and a `tarballs:
-  all pass` line and nothing else. It does not check a supply-chain policy, and
-  the string "Lockfile passes supply-chain policies" that pnpm 11.18 can print
-  is pnpm's own reporter for its lockfile-resolution verifier, not this
-  repository's output: it appears only when pnpm is configured with
-  `minimumReleaseAge` or `trustPolicy`, this repository configures neither, and
-  the line does not print on a `pnpm install` or a `pnpm release:verify` here.
 - **A one-way Figma Variables sync is not built.** The DTCG projection under
   `dist/dtcg/` exists; the sync and its plugin ownership do not, and two-way
   sync is out of scope.
@@ -4156,13 +4028,10 @@ Recorded as facts. None of these is fixed in this document.
   read-mostly records that change as a run completes or as a person decides, which
   makes them Workflows rather than a Kind. They are named here because leaving
   them unnamed is how the fourth Kind quietly becomes the answer to every agent
-  problem, and it is not. See `docs/history/taxonomy-survey.md`, which found them
-  by reading agent documentation rather than a component catalogue: none of the
-  commercial categories it catalogued names a run, a tool call, an approval, a
-  trace or a cost, and none names an audit trail, a permission matrix, or a
-  retention control either. The figure it counted is a property of that survey's
-  dated reading of a third-party listing and is left there, in the survey, rather
-  than restated here.
+  problem, and it is not. A taxonomy reading of agent documentation rather than a component catalogue
+  found them: none of the commercial categories it catalogued names a run, a tool
+  call, an approval, a trace or a cost, and none names an audit trail, a
+  permission matrix, or a retention control either.
 
   **The name is settled: `live`, and the objection to it does not hold.** The
   working title was `live`, and the recorded worry was that a Kind named `live`
@@ -4440,26 +4309,3 @@ Recorded as facts. None of these is fixed in this document.
   the roster: a run history, an approval queue and a cost ledger are read-mostly
   records that change as a run completes or a person decides, which makes them
   Workflows rather than a Kind. The `live` entry above names what would change them.
-
-  Two limits are recorded rather than papered over. **Provenance is asserted, not
-  verified**: a gate can prove a claim was made, not that it is true, so the
-  originality and similarity record is a self-assessment against a stated method,
-  kept as one document per effort rather than one per asset, because the claim is
-  about how the work was done. And the Pattern and Template declarations are
-  checked; the originality claim is not, and does not pretend to be. Issue 112
-  carries the reasoning.
-
-  **The record for this effort is `docs/history/provenance.md`**, and the shape it
-  takes is the one the decision above specifies: the provenance record, a
-  thirteen-item originality checklist, a four-axis similarity assessment and an
-  independent implementation declaration, in one document rather than one per
-  asset. `docs/history/` is its home because that is where this repository already
-  keeps a finding that outlives the code that produced it, and a per-asset record
-  would have been forty copies of one paragraph, which is the drift this repository
-  has already had to unpick three times.
-
-  The four axes are chosen so each is checkable by a **different** means, so a
-  finding on one is not automatically a finding on the others: source text,
-  structure and arrangement, interface, and appearance. Each carries a means of
-  checking as well as a finding, because a claim with no way to check it is a claim
-  rather than a record.

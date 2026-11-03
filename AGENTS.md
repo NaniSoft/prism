@@ -26,8 +26,7 @@ pnpm install
 pnpm dev            # docs site
 pnpm build          # turbo build; packages emit dist/, the site exports out/
 pnpm test           # Vitest
-pnpm check          # the repository gates; docs/quality-gates.md is the table,
-                    # and scripts/check-gate-table.mjs holds it against the chains
+pnpm check          # the repository gates
 pnpm lint           # oxlint
 pnpm typecheck
 pnpm changeset      # declare a release before merging
@@ -35,11 +34,7 @@ pnpm changeset      # declare a release before merging
 
 Run one package with `pnpm --filter @nanisoft/prism-ui <task>`. `package.json` is
 the source of truth for what a script does today, and the gate list is not
-restated above on purpose: a second list of the gates is a list that will drift,
-so the one in `docs/quality-gates.md` is compared to every `check` task in every
-manifest by `scripts/check-gate-table.mjs` and fails in both directions. Add a
-gate to a chain and the table finding names the file; rename one and it fails the
-other way.
+restated above on purpose: a second list of the gates is a list that will drift.
 
 ## Conventions
 
@@ -79,8 +74,7 @@ other way.
 The four consumer repositories are coordinated by the gates in
 `@nanisoft/prism-ui/gates`, not by a document. A law is the failure message of a
 gate, so a change to one lands here once and reaches every consumer in one release
-and cannot be declined there. Read `docs/consumer-gates.md` for where the line is
-drawn between a law and a site's own data.
+and cannot be declined there.
 
 Two rules follow from that, and both are about what may be written where:
 

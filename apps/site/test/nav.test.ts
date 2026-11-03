@@ -8,7 +8,7 @@ import { metaSchema } from 'fumadocs-core/source/schema'
 import { describe, expect, it } from 'vitest'
 
 import { discoverPublishedPackages, readPublishedChangelogs } from '../scripts/published-packages.mjs'
-import { flattenNav, PAGE_TREE, projectNav, TOP_NAV } from '../src/lib/nav'
+import { flattenNav, flattenTopNav, PAGE_TREE, projectNav, TOP_NAV } from '../src/lib/nav'
 import { LIVE_ROUTES, SECTIONS, sectionFor } from '../src/lib/sections'
 
 /**
@@ -580,30 +580,57 @@ describe('the Changelogs Section', () => {
 
   it('appears in the top navigation as the Sections and nothing else', () => {
     // The header row is derived from the manifest rather than written out, so the
-    // assertion is that the row is the manifest's Sections in the manifest's
-    // order and nothing else. A Section that exists and is missing from the row
-    // is a reader who cannot see the whole shape of the documentation at a
-    // glance, and a row entry the manifest does not declare is a route nobody
-    // chose to publish.
-    expect(TOP_NAV.map((entry) => entry.href)).toEqual(
+    // assertion is that the row, flattened, is the manifest's Sections in the
+    // manifest's order and nothing else. A Section that exists and is missing
+    // from the row is a reader who cannot see the whole shape of the
+    // documentation at a glance, and a row entry the manifest does not declare
+    // is a route nobody chose to publish.
+    const flat = flattenTopNav()
+    expect(flat.map((entry) => entry.href)).toEqual(
       SECTIONS.map((section) => `/${section.segment}`),
     )
-    expect(TOP_NAV.map((entry) => entry.label)).toEqual(SECTIONS.map((section) => section.title))
+    expect(flat.map((entry) => entry.label)).toEqual(SECTIONS.map((section) => section.title))
     // The landing page keeps no entry: the wordmark is already a link home, and
     // the label it used to carry now names a Section.
-    expect(TOP_NAV.map((entry) => entry.href)).not.toContain('/')
+    expect(flat.map((entry) => entry.href)).not.toContain('/')
     // A live reader keeps no entry either. The pack reader is a page of the
     // Foundation Section, so it is listed beside the token pages in that Section's
     // own navigation, and the row stays the shape of the whole documentation.
-    expect(TOP_NAV.map((entry) => entry.href)).not.toContain('/foundation/themes')
-    expect(TOP_NAV[TOP_NAV.length - 1]?.href).toBe(`/${SECTIONS[SECTIONS.length - 1]?.segment}`)
+    expect(flat.map((entry) => entry.href)).not.toContain('/foundation/themes')
+    expect(flat[flat.length - 1]?.href).toBe(`/${SECTIONS[SECTIONS.length - 1]?.segment}`)
+  })
+
+  it('clubs the catalogue Sections into one group and leaves the prose ones as links', () => {
+    // The row groups a run of catalogue Sections and links a prose one, both
+    // from the manifest's own `prose` flag, so the clubbing cannot disagree with
+    // the manifest's account of which Sections are collections. The group is
+    // placed where the run sits in the reading order, so the row still reads in
+    // the order the manifest declares.
+    expect(TOP_NAV).toEqual([
+      ...SECTIONS.filter((section) => section.prose).map((section) => ({
+        href: `/${section.segment}`,
+        label: section.title,
+      })),
+      {
+        label: 'Catalogue',
+        children: SECTIONS.filter((section) => !section.prose).map((section) => ({
+          href: `/${section.segment}`,
+          label: section.title,
+        })),
+      },
+    ])
   })
 
   it('starts the top navigation with a Section', () => {
     // What the reference design system does, and the reason the row begins where
     // it does: the first entry is a Section, so a reader who has not chosen a
-    // Section is nowhere yet rather than nowhere at all.
-    expect(SECTIONS.map((section) => `/${section.segment}`)).toContain(TOP_NAV[0]?.href)
+    // Section is nowhere yet rather than nowhere at all. The manifest's reading
+    // order is prose first, so a group, which is the row's other kind of entry,
+    // cannot be the first thing a reader meets.
+    const first = TOP_NAV[0]
+    expect(first && 'href' in first ? first.href : undefined).toBe(
+      `/${SECTIONS[0]?.segment}`,
+    )
   })
 })
 

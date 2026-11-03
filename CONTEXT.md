@@ -11,9 +11,9 @@ a glossary and nothing else.
 ### Theming
 
 **Pack**:
-One of the authored palettes: the neutral base pack `default`, and the five
-pastels Blush, Mint, Lavender, Sky and Peach. A pack owns a generated OKLCH ramp
-family and its own radius.
+One of the authored palettes: the neutral base pack `default`, and the seven
+pastels Blush, Mint, Lavender, Sky, Peach, Cyan and Gold. A pack owns a generated
+OKLCH ramp family and its own radius.
 _Avoid_: brand pack, colourway, color scheme, theme.
 
 **Mode**:
@@ -28,7 +28,8 @@ _Avoid_: skin, preset, pack, mode.
 
 **Pack id**:
 The string that selects a pack at runtime: `default`, `blush`, `mint`,
-`lavender`, `sky` or `peach`. Absence of a pack id means the default pack.
+`lavender`, `sky`, `peach`, `cyan` or `gold`. Absence of a pack id means the
+default pack.
 _Avoid_: theme id, colour key.
 
 ### Tokens
@@ -91,8 +92,8 @@ A recurring screen shape, named by its interaction rather than by its subject
 matter, such as a record index or a record detail. An archetype is not an Item
 and never carries a Kind of its own: the whole-screen test in `DESIGN.md` assigns
 it to Block, to Page, or to both, and the assignment is a decision about one
-catalogue Item rather than about the archetype. The archetype names in
-`docs/admin-screen-survey.md` are survey scaffolding and are not Item names; a
+catalogue Item rather than about the archetype. The archetype names are survey
+scaffolding and are not Item names; a
 name becomes a catalogue name only where a ticket authors the Item.
 _Avoid_: screen, view, page type, screen type, pattern, template, category.
 
@@ -156,9 +157,10 @@ _Avoid_: theme factory, override surface, theme object.
 
 **Section**:
 A top-level division of the documentation site, each with its own root route:
-Overview, Foundation, Content, Components, Blocks, Pages, Changelogs. A Section
-holds prose, catalogue items, or both. A Section is a division of the site, not a
-division of the design system, and it is neither a Kind nor a Category.
+Overview, Foundation, Content, Patterns, Components, Blocks, Pages, Live,
+Changelogs. A Section holds prose, catalogue items, or both. A Section is a
+division of the site, not a division of the design system, and it is neither a
+Kind nor a Category.
 _Avoid_: category, kind, group, tier, tab.
 
 **Demo**:

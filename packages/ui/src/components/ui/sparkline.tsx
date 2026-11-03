@@ -1,7 +1,6 @@
 import type { ComponentProps } from 'react'
 
 import type { ChartColor } from './chart-frame'
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableRow } from './table'
 import { cn } from '../../lib/utils'
 
 /** The fill a series mark is drawn in, from the role the caller assigned it. */
@@ -240,21 +239,28 @@ function Sparkline({
         disagree. There is no second copy of the data to fall behind, which is
         the failure `ChartFrame` states in full and the reason this table is
         generated here rather than passed in as a prop.
+
+        **Plain `table` elements rather than the `Table` Component, because the
+        `Table` Component's first act is to wrap the table in a horizontal scroll
+        container and a table nobody can see cannot be panned.** A visually
+        hidden wrapper is one pixel wide, so the container always computes
+        scrollable and never focusable, which is the pair of facts the
+        `scrollable-region-focusable` rule fails on. The wrapper is for a reader
+        a stylesheet has already removed from the page, and what that reader
+        needs is the semantics: the caption, the row heads and the cells.
       */}
       <div data-slot="sparkline-table" className="sr-only">
-        <Table>
-          <TableCaption>{label}</TableCaption>
-          <TableBody>
+        <table>
+          <caption>{label}</caption>
+          <tbody>
             {values.map((value, index) => (
-              <TableRow key={index}>
-                <TableHead scope="row" className="font-medium tabular-nums">
-                  {index + 1}
-                </TableHead>
-                <TableCell className="tabular-nums">{value}</TableCell>
-              </TableRow>
+              <tr key={index}>
+                <th scope="row">{index + 1}</th>
+                <td>{value}</td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
     </figure>
   )

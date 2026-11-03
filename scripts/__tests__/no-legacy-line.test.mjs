@@ -30,7 +30,7 @@ const CASES = path.join(FIXTURES, 'cases')
 const NOT_THE_ROOT = path.join(REPO, 'packages', 'ui')
 
 /** Every root the gate declares, which is also the fixture template's shape. */
-const ROOTS = 51
+const ROOTS = 50
 
 /**
  * The roots the gate reads when present and does not require. They are
@@ -259,7 +259,7 @@ test('a historical record is discharged by convention, and the discharge is prin
   // because a rule that fires on nothing is indistinguishable from a rule that
   // found nothing to say.
   assert.match(result.stdout, /packages\/ui\/CHANGELOG\.md:5\s+\[vendor-name\]\s+DISCHARGED by convention `changelog`/)
-  assert.match(result.stdout, /MIGRATION\.md:3\s+\[vendor-name\]\s+DISCHARGED by convention `migration-note`/)
+  assert.match(result.stdout, /docs\/MIGRATION\.md:3\s+\[vendor-name\]\s+DISCHARGED by convention `migration-note`/)
   assert.match(result.stdout, /docs\/adr\/0001-record-the-old-line\.md:1\s+\[vendor-name\]\s+DISCHARGED by convention `architecture-decision`/)
   assert.match(result.stdout, /docs\/history\/old-line\.md:3\s+\[vendor-name\]\s+DISCHARGED by convention `history-segment`/)
   assert.match(result.stdout, /docs\/archive\/old-line\.md:3\s+\[vendor-name\]\s+DISCHARGED by convention `archive-segment`/)
@@ -352,26 +352,13 @@ test('the real repository passes, and prints every historical-record discharge',
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`)
   assert.equal(result.stderr, '', 'a clean tree reports nothing on stderr')
   assert.match(result.stdout, new RegExp(`0 finding\\(s\\) in \\d+ file\\(s\\) read across ${ROOTS} root\\(s\\) \\(0 unresolved\\)`))
-  // The vendor mentions that remain are discharged by convention and printed
-  // rather than only counted, so an exemption is auditable from the run's output.
-  // The line is matched as a number and not pinned: what is under test is that
-  // the migration note's discharge is *printed*, and pinning a line number couples
-  // this test to every unrelated edit to the note. It was pinned, and the first
-  // edit to MIGRATION.md's banner failed it, which is the brittleness the
-  // repository argues against elsewhere for exactly this reason.
-  assert.match(result.stdout, /MIGRATION\.md:\d+\s+\[vendor-name\]\s+DISCHARGED by convention `migration-note`/)
-  // Three files are skipped as historical records. The migration note is one.
-  // The licensing review under `docs/history` is a second, and it names the
-  // retired line because a review of the terms governing a third-party component
-  // product is about that product rather than about Prism. The entity form and
-  // split survey is the third: a dated, cited, one-time reading of how other
-  // systems solve the two shapes, which is the same kind of record as the
-  // licensing review and is filed beside it for the same reason. It was written
-  // under `docs/research` and failed the gate there with 18 findings, so its
-  // home is the convention rather than a rewrite of prose that loses the
-  // comparison. The count is asserted rather than derived so that a file added
-  // here has to be a decision, and making this one is the reason it reads three.
-  assert.match(result.stdout, /3 file\(s\) skipped as historical record\(s\)/)
+  // The repository carries no historical records today: the migration note and
+  // the reviews under `docs/history` were removed with the retired line they
+  // documented. The count is asserted rather than derived so that a file added
+  // here has to be a decision, and the conventions themselves stay exercised by
+  // the staged fixture above rather than by this tree.
+  assert.match(result.stdout, /0 file\(s\) skipped as historical record\(s\)/)
+  assert.match(result.stdout, /0 discharge\(s\)/)
   assert.match(result.stdout, /read as a graph, never grepped: pnpm-lock\.yaml/)
 })
 

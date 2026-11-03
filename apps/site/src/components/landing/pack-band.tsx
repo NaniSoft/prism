@@ -10,15 +10,15 @@ import themes from '@nanisoft/prism-tokens/dist/themes.json'
  * **This is the band that answers "is this a design system or a theme kit".** The
  * other three bands on the landing page are words about the system, and words
  * about a design system are indistinguishable from words about any product. The
- * claim this band makes is checkable by looking at it: six cards, each one
- * painting its own compiled `primary` and its own border, in the same markup,
- * with nothing selected and no JavaScript involved.
+ * claim this band makes is checkable by looking at it: one card per pack, each
+ * one painting its own compiled `primary` and its own border, in the same
+ * markup, with nothing selected and no JavaScript involved.
  *
  * **The base pack is on this band, and it is the honest entry.** `themes.json`
  * carries the pastels only; `default` is the absence of a `data-pack`
  * attribute, which is how the token build expresses it, so it is added here
- * rather than skipped. A row of five pastel fills with no neutral in it reads as
- * a theme gallery, and the neutral is the one a reader is most likely to be
+ * rather than skipped. A row of pastel fills with no neutral in it reads as a
+ * theme gallery, and the neutral is the one a reader is most likely to be
  * using right now.
  *
  * **The boundary sits on an element with no radius utility, which is where
@@ -26,8 +26,8 @@ import themes from '@nanisoft/prism-tokens/dist/themes.json'
  * site's own pack, and the `data-pack` boundary is on the inner `div`, so the
  * pack's colour re-points for the subtree while the card keeps the shape of the
  * page. A boundary on the rounded card itself would re-point `--radius` beneath
- * it and the whole scale is computed from that, so six cards on one row would
- * carry six different corner radii and a reader comparing packs would be
+ * it and the whole scale is computed from that, so the cards on one row would
+ * carry different corner radii and a reader comparing packs would be
  * comparing shape as well as colour. `check-pack-boundary.mjs` reads this file,
  * and it is why the swatch carries `rounded-none` explicitly rather than
  * inheriting nothing: an element whose parent clips it needs no radius, and
@@ -69,7 +69,14 @@ export function PackBand({
         className="max-w-measure mb-10"
       />
 
-      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+      {/*
+        Two columns on a phone and four above the small breakpoint, because the
+        count divides evenly by both: a row of orphaned cards at the end of a
+        band is the one ragged edge this page has otherwise refused, and an even
+        grid costs the band nothing, since a swatch card is legible at both
+        widths the columns resolve to.
+      */}
+      <ul className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {packs.map((pack) => (
           <li key={pack.id} className="border-border overflow-hidden rounded-lg border">
             {/*
