@@ -1,10 +1,12 @@
-import { Blocks, Layers, Palette, ShieldCheck } from 'lucide-react'
+import { ArrowUpRight, Blocks, Layers, Palette, ShieldCheck } from 'lucide-react'
+import Link from 'next/link'
 
 import {
   buildCatalog,
   COMPONENT_CATEGORIES,
   type ComponentCategory,
 } from '@nanisoft/prism-ui/catalog'
+import { Backdrop01 } from '@nanisoft/prism-ui/blocks/backdrop-01'
 import { Hero01 } from '@nanisoft/prism-ui/blocks/hero-01'
 import { InstrumentPanel01 } from '@nanisoft/prism-ui/blocks/instrument-panel-01'
 import { AvatarGroup } from '@nanisoft/prism-ui/components/avatar-group'
@@ -13,6 +15,7 @@ import { Input } from '@nanisoft/prism-ui/components/input'
 import { Label } from '@nanisoft/prism-ui/components/label'
 import { MiniCalendar } from '@nanisoft/prism-ui/components/mini-calendar'
 import { PulseSeries, type PulseBar } from '@nanisoft/prism-ui/components/pulse-series'
+import { SignalField } from '@nanisoft/prism-ui/components/signal-field'
 import { Slider } from '@nanisoft/prism-ui/components/slider'
 import { Sparkline } from '@nanisoft/prism-ui/components/sparkline'
 import { Switch } from '@nanisoft/prism-ui/components/switch'
@@ -98,15 +101,16 @@ const SERIES: PulseBar[] = COMPONENT_CATEGORIES.map((category) => ({
 const SPARK_VALUES: readonly number[] = COMPONENT_CATEGORIES.map((category) => countIn(category))
 
 /**
- * The landing page, in four bands.
+ * The landing page, in five bands.
  *
  * Each band is a different layout family, which is the rule the page is built to
  * and not an accident of which Blocks existed: a split hero with an instrument
- * in it, a gallery of rendered Components, a hairline list, and a band of
- * swatches. Before this the page was a centred hero over four equal stat cards,
- * four equal feature cards, a filled black band and a two-column text footer,
- * which is five bands of the same shape and is what makes a documentation
- * landing read as a template rather than as a system.
+ * in it, a gallery of rendered Components, a hairline list, a band of copy over
+ * a running field, and a band of swatches. Before this the page was a centred
+ * hero over four equal stat cards, four equal feature cards, a filled black
+ * band and a two-column text footer, which is five bands of the same shape and
+ * is what makes a documentation landing read as a template rather than as a
+ * system.
  *
  * The counts a stat band used to carry in four equal cards are now the gallery
  * band's own heading, stated once beside the Components the numbers are about.
@@ -114,7 +118,14 @@ const SPARK_VALUES: readonly number[] = COMPONENT_CATEGORIES.map((category) => c
  * a template landing page, and the numbers were never the story: the Components
  * are, and the gallery shows them where the cards used to count them.
  *
- * The four bands and the one set of actions between them: the hero carries the
+ * The motion band exists because the page used to state the system's second
+ * motion law nowhere and run it once, in the hero's instrument. A design system
+ * whose landing page is nearly static is a system that looks like a component
+ * gallery, and the honest fix is not decoration bolted on but the law itself,
+ * running on the one Block published for it, with the stop control the law's
+ * own test asks for: stop the field, and the band is still true.
+ *
+ * The five bands and the one set of actions between them: the hero carries the
  * two places a reader can go next, and nothing below it repeats either intent.
  * A second "Browse components" at the bottom of the page is a control that
  * duplicates one already on screen, which is the reason the trailing band that
@@ -328,6 +339,55 @@ export default function HomePage() {
           },
         ]}
       />
+
+      {/*
+        The motion band: the system's second law, running.
+
+        The page's other four bands are read, and this one is watched. The field
+        behind the copy is a `SignalField` on the drift cycle, both from the
+        package the page documents, and the stop control is the Block's own, so
+        the law's test is on the page beside the law: stop the field, and the
+        band is still true. The copy names the two laws in the system's own
+        words, and the link is the Foundation page that states them in full,
+        which is a reading intent rather than a conversion one.
+      */}
+      <Backdrop01
+        headingLevel="h2"
+        title="Motion, two laws"
+        description="Feedback runs on the authored scale and never overshoots; a figure that shows a system running rides its own cycle and stays true with the animation stopped. This band is the second law, running."
+        field="drift"
+        intensity="present"
+        pauseControl
+        pauseLabel="Stop the field"
+        resumeLabel="Resume the field"
+        label="A field of marks, drifting on the ambient cycle the stylesheet publishes"
+        figure={<SignalField count={40} emphasisAt={0.4} />}
+      >
+        <div className="flex max-w-measure flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <h3 className="text-base font-semibold tracking-tight">The first law is feedback</h3>
+            <p className="text-muted-foreground text-pretty text-sm">
+              A colour change, a half-step lift, a drawer leaving: 80, 160 or 280 milliseconds,
+              always decelerating, never overshooting. Every hover on this page is the first law.
+            </p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <h3 className="text-base font-semibold tracking-tight">The second law is ambient</h3>
+            <p className="text-muted-foreground text-pretty text-sm">
+              A figure that shows a system running rides one of six cycles, none shorter than a
+              second, and stops to the same figure. The field behind this copy is the second law,
+              and the control stops it.
+            </p>
+          </div>
+          <Link
+            href="/foundation/motion"
+            className="text-muted-foreground hover:text-foreground flex items-center gap-1 font-mono text-mono transition-colors duration-fast ease-out"
+          >
+            foundation/motion
+            <ArrowUpRight className="size-3.5" aria-hidden />
+          </Link>
+        </div>
+      </Backdrop01>
 
       <PackBand
         headingLevel="h2"

@@ -75,10 +75,18 @@ export function PackBand({
         band is the one ragged edge this page has otherwise refused, and an even
         grid costs the band nothing, since a swatch card is legible at both
         widths the columns resolve to.
+
+        Hover is the same first law the specimen cards run, on the band the
+        reader is comparing colours on: a border tint and a half-step lift at
+        the authored fast duration, with the lift a transform so the universal
+        reduced-motion rule can remove it and leave the swatches untouched.
       */}
       <ul className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {packs.map((pack) => (
-          <li key={pack.id} className="border-border overflow-hidden rounded-lg border">
+          <li
+            key={pack.id}
+            className="border-border hover:border-primary/40 hover:-translate-y-0.5 overflow-hidden rounded-lg border transition duration-fast ease-out"
+          >
             {/*
               The boundary and the clip are two different jobs on two different
               elements, which is the whole of the pack-boundary rule: this `div`

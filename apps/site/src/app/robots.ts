@@ -5,6 +5,14 @@ import { SITE_URL } from '@/lib/site'
 /**
  * Generated once, at build.
  *
+ * This file sits at the app root and not inside the `(site)` group, and the
+ * placement is load-bearing: this site's only layouts are the two root layouts
+ * the groups hold, and Next does not emit a `robots` or a `manifest` route from
+ * inside a group, silently, while the `sitemap` beside it emits from either
+ * place. The robots file this replaces sat in the group and never shipped: the
+ * build was green, the export had no `/robots.txt`, and the sitemap directive
+ * in it was unreachable to every crawler that looked for it.
+ *
  * Under `output: 'export'` a metadata route has to be told it is static, and
  * without this the build fails with a message about `dynamic` rather than about
  * the file. It is also true rather than a formality: the answer is a function of

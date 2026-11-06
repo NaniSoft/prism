@@ -5,6 +5,8 @@ import { describe, expect, it } from 'vitest'
 import {
   parsePrismDocsStore,
   STORE_KINDS,
+  STORE_MODES,
+  STORE_PACKS,
   STORE_SECTIONS,
   STORE_SECTION_TITLES,
 } from '../src/store.js'
@@ -34,11 +36,15 @@ describe('the emitted PrismDocsStore', () => {
       expect(item.url, item.slug).toMatch(/^\//)
     }
     expect(store.pages.length).toBeGreaterThan(0)
-    // The two token vocabularies ARE closed sets the token package owns, so a
-    // literal is the right assertion for them: five packs plus the base, and a
-    // pack per mode.
-    expect(store.tokens.packs).toHaveLength(6)
-    expect(store.tokens.themes).toHaveLength(12)
+    // The two token vocabularies ARE closed sets the store owns, so they are
+    // asserted against the store's own list rather than a literal count: this
+    // lane once pinned "six packs" and kept passing for two releases after the
+    // catalogue said eight, because the build script held its own six-pack list
+    // and the test agreed with the build rather than with the vocabulary. The
+    // build now reads `STORE_PACKS`, and this says the emitted set is that list
+    // entire, with one theme per pack per mode.
+    expect(store.tokens.packs).toEqual([...STORE_PACKS])
+    expect(store.tokens.themes).toHaveLength(STORE_PACKS.length * STORE_MODES.length)
     // One entry per published package that ships a changelog, discovered from
     // the workspace rather than listed, so the field cannot be quietly empty
     // while the packages exist.

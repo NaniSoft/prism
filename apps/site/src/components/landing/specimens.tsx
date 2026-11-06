@@ -51,9 +51,12 @@ export type Specimen = {
  * month of day buttons is a control cluster the landing does not owe a reader,
  * and the band's copy names the three controls that are live.
  *
- * Hover is a colour change on the card's border and the footer's text, at the
- * authored duration, with no transform and no movement, which is the system's
- * feedback law.
+ * Hover is the first motion law, whole: a colour change on the card's border,
+ * the same on the footer's text, and a half-step lift, at the authored fast
+ * duration and decelerating easing. The lift is a transform, so the compositor
+ * owns it and the resting position is the card's full form, which is what lets
+ * the universal reduced-motion rule remove the movement and keep everything
+ * else the hover said.
  */
 export function Specimens({
   title,
@@ -98,7 +101,7 @@ export function Specimens({
         {specimens.map((specimen) => (
           <li
             key={specimen.href}
-            className={`group border-border bg-card hover:border-primary/40 flex flex-col overflow-hidden rounded-xl border transition-colors${
+            className={`group border-border bg-card hover:border-primary/40 hover:-translate-y-0.5 flex flex-col overflow-hidden rounded-xl border transition duration-fast ease-out${
               specimen.wide ? ' sm:col-span-2' : ''
             }`}
           >

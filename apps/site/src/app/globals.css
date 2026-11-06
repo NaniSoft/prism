@@ -327,6 +327,19 @@
       display: inline;
     }
 
+    /*
+     * The eighth, and the same collision as the first five wearing a variant
+     * this site had not used before. The bar's call to action is
+     * `hidden sm:inline-flex`, and `hidden` is the one display utility both
+     * builds emit, so the library's later copy of it computed `display: none`
+     * at every width and the control the bar exists to carry was not on it at
+     * any width either. Restated here for the same reason as the rest, and
+     * found by the gate on its first run rather than by a reader.
+     */
+    .sm\:inline-flex {
+      display: inline-flex;
+    }
+
     .sm\:p-6 {
       padding: var(--spacing-6);
     }

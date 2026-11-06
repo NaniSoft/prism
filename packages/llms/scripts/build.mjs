@@ -106,7 +106,6 @@ const KIND_RANK = { component: 0, block: 1, page: 2, live: 3 }
  * extension down.
  */
 const CONTENT_EXTENSIONS = ['.mdx', '.md']
-const PACKS = ['default', 'blush', 'mint', 'lavender', 'sky', 'peach']
 const MODES = ['light', 'dark']
 /**
  * The content Section read after the catalogue rather than before it.
@@ -493,12 +492,21 @@ function crossReferences(item, demo, declaration, lib, byName, publicExports) {
 }
 
 /** The PrismTokensProjection: the resolved semantic set and the bound scales. */
-async function tokensProjection() {
+async function tokensProjection(storeLib) {
   const dist = path.join(TOKENS_ROOT, 'dist')
-  const themesIndex = (await readJson(path.join(dist, 'themes.json'))) ?? []
 
   const themes = []
-  for (const pack of PACKS) {
+  /*
+   * The packs are the Store's own closed list rather than a second one written
+   * here. This file carried `['default', 'blush', 'mint', 'lavender', 'sky',
+   * 'peach']` past the release that added Cyan and Gold, so the token answers
+   * an agent read named six packs while the catalogue and the site said eight,
+   * and the lists disagreed in a place no gate compares. `STORE_PACKS` is tied
+   * to the catalogue's own vocabulary at compile time, and `parsePrismDocsStore`
+   * refuses a theme file it cannot name, so a pack added to the token build
+   * reaches the Store by one edit in one list or the build says no.
+   */
+  for (const pack of storeLib.STORE_PACKS) {
     for (const mode of MODES) {
       const file =
         pack === 'default'
@@ -547,7 +555,7 @@ async function tokensProjection() {
   }
 
   return {
-    packs: PACKS,
+    packs: storeLib.STORE_PACKS,
     modes: MODES,
     themes,
     scales,
@@ -555,7 +563,7 @@ async function tokensProjection() {
 }
 
 function prismSkill(store) {
-  const counts = { component: 0, block: 0, page: 0 }
+  const counts = { component: 0, block: 0, page: 0, live: 0 }
   for (const item of store.items) counts[item.kind] += 1
   return `# Prism agent skill
 
@@ -603,8 +611,9 @@ The read-only MCP endpoint is \`${BASE_URL}/mcp\`. It exposes nine tools:
 ## This corpus
 
 Generated from the catalogue and the authored pages: ${counts.component}
-Components, ${counts.block} Blocks and ${counts.page} Pages, plus the Overview,
-Foundation, Content and Changelogs pages. The Changelogs pages are each
+Components, ${counts.block} Blocks, ${counts.page} Pages and ${counts.live}
+live surfaces, plus the Overview, Foundation, Content, Patterns and Changelogs
+pages. The Changelogs pages are each
 published package's own changelog, byte for byte; \`get_changelog\` returns one
 package's, optionally one version of it.
 `
@@ -862,7 +871,7 @@ export async function emit(outDir, options = {}) {
 
   /* Store ---------------------------------------------------------------- */
 
-  const tokens = await tokensProjection()
+  const tokens = await tokensProjection(storeLib)
   const store = {
     version: String(uiPackage.version ?? '0.0.0'),
     items,
@@ -904,6 +913,11 @@ export async function emit(outDir, options = {}) {
     { heading: 'Components', kind: 'component' },
     { heading: 'Blocks', kind: 'block' },
     { heading: 'Pages', kind: 'page' },
+    // The fourth Kind groups with the other three and under its own Section
+    // name, because a live surface is an Item like the rest: its mirror is
+    // served and its page is published, and an index that listed three of four
+    // kinds was an agent that could not find the fourth by listing.
+    { heading: 'Live', kind: 'live' },
   ]
   const itemGroup = (heading, kind) => {
     const group = items.filter((item) => item.kind === kind)

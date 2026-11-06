@@ -5,9 +5,9 @@ title: SiteFooter
 
 ## Overview
 
-SiteFooter is the block at the foot of a product site: a brand lockup, grouped
-destinations, the links that leave the site, and an optional slot for the legal
-line.
+SiteFooter is the block at the foot of a product site: a brand lockup, an
+optional word from the site under it, grouped destinations, the links that leave
+the site, and an optional slot for the legal line.
 
 All four NaniSoft sites compose this exact footer in their root layout, and each
 one wrote its own column model, its own mark and its own current-page treatment.
@@ -24,6 +24,7 @@ import { SiteFooter } from '@nanisoft/prism-ui/blocks/site-footer'
 
 <SiteFooter
   product={{ id: 'nexus', name: 'Nexus', pack: 'lavender' }}
+  about={<p className="text-muted-foreground text-sm">Nexus, the operations console.</p>}
   columns={[
     { title: 'Site', links: [{ label: 'Docs', href: '/docs' }] },
     {
@@ -66,11 +67,14 @@ large margin around it.
   belongs together before you split it into columns.
 - **Links that leave the site open in a new tab by default**, because a link that
   leaves and comes back is a reader who has lost the page they were on. Pass
-  
-ewTab={false}` on one link to override it: Prism does not decide which
+  `newTab={false}` on one link to override it: Prism does not decide which
   destinations are external, so the per-link prop wins.
 - Put a social icon in `icon`. It is `aria-hidden`, so the label is announced once
   rather than twice.
+- Use `about` for the sentence or two a reader meets under the mark: what this
+  site is, who publishes it. It renders with no colour of its own, so muted text
+  and any headings are the caller's, and the caller's document outline decides
+  their level rather than the footer's columns.
 - Pass `headingLevel` when the footer is not the last region of a page. It defaults
   to `h2`, which is right for a footer at the root of a layout and wrong inside a
   section that already has a heading at that level, where every column would become a

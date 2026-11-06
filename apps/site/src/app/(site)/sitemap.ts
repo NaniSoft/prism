@@ -43,5 +43,17 @@ export const dynamic = 'force-static'
 export default function sitemap(): MetadataRoute.Sitemap {
   const routes = flattenNav(projectNav(source.getPageTree()))
 
-  return routes.map((entry) => ({ url: new URL(entry.url, SITE_URL).href }))
+  /*
+   * The landing page, stated first and by hand, because the navigation cannot
+   * hold it: `nav.ts` drops the home entry on purpose (the wordmark already
+   * links it, and a second route home beside "Overview" collided with the
+   * Overview Section), so a sitemap built from the navigation alone would
+   * publish every page but the one a search result is most likely to name. It
+   * is one address and one line, and the collision the header avoids does not
+   * exist in a list no reader scans.
+   */
+  return [
+    { url: new URL('/', SITE_URL).href },
+    ...routes.map((entry) => ({ url: new URL(entry.url, SITE_URL).href })),
+  ]
 }

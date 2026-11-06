@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 
+import { SiteFooter } from '@nanisoft/prism-ui/blocks/site-footer'
 import { PrismThemeScript } from '@nanisoft/prism-ui/provider'
 import { themeAttributes } from '@nanisoft/prism-ui/theming'
 
 import { SiteBar } from '@/components/site-bar'
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site'
 import { DEFAULT_MODE, DEFAULT_PACK } from '@/lib/bar'
+import { SECTIONS } from '@/lib/sections'
 
 // Order matters, and the reason is a library utility this site's own build also
 // emits, which is the collision the import order cannot fix on its own.
@@ -133,6 +134,56 @@ const STRUCTURED_DATA = {
  */
 const THEME_ATTRIBUTES = themeAttributes({ pack: DEFAULT_PACK, mode: DEFAULT_MODE })
 
+/**
+ * The year on the copyright line, frozen at build.
+ *
+ * A static export has no request to read a clock from, and the year the site was
+ * last built is the year the copy was last true, which is the only honest
+ * sentence a footer can say about time. It matches the year the brand policy
+ * states in prose rather than deriving a second fact no document backs.
+ */
+const BUILD_YEAR = new Date().getFullYear()
+
+/**
+ * The footer's link columns, projected from the Section manifest.
+ *
+ * The two destination columns are the manifest split by its own `prose` flag,
+ * which is the same flag the header's row splits on: a reader who reaches the
+ * foot of a long page finds every Section flat here, including the five the
+ * header holds behind the Catalogue trigger and the sidebar holds behind its own
+ * tree. The third column names the agent surface by its files, because those
+ * three URLs are the surface and a label that paraphrased them would be a fourth
+ * name for three things that already have one.
+ *
+ * No link here is a second list. A Section added to the manifest appears in this
+ * footer with no edit, in the column its own `prose` flag chooses, which is the
+ * same guarantee the header, the sitemap and the search index already hold.
+ */
+const FOOTER_COLUMNS = [
+  {
+    title: 'Documentation',
+    links: SECTIONS.filter((section) => section.prose).map((section) => ({
+      label: section.title,
+      href: `/${section.segment}`,
+    })),
+  },
+  {
+    title: 'Catalogue',
+    links: SECTIONS.filter((section) => !section.prose).map((section) => ({
+      label: section.title,
+      href: `/${section.segment}`,
+    })),
+  },
+  {
+    title: 'For agents',
+    links: [
+      { label: 'llms.txt', href: '/llms.txt' },
+      { label: 'llms-full.txt', href: '/llms-full.txt' },
+      { label: 'prism-skill.md', href: '/prism-skill.md' },
+    ],
+  },
+]
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" {...THEME_ATTRIBUTES} suppressHydrationWarning>
@@ -144,6 +195,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           that are mostly one large surface.
         */}
         <PrismThemeScript defaultPack={DEFAULT_PACK} defaultMode={DEFAULT_MODE} />
+        {/*
+          The raster icon links, beside the SVG icon link the app directory
+          emits for `app/icon.svg`. The SVG is what a current browser puts in the
+          tab; the `.ico` answers the `/favicon.ico` request every browser makes
+          before it reads a link, and the one Safari still needs; and the touch
+          icon is the PNG iOS stores. All three are the same mark, generated
+          from the SVG by `scripts/gen-icons.mjs`, so there is one beam and one
+          refraction in the set rather than three drawings of them.
+        */}
+        <link rel="icon" href="/favicon.ico" sizes="48x48" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         {/*
           The structured data, as a script rather than as a component in the body.
           A crawler reads it out of the document head or the body indifferently,
@@ -284,66 +346,70 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </main>
         {/*
-          Provenance, not promotion.
+          The foot of the page, composed from the library's own `SiteFooter`.
 
-          The usual footer furniture is unavailable here, not merely unwelcome:
-          there is no LICENSE file, no `license` field in any manifest, no owner
-          and no repository URL anywhere in the project, so a copyright line, a
-          social row or a newsletter form would all be invention. So the footer
-          answers the only question a reader has at the end of a page that this
-          site never answers anywhere else, which is whether what they just read
-          is generated from the token source of truth or retyped by hand, and
-          nothing else.
+          This footer was hand-written in this file for years, on a stated rule:
+          no link row, because every Section was in the header and the sidebar.
+          The rule was retired by the redesign this file is part of, with eyes
+          open rather than by neglect, for three reasons a reader can check. The
+          header holds five Sections behind the Catalogue trigger, so "every
+          Section is in the header row" was true of the row and not of what it
+          showed. The footer of a documentation site is the one place a reader
+          who has just finished a page looks for the next one, and a footer of
+          two paragraphs sends them back to the top. And the Block already
+          existed: four NaniSoft product sites compose this exact footer, and
+          the design system's own site hand-writing its own was the one site not
+          built from the system it documents.
 
-          **No link row, deliberately.** Every Section is in the header row and in
-          the sidebar, and every published package is linked from the Changelogs
-          index, which is the page that owns that list and the one a reader looking
-          for it will reach. A footer repeating any of them puts the same
-          destination twice on one screen, which is the duplication the header's
-          own comment about the landing page exists to avoid. What is left is two
-          labelled facts, so each paragraph is a small heading over its sentence:
-          an unlabelled pair of paragraphs of similar length reads as filler, and
-          these two are not the same claim.
-
-          The band is kept quieter than the header by a hairline `border-t` and
-          `text-muted-foreground`, with no accent and no motion: the header has to
-          be found, this only has to mark the end. `mt-auto` is what makes it the
-          end of a short page rather than the end of a tall one, and the body is a
-          flex column for that one reason.
+          What survived the retirement is the provenance claim, which was never
+          the problem with a link row. The two labelled facts the old footer
+          carried are now the word under the mark, through the Block's `about`
+          slot, and the legal line states the two facts the brand policy already
+          states in prose: the holder of the copyright and the licence on the
+          packages. Nothing else is claimed, and the mark is the spectrum mark
+          for the same reason the bar's is: ground violet, mark spectrum.
         */}
-        <footer className="border-border mt-auto border-t">
-          {/*
-            These two headings are labelled facts, not rungs of the page ladder, and
-            `text-sm` beside `text-sm` body copy is why they are labelled facts. They
-            are `h2` so a reader navigating by heading can find and skip each block,
-            which an `h2` at 14 pixels satisfies: the outline says there is a section
-            and the type says it is a caption. They are the widest instance of the
-            distinction `docs/quality-gates.md` records under the heading-scale gate,
-            that a heading inside a surface the reader is not reading is a caption at
-            that surface's scale rather than a rung of the page's ladder.
-          */}
-          <div className="text-muted-foreground mx-auto grid w-full max-w-page gap-8 px-6 py-12 sm:grid-cols-2 sm:gap-16">
-            <div className="flex flex-col gap-2">
-              <h2 className="text-foreground text-sm font-semibold tracking-tight">
-                What this is
-              </h2>
-              <p className="text-pretty text-sm">
-                Prism is NaniSoft&apos;s design system: a DTCG token pipeline, a published React
-                library you compose without writing CSS, and this documentation site.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2">
-              <h2 className="text-foreground text-sm font-semibold tracking-tight">
-                How this site is built
-              </h2>
-              <p className="text-pretty text-sm">
-                With the system it documents. Every token, flag and API table on these pages is
-                read from the package build rather than retyped, and the catalogue is the one
-                list behind the navigation, the corpus and the agent surface.
-              </p>
-            </div>
-          </div>
-        </footer>
+        <SiteFooter
+          className="mt-auto"
+          product={{ id: 'prism', name: 'Prism' }}
+          about={
+            <>
+              {/*
+                The two labelled facts, still headings so a reader navigating by
+                outline can find and skip each one, and still captions beside
+                `text-sm` body copy rather than rungs of any page's ladder. The
+                Block renders them with no colour of their own, so the muted
+                treatment is stated here where the words are.
+              */}
+              <div className="text-muted-foreground flex flex-col gap-1">
+                <h2 className="text-foreground text-sm font-semibold tracking-tight">
+                  What this is
+                </h2>
+                <p className="text-pretty text-sm">
+                  Prism is NaniSoft&apos;s design system: a DTCG token pipeline, a published
+                  React library you compose without writing CSS, and this documentation site.
+                </p>
+              </div>
+              <div className="text-muted-foreground flex flex-col gap-1">
+                <h2 className="text-foreground text-sm font-semibold tracking-tight">
+                  How this site is built
+                </h2>
+                <p className="text-pretty text-sm">
+                  With the system it documents. Every token, flag and API table on these pages
+                  is read from the package build rather than retyped, and the catalogue is the
+                  one list behind the navigation, the corpus and the agent surface.
+                </p>
+              </div>
+            </>
+          }
+          columns={FOOTER_COLUMNS}
+          legal={
+            <p>
+              © {BUILD_YEAR} NaniSoft. The Prism packages are MIT-licensed; the brand and
+              the pack names are the brand policy&apos;s, not the licence&apos;s.
+            </p>
+          }
+        />
       </body>
     </html>
   )

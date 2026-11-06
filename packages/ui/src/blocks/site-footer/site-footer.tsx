@@ -79,6 +79,18 @@ export type SiteFooterProps = {
    */
   product: Pick<ProductMarkProps, 'id' | 'name' | 'pack'>
   /**
+   * A slot for the sentence or two a footer carries under its mark: what this
+   * site is, who publishes it, what it is built with.
+   *
+   * A slot rather than a string, because the same position holds one paragraph
+   * on one site and two labelled ones on another, and any headings are the
+   * caller's document outline rather than this Block's to level. It renders
+   * under the mark at the measure, with no colour of its own: muted text is the
+   * caller's decision about its own copy, and a Block that coloured a node it
+   * did not render would be styling it could not see.
+   */
+  about?: ReactNode
+  /**
    * The groups of destinations: the sections of this site, its documentation, and
    * anywhere else the site sends a reader. Omit it for a footer that carries only
    * the brand lockup.
@@ -116,8 +128,9 @@ export type SiteFooterProps = {
 }
 
 /**
- * The footer of a product site: a brand lockup, grouped destinations, the links
- * that leave the site, and an optional slot for the legal line.
+ * The footer of a product site: a brand lockup, an optional word from the site
+ * under it, grouped destinations, the links that leave the site, and an optional
+ * slot for the legal line.
  *
  * It is a Block and not a Component because it is a region of a page: it
  * composes a `ProductMark` and two sets of links and owns the block they sit in.
@@ -172,6 +185,7 @@ export type SiteFooterProps = {
  */
 export function SiteFooter({
   product,
+  about,
   columns,
   social,
   legal,
@@ -188,6 +202,11 @@ export function SiteFooter({
         <div className="flex flex-col gap-10 md:flex-row md:justify-between">
           <div className="flex flex-col gap-4">
             <ProductMark id={product.id} name={product.name} pack={product.pack} size="lg" />
+            {about ? (
+              <div data-slot="site-footer-about" className="max-w-measure flex flex-col gap-2">
+                {about}
+              </div>
+            ) : null}
             {social && social.length > 0 ? (
               <ul className="flex flex-wrap items-center gap-4">
                 {social.map((link) => (

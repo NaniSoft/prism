@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { SiteNavbar } from '@nanisoft/prism-ui/blocks/site-navbar'
+import { CtaLink } from '@nanisoft/prism-ui/components/cta-link'
 
 import { COPY, DEFAULT_MODE, DEFAULT_PACK, NAV, SITES } from '@/lib/bar'
 
@@ -60,6 +61,20 @@ export function SiteBar() {
       theme={{ label: COPY.theme }}
       mode={{ lightLabel: COPY.toDark, darkLabel: COPY.toLight }}
       mobileLabels={{ open: COPY.menuOpen, close: COPY.menuClose }}
+      actions={
+        /*
+          The one conversion control the bar carries, and the label is the hero's
+          own on purpose: the landing page holds itself to one label per intent
+          wherever that intent appears, and a bar control that said "Get started"
+          for the same destination would be the second label for the first intent.
+          The Block renders it in the controls cluster after the mode toggle, and
+          it is hidden below `sm` because that cluster is already five controls
+          wide at the narrow end and the bar fits by measurement, not by luck.
+        */
+        <CtaLink href="/overview/quickstart" className="hidden sm:inline-flex">
+          Read the quickstart
+        </CtaLink>
+      }
     />
   )
 }

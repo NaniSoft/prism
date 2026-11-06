@@ -87,7 +87,14 @@ test('the mobile menu is the mirror of it, and never both', async ({ page }, tes
   // Compared as a boolean rather than against a display value, because the trigger
   // is a flex row of an icon and a sheet trigger is not obliged to compute to
   // `block`. What this lane is about is which of the two affordances is on screen.
-  expect(menu === 'none', `the mobile menu at ${width}px`).toBe(width < AT.lg)
+  //
+  // The comparison is `width >= AT.lg`, and the direction is the whole of what
+  // this asserts: the trigger is `lg:hidden`, so it is hidden from `lg` up and on
+  // screen below it. This was written `<` when the lane landed, which inverts the
+  // claim, and because both sides of the mirror failed at their own widths the
+  // lane was red at every project from its first run rather than green at two and
+  // red at one, so no passing width ever hid the inversion.
+  expect(menu === 'none', `the mobile menu at ${width}px`).toBe(width >= AT.lg)
   // The two are one decision read twice, so they cannot both be on screen.
   expect(nav === 'none').toBe(menu !== 'none')
 })
@@ -99,7 +106,7 @@ test('every header control carries its name, and the pack name follows sm', asyn
   await page.goto('/', { waitUntil: 'networkidle' })
   const controls = await page.locator('header button').evaluateAll((elements) =>
     elements.map((element) => ({
-      name: element.getAttribute('aria-label') ?? '',
+      name: element.getAttribute('aria-label') ?? (element.textContent ?? '').trim(),
       text: (element.textContent ?? '').trim(),
     })),
   )
@@ -108,7 +115,10 @@ test('every header control carries its name, and the pack name follows sm', asyn
   // `SearchEntry` makes for the 55 pixels the row needed at the `lg` threshold,
   // so the assertion that keeps that trade honest is that the name is still
   // there: an icon with no accessible name would have saved the same pixels and
-  // told a screen-reader user nothing.
+  // told a screen-reader user nothing. The name is the label when the control
+  // carries one and its own text when it does not, because the Catalogue group's
+  // trigger names itself by its content and a button whose visible word is its
+  // accessible name needs no second copy of that word in an attribute.
   for (const control of controls) {
     expect(
       control.name.length,
@@ -135,30 +145,38 @@ test('the documentation sidebars follow lg', async ({ page }, testInfo) => {
   expect(displays, `the asides at ${width}px`).toEqual([expected, expected])
 })
 
-test('the demo frame padding follows sm', async ({ page }, testInfo) => {
+test('the demo frame is full-bleed, on one step at every width', async ({ page }, testInfo) => {
   const { width } = project(testInfo)
   await page.goto('/components/button', { waitUntil: 'networkidle' })
+  // The frame this lane used to measure was a padded `div` whose inset stepped
+  // at `sm`, and it was retired when the Item showcase became a toolbar and a
+  // scaled iframe. The showcase's own record is the decision to hold: one
+  // padding step at every width, because this site and the library are two
+  // Tailwind builds sharing one `utilities` layer and the library's
+  // unconditional padding outranks a stepped variant, so a step would silently
+  // never apply. The preview stage is therefore full-bleed and the one step
+  // lives on the code panel a reader opens, which is not on the page at first
+  // paint; what is, and what this asserts, is the full-bleed stage.
   const padding = await page
-    .locator('main .p-4')
-    .first()
+    .locator('main [data-preview-stage]')
     .evaluate((element) => getComputedStyle(element).paddingTop)
-  expect(padding, `the demo frame padding at ${width}px`).toBe(width >= AT.sm ? '24px' : '16px')
+  expect(padding, `the demo frame inset at ${width}px`).toBe('0px')
 })
 
-test('the footer follows sm, and the column gap follows with it', async ({ page }, testInfo) => {
+test('the footer keeps its own rhythm, one step at every width', async ({ page }, testInfo) => {
   const { width } = project(testInfo)
   await page.goto('/', { waitUntil: 'networkidle' })
   const measured = await page.locator('footer > div').evaluate((element) => {
     const style = getComputedStyle(element)
     return { paddingTop: style.paddingTop, rowGap: style.rowGap }
   })
-  // `py-12` and `gap-8 sm:gap-16`, which is a step tighter than `Section`'s
+  // `py-12` and `gap-10`: the footer is the library's own `SiteFooter`, and its
+  // rhythm is one step at every width, a step tighter than `Section`'s
   // `py-16 sm:py-24`. The footer is the one band on the page that does not take
   // the section rhythm: it marks the end of a document, so it is quieter than a
   // section that is asking to be read, and a footer at the section rhythm reads
   // as a fifth section rather than as the edge of the page. The numbers are the
-  // ones the band is designed to rather than the ones it currently has.
-  const expected =
-    width >= AT.sm ? { paddingTop: '48px', rowGap: '64px' } : { paddingTop: '48px', rowGap: '32px' }
+  // ones the Block is designed to rather than the ones a width would prefer.
+  const expected = { paddingTop: '48px', rowGap: '40px' }
   expect(measured, `the footer at ${width}px`).toEqual(expected)
 })

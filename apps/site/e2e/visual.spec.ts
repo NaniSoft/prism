@@ -50,7 +50,39 @@ test.beforeEach(async ({ page }, testInfo) => {
 for (const route of ROUTES) {
   test(`screenshot ${route.slug}`, async ({ page }) => {
     await page.goto(route.path, { waitUntil: 'networkidle' })
-    await page.evaluate(() => document.fonts.ready)
+    /*
+     * The page is walked to its foot and allowed to settle before it is
+     * captured, because an Item page holds its Demos behind showcase frames
+     * that are `loading="lazy"`, and a full-page capture that never scrolls
+     * leaves a frame below the fold at its declared floor height: the same
+     * tree then screenshots at one of several stable heights, none of them
+     * wrong on the screen a reader scrolls and every one of them a flake
+     * here. The walk loads every frame; the settle then waits, in order, on
+     * the page's fonts, every same-origin frame's load, every frame's fonts
+     * (the parent's readiness says nothing about a frame's), and two
+     * animation frames for the showcase's measured-height commit to land.
+     */
+    await page.evaluate(async () => {
+      const scrollHeight = document.body.scrollHeight
+      for (let y = 0; y < scrollHeight; y += window.innerHeight) {
+        window.scrollTo(0, y)
+        await new Promise((resolve) => setTimeout(resolve, 16))
+      }
+      window.scrollTo(0, 0)
+      await document.fonts.ready
+      const frames = [...document.querySelectorAll<HTMLIFrameElement>('iframe')]
+      await Promise.all(
+        frames.map(
+          (frame) =>
+            new Promise<void>((resolve) => {
+              if (frame.contentDocument?.readyState === 'complete') resolve()
+              else frame.addEventListener('load', () => resolve(), { once: true })
+            }),
+        ),
+      )
+      await Promise.all(frames.map(async (frame) => void (await frame.contentDocument?.fonts.ready)))
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    })
     await expect(page).toHaveScreenshot(`${route.slug}.png`, { fullPage: true })
   })
 }
@@ -65,8 +97,23 @@ test('axe scan of the home page', async ({ page }, testInfo) => {
 test('a Prism control meets the 44px coarse-pointer floor', async ({ page }, testInfo) => {
   test.skip(!(testInfo.project.metadata as { coarse?: boolean }).coarse, 'coarse-pointer project only')
   await page.goto('/components/button', { waitUntil: 'networkidle' })
+  // The Demo renders behind the showcase's scaled iframe, which is the same
+  // origin this page is served from, so the controls the floor exists for are in
+  // the frame's document rather than in the page's own `main`. This lane queried
+  // `main button` for the page's own controls, found none since the showcase
+  // gained its toolbar, and `Math.max` over an empty list is `-Infinity`, so the
+  // assertion failed on nothing rather than measuring anything. The count is
+  // asserted first so the floor can never be held by a selector that quietly
+  // went empty a second time.
   const heights = await page
-    .locator('main button')
-    .evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().height))
+    .locator('main iframe')
+    .evaluateAll((frames: HTMLIFrameElement[]) =>
+      frames.flatMap((frame) =>
+        [...(frame.contentDocument?.querySelectorAll('button') ?? [])].map(
+          (button) => button.getBoundingClientRect().height,
+        ),
+      ),
+    )
+  expect(heights.length, 'the demo frame holds the controls this lane measures').toBeGreaterThan(0)
   expect(Math.max(...heights)).toBeGreaterThanOrEqual(44)
 })

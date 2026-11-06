@@ -186,6 +186,27 @@ export function SiteShowcase({
   }, [declared])
 
   /*
+   * Whether the frame has loaded at least once, which is the fact the observer
+   * below keys on.
+   *
+   * The load handler runs on the frame's own event, so it is the one place that
+   * knows a document exists to observe. This effect used to attach the height
+   * observer at mount with no `loaded` in its dependencies, and at mount a frame
+   * that had not loaded yet handed it no root to observe and never ran again: the
+   * height was read once at the load event and went stale exactly when the
+   * document's fonts finished after it, which is a two-state coin flip on whether
+   * hydration beat the frame. A stale read is not only a reader's cropped Demo;
+   * it is the two stable page heights a screenshot lane flaps between, because
+   * the taller state is the converged one and the shorter one is a height nobody
+   * re-read.
+   */
+  const [loaded, setLoaded] = useState(false)
+  const handleLoad = useCallback(() => {
+    setLoaded(true)
+    onLoad()
+  }, [onLoad])
+
+  /*
    * Two observers, and each earns its place.
    *
    * The column's own width is read from the frame's parent, because a
@@ -209,13 +230,31 @@ export function SiteShowcase({
   }, [])
 
   useEffect(() => {
-    if (declared !== null) return
+    if (declared !== null || !loaded) return
     const root = frame.current?.contentDocument?.documentElement
     if (!root || typeof ResizeObserver === 'undefined') return
     const observer = new ResizeObserver(onLoad)
     observer.observe(root)
     return () => observer.disconnect()
-  }, [href, declared, onLoad])
+  }, [href, declared, onLoad, loaded])
+
+  /*
+   * A frame that completed before hydration attached the load handler.
+   *
+   * The load event does not replay, so a frame the browser finished while this
+   * component was still server markup never runs `handleLoad`: `loaded` stays
+   * false, the observer above stays detached, and the frame sits at its declared
+   * floor height for the life of the page. Whether a frame beats hydration is a
+   * race between two clocks this component controls neither of, which is the
+   * coin flip the screenshot lane kept landing on. The check runs once per
+   * hydration and per `href`, which are the two moments a frame can be new, and
+   * a frame still loading is left to the event it will fire.
+   */
+  useEffect(() => {
+    if (declared !== null) return
+    const inner = frame.current?.contentDocument
+    if (inner?.readyState === 'complete') handleLoad()
+  }, [href, declared, handleLoad])
 
 return (
     /*
@@ -329,7 +368,7 @@ return (
               scale === 1 ? undefined : { width: `${deviceWidth}px`, transform: `scale(${scale})` }
             }
             height={Math.round(deviceHeight * scale)}
-            onLoad={onLoad}
+            onLoad={handleLoad}
             loading="lazy"
             className="block w-full origin-top-left border-0"
           />

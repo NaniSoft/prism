@@ -78,6 +78,7 @@ import { LIVE_ROUTES, redirectFor, RUN_WORKER_FIRST } from '../src/lib/sections.
 
 import { CONTENT_EXTENSIONS, findContentJoins, parseNav, routeForFile, routeOfHref } from './content-joins.mjs'
 import { readItemContent } from './item-content.mjs'
+import { AGENT_SURFACE_FILES } from './copy-agent-surface.mjs'
 import { CHANGELOG_SECTION, readPublishedChangelogs, splitChangelog } from './published-packages.mjs'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
@@ -327,6 +328,23 @@ for (const file of await walkFiles(APP_ROOT)) {
 for (const item of store.items) {
   routes.add(item.url)
   routes.add(`/${item.url.split('/')[1] ?? ''}`)
+}
+/*
+ * The agent surface at the root, published by the copy step rather than by the
+ * tree. The footer's third column links it, so the join has to hold for those
+ * URLs as for any route: the list is the copy step's own export, and each file
+ * is asserted to be in the export before its route is believed, because an
+ * exemption that is not gated is how a 404 ships green. The live routes above
+ * are gated the same way, for the same reason.
+ */
+for (const file of AGENT_SURFACE_FILES) {
+  if (!existsSync(path.join(OUT, file))) {
+    die(
+      `the agent surface file ${file} is not in the export, so the footer's link to it is a ` +
+        '404 this gate would otherwise believe. Run the build and its copy step before this gate.',
+    )
+  }
+  routes.add(`/${file}`)
 }
 
 /* The navigation, as published, and as the reader receives it. */
