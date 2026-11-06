@@ -1,5 +1,70 @@
 # @nanisoft/prism-ui
 
+## 1.3.0
+
+### Minor Changes
+
+- 250b34e: SiteFooter takes an `about` slot: a word from the site under the mark, for the
+  sentence or two a footer carries about what the site is and who publishes it.
+  Rendered under the lockup at the measure with no colour of its own, so the
+  muted treatment and any headings stay the caller's. The design system's own
+  site composes this footer now, and the two labelled facts its hand-written
+  footer carried for years ride in that slot.
+- 290642e: Let `SiteNavbar`'s `nav` carry groups, rendered as one trigger that opens a menu
+  
+  A `nav` entry may now be a group: `{ label, children }` beside the existing
+  link shape. On the row a group renders as the row's one control, a trigger
+  whose menu lists its children as real anchors, marked with `aria-current` when
+  the reader is on one; below the row's threshold the panel lists the same group
+  flat, as a label above its links, so no destination is two disclosures deep.
+  The current mark now reads the route as a place rather than a string, so a
+  reader on `/components/button` finds `Components` marked rather than nothing.
+  A flat `nav` renders exactly as before, and the new `SiteNavGroup` and
+  `SiteNavEntry` types are exported beside `SiteNavLink`.
+- 8265662: A `ProductMark` takes a `mark`: the product's own drawing, in place of the
+  disc. The node is the consumer's and fills the sized slot the disc occupies,
+  so one drawing arrives at every drawn size; the name beside it is unchanged
+  and still the announced half. `SiteNavbar` and `SiteFooter` carry it through
+  the `product` prop they already take, so a site's logo is the sign in the
+  bar, in the mobile panel and at the foot of the page from one fact, and the
+  two-colour disc remains the mark of a product whose identity is a hue. The
+  design system's own site draws its beam-and-refraction in both places now,
+  in place of the spectrum disc.
+
+### Patch Changes
+
+- 290642e: Render `Sparkline`'s hidden numbers table without the `Table` Component's scroll container
+  
+  The readings behind a `Sparkline` are published to assistive technology as a
+  table in a visually hidden wrapper. The wrapper is one pixel wide, so the
+  horizontal scroll container `Table` wraps its table in always computed
+  scrollable and never focusable, which the `scrollable-region-focusable` rule
+  fails on wherever a `Sparkline` renders. The hidden table is now plain `table`
+  markup with the same caption, row heads and cells: a table nobody can see
+  cannot be panned, and the semantics are the whole of what it owes.
+- 290642e: Lay `Calendar`'s month grid as a table again: the `flex` came off its cells
+  
+  The weekday headings and the day cells carried `display: flex`, and a flexed
+  `th` or `td` is pulled out of the table's column layout: the browser wraps each
+  one in its own anonymous cell, and the seven-column month collapsed into a
+  single stacked column at four times its height. In `Calendar` the day cell is
+  the `td` itself, so the whole grid fell; in `MiniCalendar` the day is a button
+  inside the cell, so the weekday row alone stacked above a surviving grid, and
+  `DatePicker` and the `Calendar01` Block inherit whichever they compose. The
+  cells are centred by the table instead (`text-center` with `align-middle` and
+  `p-0`), which keeps the seven columns, the 36px cell, the 44px coarse-pointer
+  floor and every state exactly as they were designed, and the weekday heading
+  now sits over the column it names.
+- 290642e: Align `PulseSeries`'s scan reticle with the columns it reads
+  
+  The wash behind the reticle stopped short of the baseline while its own line
+  crossed it, and the line rode inside the wash at a third of its width rather
+  than at its centre. The wash is now one column slot wide and the line runs
+  down its centre, so at every instant the wash covers exactly the column the
+  line is crossing, and both shapes meet the baseline. The travel is the plot's
+  own width, so the reticle enters and leaves aligned with the columns' field
+  and its opacity ramps are spent on the margins beside the end columns.
+
 ## 1.2.0
 
 ### Minor Changes
