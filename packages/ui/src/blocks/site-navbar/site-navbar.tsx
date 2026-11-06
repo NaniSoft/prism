@@ -125,12 +125,12 @@ export type SiteNavMobileLabels = {
 /** The props a SiteNavbar takes. */
 export type SiteNavbarProps = {
   /**
-   * The product this bar belongs to: the id, name and pack its `ProductMark` is
-   * drawn from, and the mark that heads the mobile panel. The bar renders the mark
-   * itself rather than a slot, because a bar whose brand lockup is a slot is a bar
-   * every consumer has to reimplement.
+   * The product this bar belongs to: the id, name, pack and drawn mark its
+   * `ProductMark` is drawn from, and the mark that heads the mobile panel. The
+   * bar renders the mark itself rather than a slot, because a bar whose brand
+   * lockup is a slot is a bar every consumer has to reimplement.
    */
-  product: Pick<ProductMarkProps, 'id' | 'name' | 'pack'>
+  product: Pick<ProductMarkProps, 'id' | 'name' | 'pack' | 'mark'>
   /** Where the brand lockup goes. @defaultValue '/' */
   homeHref?: string
   /**
@@ -360,7 +360,13 @@ export function SiteNavbar({
           href={homeHref}
           className="focus-visible:border-ring focus-visible:ring-ring shrink-0 rounded-sm focus-visible:ring-[3px] focus-visible:outline-none"
         >
-          <ProductMark id={product.id} name={product.name} pack={product.pack} size="sm" />
+          <ProductMark
+            id={product.id}
+            name={product.name}
+            pack={product.pack}
+            mark={product.mark}
+            size="sm"
+          />
         </a>
 
         {entries.length > 0 ? (

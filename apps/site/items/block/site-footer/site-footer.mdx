@@ -23,7 +23,12 @@ not theirs and a year that was not this one.
 import { SiteFooter } from '@nanisoft/prism-ui/blocks/site-footer'
 
 <SiteFooter
-  product={{ id: 'nexus', name: 'Nexus', pack: 'lavender' }}
+  product={{
+    id: 'nexus',
+    name: 'Nexus',
+    pack: 'lavender',
+    mark: <NexusLogo className="site-product-mark" />,
+  }}
   about={<p className="text-muted-foreground text-sm">Nexus, the operations console.</p>}
   columns={[
     { title: 'Site', links: [{ label: 'Docs', href: '/docs' }] },
@@ -38,6 +43,11 @@ import { SiteFooter } from '@nanisoft/prism-ui/blocks/site-footer'
 ```
 
 <ComponentDemo slug="site-footer" />
+
+The lockup is the product's `ProductMark` at `lg`, the same mark the bar draws,
+and `mark` carries the product's drawn logo when it has one, so a reader who
+scrolled from the bar meets the same sign at the foot. Omit it and the lockup
+is the two-colour disc.
 
 ## Guidelines
 

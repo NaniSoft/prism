@@ -72,12 +72,14 @@ export type SiteFooterSocial = {
  */
 export type SiteFooterProps = {
   /**
-   * The product this footer belongs to: the id, name and pack its `ProductMark`
-   * is drawn from. The footer renders the mark rather than taking a slot,
-   * because the brand lockup is the one part of a footer that is never
-   * product-specific and every consumer would otherwise reimplement it.
+   * The product this footer belongs to: the id, name, pack and drawn mark its
+   * `ProductMark` is drawn from. The footer renders the mark rather than taking
+   * a slot, because the brand lockup is the one part of a footer that is never
+   * product-specific and every consumer would otherwise reimplement it; a
+   * product whose identity is a drawing carries it here as data, beside the
+   * name, exactly as the bar's lockup does.
    */
-  product: Pick<ProductMarkProps, 'id' | 'name' | 'pack'>
+  product: Pick<ProductMarkProps, 'id' | 'name' | 'pack' | 'mark'>
   /**
    * A slot for the sentence or two a footer carries under its mark: what this
    * site is, who publishes it, what it is built with.
@@ -192,6 +194,11 @@ export function SiteFooter({
   headingLevel = 'h2',
   className,
 }: SiteFooterProps) {
+  /*
+   * The lockup is the same `ProductMark` the bar draws, so a product's drawn
+   * mark, when it has one, is the one drawing in both places and a reader who
+   * scrolled from the bar meets the same sign at the foot.
+   */
   const ColumnTitle = headingLevel
   return (
     <footer
@@ -201,7 +208,13 @@ export function SiteFooter({
       <div className="mx-auto flex w-full max-w-page flex-col gap-10 px-6 py-12 lg:px-8">
         <div className="flex flex-col gap-10 md:flex-row md:justify-between">
           <div className="flex flex-col gap-4">
-            <ProductMark id={product.id} name={product.name} pack={product.pack} size="lg" />
+            <ProductMark
+              id={product.id}
+              name={product.name}
+              pack={product.pack}
+              mark={product.mark}
+              size="lg"
+            />
             {about ? (
               <div data-slot="site-footer-about" className="max-w-measure flex flex-col gap-2">
                 {about}

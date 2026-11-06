@@ -1,5 +1,7 @@
 'use client'
 
+import type { ReactNode } from 'react'
+
 import type { Mode, PackId } from '../../theming'
 import type { SearchDialogMessages } from '../../components/ui/search-dialog'
 import { ModeToggle } from './mode-toggle'
@@ -13,8 +15,12 @@ import { PrismProvider } from '../../provider/provider'
 
 /** What the control cluster was told to render. Every field is optional. */
 export type NavbarControlsProps = {
-  /** The product whose mark heads the mobile panel. */
-  product: { id: string; name: string; pack?: PackId | null }
+  /**
+   * The product whose mark heads the mobile panel. The drawn `mark` crosses
+   * this client boundary as rendered content, the same way a slot does, so a
+   * consumer's drawing stays server-drawn while the panel around it is not.
+   */
+  product: { id: string; name: string; pack?: PackId | null; mark?: ReactNode }
   /** The site's own destinations, for the panel below the row's threshold. */
   nav: readonly MobileNavEntry[]
   /** The accessible name of the panel and of its trigger. */

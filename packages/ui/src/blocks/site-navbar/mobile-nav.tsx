@@ -40,7 +40,7 @@ export type MobileNavEntry = MobileNavLink | MobileNavGroup
 /** The props the mobile navigation takes. */
 export type MobileNavProps = {
   /** The product this navigation belongs to, drawn as the mark above the list. */
-  product: Pick<ProductMarkProps, 'id' | 'name' | 'pack'>
+  product: Pick<ProductMarkProps, 'id' | 'name' | 'pack' | 'mark'>
   /** Every destination, in the order a reader should meet them. */
   links: readonly MobileNavEntry[]
   /** The accessible name of the panel, which is also the trigger's name. */
@@ -100,7 +100,13 @@ export function MobileNav({
         <SheetTitle className="sr-only">{label}</SheetTitle>
         <nav aria-label={label} className="flex flex-col gap-1">
           <div className="mb-4 flex items-center">
-            <ProductMark id={product.id} name={product.name} pack={product.pack} size="md" />
+            <ProductMark
+              id={product.id}
+              name={product.name}
+              pack={product.pack}
+              mark={product.mark}
+              size="md"
+            />
           </div>
           {links.map((entry) =>
             'children' in entry ? (

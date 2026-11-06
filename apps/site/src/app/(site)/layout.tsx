@@ -5,6 +5,7 @@ import { PrismThemeScript } from '@nanisoft/prism-ui/provider'
 import { themeAttributes } from '@nanisoft/prism-ui/theming'
 
 import { SiteBar } from '@/components/site-bar'
+import { PrismLogo } from '@/components/logo'
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site'
 import { DEFAULT_MODE, DEFAULT_PACK } from '@/lib/bar'
 import { SECTIONS } from '@/lib/sections'
@@ -366,12 +367,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           carried are now the word under the mark, through the Block's `about`
           slot, and the legal line states the two facts the brand policy already
           states in prose: the holder of the copyright and the licence on the
-          packages. Nothing else is claimed, and the mark is the spectrum mark
-          for the same reason the bar's is: ground violet, mark spectrum.
+          packages. Nothing else is claimed. The mark used to be the spectrum
+          disc, and it is the drawn beam-and-refraction now: the lockup carries
+          the site's own drawing, which is what the bar's lockup above draws.
         */}
         <SiteFooter
           className="mt-auto"
-          product={{ id: 'prism', name: 'Prism' }}
+          /*
+            The same drawing the bar's lockup carries, at the footer's own size:
+            the mark is the site's data now, so the bar and the foot draw one
+            sign rather than a disc above and a drawing below.
+          */
+          product={{
+            id: 'prism',
+            name: 'Prism',
+            mark: <PrismLogo className="block size-full" />,
+          }}
           about={
             <>
               {/*

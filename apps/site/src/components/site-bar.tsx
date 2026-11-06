@@ -5,6 +5,7 @@ import { SiteNavbar } from '@nanisoft/prism-ui/blocks/site-navbar'
 import { CtaLink } from '@nanisoft/prism-ui/components/cta-link'
 
 import { COPY, DEFAULT_MODE, DEFAULT_PACK, NAV, SITES } from '@/lib/bar'
+import { PrismLogo } from '@/components/logo'
 
 /**
  * The site bar, and the one reason this file exists.
@@ -36,7 +37,19 @@ export function SiteBar() {
 
   return (
     <SiteNavbar
-      product={{ id: 'prism', name: 'Prism' }}
+      /*
+        The lockup is the mark this site gave itself, drawn as the drawing
+        rather than as the spectrum disc: the beam and the refraction the
+        landing's panel already draws, now at the size the row's mark is drawn
+        at. The drawing fills the slot with the site's own utilities, which is
+        the consumer's half of the contract: a viewBox drawing that fills its
+        box arrives at every drawn size from one node.
+      */
+      product={{
+        id: 'prism',
+        name: 'Prism',
+        mark: <PrismLogo className="block size-full" />,
+      }}
       defaultPack={DEFAULT_PACK}
       defaultMode={DEFAULT_MODE}
       navLabel={COPY.nav}

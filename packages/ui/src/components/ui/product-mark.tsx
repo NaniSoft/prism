@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 import type { PackId } from '../../theming'
 
 import { cn } from '../../lib/utils'
@@ -51,10 +53,11 @@ export type ProductMarkSize = keyof typeof SIZES
  * The props a ProductMark takes.
  *
  * There is no product directory in this package. A product's identity is the
- * consumer's data, so the Component takes the three facts the mark is drawn
- * from and owns none of them: `id` for the markup, `name` for the second part,
- * and `pack` for the hue. Where the set of products is published is the
- * consumer's decision, and Prism ships the mark rather than a list of products.
+ * consumer's data, so the Component takes the facts the mark is drawn from and
+ * owns none of them: `id` for the markup, `name` for the second part, `pack`
+ * for the hue, and `mark` for the drawing itself when the identity has one.
+ * Where the set of products is published is the consumer's decision, and Prism
+ * ships the mark rather than a list of products.
  */
 export type ProductMarkProps = {
   /**
@@ -83,6 +86,21 @@ export type ProductMarkProps = {
    */
   pack?: PackId | null
   /**
+   * The product's drawn mark, when its identity includes one: the logo in
+   * place of the disc. The node is the consumer's drawing and this Component
+   * owns none of it, exactly as it owns none of the name; it is drawn inside
+   * the sized slot the disc occupies, so a `viewBox` drawing that fills its
+   * box arrives at every drawn size from one node. Ink strokes drawn in
+   * `currentColor` and accents drawn through a token class keep the drawing
+   * reachable by the cascade and by a pack boundary the same way the disc is.
+   *
+   * The drawing is hidden from assistive technology, as the disc is: the name
+   * is the mark's announced half either way. Omit it for the two-colour disc,
+   * which remains the mark of a product whose identity is a hue rather than a
+   * drawing.
+   */
+  mark?: ReactNode
+  /**
    * Which of the three drawn sizes to use. @defaultValue 'md'
    */
   size?: ProductMarkSize
@@ -95,8 +113,10 @@ export type ProductMarkProps = {
 }
 
 /**
- * A product's two-part colour mark: a hairline ring in the brand ink around a
- * core in the pack's own fill, beside the product's name in the brand ink.
+ * A product's two-part mark: the shape, beside the product's name in the brand
+ * ink. The shape is a disc by default, a hairline ring in the brand ink around
+ * a core in the pack's own fill, and it is the product's own drawing when
+ * `mark` carries one.
  *
  * Two parts, and both colours come from tokens, which is the whole reason this
  * is promoted out of the two hand-written copies it replaces. The ring is
@@ -130,7 +150,7 @@ export type ProductMarkProps = {
  * The disc is `aria-hidden` and the name is not, so the mark adds a shape beside
  * the word rather than a second reading of it.
  */
-function ProductMark({ id, name, pack, size = 'md', className }: ProductMarkProps) {
+function ProductMark({ id, name, pack, mark, size = 'md', className }: ProductMarkProps) {
   const drawn = SIZES[size]
   // `default` is the absence of a pack id, spelled the way the token build
   // spells it, so a base-pack product resolves `primary` from the page rather
@@ -142,16 +162,27 @@ function ProductMark({ id, name, pack, size = 'md', className }: ProductMarkProp
       data-pack={boundary}
       className={cn('inline-flex items-center gap-2', className)}
     >
-      <span
-        data-slot="product-mark-disc"
-        data-product={id}
-        aria-hidden
-        className={cn(
-          'inline-block shrink-0 rounded-full border border-brand-ink',
-          drawn.mark,
-          pack ? 'bg-primary' : SPECTRUM,
-        )}
-      />
+      {mark ? (
+        <span
+          data-slot="product-mark-drawn"
+          data-product={id}
+          aria-hidden
+          className={cn('inline-block shrink-0', drawn.mark)}
+        >
+          {mark}
+        </span>
+      ) : (
+        <span
+          data-slot="product-mark-disc"
+          data-product={id}
+          aria-hidden
+          className={cn(
+            'inline-block shrink-0 rounded-full border border-brand-ink',
+            drawn.mark,
+            pack ? 'bg-primary' : SPECTRUM,
+          )}
+        />
+      )}
       <span data-slot="product-mark-name" className={cn('font-medium text-brand-ink', drawn.name)}>
         {name}
       </span>

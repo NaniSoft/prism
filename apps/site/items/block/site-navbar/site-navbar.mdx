@@ -36,7 +36,12 @@ none.
 import { SiteNavbar } from '@nanisoft/prism-ui/blocks/site-navbar'
 
 <SiteNavbar
-  product={{ id: 'nexus', name: 'Nexus', pack: 'lavender' }}
+  product={{
+    id: 'nexus',
+    name: 'Nexus',
+    pack: 'lavender',
+    mark: <NexusLogo className="site-product-mark" />,
+  }}
   defaultPack="lavender"
   defaultMode="dark"
   navLabel="Site"
@@ -69,6 +74,11 @@ import { SiteNavbar } from '@nanisoft/prism-ui/blocks/site-navbar'
 ```
 
 <ComponentDemo slug="site-navbar" />
+
+The lockup is the product's `ProductMark`, and `mark` carries the product's
+drawn logo when it has one: the drawing replaces the disc in the row and in the
+mobile panel, and the name beside it is unchanged. Omit it and the lockup is
+the two-colour disc.
 
 ## Guidelines
 

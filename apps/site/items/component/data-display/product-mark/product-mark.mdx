@@ -5,9 +5,11 @@ title: ProductMark
 
 ## Overview
 
-A ProductMark is a product's two-part colour mark: a ring in the brand ink around
-a core in the product's own pack fill, beside the product's name in the same
-brand ink. It is a server component and ships no client code.
+A ProductMark is a product's two-part mark: the shape, beside the product's name
+in the same brand ink. The shape is a disc by default, a ring in the brand ink
+around a core in the product's own pack fill, and it is the product's own
+drawing when `mark` carries one. It is a server component and ships no client
+code.
 
 The mark is promoted to a component because a product row and a product switcher
 both need it, and two hand-written copies is the arrangement this design system
@@ -27,7 +29,9 @@ no `pack` is drawn as a conic sweep of all five chart steps. A colourless mark
 would take the reading page's accent and change per site, so a product with no
 single colour would be a different colour on every site that listed it. The one
 entry with no pack is the company root, and the spectrum says so once rather
-than five times.
+than five times. A product with a drawn `mark` sidesteps the question: its
+shape is the identity, and the spectrum disc is what a product without a
+drawing falls back to.
 
 ## Usage
 
@@ -67,6 +71,13 @@ instead, which is the axis the mark actually reads.
 
 Do not hand-write a second mark. If a surface needs a mark this component does
 not cover, extend this one.
+
+Pass the product's drawn logo through `mark` when it has one. The node is drawn
+inside the sized slot the disc occupies, so it should be a `viewBox` drawing
+that fills its box; ink strokes in `currentColor` and accents through a token
+class keep the drawing reachable by the cascade and by a pack boundary, the
+same way the disc is. The drawing is `aria-hidden`, as the disc is: the name
+beside it is the announced half either way.
 
 ### Best practices
 
