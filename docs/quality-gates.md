@@ -1,4 +1,4 @@
-# Quality gates A–L: which program holds which law
+# Quality gates A-L: which program holds which law
 
 Every Mission §10 gate is a program under `packages/ui/scripts/` or
 `packages/tokens/scripts/`, run by `pnpm check` and proved by a test with a
@@ -22,12 +22,12 @@ themselves are its failure messages.
 
 ## Where the tests are
 
-- `packages/ui/test/asset-gates.test.tsx` — Gates C/D/E positive and negative fixtures
-- `packages/ui/test/compliance-gates.test.tsx` — Token-compliance, stylesheet-budget and asset-integrity failures proved, plus clean passes over the real tree
-- `packages/ui/test/ds-assets.test.tsx` — DS behaviours (ratios, registry, sizes, video captions, matrix arithmetic)
-- `packages/ui/test/ds-matrix.test.tsx` — Gates F/G/H over the DS layer (16 combinations, grid narrowing, axe)
-- `packages/ui/test/a11y.test.tsx`, `interaction.test.tsx`, `provider.test.tsx`, `theme-resolution-gate.test.tsx` — axe, keyboard, theme truth
-- `scripts/__tests__/check-*.test.mjs` — tokens gates (motion, elevation, heading, block-controls), gate-kit and contrast/determinism proofs
+- `packages/ui/test/asset-gates.test.tsx`: Gates C/D/E positive and negative fixtures
+- `packages/ui/test/compliance-gates.test.tsx`: Token-compliance, stylesheet-budget and asset-integrity failures proved, plus clean passes over the real tree
+- `packages/ui/test/ds-assets.test.tsx`: DS behaviours (ratios, registry, sizes, video captions, matrix arithmetic)
+- `packages/ui/test/ds-matrix.test.tsx`: Gates F/G/H over the DS layer (16 combinations, grid narrowing, axe)
+- `packages/ui/test/a11y.test.tsx`, `interaction.test.tsx`, `provider.test.tsx`, `theme-resolution-gate.test.tsx`: axe, keyboard, theme truth
+- `scripts/__tests__/check-*.test.mjs`: tokens gates (motion, elevation, heading, block-controls), gate-kit and contrast/determinism proofs
 
 ## What is not gated yet
 

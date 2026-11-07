@@ -114,28 +114,30 @@ describe('the breakpoint-variant gate', () => {
     expect(result.stdout).toMatch(/[1-9]\d* responsive variant\(s\) judged/)
     // Both halves of the authority are named on the line, so a reader can tell
     // which set of screens the run held the classes to without reading the file.
-    expect(result.stdout).toContain('layout.tokens.json: lg, md, sm')
-    expect(result.stdout).toContain("closed with `initial` by packages/tokens/build/build.mjs: 2xl, xl")
+    expect(result.stdout).toContain('layout.tokens.json: lg, md, sm, xl')
+    expect(result.stdout).toContain(
+      'closed with `initial` by packages/tokens/build/build.mjs: 2xl; emitted: lg, md, sm, xl',
+    )
     expect(result.stdout).toContain('every responsive variant read names a screen the token package emits')
   })
 
-  it('fails the exact class the shipped DocsShell frame carried', () => {
+  it('passes the class the shipped DocsShell frame once carried, because the theme now emits `xl`', () => {
+    // The class below is the exact string the DocsShell frame shipped before
+    // the fix, and it compiled to no media query because the theme then closed
+    // `xl` with `initial`. `xl` now emits `--breakpoint-xl: 90rem`, so the same
+    // string passes, and the class that stayed dead is the one naming `2xl`,
+    // the last screen the build closes.
     const result = stage(
       underTest('lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] xl:grid-cols-[15rem_minmax(0,1fr)_13rem]'),
     )
 
-    expect(result.status).toBe(1)
-    expect(result.stderr).toMatch(
-      /error packages\/ui\/src\/components\/ui\/under-test\.tsx:\d+ {2}`xl:grid-cols-\[15rem_minmax\(0,1fr\)_13rem\]` names the screen `xl`/,
-    )
-    expect(result.stderr).toContain('the token build closes `xl` with `--breakpoint-xl: initial`')
-    expect(result.stderr).toContain('Screens this repository emits: lg, md, sm')
-    expect(result.stdout).toMatch(/1 finding\(s\)/)
+    expect(result.stderr).toBe('')
+    expect(result.status).toBe(0)
   })
 
   const closed = [
     ['a 2xl class', '2xl:grid-cols-3'],
-    ['a max-xl ranged class', 'max-xl:gap-4'],
+    ['a max-2xl ranged class', 'max-2xl:gap-4'],
     ['a min-2xl ranged class', 'min-2xl:flex-row'],
   ] as const
 
@@ -163,8 +165,10 @@ describe('the breakpoint-variant gate', () => {
 
   const emitted = [
     'lg:grid-cols-3',
+    'xl:grid-cols-[15rem_minmax(0,1fr)_13rem]',
     'sm:px-6 md:py-10 lg:px-8',
     'min-lg:flex-row max-md:flex-col',
+    'min-xl:grid-cols-3 max-xl:flex-col',
     'hover:underline focus-visible:ring-4 dark:bg-muted',
     'group-hover:underline peer-checked:text-foreground',
     'odd:border-t even:border-b first:ps-3 ltr:text-start rtl:text-end',
@@ -312,7 +316,8 @@ describe('the shipped DocsShell frame', () => {
       .slice(at, at + 1400)
       .replace(/^\s*\/\/ ?/gm, '')
       .replace(/\s+/g, ' ')
-    expect(frame).toContain('the emitted theme closes `xl` with `initial`')
+    expect(frame).toContain('closed `xl` with `initial`')
+    expect(frame).toContain('`xl` is now a 90rem screen')
     expect(frame).toContain('check-breakpoint-variants.mjs')
   })
 

@@ -59,7 +59,7 @@
   
   `test/ds-matrix.test.tsx` extends the theme matrix (Gates F/G/H) over the governed layer: all nine `DS*` components render under all 16 pack×mode combinations, grid narrowing below `sm` is asserted, and axe runs over them. `test/compliance-gates.test.tsx` proves each new gate fails loudly with a staged defect and prints what it read otherwise.
   
-  `docs/quality-gates.md` is the A–L map to the program that holds each law.
+  `docs/quality-gates.md` is the A-L map to the program that holds each law.
 - Add the reference consumer that certifies every release
   
   `apps/reference-consumer` is the zero-CSS consumer: one import of
