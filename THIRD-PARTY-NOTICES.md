@@ -26,6 +26,7 @@ package or repository.
 | `tailwind-merge` | `@nanisoft/prism-ui` (internal class composition) | MIT |
 | `lucide-react` | `@nanisoft/prism-ui` and the site (icons) | ISC, copyright the Lucide contributors, with portions copyright Cole Bemis 2013 to 2023 as part of Feather (MIT) |
 | `tailwindcss` | `@nanisoft/prism-ui` and the site (internal build dependency) | MIT, copyright Tailwind Labs, Inc. |
+| `@tsparticles/react`, `@tsparticles/engine`, `@tsparticles/slim` | `@nanisoft/prism-ui` (`TsparticlesField`) | MIT, copyright Matteo Bruni and contributors |
 
 Tailwind 4 is not a consumer dependency. It runs only in Prism's build, and its
 compiled output is part of the component package's precompiled `styles.css`.

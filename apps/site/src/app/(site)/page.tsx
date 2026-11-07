@@ -12,11 +12,12 @@ import { MediaBand01 } from '@nanisoft/prism-ui/blocks/media-band-01'
 import { ProductGrid01 } from '@nanisoft/prism-ui/blocks/product-grid-01'
 import { AvatarGroup } from '@nanisoft/prism-ui/components/avatar-group'
 import { AuroraWash } from '@nanisoft/prism-ui/components/aurora-wash'
+import { HeaderTransparency } from '@nanisoft/prism-ui/components/header-transparency'
+import { TsparticlesField } from '@nanisoft/prism-ui/components/tsparticles-field'
 import { Badge } from '@nanisoft/prism-ui/components/badge'
 import { Input } from '@nanisoft/prism-ui/components/input'
 import { Label } from '@nanisoft/prism-ui/components/label'
 import { MiniCalendar } from '@nanisoft/prism-ui/components/mini-calendar'
-import { ParticleField } from '@nanisoft/prism-ui/components/particle-field'
 import { Reveal } from '@nanisoft/prism-ui/components/reveal'
 import { SignalField } from '@nanisoft/prism-ui/components/signal-field'
 import { Slider } from '@nanisoft/prism-ui/components/slider'
@@ -131,6 +132,17 @@ export default function HomePage() {
   return (
     <>
       {/*
+        The page's one continuous ground: light and a moving medium, fixed behind
+        every section so the whole page reads as one surface rather than as a hero
+        and a set of separate bands. `aria-hidden` because a medium is not
+        information.
+      */}
+      <div aria-hidden className="site-atmosphere">
+        <AuroraWash />
+        <TsparticlesField />
+      </div>
+      <HeaderTransparency />
+      {/*
         The hero carries the page's one authored moment and no arrival: its entry
         is the page's entry, and the page does not introduce itself twice. The
         ground is the claim, a lit surface with a medium moving through it, and
@@ -152,12 +164,6 @@ export default function HomePage() {
           { label: 'Browse components', href: '/components', variant: 'outline' },
         ]}
         instrument={<SpecimenBoard values={SPARK_VALUES} />}
-        backdrop={
-          <>
-            <AuroraWash />
-            <ParticleField count={48} />
-          </>
-        }
       />
 
       {/*

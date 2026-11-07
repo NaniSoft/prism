@@ -1,0 +1,50 @@
+---
+slug: components/header-transparency
+title: HeaderTransparency
+---
+
+## Overview
+
+HeaderTransparency is the scroll state that makes a page bar invisible at the
+top of the page and translucent below it. Rendered once, it writes two
+attributes and nothing else: `data-header="transparent"` on the document, so the
+stylesheet knows the page wants a transparent bar, and `data-scrolled` on the
+bar itself once the reader is past twelve pixels of scroll.
+
+The transparency itself is CSS, in the package stylesheet, keyed on those two
+attributes: at the top the bar carries no surface and no hairline, so the brand
+and the navigation are bare text over the page's ground, and below it the bar
+gains a translucent, frosted surface and its hairline, so content passing beneath
+it never reads as if it runs into the labels.
+
+## Usage
+
+```tsx
+import { HeaderTransparency } from '@nanisoft/prism-ui/components/header-transparency'
+
+<HeaderTransparency />
+```
+
+<ComponentDemo slug="header-transparency" />
+
+## Guidelines
+
+### When to use
+
+Use it on a page whose first screen is a hero that fills the viewport, where the
+bar would otherwise draw an opaque band over the page's own ground. The bar
+keeps its own opaque surface wherever this component is not rendered, so the
+about, docs and blog pages of a site are untouched by it.
+
+### When not to use
+
+Do not use it on a page that has no tall first screen: a bar that is transparent
+over a paragraph is a bar whose labels have nothing behind them. And do not
+render it twice on one page.
+
+### Best practices
+
+- Render one, above or beside the bar it describes, and let the stylesheet carry
+  the look.
+- Leave it under reduced motion. The change of state is not a movement, so the
+  package's universal rule makes it an instant one rather than removing it.

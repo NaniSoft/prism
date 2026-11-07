@@ -31,3 +31,6 @@ allowBuilds:
   # job is report-only (ticket 15 Q11) and its browsers are installed by the CI
   # job rather than at `pnpm install`, so the download is skipped here.
   playwright: false
+  # tsParticles' install script only prints a funding message; the engine needs
+  # no postinstall to run, so it is denied like core-js-pure below.
+  '@tsparticles/engine': false

@@ -1,5 +1,36 @@
 # @nanisoft/prism-ui
 
+## 1.6.0
+
+### Minor Changes
+
+- Add three Components and unify the marketing surface behind them.
+  
+  `TsparticlesField` is a living field whose links reach out to the reader's
+  pointer: a connected network drawn by the tsParticles slim bundle over a complete
+  static floor, inked by the page's own foreground tokens and disarmed under
+  `prefers-reduced-motion`. It is the pointer-answering form of `ParticleField`,
+  and the only place this package carries a particle engine.
+  
+  `HeaderTransparency` is the scroll state that makes the bar transparent at the
+  top of a page and translucent below it. It renders nothing and writes two
+  attributes, and the package stylesheet keyed on those attributes carries the
+  transparency. The same stylesheet now also carries the raised, centred brand
+  lockup, the continuous fixed page ground, and the footer that sits on it, so a
+  consumer that composes `SiteNavbar` and `SiteFooter` gets the treatment with no
+  stylesheet of its own.
+  
+  `ProductMarks` is the five NaniSoft family marks as drawn components, for
+  `ProductMark`'s `mark` slot, so a consumer listing the family draws each member's
+  own logo rather than a two-colour disc.
+  
+  `SwitcherProduct` and `ProductGrid01Product` now carry the optional `mark`, and
+  `ProductGrid01`'s `title` is a `ReactNode` so a caller can carry the spectrum ink
+  into a section title. The shared marketing CSS is also folded into the emitted
+  stylesheet: the header proportions, the scroll-transparency rules, and the
+  transparent footer and manifesto band now live in one stylesheet every consumer
+  imports once.
+
 ## 1.5.0
 
 ### Minor Changes

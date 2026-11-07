@@ -94,7 +94,7 @@ export function SitesMenu({ sites, currentId, label }: SitesMenuProps) {
                   />
                 }
               >
-                <ProductMark id={site.id} name={site.name} pack={site.pack} size="sm" />
+                <ProductMark id={site.id} name={site.name} pack={site.pack} mark={site.mark} size="sm" />
               </DropdownMenuItem>
             )
           })}

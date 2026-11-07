@@ -1,0 +1,58 @@
+---
+slug: components/tsparticles-field
+title: TsparticlesField
+---
+
+## Overview
+
+TsparticlesField is a living field whose links reach out to the reader's pointer:
+a connected network drawn by tsParticles over a complete static floor. Where
+`ParticleField` drifts on the ambient cycle and answers the pointer with a quiet
+repulsion, this one puts the reader's cursor inside the medium, and the network
+grabs toward it.
+
+The floor is the contract, and the engine only ever adds the motion. The static
+field is rendered on the server, so a reader with scripting off, a crawler, a
+print stylesheet, or a reader who asked the platform for less motion meets a
+complete figure at rest rather than an empty rectangle.
+
+## Usage
+
+```tsx
+import { TsparticlesField } from '@nanisoft/prism-ui/components/tsparticles-field'
+
+<div className="relative overflow-hidden">
+  <TsparticlesField className="absolute inset-0" />
+  <div className="relative">{children}</div>
+</div>
+```
+
+<ComponentDemo slug="tsparticles-field" />
+
+## Guidelines
+
+### When to use
+
+Use it where a page wants the medium to answer the cursor, for example a hero
+that says the reader can reach into the system. The links are what make it a
+medium rather than dust, so size `linkDistance` to the band.
+
+It composes behind type rather than beside it, as a ground, exactly as
+`ParticleField` does, and it pairs with `AuroraWash` when the claim is light
+moving through the medium as well as across it.
+
+### When not to use
+
+Do not use it behind a reading passage, and do not use it to say something: it
+is `aria-hidden` because a medium is not information.
+
+Do not stack two media on one page, and do not load the engine where a still
+figure would do. The bundle is the one real cost this component carries; a page
+that only needs a ground should use `SignalField` or `ParticleField` instead.
+
+### Best practices
+
+- Keep the count in the dozens and the link distance near 150 pixels: a denser
+  field is a haze, and the clamp will not save a composition that wanted fog.
+- Trust the floor. The engine arms over markup that already is the figure, so
+  the component never renders nothing until a script runs.

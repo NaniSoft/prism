@@ -1,0 +1,48 @@
+---
+slug: components/product-marks
+title: ProductMarks
+---
+
+## Overview
+
+ProductMarks is the five NaniSoft family marks as drawn components: `NaniSoftMark`,
+`NexusMark`, `AtlasMark`, `AlphaLensMark` and `PrismMark`. Each is the member's own
+logo, held in step with the drawing that member's own site draws in its bar.
+
+A consumer that lists the family, in a header menu, a product band, or a switcher,
+composes these into `ProductMark`'s `mark` slot rather than copying a drawing, so
+a reader meets one sign wherever a member appears and never a two-colour disc where
+a logo belongs. Every drawing follows the family grammar: ink strokes in
+`currentColor` and accents through the token classes the package stylesheet
+declares, so the pack boundary `ProductMark` carries repaints the accent without
+touching the drawing.
+
+## Usage
+
+```tsx
+import { ProductMark } from '@nanisoft/prism-ui/components/product-mark'
+import { AtlasMark } from '@nanisoft/prism-ui/components/product-marks'
+
+<ProductMark id="atlas" name="Atlas" pack="mint" mark={<AtlasMark className="site-product-mark" />} />
+```
+
+<ComponentDemo slug="product-marks" />
+
+## Guidelines
+
+### When to use
+
+Use them wherever a page names a member of the NaniSoft family and that member has
+a drawing of its own: the sites menu, a product row, a switcher. The drawing
+arrives at every size `ProductMark` draws, so one node serves the bar, the menu
+and the footer alike.
+
+### When not to use
+
+Do not use a second copy of a drawing. The marks exist here so that a drawing
+stays one drawing; a copy in a consumer repository is a family portrait with one
+wrong face waiting to happen.
+
+Do not reach for them for a product whose identity is a hue rather than a
+drawing. That product omits `mark` and is drawn as the two-colour disc, which is
+the mark of a product whose identity is a colour.

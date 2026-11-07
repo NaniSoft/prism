@@ -219,8 +219,21 @@ const WORK_PARENT = path.join(PKG, '.turbo')
  * next batch of client work would breach the figure and that it would be answered
  * by moving it; that is what happened, and the honest thing is to say so rather
  * than to trim the surface to fit a number.
+ *
+ * ### 320 to 384, 2026-11, and the first third-party engine
+ *
+ * `TsparticlesField` carries the tsParticles engine and slim bundle, 49.5 KB of it.
+ * Unlike every previous addition, which mostly reused a dependency the bundle
+ * already carried, this one is a dependency the bundle did not carry at all, so
+ * the deduplicated figure moved by the engine's own weight rather than by a
+ * margin over it: 307.4 KB to 356.9 KB. The ceiling moves to 384, about eight
+ * percent of headroom over the measurement, which is the same bought headroom
+ * this comment has recorded for every previous move. A consumer who never renders
+ * this field never receives those bytes: the gate measures the tree, not any
+ * consumer's page, and the number it gates is a statement about the catalogue
+ * rather than about a page a reader downloads.
  */
-const CEILING = 320 * 1024
+const CEILING = 384 * 1024
 
 /**
  * Ticket 19 section 5, in KB: the Components, and their per-item budgets.
@@ -266,6 +279,19 @@ const BUDGETS = {
    * markup and cost the client nothing.
    */
   'particle-field': 6,
+  /**
+   * The pointer-grab field, which carries the tsParticles engine and slim bundle.
+   * Its weight is the engine's rather than the component's, and it is the only
+   * row here that prices a third-party particle library. The server-rendered
+   * floor it stands on costs the client nothing.
+   */
+  'tsparticles-field': 50,
+  /**
+   * One scroll listener and two attribute writes. Priced at 1 like
+   * `platform-modifier-key`, because a component whose whole job is a hook
+   * looks free and then grows a second copy of its own.
+   */
+  'header-transparency': 1,
   avatar: 3,
   calendar: 14,
   carousel: 12,

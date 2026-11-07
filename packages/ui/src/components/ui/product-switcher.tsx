@@ -27,6 +27,12 @@ export type SwitcherProduct = {
    */
   pack?: ProductMarkProps['pack']
   /**
+   * The product's drawn mark, when its identity includes one: the logo in place
+   * of the two-colour disc. Omit it and the disc is drawn, which is the mark of a
+   * product whose identity is a hue rather than a drawing.
+   */
+  mark?: ProductMarkProps['mark']
+  /**
    * Where the member goes. Required, because a switcher whose members do not go
    * anywhere is a list of labels.
    */
@@ -146,6 +152,7 @@ function ProductSwitcher({
               id={product.id}
               name={product.name}
               pack={product.pack}
+              mark={product.mark}
               size={size}
             />
           </a>

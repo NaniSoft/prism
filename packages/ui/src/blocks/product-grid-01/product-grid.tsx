@@ -1,6 +1,7 @@
+import type { ReactNode } from 'react'
+
 import { ProductMark, type ProductMarkProps } from '../../components/ui/product-mark'
 import { Section, SectionHeading, type HeadingLevel } from '../../components/ui/section'
-
 /**
  * One product in the grid, as the row draws it.
  *
@@ -26,6 +27,12 @@ export type ProductGrid01Product = {
    * wears the full spectrum rather than a colourless mark.
    */
   pack?: ProductMarkProps['pack']
+  /**
+   * The product's drawn mark, when its identity includes one: the logo in place
+   * of the two-colour disc. Omit it and the disc is drawn, which is the mark of a
+   * product whose identity is a hue rather than a drawing.
+   */
+  mark?: ProductMarkProps['mark']
   /** One line about what the product is. */
   tagline: string
   /**
@@ -70,8 +77,13 @@ export type ProductGrid01Product = {
 export type ProductGrid01Props = {
   /** Optional label above the section title. See the No-Default-Eyebrow Rule. */
   eyebrow?: string
-  /** The section title. Omit it for a grid composed under its own heading. */
-  title?: string
+  /**
+   * The section title. A node rather than a string, so a caller can carry the
+   * design system's own text treatment (such as spectrum ink on a phrase) into
+   * the title rather than being limited to a plain string. Omit it for a grid
+   * composed under its own heading.
+   */
+  title?: ReactNode
   /** One or two sentences under the title. */
   description?: string
   /**
@@ -177,7 +189,7 @@ export function ProductGrid01({
               className="hover:bg-accent/50 focus-visible:ring-ring flex flex-col gap-1 px-2 py-4 transition-colors duration-fast ease-out sm:flex-row sm:items-baseline sm:gap-6 focus-visible:ring-[3px] focus-visible:outline-none"
             >
               <span className="flex shrink-0 items-center sm:w-64">
-                <ProductMark id={product.id} name={product.name} pack={product.pack} size="md" />
+                <ProductMark id={product.id} name={product.name} pack={product.pack} mark={product.mark} size="md" />
               </span>
               <span className="flex min-w-0 flex-col gap-0.5">
                 <span className="text-muted-foreground text-pretty text-sm">{product.tagline}</span>

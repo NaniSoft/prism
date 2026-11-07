@@ -1071,6 +1071,28 @@
       ]
     },
     {
+      "name": "header-transparency",
+      "title": "Header-transparency",
+      "description": "Shared header-transparency primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/header-transparency.tsx",
+          "type": "registry:component",
+          "target": "components/ui/header-transparency.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "hover-card",
       "title": "Hover-card",
       "description": "Shared hover-card primitive. Installed automatically as a dependency of any block that uses it.",
@@ -1923,6 +1945,28 @@
           "path": "src/components/ui/product-mark.tsx",
           "type": "registry:component",
           "target": "components/ui/product-mark.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "product-marks",
+      "title": "Product-marks",
+      "description": "Shared product-marks primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/product-marks.tsx",
+          "type": "registry:component",
+          "target": "components/ui/product-marks.tsx"
         },
         {
           "path": "src/lib/utils.ts",
@@ -3006,6 +3050,31 @@
           "path": "src/components/ui/tree.tsx",
           "type": "registry:component",
           "target": "components/ui/tree.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "tsparticles-field",
+      "title": "Tsparticles-field",
+      "description": "Shared tsparticles-field primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "@tsparticles/engine",
+        "@tsparticles/react",
+        "@tsparticles/slim",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/tsparticles-field.tsx",
+          "type": "registry:component",
+          "target": "components/ui/tsparticles-field.tsx"
         },
         {
           "path": "src/lib/utils.ts",

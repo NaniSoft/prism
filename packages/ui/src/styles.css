@@ -812,3 +812,132 @@
   }
 }
 
+/* ------------------------------------------------------------------ *
+ * The marketing surface
+ *
+ * The shared visual treatment the five NaniSoft sites wear on their landing
+ * pages: a raised brand lockup in the bar, a transparent bar that turns
+ * translucent on scroll, one continuous fixed ground behind every section, and a
+ * footer that sits on that ground rather than on a surface of its own. These
+ * rules key on the slots the Blocks publish, so a site composes the blocks and
+ * gets this treatment with no stylesheet of its own.
+ * ------------------------------------------------------------------ */
+
+/* The family marks' accents: each mark reads the pack its own boundary carries.
+   Kept here so the drawing a site passes into `ProductMark`'s `mark` slot
+   resolves its accents from the package rather than from the site's own sheet. */
+.prism-mark__ray-1 {
+  stroke: var(--chart-1);
+}
+
+.prism-mark__ray-2 {
+  stroke: var(--chart-2);
+}
+
+.prism-mark__ray-3 {
+  stroke: var(--chart-3);
+}
+
+.prism-mark__accent {
+  fill: var(--primary);
+}
+
+.prism-mark__accent-stroke {
+  stroke: var(--primary);
+}
+
+.prism-mark__point {
+  fill: var(--brand-ink);
+}
+
+/* The page's content column is a stacking context, so the fixed ground behind it
+   can sit at `z-index: -1` and paint above the body's background. */
+.site-main {
+  position: relative;
+  z-index: 1;
+}
+
+/* The bar's brand lockup: raised to the mark's largest size, centred as a unit
+   rather than sitting on the anchor's own text baseline. */
+[data-slot='site-navbar'] > div {
+  gap: var(--spacing-5);
+}
+
+[data-slot='site-navbar'] > div > a {
+  display: flex;
+  align-items: center;
+}
+
+[data-slot='site-navbar'] > div > a [data-slot='product-mark-drawn'] {
+  width: var(--spacing-6);
+  height: var(--spacing-6);
+}
+
+[data-slot='site-navbar'] > div > a [data-slot='product-mark-name'] {
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* The bar's transparency: invisible on the first screen, translucent once the
+   reader scrolls. The two attributes are written by `HeaderTransparency`, which
+   the landing renders; other pages keep the bar's own opaque surface. */
+[data-header='transparent'] [data-slot='site-navbar'] {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+[data-header='transparent'] [data-slot='site-navbar']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: transparent;
+}
+
+[data-header='transparent'] [data-slot='site-navbar'][data-scrolled]::before {
+  background-color: rgb(from var(--background) r g b / 0.72);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+[data-header='transparent'] [data-slot='site-navbar'][data-scrolled] {
+  border-color: var(--border);
+}
+
+/* One continuous ground behind every section, fixed so it stays put while the
+   sections scroll over it. */
+.site-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* The manifesto band's copy stands on the ground, not on a muted slab. */
+.site-media-band {
+  background-color: transparent;
+}
+
+/* The footer is part of the same ground as the rest of the page. */
+[data-slot='site-footer'] {
+  position: relative;
+  z-index: 1;
+  background-color: transparent;
+}
+
+.site-footer-tagline {
+  margin: 0;
+  color: var(--foreground);
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+}
+
+[data-slot='site-footer'] > div > div:last-child {
+  border-top: 1px solid var(--border);
+  padding-top: var(--spacing-6);
+}
+
+

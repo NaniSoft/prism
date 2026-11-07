@@ -580,6 +580,39 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'TsparticlesField',
+    slug: 'tsparticles-field',
+    kind: 'component',
+    category: 'Data display',
+    description:
+      'A living field whose links reach out to the pointer: a connected network drawn by tsParticles over a complete static floor.',
+    source: 'src/components/ui/tsparticles-field.tsx',
+    exports: ['TsparticlesField'],
+    status: 'stable',
+  },
+  {
+    name: 'HeaderTransparency',
+    slug: 'header-transparency',
+    kind: 'component',
+    category: 'Layout',
+    description:
+      'The scroll state that makes the bar transparent at the top of a page and translucent below it.',
+    source: 'src/components/ui/header-transparency.tsx',
+    exports: ['HeaderTransparency'],
+    status: 'stable',
+  },
+  {
+    name: 'ProductMarks',
+    slug: 'product-marks',
+    kind: 'component',
+    category: 'Data display',
+    description:
+      'The five NaniSoft family marks as drawn components, for ProductMark\'s mark slot.',
+    source: 'src/components/ui/product-marks.tsx',
+    exports: ['NaniSoftMark', 'NexusMark', 'AtlasMark', 'AlphaLensMark', 'PrismMark'],
+    status: 'stable',
+  },
+  {
     name: 'AuroraWash',
     slug: 'aurora-wash',
     kind: 'component',
