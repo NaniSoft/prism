@@ -188,10 +188,13 @@ function staticThemeDecls() {
   emitGroup('shadow')
 
   emitGroup('breakpoint')
-  // The authored breakpoint set is exhaustive: xl and 2xl are closed so an
-  // `xl:` utility cannot silently resolve to a value this repository never wrote.
-  push('--breakpoint-xl', 'initial')
+  // The authored breakpoint set is exhaustive: 2xl is closed so a
+  // `2xl:` utility cannot silently resolve to a value this repository never wrote.
   push('--breakpoint-2xl', 'initial')
+
+  emitGroup('aspect')
+  emitGroup('z')
+  emitGroup('media')
 
   /*
    * The whole Tailwind container namespace is closed, and this line is why two

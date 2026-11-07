@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.nanisoft.com/asset-manifest.schema.json",
+  "title": "Prism asset manifest",
+  "description": "Machine-readable registry of governed package assets. One entry per shipped file or derived mark. Consumers never author this file; it is emitted to dist/assets/manifest.json by the build.",
+  "type": "object",
+  "required": ["version", "budgetsKiB", "variants", "assets"],
+  "properties": {
+    "version": { "type": "integer", "const": 1 },
+    "budgetsKiB": {
+      "type": "object",
+      "required": ["icon", "illustration", "logo", "card", "banner", "hero", "thumbnail", "font"],
+      "properties": {
+        "icon": { "type": "number", "minimum": 1 },
+        "illustration": { "type": "number", "minimum": 1 },
+        "logo": { "type": "number", "minimum": 1 },
+        "card": { "type": "number", "minimum": 1 },
+        "banner": { "type": "number", "minimum": 1 },
+        "hero": { "type": "number", "minimum": 1 },
+        "thumbnail": { "type": "number", "minimum": 1 },
+        "font": { "type": "number", "minimum": 1 }
+      }
+    },
+    "variants": {
+      "type": "object",
+      "required": ["hero", "wide-hero", "banner", "card", "landscape-thumb", "square-thumb", "avatar", "product", "logo", "illustration", "icon"],
+      "properties": {
+        "hero": { "$ref": "#/$defs/variant" },
+        "wide-hero": { "$ref": "#/$defs/variant" },
+        "banner": { "$ref": "#/$defs/variant" },
+        "card": { "$ref": "#/$defs/variant" },
+        "landscape-thumb": { "$ref": "#/$defs/variant" },
+        "square-thumb": { "$ref": "#/$defs/variant" },
+        "avatar": { "$ref": "#/$defs/variant" },
+        "product": { "$ref": "#/$defs/variant" },
+        "logo": { "$ref": "#/$defs/variant" },
+        "illustration": { "$ref": "#/$defs/variant" },
+        "icon": { "$ref": "#/$defs/variant" }
+      }
+    },
+    "assets": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/asset" } }
+  },
+  "$defs": {
+    "variant": {
+      "type": "object",
+      "required": ["aspectRatio", "objectFit", "maxRendered"],
+      "properties": {
+        "aspectRatio": { "type": ["string", "null"], "pattern": "^\\d+ / \\d+$|^null$" },
+        "objectFit": { "enum": ["cover", "contain"] },
+        "maxRendered": {
+          "type": "object",
+          "required": ["widthPx", "heightPx"],
+          "properties": {
+            "widthPx": { "type": "number", "minimum": 1 },
+            "heightPx": { "type": "number", "minimum": 1 }
+          }
+        }
+      }
+    },
+    "asset": {
+      "type": "object",
+      "required": ["id", "path", "category", "format", "allowedVariants", "themeAware"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "path": { "type": "string" },
+        "category": { "enum": ["font", "image", "icon", "logo", "illustration", "video"] },
+        "format": { "enum": ["woff2", "png", "svg", "ico", "svg-component", "webp", "avif", "mp4", "webm"] },
+        "intrinsicWidth": { "type": ["number", "null"] },
+        "intrinsicHeight": { "type": ["number", "null"] },
+        "aspectRatio": { "type": ["string", "null"] },
+        "fileSizeBytes": { "type": ["number", "null"] },
+        "allowedVariants": { "type": "array", "items": { "type": "string" } },
+        "minSource": {
+          "type": ["object", "null"],
+          "properties": {
+            "widthPx": { "type": "number", "minimum": 1 },
+            "heightPx": { "type": "number", "minimum": 1 }
+          }
+        },
+        "maxRenderedWidthPx": { "type": ["number", "null"] },
+        "maxRenderedHeightPx": { "type": ["number", "null"] },
+        "devicePixelRatio": { "type": ["number", "null"] },
+        "themeAware": { "type": "boolean" },
+        "themeRestrictions": { "type": "array", "items": { "type": "string" } },
+        "budgetKiB": { "type": "number", "minimum": 1 },
+        "role": { "enum": ["ui-icon", "brand-logo", "decoration", "complex-diagram", "content", "font"] },
+        "license": { "type": "string" },
+        "alt": { "type": ["string", "null"] },
+        "exception": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

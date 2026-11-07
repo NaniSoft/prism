@@ -97,6 +97,11 @@ The base pack is the absence of `data-pack`. A themed subtree states both axes,
 and descendant scoping is supported, so a marketing page can show every pack at
 once without writing CSS. `default` is expressed by omitting `data-pack`.
 
+A reader who has never chosen gets the consumer's default mode, which may be
+`light`, `dark` or `system`. `system` reads `prefers-color-scheme` once per
+resolution and resolves to a mode before anything is applied, so a stored
+choice still outranks it and the origin stays one of the closed set.
+
 ## Components, Blocks and Pages
 
 The public surface is three layers, and every layer is an npm export:

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "ds-illustration",
+  "title": "Ds-illustration",
+  "description": "Shared ds-illustration primitive. Installed automatically as a dependency of any block that uses it.",
+  "dependencies": [
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/components/ui/ds-illustration.tsx",
+      "content": "import type { ComponentProps } from 'react'\nimport { cn } from '../../lib/utils'\n\n/** The props the DSIllustration accepts. */\nexport interface DSIllustrationProps extends Omit<ComponentProps<'img'>, 'src' | 'alt'> {\n  /** The illustration file. A path or URL supplied by the caller. */\n  src: string\n  /**\n   * The illustration's description, and required.\n   *\n   * Required for the same reason `DSImage` requires it: an illustration is a\n   * claim about what the product does, and an unnamed one is decoration a\n   * reader paid to decode. Empty string marks it decorative.\n   */\n  alt: string\n  /** How the browser fetches it. @defaultValue 'lazy' */\n  loading?: 'eager' | 'lazy'\n  /** Layout only, exactly as on every Component. */\n  className?: string\n}\n\n/**\n * An illustration presented at its own proportions, contained rather than cropped.\n *\n * **Asset-defined, because an illustration's ratio is information the asset\n * contains.** There is no token for it and no crop that preserves it: cropping\n * an illustration to 16 / 9 cuts the drawing at its own edges. `object-contain`\n * keeps the whole figure inside the column and lets the height follow the\n * width the file carries.\n *\n * **Distinct from `DSImage`, and the difference is a rule rather than a\n * filename.** A `DSImage` at a presentation owns a ratio, a maximum rendered\n * size and a 2x minimum; an illustration owns none of them, because a drawing\n * is judged as a drawing and a photograph is judged as a photograph. One\n * Component for both would be a Component whose contract changed by the kind\n * of file a caller passed.\n *\n * It is a server Component. It holds no state and reads nothing.\n */\nfunction DSIllustration({ src, alt, loading = 'lazy', className, ...props }: DSIllustrationProps) {\n  return (\n    <img\n      data-slot=\"ds-illustration\"\n      src={src}\n      alt={alt}\n      loading={loading}\n      decoding=\"async\"\n      className={cn('h-auto w-full max-w-full object-contain', className)}\n      {...props}\n    />\n  )\n}\n\nexport { DSIllustration }\n",
+      "type": "registry:component",
+      "target": "components/ui/ds-illustration.tsx"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "content": "import { type ClassValue, clsx } from 'clsx'\nimport { twMerge } from 'tailwind-merge'\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs))\n}\n\n/**\n * The calendar day a moment falls on, as a `YYYY-MM-DD` key.\n *\n * **This is here rather than in three Blocks because three Blocks needed it and\n * the fourth would have been the argument.** `activity-feed-01`, `audit-log-01`\n * and `calendar-01` each grew their own copy while the roster was being authored,\n * each with its own three-line JSDoc saying the duplication was a decision and\n * naming this file as the right home. Three copies of a five-line function that\n * computes a date are three places a bug would be fixed once and stay broken\n * twice, so this module holds the one and the three Blocks import it.\n *\n * `lib/utils.ts` is the file every registry item already ships beside itself, so\n * the shared implementation needs no new path in the generated registry and no\n * new entry for a consumer to resolve. That is why the helper is here and not in\n * a second `lib` module.\n *\n * **The day is the runtime's, not the reader's**, and the JSDoc on each of the\n * three Blocks says what to do about that: a consumer whose records are grouped\n * by a named zone groups them itself and passes one entry per group with grouping\n * off. Prism ships no calendar, and a Block cannot pick the reader's zone without\n * a prop that would be a guess dressed as a setting. A caller who needs a\n * particular zone composes `Intl.DateTimeFormat` with one and passes the key.\n *\n * Accepts the same three shapes the Blocks pass: epoch milliseconds, a `Date`,\n * and a date string. A string that is not parseable returns an empty key rather\n * than throwing, because the Blocks treat an absent key as a moment with no group\n * and a throw would take a whole record list down over one bad row.\n */\nexport function dayKey(at: number | string | Date): string {\n  const date = at instanceof Date ? at : new Date(at)\n  if (Number.isNaN(date.getTime())) return ''\n  const two = (value: number) => String(value).padStart(2, '0')\n  return `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())}`\n}\n",
+      "type": "registry:lib",
+      "target": "lib/utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

@@ -20,6 +20,13 @@ _Avoid_: brand pack, colourway, color scheme, theme.
 The appearance of a pack: `light` or `dark`.
 _Avoid_: beam-dark, theme, appearance.
 
+**Default mode**:
+The mode a consumer names for a reader who has never chosen: `light`,
+`dark` or `system`. `system` defers to the reader's appearance once per
+resolution and resolves to a mode. It is an input to the resolution
+rule, never a mode any surface wears and never a stored value.
+_Avoid_: appearance, colour scheme.
+
 **Theme**:
 One pack in one mode (pack times mode), such as Blush dark or the default light.
 A theme is a fully resolved token set, not an object and not an API; there is no

@@ -1,0 +1,29 @@
+{
+  "$comment": [
+    "The reference consumer's half of the cross-repository contract, data only.",
+    "The laws are not here. They are the failure messages of the gates in @nanisoft/prism-ui/gates",
+    "which this repository pins exactly. What is here is what only this site knows:",
+    "which sheet is its own, how much of it counts as having read something, where",
+    "its export lands, what its pack map describes, and which source roots read no tokens at runtime.",
+    "This site has no own sheet, so the stylesheet-ownership and hidden-state floors are 0."
+  ],
+  "gateKit": 1,
+  "gates": [
+    "stylesheet-ownership",
+    "links",
+    "pack-boundary",
+    "hidden-state",
+    "runtime-token-read"
+  ],
+  "pack-boundary": {
+    "outDir": "out",
+    "map": "scripts/pack-map.json",
+    "regionResolver": "scripts/pack-regions.mjs",
+    "landing": "/assets",
+    "markSlot": "product-mark"
+  },
+  "stylesheet-ownership": { "sheets": [], "minDeclarations": 0 },
+  "hidden-state": { "sheets": [], "minRules": 0, "sourceRoots": ["app"] },
+  "links": { "outDir": "out", "minRoutes": 3, "minAnchors": 20 },
+  "runtime-token-read": { "sourceRoots": ["app"], "minFiles": 2 }
+}

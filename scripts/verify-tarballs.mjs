@@ -68,7 +68,7 @@ const ARTIFACTS = {
   // That is the failure this lane exists to catch before a publish rather than
   // after: the consumers fail on the next `pnpm install`, and the version is
   // already spent.
-  '@nanisoft/prism-ui': ['dist/styles.css', 'gates/cli.mjs', 'gates/index.mjs', 'gates/laws.mjs'],
+  '@nanisoft/prism-ui': ['dist/styles.css', 'dist/assets/manifest.json', 'gates/cli.mjs', 'gates/index.mjs', 'gates/laws.mjs'],
   '@nanisoft/prism-llms': ['dist/data.json'],
 }
 

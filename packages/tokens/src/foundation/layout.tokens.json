@@ -1,10 +1,11 @@
 {
   "breakpoint": {
     "$type": "dimension",
-    "$description": "Breakpoint thresholds. The authored set is exhaustive: sm, md and lg are real thresholds, and xl and 2xl are closed in the emitted theme so an xl: or 2xl: utility cannot silently resolve to a value this repository never authored.",
+    "$description": "Breakpoint thresholds. The authored set is exhaustive: sm, md, lg and xl are real thresholds, and 2xl is closed in the emitted theme so a 2xl: utility cannot silently resolve to a value this repository never authored.",
     "sm": { "$value": { "value": 40, "unit": "rem" } },
     "md": { "$value": { "value": 48, "unit": "rem" } },
-    "lg": { "$value": { "value": 64, "unit": "rem" } }
+    "lg": { "$value": { "value": 64, "unit": "rem" } },
+    "xl": { "$value": { "value": 90, "unit": "rem" } }
   },
   "container": {
     "$type": "dimension",

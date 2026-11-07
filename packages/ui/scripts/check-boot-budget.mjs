@@ -24,7 +24,7 @@
  *   ceiling = pinned base + clause + one migration generation
  *           = non-migration part + clause + clause
  *           = measured emission + one migration generation
- *           = 834 + 229 + 229 = 1292 B
+ *           = 950 + 229 + 229 = 1408 B
  *
  * The last line of that is an identity only while the pin is current, so the
  * run prints the drift between the live non-migration part and the pin rather
@@ -73,14 +73,14 @@ const WORK = path.join(PKG, '.turbo', 'boot-budget')
 const SCRIPT_MODULE = path.join(PKG, 'dist', 'provider', 'theme-script.js')
 
 /**
- * The non-migration part of the emission, in bytes, as of ticket 90.
- *
- * A measurement, not a judgement, and the run below prints the live figure so a
- * drift shows up next to it rather than as a surprise failure. Re-take it as
- * `measured emission - migration clause` when the non-migration part genuinely
- * has to change, and say why in this comment.
+ * The non-migration part of the emission, in bytes, as of the system-default
+ * extension. The measurement is `measured emission - migration clause` (950 B),
+ * re-taken when the system-appearance read joined the script: the `Y`
+ * derivation reads `matchMedia` once, resolves `system` to a mode before the
+ * resolution, and leaves the origin set unchanged. Re-take it the same way
+ * when the script genuinely has to change again.
  */
-const NON_MIGRATION_BASE_BYTES = 834
+const NON_MIGRATION_BASE_BYTES = 950
 
 /** How many migration generations beyond the one present may be paid for. */
 const MIGRATION_GENERATIONS_ALLOWED = 1

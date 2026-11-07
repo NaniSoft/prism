@@ -1,0 +1,39 @@
+{
+  "aspect": {
+    "$type": "other",
+    "$description": "Standard asset presentation ratios. Each name is a variant a controlled media component resolves; the value is the CSS aspect-ratio (width over height). Intrinsic and asset-defined variants carry no ratio and are not authored here (logo, illustration). Hero and landscape-thumb share 16 / 9 intentionally; avatar, product and icon share 1 / 1 intentionally: a ratio is a presentation, a name is an intent.",
+    "hero": { "$value": "16 / 9" },
+    "wide-hero": { "$value": "21 / 9" },
+    "banner": { "$value": "3 / 1" },
+    "card": { "$value": "4 / 3" },
+    "landscape-thumb": { "$value": "16 / 9" },
+    "square-thumb": { "$value": "1 / 1" },
+    "avatar": { "$value": "1 / 1" },
+    "product": { "$value": "1 / 1" },
+    "icon": { "$value": "1 / 1" }
+  },
+  "z": {
+    "$type": "number",
+    "$description": "Governed stacking layers. A component names a layer rather than a raw index, so one layer is one integer everywhere. Behind sits below the page ground (fixed washes), raised floats above its siblings (overlapping discs), sticky holds during scroll, overlay covers the page (menus, dialogs) and modal sits above an overlay. Values match the indices the tree already draws at, so naming a layer moves no surface.",
+    "behind": { "$value": -10 },
+    "content": { "$value": 0 },
+    "raised": { "$value": 10 },
+    "sticky": { "$value": 20 },
+    "bar": { "$value": 30 },
+    "overlay": { "$value": 50 },
+    "modal": { "$value": 60 }
+  },
+  "media": {
+    "$type": "dimension",
+    "$description": "Rendered media heights by width band (sm below the md threshold, md, lg from the lg threshold). Height is a token rather than an arbitrary pixel so every hero, banner and avatar renders at the governed size; width stays fluid and the aspect token fixes the ratio. Avatar sizes are square and match the spacing scale (2rem is 32px, 2.5rem is 40px, 4rem is 64px) so the avatar token and the size utility name the same size.",
+    "hero-sm": { "$value": { "value": 11.25, "unit": "rem" } },
+    "hero-md": { "$value": { "value": 16.25, "unit": "rem" } },
+    "hero-lg": { "$value": { "value": 26.25, "unit": "rem" } },
+    "banner-sm": { "$value": { "value": 6, "unit": "rem" } },
+    "banner-md": { "$value": { "value": 7.5, "unit": "rem" } },
+    "banner-lg": { "$value": { "value": 10, "unit": "rem" } },
+    "avatar-sm": { "$value": { "value": 2, "unit": "rem" } },
+    "avatar-md": { "$value": { "value": 2.5, "unit": "rem" } },
+    "avatar-lg": { "$value": { "value": 4, "unit": "rem" } }
+  }
+}

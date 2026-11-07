@@ -24,7 +24,8 @@
     "release:pre:enter": "changeset pre enter next",
     "release:pre:exit": "changeset pre exit",
     "release:dry": "node scripts/verify-tarballs.mjs --mode=verify && pnpm -r --filter \"./packages/*\" publish --dry-run --no-git-checks",
-    "release:verify": "node scripts/verify-tarballs.mjs"
+    "release:verify": "node scripts/verify-tarballs.mjs",
+    "test:clean-consumer": "node scripts/test-clean-consumer.mjs"
   },
   "devDependencies": {
     "@changesets/assemble-release-plan": "^7.0.0",

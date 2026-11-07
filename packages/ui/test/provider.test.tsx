@@ -59,6 +59,32 @@ describe('PrismProvider resolution', () => {
     expect(await screen.findByText('default:light')).toBeInTheDocument()
   })
 
+  it('resolves a system default from the reader appearance', async () => {
+    const matches = (window as unknown as { matchMedia?: unknown }).matchMedia
+    window.matchMedia = (() => ({ matches: true })) as unknown as typeof window.matchMedia
+    try {
+      mount({ defaultPack: 'default', defaultMode: 'system' })
+      expect(await screen.findByText('default:dark')).toBeInTheDocument()
+      expect(document.documentElement.classList.contains('dark')).toBe(true)
+    } finally {
+      if (matches === undefined) delete (window as unknown as { matchMedia?: unknown }).matchMedia
+      else (window as unknown as { matchMedia?: unknown }).matchMedia = matches
+    }
+  })
+
+  it('lets a stored choice outrank a system default', async () => {
+    const matches = (window as unknown as { matchMedia?: unknown }).matchMedia
+    window.matchMedia = (() => ({ matches: true })) as unknown as typeof window.matchMedia
+    try {
+      localStorage.setItem(DEFAULT_STORAGE_KEY, '{"pack":"mint","mode":"light"}')
+      mount({ defaultPack: 'default', defaultMode: 'system' })
+      expect(await screen.findByText('mint:light')).toBeInTheDocument()
+    } finally {
+      if (matches === undefined) delete (window as unknown as { matchMedia?: unknown }).matchMedia
+      else (window as unknown as { matchMedia?: unknown }).matchMedia = matches
+    }
+  })
+
   it('keeps a server-rendered pack through hydration instead of flashing to the default', async () => {
     document.documentElement.setAttribute(PACK_ATTRIBUTE, 'sky')
 

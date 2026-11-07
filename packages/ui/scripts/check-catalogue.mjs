@@ -635,10 +635,13 @@ function readRegistry(base) {
  * `Button` to `button`, `RadioGroup` to `radio-group`, `Hero01` to `hero-01`. The
  * digit rule is what carries the numbered Blocks: a hyphen goes between a letter
  * and a following digit, so `Hero01` is `hero-01` and not `hero01`, and
- * `FeatureGrid01` is `feature-grid-01`.
+ * `FeatureGrid01` is `feature-grid-01`. An acronym closes its own word before
+ * the next capitalised word begins, so `DSImage` is `ds-image` and not
+ * `dsimage`: two leading capitals are one acronym, not one word.
  */
 const kebab = (name) =>
   name
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1-$2')
     .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
     .replace(/([A-Za-z])(\d)/g, '$1-$2')
     .toLowerCase()

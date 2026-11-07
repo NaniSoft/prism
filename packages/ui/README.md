@@ -52,7 +52,9 @@ import { Button } from '@nanisoft/prism-ui/components/button'
 | `./components`, `./components/*` | every Component, or one |
 | `./blocks`, `./blocks/*` | every Block, or one |
 | `./pages`, `./pages/*` | every Page, or one |
-| `./theming` | `PACKS`, `PackId`, `MODES`, `Mode`, `parseStoredTheme`, `themeAttributes` |
+| `./theming` | `PACKS`, `PackId`, `MODES`, `Mode`, `DefaultMode`, `DEFAULT_MODES`, `parseStoredTheme`, `themeAttributes` |
+| `./assets` | `AssetCategory`, `AssetPresentation`, `AssetEntry`, `AssetManifest`, `ASSET_BUDGETS_KIB`, `VARIANT_RATIOS`, `SOURCE_TARGETS_PX`, `minimumSourcePx`, `validateRasterSize` |
+| `./assets/manifest.json` | the checked asset registry (governed media, budgets, presentations) |
 | `./catalog` | the checked catalogue, for tooling and docs |
 | `./styles.css` | the one stylesheet a consumer imports |
 

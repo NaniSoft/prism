@@ -15,6 +15,18 @@ export type PackId = (typeof PACKS)[number]
 export const MODES = ['light', 'dark'] as const
 export type Mode = (typeof MODES)[number]
 
+/**
+ * What a consumer may name as its default mode.
+ *
+ * `system` defers to the reader's appearance: the pre-paint script and the
+ * provider read `prefers-color-scheme` once per resolution and resolve to
+ * `light` or `dark` before the usual fall-through, so a stored choice still
+ * outranks the system and the origin stays one of the closed set. It is an
+ * input to the rule, never a stored value and never a mode any surface wears.
+ */
+export const DEFAULT_MODES = ['light', 'dark', 'system'] as const
+export type DefaultMode = (typeof DEFAULT_MODES)[number]
+
 export const PACK_ATTRIBUTE = 'data-pack'
 export const DEFAULT_STORAGE_KEY = 'prism-theme'
 
@@ -125,7 +137,9 @@ export type ThemeResolutionInput = {
   /** Whether the root element carries `.dark` as rendered. */
   documentDark: boolean
   defaultPack: PackId
-  defaultMode: Mode
+  defaultMode: DefaultMode
+  /** Whether the reader's appearance is dark, or `null` when no signal exists. */
+  systemDark?: boolean | null
 }
 
 export type ThemeResolution = {
@@ -162,10 +176,14 @@ export type ThemeResolution = {
  *   4. The root element's own attributes, which is what a server rendered and
  *      what must survive hydration rather than flash to the default.
  *   5. The consumer's defaults, which is the site's decision, not the reader's.
+ *      A `system` default resolves here, once, from `systemDark`: a stored
+ *      choice and a server-rendered mode never read the system, because each
+ *      already names a mode and never asks what the default would have been.
  *
  * Every step names its own source, so the pack and the mode always come from
  * the same one. That is the whole-vs-half property, and it is structural rather
- * than a check.
+ * than a check. `system` is not an origin: it arrives at step 5 with origin
+ * `default`, so the closed origin set is unchanged.
  */
 export function resolveTheme({
   stored,
@@ -174,15 +192,18 @@ export function resolveTheme({
   documentDark,
   defaultPack,
   defaultMode,
+  systemDark = null,
 }: ThemeResolutionInput): ThemeResolution {
   const pair = parseStoredTheme(stored)
   if (pair) return { pack: pair.pack, mode: pair.mode, origin: 'stored' }
 
+  const fallbackMode: Mode =
+    defaultMode === 'system' ? (systemDark ? 'dark' : 'light') : defaultMode
   const renderedPack = isPack(documentPack) ? documentPack : null
   const renderedMode = documentDark ? 'dark' : null
   const fromDocument = (): ThemeResolution => ({
     pack: renderedPack ?? defaultPack,
-    mode: renderedMode ?? defaultMode,
+    mode: (renderedMode ?? fallbackMode) as Mode,
     origin: 'document',
   })
 
@@ -193,7 +214,7 @@ export function resolveTheme({
   if (isMode(legacy)) return { pack: defaultPack, mode: legacy, origin: 'legacy' }
   if (renderedPack !== null || renderedMode !== null) return fromDocument()
 
-  return { pack: defaultPack, mode: defaultMode, origin: 'default' }
+  return { pack: defaultPack, mode: fallbackMode, origin: 'default' }
 }
 
 /**
