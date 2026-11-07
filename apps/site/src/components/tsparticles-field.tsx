@@ -10,20 +10,32 @@ import { loadSlim } from '@tsparticles/slim'
  * The landing's living medium: a connected network whose links reach out to the
  * reader's pointer. The ink is read from the page's own foreground and
  * muted-foreground tokens, re-read on theme change, and reduced motion removes it.
+ *
+ * The initial reads happen in lazy initializers rather than inside the effect:
+ * the effect subscribes to change and re-reads in its callbacks, which is the
+ * shape React's own rules ask for.
  */
+const INK_DEFAULT = { particle: '#aebccb', link: '#8b98a7' }
+
+function readInk() {
+  if (typeof window === 'undefined') return INK_DEFAULT
+  const styles = getComputedStyle(document.documentElement)
+  const particle = styles.getPropertyValue('--foreground').trim()
+  const link = styles.getPropertyValue('--muted-foreground').trim()
+  return particle ? { particle, link: link || particle } : INK_DEFAULT
+}
+
 export function TsparticlesField() {
-  const [ink, setInk] = useState({ particle: '#aebccb', link: '#8b98a7' })
-  const [reduced, setReduced] = useState(false)
+  const [ink, setInk] = useState(readInk)
+  const [reduced, setReduced] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  )
 
   useEffect(() => {
-    const read = () => {
-      const styles = getComputedStyle(document.documentElement)
-      const particle = styles.getPropertyValue('--foreground').trim()
-      const link = styles.getPropertyValue('--muted-foreground').trim()
-      if (particle) setInk({ particle, link: link || particle })
-    }
-    read()
-    const observer = new MutationObserver(read)
+    const observer = new MutationObserver(() => setInk(readInk()))
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class', 'data-pack'],
@@ -34,7 +46,6 @@ export function TsparticlesField() {
     if (typeof window.matchMedia === 'function') {
       const mql = window.matchMedia('(prefers-reduced-motion: reduce)')
       motion = mql
-      setReduced(mql.matches)
       onMotion = () => setReduced(mql.matches)
       if (typeof mql.addEventListener === 'function') {
         mql.addEventListener('change', onMotion)
