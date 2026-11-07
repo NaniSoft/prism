@@ -33,6 +33,9 @@ jobs:
       - name: Verify the published tarballs
         run: node scripts/verify-tarballs.mjs --mode=verify
 
+      - name: Test the tarballs in clean consumers
+        run: node scripts/test-clean-consumer.mjs
+
   # Report-only visual regression (ticket 15 Q11). The promotion rule is written
   # in apps/site/playwright.config.ts: two consecutive weeks with no unexplained
   # diff (target ten merges) and the `continue-on-error` line comes off.

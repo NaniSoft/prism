@@ -1,5 +1,100 @@
 # @nanisoft/prism-ui
 
+## 1.7.0
+
+### Minor Changes
+
+- Add the governed asset registry, its subpaths and its three gates
+  
+  `@nanisoft/prism-ui/assets` exports the closed category and presentation
+  vocabulary, the byte budgets, the recommended source sizes and the
+  minimum-resolution arithmetic. `@nanisoft/prism-ui/assets/manifest.json` is the
+  checked registry of everything the package ships: the four Inter faces, the
+  favicon family, and the five product marks, each with the measured size, the
+  presentation it may take and the ceiling it was judged against.
+  
+  Three gates run in the package `check`: `check-asset-metadata` (file exists,
+  fits its budget, dimensions agree), `check-asset-resolution` (every raster
+  source clears its rendered maximum at 2x on both axes) and `check-svg-security`
+  (no script, event handler, external reference or unexempted painted literal).
+  The full contract and the ingestion steps live in `docs/asset-contract.md`.
+- Prove the release builds outside the monorepo with a Gate J isolation test
+  
+  `node scripts/test-clean-consumer.mjs` (also `pnpm test:clean-consumer`, and
+  the `verify` CI job) packs the tarballs, scaffolds a Vite CSR app and a Next.js
+  static-export app outside the repo, installs only the tarballs, and builds
+  both. Neither carries a Tailwind config, a PostCSS config, a Sass setup, or a
+  custom stylesheet: the one `@nanisoft/prism-ui/styles.css` import and the
+  `DS*` imports are the whole styling story. Both builds assert the governed
+  CSS (`--aspect-hero`, `--breakpoint-xl`) and the shipped Inter faces
+  (`dist/fonts/*.woff2`) reach the consumer bundle.
+  
+  The packed `@nanisoft/prism-ui` manifest now resolves
+  `@nanisoft/prism-tokens` to an exact registry version, `sideEffects` names
+  `**/*.css`, and `peerDependencies` stay `react react-dom ^19.2.0`.
+  `verify-tarballs` additionally asserts `dist/assets/manifest.json` ships.
+- Add the governed media and layout components
+  
+  Nine new components in `Data display` and `Layout`, exported from their own
+  subpaths and the barrels: `DSImage` (client: it notices a failed source and
+  hands over to the fallback), `DSIcon` (a closed registry of `settings`,
+  `search` and the chrome glyphs the catalogue already needs, five sizes, no SVG
+  file a consumer imports), `DSLogo`, `DSAvatar`, `DSIllustration`, `DSVideo`
+  (the governed frame over `VideoPlayer`), `DSMediaCard`, `DSStack` and `DSGrid`.
+  
+  Every string is a prop (`alt`, `label`, `title`, `description`). There is no
+  prop for a raw ratio, size, fit or gap, so no consumer can reproduce a decision
+  the tokens own, and `className` is layout only. The aspect the tokens author is
+  the aspect the component renders, and an unknown icon name throws rather than
+  rendering nothing.
+  
+  The catalogue kebab gain for an acronym word boundary, so `DSImage` keys to
+  `ds-image` in the checked list. `docs/ds-components.md` records the audit of
+  the existing catalogue, the capped internal exceptions (`Gallery01` portrait,
+  `Lightbox`, `ImageZoom`, `VideoPlayer`) and why each is not a second governed
+  path.
+- Close the Mission §10 quality-gate set: token compliance, stylesheet budget and asset integrity
+  
+  Three new gates in the package `check`: `check-token-compliance` (Gates A and B: no hex outside the foundation tier and no Tailwind arbitrary value that resolves a colour, over 452 files including 118 arbitrary-colour utilities, one canvas fallback exempted in code), `check-asset-integrity` (Gate L: every shipped font listed, present, non-empty, and named by the emitted CSS), and `check-stylesheet-budget` (Gate K: `dist/styles.css` 139.7 KB against a 160 KB ceiling).
+  
+  `test/ds-matrix.test.tsx` extends the theme matrix (Gates F/G/H) over the governed layer: all nine `DS*` components render under all 16 pack×mode combinations, grid narrowing below `sm` is asserted, and axe runs over them. `test/compliance-gates.test.tsx` proves each new gate fails loudly with a staged defect and prints what it read otherwise.
+  
+  `docs/quality-gates.md` is the A-L map to the program that holds each law.
+- Add the reference consumer that certifies every release
+  
+  `apps/reference-consumer` is the zero-CSS consumer: one import of
+  `@nanisoft/prism-ui/styles.css`, catalogue Blocks/Pages, the nine `DS*`
+  components, `DSStack`/`DSGrid` layout primitives, pack boundaries on marks,
+  and three routes (marketing, dashboard, assets) across mobile, tablet and
+  desktop. It carries no custom stylesheet, no font, and no competing icon
+  library; `@nanisoft/prism-ui` is pinned as the only styling source.
+  
+  It is wired into the monorepo as a workspace app and passes its own consumer
+  gates (`stylesheet-ownership` and `hidden-state` vacuously, with printed
+  vacuous-pass proof; `pack-boundary` with 7/7 boundaries on marks on 5
+  documents; `links` 5 routes; `runtime-token-read`). Its build is the surface
+  future releases certify alongside the pack-and-install isolation harness
+  (`pnpm test:clean-consumer`).
+- Add governed responsive and media tokens, and the `system` default mode
+  
+  The token package authors the `xl` breakpoint at 90rem (1440px) for wide
+  desktop, the standard `aspect-*` ratios, the `z-*` stacking layers and the
+  `media-*` heights for hero, banner and avatar. The component package accepts
+  `system` as a `defaultMode` on `PrismProvider` and `PrismThemeScript`: it
+  reads `prefers-color-scheme` once per resolution and resolves to `light` or
+  `dark` before applying, so a stored choice still outranks it.
+  
+  Consumers that set an explicit `light` or `dark` default are unchanged. A
+  consumer that wants the reader's appearance passes `defaultMode="system"` to
+  the provider or the boot script; the origin attribute keeps its five closed
+  values and `system` never appears as a stored mode.
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies
+  - @nanisoft/prism-tokens@1.7.0
+
 ## 1.6.0
 
 ### Minor Changes

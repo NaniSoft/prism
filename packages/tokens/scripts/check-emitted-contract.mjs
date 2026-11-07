@@ -129,8 +129,10 @@ put('default-transition-timing-function', 'var(--ease-out)')
 
 for (const [key, token] of groupEntries(foundationTree, ['shadow'])) put(`shadow-${key}`, readToken(token))
 for (const [key, token] of groupEntries(foundationTree, ['breakpoint'])) put(`breakpoint-${key}`, readToken(token))
-put('breakpoint-xl', 'initial')
 put('breakpoint-2xl', 'initial')
+for (const [key, token] of groupEntries(foundationTree, ['aspect'])) put(`aspect-${key}`, readToken(token))
+for (const [key, token] of groupEntries(foundationTree, ['z'])) put(`z-${key}`, readToken(token))
+for (const [key, token] of groupEntries(foundationTree, ['media'])) put(`media-${key}`, readToken(token))
 
 // Tailwind's own `--container-*` namespace is closed whole, before the authored
 // entries, so `max-w-6xl` cannot resolve to 72rem beside `max-w-page`.
@@ -188,6 +190,7 @@ for (const [name, want] of expected) {
 const NAMESPACES = [
   'font-', 'font-weight-', 'text-', 'leading-', 'tracking-',
   'duration-', 'ease-', 'ambient-', 'ambient-ease-', 'shadow-', 'breakpoint-', 'container-',
+  'aspect-', 'z-', 'media-',
   'transition-duration-', 'default-transition-duration', 'default-transition-timing-function',
 ]
 const isBound = (name) =>
@@ -301,8 +304,35 @@ for (const name of staticDecls.keys()) {
 }
 
 const breakpointKeys = groupEntries(foundationTree, ['breakpoint']).map(([key]) => key).sort()
-check(JSON.stringify(breakpointKeys) === JSON.stringify(['lg', 'md', 'sm']), `breakpoint set must be {sm, md, lg}, found {${breakpointKeys.join(', ')}}`)
-check(staticDecls.get('breakpoint-xl') === 'initial' && staticDecls.get('breakpoint-2xl') === 'initial', 'breakpoint-xl and breakpoint-2xl must be closed with `initial`')
+check(JSON.stringify(breakpointKeys) === JSON.stringify(['lg', 'md', 'sm', 'xl']), `breakpoint set must be {sm, md, lg, xl}, found {${breakpointKeys.join(', ')}}`)
+check(staticDecls.get('breakpoint-2xl') === 'initial', 'breakpoint-2xl must be closed with `initial`')
+check(staticDecls.get('breakpoint-xl') === '90rem', `--breakpoint-xl in theme.css is "${staticDecls.get('breakpoint-xl')}", authored "90rem"`)
+
+const aspectKeys = groupEntries(foundationTree, ['aspect']).map(([key]) => key).sort()
+check(
+  JSON.stringify(aspectKeys) === JSON.stringify(['avatar', 'banner', 'card', 'hero', 'icon', 'landscape-thumb', 'product', 'square-thumb', 'wide-hero']),
+  `aspect set must be {hero, wide-hero, banner, card, landscape-thumb, square-thumb, avatar, product, icon}, found {${aspectKeys.join(', ')}}`,
+)
+for (const [key, token] of groupEntries(foundationTree, ['aspect'])) {
+  check(/^\d+ \/ \d+$/.test(readToken(token)), `aspect.${key} is "${readToken(token)}", and a ratio must be authored as "<width> / <height>"`)
+}
+
+const zKeys = groupEntries(foundationTree, ['z']).map(([key]) => key).sort()
+check(
+  JSON.stringify(zKeys) === JSON.stringify(['bar', 'behind', 'content', 'modal', 'overlay', 'raised', 'sticky']),
+  `z set must be {behind, content, raised, sticky, bar, overlay, modal}, found {${zKeys.join(', ')}}`,
+)
+for (const [key, token] of groupEntries(foundationTree, ['z'])) {
+  const value = Number(readToken(token))
+  check(Number.isInteger(value), `z.${key} is "${readToken(token)}", and a stacking layer must be an integer`)
+}
+
+const mediaKeys = groupEntries(foundationTree, ['media']).map(([key]) => key).sort()
+check(
+  JSON.stringify(mediaKeys) ===
+    JSON.stringify(['avatar-lg', 'avatar-md', 'avatar-sm', 'banner-lg', 'banner-md', 'banner-sm', 'hero-lg', 'hero-md', 'hero-sm']),
+  `media set must be {hero-sm, hero-md, hero-lg, banner-sm, banner-md, banner-lg, avatar-sm, avatar-md, avatar-lg}, found {${mediaKeys.join(', ')}}`,
+)
 
 const containerKeys = groupEntries(foundationTree, ['container']).map(([key]) => key).sort()
 check(

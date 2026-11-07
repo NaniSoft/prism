@@ -98,8 +98,10 @@ put('default-transition-timing-function', 'var(--ease-out)')
 
 for (const [key, token] of groupEntries(foundationTree, ['shadow'])) put(`shadow-${key}`, readToken(token))
 for (const [key, token] of groupEntries(foundationTree, ['breakpoint'])) put(`breakpoint-${key}`, readToken(token))
-put('breakpoint-xl', 'initial')
 put('breakpoint-2xl', 'initial')
+for (const [key, token] of groupEntries(foundationTree, ['aspect'])) put(`aspect-${key}`, readToken(token))
+for (const [key, token] of groupEntries(foundationTree, ['z'])) put(`z-${key}`, readToken(token))
+for (const [key, token] of groupEntries(foundationTree, ['media'])) put(`media-${key}`, readToken(token))
 
 // Tailwind's own container namespace is closed whole, ahead of the authored
 // widths, so `max-w-6xl` cannot resolve to 72rem beside `max-w-page`.
@@ -128,6 +130,9 @@ const NAMESPACES = [
   'shadow-',
   'breakpoint-',
   'container-',
+  'aspect-',
+  'z-',
+  'media-',
   'transition-duration-',
   'default-transition-duration',
   'default-transition-timing-function',
@@ -213,11 +218,23 @@ describe('emitted token contract', () => {
     }
   })
 
-  it('closes breakpoints to {sm, md, lg} with xl and 2xl initial', () => {
+  it('closes breakpoints to {sm, md, lg, xl} with 2xl initial', () => {
     const breakpointKeys = groupEntries(foundationTree, ['breakpoint']).map(([key]) => key).sort()
-    expect(breakpointKeys).toEqual(['lg', 'md', 'sm'])
-    expect(staticDecls.get('breakpoint-xl')).toBe('initial')
+    expect(breakpointKeys).toEqual(['lg', 'md', 'sm', 'xl'])
+    expect(staticDecls.get('breakpoint-xl')).toBe('90rem')
     expect(staticDecls.get('breakpoint-2xl')).toBe('initial')
+  })
+
+  it('authors the aspect, z and media groups for governed media', () => {
+    const aspectKeys = groupEntries(foundationTree, ['aspect']).map(([key]) => key).sort()
+    expect(aspectKeys).toEqual(['avatar', 'banner', 'card', 'hero', 'icon', 'landscape-thumb', 'product', 'square-thumb', 'wide-hero'])
+    expect(staticDecls.get('aspect-hero')).toBe('16 / 9')
+    const zKeys = groupEntries(foundationTree, ['z']).map(([key]) => key).sort()
+    expect(zKeys).toEqual(['bar', 'behind', 'content', 'modal', 'overlay', 'raised', 'sticky'])
+    expect(staticDecls.get('z-overlay')).toBe('50')
+    const mediaKeys = groupEntries(foundationTree, ['media']).map(([key]) => key).sort()
+    expect(mediaKeys).toEqual(['avatar-lg', 'avatar-md', 'avatar-sm', 'banner-lg', 'banner-md', 'banner-sm', 'hero-lg', 'hero-md', 'hero-sm'])
+    expect(staticDecls.get('media-hero-lg')).toBe('26.25rem')
   })
 
   it('closes containers to the page family and the five overlay widths', () => {

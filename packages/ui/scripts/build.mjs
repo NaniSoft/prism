@@ -166,6 +166,23 @@ const result = await postcss([tailwindcss()]).process(readFileSync(STYLES_IN, 'u
 })
 writeFileSync(STYLES_OUT, result.css)
 
+/* ── 4. The asset manifest, validated before it ships ────────────────────── */
+
+// `dist/assets/manifest.json` is the published registry a consumer reads. It is
+// the authored manifest verbatim, so an invalid entry fails the build here
+// rather than reaching an install. The gates that check it run from the same
+// source, so the artefact and the law cannot drift.
+{
+  const authored = path.join(SRC, 'assets', 'asset-manifest.json')
+  if (!existsSync(authored)) {
+    throw new Error(`the asset manifest ${path.relative(PKG, authored)} is missing; the registry ships no placeholder`)
+  }
+  const out = path.join(DIST, 'assets', 'manifest.json')
+  mkdirSync(path.dirname(out), { recursive: true })
+  writeFileSync(out, readFileSync(authored, 'utf8'), 'utf8')
+  console.log(`  assets: manifest written to ${path.relative(PKG, out)}`)
+}
+
 /* ── 3. The face, next to the stylesheet that names it ────────────────────── */
 
 // The `@font-face` sources in the emitted stylesheet are relative to it, and a

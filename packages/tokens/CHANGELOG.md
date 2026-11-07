@@ -1,5 +1,38 @@
 # @nanisoft/prism-tokens
 
+## 1.7.0
+
+### Minor Changes
+
+- Prove the release builds outside the monorepo with a Gate J isolation test
+  
+  `node scripts/test-clean-consumer.mjs` (also `pnpm test:clean-consumer`, and
+  the `verify` CI job) packs the tarballs, scaffolds a Vite CSR app and a Next.js
+  static-export app outside the repo, installs only the tarballs, and builds
+  both. Neither carries a Tailwind config, a PostCSS config, a Sass setup, or a
+  custom stylesheet: the one `@nanisoft/prism-ui/styles.css` import and the
+  `DS*` imports are the whole styling story. Both builds assert the governed
+  CSS (`--aspect-hero`, `--breakpoint-xl`) and the shipped Inter faces
+  (`dist/fonts/*.woff2`) reach the consumer bundle.
+  
+  The packed `@nanisoft/prism-ui` manifest now resolves
+  `@nanisoft/prism-tokens` to an exact registry version, `sideEffects` names
+  `**/*.css`, and `peerDependencies` stay `react react-dom ^19.2.0`.
+  `verify-tarballs` additionally asserts `dist/assets/manifest.json` ships.
+- Add governed responsive and media tokens, and the `system` default mode
+  
+  The token package authors the `xl` breakpoint at 90rem (1440px) for wide
+  desktop, the standard `aspect-*` ratios, the `z-*` stacking layers and the
+  `media-*` heights for hero, banner and avatar. The component package accepts
+  `system` as a `defaultMode` on `PrismProvider` and `PrismThemeScript`: it
+  reads `prefers-color-scheme` once per resolution and resolves to `light` or
+  `dark` before applying, so a stored choice still outranks it.
+  
+  Consumers that set an explicit `light` or `dark` default are unchanged. A
+  consumer that wants the reader's appearance passes `defaultMode="system"` to
+  the provider or the boot script; the origin attribute keeps its five closed
+  values and `system` never appears as a stored mode.
+
 ## 1.5.0
 
 ### Minor Changes

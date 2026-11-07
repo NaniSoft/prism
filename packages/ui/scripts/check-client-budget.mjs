@@ -476,6 +476,8 @@ const BUDGETS = {
   'toggle-group': 4,
   tooltip: 5,
   tree: 2,
+  'ds-image': 6,
+  'ds-avatar': 5,
 }
 
 /**
@@ -544,6 +546,10 @@ const EXCLUSIONS = [
     // reader pays.
     match: (rel) => /^fonts\//.test(rel),
     reason: 'the face and its licence: 93.5 KB of binary fetched over the network, priced by check-typeface.mjs and not by this gate',
+  },
+  {
+    match: (rel) => rel === 'assets/manifest.json',
+    reason: 'the asset registry: a JSON manifest a consumer reads, not JavaScript a browser runs; priced by check-asset-metadata.mjs and not by this gate',
   },
 ]
 

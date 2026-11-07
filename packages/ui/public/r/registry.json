@@ -892,6 +892,205 @@
       ]
     },
     {
+      "name": "ds-avatar",
+      "title": "Ds-avatar",
+      "description": "Shared ds-avatar primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/ds-avatar.tsx",
+          "type": "registry:component",
+          "target": "components/ui/ds-avatar.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "ds-grid",
+      "title": "Ds-grid",
+      "description": "Shared ds-grid primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/ds-grid.tsx",
+          "type": "registry:component",
+          "target": "components/ui/ds-grid.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "ds-icon",
+      "title": "Ds-icon",
+      "description": "Shared ds-icon primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "lucide-react",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/ds-icon.tsx",
+          "type": "registry:component",
+          "target": "components/ui/ds-icon.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "ds-illustration",
+      "title": "Ds-illustration",
+      "description": "Shared ds-illustration primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/ds-illustration.tsx",
+          "type": "registry:component",
+          "target": "components/ui/ds-illustration.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "ds-image",
+      "title": "Ds-image",
+      "description": "Shared ds-image primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/ds-image.tsx",
+          "type": "registry:component",
+          "target": "components/ui/ds-image.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "ds-logo",
+      "title": "Ds-logo",
+      "description": "Shared ds-logo primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/ds-logo.tsx",
+          "type": "registry:component",
+          "target": "components/ui/ds-logo.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "ds-media-card",
+      "title": "Ds-media-card",
+      "description": "Shared ds-media-card primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/ds-media-card.tsx",
+          "type": "registry:component",
+          "target": "components/ui/ds-media-card.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "ds-stack",
+      "title": "Ds-stack",
+      "description": "Shared ds-stack primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/ds-stack.tsx",
+          "type": "registry:component",
+          "target": "components/ui/ds-stack.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "ds-video",
+      "title": "Ds-video",
+      "description": "Shared ds-video primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/ds-video.tsx",
+          "type": "registry:component",
+          "target": "components/ui/ds-video.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "emoji-picker",
       "title": "Emoji-picker",
       "description": "Shared emoji-picker primitive. Installed automatically as a dependency of any block that uses it.",

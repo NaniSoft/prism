@@ -32,6 +32,7 @@ import {
   readLegacyMode,
   resolveTheme,
   themeAttributes,
+  type DefaultMode,
   type Mode,
   type PackId,
   type ThemeResolution,
@@ -50,8 +51,8 @@ const PrismThemeContext = createContext<PrismTheme | null>(null)
 export type PrismProviderProps = {
   /** Pack used when nothing is stored and no pack attribute is present. */
   defaultPack?: PackId
-  /** Mode used in the same fallback. */
-  defaultMode?: Mode
+  /** Mode used in the same fallback, or `system` for the reader's appearance. */
+  defaultMode?: DefaultMode
   /** localStorage key for the persisted `{ pack, mode }` object. */
   storageKey?: string
   children?: ReactNode
@@ -75,6 +76,19 @@ function read(key: string): string | null {
   } catch {
     return null
   }
+}
+
+/** The reader's appearance as dark, or null when it cannot be read. */
+function readSystemDark(): boolean | null {
+  try {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+  } catch {
+    return null
+  }
+}
+
+function fallbackModeOf(defaultMode: DefaultMode): Mode {
+  return defaultMode === 'system' ? (readSystemDark() ? 'dark' : 'light') : defaultMode
 }
 
 /** One guarded write. The attributes are already applied when this fails. */
@@ -135,6 +149,7 @@ export function PrismProvider({
       documentDark: document.documentElement.classList.contains('dark'),
       defaultPack,
       defaultMode,
+      systemDark: readSystemDark(),
     })
 
     if (next.origin === 'legacy' && recovered) {
@@ -171,7 +186,7 @@ export function PrismProvider({
       decided.current = true
       setTheme((current) => ({
         pack: next,
-        mode: current?.mode ?? defaultMode,
+        mode: current?.mode ?? fallbackModeOf(defaultMode),
         origin: 'stored',
       }))
     },
@@ -211,7 +226,7 @@ export function PrismProvider({
   const value = useMemo<PrismTheme>(
     () => ({
       pack: theme?.pack ?? defaultPack,
-      mode: theme?.mode ?? defaultMode,
+      mode: theme?.mode ?? fallbackModeOf(defaultMode),
       setPack,
       setMode,
       toggleMode,

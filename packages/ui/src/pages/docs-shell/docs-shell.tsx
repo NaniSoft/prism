@@ -451,13 +451,15 @@ export function DocsShell({
           // tree with no contents rail has two children, so a three-track
           // template would leave the document in the 15rem first track.
           //
-          // The third track is at the same width as the two-column frame, and
-          // that is a fact about the token package rather than a preference: the
-          // emitted theme closes `xl` with `initial`, so a third track written
-          // against a wider screen compiled to no media query at all, and the
-          // contents rail landed in an implicit `auto` track rather than the
-          // 13rem one. `check-breakpoint-variants.mjs` is the gate that says so
-          // to the next class written against a screen the theme does not emit.
+          // The third track is at the same width as the two-column frame rather
+          // than at a wider screen: the class this replaced read `xl:` against a
+          // theme that closed `xl` with `initial`, so it compiled to no media
+          // query and the contents rail landed in an implicit `auto` track rather
+          // than the 13rem one. `xl` is now a 90rem screen, but the frame
+          // frame keeps its single breakpoint at `lg` so the article column never
+          // waits for a wider screen. `check-breakpoint-variants.mjs` is the gate
+          // that says so to the next class written against a screen the theme
+          // does not emit.
           contents ? 'lg:grid lg:grid-cols-[15rem_minmax(0,1fr)_13rem]' : 'lg:grid lg:grid-cols-[15rem_minmax(0,1fr)]',
         )}
       >

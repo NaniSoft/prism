@@ -29,7 +29,7 @@ import {
   PACKS,
   PACK_ATTRIBUTE,
   THEME_ORIGIN_ATTRIBUTE,
-  type Mode,
+  type DefaultMode,
   type PackId,
 } from '../theming'
 
@@ -64,7 +64,7 @@ export const THEME_MIGRATION_RETIRE =
 export type PrismThemeScriptProps = {
   storageKey?: string
   defaultPack?: PackId
-  defaultMode?: Mode
+  defaultMode?: DefaultMode
 }
 
 export function PrismThemeScript({
@@ -89,12 +89,13 @@ export function PrismThemeScript({
     'DPK=P.indexOf(a)>-1?a:null,' +
     'DK=r.classList.contains("dark")?"dark":null,' +
     'U=S&&typeof S=="object"&&P.indexOf(S.pack)>-1&&M.indexOf(S.mode)>-1,' +
+    'Y=DM==="system"?(typeof matchMedia==="function"&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):DM,' +
     'pack,m,G;' +
     'if(U){pack=S.pack;m=S.mode;G="stored";}' +
-    'else if(T){pack=DPK||DP;m=DK||DM;G="unparsed";}' +
+    'else if(T){pack=DPK||DP;m=DK||Y;G="unparsed";}' +
     'else if(L){pack=DP;m=L;G="legacy";}' +
-    'else if(DPK||DK){pack=DPK||DP;m=DK||DM;G="document";}' +
-    'else{pack=DP;m=DM;G="default";}' +
+    'else if(DPK||DK){pack=DPK||DP;m=DK||Y;G="document";}' +
+    'else{pack=DP;m=Y;G="default";}' +
     THEME_MIGRATION_RETIRE +
     'if(pack!=="default"){r.setAttribute(A,pack);}else{r.removeAttribute(A);}' +
     'r.classList.toggle("dark",m==="dark");' +

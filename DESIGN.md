@@ -547,13 +547,17 @@ would invent a decision nobody took, and an arbitrary `max-w-[...]` is refused b
 
 ### Breakpoints
 
-`sm` at 40rem, `md` at 48rem and `lg` at 64rem, matching the values Tailwind
-compiled before so no media query moved. The set is closed: `xl` and `2xl` are
-dropped, so an `xl:` utility cannot resolve to a value this repository never
-authored. Breakpoints are not consumer-overridable. A breakpoint exists only as
-the threshold Tailwind compiles into a media query inside `styles.css`; the
-consumer does not run Tailwind, and the contract forbids re-declaring the
-namespace.
+`sm` at 40rem, `md` at 48rem, `lg` at 64rem and `xl` at 90rem (1440px), the
+wide desktop threshold. The first three match the values Tailwind
+compiled before so no media query moved; `xl` is the new wide tier and no
+existing class names it, so adding it moves no surface. The set is
+closed: `2xl` is dropped, so a `2xl:` utility cannot resolve to a value
+this repository never authored. Breakpoints are not
+consumer-overridable. A breakpoint exists only as the threshold Tailwind
+compiles into a media query inside `styles.css`; the consumer does not
+run Tailwind, and the contract forbids re-declaring the namespace. The
+bands are mobile below 48rem, tablet from 48rem, desktop from 64rem and
+wide from 90rem, with no consumer-authored media query.
 
 **Closing a screen closes the class as well as the value, and the class is the
 half that was unchecked.** `packages/ui/scripts/check-breakpoint-variants.mjs`
@@ -595,6 +599,40 @@ padding (`py-16 sm:py-24`, 4rem rising to 6rem from 40rem up) so a composition
 keeps one rhythm. Blocks compose `Section` and a section heading rather than
 re-deriving padding.
 
+### Media and assets
+
+**A governed picture, or a violation.** Every asset is a registry entry: a
+category, an allowed presentation, the measured dimensions and the budget it
+was judged against. The authored registry is
+`packages/ui/src/assets/asset-manifest.json`, emitted verbatim to
+`dist/assets/manifest.json`, and its types and arithmetic ship as
+`@nanisoft/prism-ui/assets`. The full presentation table, the budgets and the
+ingestion steps live in `docs/asset-contract.md`. The rules it states are
+gated by `check-asset-metadata`, `check-asset-resolution` and
+`check-svg-security`, so a new asset is held to the file it names rather than
+to the entry that describes it.
+
+A UI icon paints in `currentColor` or semantic tokens over a `viewBox` and
+carries no painted literal. A brand logo may carry fixed colour only under a
+written exemption on its entry, because chrome does not run the token cascade.
+A decorative illustration is `aria-hidden`. A complex diagram names itself in
+words. Supported content formats are webp/avif with a fallback; shipped
+package files are woff2, png, ico and svg. A content image arriving from a
+consumer host is judged at render time by the same arithmetic: its source must
+clear its rendered maximum at 2x, on both axes.
+
+**The consumer's answer to all of it is the governed media layer.** `DSImage`,
+`DSIcon`, `DSLogo`, `DSAvatar`, `DSIllustration`, `DSVideo` and `DSMediaCard`
+are the only paths a consumer gets to a picture, a glyph or a video: a name
+and a presentation, with a ratio, a size, a fit, a fallback, a lazy hint and a
+name a reader can hear. The two layout primitives that remove the other
+stylesheet, `DSStack` and `DSGrid`, are the same shape for arrangement: a gap
+from four steps and a count from four. What each one owns and the exact props
+are in `docs/ds-components.md` and the JSDoc each Component carries; the
+catalogue is the checked list. `Lightbox`, `ImageZoom`, `Avatar` and
+`VideoPlayer` are what those components compose internally, and they stay
+internal paths: a consumer does not reach the media element through them.
+
 ### What remains Tailwind-authoritative
 
 Every property that carries a design value on a scale or a palette now comes
@@ -606,7 +644,14 @@ properties that have no token-shaped value:
   threshold is a token; the decision to change at it is composition.
 - **Sizing magnitudes.** `size-*`, `w-*`, `h-*` and `min-w-11` are arithmetic on
   the authored `--spacing` multiplier. There is no per-size token group.
-- **Stacking.** `z-30`, `z-50`, `-z-10`.
+- **Stacking.** Named layers (`z-behind`, `z-raised`, `z-sticky`, `z-bar`,
+  `z-overlay`, `z-modal`) are tokens; a raw index is arithmetic that names no
+  layer and is refused outside the token source.
+- **Media ratios and heights.** `aspect-*` ratios and `media-*` heights are
+  tokens; the width stays fluid and the ratio plus height fix the
+  presentation. The image widths sit behind `--container-overlay-media`
+  (64rem) rather than a second width scale, so a retune of the reading
+  measure cannot move a picture.
 - **Opacity and alpha modifiers.** `opacity-50`, `bg-primary/90`, `ring-ring/50`.
   The colour is a token; the multiplier is Tailwind's.
 - **Transition property lists.** `transition-colors`, `transition-transform`,

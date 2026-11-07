@@ -145,10 +145,16 @@ const ROWS = [
   { name: 'a non-default consumer default, nothing stored', defaultPack: 'peach', defaultMode: 'dark' },
   { name: 'a non-default default with a retired key', defaultPack: 'peach', legacy: 'light' },
   { name: 'a non-default default, unparseable', defaultPack: 'peach', defaultMode: 'dark', stored: '{}', whole: 'a non-default consumer default, nothing stored' },
+
+  { name: 'a system default in dark appearance, nothing stored', defaultMode: 'system', systemDark: true },
+  { name: 'a system default in light appearance, nothing stored', defaultMode: 'system', systemDark: false },
+  { name: 'a system default beside a stored choice', defaultMode: 'system', systemDark: true, stored: '{"pack":"mint","mode":"light"}' },
+  { name: 'a system default beside a server-rendered dark class', defaultMode: 'system', systemDark: false, documentDark: true },
+  { name: 'a system default, unparseable', defaultMode: 'system', systemDark: true, stored: '{}', whole: 'a system default in dark appearance, nothing stored' },
 ]
 
 /** A root element and a localStorage, small enough to audit line by line. */
-function browser(emitted, stored, legacy, documentPack, documentDark) {
+function browser(emitted, stored, legacy, documentPack, documentDark, systemDark) {
   const initial = new Map()
   if (stored !== null) initial.set(STORAGE_KEY, stored)
   if (legacy !== null) initial.set(LEGACY_KEY, legacy)
@@ -177,13 +183,20 @@ function browser(emitted, stored, legacy, documentPack, documentDark) {
     removeItem: (key) => storage.delete(key),
   }
 
+  const matchMedia = (query) => ({
+    matches: query === '(prefers-color-scheme: dark)' ? Boolean(systemDark) : false,
+  })
+
   return {
     attributes,
     classes,
     storage,
     initial,
     run: () => {
-      vm.runInContext(emitted, vm.createContext({ document: { documentElement: root }, localStorage }))
+      vm.runInContext(
+        emitted,
+        vm.createContext({ document: { documentElement: root }, localStorage, matchMedia }),
+      )
       return {
         pack: attributes.get(PACK_ATTRIBUTE) ?? 'default',
         mode: classes.has('dark') ? 'dark' : 'light',
@@ -207,11 +220,12 @@ for (const row of ROWS) {
     documentDark: row.documentDark ?? false,
     defaultPack: row.defaultPack ?? 'default',
     defaultMode: row.defaultMode ?? 'light',
+    systemDark: row.systemDark ?? false,
   }
 
   const expected = resolveTheme(input)
   const emitted = emissionFor(input.defaultPack, input.defaultMode)
-  const actual = browser(emitted, input.stored, input.legacy, input.documentPack, input.documentDark).run()
+  const actual = browser(emitted, input.stored, input.legacy, input.documentPack, input.documentDark, input.systemDark).run()
   answers.set(row.name, { expected, actual })
   inputs.set(row.name, input)
 
@@ -279,7 +293,7 @@ for (const row of ROWS) {
    */
   const here = inputs.get(row.whole)
   const there = inputs.get(row.name)
-  for (const field of ['documentPack', 'documentDark', 'defaultPack', 'defaultMode']) {
+  for (const field of ['documentPack', 'documentDark', 'defaultPack', 'defaultMode', 'systemDark']) {
     if (here[field] !== there[field]) {
       failures.push(
         `${row.name}: its whole fall-through "${row.whole}" also differs in ${field} ` +

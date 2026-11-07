@@ -18,15 +18,16 @@
  *
  * **Nothing else here could see it, and the reason is a direction.** The
  * breakpoint question has two sides and every gate had one. The token side is
- * asserted: `packages/tokens/scripts/check-emitted-contract.mjs` fails unless the
- * emitted set is exactly `{sm, md, lg}` with `xl` and `2xl` closed to `initial`,
- * and `scripts/check-elevation-layout.mjs` fails on a `--breakpoint-` property
- * declared outside the token package. Both are about the VALUE. The authored
- * `breakpoint` group's own `$description` says closing `xl` means an `xl:`
- * utility "cannot silently resolve to a value this repository never authored",
- * which was true of the value and had never been checked of the class, so the
- * sentence described a protection nobody was checking. This gate is the other
- * side: a screen the emitted theme does not have, named by a class.
+ * asserted: `packages/tokens/scripts/check-emitted-contract.mjs` fails unless
+ * the emitted set still matches the authored set with the closed screens the
+ * build lists held at `initial`, and `scripts/check-elevation-layout.mjs`
+ * fails on a `--breakpoint-` property declared outside the token package.
+ * Both are about the VALUE. The authored `breakpoint` group's own
+ * `$description` says closing `2xl` means a `2xl:` utility "cannot silently
+ * resolve to a value this repository never authored", which was true of the
+ * value and had never been checked of the class, so the sentence described a
+ * protection nobody was checking. This gate is the other side: a screen the
+ * emitted theme does not have, named by a class.
  *
  * **The screens come from the token SOURCE, never from `dist/`.** Two reads, and
  * both are deliberate. The authored set is
