@@ -219,11 +219,12 @@ const cleanBlock = [
  * A type argument, because a Component narrows a type it forwards rather than
  * writing its own; a prop default, because every accessible name a control owns
  * is a default a caller may override; a vector coordinate, because a drawing is
- * written in numbers that happen to carry a space; and an SVG fit keyword, which
- * is the one machine value on a drawing element that reads as a sentence. The
- * fixture has to carry all of them or the gate reports them as exclusions that
- * resolve to nothing, which is the gate's own rule and is the reason this
- * comment exists.
+ * written in numbers that happen to carry a space; an SVG fit keyword, which
+ * is the one machine value on a drawing element that reads as a sentence; and
+ * a media condition, which is the platform's own spelling of a reader's
+ * preference and is compared by the platform rather than read. The fixture has
+ * to carry all of them or the gate reports them as exclusions that resolve to
+ * nothing, which is the gate's own rule and is the reason this comment exists.
  */
 const cleanComponent = [
   "import type { ComponentProps } from 'react'",
@@ -233,6 +234,8 @@ const cleanComponent = [
   ' */',
   "export function Thing({ label = 'Thing' }: Omit<ComponentProps<'div'>, 'onValueChange'>) {",
   "  if (label === 'ArrowDown') return null",
+  "  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches",
+  '  if (still) return null',
   "  return (",
   "    <svg data-slot='thing' preserveAspectRatio='xMidYMid slice'>",
   "      <line x1='4 4' />",

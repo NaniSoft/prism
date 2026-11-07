@@ -180,6 +180,23 @@ export type Hero01Props = {
    */
   split?: boolean
   /**
+   * The ground the hero stands on: a figure the whole band is drawn over.
+   *
+   * A slot, and for the same reason the instrument is one: the ground a hero
+   * wants is the product's own claim, and this Block cannot make it. An
+   * `AuroraWash` says the surface is lit, a `ParticleField` says there is a
+   * medium to move through, and a caller who wants both composes both, because
+   * the one decision a hero should not delegate is what its ground claims.
+   *
+   * The Block clips the ground to the band, takes the pointer away from it, and
+   * holds it behind the copy beside the hero's own faint wash, so a slot here
+   * never has to arrive pre-positioned. A ground that would not still be true
+   * with every animation stopped does not belong here, for the same reason an
+   * instrument that only reads as motion does not: this is a band making a
+   * claim, not a frame around a video.
+   */
+  backdrop?: ReactNode
+  /**
    * Heading level for the title. Defaults to `h2` because a block is composed,
    * not a page: it installs into a consumer's layout and renders
    * inside catalog previews, so the surrounding document already owns the `h1`.
@@ -241,6 +258,7 @@ export function Hero01({
   align = 'center',
   instrument,
   split,
+  backdrop,
   headingLevel = 'h2',
   className,
 }: Hero01Props) {
@@ -306,6 +324,21 @@ export function Hero01({
         aria-hidden
         className="from-primary/5 pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b to-transparent"
       />
+      {/*
+        The ground the caller named, over the wash and behind everything. The
+        slot arrives unpositioned on purpose: the band gives it its frame, its
+        clip and its place in the stack, so a caller composing a ground thinks
+        only about what the ground claims.
+      */}
+      {backdrop ? (
+        <div
+          data-slot="hero-01-backdrop"
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10"
+        >
+          {backdrop}
+        </div>
+      ) : null}
       {/*
         The band. The two columns are a Tailwind grid track rather than a
         fractional split, and the split is `5fr / 6fr` for a reason worth

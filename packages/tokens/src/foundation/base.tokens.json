@@ -149,7 +149,8 @@
     "drift": { "$value": { "value": 18000, "unit": "ms" } },
     "scan": { "$value": { "value": 6000, "unit": "ms" } },
     "pulse": { "$value": { "value": 2400, "unit": "ms" } },
-    "shimmer": { "$value": { "value": 3200, "unit": "ms" } }
+    "shimmer": { "$value": { "value": 3200, "unit": "ms" } },
+    "aurora": { "$value": { "value": 24000, "unit": "ms" } }
   },
   "ambient-ease": {
     "$type": "cubicBezier",

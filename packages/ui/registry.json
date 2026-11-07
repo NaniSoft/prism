@@ -120,6 +120,28 @@
       ]
     },
     {
+      "name": "aurora-wash",
+      "title": "Aurora-wash",
+      "description": "Shared aurora-wash primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/aurora-wash.tsx",
+          "type": "registry:component",
+          "target": "components/ui/aurora-wash.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "avatar-group",
       "title": "Avatar-group",
       "description": "Shared avatar-group primitive. Installed automatically as a dependency of any block that uses it.",
@@ -1754,6 +1776,28 @@
       ]
     },
     {
+      "name": "particle-field",
+      "title": "Particle-field",
+      "description": "Shared particle-field primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/particle-field.tsx",
+          "type": "registry:component",
+          "target": "components/ui/particle-field.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "password-field",
       "title": "Password-field",
       "description": "Shared password-field primitive. Installed automatically as a dependency of any block that uses it.",
@@ -2194,6 +2238,28 @@
           "path": "src/components/ui/resizable.tsx",
           "type": "registry:component",
           "target": "components/ui/resizable.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "reveal",
+      "title": "Reveal",
+      "description": "Shared reveal primitive. Installed automatically as a dependency of any block that uses it.",
+      "type": "registry:component",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/components/ui/reveal.tsx",
+          "type": "registry:component",
+          "target": "components/ui/reveal.tsx"
         },
         {
           "path": "src/lib/utils.ts",

@@ -9,10 +9,10 @@ import { cn } from '../../lib/utils'
 /**
  * The cycles a backdrop can run, named for the mechanism and not for a length.
  *
- * Seven members and six are the cycles the ambient scale authors in the token
- * package. `rise` is the seventh because the stylesheet publishes a class for it
- * beside the other six and a Block that offered six of seven would be making the
- * caller find the seventh some other way.
+ * Eight members and seven are the cycles the ambient scale authors in the token
+ * package. `rise` is the eighth because the stylesheet publishes a class for it
+ * beside the other seven and a Block that offered seven of eight would be making
+ * the caller find the eighth some other way.
  *
  * The value is the caller's choice and the names are Prism's, and that is the
  * right way round. A field is which mechanism the reader is watching, which is a
@@ -30,11 +30,12 @@ export type Backdrop01Field =
   | 'pulse'
   | 'shimmer'
   | 'rise'
+  | 'aurora'
 
 /**
  * The class each cycle is named by, which is the whole of how a Block picks one.
  *
- * Seven entries and no shorthand anywhere near them. `prism-ambient-travel` reads
+ * Eight entries and no shorthand anywhere near them. `prism-ambient-travel` reads
  * its length from `var(--ambient-travel)` and its easing from
  * `var(--ambient-ease-linear)` in the one stylesheet a consumer downloads, so the
  * component package states a mechanism and the token package prices it. The
@@ -51,13 +52,14 @@ const AMBIENT: Record<Backdrop01Field, string> = {
   pulse: 'prism-ambient-pulse',
   shimmer: 'prism-ambient-shimmer',
   rise: 'prism-ambient-rise',
+  aurora: 'prism-ambient-aurora',
 }
 
 /**
  * How loud the field is behind the copy, as opacity on the layer that holds it.
  *
  * Two steps, and the names are Prism's while the choice is the caller's, for the
- * same reason the seven cycle names are: which of the two is a decision about
+ * same reason the eight cycle names are: which of the two is a decision about
  * contrast between a field and the copy sitting on it, and a decision a Block can
  * make from the two things it can see. The declared union rather than a lookup
  * into the map below, so the emitted declaration the corpus reads says
@@ -307,7 +309,11 @@ export type Backdrop01Props = {
  * full form, so they are safe on any drawing. `travel`, `sweep`, `scan` and
  * `shimmer` carry something *across* a field, which is what the stylesheet says
  * they are for, and a caller who puts one on a figure narrower than the band is
- * asking for a marker to leave. The band clips, so nothing escapes the frame, and
+ * asking for a marker to leave. `aurora` carries the whole layer rather than a
+ * mark across it: the figure rides a slow orbit and breathes at its edges, so
+ * it is the one mechanism here that suits a wash or a wide field and
+ * mismatches a drawing with a baseline, which would visibly leave the ground it
+ * was measured on. The band clips, so nothing escapes the frame, and
  * a caller who pauses and finds the field thin has learned which cycle their
  * figure wanted. That is the falsifiable test above doing its job, and it is a
  * better outcome than the alternative this Block refused: choosing the cycle for

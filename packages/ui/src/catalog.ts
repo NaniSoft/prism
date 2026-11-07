@@ -569,6 +569,39 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'ParticleField',
+    slug: 'particle-field',
+    kind: 'component',
+    category: 'Data display',
+    description:
+      'A living field: points drifting on linked paths, answering the pointer, and standing still as a complete figure when the loop is stopped or declined.',
+    source: 'src/components/ui/particle-field.tsx',
+    exports: ['ParticleField'],
+    status: 'stable',
+  },
+  {
+    name: 'AuroraWash',
+    slug: 'aurora-wash',
+    kind: 'component',
+    category: 'Data display',
+    description:
+      'Light moving through a ground: translucent planes in the pack’s own colours, each on its own long orbit of the aurora cycle.',
+    source: 'src/components/ui/aurora-wash.tsx',
+    exports: ['AuroraWash'],
+    status: 'stable',
+  },
+  {
+    name: 'Reveal',
+    slug: 'reveal',
+    kind: 'component',
+    category: 'Layout',
+    description:
+      'A section that meets the reader: the wrapper that binds an arrival to the reader’s own scroll position, with no script and no second introduction for the hero.',
+    source: 'src/components/ui/reveal.tsx',
+    exports: ['Reveal'],
+    status: 'stable',
+  },
+  {
     name: 'ProductMark',
     slug: 'product-mark',
     kind: 'component',

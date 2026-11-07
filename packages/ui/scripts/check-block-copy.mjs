@@ -225,6 +225,12 @@ const EXCLUSIONS = [
     reason:
       'the `preserveAspectRatio` value, which is two keywords from a closed set the SVG specification defines and a space apart by construction. It is the one machine value on an element that the shape rule reads as a sentence, and it is exempted by its own closed shape rather than by the attribute it happens to sit on: an `aria-label` reading `xMidYMid slice` would be nonsense, so exempting the pair costs nothing, and exempting the attribute would have exempted a real sentence.',
   },
+  {
+    name: 'a media condition',
+    match: /^\((?:prefers-reduced-motion: (?:reduce|no-preference)|prefers-color-scheme: (?:light|dark)|prefers-contrast: (?:more|less|no-preference))\)$/,
+    reason:
+      'a media-feature condition handed to `matchMedia`, read from its shape against the enumerated spellings the media-queries specification defines rather than from its position, because the platform compares the string and no reader ever sees it. `prefers-reduced-motion: reduce` reads as a sentence to the shape rule and is the platform\'s own spelling of a reader\'s preference, so the members are enumerated exactly as the key-name set is, and a sentence that merely begins with a condition stays a sentence.',
+  },
 ]
 
 /**
@@ -693,6 +699,11 @@ for (const result of results) {
 
       if (EXCLUSIONS[9].match.test(value)) {
         resolved.get(EXCLUSIONS[9]).push(`key name '${value}' (${shown})`)
+        continue
+      }
+
+      if (EXCLUSIONS[11].match.test(value)) {
+        resolved.get(EXCLUSIONS[11]).push(`media condition '${value}' (${shown})`)
         continue
       }
 

@@ -1,10 +1,10 @@
 ---
 title: Motion
-description: "Two laws: feedback on a short scale, and a running figure on a cycle scale, both by token."
+description: "Three laws: feedback on a short scale, a running figure on a cycle scale, and an arrival bound to the reader's own scroll, all by token."
 ---
 
-Motion has two laws, and they are different laws rather than one law with an
-exception. The distinction is falsifiable: stop the animation and ask whether
+Motion has three laws, and they are different laws rather than one law with
+exceptions. The distinction is falsifiable: stop the animation and ask whether
 the figure is still true and still legible.
 
 **Feedback is a response.** Something happened because the reader did it. They
@@ -14,29 +14,46 @@ overshoots. The scale is `fast` 80ms, `base` 160ms and `slow` 280ms, with
 token rather than a value, and it does not decide reduced motion for itself.
 
 **A cycle is a demonstration.** A marker crosses a rail, a reticle crosses a
-series, a wavefront crosses a field. The reader did not cause it and is not
-waiting for it: the figure is making a claim about a mechanism and the motion is
-how the claim is made visible. If stopping the animation leaves nothing true and
-nothing legible, the motion was the figure, and the right component is one that
-says it is atmosphere.
+series, a wavefront crosses a field, light crosses a ground. The reader did not
+cause it and is not waiting for it: the figure is making a claim about a
+mechanism and the motion is how the claim is made visible. If stopping the
+animation leaves nothing true and nothing legible, the motion was the figure,
+and the right component is one that says it is atmosphere.
 
-The cycle scale is separate because the two measure different things by a factor
+**An arrival is bound to the reader's own scroll.** A section a reader scrolls
+to may meet them, and the meeting is the third law rather than a loosened
+second: it runs on CSS scroll-driven animations, so no script decides when it
+plays and no timer can play it early; the content exists in the document from
+the first paint; a browser that does not ship the timeline declines the whole
+rule and shows the section simply there; and the universal reduced-motion rule
+hands that reader the same still page. The one script-driven figure in the
+system, `ParticleField`, follows the same test from the other side: it renders
+its complete still figure on the server and the script only adds the movement.
+
+The cycle scale is separate because it measures a different thing by a factor
 of twenty-five, and one name cannot mean both. `ambient` is in seconds, and the
-emitted contract measures it with a floor of one second: a cycle faster than that
-is unreadable before it is understood.
+emitted contract measures it with a floor of one second: a cycle faster than
+that is unreadable before it is understood.
 
-Three rules bound it, and none of them is a matter of taste.
+Three rules bound the ambient layer, and none of them is a matter of taste.
 
-- **Nothing is hidden.** No ambient rule sets `opacity: 0`, and nothing waits
-  for a script, an intersection or a timer. Every figure is complete at first
-  paint, so a reader with scripting off, a print stylesheet or a crawler sees the
-  whole drawing.
+- **Nothing in the ambient layer is hidden.** No ambient rule sets `opacity: 0`
+  and no ambient figure waits for a script or a timer. Every figure is complete
+  at first paint, so a reader with scripting off, a print stylesheet or a
+  crawler sees the whole drawing. The reveal layer is the one exception ever
+  granted, and it is granted to the reader's own scroll position rather than to
+  a script: it lives behind a capability check, and collapses to the fully
+  visible form the moment anything, including reduced motion, declines to run
+  it.
 - **Reduced motion removes the movement, not the figure.** The
   `prefers-reduced-motion` block is one unlayered rule setting `animation: none`
   and `transition: none` on the universal selector, and because every resting
   state is the full form, that reader gets the same figure, still.
-- **Compositor properties only.** Every keyframe animates `transform` or
-  `opacity`. Nothing in the layer animates a layout or paint property.
+- **Compositor properties only.** Every ambient keyframe animates `transform`
+  or `opacity`. Nothing in the layer animates a layout or paint property. The
+  one named exception is the spectrum ink on display type, which animates a
+  gradient position because text cannot be moved behind its own gradient, and
+  the exception is a class in the stylesheet with a scope, not a licence.
 
 One rule covers the whole package rather than each component guarding itself, and
 that is a correction rather than a preference. A `motion-safe:` variant adds a
@@ -51,8 +68,8 @@ announcement, without the time.
 A keyframe is a mechanism and lives in the component package's stylesheet; a
 duration is a value and lives in the token source. They meet at exactly one
 place, an `animation` shorthand whose length is `var(--ambient-travel)`, so
-neither can invent the other. The six `prism-ambient-*` classes exist so that a
-component picks a cycle by naming a mechanism and never writes a timing.
+neither can invent the other. The eight `prism-ambient-*` classes exist so that
+a component picks a cycle by naming a mechanism and never writes a timing.
 
 <TokenTable group="motion" />
 

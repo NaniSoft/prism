@@ -257,6 +257,15 @@ const BUDGETS = {
   'mini-calendar': 4,
   'mode-toggle': 3,
   'password-field': 3,
+  /**
+   * The one script-driven figure, measured at 4.6 KB and held a little above
+   * that. Its weight is the arm function: the loop, the observers and the
+   * palette read, all of it its own rather than a dependency's, so the row
+   * cannot grow by composing something already budgeted and the headroom is
+   * the field's own. The floor and the wash it travels with are server
+   * markup and cost the client nothing.
+   */
+  'particle-field': 6,
   avatar: 3,
   calendar: 14,
   carousel: 12,

@@ -169,8 +169,8 @@
  * The ambient motion layer.
  *
  * ---------------------------------------------------------------------------
- * This section exists because the system has two kinds of motion, and until now
- * it had only the first.
+ * This section exists because the system has three kinds of motion, and for a
+ * long time it had only the first.
  * ---------------------------------------------------------------------------
  *
  * The motion that was already here is *feedback*: a reader hovered a control, or
@@ -180,7 +180,7 @@
  * wearing feedback's clothes. That reasoning is unchanged and everything built
  * on it stands.
  *
- * What was missing is the other kind. A figure that shows a *system running* is
+ * What was missing is the other two. A figure that shows a *system running* is
  * not a response to anything. Nobody hovered it. There is no interaction to
  * acknowledge, no state to enter, and therefore no transition to run and nothing
  * for a reader to wait for. It is a claim about what the product does, drawn
@@ -196,6 +196,15 @@
  * uncancellable loop on a reader who had asked for less motion. So the intent
  * came back and the mechanism did not.
  *
+ * The third kind is an *arrival*: a section a reader scrolled to meets them
+ * rather than sitting there all along. It is the one motion that is allowed to
+ * begin from an invisible state, and it earns that by being bound to the
+ * reader's own scroll position through CSS scroll-driven animations: no script
+ * decides when it plays, no timer can play it early, and a browser that does
+ * not support the timeline ships no reveal at all rather than a hidden one. The
+ * rules for it live with the reveal utilities below and in the third law of
+ * motion in DESIGN.md.
+ *
  * The rules that make this layer safe, and every one of them is a rule a
  * reviewer can check rather than a principle:
  *
@@ -205,13 +214,17 @@
  *      question "how long does this run for" has exactly one answer and it is
  *      in the token source.
  *
- *   2. **Nothing is hidden.** No rule in this layer sets `opacity: 0`, and
- *      nothing waits for a script, a scroll position or an intersection to
- *      reveal itself. A figure that starts hidden is a figure a reader with
- *      scripting off, a slow connection, or a print stylesheet never sees, and
- *      this system does not author that state. Every figure here renders its
- *      complete, correct, fully legible form at first paint; the animation only
- *      ever moves something that is already visible.
+ *   2. **Nothing is hidden.** No rule in the ambient layer sets `opacity: 0`,
+ *      and no figure here waits for a script or a timer. A figure that starts
+ *      hidden is a figure a reader with scripting off, a slow connection, or a
+ *      print stylesheet never sees, and this layer does not author that state.
+ *      Every figure here renders its complete, correct, fully legible form at
+ *      first paint; the animation only ever moves something that is already
+ *      visible. The reveal layer below is the one exception ever granted, and
+ *      it is granted to the reader's own scroll position rather than to a
+ *      script: it lives behind a capability check, holds no timeline a browser
+ *      does not ship, and collapses to the fully visible form the moment
+ *      anything, including reduced motion, declines to run it.
  *
  *   3. **Reduced motion removes the movement, not the figure.** The
  *      `prefers-reduced-motion` block at the foot of this section does not fade
@@ -368,11 +381,100 @@
   }
 }
 
+/*
+ * A wash drifting across a ground: the aurora. Two or three large translucent
+ * gradient planes, each on its own long orbit, read as light moving through a
+ * space rather than as an image cycling, which is the same claim every other
+ * cycle here makes in its own register.
+ *
+ * The plane's gradient and blur are the caller's composition and stay out of
+ * this file; the cycle owns only the movement, and the movement is a transform:
+ * translate and scale, one direction per plane, so two planes sharing this
+ * keyframe and differing only in their custom properties never move in step.
+ * The scale stays modest on purpose, because a blurred plane scaling past the
+ * bounds of its container is a flicker at the edges of vision, and the edges of
+ * vision are exactly where a wash must stay calm.
+ */
+@keyframes prism-aurora {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(
+        var(--ambient-aurora-x, 2.5rem),
+        var(--ambient-aurora-y, -1.5rem),
+        0
+      )
+      scale(var(--ambient-aurora-scale, 1.12));
+  }
+}
+
+/*
+ * A section arriving. This is the one keyframe in the system whose resting
+ * start is invisible, and the conditions under which it is authored are the
+ * third law of motion in DESIGN.md: it plays against the reader's own scroll
+ * position through a view timeline, it never runs on a clock, and every way of
+ * declining to run it leaves the content fully visible.
+ *
+ * The rise is half a rem rather than a screen-height leap for the same reason
+ * the first law caps its answers at a blink: an arrival is an acknowledgement
+ * that the reader moved, not a journey of its own.
+ */
+@keyframes prism-reveal {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.5rem, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/*
+ * The reading rail filling under the bar. A progress that a reader scrolled to
+ * is a reading, the same word the Progress indicator uses for the same reason,
+ * and a rail filling across the measure is the travel figure at the scale of a
+ * page: one marker, one rail, the reader's own hand providing the motion.
+ */
+@keyframes prism-rail {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/*
+ * The spectrum ink. A gradient crossing the ink of a display heading, on the
+ * sweep cycle the wavefront already owns, because the same tempo that reads as
+ * "a field being observed" reads as "a line being lit" when the figure under
+ * it is a word.
+ *
+ * This is the one keyframe in the system that animates a paint property,
+ * background-position, because text cannot be moved behind its own gradient; a
+ * transform would carry the glyphs with it. It is admitted for display ink
+ * alone, where the paint is one line of large type on a page, and the law that
+ * admits it names both the scope and the cost.
+ */
+@keyframes prism-spectrum {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 200% 50%;
+  }
+}
+
 @layer base {
   /*
-   * The ambient utilities. Six names, one per cycle the token scale authors, so
-   * a component picks a cycle by naming the mechanism it wants rather than by
-   * writing a shorthand with a duration in it.
+   * The ambient utilities. Eight names over the seven cycles the token scale
+   * authors, so a component picks a cycle by naming the mechanism it wants
+   * rather than by writing a shorthand with a duration in it. Seven mechanisms
+   * read the seven lengths; the eighth, rise, reads the shimmer's length,
+   * because a column growing out of a baseline and a frame shimmering are two
+   * readings of one tempo.
    *
    * Each is a class rather than a variant because a variant would still leave
    * the duration in the component's source, and the duration is the thing that
@@ -407,6 +509,10 @@
     animation: prism-rise var(--ambient-shimmer) var(--ambient-ease-out) infinite;
   }
 
+  .prism-ambient-aurora {
+    animation: prism-aurora var(--ambient-aurora) var(--ambient-ease-drift) infinite alternate;
+  }
+
   /*
    * The stagger, and the pause.
    *
@@ -437,6 +543,119 @@
   .prism-ambient-paused,
   .prism-ambient-paused * {
     animation-play-state: paused;
+  }
+}
+
+@layer base {
+  /*
+   * The reveal utilities, and the reading rail.
+   *
+   * ---------------------------------------------------------------------------
+   * Every rule in this block sits inside a capability check, and the check is
+   * the law, not the courtesy.
+   * ---------------------------------------------------------------------------
+   *
+   * A scroll-driven animation is safe to author only when the browser that
+   * cannot run it declines the whole rule rather than half of it. An animation
+   * whose timeline fails to resolve pauses at its first keyframe, and the first
+   * keyframe here is the invisible one: a browser given `animation-timeline`
+   * without support for it would hold every revealed section at opacity zero
+   * for as long as the page lived. The supports check closes that by handing
+   * the whole rule, animation and timeline together, to browsers that can honour
+   * both, and to every other browser nothing at all, which is the visible page.
+   * The motion gate holds this shape: a reveal or rail selector outside the
+   * matching capability check is a finding, so the law is a failure message
+   * rather than a paragraph.
+   *
+   * No duration is named anywhere in this block. A view timeline does not run on
+   * a clock, and the reader's scroll is the only input the reveal answers to:
+   * the stagger is written in `animation-range` offsets, fractions of the entry
+   * a section makes, rather than in milliseconds, because a delay on a
+   * scroll-driven animation would be a wait the reader did not cause and could
+   * not hurry. A section that has already finished entering when the page loads
+   * is simply present, which is why a hero carries no reveal: its entry is the
+   * page's entry, and the page does not introduce itself twice.
+   *
+   * The rail is the same law at the scale of the page: `scroll()` against the
+   * root scroller, one transform from empty to full. Its whole figure, the
+   * geometry and the spectrum stops and the movement, lives inside the same
+   * capability check, because a browser that cannot run the timeline must not
+   * be handed a finished rainbow it cannot fill: the rail a browser cannot
+   * animate is no rail at all, not a permanently full one. Reduced motion
+   * holds it in the same stroke as every cycle: the universal block at the
+   * foot of this file stops the animation and the rail rests at full, a
+   * spectrum hairline that no longer claims a position, which is the figure
+   * still true and the movement gone.
+   */
+  @supports (animation-timeline: view()) {
+    .prism-reveal {
+      animation: prism-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 45%;
+    }
+
+    .prism-reveal-delay-1 {
+      animation-range: entry 12% entry 52%;
+    }
+
+    .prism-reveal-delay-2 {
+      animation-range: entry 20% entry 60%;
+    }
+
+    .prism-reveal-delay-3 {
+      animation-range: entry 28% entry 68%;
+    }
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .prism-scroll-rail {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      transform-origin: left center;
+      background-image: linear-gradient(
+        90deg,
+        var(--chart-1),
+        var(--chart-2),
+        var(--chart-3),
+        var(--chart-4),
+        var(--chart-5)
+      );
+      animation: prism-rail linear both;
+      animation-timeline: scroll();
+    }
+  }
+
+  /*
+   * The spectrum ink, outside both capability checks because it runs on a clock
+   * like every ambient cycle and needs no timeline a browser might not ship.
+   *
+   * The stops are semantic and the ends are foreground, which is the part that
+   * keeps it legible in every pack and both modes: a gradient that began and
+   * ended in a chart colour would hand the reader's legibility to the series
+   * palette, whose job is distinctness between series, not contrast against a
+   * ground. The pack's primary and one series colour pass through the middle of
+   * the sweep, so the ink lights up with the page's own hue and settles back to
+   * full contrast at the turn. It is for display ink: the one place it is
+   * authored is a page's largest type, where a moment of a mid-sweep stop is a
+   * large-text contrast question rather than a body-text one.
+   */
+  .prism-text-spectrum {
+    background-image: linear-gradient(
+      90deg,
+      var(--foreground),
+      var(--primary),
+      var(--chart-2),
+      var(--primary),
+      var(--foreground)
+    );
+    background-size: 200% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: prism-spectrum var(--ambient-sweep) var(--ambient-ease-linear) infinite;
   }
 }
 

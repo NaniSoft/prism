@@ -96,15 +96,38 @@ export function run({ root, config }) {
         '  all. A workspace configuration that does not exist is the cleanest version of this defect.',
     )
   }
+  /*
+   * The one sanctioned mention of the token package in the workspace
+   * configuration: an overrides entry whose value is a file: path, which is how
+   * a consumer verifies an unreleased pair against local packs before the
+   * release that publishes them. The escape is shaped so it cannot carry the
+   * thing this law refuses: a file: value names a tarball on the verifier's own
+   * disk, the version lives inside that tarball, and no number this repository
+   * could write here would survive the release the override exists to precede.
+   * A version, a range or a registry spec in this file is still the finding it
+   * always was, and so is any mention outside an overrides key.
+   */
+  const localTokensOverride = new RegExp(
+    `^\\s*['"]?${TOKEN_PACKAGE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"]?\\s*:\\s*file:`,
+  )
   workspace.split('\n').forEach((line, index) => {
     if (!line.includes(TOKEN_PACKAGE)) return
+    if (localTokensOverride.test(line)) {
+      notes.push(
+        `${l.id}: a local file override for ${TOKEN_PACKAGE} was read in ${workspacePath}. It carries no ` +
+          'version, so it is not a second declaration; it comes out when the released pair lands and the pin moves',
+      )
+      return
+    }
     findings.push(
       finding(
         `${workspacePath}:${index + 1}`,
         'second-declaration',
         'the token package\'s name is in the workspace configuration. A release-age exclusion is a\n' +
           '      second declaration of the version the component package already declares, and it is the\n' +
-          '      copy nothing else can see.',
+          '      copy nothing else can see. The one sanctioned mention is an overrides entry whose value\n' +
+          '      is a file: path, which names a local pre-release pack rather than a version this\n' +
+          '      repository states.',
       ),
     )
   })

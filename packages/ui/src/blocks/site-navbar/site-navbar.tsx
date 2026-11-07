@@ -205,12 +205,29 @@ export type SiteNavbarProps = {
    * because the bar is how a reader leaves the page they are on, and a bar that
    * scrolls away takes that with it on exactly the long pages a reader needs it.
    *
-   * `false` is honoured: the bar is then part of the flow and scrolls away with the
-   * page. It was accepted and ignored until this release, so a site that passed it
+   * `false` is honoured: the bar is then part of the flow and scrolls away with
+   * the page. It was accepted and ignored until this release, so a site that passed it
    * was given the sticky bar it had asked not to have, and `SiteHeader` has always
    * applied it the other way round.
    */
   sticky?: boolean
+  /**
+   * Draws the reading rail: a two-pixel spectrum line on the bar's bottom
+   * hairline that fills with the reader's own progress through the page.
+   * @defaultValue true
+   *
+   * On by default, because the rail is the one motion that costs a reader
+   * nothing: it is bound to the scroll position the reader already owns, it
+   * runs on a transform, and a browser that cannot run it draws no rail rather
+   * than an empty promise of one. A reader who asked the platform for less
+   * motion gets a still spectrum hairline, the same figure without the claim.
+   *
+   * `false` is for the pages the rail would misread: a short page whose scroll
+   * never gets going, or a composition where a second line under the bar is a
+   * line too many. The rail rides only a sticky bar, so `sticky={false}` takes
+   * it regardless.
+   */
+  scrollRail?: boolean
   /** Layout only. Changing a Prism-owned visual property from here is prohibited. */
   className?: string
 }
@@ -253,7 +270,10 @@ export type SiteNavbarProps = {
  * The bottom hairline is `border-border`, so the bar separates from the page by a
  * line rather than by a fill change, which is how every surface in this system is
  * separated: in the base pack `background` and `card` resolve to the same value, so
- * a fill is not available as a separator.
+ * a fill is not available as a separator. On the sticky bar the same hairline
+ * carries the reading rail, the spectrum line that fills with the reader's own
+ * progress through the page; see `scrollRail`, and the Motion section of
+ * `DESIGN.md` for the law it runs under.
  *
  * **The bar is opaque, and it used not to be.** It carried `bg-background/80` and
  * `backdrop-blur`, so the page showed through it blurred. A backdrop filter is
@@ -279,12 +299,14 @@ export type SiteNavbarProps = {
  * all, because the colour under it is a decision the reader's scroll position makes
  * and no token in this system describes it.
  *
- * `will-change` is absent and stays absent. A `backdrop-filter` is promoted to its
- * own layer by the browser when it has something to filter, so `will-change` on the
- * bar would only keep that layer alive: nothing on this bar animates, there is no
- * frame coming for the hint to be ready for, and a hint applied at rest is a hint
- * with no release. This package ships no `will-change` anywhere, and the bar is not
- * the place to start one.
+ * `will-change` is absent and stays absent. Two things on this bar move, and
+ * both are compositor transforms that the browser promotes when they animate:
+ * the current link's underline, which grows once per navigation at the authored
+ * duration, and the reading rail, which is driven by the scroll position
+ * through the stylesheet's scroll timeline rather than by a frame budget a hint
+ * could front. A hint applied at rest is a hint with no release, and neither
+ * motion needs one. This package ships no `will-change` anywhere, and the bar
+ * is not the place to start one.
  *
  * **It is a server Component whose client islands are the ones a reader opens.** The
  * lockup and the row's links are rendered on the server and ship no JavaScript; the
@@ -312,6 +334,7 @@ export function SiteNavbar({
   mobileLabels,
   actions,
   sticky = true,
+  scrollRail = true,
   className,
 }: SiteNavbarProps) {
   const entries = nav ?? []
@@ -388,8 +411,19 @@ export function SiteNavbar({
                   rel={entry.newTab ? 'noopener noreferrer' : undefined}
                   target={entry.newTab ? '_blank' : undefined}
                   className={
+                    /*
+                     * The current mark is an underline rather than a filled pill,
+                     * and the reason is the reading rail at the foot of the bar:
+                     * the bar now carries one spectrum line that answers the
+                     * scroll, and a block of accent fill sitting above it would
+                     * have been two indicator systems on one edge. The underline
+                     * is shape rather than colour, so a reader who cannot
+                     * distinguish the hues still finds the page they are on, and
+                     * `aria-current` still says it to a reader who sees nothing
+                     * at all.
+                     */
                     entryCurrent(entry)
-                      ? 'bg-accent text-accent-foreground focus-visible:border-ring focus-visible:ring-ring rounded-md px-2 py-1.5 text-sm font-medium transition-colors focus-visible:ring-[3px] focus-visible:outline-none'
+                      ? 'text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-ring relative rounded-md px-2 py-1.5 text-sm font-medium transition-colors after:absolute after:inset-x-2 after:bottom-0.5 after:h-0.5 after:origin-left after:rounded-full after:bg-gradient-to-r after:from-chart-1 after:via-chart-3 after:to-chart-5 after:scale-x-100 after:transition-transform after:duration-base after:ease-out focus-visible:ring-[3px] focus-visible:outline-none'
                       : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-ring rounded-md px-2 py-1.5 text-sm font-medium transition-colors focus-visible:ring-[3px] focus-visible:outline-none'
                   }
                 >
@@ -430,6 +464,21 @@ export function SiteNavbar({
           actions={actions}
         />
       </div>
+      {/*
+        The reading rail, drawn on the bottom hairline and filled by the page's
+        own scroll. It is the travel figure at the scale of a page: one marker,
+        one rail, the reader's hand providing the motion, which is why it rides
+        the stylesheet's scroll timeline rather than any script. The whole
+        figure, look and movement together, lives behind the capability check in
+        the stylesheet, so a browser that cannot run the timeline draws no rail
+        at all; it is `aria-hidden`, because a reading position a reader can see
+        in the scrollbar already is not information this bar needs to announce;
+        and it rides only the sticky bar, because a rail that scrolls away with
+        the page is a rail nobody can read.
+      */}
+      {sticky && scrollRail ? (
+        <span data-slot="site-navbar-rail" aria-hidden className="prism-scroll-rail" />
+      ) : null}
     </header>
   )
 }

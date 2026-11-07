@@ -166,6 +166,29 @@ test('the pin gate passes on a consumer that pins the one package and declares n
   assert.match(result.stdout, /pinned exactly, and @nanisoft\/prism-tokens is declared by @nanisoft\/prism-ui@/)
 })
 
+test('the pin gate allows the one sanctioned mention, a file override that carries no version', () => {
+  const local = pinToRealSystem(
+    consumer({
+      workspace:
+        "overrides:\n  '@nanisoft/prism-tokens': file:../prism-local-packs/nanisoft-prism-tokens-1.3.0.tgz\n",
+    }),
+  )
+  const passed = run(local, { gates: ['pin'] })
+  assert.equal(passed.status, 0, passed.stdout + passed.stderr)
+  assert.match(passed.stdout, /a local file override for @nanisoft\/prism-tokens was read/)
+
+  // The escape is the shape, not the name: the same override carrying a version
+  // instead of a path is the second declaration it always was.
+  const versioned = pinToRealSystem(
+    consumer({
+      workspace: "overrides:\n  '@nanisoft/prism-tokens': '1.3.0'\n",
+    }),
+  )
+  const failed = run(versioned, { gates: ['pin'] })
+  assert.equal(failed.status, 1)
+  assert.match(failed.stderr, /pnpm-workspace\.yaml:\d+\s+\[second-declaration\]/)
+})
+
 test('the pin gate fails rather than passing when the design system does not resolve', () => {
   const root = consumer()
   const result = run(root, { gates: ['pin'] })
@@ -651,10 +674,18 @@ test('no consumer declares the token package, and none names it in its workspace
       )
     }
     const workspace = readFileSync(path.join(REPO, '..', site, 'pnpm-workspace.yaml'), 'utf8')
+    // The pin gate sanctions exactly one mention: an overrides entry whose value
+    // is a file: path, which is a local pre-release pack carrying its own
+    // version rather than a number the consumer states. Every other mention of
+    // the name is still the second declaration the law refuses.
+    const unsanctioned = workspace
+      .split('\n')
+      .filter((line) => /@nanisoft\/prism-tokens/.test(line))
+      .filter((line) => !/^\s*['"]?@nanisoft\/prism-tokens['"]?\s*:\s*file:/.test(line))
     assert.equal(
-      /@nanisoft\/prism-tokens/.test(workspace),
-      false,
-      `${site} names @nanisoft/prism-tokens in its workspace configuration`,
+      unsanctioned.length,
+      0,
+      `${site} names @nanisoft/prism-tokens in its workspace configuration outside the one sanctioned file override`,
     )
   }
 })

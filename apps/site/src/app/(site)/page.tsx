@@ -11,10 +11,13 @@ import { Hero01 } from '@nanisoft/prism-ui/blocks/hero-01'
 import { MediaBand01 } from '@nanisoft/prism-ui/blocks/media-band-01'
 import { ProductGrid01 } from '@nanisoft/prism-ui/blocks/product-grid-01'
 import { AvatarGroup } from '@nanisoft/prism-ui/components/avatar-group'
+import { AuroraWash } from '@nanisoft/prism-ui/components/aurora-wash'
 import { Badge } from '@nanisoft/prism-ui/components/badge'
 import { Input } from '@nanisoft/prism-ui/components/input'
 import { Label } from '@nanisoft/prism-ui/components/label'
 import { MiniCalendar } from '@nanisoft/prism-ui/components/mini-calendar'
+import { ParticleField } from '@nanisoft/prism-ui/components/particle-field'
+import { Reveal } from '@nanisoft/prism-ui/components/reveal'
 import { SignalField } from '@nanisoft/prism-ui/components/signal-field'
 import { Slider } from '@nanisoft/prism-ui/components/slider'
 import { Sparkline } from '@nanisoft/prism-ui/components/sparkline'
@@ -127,18 +130,43 @@ const SITES = [
 export default function HomePage() {
   return (
     <>
+      {/*
+        The hero carries the page's one authored moment and no arrival: its entry
+        is the page's entry, and the page does not introduce itself twice. The
+        ground is the claim, a lit surface with a medium moving through it, and
+        the punch phrase of the headline carries the spectrum ink, the one motion
+        on text this system authors.
+      */}
       <Hero01
         headingLevel="h1"
         eyebrow="NaniSoft design system"
-        title="Components your product composes. CSS it never writes."
+        title={
+          <>
+            Components your product composes.{' '}
+            <span className="prism-text-spectrum">CSS it never writes.</span>
+          </>
+        }
         description="A token pipeline, a React library you compose, and documentation read from the build rather than retyped from it."
         actions={[
           { label: 'Read the quickstart', href: '/overview/quickstart' },
           { label: 'Browse components', href: '/components', variant: 'outline' },
         ]}
         instrument={<SpecimenBoard values={SPARK_VALUES} />}
+        backdrop={
+          <>
+            <AuroraWash />
+            <ParticleField count={48} />
+          </>
+        }
       />
 
+      {/*
+        The bands a reader scrolls to meet them on the way in; the hero and the
+        install band stay still, because a page that arrives everywhere arrives
+        nowhere, and the command band is furniture rather than an argument. The
+        delays step the rhythm so the two editorial bands do not enter in step.
+      */}
+      <Reveal>
       <Specimens
         headingLevel="h2"
         title="Rendered, not pictured"
@@ -272,23 +300,27 @@ export default function HomePage() {
           },
         ]}
       />
+      </Reveal>
 
       <InstallBand />
 
+      <Reveal>
       <Foundations />
+      </Reveal>
 
       {/*
-        The motion band: the system's second law, running.
+        The motion band: the laws, running.
 
         The page's other bands are read, and this one is watched. The field behind
         the copy is a `SignalField` on the drift cycle, both from the package the
         page documents, and the stop control is the Block's own, so the law's test
         is on the page beside the law: stop the field, and the band is still true.
       */}
+      <Reveal delay={1}>
       <Backdrop01
         headingLevel="h2"
-        title="Motion, two laws"
-        description="Feedback runs on the authored scale and never overshoots; a figure that shows a system running rides its own cycle and stays true with the animation stopped. This band is the second law, running."
+        title="Motion, three laws"
+        description="Feedback runs on the authored scale and never overshoots; a figure that shows a system running rides its own cycle and stays true stopped; a section that meets you does so on your own scroll. This band is the second law, running, and the arrivals around it are the third."
         field="drift"
         intensity="present"
         pauseControl
@@ -308,9 +340,17 @@ export default function HomePage() {
           <div className="flex flex-col gap-1">
             <h3 className="text-base font-semibold tracking-tight">The second law is ambient</h3>
             <p className="text-muted-foreground text-pretty text-sm">
-              A figure that shows a system running rides one of six cycles, none shorter than a
+              A figure that shows a system running rides one of seven cycles, none shorter than a
               second, and stops to the same figure. The field behind this copy is the second law,
               and the control stops it.
+            </p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <h3 className="text-base font-semibold tracking-tight">The third law is arrival</h3>
+            <p className="text-muted-foreground text-pretty text-sm">
+              Every band you scrolled to on this page met you on the way in, and the rail in the
+              bar above has been filling since you started reading. That is the whole of the third
+              law: your own scroll, answered, and never a script.
             </p>
           </div>
           <Link
@@ -322,14 +362,18 @@ export default function HomePage() {
           </Link>
         </div>
       </Backdrop01>
+      </Reveal>
 
+      <Reveal>
       <PackBand
         headingLevel="h2"
         title="Eight packs, one contract"
         description="A pack re-points the semantic tokens rather than replacing them, so the component package is published once and the theme is chosen at runtime. Every pack below is drawn in its own values, on the page you are reading."
         action={{ label: 'See the packs', href: '/foundation/themes' }}
       />
+      </Reveal>
 
+      <Reveal delay={1}>
       <MediaBand01
         headingLevel="h2"
         title="One design language. Five expressions."
@@ -339,7 +383,9 @@ export default function HomePage() {
         align="media-right"
         caption="A composition, not a photograph: the prism is the mark, the fan is the pack set, and the beam is one token contract."
       />
+      </Reveal>
 
+      <Reveal delay={2}>
       <ProductGrid01
         headingLevel="h2"
         title="Used by every NaniSoft site"
@@ -347,6 +393,7 @@ export default function HomePage() {
         products={SITES}
         caption="The company site and the three products that are live today. Nexus is in development, and its site is the fourth."
       />
+      </Reveal>
     </>
   )
 }

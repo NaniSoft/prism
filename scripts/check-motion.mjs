@@ -55,6 +55,18 @@
  * the file is in the population and stays quiet in a staged tree that has no
  * stylesheet in it.
  *
+ * AND THE SIXTH THING, WHICH IS ALSO A POSITION RATHER THAN A PATTERN
+ *
+ * The scroll-driven layer is checked over the same file, for a reason that is the
+ * reveal law's own. An animation whose timeline fails to resolve pauses at its
+ * first keyframe, and a reveal's first keyframe is the invisible one, so a
+ * `.prism-reveal` or `.prism-scroll-rail` selector outside the `@supports` block
+ * naming its timeline is a browser-conditional hidden state: every browser that
+ * cannot run the timeline holds the content at opacity zero for the life of the
+ * page, and nothing in the shipped surface would say so. `reveal-guard` holds
+ * that the whole rule, animation and timeline together, sits inside the one
+ * capability check that can honour both.
+ *
  * WHAT IS DELIBERATELY NOT READ, AND WHY
  *
  * `packages/tokens/**` is the foundation tier and owns the values. The literal curve
@@ -356,7 +368,7 @@ const RULES = [
     id: 'arbitrary-motion',
     pattern: /(?:^|[^\w-])(?:duration|ease|animate)-\[/g,
     message:
-      'an arbitrary duration, easing or animation utility — name `duration-fast|base|slow` and `ease-out|in-out`, or one of the six `prism-ambient-*` classes',
+      'an arbitrary duration, easing or animation utility — name `duration-fast|base|slow` and `ease-out|in-out`, or one of the eight `prism-ambient-*` classes',
   },
   {
     id: 'value-in-style',
@@ -562,6 +574,62 @@ function checkPolicy(source, readable) {
 }
 
 /**
+ * The scroll-driven layer, checked over the stylesheet that states it.
+ *
+ * A reveal or rail selector must sit inside the `@supports` block naming the
+ * timeline it reads, and the check is positional for the reason the header states:
+ * the defect is not a token in the rule but the rule's place in the file. The
+ * selector pattern runs over the MASKED text, so a class name quoted in a comment
+ * is a record and stays one, exactly as for the pattern rules.
+ *
+ * The timeline is matched on the member rather than the string, so a check that
+ * should hold `view()` cannot be satisfied by a block that promises `scroll()`:
+ * the two supports conditions are different laws, and the rail must not ride the
+ * reveal's coat tails nor the reveal the rail's.
+ */
+const REVEAL_SELECTOR = /\.prism-((?:reveal|scroll-rail)[\w-]*)/g
+
+function checkScrollDriven(source, readable) {
+  for (const match of readable.matchAll(REVEAL_SELECTOR)) {
+    const kind = match[1] === 'reveal' || match[1].startsWith('reveal-') ? 'reveal' : 'rail'
+    const member = kind === 'reveal' ? 'view' : 'scroll'
+    /*
+     * The at-rule stack is walked over the MASKED text, not the raw one. A
+     * prelude is read back to the nearest `{};`, and in the raw source the
+     * text before an `@supports {` is its own explaining comment, so the
+     * prelude would start with `/*` and the check would report the block it
+     * exists to hold. Masked, the comment is spaces, the brace structure is
+     * unchanged, and the prelude is the at-rule and nothing else.
+     */
+    const guarded = enclosingAtRules(readable, match.index).some((rule) => {
+      const flat = rule.replace(/\s+/g, ' ')
+      return (
+        flat.startsWith('@supports') &&
+        flat.includes('animation-timeline') &&
+        flat.includes(`animation-timeline: ${member}()`)
+      )
+    })
+    if (guarded) continue
+    findings.push({
+      rule: 'reveal-guard',
+      file: STYLESHEET,
+      line: lineAt(source, match.index),
+      text: `.${match[1]}`,
+      message:
+        kind === 'reveal'
+          ? 'a reveal selector outside the `@supports (animation-timeline: view())` block that must hold it. An ' +
+            'animation whose timeline fails to resolve pauses at its first keyframe, and the first keyframe is ' +
+            'the invisible one: every browser that cannot run the timeline would hold this content hidden for ' +
+            'the life of the page. The whole rule, animation and timeline together, is handed to browsers that ' +
+            'can honour both, and to every other browser nothing at all'
+          : 'a rail selector outside the `@supports (animation-timeline: scroll())` block that must hold it. A ' +
+            'rail a browser cannot animate is no rail at all, not a permanently full one, so the whole figure, ' +
+            'the look and the movement together, rides the same capability check',
+    })
+  }
+}
+
+/**
  * The at-rules a position in the stylesheet sits inside, outermost first.
  *
  * Braces only, and no string handling, which is a stated limit rather than an
@@ -618,6 +686,7 @@ for (const result of results) {
     if (shown === STYLESHEET) {
       policyRead = true
       checkPolicy(source, readable)
+      checkScrollDriven(source, readable)
     }
   }
 }
@@ -660,6 +729,12 @@ console.log(
         'names no class, and both `animation: none` and `transition: none`'
       : 'NOT READ on this run, because that file is not in the population this tree was walked with'),
 )
+console.log(
+  `${NAME}: the scroll-driven layer is lawfully placed or it does not ship: every ` +
+    '`prism-reveal` selector inside `@supports (animation-timeline: view())` and every `prism-scroll-rail` ' +
+    'inside `@supports (animation-timeline: scroll())`, so a browser without the timeline is handed no rule at ' +
+    'all rather than half of one',
+)
 console.log(`${NAME}: not read, by scope rather than by exclusion: ${EXCLUSIONS.join('; ')}`)
 console.log(
   `${NAME}: ${skipped} generated file(s) skipped as build output` +
@@ -669,10 +744,11 @@ console.log(
 if (findings.length > 0) {
   console.error(
     '\nMotion is priced by a named token or it is not priced. `DESIGN.md` states the scale: `duration-fast`\n' +
-      '  80ms, `duration-base` 160ms, `duration-slow` 280ms, `ease-out` and `ease-in-out`, and the six\n' +
+      '  80ms, `duration-base` 160ms, `duration-slow` 280ms, `ease-out` and `ease-in-out`, and the eight\n' +
       '  `prism-ambient-*` classes for a cycle. A figure that shows a system running names an `ambient-*`\n' +
-      '  token and one of those classes, which resolves the cycle for you. Reduced motion is decided in one\n' +
-      '  rule at the foot of `packages/ui/src/styles.css` and not at a call site.',
+      '  token and one of those classes, which resolves the cycle for you. A section that meets the reader\n' +
+      '  is one of the `prism-reveal` utilities behind its capability check, and never a script. Reduced\n' +
+      '  motion is decided in one rule at the foot of `packages/ui/src/styles.css` and not at a call site.',
   )
   process.exit(1)
 }

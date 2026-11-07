@@ -75,6 +75,11 @@ of those is a mechanism, and a mechanism reads better shown than described. The
 figure should be one that would still be true with every animation stopped, so
 what the reader gets from it is the claim and the motion is only the emphasis.
 
+Compose a ground with `backdrop` when the claim is the surface the hero stands
+on. An `AuroraWash` says the surface is lit, a `ParticleField` says there is a
+medium to move through, and the band clips and positions whatever it is given,
+so the caller composes a claim rather than a layout.
+
 ### When not to use
 
 Do not use Hero01 inside an application screen. It is a marketing composition,
@@ -88,7 +93,9 @@ inside `Section` instead.
 
 Do not pass a figure that is only interesting while it moves. A slot that reads
 as empty in a still frame is a decoration with a slot, and this system does not
-author those.
+author those. The same test holds for the ground: a `backdrop` that collapses
+into nothing when it is stopped was a video with extra steps, and the hero is a
+band making a claim, not a frame around one.
 
 ### Best practices
 

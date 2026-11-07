@@ -3404,10 +3404,12 @@ the class is.
 
 ## Motion
 
-The system has two laws of motion, and they are different laws rather than one
-law with an exception carved out of it. Everything above this heading is the
-first. This heading is the second, and the second exists because the first alone
-left a hole that four products fell into.
+The system has three laws of motion, and they are different laws rather than one
+law with exceptions carved out of it. Everything above this heading is the
+first. This section holds the second and the third: the second exists because
+the first alone left a hole that four products fell into, and the third exists
+because the system then refused the one motion a reader causes a hundred times
+a page, their own scroll.
 
 ### The hole, stated as a measurement
 
@@ -3430,7 +3432,17 @@ was written to exclude, and permitting it would have undone a correct decision
 to make an incorrect one. The fix was to name the second kind of motion for what
 it is, and then to bound it with rules that can be checked.
 
-### The two laws
+The third law has the same shape of story. The refusal of scroll effects held
+for as long as it did because the alternatives were all scripts: an observer
+deciding what the reader had reached, a timer deciding when, an animation
+library deciding how. Then CSS scroll-driven animations arrived, and with them
+a motion that is bound to the reader's own hand, needs no script, and declines
+wholesale in a browser that cannot run it. The page stopped being the one
+surface in a reader's life that never answered their scroll, and the refusal
+that had protected the page from scripts was left protecting it from a
+stylesheet.
+
+### The three laws
 
 **Feedback is a response.** Something happened because the reader did it: a
 control was hovered, focused, pressed, opened, closed. The reader is waiting for
@@ -3439,9 +3451,18 @@ overshoots. This law is unchanged by this section.
 
 **A cycle is a demonstration.** Something runs because the system does: a marker
 crosses a rail, a reticle crosses a series, a wavefront crosses a field, a point
-drifts. The reader did not cause it and is not waiting for it. Nothing is being
-answered. The figure is making a claim about a mechanism, and the motion is how
-the claim is made visible rather than merely asserted.
+drifts, light crosses a ground. The reader did not cause it and is not waiting
+for it. Nothing is being answered. The figure is making a claim about a
+mechanism, and the motion is how the claim is made visible rather than merely
+asserted.
+
+**An arrival is bound to the reader's own scroll.** A section a reader scrolls
+to may meet them rather than sitting there all along, and the meeting is the
+reader's own motion continued rather than a new one started for them. It is the
+only motion in the system that may begin from an invisible state, and
+everything about how it is authored follows from whose motion it is: no script
+decides when it plays, no clock can play it early, and no browser is left
+holding content it cannot reveal.
 
 The distinction is not a rationalisation for ornament, and the test for which
 one a motion is is falsifiable: **stop the animation. Is the figure still true
@@ -3468,6 +3489,7 @@ hundreds of milliseconds is a flicker rather than a cycle.
 | `--ambient-scan` | 6000ms | a reticle crossing a series |
 | `--ambient-pulse` | 2400ms | a node breathing while a marker passes |
 | `--ambient-shimmer` | 3200ms | a figure's own load shimmer |
+| `--ambient-aurora` | 24000ms | light crossing a ground, on the drift easing |
 
 The easings are separate for the same reason, and `ease` and `ambient-ease` are
 both closed to two or three members with no control point y above 1:
@@ -3497,18 +3519,21 @@ var(--ambient-ease-linear) infinite` in the component package's stylesheet is a
 duration *naming* a duration. So a keyframe cannot invent a timing and a token
 cannot invent a trajectory, and every cycle in the system is priced by the token
 that names it. A component never writes a keyframe name into a shorthand with a
-length attached, and the six `prism-ambient-*` classes exist precisely so it
+length attached, and the eight `prism-ambient-*` classes exist precisely so it
 never has to.
 
 ### The four rules that make this safe
 
-**Nothing is hidden.** No rule in the ambient layer sets `opacity: 0`, and
-nothing waits for a script, an intersection, a scroll position or a timer. Every
-figure renders its complete, correct, fully legible form at first paint, and the
-animation only ever moves something already visible. A reader with scripting
-off, a slow connection, a print stylesheet, a crawler, or a browser that never
-runs the animation at all sees the whole drawing. This is why a consumer needs
-no exception to enable the `hidden-state` gate: the state does not exist.
+**Nothing is hidden.** No rule in the ambient layer sets `opacity: 0`, and no
+ambient figure waits for a script, an intersection, a scroll position or a
+timer. Every ambient figure renders its complete, correct, fully legible form at
+first paint, and the animation only ever moves something already visible. A
+reader with scripting off, a slow connection, a print stylesheet, a crawler, or
+a browser that never runs the animation at all sees the whole drawing. This is
+why a consumer needs no exception to enable the `hidden-state` gate: the
+ambient layer authors no hidden state, and the one hidden state the package
+does author is the reveal layer's, which holds its own claims below and cannot
+strand anything, because no script exists to strand it.
 
 **Reduced motion removes the movement, not the figure.** The
 `prefers-reduced-motion` block at the foot of `packages/ui/src/styles.css` is one
@@ -3579,15 +3604,89 @@ in the layer, because those are layout and paint properties that run on the main
 thread, and a figure built from them stutters on a mid-range machine. This is
 also why the three-dimensional transforms in `prism-drift` and the `scaleY` in
 `prism-rise` are written the way they are rather than as a width change that
-would read the same.
+would read the same. The spectrum ink below is the one exception, it is named
+where it is admitted, and it is a class with a scope rather than a licence.
+
+### The reveal layer, and the rail
+
+The third law is two blocks of utilities in the one stylesheet, and the claims
+each must hold are the law rather than a review step.
+
+**The reveal runs on the reader's own scroll, and on nothing else.** The
+`prism-reveal` utilities and their three delay steps are bound to a view
+timeline. No script arms them, no duration is named anywhere in the block, and
+the stagger is written in fractions of the entry rather than in milliseconds,
+because the reader's scroll is the only clock a reveal answers to and a delay a
+reader could not hurry would be a wait the reader did not cause.
+
+**The whole rule lives behind a capability check.** An animation whose timeline
+fails to resolve pauses at its first keyframe, and a reveal's first keyframe is
+the invisible one. Every reveal and rail selector therefore sits inside a
+`@supports` block naming the timeline it needs, and `scripts/check-motion.mjs`
+fails on one that does not, so a browser without the timeline is handed no rule
+at all rather than half of one, and gets the visible page.
+
+**The content exists from the first paint.** The reveal is a style the browser
+resolves, not a state a script flips: the section is in the document, complete,
+from the first paint, and a crawler, a print stylesheet and a reader with
+scripting off all meet it. This is the difference between the one hidden state
+this layer authors and the hidden state the ambient layer refuses, and it is
+why a consumer's `hidden-state` gate still needs no exception: the gate reads
+the consumer's own CSS, and the package's one hidden state is inert rather than
+armed.
+
+**A section that has finished entering is simply present.** The reveal plays
+across a section's entry and holds at its end. It never runs again, and a
+section above the fold when the page loads, a hero included, is better left
+unwrapped: the page does not introduce itself twice, and the one authored
+moment a page carries belongs to its hero, not to every band under it. The
+`Reveal` Component is a wrapper rather than a prop for the same reason, so no
+Block widens for a behaviour the whole page shares.
+
+**The rail is the same law at the scale of the page.** The reading rail under a
+sticky bar fills with the root scroller's position through a scroll timeline,
+on one transform, and its whole figure, the spectrum stops and the movement
+together, lives behind the same shape of capability check: a browser that
+cannot run the timeline draws no rail, not a permanently full one. It is
+`aria-hidden`, because a reading position the scrollbar already shows is not
+information, and under reduced motion it rests at full, which is the figure
+still true and the movement gone.
+
+### The living field, and the one exception on text
+
+**A script-driven figure renders its complete still form first.** `ParticleField`
+is the one script-driven figure in the system, admitted because the claim it
+carries, a medium that answers the hand, cannot be made in a stylesheet. The
+contract that makes it lawful is the floor: the complete field is drawn as
+server-rendered markup, the canvas only ever adds the motion, reduced motion
+never arms it, the loop stops off screen, and its palette is read from the page
+so a pack or mode change re-inks it rather than leaving it in the colours it
+was born with. Stop the loop and the figure is the floor, still true, which is
+the test every ambient figure passes, applied from the other side.
+
+**Text carries no motion, with one exception.** The spectrum ink is a gradient
+crossing the ink of display type on the sweep cycle. It is the one keyframe in
+the system that animates a paint property, because text cannot be moved behind
+its own gradient, and it is admitted for display type alone, where the paint is
+one line of large type. The stops are semantic and the ends are the foreground,
+so the ink passes through the pack's hue and settles back to full contrast, in
+every pack and both modes. It is a class with a scope, not a licence, and motion
+on body text remains refused.
 
 ### What this section does not author
 
-No entrance animation, no scroll-reveal, no parallax, no carousels, no
-attention loop, and no motion on text. The first law's prohibitions are
-untouched by this section, and the reason they were right is the reason they
-stand: a reader who did not ask for a thing moving is owed a page that is still.
-What was missing was a way to say that a system is running, and this is it.
+No parallax, no carousels, no attention loop, and no open season on text. An
+entrance and a scroll-reveal are no longer refused outright: they are the third
+law, and they exist in exactly one authored form, the reveal utilities behind
+their capability check and the `Reveal` Component that wraps them. What stays
+refused is everything the third law does not reach: a layer that moves against
+the reader's scroll rather than with it, a sequence that cycles for attention
+rather than demonstrating a mechanism, and text that moves, with the one
+exception above of display ink that lights up at the ambient tempo. The first
+law's prohibitions are untouched by this section, and the reason they were
+right is the reason they stand: a reader who did not ask for a thing moving is
+owed a page that is still. What was missing was a way to say that a system is
+running, and a way to answer the reader's own scroll, and this section is both.
 
 **The emitted format list.** The token package publishes `light.css`,
 `dark.css`, `theme.css`, the resolved token JSON, `index.js`, `themes.json`, the
@@ -3648,9 +3747,11 @@ than the page ground.
 **The grep gates.** `scripts/check-motion.mjs` fails on a `cubic-bezier(...)`
 literal, an arbitrary duration, easing or animation utility, a time value beside a
 motion property in component source outside the token package, a per-call-site
-reduced-motion guard on a motion utility, and a `prefers-reduced-motion` block in
+reduced-motion guard on a motion utility, a `prefers-reduced-motion` block in
 the library's stylesheet that is not one unconditional unlayered rule declaring
-both `animation: none` and `transition: none`. It blanks comments before it reads,
+both `animation: none` and `transition: none`, and a reveal or rail selector in
+that stylesheet that sits outside the `@supports` capability check its timeline
+requires. It blanks comments before it reads,
 because a JSDoc block that quotes a banned value while explaining why it is banned
 is a record and not a violation; it judges a millisecond only beside a closed table
 of motion property names, because a caller stating a reading in their own register

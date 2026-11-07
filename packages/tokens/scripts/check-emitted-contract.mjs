@@ -246,7 +246,8 @@ for (const [key, token] of groupEntries(foundationTree, ['ease'])) {
  * the system actually ships: a marker crossing a rail (`travel`), a wavefront
  * crossing a field (`sweep`), a point drifting on its own long cycle (`drift`),
  * a scan crossing a chart (`scan`), a node breathing while a packet passes it
- * (`pulse`), and a figure's own load shimmer (`shimmer`).
+ * (`pulse`), a figure's own load shimmer (`shimmer`), and light crossing a
+ * ground (`aurora`).
  *
  * Why the floor is one second rather than zero. The `duration` scale is
  * bounded above at 280ms because anything longer stops being feedback. This
@@ -259,7 +260,7 @@ for (const [key, token] of groupEntries(foundationTree, ['ease'])) {
  * added to the group is measured against the reason the group exists.
  */
 const ambientKeys = groupEntries(foundationTree, ['ambient']).map(([key]) => key).sort()
-const AMBIENT_SET = ['drift', 'pulse', 'scan', 'shimmer', 'sweep', 'travel']
+const AMBIENT_SET = ['aurora', 'drift', 'pulse', 'scan', 'shimmer', 'sweep', 'travel']
 check(
   JSON.stringify(ambientKeys) === JSON.stringify(AMBIENT_SET),
   `ambient set must be {${AMBIENT_SET.join(', ')}}, found {${ambientKeys.join(', ')}}`,

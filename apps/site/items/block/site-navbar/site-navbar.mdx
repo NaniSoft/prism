@@ -127,6 +127,11 @@ none of the four and would rather compose its own.
 - Leave `sticky` on unless the page does not scroll. The bar is how a reader leaves
   the page they are on, and it takes that with them on exactly the long pages where
   it is needed. `sticky={false}` is honoured and puts the bar back in the flow.
+- Leave `scrollRail` on for pages a reader reads end to end. The rail fills with
+  the reader's own progress, a browser that cannot run it draws no rail at all,
+  and a reader who asked for less motion gets a still spectrum hairline. Turn
+  it off on a short page, where a rail that is born nearly full misreads the
+  page it is on.
 
 ### Content guidelines
 
@@ -165,9 +170,25 @@ Two things to know if you were styling against the old bar:
 - A rule that relied on the bar being translucent to hide a scrolling heading will
   no longer hide it, which is the point.
 
-`will-change` is not on the bar and is not proposed for it. Nothing on the bar
-animates, so a compositing hint applied at rest has no frame to be ready for and
-nothing that would release it.
+`will-change` is not on the bar and is not proposed for it. Two things on the bar
+move, the current link's underline and the reading rail, and both are compositor
+transforms the browser promotes while they run, so a hint applied at rest has no
+frame to be ready for and nothing that would release it.
+
+### The reading rail, and the current link's underline
+
+The sticky bar carries a two-pixel spectrum line on its bottom hairline, filled
+left to right by the page's own scroll. It is the travel figure at the scale of a
+page: one marker, one rail, the reader's hand providing the motion. The whole
+figure lives behind a capability check in the stylesheet, so a browser without
+scroll-driven animations draws no rail rather than an empty one, and the rail is
+`aria-hidden` because a reading position the scrollbar already shows is not
+information the bar needs to announce.
+
+The current link is marked by a persistent underline in the same spectrum rather
+than by a filled pill, so the bar carries one indicator language on one edge. The
+underline is shape rather than colour, and `aria-current` still says the page to
+a reader who sees nothing at all.
 
 ### The one client boundary
 

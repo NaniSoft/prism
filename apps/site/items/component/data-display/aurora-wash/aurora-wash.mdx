@@ -1,0 +1,61 @@
+---
+slug: components/aurora-wash
+title: AuroraWash
+---
+
+## Overview
+
+AuroraWash is light moving through a ground: two or three large translucent
+planes in the pack's own colours, each on its own long orbit of the aurora
+cycle. It follows the wash law, so the stops are semantic, the element is
+`aria-hidden`, and it never touches text.
+
+## Usage
+
+```tsx
+import { AuroraWash } from '@nanisoft/prism-ui/components/aurora-wash'
+
+<div className="relative overflow-hidden">
+  <AuroraWash className="absolute inset-0" />
+  <div className="relative">{children}</div>
+</div>
+```
+
+<ComponentDemo slug="aurora-wash" />
+
+## Guidelines
+
+### When to use
+
+Use it where a hero's ground would otherwise be flat: a band whose claim is
+that a surface is alive reads differently with light crossing it, and the wash
+says that without drawing a single invented mark. It repaints with the pack,
+because the planes carry the pack's own primary and series colours, so a wash
+in one pack is a different wash in another.
+
+Give it a clipped container. The wrapper clips, but the caller gives it the
+positioned ancestor to fill, and a wash that escapes its band is a page-wide
+stain.
+
+### When not to use
+
+Do not put type on it without its own contrast. A wash is a ground, and the
+content over it owns the contrast the way content over `SignalField` does.
+
+Do not use two on one page. Light moving through two grounds is two weathers,
+and the reader cannot be in both.
+
+Do not reach for it when the claim is a mechanism rather than an atmosphere. A
+marker crossing a rail is `Backdrop01` with the travel cycle; the wash says a
+surface is lit, not that a system runs.
+
+### Best practices
+
+- Let it be quiet. The intensity of a wash is the caller's, through opacity on
+  the caller's own wrapper, and the restrained version is the one that reads
+  as a place rather than as a poster.
+- Pair it with `ParticleField` only when the two claims belong together, and
+  let the tempos differ, which the aurora and drift cycles already do.
+- Trust the still frame. The reduced-motion rule holds the planes at rest and
+  the wash survives it, which is the test every ambient figure in this system
+  passes.

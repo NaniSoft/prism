@@ -25,8 +25,9 @@ export type NavMenuProps = {
   /**
    * Marks the group as holding the page the reader is on, which the bar
    * resolves against its own `currentPath` before it crosses the client
-   * boundary. The trigger is filled rather than merely tinted, so a reader who
-   * cannot distinguish the fill still finds the page named inside the menu.
+   * boundary. The trigger carries the same persistent underline a current link
+   * on the row carries, so the place the reader is on is named on the row even
+   * with the menu shut, by a mark that is shape rather than colour.
    */
   current: boolean
 }
@@ -57,7 +58,8 @@ export type NavMenuProps = {
  *
  * **The chevron rotates on the open state and on nothing else.** Something
  * happened and the reader can see that it did, at the authored duration, and
- * the rotation is the only motion here.
+ * the rotation, with the persistent underline a current trigger carries, is the
+ * whole of the motion here.
  */
 export function NavMenu({ label, links, current }: NavMenuProps) {
   return (
@@ -67,7 +69,7 @@ export function NavMenu({ label, links, current }: NavMenuProps) {
         data-current={current ? 'true' : undefined}
         className={
           current
-            ? 'group data-[popup-open]:bg-accent data-[popup-open]:text-accent-foreground bg-accent text-accent-foreground focus-visible:border-ring focus-visible:ring-ring gap-1 rounded-md px-2 py-1.5 text-sm font-medium transition-colors focus-visible:ring-[3px] focus-visible:outline-none'
+            ? 'group data-[popup-open]:bg-accent data-[popup-open]:text-accent-foreground text-foreground focus-visible:border-ring focus-visible:ring-ring relative gap-1 rounded-md px-2 py-1.5 text-sm font-medium transition-colors after:absolute after:inset-x-2 after:bottom-0.5 after:h-0.5 after:origin-left after:rounded-full after:bg-gradient-to-r after:from-chart-1 after:via-chart-3 after:to-chart-5 after:scale-x-100 after:transition-transform after:duration-base after:ease-out focus-visible:ring-[3px] focus-visible:outline-none'
             : 'group data-[popup-open]:bg-accent data-[popup-open]:text-accent-foreground text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-ring gap-1 rounded-md px-2 py-1.5 text-sm font-medium transition-colors focus-visible:ring-[3px] focus-visible:outline-none'
         }
       >

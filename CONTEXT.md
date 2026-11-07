@@ -153,6 +153,45 @@ The optional client module that carries pack and mode through context and writes
 the two document-element attributes. It has no override path.
 _Avoid_: theme factory, override surface, theme object.
 
+### Motion
+
+**Feedback**:
+The first law of motion: an answer to something the reader did, on the authored
+scale of `duration-fast`, `duration-base` and `duration-slow`, decelerating and
+never overshooting.
+_Avoid_: micro-interaction, delight, juice.
+
+**Cycle**:
+The second law of motion: a figure showing a system running, on the ambient
+scale of seconds, named by an `ambient-*` token and one of the `prism-ambient-*`
+classes, and still true with the animation stopped.
+_Avoid_: loop, decorative animation, spinner state.
+
+**Arrival**:
+The third law of motion: a section meeting the reader on the reader's own
+scroll, bound to a view timeline through the `prism-reveal` utilities or the
+`Reveal` Component, never to a script or a clock. A section that has finished
+entering is simply present, and a hero carries no arrival.
+_Avoid_: entrance animation, scroll-trigger, fade-in, reveal-on-scroll.
+
+**Reading rail**:
+The spectrum line on a sticky bar's bottom hairline that fills with the root
+scroller's position, behind a scroll-timeline capability check. Under reduced
+motion it rests at full, which is the figure still true and the movement gone.
+_Avoid_: progress bar, scroll indicator, page loader.
+
+**Spectrum ink**:
+The one motion on text: a gradient crossing the ink of display type on the sweep
+cycle, published as `prism-text-spectrum`, with semantic stops and foreground
+ends so it holds its contrast in every pack and both modes.
+_Avoid_: gradient text, animated gradient, shimmer text.
+
+**Living field**:
+The one script-driven figure: `ParticleField`, which renders its complete still
+field on the server and lets the script add the movement, answers the pointer,
+and disarms under reduced motion to leave the floor.
+_Avoid_: particle system, canvas background, animated background.
+
 ### Documentation site
 
 **Section**:

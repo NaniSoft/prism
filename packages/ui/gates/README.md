@@ -66,7 +66,7 @@ than a silent change of wording underneath it.
 
 | id | the law |
 | --- | --- |
-| `pin` | the design system is an exact version, and the token package is the component package's dependency rather than the consumer's |
+| `pin` | the design system is an exact version, and the token package is the component package's dependency rather than the consumer's; the one sanctioned mention of the token package in workspace configuration is an `overrides` entry whose value is a `file:` path, which names a local pre-release pack and carries no version |
 | `retired-line` | no trace of the retired component library survives |
 | `stylesheet-ownership` | a site stylesheet does not own a surface the design system owns |
 | `token-read` | a custom property that nothing declares is not a wrong colour, it is no declaration at all |

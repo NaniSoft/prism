@@ -1,0 +1,65 @@
+---
+slug: components/particle-field
+title: ParticleField
+---
+
+## Overview
+
+ParticleField is a living field: points drifting on linked paths, the medium a
+page's largest statements stand in front of. It is the one script-driven figure
+in the system, and the static field it renders on the server is the contract
+that makes that safe: stop the loop, disarm the canvas, print the page, and the
+figure is still a field, still true, still legible.
+
+## Usage
+
+```tsx
+import { ParticleField } from '@nanisoft/prism-ui/components/particle-field'
+
+<div className="relative overflow-hidden">
+  <ParticleField count={64} className="absolute inset-0" />
+  <div className="relative">{children}</div>
+</div>
+```
+
+<ComponentDemo slug="particle-field" />
+
+## Guidelines
+
+### When to use
+
+Use it where a page claims there is a medium to move through: a hero that says
+traffic flows, a band that says an estate is observed, a ground that says the
+surface is live. The links are what make it a medium rather than dust, so size
+`linkDistance` to the band: a wide band carries longer lines than a panel.
+
+Give it room behind content that has its own position and its own contrast. It
+is a ground, exactly as `SignalField` is, and it composes behind type rather
+than beside it.
+
+### When not to use
+
+Do not use it behind a reading passage. A medium that moves while a reader
+reads is the first thing a reader with vestibular sensitivity will ask to have
+gone, and `SignalField` still, or nothing, is the ground a passage wants.
+
+Do not use it to say something. It is `aria-hidden` by default because a medium
+is not information; a figure that carries a claim is `PulseGraph` or
+`PulseSeries`, both of which require a name.
+
+Do not stack two of them. Two media on one page is a collision, and the reader
+cannot tell which one they are looking through.
+
+### Best practices
+
+- Leave `interactive` on wherever a reader's hand can reach the ground, and
+  turn it off under text a reader will select, because a surface that moves
+  during a selection is a surface fighting the selection.
+- Keep the count in the dozens. A field with hundreds of points is a haze, and
+  the clamp will not save a composition that wanted fog.
+- Pair it with `AuroraWash` when the claim is light moving through the medium
+  as well as across it, and let the two differ in tempo, which they already do
+  by an order of magnitude.
+- Trust the floor. The component that renders nothing until a script runs is
+  the retired line's defect, and this one renders the whole figure before any
+  script decides to help.

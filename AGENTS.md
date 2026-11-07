@@ -46,11 +46,15 @@ restated above on purpose: a second list of the gates is a list that will drift.
   component.
 - **Motion is by token only.** Name `duration-fast`, `duration-base` or
   `duration-slow` and `ease-out` or `ease-in-out`; never a millisecond value or a
-  `cubic-bezier(...)` literal, and never a keyframe. A figure that shows a system
-  running is the one other case: name an `ambient-*` token and one of the six
-  `prism-ambient-*` classes the stylesheet publishes, which resolves the cycle
-  for you. Read `DESIGN.md` under Motion before authoring one. The gate is
-  `scripts/check-motion.mjs`.
+  `cubic-bezier(...)` literal, and never a keyframe. Three other cases exist. A
+  figure that shows a system running names an `ambient-*` token and one of the
+  eight `prism-ambient-*` classes the stylesheet publishes, which resolves the
+  cycle for you. A section that meets the reader wraps in `Reveal` or names one
+  of the `prism-reveal` utilities, which are bound to a view timeline and live
+  behind a capability check. The reading rail under a sticky bar is
+  `prism-scroll-rail`, behind its own check, and the spectrum ink on display
+  type is `prism-text-spectrum`. Read `DESIGN.md` under Motion before authoring
+  any of them. The gate is `scripts/check-motion.mjs`.
 - **One stylesheet.** A consumer imports `@nanisoft/prism-ui/styles.css` once.
   Tailwind is an internal build dependency of the component package and the site,
   never the consumer's.
@@ -143,7 +147,11 @@ Two rules follow from that, and both are about what may be written where:
   unlayered `@media (prefers-reduced-motion: reduce)` rule setting `animation: none`
   and `transition: none` on the universal selector, so a Component that re-decides
   reduced motion with a `motion-safe:` or `motion-reduce:` variant is a finding and
-  a block narrowed back to a list of class names is a finding.
+  a block narrowed back to a list of class names is a finding. The same stylesheet
+  holds the scroll-driven layer, and a `prism-reveal` or `prism-scroll-rail`
+  selector outside the `@supports` block naming its timeline is a finding, because
+  an animation whose timeline fails to resolve pauses at its first keyframe and a
+  reveal's first keyframe is the invisible one.
 - **A control inside a control is a finding, and the reason is that the alternative
   is unreachable.** `scripts/check-nested-controls.mjs` reads the JSX in
   `packages/ui/src`, `apps/site/src` and `apps/site/items`, and fails on a control

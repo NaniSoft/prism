@@ -1,0 +1,69 @@
+---
+slug: components/reveal
+title: Reveal
+---
+
+## Overview
+
+Reveal is a section that meets the reader: the wrapper that binds an arrival to
+the reader's own scroll position and to nothing else. It is a style the browser
+resolves rather than a state a script flips, so there is no observer, no
+listener and no client boundary, and the content exists from the first paint.
+
+## Usage
+
+```tsx
+import { Reveal } from '@nanisoft/prism-ui/components/reveal'
+
+<Reveal>
+  <FeatureGrid01 columns={…} cells={…} />
+</Reveal>
+
+<Reveal delay={1}>
+  <ProductGrid01 products={…} />
+</Reveal>
+```
+
+<ComponentDemo slug="reveal" />
+
+## Guidelines
+
+### When to use
+
+Use it on the bands a reader scrolls to. An arrival acknowledges the reader's
+own movement, which is the only input it answers to, and a band that enters
+the viewport as the reader arrives reads as a page composed for reading rather
+than as one long poster.
+
+Stagger with `delay` when bands arrive in a rhythm, and keep the stagger to a
+page's own measure: three steps exist, and a cascade longer than the rhythm it
+sits in is a wait the reader did not cause.
+
+### When not to use
+
+Do not wrap the hero. A section above the fold when the page loads has already
+finished entering, and the page does not introduce itself twice; the one
+authored moment a page carries belongs to its hero, not to every band under
+it.
+
+Do not wrap everything. A reveal on every section is one identical entrance
+wearing four different clothes, and the second arrival a reader notices is the
+one where the device stops being about the content. Let the still bands
+between the arriving ones carry their own weight.
+
+Do not use it for feedback or for state. A control answering a reader is the
+first law of motion and already has its scale; an arrival is the third law and
+holds exactly one job.
+
+### Best practices
+
+- Compose it around a Block, not inside one. The wrapper is the whole of the
+  component, every Block keeps its own surface, and no Block widens for a
+  behaviour the whole page shares.
+- Remember the fallbacks are the design: a browser without scroll-driven
+  animations shows the section simply there, a reader who asked for less
+  motion gets the same still page, and neither of those outcomes is a failure
+  to be worked around.
+- The `delay` steps are fractions of the entry rather than waits, so a reader
+  who scrolls fast arrives fast. That is the property that separates this law
+  from a timer, and it is worth keeping.
