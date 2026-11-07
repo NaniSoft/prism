@@ -5677,6 +5677,46 @@
       ]
     },
     {
+      "name": "media-band-01",
+      "title": "Media Band 01 - An Editorial Image Beside A Statement",
+      "description": "A full-width editorial band: one media slot held at a caller's ratio, beside or below a title, a description and one destination. The media is the caller's node, so an image, a video poster or a composed figure can sit in the frame, and the block owns the frame, the ratio, the surface and the order. There is no animation and no shipped image.",
+      "type": "registry:block",
+      "categories": [
+        "marketing"
+      ],
+      "registryDependencies": [
+        "section",
+        "aspect-ratio",
+        "cta-link"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/media-band-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/media-band-01/index.tsx"
+        },
+        {
+          "path": "src/blocks/media-band-01/media-band.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/media-band-01/media-band.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "member-list-01",
       "title": "Member List 01 - People With Presence And A Last-Seen Reading",
       "description": "A dense row list for an application surface: a portrait, a name, a role, one of three presence tones beside the caller's own words, a last-seen reading and a slot for the caller's row actions. The tones are mapped here and the words are the caller's, because a presence is a claim about a colleague. Nothing is formatted and no member, word or presence is passed in as anything but a prop.",

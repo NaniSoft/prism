@@ -18,6 +18,32 @@ describe('Section', () => {
     render(<SectionHeading as="h3" title="Nested" />)
     expect(screen.getByRole('heading', { name: 'Nested', level: 3 })).toBeInTheDocument()
   })
+
+  it('defaults to the rhythm every block already composed', () => {
+    const { container } = render(<Section>Default</Section>)
+    expect(container.querySelector('section')?.className).toContain('py-16')
+    expect(container.querySelector('section')?.className).toContain('sm:py-24')
+  })
+
+  it('declares a different rhythm for each size name', () => {
+    const classes = (['compact', 'default', 'tall'] as const).map((size) => {
+      const { container, unmount } = render(<Section size={size}>{size}</Section>)
+      const className = container.querySelector('section')?.className ?? ''
+      unmount()
+      return className
+    })
+    expect(new Set(classes).size).toBe(3)
+  })
+
+  it('keeps a caller class alongside the authored rhythm', () => {
+    const { container } = render(
+      <Section size="tall" className="site-band">
+        Tall
+      </Section>,
+    )
+    expect(container.querySelector('section')?.className).toContain('py-20')
+    expect(container.querySelector('section')?.className).toContain('site-band')
+  })
 })
 
 /**

@@ -24,8 +24,27 @@ export type Specimen = {
   name: string
   /** The Component's own documentation route, `/components/<slug>`. */
   href: string
-  /** Whether the cell takes two grid columns rather than one. */
-  wide?: boolean
+  /**
+   * How much of the three-track grid the cell takes.
+   *
+   * `sm` is one track, `md` is two and `lg` is all three. The names describe the
+   * cell rather than the tracks, so a caller does not have to know the grid is
+   * three wide to compose with it. The default is `sm`.
+   */
+  span?: 'sm' | 'md' | 'lg'
+}
+
+/**
+ * The classes each span adds at the wide breakpoint.
+ *
+ * Below `lg` the grid is two tracks, so `lg` and `md` both take the full row and
+ * only the wide breakpoint separates them. The map is one table rather than a
+ * conditional chain, so a fourth span is a change in one place.
+ */
+const SPAN: Record<NonNullable<Specimen['span']>, string> = {
+  sm: '',
+  md: 'sm:col-span-2',
+  lg: 'sm:col-span-2 lg:col-span-3',
 }
 
 /**
@@ -101,9 +120,7 @@ export function Specimens({
         {specimens.map((specimen) => (
           <li
             key={specimen.href}
-            className={`group border-border bg-card hover:border-primary/40 hover:-translate-y-0.5 flex flex-col overflow-hidden rounded-xl border transition duration-fast ease-out${
-              specimen.wide ? ' sm:col-span-2' : ''
-            }`}
+            className={`group border-border bg-card hover:border-primary/40 hover:-translate-y-0.5 flex flex-col overflow-hidden rounded-xl border transition duration-fast ease-out ${SPAN[specimen.span ?? 'sm']}`}
           >
             <div className="border-border flex min-h-40 flex-1 items-center justify-center border-b p-6">
               {specimen.node}

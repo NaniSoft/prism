@@ -120,6 +120,13 @@ export { Integration01 } from './integration-01'
 export type { Integration01Props, Integration, IntegrationState } from './integration-01'
 export { LogoCloud01 } from './logo-cloud-01'
 export type { LogoCloud01Props, LogoCloudLogo } from './logo-cloud-01'
+export { MediaBand01 } from './media-band-01'
+export type {
+  MediaBand01Action,
+  MediaBand01Props,
+  MediaBand01Ratio,
+  MediaBand01Size,
+} from './media-band-01'
 export { MemberList01 } from './member-list-01'
 export type { MemberList01Props, MemberList01Member, MemberPresence } from './member-list-01'
 export { MilestoneTimeline01 } from './milestone-timeline-01'

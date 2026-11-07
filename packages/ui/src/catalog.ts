@@ -1896,6 +1896,17 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'MediaBand01',
+    slug: 'media-band-01',
+    kind: 'block',
+    category: null,
+    description:
+      'An editorial band: one media slot held at a caller ratio beside one title, description and optional destination, with the copy always on a solid surface.',
+    source: 'src/blocks/media-band-01/index.tsx',
+    exports: ['MediaBand01'],
+    status: 'stable',
+  },
+  {
     name: 'Download01',
     slug: 'download-01',
     kind: 'block',

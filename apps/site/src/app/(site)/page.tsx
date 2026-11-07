@@ -1,29 +1,31 @@
-import { ArrowUpRight, Blocks, Layers, Palette, ShieldCheck } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
 
 import {
   buildCatalog,
   COMPONENT_CATEGORIES,
-  type ComponentCategory,
 } from '@nanisoft/prism-ui/catalog'
 import { Backdrop01 } from '@nanisoft/prism-ui/blocks/backdrop-01'
+import { Bento01 } from '@nanisoft/prism-ui/blocks/bento-01'
 import { Hero01 } from '@nanisoft/prism-ui/blocks/hero-01'
-import { InstrumentPanel01 } from '@nanisoft/prism-ui/blocks/instrument-panel-01'
+import { MediaBand01 } from '@nanisoft/prism-ui/blocks/media-band-01'
+import { ProductGrid01 } from '@nanisoft/prism-ui/blocks/product-grid-01'
 import { AvatarGroup } from '@nanisoft/prism-ui/components/avatar-group'
 import { Badge } from '@nanisoft/prism-ui/components/badge'
 import { Input } from '@nanisoft/prism-ui/components/input'
 import { Label } from '@nanisoft/prism-ui/components/label'
 import { MiniCalendar } from '@nanisoft/prism-ui/components/mini-calendar'
-import { PulseSeries, type PulseBar } from '@nanisoft/prism-ui/components/pulse-series'
 import { SignalField } from '@nanisoft/prism-ui/components/signal-field'
 import { Slider } from '@nanisoft/prism-ui/components/slider'
 import { Sparkline } from '@nanisoft/prism-ui/components/sparkline'
 import { Switch } from '@nanisoft/prism-ui/components/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@nanisoft/prism-ui/components/tabs'
+import { EditorialPrism } from '@/components/landing/editorial-prism'
+import { Foundations } from '@/components/landing/foundations'
+import { InstallBand } from '@/components/landing/install-band'
 import { PackBand } from '@/components/landing/pack-band'
-import { Principles } from '@/components/landing/principles'
+import { SpecimenBoard } from '@/components/landing/specimen-board'
 import { Specimens } from '@/components/landing/specimens'
-import { PrismLogo } from '@/components/logo'
 
 /**
  * The marketing landing.
@@ -38,11 +40,18 @@ import { PrismLogo } from '@/components/logo'
  * that only the author of the landing page believed.
  *
  * **Every figure on this page is the package, not a picture of it.** The hero
- * draws the catalogue's own shape from `PulseSeries`, the band under it renders
- * the published Components themselves, and the swatch band paints every pack in
- * its own compiled values. A screenshot of the library is a second copy of its
- * appearance that the next release silently rots, and a reader comparing packs
- * or flipping a specimen's switch is seeing the one truth there is.
+ * renders a small page assembled from published Components, the band under it
+ * renders the published Components themselves, and the pack band paints every
+ * pack in its own compiled values. A screenshot of the library is a second copy
+ * of its appearance that the next release silently rots, and a reader comparing
+ * packs or flipping a specimen's switch is seeing the one truth there is.
+ *
+ * **The order is the system's argument, not a template's.** A reader meets the
+ * composed page first, then the parts, then the two commands that put them in a
+ * project, then the foundations, then the motion law, then the packs, then the
+ * sites already wearing it. Every band is a different family: a split hero, a
+ * bento gallery, a code band, a foundations bento, a field, a swatch grid, an
+ * editorial band and a product list.
  */
 const catalogue = buildCatalog()
 import themes from '@nanisoft/prism-tokens/dist/themes.json'
@@ -51,87 +60,69 @@ const countOf = (kind: (typeof catalogue)[number]['kind']) =>
   catalogue.filter((item) => item.kind === kind).length
 
 /**
- * The short name each category carries inside a figure.
+ * The same counts in the categories' own order, for the sparkline in the hero.
  *
- * A figure's labels are drawn in the mono face at a size tied to the canvas, so
- * the catalogue's own names ("Forms and inputs") are too wide for the space a
- * bar's label owns and the short forms are the figure's own vocabulary rather
- * than a rename: the Category's page and the catalogue keep the full name.
+ * The sorted series the old hero used was a bar chart that only fell, which
+ * reads as a metric in decline no matter what its label says. In the categories'
+ * declared order the same counts rise and fall, which is the honest shape of a
+ * catalogue that grew category by category.
  */
-const CATEGORY_SHORT: Record<ComponentCategory, string> = {
-  'Call to action': 'actions',
-  'Forms and inputs': 'forms',
-  'Data display': 'display',
-  Layout: 'layout',
-  Feedback: 'feedback',
-  Typography: 'type',
-  Miscellaneous: 'misc',
-}
-
-const countIn = (category: ComponentCategory) =>
-  catalogue.filter((item) => item.kind === 'component' && item.category === category).length
+const SPARK_VALUES: readonly number[] = COMPONENT_CATEGORIES.map(
+  (category) =>
+    catalogue.filter((item) => item.kind === 'component' && item.category === category).length,
+)
 
 /**
- * The series the hero draws: the component catalogue as one bar chart, counted
- * from the build.
+ * The four sites that wear Prism, as the proof band reads them.
  *
- * The counts are the categories' own, sorted tallest first so the emphasised
- * column is the breadth of the library at a glance, and the series is passed in
- * like any other content because a Component draws no data of its own. This
- * replaced a four-stage drawing of the pipeline, which showed how Prism is built
- * to a reader who had not yet been shown what built things look like.
+ * Prism is not in the list because this is its own page. The marks are the same
+ * marks each site draws in its own bar, and the destinations are absolute because
+ * the family is five origins rather than five routes.
  */
-const SERIES: PulseBar[] = COMPONENT_CATEGORIES.map((category) => ({
-  id: category,
-  label: `${CATEGORY_SHORT[category]} ${countIn(category)}`,
-  value: countIn(category),
-}))
-  .toSorted((a, b) => b.value - a.value)
-  .map((bar, index) => (index === 0 ? { ...bar, emphasis: true } : bar))
+const SITES = [
+  {
+    id: 'www',
+    name: 'NaniSoft',
+    pack: 'sky' as const,
+    tagline: 'The company site, and the front door to the family.',
+    href: 'https://www.nanisoft.com',
+    newTab: true,
+  },
+  {
+    id: 'nexus',
+    name: 'Nexus',
+    pack: 'cyan' as const,
+    tagline: 'The Agent Factory: an issue in, a reviewed change out.',
+    href: 'https://nexus.nanisoft.com',
+    newTab: true,
+  },
+  {
+    id: 'atlas',
+    name: 'Atlas',
+    pack: 'mint' as const,
+    tagline: 'The Digital Twin Platform: living models of real systems.',
+    href: 'https://atlas.nanisoft.com',
+    newTab: true,
+  },
+  {
+    id: 'alphalens',
+    name: 'AlphaLens',
+    pack: 'gold' as const,
+    tagline: 'Quantitative market research for the Indian market.',
+    href: 'https://alphalens.nanisoft.com',
+    newTab: true,
+  },
+]
 
 /**
- * The same counts in the categories' own order, for the specimen band's line.
+ * The landing page, in eight bands.
  *
- * The sorted series is the bar chart's shape, but a line of the same numbers
- * sorted descending is a line that only falls, and a falling line on a landing
- * page reads as a metric in decline no matter what its label says. In the
- * categories' declared order the same counts rise and fall, which is the honest
- * shape of a catalogue that grew category by category.
- */
-const SPARK_VALUES: readonly number[] = COMPONENT_CATEGORIES.map((category) => countIn(category))
-
-/**
- * The landing page, in five bands.
- *
- * Each band is a different layout family, which is the rule the page is built to
- * and not an accident of which Blocks existed: a split hero with an instrument
- * in it, a gallery of rendered Components, a hairline list, a band of copy over
- * a running field, and a band of swatches. Before this the page was a centred
- * hero over four equal stat cards, four equal feature cards, a filled black
- * band and a two-column text footer, which is five bands of the same shape and
- * is what makes a documentation landing read as a template rather than as a
- * system.
- *
- * The counts a stat band used to carry in four equal cards are now the gallery
- * band's own heading, stated once beside the Components the numbers are about.
- * Four equal cards with a number each is the single most recognisable shape of
- * a template landing page, and the numbers were never the story: the Components
- * are, and the gallery shows them where the cards used to count them.
- *
- * The motion band exists because the page used to state the system's second
- * motion law nowhere and run it once, in the hero's instrument. A design system
- * whose landing page is nearly static is a system that looks like a component
- * gallery, and the honest fix is not decoration bolted on but the law itself,
- * running on the one Block published for it, with the stop control the law's
- * own test asks for: stop the field, and the band is still true.
- *
- * The five bands and the one set of actions between them: the hero carries the
- * two places a reader can go next, and nothing below it repeats either intent.
- * A second "Browse components" at the bottom of the page is a control that
- * duplicates one already on screen, which is the reason the trailing band that
- * used to carry the catalogue links was removed rather than restyled. The
- * gallery's own links name individual Components, which is a different intent
- * from the route that lists them all.
+ * The hero is the composed page; the specimens are the parts; the install band is
+ * the way in; the foundations and the motion band are the rules; the packs are
+ * the themes; the editorial band is the system's own image; and the product rows
+ * are the proof. No band repeats another's layout family, and no action repeats
+ * another's intent: the hero asks a reader to read or browse, the rest of the
+ * page is evidence.
  */
 export default function HomePage() {
   return (
@@ -145,46 +136,7 @@ export default function HomePage() {
           { label: 'Read the quickstart', href: '/overview/quickstart' },
           { label: 'Browse components', href: '/components', variant: 'outline' },
         ]}
-        instrument={
-          <InstrumentPanel01
-            label="the catalogue, by category"
-            state="live"
-            stateLabel="live"
-            caption="The component catalogue as one series, counted from the build."
-            footnote="Counted from the catalogue at render, not typed in. A figure that shows a system running is the one thing Prism animates, and it reads the same with every animation stopped."
-            actions={<PrismLogo size={22} className="text-muted-foreground block" />}
-          >
-            {/*
-              The figure keeps a readable minimum width and the panel scrolls it,
-              because a drawing that shrinks to fit a phone is no longer legible
-              and DESIGN.md's ambient rule is explicit that every figure renders
-              its complete, fully legible form at first paint. The series' labels
-              are 11 units in a 640 unit canvas, so at a 342 pixel panel width
-              they would rasterise at under six pixels each: a caption-shaped
-              smudge that a reader can neither read nor act on. Scrolling is the
-              honest answer and it costs nothing at desktop, where the panel is
-              wider than the minimum and no scrollbar appears.
-
-              The scroll container is a focusable region with a name, because a
-              sideways scroll a keyboard cannot reach is a figure a reader who
-              does not use a pointer cannot pan, and the focus ring is the only
-              affordance a clipped drawing needs.
-            */}
-            <div
-              role="region"
-              aria-label="Components by category, scrollable figure"
-              tabIndex={0}
-              className="overflow-x-auto"
-            >
-              <PulseSeries
-                bars={SERIES}
-                scan
-                label="Components by category"
-                className="min-w-[33rem]"
-              />
-            </div>
-          </InstrumentPanel01>
-        }
+        instrument={<SpecimenBoard values={SPARK_VALUES} />}
       />
 
       <Specimens
@@ -194,7 +146,7 @@ export default function HomePage() {
         meta="base ui · tailwind 4 · mit · llms.txt · read-only mcp"
         specimens={[
           {
-            wide: true,
+            span: 'lg',
             href: '/components/sparkline',
             name: 'Sparkline',
             node: (
@@ -207,6 +159,7 @@ export default function HomePage() {
             ),
           },
           {
+            span: 'md',
             href: '/components/tabs',
             name: 'Tabs',
             node: (
@@ -216,42 +169,20 @@ export default function HomePage() {
                   <TabsTrigger value="components">Components</TabsTrigger>
                   <TabsTrigger value="blocks">Blocks</TabsTrigger>
                 </TabsList>
-                <TabsContent value="tokens">Colour, radius, type, spacing and motion, one emitted contract</TabsContent>
-                <TabsContent value="components">{countOf('component')} across seven role categories</TabsContent>
-                <TabsContent value="blocks">{countOf('block')} composed sections that take content as props</TabsContent>
+                <TabsContent value="tokens">
+                  Colour, radius, type, spacing and motion, one emitted contract
+                </TabsContent>
+                <TabsContent value="components">
+                  {countOf('component')} across seven role categories
+                </TabsContent>
+                <TabsContent value="blocks">
+                  {countOf('block')} composed sections that take content as props
+                </TabsContent>
               </Tabs>
             ),
           },
           {
-            href: '/components/badge',
-            name: 'Badge',
-            node: (
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <Badge>stable</Badge>
-                <Badge variant="success">gated</Badge>
-                <Badge variant="warning">advisory</Badge>
-                <Badge variant="secondary">pastel</Badge>
-              </div>
-            ),
-          },
-          {
-            href: '/components/mini-calendar',
-            name: 'MiniCalendar',
-            // Inert, because a month of day buttons is a control cluster the
-            // landing does not owe a reader: the band's copy names the three
-            // controls that are live, and the calendar is here as a specimen of
-            // what the library draws, not as a date picker to use.
-            node: (
-              <div inert>
-                <MiniCalendar
-                  label="This month, as the library draws it"
-                  previousLabel="Previous month"
-                  nextLabel="Next month"
-                />
-              </div>
-            ),
-          },
-          {
+            span: 'sm',
             href: '/components/switch',
             name: 'Switch',
             node: (
@@ -272,6 +203,34 @@ export default function HomePage() {
             ),
           },
           {
+            span: 'md',
+            href: '/components/mini-calendar',
+            name: 'MiniCalendar',
+            node: (
+              <div inert>
+                <MiniCalendar
+                  label="This month, as the library draws it"
+                  previousLabel="Previous month"
+                  nextLabel="Next month"
+                />
+              </div>
+            ),
+          },
+          {
+            span: 'sm',
+            href: '/components/badge',
+            name: 'Badge',
+            node: (
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Badge>stable</Badge>
+                <Badge variant="success">gated</Badge>
+                <Badge variant="warning">advisory</Badge>
+                <Badge variant="secondary">pastel</Badge>
+              </div>
+            ),
+          },
+          {
+            span: 'sm',
             href: '/components/slider',
             name: 'Slider',
             node: (
@@ -285,6 +244,7 @@ export default function HomePage() {
             ),
           },
           {
+            span: 'sm',
             href: '/components/avatar-group',
             name: 'AvatarGroup',
             node: (
@@ -300,6 +260,7 @@ export default function HomePage() {
             ),
           },
           {
+            span: 'sm',
             href: '/components/input',
             name: 'Input',
             node: (
@@ -312,44 +273,17 @@ export default function HomePage() {
         ]}
       />
 
-      <Principles
-        headingLevel="h2"
-        title="Four rules the packages hold"
-        description="These are the rules a consumer inherits by installing, whether or not they read them. Each one is a build gate somewhere in this repository, so a change that breaks it fails before it publishes."
-        principles={[
-          {
-            icon: Palette,
-            title: 'One source of truth',
-            body: 'Every colour, radius and type step is authored here and reaches a consumer as a token. A new pack is a token swap rather than a refactor.',
-          },
-          {
-            icon: Layers,
-            title: 'Take the smallest layer that owns the job',
-            body: 'A Component has one job, a Block is a section composed of them, and a Page is a screen composed of those. Composition stops at the layer that already answered the question.',
-          },
-          {
-            icon: Blocks,
-            title: 'One stylesheet, no override path',
-            body: 'A consumer imports the compiled sheet once and writes no CSS. There is no merge, no wrapper theme and no copy-out: a missing item is requested upstream.',
-          },
-          {
-            icon: ShieldCheck,
-            title: 'Gated before it publishes',
-            body: 'Contrast, the emitted token contract, the catalogue and the copy in every Block are build gates, so a regression fails the build rather than shipping.',
-          },
-        ]}
-      />
+      <InstallBand />
+
+      <Foundations />
 
       {/*
         The motion band: the system's second law, running.
 
-        The page's other four bands are read, and this one is watched. The field
-        behind the copy is a `SignalField` on the drift cycle, both from the
-        package the page documents, and the stop control is the Block's own, so
-        the law's test is on the page beside the law: stop the field, and the
-        band is still true. The copy names the two laws in the system's own
-        words, and the link is the Foundation page that states them in full,
-        which is a reading intent rather than a conversion one.
+        The page's other bands are read, and this one is watched. The field behind
+        the copy is a `SignalField` on the drift cycle, both from the package the
+        page documents, and the stop control is the Block's own, so the law's test
+        is on the page beside the law: stop the field, and the band is still true.
       */}
       <Backdrop01
         headingLevel="h2"
@@ -394,6 +328,24 @@ export default function HomePage() {
         title="Eight packs, one contract"
         description="A pack re-points the semantic tokens rather than replacing them, so the component package is published once and the theme is chosen at runtime. Every pack below is drawn in its own values, on the page you are reading."
         action={{ label: 'See the packs', href: '/foundation/themes' }}
+      />
+
+      <MediaBand01
+        headingLevel="h2"
+        title="One design language. Five expressions."
+        description="A prism does not own one colour. It separates one beam into the colours already in it. The system is the prism: the packs are the expressions, and every NaniSoft site wears one without forking the library."
+        media={<EditorialPrism />}
+        ratio="wide"
+        align="media-right"
+        caption="A composition, not a photograph: the prism is the mark, the fan is the pack set, and the beam is one token contract."
+      />
+
+      <ProductGrid01
+        headingLevel="h2"
+        title="Used by every NaniSoft site"
+        description="Four products, one design language. The marks are the same marks their own bars draw, and every one of these sites imports the stylesheet this page does."
+        products={SITES}
+        caption="The company site and the three products that are live today. Nexus is in development, and its site is the fourth."
       />
     </>
   )

@@ -1,0 +1,8 @@
+{
+  "name": "media-band-01",
+  "title": "Media Band 01 - An Editorial Image Beside A Statement",
+  "description": "A full-width editorial band: one media slot held at a caller's ratio, beside or below a title, a description and one destination. The media is the caller's node, so an image, a video poster or a composed figure can sit in the frame, and the block owns the frame, the ratio, the surface and the order. There is no animation and no shipped image.",
+  "categories": ["marketing"],
+  "registryDependencies": ["section", "aspect-ratio", "cta-link"],
+  "dependencies": []
+}

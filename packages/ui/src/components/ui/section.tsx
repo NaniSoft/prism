@@ -2,6 +2,38 @@ import type { ReactNode } from 'react'
 import { cn } from '../../lib/utils'
 
 /**
+ * The three vertical rhythms a Section can be composed at.
+ *
+ * `default` is the rhythm every existing block already composes, so a Block that
+ * does not pass a size renders exactly what it rendered before this prop existed.
+ * `compact` is for a transition band: a strip of facts or a line of status whose
+ * job is to separate two larger bands rather than to be one. `tall` is for a band
+ * that is a statement: a hero, a manifesto, or an editorial moment that needs the
+ * page to stop for it.
+ *
+ * Three and not a number, for the reason every closed union in this package is
+ * closed: a `padding: number` prop hands a consumer a spacing scale to reproduce,
+ * and the first consumer to pass 73 has a rhythm nobody authored. The names say
+ * what the band is for, which is the decision a caller actually makes.
+ */
+export type SectionSize = 'compact' | 'default' | 'tall'
+
+/**
+ * The padding each rhythm sets.
+ *
+ * `default` is byte-identical to the string this Component rendered before the
+ * prop existed, so adding the prop cannot move a band that did not ask to move.
+ * The other two are on the same quarter-rem grid: `compact` is 3rem to 4rem and
+ * `tall` is 5rem to 8rem, which are the same two statements the four consumer
+ * sites had been writing by hand in their own stylesheets.
+ */
+const SECTION_SIZE: Record<SectionSize, string> = {
+  compact: 'py-12 sm:py-16',
+  default: 'py-16 sm:py-24',
+  tall: 'py-20 sm:py-32',
+}
+
+/**
  * Container primitive. Every block composes its own section from this so vertical
  * rhythm stays consistent across the catalog instead of being re-invented per block.
  *
@@ -19,20 +51,30 @@ import { cn } from '../../lib/utils'
  * Tailwind's extractor reads this file, comments included, so a utility quoted in
  * a JSDoc block is a utility the shipped stylesheet emits. A record of a retired
  * class written as a class is a second copy of the tree nobody edits.
+ *
+ * **`size` is the band's job, not a spacing slider.** See `SectionSize`: a
+ * transition band, an ordinary band and a statement are three different amounts
+ * of room, and a page that gives all three the same amount reads as one band
+ * repeated. The prop exists so the choice is made once in the design system
+ * rather than five times in five site stylesheets.
  */
 export function Section({
+  size = 'default',
   className,
   children,
   ...props
-}: React.ComponentProps<'section'>) {
+}: React.ComponentProps<'section'> & {
+  /**
+   * The band's vertical rhythm. Defaults to `default`, which is the rhythm every
+   * existing Block already composes. See `SectionSize`.
+   *
+   * @defaultValue 'default'
+   */
+  size?: SectionSize
+}) {
   return (
-    <section
-      className={cn('py-16 sm:py-24', className)}
-      {...props}
-    >
-      <div className="mx-auto w-full max-w-page px-6 lg:px-8">
-        {children}
-      </div>
+    <section className={cn(SECTION_SIZE[size], className)} {...props}>
+      <div className="mx-auto w-full max-w-page px-6 lg:px-8">{children}</div>
     </section>
   )
 }

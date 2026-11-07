@@ -1,0 +1,88 @@
+---
+slug: blocks/media-band-01
+title: MediaBand01
+---
+
+## Overview
+
+MediaBand01 is an editorial band: one media frame beside one statement, with one
+action. It is the marketing surface the catalogue did not have. `Bento01` holds a
+media node in a cell, but a cell is one item of a set, and a set is the wrong shape
+for the one photograph a page stops on. `Gallery01` holds a set of images and opens
+one at full size, which is right for a portfolio and wrong for a statement.
+
+The media is a slot, not a `src`. A caller can pass an image, a video poster, a
+rendered figure, or a composition of its own components. The Block owns the frame,
+the ratio, the surface and the order. The caller owns the node and its accessible
+name.
+
+The copy is first in the document, and the media is first only in the visual order
+the caller asks for. A reader on a phone meets the title before the picture, and a
+reader at `lg` meets the arrangement the caller chose. That is one tree, so the
+heading is in the outline once.
+
+The copy never sits on the picture. A title over an arbitrary photograph is a
+contrast failure nobody measured, and the solid column beside the image is both
+more legible and more editorial.
+
+There is no animation. An editorial photograph is not feedback and it is not a
+figure showing a system running, so the band does not zoom, slide or reveal.
+
+## Usage
+
+```tsx
+import { MediaBand01 } from '@nanisoft/prism-ui/blocks/media-band-01'
+
+<MediaBand01
+  eyebrow="The floor"
+  title="A person decides. The factory does the rest."
+  description="One issue in, one reviewed pull request out. The photograph is the material; the board is the proof."
+  media={
+    <img
+      src="/media/editorial-factory.webp"
+      alt="A precision assembly line in monochrome."
+      width={2400}
+      height={1029}
+      loading="lazy"
+    />
+  }
+  caption="A placeholder photograph, to be replaced with the real floor."
+  action={{ label: 'Read the loop', href: '#loop' }}
+/>
+```
+
+<ComponentDemo slug="media-band-01" />
+
+## Guidelines
+
+### When to use
+
+Use MediaBand01 when a page has one photograph or one composed figure that is a
+moment of its own, and one sentence that the picture makes. It is the band a page
+stops on between two sections of argument.
+
+### When not to use
+
+Do not use it for a set of images. A set is `Gallery01` or a `Bento01` grid. Do not
+use it for a figure that carries a claim a screen reader must hear in full; that is
+`InstrumentPanel01` or one of the figure Components. Do not put the copy on top of
+the image; the solid column is the arrangement this Block exists to make easy.
+
+### Ratios and sides
+
+`ratio` is `wide`, `square` or `portrait`. `align` is `media-left` or `media-right`,
+and it changes the visual order only. Below the breakpoint the copy always comes
+first.
+
+### Tone
+
+`default` leaves the band on the page ground. `muted` puts it on the muted surface,
+which is for a band that is a chapter rather than a transition. The muted arm states
+its own ink as well as its own fill.
+
+### The media slot
+
+The caller's node fills the frame. The Block does not style a node it did not
+render, so the image should set its own width, height and `object-fit`, and it
+should carry the alt text that names it. A composed figure should carry its own
+accessible name.
