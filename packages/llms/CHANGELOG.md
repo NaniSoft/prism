@@ -1,5 +1,16 @@
 # @nanisoft/prism-llms
 
+## 0.6.0
+
+### Minor Changes
+
+- Regenerate the corpus for the third law of motion
+  
+  The corpus picks up the `ParticleField`, `AuroraWash` and `Reveal` entries, the
+  `backdrop` slot on `Hero01`, the `aurora` field on `Backdrop01`, the
+  `scrollRail` prop on `SiteNavbar`, and the rewritten Motion documentation,
+  whose third law the new items document in their own JSDoc.
+
 ## 0.5.2
 
 ### Patch Changes

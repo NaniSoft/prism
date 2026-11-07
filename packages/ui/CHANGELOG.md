@@ -1,5 +1,44 @@
 # @nanisoft/prism-ui
 
+## 1.5.0
+
+### Minor Changes
+
+- Add the third law of motion: arrivals, living fields, and the reading rail
+  
+  Motion now has three laws. Feedback and the ambient cycles are unchanged; the
+  new law admits three authored mechanisms, each shipped as primitives rather
+  than opened as a licence:
+  
+  - `Reveal` wraps a band in a scroll-driven arrival bound to the reader's own
+    scroll through `prism-reveal` utilities behind a view-timeline capability
+    check. No script arms it, a browser without the timeline ships no rule at
+    all, and the universal reduced-motion rule hands that reader the visible
+    page.
+  - `ParticleField` is the one script-driven figure: a linked, pointer-answering
+    medium whose complete still field renders on the server, whose loop stops off
+    screen, and whose palette is re-read when the document's pack or mode
+    changes. `AuroraWash` is the still counterpart: translucent planes in the
+    pack's own colours on the new `aurora` cycle, transform-only.
+  - `SiteNavbar` gains a reading rail on its sticky hairline, `scrollRail` on by
+    default: a spectrum line filling with the page's own scroll, drawing nothing
+    in a browser that cannot run the timeline. The current link's filled pill
+    becomes a persistent spectrum underline, and `Hero01` gains a `backdrop` slot
+    so a hero composes its own ground.
+  
+  `Backdrop01` offers `field="aurora"`, and `prism-text-spectrum` is the one
+  admitted motion on text: display ink lit at the sweep tempo with foreground
+  ends, so it holds contrast in every pack and both modes.
+  
+  `scripts/check-motion.mjs` holds the new layer: a reveal or rail selector
+  outside the `@supports` block naming its timeline fails the build, because an
+  animation whose timeline fails to resolve pauses at its invisible keyframe.
+
+### Patch Changes
+
+- Updated dependencies
+  - @nanisoft/prism-tokens@1.5.0
+
 ## 1.4.0
 
 ### Minor Changes

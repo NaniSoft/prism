@@ -1,5 +1,15 @@
 # @nanisoft/prism-tokens
 
+## 1.5.0
+
+### Minor Changes
+
+- Add the `aurora` ambient cycle at 24000ms
+  
+  The new member measures light crossing a ground: the washes a hero stands on.
+  It rides `ambient-ease-drift`, holds to the one-second floor with the rest of
+  the group, and is admitted into the closed set the emitted-contract gate holds.
+
 ## 1.2.0
 
 ### Minor Changes
