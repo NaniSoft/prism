@@ -1,5 +1,18 @@
 # @nanisoft/prism-ui
 
+## 1.7.1
+
+### Patch Changes
+
+- Fix `TsparticlesField` throwing on re-render
+  
+  `ParticlesProvider` keeps the first `init` callback it receives and throws
+  `ParticlesProvider init callback must be stable across the app lifecycle`
+  when a later one differs. The field passed an inline arrow, so the ink
+  re-read on mount, or a double mount before the engine finished loading,
+  handed the provider a new function and threw. The callback now lives at
+  module scope, so its identity is stable for the app lifecycle.
+
 ## 1.7.0
 
 ### Minor Changes

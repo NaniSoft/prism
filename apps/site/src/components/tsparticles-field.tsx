@@ -3,8 +3,17 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import Particles, { ParticlesProvider } from '@tsparticles/react'
-import type { ISourceOptions } from '@tsparticles/engine'
+import type { Engine, ISourceOptions } from '@tsparticles/engine'
 import { loadSlim } from '@tsparticles/slim'
+
+/**
+ * The provider's init callback, at module scope so its identity is stable for
+ * the app lifecycle. `ParticlesProvider` keeps the first callback it receives
+ * and throws when a later one differs, so an inline arrow here threw
+ * `ParticlesProvider init callback must be stable across the app lifecycle`
+ * on a re-render or a double mount before the engine finished loading.
+ */
+const initTsparticles = (engine: Engine): Promise<void> => loadSlim(engine)
 
 /**
  * The landing's living medium: a connected network whose links reach out to the
@@ -91,7 +100,7 @@ export function TsparticlesField() {
   if (reduced) return null
 
   return (
-    <ParticlesProvider init={(engine) => loadSlim(engine)}>
+    <ParticlesProvider init={initTsparticles}>
       <Particles
         id="tsparticles"
         key={ink.particle + ink.link}
