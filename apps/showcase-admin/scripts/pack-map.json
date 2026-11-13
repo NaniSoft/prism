@@ -1,0 +1,16 @@
+{
+  "$comment": [
+    "The console showcase's pack map: every data-pack boundary on the built export is here.",
+    "The console carries one mark, the brand at the top of the rail, and no footer. The top",
+    "bar's chooser adds the second boundary, the swatch that shows the pack the page is in,",
+    "and the static export carries the ground because a reader's choice is the reader's and",
+    "not the server's. The mobile sheet renders the same mark inside a Dialog that a static",
+    "export never opens, so the rail is the only other boundary the build emits."
+  ],
+  "ground": "sky",
+  "secondPackRegions": [],
+  "regions": {
+    "rail.brand": { "why": "The brand at the top of the rail is the one mark this surface carries.", "packs": ["sky"] },
+    "header.theme": { "why": "The chooser's swatch in the top bar, which shows the pack the page is in.", "packs": ["sky"] }
+  }
+}

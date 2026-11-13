@@ -139,6 +139,27 @@ export function requireRoot(root, relative) {
   return full
 }
 
+/**
+ * The address a route is served at when the export is hosted under a base path.
+ *
+ * A consumer whose export is mounted at `/showcase/landing` emits `out/pricing.html`
+ * carrying `href="/showcase/landing/pricing"`, because the base path prefixes the
+ * address the reader uses and not the file the build writes. The two route-derived
+ * gates therefore read the prefix from the configuration and apply it to the routes
+ * they derive from files, and every route-shaped value in the configuration stays
+ * app-internal (`/pricing`, `/`) rather than leaking where the app happens to be
+ * hosted. An empty prefix is the root-hosted consumer, and the answer is the route
+ * unchanged.
+ *
+ * One helper, because two implementations of "the route a file is addressed by" is
+ * the second thing this kit exists to prevent: the links gate resolving a prefix the
+ * pack-boundary gate forgot is a gate that disagrees with its own run.
+ */
+export function publicRoute(basePath, route) {
+  const prefix = basePath === '' ? '' : `/${String(basePath).replace(/^\/+|\/+$/g, '')}`
+  return route === '/' ? prefix || '/' : `${prefix}${route}`
+}
+
 /* ------------------------------------------------- the design system, resolved */
 
 /**

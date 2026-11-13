@@ -1,0 +1,8 @@
+{
+  "name": "ground-01",
+  "title": "Ground 01 - The Page's Fixed Ground Of Light And A Medium",
+  "description": "The page's one continuous ground: an aurora wash and a particle field fixed behind every section, with the bar's transparency armed by the same Block. Worn at full presence on a landing and one rung quieter under a working surface.",
+  "categories": ["chrome"],
+  "registryDependencies": ["aurora-wash", "tsparticles-field", "header-transparency"],
+  "dependencies": []
+}

@@ -18,7 +18,7 @@
 import { LAW_IDS, law } from './laws.mjs'
 
 /** The contract generation. Bump it when a law's wording or its gate's surface changes. */
-export const GATE_KIT_VERSION = 1
+export const GATE_KIT_VERSION = 2
 
 /** Every gate, keyed by the id a consumer names. The value is the module's `run`. */
 export const GATES = {
@@ -29,6 +29,7 @@ export const GATES = {
   'hidden-state': () => import('./hidden-state.mjs'),
   'runtime-token-read': () => import('./runtime-token-read.mjs'),
   pin: () => import('./pin.mjs'),
+  'view-only': () => import('./view-only.mjs'),
 }
 
 /**
@@ -49,6 +50,7 @@ export const GATE_LAWS = {
   'hidden-state': ['hidden-state'],
   'runtime-token-read': ['runtime-token-read'],
   pin: ['pin'],
+  'view-only': ['view-only'],
 }
 
 /** The gate ids, in the order a report prints them. */

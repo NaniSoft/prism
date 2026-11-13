@@ -343,7 +343,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           it, that outline is the only signal that the caret has landed, because
           the skip link itself has just given focus up and hidden again.
         */}
-        <main id="main" tabIndex={-1}>
+        {/*
+          The `site-main` slot is the stylesheet's stacking contract: the landing's
+          fixed ground sits at `z-index: -1` over the body's background, and this
+          column is the stacking context that keeps every page above it. The docs
+          routes wear no ground and the slot costs them nothing.
+        */}
+        <main id="main" data-slot="site-main" tabIndex={-1}>
           {children}
         </main>
         {/*

@@ -93,17 +93,20 @@ export const LAWS = {
   },
 
   'pack-boundary': {
-    title: 'A pack boundary lands on a mark, and a declared region set is the whole of what may carry a second pack.',
+    title: 'A pack boundary lands on a mark or on a pack swatch, and a declared region set is the whole of what may carry a second pack.',
     message:
       'A pack boundary is a promise with two axes. It re-points the corner radius as well as the colour,\n' +
-      '  so a boundary on anything but a fully rounded mark changes that shape, and a boundary with no\n' +
+      '  so a boundary on anything but a fully rounded shape changes that shape, and a boundary with no\n' +
       '  mode class of its own resolves its pack in the wrong mode on half the pages a reader sees. A\n' +
       '  screenshot in one mode is not evidence for either.',
     why:
       'A boundary that carries no descendant form resolves the light block on a dark page, which is\n' +
       '      pack-correct, mode-inverted and indistinguishable from a design decision. And because radius\n' +
       '      is the one non-colour member of a pack block, a section ground would put the section index\n' +
-      '      into that section\'s corner radius, which is an encoding nobody chose.',
+      '      into that section\'s corner radius, which is an encoding nobody chose. The two shapes the\n' +
+      '      system itself draws for a boundary are the mark, which a boundary names a product with, and\n' +
+      '      the pack swatch, which a boundary shows a pack as; both are fully rounded by construction,\n' +
+      '      and a boundary on any third shape is a finding even when its radius utility says otherwise.',
   },
 
   'runtime-token-read': {
@@ -139,13 +142,33 @@ export const LAWS = {
     message:
       'The pinned package is the whole cross-repository contract, so the pin is an exact version and the\n' +
       '  token package is not a dependency of this repository: `@nanisoft/prism-ui` declares it at an\n' +
-      '      exact version, so a consumer cannot be handed a mismatched pair, and a second declaration of\n' +
+      '  exact version, so a consumer cannot be handed a mismatched pair, and a second declaration of\n' +
       '      that number in a consumer is a second fact to keep in step with a release.',
     why:
       'The four repositories each declared the token version beside the component version, in a\n' +
       '      workspace configuration file as well as a manifest, so there were five places holding the\n' +
       '      same pair and no gate that could read all five. One site spent a release on the wrong line\n' +
       '      because nothing failed.',
+  },
+
+  'view-only': {
+    title: 'A view-only consumer owns no stylesheet, no style tooling and no client module.',
+    message:
+      'Prism is a view-only library: the consumer composes published Components and Blocks, passes\n' +
+      '  content and data as props, and every style and every animation arrives through the one imported\n' +
+      '  stylesheet. A stylesheet file, a style-tooling configuration or dependency, a `\'use client\'`\n' +
+      '  module or an inline `style=` attribute is the consumer re-owning a surface the system already\n' +
+      '  owns, and the fix is deletion: request the surface upstream and, when the release that carries\n' +
+      '  it lands, delete the local copy in the same change that takes the upgrade.',
+    why:
+      'Every surface a consumer styled itself was a surface the system could not repair. A retune of\n' +
+      '      the veil scale or a fix to the reduced-motion policy reached every consumer that owned\n' +
+      '      nothing and reached a consumer that owned a copy only if it re-implemented the repair, so\n' +
+      '      the site that lagged served a page that disagreed with its own design system while every\n' +
+      '      gate stayed green. This law is named rather than universal: a repository that has a reason\n' +
+      '      for a client boundary does not name this gate, and one that names it is holding itself to\n' +
+      '      the shape the showcase applications ship, which is zero stylesheets and zero client\n' +
+      '      modules.',
   },
 }
 

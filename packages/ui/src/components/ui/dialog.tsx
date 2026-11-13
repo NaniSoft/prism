@@ -181,7 +181,7 @@ function DialogContent({
     <DialogPrimitive.Portal>
       <DialogPrimitive.Backdrop
         data-slot="dialog-backdrop"
-        className="bg-background/80 fixed inset-0 z-50 backdrop-blur-sm transition-opacity duration-base ease-out data-[starting-style]:opacity-0 data-[ending-style]:opacity-0"
+        className="bg-background/(--veil-scrim) fixed inset-0 z-50 backdrop-blur-sm transition-opacity duration-base ease-out data-[starting-style]:opacity-0 data-[ending-style]:opacity-0"
       />
       <DialogPrimitive.Viewport data-slot="dialog-viewport" className={VIEWPORT[side]}>
         <DialogPrimitive.Popup

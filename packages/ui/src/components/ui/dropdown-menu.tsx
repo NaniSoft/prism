@@ -239,11 +239,21 @@ function DropdownMenuContent({
 }: DropdownMenuContentProps) {
   return (
     <MenuPrimitive.Portal>
+      {/*
+        The z lands on the Positioner and not only on the Popup, because Base UI
+        positions the Positioner with an inline transform and a transformed element
+        is a stacking context: a Popup-only z is trapped inside a context the page
+        outranks. A page column that holds the fixed ground below it (`z-index: 1`
+        on `site-main`) then paints over the whole menu, and the reader's clicks
+        land on the page behind it. Popover, Select, Tooltip and HoverCard already
+        carry their z here for that reason; this menu now joins them.
+      */}
       <MenuPrimitive.Positioner
         side={side}
         align={align}
         sideOffset={sideOffset}
         alignOffset={alignOffset}
+        className="z-50"
       >
         <MenuPrimitive.Popup
           data-slot="dropdown-menu-content"
@@ -395,7 +405,7 @@ function DropdownMenuSubContent({
 }: DropdownMenuSubContentProps) {
   return (
     <MenuPrimitive.Portal>
-      <MenuPrimitive.Positioner align={align} sideOffset={sideOffset}>
+      <MenuPrimitive.Positioner align={align} sideOffset={sideOffset} className="z-50">
         <MenuPrimitive.Popup
           data-slot="dropdown-menu-sub-content"
           className={cn(POPUP, className)}

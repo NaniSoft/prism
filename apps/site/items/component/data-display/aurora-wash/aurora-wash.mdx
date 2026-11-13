@@ -8,7 +8,9 @@ title: AuroraWash
 AuroraWash is light moving through a ground: two or three large translucent
 planes in the pack's own colours, each on its own long orbit of the aurora
 cycle. It follows the wash law, so the stops are semantic, the element is
-`aria-hidden`, and it never touches text.
+`aria-hidden`, and it never touches text. Every plane names a rung of the veil
+scale, so the wash's translucency and the bar's glass and a dialog's scrim are
+priced by one ladder.
 
 ## Usage
 
@@ -19,6 +21,14 @@ import { AuroraWash } from '@nanisoft/prism-ui/components/aurora-wash'
   <AuroraWash className="absolute inset-0" />
   <div className="relative">{children}</div>
 </div>
+```
+
+The `intensity` prop steps every plane one rung down the veil ladder at once.
+`present` is the default and the figure a landing wears; `subtle` is the same
+figure one measure quieter, for a surface a reader works at:
+
+```tsx
+<AuroraWash intensity="subtle" className="absolute inset-0" />
 ```
 
 <ComponentDemo slug="aurora-wash" />
@@ -51,9 +61,11 @@ surface is lit, not that a system runs.
 
 ### Best practices
 
-- Let it be quiet. The intensity of a wash is the caller's, through opacity on
-  the caller's own wrapper, and the restrained version is the one that reads
-  as a place rather than as a poster.
+- Let it be quiet through the prop, not through a wrapper. `intensity="subtle"`
+  steps every plane down one named rung, while an `opacity-*` utility on the
+  wrapper multiplies whatever the planes happen to carry into values nobody
+  chose; the restrained version is the one that reads as a place rather than as
+  a poster, and it names its rung.
 - Pair it with `ParticleField` only when the two claims belong together, and
   let the tempos differ, which the aurora and drift cycles already do.
 - Trust the still frame. The reduced-motion rule holds the planes at rest and

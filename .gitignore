@@ -26,6 +26,7 @@ pnpm-debug.log*
 .opencode/
 .playwright-mcp/
 .superpowers/
+.zcode/
 opencode.exe
 
 packages/tokens/.generated/

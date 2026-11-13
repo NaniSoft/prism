@@ -83,6 +83,25 @@ for (const route of ROUTES) {
       await Promise.all(frames.map(async (frame) => void (await frame.contentDocument?.fonts.ready)))
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
     })
+    /*
+     * The two sticky panes are capped by the viewport's own height
+     * (`max-h-[calc(100dvh-3.5rem)]`), so on a page whose article is shorter
+     * than its rail the rail is the taller column and the document's height
+     * depends on the viewport's. A reader never meets that: their viewport is
+     * the one the rail is capped by. A full-page capture does, because the
+     * capture is taken as a viewport no reader has, and a page that grows with
+     * the viewport grows again under the capture, which is the two stable
+     * heights this lane used to flap between. The panes are pinned to this
+     * project's own viewport height for the capture, which is the height the
+     * screenshots have always meant to show: the page as the project's reader
+     * has it.
+     */
+    await page.evaluate(() => {
+      const cap = `${window.innerHeight - 56}px`
+      for (const pane of document.querySelectorAll<HTMLElement>('[data-slot="docs-rail"], [data-slot="docs-toc"]')) {
+        pane.style.maxHeight = cap
+      }
+    })
     await expect(page).toHaveScreenshot(`${route.slug}.png`, { fullPage: true })
   })
 }

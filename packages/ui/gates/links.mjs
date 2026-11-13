@@ -33,7 +33,7 @@ import { createRequire } from 'node:module'
 import path from 'node:path'
 
 import { law } from './laws.mjs'
-import { CoverageError, finding, floor } from './run.mjs'
+import { CoverageError, finding, floor, publicRoute } from './run.mjs'
 
 /**
  * The document parser, resolved from the consumer's own dependency.
@@ -54,7 +54,7 @@ function loadParser(root) {
 }
 
 /** Every emitted HTML file under `outDir`, as `[absolute path, route]` pairs, sorted. */
-export function emittedRoutes(root, outDir) {
+export function emittedRoutes(root, outDir, basePath = '') {
   const out = path.join(root, outDir)
   if (!existsSync(out)) {
     throw new CoverageError(
@@ -69,7 +69,8 @@ export function emittedRoutes(root, outDir) {
       if (entry.isDirectory()) walk(full)
       else if (entry.name.endsWith('.html')) {
         const relative = path.relative(out, full).split(path.sep).join('/')
-        files.push([full, relative === 'index.html' ? '/' : `/${relative.replace(/\.html$/, '')}`])
+        const route = relative === 'index.html' ? '/' : `/${relative.replace(/\.html$/, '')}`
+        files.push([full, publicRoute(basePath, route)])
       }
     }
   }
@@ -80,12 +81,13 @@ export function emittedRoutes(root, outDir) {
 export function run({ root, config }) {
   const l = law('links')
   const outDir = config.outDir ?? 'out'
+  const basePath = config.basePath ?? ''
   const minRoutes = config.minRoutes ?? 6
   const minAnchors = config.minAnchors ?? 0
   const knownBroken = config.knownBroken ?? {}
 
   const JSDOM = loadParser(root)
-  const files = emittedRoutes(root, outDir)
+  const files = emittedRoutes(root, outDir, basePath)
   floor('route(s) read', files.length, minRoutes)
 
   const emitted = new Set(files.map(([, route]) => route))
@@ -136,7 +138,7 @@ export function run({ root, config }) {
             finding(route, 'fragment', `"${href}" names an id this document does not emit.`),
           )
         }
-      } else if (/^(mailto:|tel):/.test(href)) {
+      } else if (/^(mailto|tel):/.test(href)) {
         schemes.add(`${href.split(':')[0]}:`)
       } else if (/^https?:\/\//.test(href)) {
         external.add(new URL(href).host)
@@ -171,6 +173,12 @@ export function run({ root, config }) {
     `${l.id}: fragments resolved: ${[...fragments].sort().join(', ') || 'none'}`,
     `${l.id}: destinations off this site, listed and not resolved: ${[...external].sort().join(', ') || 'none'}`,
   ]
+  if (basePath !== '') {
+    notes.push(
+      `${l.id}: every route above is addressed under the base path "${publicRoute(basePath, '/')}", because this\n` +
+        '  export is hosted at a sub-path and the address a reader uses is not the file the build writes.',
+    )
+  }
   if (schemes.size > 0) {
     notes.push(`${l.id}: reader-handled schemes, listed and not resolved: ${[...schemes].sort().join(', ')}`)
   }

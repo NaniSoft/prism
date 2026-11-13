@@ -36,6 +36,21 @@ export type SiteNavLink = {
    * external: a cross-origin destination is not by itself a reason to open a tab.
    */
   newTab?: boolean
+  /**
+   * Holds the link back to the panel below the row's threshold and out of the
+   * row itself.
+   *
+   * The row and the panel render the one array, and a destination is usually in
+   * both because a destination the panel omits is a route a narrow-viewport
+   * reader cannot find. The one honest exception is a destination the row already
+   * carries another way: a site whose header shows a destination as an action in
+   * its controls cluster above one width and cannot afford the cluster's fifth
+   * control below it holds the place with a `mobileOnly` link rather than losing
+   * the destination entirely. Set it on that one link and on nothing else,
+   * because a row that hid a destination the panel also hid would be exactly the
+   * omission this field exists to close.
+   */
+  mobileOnly?: boolean
   /** Forbidden: a destination carrying children is a `SiteNavGroup`, not a link. */
   children?: never
 }
@@ -340,6 +355,13 @@ export function SiteNavbar({
   const entries = nav ?? []
 
   /*
+   * The row's half of the one array: every entry the panel does not reserve.
+   * A group cannot be `mobileOnly`, so the narrowing is on `href`, the one key
+   * a link carries and a group does not.
+   */
+  const rowEntries = entries.filter((entry) => !('href' in entry && entry.mobileOnly))
+
+  /*
    * The current mark reads the route as a place rather than as a string, so a
    * reader on a page inside a destination is still on it: `/components/button`
    * marks Components on the row, which is the question a reader asking "where
@@ -392,9 +414,16 @@ export function SiteNavbar({
           />
         </a>
 
-        {entries.length > 0 ? (
+        {/*
+          The row renders the entries the panel reserves none of: a `mobileOnly`
+          link is a destination the row's own cluster carries another way (an
+          action CTA above a width the cluster fits at), so drawing it here as
+          well would be the one destination shown twice while the row is wide
+          enough to show it once. The panel below receives every entry.
+        */}
+        {rowEntries.length > 0 ? (
           <nav aria-label={navLabel} className="hidden items-center lg:flex">
-            {entries.map((entry) =>
+            {rowEntries.map((entry) =>
               /*
                * A group is the one control in the row, because it is the one
                * entry that is a place rather than a destination, and its menu is

@@ -402,7 +402,7 @@ export function Backdrop01({
         <div
           data-slot="backdrop-wash"
           aria-hidden="true"
-          className="bg-background/40 pointer-events-none absolute inset-0 -z-10"
+          className="bg-background/(--veil-quiet) pointer-events-none absolute inset-0 -z-10"
         />
 
         <div data-slot="backdrop-content" className="relative flex flex-col gap-6 p-6 sm:p-10">

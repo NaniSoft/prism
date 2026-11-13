@@ -87,8 +87,20 @@ function readSystemDark(): boolean | null {
   }
 }
 
+/**
+ * The mode an unresolved render reports, which is the light member of the pair
+ * and never the reader's own system preference.
+ *
+ * The system preference is read by the resolution on mount and by nothing else,
+ * because a value read from `matchMedia` during render is a value the server
+ * cannot know: the first client render would report the reader's dark while the
+ * server render beside it reported light, and every control that draws by the
+ * mode, which is the mode toggle's icon, hydrates as a mismatch. The one frame
+ * a dark-preferring reader sees the light icon is the price of the two renders
+ * agreeing, and the resolution replaces it before the reader can act.
+ */
 function fallbackModeOf(defaultMode: DefaultMode): Mode {
-  return defaultMode === 'system' ? (readSystemDark() ? 'dark' : 'light') : defaultMode
+  return defaultMode === 'system' ? 'light' : defaultMode
 }
 
 /** One guarded write. The attributes are already applied when this fails. */

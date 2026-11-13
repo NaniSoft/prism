@@ -372,6 +372,76 @@ test('the runtime token read gate fails when its roots do not resolve, rather th
   assert.match(result.stderr, /declared source roots do not resolve/)
 })
 
+test('the view-only gate fails on each surface a consumer took back: a sheet, tooling, a client module, an inline style', () => {
+  const root = pinToRealSystem(
+    consumer({
+      manifest: { devDependencies: { tailwindcss: '^4.0.0' } },
+      files: {
+        'app/page.tsx': 'export const Page = () => <main style={{ minHeight: 80 }}>readable</main>\n',
+        'app/layout.tsx': "import { Mark } from '../components/mark'\nexport const Layout = () => <Mark />\n",
+        'app/globals.css': sheet('main { color: var(--foreground); }'),
+        'components/mark.tsx': "'use client'\nexport const Mark = () => <span />\n",
+        'lib/site.ts': 'export const ground = "sky"\n',
+      },
+    }),
+  )
+  const result = run(root, { gates: ['view-only'], 'view-only': { minFiles: 1 } })
+
+  assert.equal(result.status, 1)
+  assert.match(result.stderr, /app\/globals\.css\s+\[view-only-stylesheet\]/)
+  assert.match(result.stderr, /a surface this repository owns and the design system already owns/)
+  assert.match(result.stderr, /package\.json \(devDependencies\)\s+\[view-only-tooling\]/)
+  assert.match(result.stderr, /components\/mark\.tsx\s+\[view-only-client\]/)
+  assert.match(result.stderr, /a client boundary this repository took back/)
+  assert.match(result.stderr, /app\/page\.tsx:\d+\s+\[view-only-inline-style\]/)
+  assert.match(result.stderr, /a stylesheet of one element/)
+})
+
+test('the view-only gate fails on a style-tooling configuration at the root, which is a build step the system already performed', () => {
+  const root = pinToRealSystem(
+    consumer({
+      files: {
+        'app/page.tsx': 'export const Page = () => <main>readable</main>\n',
+        'app/layout.tsx': 'export const Layout = () => null\n',
+        'components/mark.tsx': 'export const Mark = () => <span />\n',
+        'lib/site.ts': 'export const ground = "sky"\n',
+        'postcss.config.mjs': "export default { plugins: {} }\n",
+      },
+    }),
+  )
+  const result = run(root, { gates: ['view-only'], 'view-only': { minFiles: 1 } })
+
+  assert.equal(result.status, 1)
+  assert.match(result.stderr, /postcss\.config\.mjs\s+\[view-only-tooling\]/)
+  assert.match(result.stderr, /a second build\s+of a surface the system already shipped/)
+})
+
+test('the view-only gate passes on the showcase shape and counts what it read', () => {
+  const root = pinToRealSystem(
+    consumer({
+      files: {
+        'app/page.tsx': "import { Ground01 } from '@nanisoft/prism-ui/blocks/ground-01'\nexport const Page = () => <Ground01 />\n",
+        'app/layout.tsx': "export const Layout = () => null\n",
+        'lib/site.ts': 'export const ground = "sky"\n',
+        'components/chrome.tsx': 'export const Chrome = () => null\n',
+      },
+    }),
+  )
+  const result = run(root, { gates: ['view-only'], 'view-only': { minFiles: 1 } })
+
+  assert.equal(result.status, 0, result.stdout + result.stderr)
+  assert.match(result.stdout, /0 client module\(s\), 0 root style-tooling configuration\(s\)/)
+  assert.match(result.stdout, /The showcase shape is/)
+})
+
+test('the view-only gate fails when its roots do not resolve, rather than reporting a repository that owns nothing', () => {
+  const root = consumer({ files: { 'app/page.tsx': 'export const Page = () => null\n' } })
+  const result = run(root, { gates: ['view-only'], 'view-only': { sourceRoots: ['app', 'nowhere'] } })
+
+  assert.equal(result.status, 1)
+  assert.match(result.stderr, /declared source roots do not resolve/)
+})
+
 test('the hidden-state gate fails on an arming attribute with no writer and with no withdrawal', () => {
   const rules = Array.from({ length: 30 }, (_, i) => `.site .r${i} { color: var(--foreground); }`).join('\n')
   const sheetWith = (extra) =>
@@ -494,6 +564,53 @@ test('the links gate fails when its floor is not met, which is a pass having rea
   assert.match(result.stderr, /jsdom does not resolve|route\(s\) read/)
 })
 
+test('the links gate derives routes under a declared base path, so a sub-path host can run it', async () => {
+  const { emittedRoutes } = await import(pathToFileURL(path.join(KIT, 'links.mjs')).href)
+  const root = consumer({
+    files: {
+      'out/index.html': '<html></html>',
+      'out/pricing.html': '<html></html>',
+      'out/dashboard/orders.html': '<html></html>',
+    },
+  })
+  const routes = emittedRoutes(root, 'out', '/showcase/landing').map(([, route]) => route).sort()
+
+  // The file the build writes is out/pricing.html; the address a reader uses at a
+  // sub-path host is /showcase/landing/pricing. The derived set must carry the
+  // prefix, or every internal link in the export is a finding on a working page.
+  assert.deepEqual(routes, [
+    '/showcase/landing',
+    '/showcase/landing/dashboard/orders',
+    '/showcase/landing/pricing',
+  ])
+
+  // A trailing slash on the prefix is normalised rather than trusted, because a
+  // doubled slash in a route is an address no reader can reach.
+  assert.deepEqual(
+    emittedRoutes(root, 'out', '/showcase/landing/').map(([, route]) => route).sort(),
+    routes,
+  )
+
+  // The root-hosted consumer declares no prefix, and its routes are unchanged.
+  assert.deepEqual(emittedRoutes(root, 'out').map(([, route]) => route).sort(), [
+    '/',
+    '/dashboard/orders',
+    '/pricing',
+  ])
+})
+
+test('publicRoute keeps the route the configuration names app-internal', async () => {
+  const { publicRoute } = await import(pathToFileURL(path.join(KIT, 'run.mjs')).href)
+
+  // The landing stays "/" in a consumer's prism-gates.json wherever it is hosted,
+  // because where it is hosted is not a fact about its pages.
+  assert.equal(publicRoute('', '/'), '/')
+  assert.equal(publicRoute('/showcase/admin', '/'), '/showcase/admin')
+  assert.equal(publicRoute('showcase/admin/', '/'), '/showcase/admin')
+  assert.equal(publicRoute('/showcase/admin', '/orders'), '/showcase/admin/orders')
+  assert.equal(publicRoute('', '/orders'), '/orders')
+})
+
 /* ------------------------------------------------------- the configuration */
 
 test('a configuration that names no gates fails rather than reporting a clean run', () => {
@@ -537,6 +654,7 @@ test('every law is defined once, in the package, and each has a title, a message
     'hidden-state',
     'runtime-token-read',
     'pin',
+    'view-only',
   ]
 
   assert.deepEqual(Object.keys(LAWS).sort(), [...expected].sort())

@@ -303,7 +303,7 @@ function DrawerContent({
     <DrawerPrimitive.Portal>
       <DrawerPrimitive.Backdrop
         data-slot="drawer-backdrop"
-        className="bg-background/80 fixed inset-0 z-50 backdrop-blur-sm transition-opacity duration-base ease-out data-[starting-style]:opacity-0 data-[ending-style]:opacity-0 data-swiping:transition-none"
+        className="bg-background/(--veil-scrim) fixed inset-0 z-50 backdrop-blur-sm transition-opacity duration-base ease-out data-[starting-style]:opacity-0 data-[ending-style]:opacity-0 data-swiping:transition-none"
       />
       <DrawerPrimitive.Viewport data-slot="drawer-viewport" className={VIEWPORT[side]}>
         <DrawerPrimitive.Popup

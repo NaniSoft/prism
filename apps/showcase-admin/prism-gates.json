@@ -1,0 +1,36 @@
+{
+  "$comment": [
+    "The console showcase's half of the cross-repository contract, data only.",
+    "The laws are not here. They are the failure messages of the gates in @nanisoft/prism-ui/gates",
+    "which this repository pins exactly. What is here is what only this site knows:",
+    "which sheet is its own, where its export is hosted, how much of it counts as",
+    "having read something, what its pack map describes, and which source roots read",
+    "no tokens at runtime. This site has no own sheet, so the stylesheet-ownership and",
+    "hidden-state floors are 0. It names the view-only gate because it is the shape",
+    "that law holds: no stylesheet, no style tooling, no client module, no inline",
+    "style. The base path is declared once per route-derived gate, and the routes",
+    "those gates name stay app-internal."
+  ],
+  "gateKit": 2,
+  "gates": [
+    "stylesheet-ownership",
+    "links",
+    "pack-boundary",
+    "hidden-state",
+    "runtime-token-read",
+    "view-only"
+  ],
+  "pack-boundary": {
+    "outDir": "out",
+    "basePath": "/showcase/admin",
+    "map": "scripts/pack-map.json",
+    "regionResolver": "scripts/pack-regions.mjs",
+    "landing": "/",
+    "markSlot": "product-mark"
+  },
+  "stylesheet-ownership": { "sheets": [], "minDeclarations": 0 },
+  "hidden-state": { "sheets": [], "minRules": 0, "sourceRoots": ["app"] },
+  "links": { "outDir": "out", "basePath": "/showcase/admin", "minRoutes": 5, "minAnchors": 20 },
+  "runtime-token-read": { "sourceRoots": ["app"], "minFiles": 2 },
+  "view-only": { "sourceRoots": ["app", "components", "lib"], "minFiles": 8 }
+}

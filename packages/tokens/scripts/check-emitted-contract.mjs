@@ -121,6 +121,11 @@ for (const [key, token] of groupEntries(foundationTree, ['ease'])) put(`ease-${k
 for (const [key, token] of groupEntries(foundationTree, ['ambient'])) put(`ambient-${key}`, readToken(token))
 for (const [key, token] of groupEntries(foundationTree, ['ambient-ease'])) put(`ambient-ease-${key}`, readToken(token))
 
+// The veil group authors fractions and emits percentages, so the expected value
+// carries the same conversion the build performs rather than readToken's fraction.
+const veilPercent = (token) => `${Math.round((token.$value ?? token.value) * 100)}%`
+for (const [key, token] of groupEntries(foundationTree, ['veil'])) put(`veil-${key}`, veilPercent(token))
+
 put('transition-duration-fast', 'var(--duration-fast)')
 put('transition-duration-base', 'var(--duration-base)')
 put('transition-duration-slow', 'var(--duration-slow)')
@@ -189,7 +194,7 @@ for (const [name, want] of expected) {
 // 4. No declaration in a bound namespace that the source did not author.
 const NAMESPACES = [
   'font-', 'font-weight-', 'text-', 'leading-', 'tracking-',
-  'duration-', 'ease-', 'ambient-', 'ambient-ease-', 'shadow-', 'breakpoint-', 'container-',
+  'duration-', 'ease-', 'ambient-', 'ambient-ease-', 'veil-', 'shadow-', 'breakpoint-', 'container-',
   'aspect-', 'z-', 'media-',
   'transition-duration-', 'default-transition-duration', 'default-transition-timing-function',
 ]
@@ -292,6 +297,46 @@ for (const [key, token] of groupEntries(foundationTree, ['ambient-ease'])) {
       `ambient-ease.${key} overshoots: control-point y must stay in [0, 1]`,
     )
   }
+}
+
+/*
+ * The veil scale, held to the same three rules as `duration` and `ambient`: a
+ * closed set, values stated rather than ranged, and a shape rule that prices
+ * the reason the group exists. `veil` exists so that translucency is a decision
+ * rather than a number, and the closed set is the decision; the moment the
+ * group can grow, a component can name a translucency nobody chose, and four
+ * surfaces that mean the same thing can wear four numbers again, which is the
+ * defect this group was written to retire.
+ *
+ * The shape rule is that the members ascend, with no two sharing a value. A
+ * scale with a repeated value is two names for one decision, and a scale that
+ * doubles back is a suggestion rather than a ladder: a component naming a step
+ * must be able to say "more veil" or "less veil" and have the answer be the
+ * next name, or the names are decoration on a number.
+ */
+const veilEntries = groupEntries(foundationTree, ['veil'])
+const veilKeys = veilEntries.map(([key]) => key)
+const VEIL_ORDER = ['faint', 'whisper', 'soft', 'light', 'quiet', 'glass', 'scrim', 'cover']
+check(
+  JSON.stringify([...veilKeys].sort()) === JSON.stringify([...VEIL_ORDER].sort()),
+  `veil set must be {${VEIL_ORDER.join(', ')}}, found {${veilKeys.join(', ')}}`,
+)
+const veilValues = veilEntries.map(([, token]) => token.$value ?? token.value)
+for (const [key, value] of veilEntries.map(([key, token]) => [key, token.$value ?? token.value])) {
+  check(
+    typeof value === 'number' && value > 0 && value < 1,
+    `veil.${key} is ${JSON.stringify(value)}, and a veil is a fraction strictly between 0 and 1: 0 is opacity and 1 is a surface`,
+  )
+}
+check(
+  JSON.stringify(veilKeys) === JSON.stringify(VEIL_ORDER),
+  `veil steps must be authored in ascending order {${VEIL_ORDER.join(' < ')}}, found {${veilKeys.join(', ')}}`,
+)
+for (let i = 1; i < veilValues.length; i += 1) {
+  check(
+    typeof veilValues[i - 1] === 'number' && typeof veilValues[i] === 'number' && veilValues[i] > veilValues[i - 1],
+    `veil is not a ladder: ${veilKeys[i - 1]} (${veilValues[i - 1]}) must be less than ${veilKeys[i]} (${veilValues[i]})`,
+  )
 }
 
 const shadowKeys = groupEntries(foundationTree, ['shadow']).map(([key]) => key).sort()

@@ -22,6 +22,7 @@ A consumer's repository holds **data**:
 | its coverage floors | how many rules or routes count as having read something |
 | its destinations known to be broken | one site's content defect, with a reason |
 | its custom properties the build supplies | one site's build, one site's font |
+| its base path | where the export is mounted is a fact about its hosting, not about its pages, so `links` and `pack-boundary` take it once and prefix the routes they derive from `out/`, while every route-shaped value in the configuration stays app-internal |
 
 The package holds **every law**: what the judgements are, what each failure says,
 and why each one exists. A consumer that restates any of it has two rules that will
@@ -55,6 +56,16 @@ And in `prism-gates.json`, at the repository root:
   "links": { "outDir": "out", "minRoutes": 30, "minAnchors": 200 },
   "hidden-state": { "sheets": ["app/globals.css"], "minRules": 25 }
 }
+
+A consumer whose export is mounted at a sub-path declares it once per route-derived
+gate, and the routes its configuration names stay app-internal:
+
+```json
+{
+  "links": { "outDir": "out", "basePath": "/showcase/landing", "minRoutes": 4 },
+  "pack-boundary": { "outDir": "out", "basePath": "/showcase/landing", "landing": "/" }
+}
+```
 ```
 
 `gateKit` is the generation of the contract the consumer is holding itself to. A

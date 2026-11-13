@@ -345,6 +345,22 @@
     }
   }
 
+  @media (width >= theme(--breakpoint-xl)) {
+    /*
+     * The ninth, and the eighth's sibling. The bar's showcase control is
+     * `hidden xl:inline-flex`, and `hidden` is the one display utility both
+     * builds emit, so the library's later copy of it computed `display: none`
+     * at every width and this control joined the quickstart off the bar at
+     * every width too. The eighth is hidden below `sm` and this one below
+     * `xl`, because at `lg` the Sections row returns to the bar and the
+     * controls cluster has no measured room for a second control until `xl`,
+     * which is what the fit spec holds.
+     */
+    .xl\:inline-flex {
+      display: inline-flex;
+    }
+  }
+
   @media (width >= theme(--breakpoint-lg)) {
     .lg\:block {
       display: block;

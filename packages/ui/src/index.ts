@@ -222,6 +222,8 @@ export { StackGrid01 } from './blocks/stack-grid-01'
 export { LogoStrip01 } from './blocks/logo-strip-01'
 export { NoteGrid01 } from './blocks/note-grid-01'
 export { InstrumentPanel01 } from './blocks/instrument-panel-01'
+export { Ground01 } from './blocks/ground-01'
+export type { Ground01Props } from './blocks/ground-01'
 export { SiteHeader } from './blocks/site-header'
 export { SiteFooter } from './blocks/site-footer'
 
