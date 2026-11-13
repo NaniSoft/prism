@@ -1,5 +1,95 @@
 # @nanisoft/prism-ui
 
+## 1.8.0
+
+### Minor Changes
+
+- 64e5c91: `Ground01`, the page's one continuous ground as a published Block: the aurora
+  wash, the particle field, the fixed `site-atmosphere` layer and the bar's
+  transparency state in one composition, so an application no longer assembles the
+  four by hand in its layout and the assembly cannot drift per site. `AuroraWash`
+  gains an `intensity` prop that steps every plane one rung down the veil ladder,
+  which retires the wrapper-opacity dimming a working surface used to carry.
+  
+  Every translucent surface in the library now names a rung of the `veil` scale
+  the token package publishes: the wash planes, the hero and CTA washes, the
+  backdrop veil, the gallery cover, the dialog family's scrims, and the bar that
+  turns to glass on scroll. A utility reaches a rung as
+  `bg-primary/(--veil-light)`, which compiles to a `color-mix` on the token, so a
+  retune of the scale reaches every translucent surface at once. The `site-main`
+  stacking contract is now held for a `main` carrying the slot, which the
+  stylesheet's own comment always described and no markup could actually reach.
+  
+  The gate kit's contract generation is 2. It adds the `view-only` law and its
+  gate, for the repositories that have decided Prism is a view-only library and
+  hold themselves to it: no stylesheet, no style-tooling configuration or
+  dependency, no client module, no inline style. The law is named rather than
+  universal, so a consumer declares it by naming the gate; the showcase
+  applications run it at kit generation 2.
+- 64e5c91: `AppShell01` accepts `theme` and `mode`, composing the site bar's own
+  `ThemeMenu` and `ModeToggle` in its top bar before the caller's actions. The
+  controls are imported from the navbar rather than drawn again, so a reader meets
+  one chooser on a console's bar and a site's, and a repository that holds no
+  client module of its own, which the view-only law asks of a showcase, can still
+  offer its operator the pack and the mode. The two are separate props because a
+  console that offers the mode and not the pack is a real shape and not half of
+  one.
+  
+  `SiteNavbar`'s links gain `mobileOnly`, which holds a destination back to the
+  panel below the row's threshold and out of the row itself. The row and the panel
+  render the one array, and the field exists for the one honest exception: a
+  destination the row already carries another way, as an action in its controls
+  cluster above the width that cluster fits, is held in the panel below it rather
+  than lost to the reader entirely.
+  
+  The pack-boundary law names the second shape a boundary may land on: the pack
+  swatch, which the `pack-swatch` slot draws, beside the mark the consumer's
+  `markSlot` names. A swatch is a boundary's other half, showing a pack as a disc
+  where a mark names a product with one, and the chooser the bar renders could not
+  cross a consumer's gate without it, because a boundary the gate cannot tell from
+  a misplaced one is a boundary the gate fails. The chooser's swatches now carry
+  the slot, and a consumer's map declares the chooser's region as its own.
+- 64e5c91: The `links` and `pack-boundary` gates accept a `basePath`, so a consumer whose
+  export is mounted at a sub-path can run its gate chain.
+  
+  The file a build writes is `out/pricing.html` while the address a reader uses at
+  a sub-path host is `/team/pricing`, so a gate that derived routes from files
+  alone reported every internal link in a working export as broken. A consumer now
+  declares `"basePath": "/team"` once per route-derived gate and every derived
+  route carries the prefix, while the routes its configuration names (`landing`,
+  `knownBroken`) stay app-internal, because where an app is hosted is not a fact
+  about its pages.
+  
+  The same gate's reader-handled scheme test also misread `mailto:` and `tel:`
+  addresses as unclassified destinations, because its pattern asked for a second
+  colon neither scheme carries, so a consumer with an email link was a finding on
+  a working page. The pattern now names the two schemes as they are written.
+
+### Patch Changes
+
+- 64e5c91: Every anchored popup the package portals now carries its `z` on the Base UI
+  positioner: the dropdown menu and its submenus, the context menu and its
+  submenus, and the menubar's menus. Popover, Select, Tooltip, HoverCard and
+  NavigationMenu already did, which is why a site's colour chooser could open
+  behind the page while the select beside it opened above it.
+  
+  The positioner is the element Base UI places with an inline `transform`, and a
+  transformed element is a stacking context, so the `z-50` the popup itself
+  carried was trapped inside a context the page could outrank. The ground contract
+  gives the page's `main` `z-index: 1`, and an unranked positioner painted below
+  it: a menu opened from the bar landed behind the hero and its clicks reached the
+  page. The fix joins the positioner to the layer its popup always claimed.
+  
+  The same release repairs the provider's first render. A `PrismProvider` whose
+  `defaultMode` is `system` reported the reader's own preference while the theme
+  was still unresolved, which the server render beside it cannot know, so the mode
+  toggle hydrated as a mismatch on every system-dark reader of a site that
+  defaults to the system mode. The unresolved render now reports the light member
+  on both sides, and the mount resolution replaces it with the truth before a
+  reader can act.
+- Updated dependencies [64e5c91]
+  - @nanisoft/prism-tokens@1.8.0
+
 ## 1.7.1
 
 ### Patch Changes
