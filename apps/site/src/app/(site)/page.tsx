@@ -7,28 +7,33 @@ import {
 } from '@nanisoft/prism-ui/catalog'
 import { Backdrop01 } from '@nanisoft/prism-ui/blocks/backdrop-01'
 import { Bento01 } from '@nanisoft/prism-ui/blocks/bento-01'
+import { Ground01 } from '@nanisoft/prism-ui/blocks/ground-01'
 import { Hero01 } from '@nanisoft/prism-ui/blocks/hero-01'
 import { MediaBand01 } from '@nanisoft/prism-ui/blocks/media-band-01'
 import { ProductGrid01 } from '@nanisoft/prism-ui/blocks/product-grid-01'
 import { AvatarGroup } from '@nanisoft/prism-ui/components/avatar-group'
-import { AuroraWash } from '@nanisoft/prism-ui/components/aurora-wash'
-import { HeaderTransparency } from '@nanisoft/prism-ui/components/header-transparency'
-import { TsparticlesField } from '@nanisoft/prism-ui/components/tsparticles-field'
 import { Badge } from '@nanisoft/prism-ui/components/badge'
 import { Input } from '@nanisoft/prism-ui/components/input'
 import { Label } from '@nanisoft/prism-ui/components/label'
 import { MiniCalendar } from '@nanisoft/prism-ui/components/mini-calendar'
+import {
+  AlphaLensMark,
+  AtlasMark,
+  NaniSoftMark,
+  NexusMark,
+} from '@nanisoft/prism-ui/components/product-marks'
 import { Reveal } from '@nanisoft/prism-ui/components/reveal'
 import { SignalField } from '@nanisoft/prism-ui/components/signal-field'
 import { Slider } from '@nanisoft/prism-ui/components/slider'
 import { Sparkline } from '@nanisoft/prism-ui/components/sparkline'
 import { Switch } from '@nanisoft/prism-ui/components/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@nanisoft/prism-ui/components/tabs'
+import { ComposedPage } from '@/components/landing/composed-page'
 import { EditorialPrism } from '@/components/landing/editorial-prism'
 import { Foundations } from '@/components/landing/foundations'
 import { InstallBand } from '@/components/landing/install-band'
 import { PackBand } from '@/components/landing/pack-band'
-import { SpecimenBoard } from '@/components/landing/specimen-board'
+import { ShowcaseBand } from '@/components/landing/showcase-band'
 import { Specimens } from '@/components/landing/specimens'
 
 /**
@@ -44,18 +49,20 @@ import { Specimens } from '@/components/landing/specimens'
  * that only the author of the landing page believed.
  *
  * **Every figure on this page is the package, not a picture of it.** The hero
- * renders a small page assembled from published Components, the band under it
- * renders the published Components themselves, and the pack band paints every
- * pack in its own compiled values. A screenshot of the library is a second copy
- * of its appearance that the next release silently rots, and a reader comparing
- * packs or flipping a specimen's switch is seeing the one truth there is.
+ * renders a small page assembled from published Components and re-points it
+ * through every pack as you choose one, the band under it renders the published
+ * Components themselves, and the pack band paints every pack in its own compiled
+ * values. A screenshot of the library is a second copy of its appearance that
+ * the next release silently rots, and a reader comparing packs or flipping a
+ * specimen's switch is seeing the one truth there is.
  *
  * **The order is the system's argument, not a template's.** A reader meets the
  * composed page first, then the parts, then the two commands that put them in a
  * project, then the foundations, then the motion law, then the packs, then the
+ * system's own image, then two whole applications built with it, then the
  * sites already wearing it. Every band is a different family: a split hero, a
  * bento gallery, a code band, a foundations bento, a field, a swatch grid, an
- * editorial band and a product list.
+ * editorial band, a showcase specification and a product list.
  */
 const catalogue = buildCatalog()
 import themes from '@nanisoft/prism-tokens/dist/themes.json'
@@ -81,7 +88,9 @@ const SPARK_VALUES: readonly number[] = COMPONENT_CATEGORIES.map(
  *
  * Prism is not in the list because this is its own page. The marks are the same
  * marks each site draws in its own bar, and the destinations are absolute because
- * the family is five origins rather than five routes.
+ * the family is five origins rather than five routes. Each row wears the member's
+ * own drawing from `ProductMarks`, so the mark a reader meets here is the one they
+ * meet in that site's bar rather than a disc standing in for it.
  */
 const SITES = [
   {
@@ -91,6 +100,7 @@ const SITES = [
     tagline: 'The company site, and the front door to the family.',
     href: 'https://www.nanisoft.com',
     newTab: true,
+    mark: <NaniSoftMark className="block size-full" />,
   },
   {
     id: 'nexus',
@@ -99,6 +109,7 @@ const SITES = [
     tagline: 'The Agent Factory: an issue in, a reviewed change out.',
     href: 'https://nexus.nanisoft.com',
     newTab: true,
+    mark: <NexusMark className="block size-full" />,
   },
   {
     id: 'atlas',
@@ -107,6 +118,7 @@ const SITES = [
     tagline: 'The Digital Twin Platform: living models of real systems.',
     href: 'https://atlas.nanisoft.com',
     newTab: true,
+    mark: <AtlasMark className="block size-full" />,
   },
   {
     id: 'alphalens',
@@ -115,18 +127,20 @@ const SITES = [
     tagline: 'Quantitative market research for the Indian market.',
     href: 'https://alphalens.nanisoft.com',
     newTab: true,
+    mark: <AlphaLensMark className="block size-full" />,
   },
 ]
 
 /**
- * The landing page, in eight bands.
+ * The landing page, in nine bands.
  *
  * The hero is the composed page; the specimens are the parts; the install band is
  * the way in; the foundations and the motion band are the rules; the packs are
- * the themes; the editorial band is the system's own image; and the product rows
- * are the proof. No band repeats another's layout family, and no action repeats
- * another's intent: the hero asks a reader to read or browse, the rest of the
- * page is evidence.
+ * the themes; the editorial band is the system's own image; the showcase band is
+ * two whole applications composed from it; and the product rows are the proof.
+ * No band repeats another's layout family, and no action repeats another's
+ * intent: the hero asks a reader to read or browse, the rest of the page is
+ * evidence.
  */
 export default function HomePage() {
   return (
@@ -134,14 +148,11 @@ export default function HomePage() {
       {/*
         The page's one continuous ground: light and a moving medium, fixed behind
         every section so the whole page reads as one surface rather than as a hero
-        and a set of separate bands. `aria-hidden` because a medium is not
-        information.
+        and a set of separate bands. The Block owns the whole figure, and this
+        page's decision is only that the landing wears it at full presence with
+        the transparent bar.
       */}
-      <div aria-hidden className="site-atmosphere">
-        <AuroraWash />
-        <TsparticlesField />
-      </div>
-      <HeaderTransparency />
+      <Ground01 />
       {/*
         The hero carries the page's one authored moment and no arrival: its entry
         is the page's entry, and the page does not introduce itself twice. The
@@ -163,7 +174,7 @@ export default function HomePage() {
           { label: 'Read the quickstart', href: '/overview/quickstart' },
           { label: 'Browse components', href: '/components', variant: 'outline' },
         ]}
-        instrument={<SpecimenBoard values={SPARK_VALUES} />}
+        instrument={<ComposedPage values={SPARK_VALUES} count={countOf('component')} />}
       />
 
       {/*
@@ -391,7 +402,17 @@ export default function HomePage() {
       />
       </Reveal>
 
+      {/*
+        The showcase band: the whole library, at the scale of an application.
+        Where the editorial band above is the system's own image, this one is two
+        complete consumers published beside the site, and the actions are the
+        applications themselves rather than pictures of them.
+      */}
       <Reveal delay={2}>
+      <ShowcaseBand />
+      </Reveal>
+
+      <Reveal delay={1}>
       <ProductGrid01
         headingLevel="h2"
         title="Used by every NaniSoft site"

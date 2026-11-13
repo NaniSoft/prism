@@ -1,0 +1,11 @@
+{
+  "siteId": "meridian-landing",
+  "siteName": "Meridian",
+  "ground": "sky",
+  "defaultMode": "system",
+  "products": [
+    { "id": "meridian-landing", "name": "Meridian", "pack": "sky", "href": "/" },
+    { "id": "meridian-console", "name": "Console", "pack": null, "href": "https://prism.nanisoft.com/showcase/admin" },
+    { "id": "prism", "name": "Prism", "pack": "lavender", "href": "https://prism.nanisoft.com" }
+  ]
+}

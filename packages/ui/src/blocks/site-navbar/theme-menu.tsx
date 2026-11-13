@@ -86,7 +86,14 @@ export function ThemeMenu({ packs, label }: ThemeMenuProps) {
         aria-label={`${label}: ${active.name}`}
         className="border-border bg-card text-foreground hover:bg-accent hover:text-accent-foreground data-[popup-open]:bg-accent data-[popup-open]:text-accent-foreground h-11 shrink-0 gap-2 rounded-full border pr-2.5 pl-3"
       >
+        {/*
+          The swatch carries the package's pack-swatch slot rather than no slot at
+          all, because the boundary on it is a boundary the gate kit holds: a
+          boundary is legitimate on a mark or on a pack swatch, and the slot is
+          what tells a consumer's gate which of the two it is looking at.
+        */}
         <span
+          data-slot="pack-swatch"
           data-pack={active.id}
           aria-hidden
           className="border-border/60 bg-primary size-3.5 rounded-full border"
@@ -107,6 +114,7 @@ export function ThemeMenu({ packs, label }: ThemeMenuProps) {
           {options.map((option) => (
             <DropdownMenuRadioItem key={option.id} value={option.id} closeOnClick>
               <span
+                data-slot="pack-swatch"
                 data-pack={option.id}
                 aria-hidden
                 className="border-border/60 bg-primary size-3.5 shrink-0 rounded-full border"

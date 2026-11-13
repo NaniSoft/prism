@@ -1,0 +1,37 @@
+{
+  "name": "@nanisoft/showcase-admin",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The console showcase: a fictional product's admin site, composed entirely from Prism with no CSS or JS of its own. Hosted at prism.nanisoft.com/showcase/admin.",
+  "packageManager": "pnpm@11.18.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "oxlint .",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "check:prism-gates": "prism-gates",
+    "check": "pnpm check:prism-gates"
+  },
+  "dependencies": {
+    "@nanisoft/prism-ui": "workspace:*",
+    "next": "^16.3.5",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "jsdom": "^26.1.0",
+    "oxlint": "^1.82.0",
+    "typescript": "^7.0.2",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,6 +1,6 @@
 /**
- * The pack-boundary law: a boundary lands on a mark, and a declared region set is
- * the whole of what may carry a second pack.
+ * The pack-boundary law: a boundary lands on a mark or on a pack swatch, and a
+ * declared region set is the whole of what may carry a second pack.
  *
  * **A screenshot cannot check this, in either mode, and that is the finding.** A
  * boundary is correct only if it resolves to its own pack in the mode the document
@@ -62,6 +62,7 @@ import {
   finding,
   floor,
   properties,
+  publicRoute,
   readJson,
   sameColour,
 } from './run.mjs'
@@ -77,8 +78,9 @@ export async function run({ root, config }) {
   const findings = []
   const notes = []
   const outDir = config.outDir ?? 'out'
+  const basePath = config.basePath ?? ''
   const mapPath = config.map ?? 'scripts/pack-map.json'
-  const landing = config.landing ?? '/'
+  const landing = publicRoute(basePath, config.landing ?? '/')
   const markSlot = config.markSlot ?? 'product-mark'
 
   const map = readJson(root, mapPath)
@@ -134,7 +136,8 @@ export async function run({ root, config }) {
       if (entry.isDirectory()) walkHtml(full)
       else if (entry.name.endsWith('.html')) {
         const relative = path.relative(out, full).split(path.sep).join('/')
-        documents.push([full, relative === 'index.html' ? '/' : `/${relative.replace(/\.html$/, '')}`])
+        const route = relative === 'index.html' ? '/' : `/${relative.replace(/\.html$/, '')}`
+        documents.push([full, publicRoute(basePath, route)])
       }
     }
   }
@@ -198,15 +201,24 @@ export async function run({ root, config }) {
       regions.get(region).push(pack)
 
       const tag = element.tagName.toLowerCase()
-      if (element.getAttribute('data-slot') === markSlot) marks += 1
+      /*
+        The two shapes a boundary may land on: the consumer's mark slot, and the
+        pack swatch the component package itself draws. A swatch is a boundary's
+        other half: a mark names a product with its boundary, and a swatch shows a
+        pack as one. `PackSwatch` and the navbar's chooser both draw the slot, and
+        both are fully rounded by construction, which is the property the law is
+        holding every other shape to.
+      */
+      const slot = element.getAttribute('data-slot')
+      if (slot === markSlot || slot === 'pack-swatch') marks += 1
       else {
         report(
           `off-mark:${element.tagName}`,
           route,
           'boundary-off-a-mark',
-          `a data-pack="${pack}" boundary in ${region} sits on a <${tag}>, not on a mark. A boundary\n` +
-            '      re-points --radius as well as colour, so anything that is not a fully rounded shape changes\n' +
-            '      shape with its pack.',
+          `a data-pack="${pack}" boundary in ${region} sits on a <${tag}>, not on a mark or a pack\n` +
+            '      swatch. A boundary re-points --radius as well as colour, so anything that is not a fully\n' +
+            '      rounded shape changes shape with its pack.',
         )
       }
       if (SHAPES.includes(tag)) {
@@ -369,6 +381,13 @@ export async function run({ root, config }) {
   notes.push(
     `${l.id}: ${findings.length} finding(s) across ${documents.length} document(s) and ${boundaries} boundary/boundaries read`,
   )
+  if (basePath !== '') {
+    notes.push(
+      `${l.id}: every route above, the landing included, is addressed under the base path ` +
+        `"${publicRoute(basePath, '/')}", because this export is hosted at a sub-path and the address a\n` +
+        '  reader uses is not the file the build writes.',
+    )
+  }
   notes.push(`${l.id}: the ground is "${map.ground}"; ${marks} of ${boundaries} boundary/boundaries sit on a mark`)
   notes.push(`${l.id}: regions read, with the packs each carries and how many routes carry it:`)
   for (const [region, entry] of [...actual.entries()].sort()) {

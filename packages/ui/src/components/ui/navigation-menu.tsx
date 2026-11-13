@@ -339,7 +339,7 @@ function NavigationMenuBackdrop({ className, ...props }: NavigationMenuBackdropP
   return (
     <NavigationMenuPrimitive.Backdrop
       data-slot="navigation-menu-backdrop"
-      className={cn('fixed inset-0 z-40 bg-background/40 transition-opacity duration-base ease-out data-[starting-style]:opacity-0 data-[ending-style]:opacity-0', className)}
+      className={cn('fixed inset-0 z-40 bg-background/(--veil-quiet) transition-opacity duration-base ease-out data-[starting-style]:opacity-0 data-[ending-style]:opacity-0', className)}
       {...props}
     />
   )

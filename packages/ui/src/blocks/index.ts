@@ -41,6 +41,8 @@ export { StackGrid01 } from './stack-grid-01'
 export { LogoStrip01 } from './logo-strip-01'
 export { NoteGrid01 } from './note-grid-01'
 export { InstrumentPanel01 } from './instrument-panel-01'
+export { Ground01 } from './ground-01'
+export type { Ground01Props } from './ground-01'
 export { SiteHeader } from './site-header'
 export { SiteFooter } from './site-footer'
 

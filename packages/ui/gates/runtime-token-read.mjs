@@ -19,10 +19,13 @@
  * What this gate does not do is forbid client code. Three of the four consumer
  * repositories ship none and one ships exactly one component for a reason its own
  * gate explains; whether a given repository has a client boundary is that
- * repository's business, and a gate that forbade one would be a law about one
- * site's structure pretending to be a law about all of them. What is universal is
- * the read, because a read resolves once and paints a value that never follows the
- * cascade.
+ * repository's business, and a universal gate that forbade one would be a law
+ * about one site's structure pretending to be a law about all of them. Kit
+ * generation 2 adds the view-only law for the repositories that have decided the
+ * other way: it is named rather than universal, so a repository declares that
+ * decision by naming it, and this gate keeps holding only the read either way.
+ * What is universal is the read, because a read resolves once and paints a value
+ * that never follows the cascade.
  *
  * Coverage is asserted: the declared roots must hold at least as many source files
  * as the consumer declares as its floor, so a renamed directory cannot empty this

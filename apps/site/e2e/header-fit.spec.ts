@@ -1,6 +1,6 @@
 import { expect, test, type Page, type TestInfo } from '@playwright/test'
 
-import { flattenTopNav } from '../src/lib/nav'
+import { NAV } from '../src/lib/bar'
 
 /**
  * Does the header fit, and is the right affordance on screen.
@@ -155,20 +155,23 @@ test('the panel carries every Section below lg, so the row moving cost no route'
     const links = await page
       .locator('[data-slot="sheet-content"] nav[aria-label="Main"] a')
       .evaluateAll((elements) => elements.map((element) => (element.textContent ?? '').trim()))
-    // The count is the manifest's, read from the same module the panel renders
-    // from, rather than a number typed here. It was `7`, and the manifest grew to
-    // nine when Patterns and Live joined it, so this assertion had been asserting a
-    // roster the site stopped publishing: it would have failed the next time anyone
-    // ran this lane, which is the best possible outcome, and would have been a
-    // false failure about a regression that never happened. A Section that cannot
-    // reach a reader is the harm this lane exists for, so the assertion has to be
-    // about the roster rather than about the roster as it was once.
+    // The roster is the bar's own, read from the same module the panel renders
+    // from, rather than a list typed here. It was `flattenTopNav()` when the two
+    // were the same array, and the panel outgrew the Section manifest the day it
+    // also carried the one destination the row holds another way (`mobileOnly`):
+    // reading the manifest here would have turned that destination into a failure
+    // this lane exists to prevent. A destination that cannot reach a reader is
+    // the harm this lane exists for, so the assertion has to be about the roster
+    // the panel publishes rather than about a roster a reader cannot open.
     //
     // The panel lists the row flattened: a group is a label above its links
     // rather than a second thing to open, so the roster the panel owes a reader
-    // is every Section, in reading order, with the group's own name on no
+    // is every destination, in reading order, with the group's own name on no
     // anchor of its own.
-    expect(links, `the panel at ${width}px`).toEqual(flattenTopNav().map((item) => item.label))
+    const roster = NAV.flatMap((entry) =>
+      'href' in entry ? [entry.label] : entry.children.map((child) => child.label),
+    )
+    expect(links, `the panel at ${width}px`).toEqual(roster)
     // The horizontal row is rendered but not on screen, so a reader is never
     // looking at two lists of Sections at once.
     expect(await page.locator('header nav[aria-label="Main"]').first().isVisible()).toBe(false)

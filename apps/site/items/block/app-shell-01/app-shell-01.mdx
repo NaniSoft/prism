@@ -16,12 +16,21 @@ The block composes these components:
 | --- | --- | --- |
 | Rail | Separator | the fixed navigation column and its dividers |
 | Top bar | Breadcrumb, Button | the trail and the sheet trigger |
+| Theme controls | ThemeMenu, ModeToggle | the colour chooser and the light and dark control, when the bar is handed them |
 | Sheet | Dialog | the left drawer that holds navigation on small screens |
 | Content | children | the application-owned main region |
 
 The navigation is passed as a node rather than a route table. The block never
 imports a router and fetches nothing, so the application keeps its own links and
 data.
+
+The theme controls are the same `ThemeMenu` and `ModeToggle` the site bar renders,
+composed from the navbar rather than drawn again, so a reader meets one chooser on a
+console's bar and a site's. They are optional and off by default: a product's
+console can refuse them for the same reason a product site can, because the ground
+is the product's own. Pass `theme` and `mode` with the words a reader hears, and the
+shell mounts the provider around them, so the choice persists across the
+application.
 
 ## Usage
 
@@ -64,6 +73,9 @@ navigation directly.
 - Keep the breadcrumb to the ancestors and the current page. The page's own
   title belongs in the page header, not the top bar.
 - Put account controls, a theme switch or a search in `actions`.
+- Pass `theme` and `mode` when the console shows the system rather than only
+  working in it. The two are separate props because a console that offers its
+  operator the mode and not the pack is a real shape and not half of one.
 - Give the shell a real `navigationLabel`: it names two navigation landmarks
   and the sheet trigger, and it is the only required string.
 

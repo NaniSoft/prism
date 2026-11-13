@@ -1,0 +1,86 @@
+---
+slug: blocks/ground-01
+title: Ground01
+---
+
+## Overview
+
+Ground01 is the page's one continuous ground: an aurora wash and a particle field
+fixed behind every section, with the bar's transparency armed by the same Block. A
+page that wears it reads as one surface rather than as a hero and a set of separate
+bands, because the ground stays put while the sections scroll over it.
+
+It exists because the ground was always made of published parts that every
+application assembled by hand. The `site-atmosphere` class and the bar's
+transparency are the stylesheet's; the wash, the field and the scroll state are
+Components. Before this Block, one application wore the assembly on every route and
+another on a single page, one dimmed the wash with a wrapper opacity and another ran
+it at full presence, and no two of them disagreed on purpose. The Block is the
+composition itself, so the decision is made once and a consumer makes it by choosing
+props.
+
+Every translucent surface involved names the same ladder. The wash's planes carry
+`veil` steps, and the bar that turns to glass over the ground carries the
+`veil-glass` step, so the figure below the headline and the surface above it are
+priced by one scale. This is what keeps four translucent surfaces that mean the same
+thing from wearing four numbers, which is the defect the veil scale was written to
+retire.
+
+## Usage
+
+At layout scope, so every route of a marketing site wears one ground:
+
+```tsx
+import { Ground01 } from '@nanisoft/prism-ui/blocks/ground-01'
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <Ground01 />
+        {children}
+      </body>
+    </html>
+  )
+}
+```
+
+On a single page, the ground arrives and leaves with it, and the page gives its own
+`main` the `site-main` slot so the stacking contract holds: the ground sits at
+`z-index: -1` over the body's background, and the content column is the stacking
+context above it.
+
+A console does not take this Block. A fixed field behind an instrument panel is a
+distraction rather than a setting, so a working surface composes an `AuroraWash` on
+its own `subtle` intensity inside the column its reader works in and keeps the rail
+on a still ground.
+
+<ComponentDemo slug="ground-01" />
+
+## Guidelines
+
+### When to use
+
+- A marketing surface whose first screen carries a hero, and whose sections should
+  read as one page rather than as stacked bands. Wear it at layout scope with
+  `intensity="present"` and the transparent bar.
+- A page whose reader works rather than reads: keep the fixed ground off it, and put
+  a `subtle` wash behind the working column instead, so the light is a setting
+  rather than a claim.
+
+### When not to use
+
+- Behind long-form reading. The docs pages of this site wear no ground, because a
+  moving medium behind a passage a reader is trying to finish is a tax on the
+  reading rather than a setting for it.
+- As a per-section backdrop. A band whose content sits over a running figure is
+  what `Backdrop01` is: an in-flow figure with a veil between it and the copy. This
+  Block is the page-level ground, and the two compose rather than substitute.
+
+### The contract the page holds up
+
+The ground renders `aria-hidden` and takes no pointer, because a medium is not
+information and a reader never reaches into a setting. A reader who asks the
+platform for less motion gets the same ground at rest: the wash's planes stop on
+their orbit, and the field stands on its server-rendered floor, which is complete
+before any script runs.

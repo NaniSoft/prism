@@ -263,7 +263,7 @@ export function Hero02({
     <Section data-slot="hero-02" className={cn('relative overflow-hidden', className)}>
       <div
         aria-hidden
-        className="from-primary/5 pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b to-transparent"
+        className="from-primary/(--veil-faint) pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b to-transparent"
       />
       {/*
         The band. The two tracks are `4fr / 8fr` and the column gap is zero, which

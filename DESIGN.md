@@ -744,6 +744,16 @@ wash layer sitting behind content rather than beside it.
 **Gradients** carry no brand hue of their own. A wash is a semantic colour fading
 to transparent, is always `aria-hidden`, and is never applied to text.
 
+**Translucency names a step of the veil scale.** No component writes a raw alpha
+at a call site: a wash fades to `veil-faint`, an aurora plane carries `light`,
+`soft` or `whisper`, the veil between a figure and its copy is `quiet`, the bar
+that turns to glass on scroll is `glass`, a modal's scrim is `scrim`, and the
+cover that all but hides the page is `cover`. Before the scale existed, four
+surfaces that meant the same thing wore four hand-picked numbers, and the fourth
+was written before anybody noticed the first three disagreed. A utility reaches a
+step as `bg-primary/(--veil-light)`, which resolves to a `color-mix` on the token,
+so a retune of the scale reaches every translucent surface in the system at once.
+
 ## Components
 
 The taxonomy is Component, Block and Page, and nothing else. This section states
@@ -3146,7 +3156,7 @@ entry points.
 - **Don't** add a keyframe animation or an entrance or scroll effect. Reduced
   motion is one unlayered rule in the component package's stylesheet, and a
   Component never re-decides it with a `motion-safe:` or `motion-reduce:` variant.
-- **Don't** author an ambient cycle outside the six classes the stylesheet
+- **Don't** author an ambient cycle outside the eight classes the stylesheet
   publishes, and never give a keyframe a duration of its own.
 - **Don't** add an em dash or an en dash to reader-facing copy. The dash gate
   covers this file and the other root documents.
@@ -3550,6 +3560,41 @@ unreadable before it is understood, and no duration in the 80 to 280ms band
 could ever have caught that, because a flicker was not a value this repository
 could previously express. The test is written as a measurement rather than a
 list, so a cycle added later is measured against the reason the group exists.
+
+### The veil scale, and why translucency is a role rather than a percentage
+
+Translucency is its own group with its own namespace, for the same structural
+reason `ambient` is not folded into `duration`: folding it in would have made
+one name mean two things, and here the two things are a decision and a number.
+Every alpha the shipped surface carries names a rung of one ladder, and the
+rungs are roles because a percentage is a number somebody measured once and a
+role is a decision somebody can retune.
+
+| Token | Value | What it is the translucency of |
+| --- | --- | --- |
+| `--veil-faint` | 5% | a wash separating a figure from its ground |
+| `--veil-whisper` | 10% | the outermost aurora plane, holding the middle |
+| `--veil-soft` | 15% | the answering aurora plane, a series colour |
+| `--veil-light` | 20% | the leading aurora plane, the pack's primary |
+| `--veil-quiet` | 40% | the veil that stills a figure behind copy |
+| `--veil-glass` | 72% | the bar, once the reader has scrolled |
+| `--veil-scrim` | 80% | a modal's scrim, blurring what it covers |
+| `--veil-cover` | 90% | a cover that all but hides the page |
+
+The group authors fractions and emits percentages, because CSS reads an alpha
+through `color-mix`, and a unitless fraction substituted there is invalid at
+computed-value time: the declaration holds, the property silently becomes unset,
+and the surface renders opaque. That is the quietest failure CSS knows, and the
+unit is the whole defence against it.
+
+**The set is closed and the ladder ascends, and both are gates.** A second rung
+at a value an existing rung already holds is two names for one decision, and a
+ladder that doubles back is a suggestion rather than a scale: a component naming
+a step must be able to say more veil or less veil and have the answer be the
+next name. An intensity that steps the whole ladder, like the wash's `subtle`,
+walks every plane down one rung rather than multiplying them by an opacity,
+because a multiplied alpha is a value nobody chose and a stepped one is the same
+figure one measure quieter.
 
 ### Why the keyframes are in the stylesheet and the durations are in the tokens
 

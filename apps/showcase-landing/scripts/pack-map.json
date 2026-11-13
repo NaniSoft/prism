@@ -1,0 +1,17 @@
+{
+  "$comment": [
+    "The landing showcase's pack map: every data-pack boundary on the built export is here.",
+    "The bar lockup and the footer lockup are the one brand mark, in the page ground.",
+    "The chooser's swatch is the third boundary: the pack the page is wearing, drawn as the",
+    "pack's own disc, and the static export carries the ground because a reader's choice is",
+    "the reader's and not the server's. The sites switcher's sibling marks live in a closed",
+    "dropdown, so the static export carries only the current mark."
+  ],
+  "ground": "sky",
+  "secondPackRegions": [],
+  "regions": {
+    "header.brand": { "why": "The bar lockup is this site, and its pack is the page ground.", "packs": ["sky"] },
+    "header.theme": { "why": "The chooser's swatch, which shows the pack the page is in.", "packs": ["sky"] },
+    "footer.brand": { "why": "The same lockup in the footer.", "packs": ["sky"] }
+  }
+}

@@ -76,17 +76,27 @@ export function SiteBar() {
       mobileLabels={{ open: COPY.menuOpen, close: COPY.menuClose }}
       actions={
         /*
-          The one conversion control the bar carries, and the label is the hero's
-          own on purpose: the landing page holds itself to one label per intent
-          wherever that intent appears, and a bar control that said "Get started"
-          for the same destination would be the second label for the first intent.
-          The Block renders it in the controls cluster after the mode toggle, and
-          it is hidden below `sm` because that cluster is already five controls
-          wide at the narrow end and the bar fits by measurement, not by luck.
+          The bar's two ways out, each with the hero's own label on purpose: the
+          landing page holds itself to one label per intent wherever that intent
+          appears, and a bar control that said something else for the same
+          destination would be the second label for the first intent. The Block
+          renders them in the controls cluster after the mode toggle, and each is
+          hidden below a width chosen for it, because that cluster is already
+          five controls wide at the narrow end and the bar fits by measurement,
+          not by luck.
         */
-        <CtaLink href="/overview/quickstart" className="hidden sm:inline-flex">
-          Read the quickstart
-        </CtaLink>
+        <>
+          <CtaLink
+            href="/showcase/landing"
+            variant="outline"
+            className="hidden xl:inline-flex"
+          >
+            Showcase
+          </CtaLink>
+          <CtaLink href="/overview/quickstart" className="hidden sm:inline-flex">
+            Read the quickstart
+          </CtaLink>
+        </>
       }
     />
   )

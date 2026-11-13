@@ -17,6 +17,8 @@ and avoid the words it retires.
 | `packages/llms` | `@nanisoft/prism-llms` | generated `llms.txt`, the Markdown mirror, and the store |
 | `packages/mcp-server` | `@nanisoft/prism-mcp-server` | read-only MCP tool logic, served from the site Worker |
 | `apps/site` | `@nanisoft/site` | static docs site, landing page, themes, and the Worker |
+| `apps/showcase-landing` | `@nanisoft/showcase-landing` | the landing showcase: a fictional product's marketing site, composed from Prism and published at `/showcase/landing` |
+| `apps/showcase-admin` | `@nanisoft/showcase-admin` | the console showcase: the same fictional product's admin site, composed from Prism and published at `/showcase/admin` |
 | `scripts` | - | repository gates and release scripts |
 
 ## Commands
@@ -114,6 +116,18 @@ Two rules follow from that, and both are about what may be written where:
   runner has no `dist/` and a test that passed locally after a manual build
   fails. A test that quietly depends on the order things ran in is a test of the
   order.
+- **The showcase apps are copied into the site's export, and the task graph is
+  what keeps the copy honest.** The site's postbuild runs
+  `apps/site/scripts/copy-showcase.mjs`, which copies `apps/showcase-landing/out`
+  and `apps/showcase-admin/out` under `out/showcase/**`, and `apps/site/turbo.json`
+  declares both apps' builds as dependencies of the site's build so a plain
+  `pnpm build` produces a complete export. Each app also declares its own turbo
+  outputs (`out/**`), because the generic task caches only `dist/**` and a warm
+  cache would otherwise restore a build with no export to copy. The
+  content-joins gate asserts each showcase route's entry document exists before
+  believing the route, and skips `out/showcase/**` in its navigation walk: those
+  pages are another consumer's export, gated by that consumer's own `prism-gates`
+  chain.
 - **The shadcn registry is internal.** Never serve it or document it as an install
   lane.
 - **`packages/ui/gates/` is published and `packages/ui/src` is the library.** The

@@ -158,5 +158,17 @@
     "linear": { "$value": [0, 0, 1, 1] },
     "in-out": { "$value": [0.42, 0, 0.58, 1] },
     "drift": { "$value": [0.37, 0, 0.63, 1] }
+  },
+  "veil": {
+    "$type": "number",
+    "$description": "The translucency scale: how much of a surface shows through a translucent one. A component never writes a raw alpha at a call site; it names a step, the same way motion names a duration. The steps are roles rather than percentages, because a percentage is a number somebody measured once and a role is a decision: a wash that separates a figure from its ground fades to `faint`, an aurora plane names `light`, `soft` or `whisper`, a veil standing between a figure and its copy names `quiet`, the bar that turns to glass on scroll names `glass`, a modal's scrim names `scrim`, and the cover that all but hides the page names `cover`. Emitted as percentages rather than unitless fractions because CSS reads an alpha through `color-mix`, and a percentage is the one form that reaches it.",
+    "faint": { "$value": 0.05 },
+    "whisper": { "$value": 0.1 },
+    "soft": { "$value": 0.15 },
+    "light": { "$value": 0.2 },
+    "quiet": { "$value": 0.4 },
+    "glass": { "$value": 0.72 },
+    "scrim": { "$value": 0.8 },
+    "cover": { "$value": 0.9 }
   }
 }

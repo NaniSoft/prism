@@ -63,6 +63,14 @@ A value in the DTCG source, either foundation or semantic. A token is the
 source; a CSS custom property is its emitted form.
 _Avoid_: variable (when the token source is meant).
 
+**Veil**:
+The translucency scale: how much of a surface shows through a translucent one,
+authored as fractions and emitted as percentages, with rungs named for the role
+each plays (`faint` for a wash, `glass` for the scrolled bar, `scrim` for a
+modal). No component writes a raw alpha at a call site; a translucent surface
+names a rung, and a colour utility reaches one as `bg-primary/(--veil-light)`.
+_Avoid_: opacity token, alpha value, glassmorphism, transparency.
+
 ### Composition
 
 **Component**:
@@ -198,6 +206,16 @@ The one script-driven figure: `ParticleField`, which renders its complete still
 field on the server and lets the script add the movement, answers the pointer,
 and disarms under reduced motion to leave the floor.
 _Avoid_: particle system, canvas background, animated background.
+
+**Ground**:
+The page's one continuous surface: light and a medium fixed behind every
+section, published as the `Ground01` Block rather than assembled per
+application. A page that wears it gives its `main` the `site-main` slot, which
+is the stacking contract that keeps the content above the ground. A working
+surface does not wear the ground; it composes a wash on its own subtle
+intensity.
+_Avoid_: hero background, page background, ambient layer, backdrop (which is
+`Backdrop01`, an in-band figure).
 
 ### Documentation site
 

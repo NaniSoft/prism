@@ -322,7 +322,7 @@ export function Hero01({
     <Section className={cn('relative overflow-hidden', className)}>
       <div
         aria-hidden
-        className="from-primary/5 pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b to-transparent"
+        className="from-primary/(--veil-faint) pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b to-transparent"
       />
       {/*
         The ground the caller named, over the wash and behind everything. The

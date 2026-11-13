@@ -177,6 +177,29 @@ function staticThemeDecls() {
   emitGroup('ambient')
   emitGroup('ambient-ease')
 
+  /*
+   * The veil scale, in its own group under its own namespace, emitted as
+   * percentages rather than the unitless fractions the group authors.
+   *
+   * A veil is how much of a surface shows through a translucent one, and before
+   * this group every alpha in the shipped surface was a hand-picked literal at
+   * its call site: the bar's 0.72, a dialog scrim's 80, a figure veil's 40, the
+   * aurora planes' 20/15/10, each chosen once and none of them a decision the
+   * system had made. Four surfaces that mean the same thing wore four numbers,
+   * and the fourth was written before anybody noticed the first three disagreed.
+   *
+   * The fractions are authored, and the percentages are emitted, because CSS
+   * reads an alpha through `color-mix`, and a colour utility reaches a step as
+   * `bg-primary/(--veil-light)`, which resolves to
+   * `color-mix(in oklab, var(--primary) var(--veil-light), transparent)`. A
+   * unitless `0.2` substituted there is invalid at computed-value time, which is
+   * the quietest failure CSS knows: the declaration holds, the property
+   * silently becomes unset, and the surface renders opaque. A percentage cannot
+   * fail that way, so the build carries the unit and the source carries the
+   * fraction, and neither is ever written where the other belongs.
+   */
+  emitGroup('veil', (token) => `${Math.round((token.$value ?? token.value) * 100)}%`)
+
   // Tailwind's `duration-*` utility reads `--transition-duration-*`, not
   // `--duration-*`, so the duration tokens are mirrored here.
   push('--transition-duration-fast', 'var(--duration-fast)')

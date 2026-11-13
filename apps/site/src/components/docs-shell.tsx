@@ -40,6 +40,15 @@ import { TableOfContents } from './table-of-contents'
  * enough not to need one. `overscroll-contain` stops a rail that has reached its
  * end from handing the gesture to the page, which is the same scroll-chaining
  * that makes a two-pane layout feel loose.
+ *
+ * The rail's cap is a height a reader's viewport names, and that has one
+ * consequence a reader never meets: on a viewport taller than the page's own
+ * article, the rail is the taller column and the page grows to hold it, so the
+ * document's height depends on the viewport's. The two sticky panes carry
+ * `data-slot` names (`docs-rail`, `docs-toc`) so the visual lane can pin them
+ * to its own project viewport before a full-page capture, which is the one
+ * place a viewport taller than any reader's is ever emulated and the one place
+ * the dependence would feed back on itself.
  */
 export function DocsShell({
   sections,
@@ -57,7 +66,10 @@ export function DocsShell({
   return (
     <div className="mx-auto flex w-full max-w-page gap-10 px-6">
       <aside className="bg-sidebar border-sidebar-border hidden w-64 shrink-0 border-r lg:-ml-6 lg:block lg:pl-6">
-        <div className="sticky top-14 flex max-h-[calc(100dvh-3.5rem)] flex-col gap-8 overflow-y-auto overscroll-contain py-10 pr-6">
+        <div
+          data-slot="docs-rail"
+          className="sticky top-14 flex max-h-[calc(100dvh-3.5rem)] flex-col gap-8 overflow-y-auto overscroll-contain py-10 pr-6"
+        >
           <SectionNav sections={sections} currentUrl={currentUrl} />
         </div>
       </aside>
@@ -69,7 +81,10 @@ export function DocsShell({
 
       {toc && toc.length ? (
         <aside className="hidden w-52 shrink-0 lg:block">
-          <div className="sticky top-14 flex max-h-[calc(100dvh-3.5rem)] flex-col gap-8 overflow-y-auto overscroll-contain py-10">
+          <div
+            data-slot="docs-toc"
+            className="sticky top-14 flex max-h-[calc(100dvh-3.5rem)] flex-col gap-8 overflow-y-auto overscroll-contain py-10"
+          >
             <TableOfContents toc={toc} />
           </div>
         </aside>

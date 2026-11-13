@@ -1307,6 +1307,17 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'Ground01',
+    slug: 'ground-01',
+    kind: 'block',
+    category: null,
+    description:
+      'The page\'s one continuous ground: an aurora wash and a particle field fixed behind every section, with the bar\'s transparency armed by the same Block.',
+    source: 'src/blocks/ground-01/index.tsx',
+    exports: ['Ground01'],
+    status: 'stable',
+  },
+  {
     name: 'SiteFooter',
     slug: 'site-footer',
     kind: 'block',

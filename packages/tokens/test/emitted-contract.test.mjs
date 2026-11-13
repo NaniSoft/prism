@@ -89,6 +89,13 @@ for (const [key, token] of spacing) put(`spacing-${escapeDot(key)}`, readToken(t
 
 for (const [key, token] of groupEntries(foundationTree, ['duration'])) put(`duration-${key}`, readToken(token))
 for (const [key, token] of groupEntries(foundationTree, ['ease'])) put(`ease-${key}`, readToken(token))
+for (const [key, token] of groupEntries(foundationTree, ['ambient'])) put(`ambient-${key}`, readToken(token))
+for (const [key, token] of groupEntries(foundationTree, ['ambient-ease'])) put(`ambient-ease-${key}`, readToken(token))
+
+// The veil group authors fractions and emits percentages; the expected value
+// carries the same conversion the build performs.
+const veilPercent = (token) => `${Math.round((token.$value ?? token.value) * 100)}%`
+for (const [key, token] of groupEntries(foundationTree, ['veil'])) put(`veil-${key}`, veilPercent(token))
 
 put('transition-duration-fast', 'var(--duration-fast)')
 put('transition-duration-base', 'var(--duration-base)')
@@ -127,6 +134,9 @@ const NAMESPACES = [
   'tracking-',
   'duration-',
   'ease-',
+  'ambient-',
+  'ambient-ease-',
+  'veil-',
   'shadow-',
   'breakpoint-',
   'container-',
@@ -205,6 +215,23 @@ describe('emitted token contract', () => {
       expect(value[3], `ease.${key} control-point y`).toBeGreaterThanOrEqual(0)
       expect(value[3], `ease.${key} control-point y`).toBeLessThanOrEqual(1)
     }
+  })
+
+  it('closes the veil set to an ascending ladder emitted as percentages', () => {
+    const entries = groupEntries(foundationTree, ['veil'])
+    expect(entries.map(([key]) => key)).toEqual(['faint', 'whisper', 'soft', 'light', 'quiet', 'glass', 'scrim', 'cover'])
+    const values = entries.map(([, token]) => token.$value ?? token.value)
+    for (const [key, value] of entries.map(([key, token]) => [key, token.$value ?? token.value])) {
+      expect(typeof value === 'number' && value > 0 && value < 1, `veil.${key} is a fraction strictly between 0 and 1`).toBe(true)
+    }
+    for (let i = 1; i < values.length; i += 1) {
+      expect(values[i], `veil.${entries[i][0]} ascends past ${entries[i - 1][0]}`).toBeGreaterThan(values[i - 1])
+    }
+    // Emitted as percentages because CSS reads an alpha through color-mix, and a
+    // unitless fraction substituted there is invalid at computed-value time.
+    expect(staticDecls.get('veil-faint')).toBe('5%')
+    expect(staticDecls.get('veil-glass')).toBe('72%')
+    expect(staticDecls.get('veil-cover')).toBe('90%')
   })
 
   it('closes the shadow set to xs, sm and md', () => {

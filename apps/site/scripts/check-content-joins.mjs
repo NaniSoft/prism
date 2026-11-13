@@ -79,6 +79,7 @@ import { LIVE_ROUTES, redirectFor, RUN_WORKER_FIRST } from '../src/lib/sections.
 import { CONTENT_EXTENSIONS, findContentJoins, parseNav, routeForFile, routeOfHref } from './content-joins.mjs'
 import { readItemContent } from './item-content.mjs'
 import { AGENT_SURFACE_FILES } from './copy-agent-surface.mjs'
+import { SHOWCASE_ROUTES } from './copy-showcase.mjs'
 import { CHANGELOG_SECTION, readPublishedChangelogs, splitChangelog } from './published-packages.mjs'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
@@ -347,6 +348,26 @@ for (const file of AGENT_SURFACE_FILES) {
   routes.add(`/${file}`)
 }
 
+/*
+ * The showcase apps under /showcase, published by the copy step rather than by
+ * this tree. Each one is a separate consumer's whole export with its own gate
+ * chain, so the walk below does not read its pages as this site's navigation;
+ * the landing page links both routes, so the join has to hold for these URLs as
+ * for any route. The list is the copy step's own export and each route's entry
+ * document is asserted to be in the export before the route is believed, which
+ * is the same treatment the agent surface files get.
+ */
+for (const route of SHOWCASE_ROUTES) {
+  const entry = path.join(OUT, ...route.split('/').filter(Boolean), 'index.html')
+  if (!existsSync(entry)) {
+    die(
+      `the showcase route ${route} has no entry document in the export, so the landing page's link to it is a ` +
+        '404 this gate would otherwise believe. Run the build and its copy step before this gate.',
+    )
+  }
+  routes.add(route)
+}
+
 /* The navigation, as published, and as the reader receives it. */
 
 if (!existsSync(OUT)) {
@@ -359,6 +380,13 @@ const navBlocks = new Map()
 let publishedPages = 0
 for (const file of await walkFiles(OUT)) {
   if (!file.endsWith('.html')) continue
+  /*
+   * A showcase app's export under out/showcase is another consumer's pages,
+   * gated by that consumer's own prism-gates chain, and its navigation is not
+   * this site's. The directory is the boundary the copy step owns, so it is
+   * named once here rather than patterned after every future sub-path.
+   */
+  if (below(OUT, file).startsWith('showcase/')) continue
   publishedPages += 1
   for (const block of parseNav(await readFile(file, 'utf8'))) {
     navBlocks.set(JSON.stringify(block), block)

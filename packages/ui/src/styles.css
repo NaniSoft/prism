@@ -851,8 +851,11 @@
 }
 
 /* The page's content column is a stacking context, so the fixed ground behind it
-   can sit at `z-index: -1` and paint above the body's background. */
-.site-main {
+   can sit at `z-index: -1` and paint above the body's background. The rule keys
+   on the slot rather than a class, because the column it names is the page's own
+   `main`, and a page that wears the ground gives that one element the slot and
+   the contract with it. */
+[data-slot='site-main'] {
   position: relative;
   z-index: 1;
 }
@@ -896,7 +899,7 @@
 }
 
 [data-header='transparent'] [data-slot='site-navbar'][data-scrolled]::before {
-  background-color: rgb(from var(--background) r g b / 0.72);
+  background-color: rgb(from var(--background) r g b / var(--veil-glass));
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
@@ -913,11 +916,6 @@
   z-index: -1;
   pointer-events: none;
   overflow: hidden;
-}
-
-/* The manifesto band's copy stands on the ground, not on a muted slab. */
-.site-media-band {
-  background-color: transparent;
 }
 
 /* The footer is part of the same ground as the rest of the page. */

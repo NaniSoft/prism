@@ -5148,6 +5148,46 @@
       ]
     },
     {
+      "name": "ground-01",
+      "title": "Ground 01 - The Page's Fixed Ground Of Light And A Medium",
+      "description": "The page's one continuous ground: an aurora wash and a particle field fixed behind every section, with the bar's transparency armed by the same Block. Worn at full presence on a landing and one rung quieter under a working surface.",
+      "type": "registry:block",
+      "categories": [
+        "chrome"
+      ],
+      "registryDependencies": [
+        "aurora-wash",
+        "tsparticles-field",
+        "header-transparency"
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/ground-01/ground.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/ground-01/ground.tsx"
+        },
+        {
+          "path": "src/blocks/ground-01/index.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/ground-01/index.tsx"
+        },
+        {
+          "path": "src/components/ui/section.tsx",
+          "type": "registry:component",
+          "target": "components/ui/section.tsx"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ]
+    },
+    {
       "name": "handoff-01",
       "title": "Handoff 01 - A Run Changing Hands",
       "description": "A run being handed from one owner to another: who is handing over, who is receiving at the same weight because the handover is not complete until the receiver confirms, the run's own state, the outstanding items drawn in full rather than counted, and a confirm control whose words in both states are the caller's. The Block does not decide whether the handover happened, and a confirmed state with no words for the control throws. Every string is passed in as a prop.",

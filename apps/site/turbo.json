@@ -3,6 +3,11 @@
   "extends": ["//"],
   "tasks": {
     "build": {
+      "dependsOn": [
+        "^build",
+        "@nanisoft/showcase-landing#build",
+        "@nanisoft/showcase-admin#build"
+      ],
       "outputs": ["out/**", ".next/**", "!.next/cache/**"]
     }
   }

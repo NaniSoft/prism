@@ -173,7 +173,11 @@ function ContextMenuContent({
 }: ContextMenuContentProps) {
   return (
     <ContextMenuPrimitive.Portal>
-      <ContextMenuPrimitive.Positioner sideOffset={sideOffset} alignOffset={alignOffset}>
+      <ContextMenuPrimitive.Positioner
+        sideOffset={sideOffset}
+        alignOffset={alignOffset}
+        className="z-50"
+      >
         <ContextMenuPrimitive.Popup
           data-slot="context-menu-content"
           aria-label={label}
@@ -276,7 +280,11 @@ function ContextMenuSubTrigger({ className, children, ...props }: ContextMenuSub
 function ContextMenuSubContent({ className, sideOffset = 0, alignOffset = 0, ...props }: ContextMenuSubContentProps) {
   return (
     <ContextMenuPrimitive.Portal>
-      <ContextMenuPrimitive.Positioner sideOffset={sideOffset} alignOffset={alignOffset}>
+      <ContextMenuPrimitive.Positioner
+        sideOffset={sideOffset}
+        alignOffset={alignOffset}
+        className="z-50"
+      >
         <ContextMenuPrimitive.Popup
           data-slot="context-menu-sub-content"
           className={cn(POPUP, className)}

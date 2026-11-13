@@ -368,7 +368,7 @@ export function Gallery01({
                 <span
                   data-slot="gallery-count"
                   aria-hidden="true"
-                  className="bg-background/90 text-foreground absolute right-2 bottom-2 rounded-md px-1.5 py-0.5 font-mono text-xs"
+                  className="bg-background/(--veil-cover) text-foreground absolute right-2 bottom-2 rounded-md px-1.5 py-0.5 font-mono text-xs"
                 >
                   {items.length}
                 </span>

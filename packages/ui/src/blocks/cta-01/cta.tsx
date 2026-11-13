@@ -155,7 +155,7 @@ export function Cta01({
       <div className="bg-primary text-primary-foreground relative overflow-hidden rounded-2xl px-8 py-16 text-center">
         <div
           aria-hidden
-          className="from-primary-foreground/15 pointer-events-none absolute inset-0 bg-gradient-to-tr to-transparent"
+          className="from-primary-foreground/(--veil-soft) pointer-events-none absolute inset-0 bg-gradient-to-tr to-transparent"
         />
         <div className="relative flex flex-col items-center gap-6">
           <Heading

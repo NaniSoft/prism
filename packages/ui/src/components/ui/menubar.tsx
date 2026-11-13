@@ -232,7 +232,11 @@ function MenubarTrigger({ className, ...props }: MenubarTriggerProps) {
 function MenubarContent({ className, sideOffset = 4, alignOffset = 0, ...props }: MenubarContentProps) {
   return (
     <MenuPrimitive.Portal>
-      <MenuPrimitive.Positioner sideOffset={sideOffset} alignOffset={alignOffset}>
+      <MenuPrimitive.Positioner
+        sideOffset={sideOffset}
+        alignOffset={alignOffset}
+        className="z-50"
+      >
         <MenuPrimitive.Popup
           data-slot="menubar-content"
           className={cn(POPUP, className)}
@@ -360,7 +364,11 @@ function MenubarSubTrigger({ className, children, ...props }: MenubarSubTriggerP
 function MenubarSubContent({ className, sideOffset = 0, alignOffset = 0, ...props }: MenubarSubContentProps) {
   return (
     <MenuPrimitive.Portal>
-      <MenuPrimitive.Positioner sideOffset={sideOffset} alignOffset={alignOffset}>
+      <MenuPrimitive.Positioner
+        sideOffset={sideOffset}
+        alignOffset={alignOffset}
+        className="z-50"
+      >
         <MenuPrimitive.Popup
           data-slot="menubar-sub-content"
           className={cn(POPUP, className)}
