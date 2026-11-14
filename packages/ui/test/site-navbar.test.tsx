@@ -318,6 +318,39 @@ describe('a grouped navigation in the bar', () => {
     expect(links.map((link) => (link.textContent ?? '').trim())).toEqual(['Components', 'Blocks'])
     expect(links[1]).toHaveAttribute('aria-current', 'page')
   })
+
+  it('holds a mobileOnly entry back to the panel, and opens it the way the row would have', async () => {
+    const user = userEvent.setup()
+    render(
+      <SiteNavbar
+        product={PRODUCT}
+        defaultPack="lavender"
+        defaultMode="light"
+        navLabel={COPY.nav}
+        mobileLabels={{ open: COPY.menuOpen, close: COPY.menuClose }}
+        nav={[
+          { label: 'Docs', href: '/docs' },
+          { label: 'Playground', href: 'https://playground.nanisoft.com', newTab: true, mobileOnly: true },
+        ]}
+      />,
+    )
+
+    // The row renders the entries the panel reserves none of, so a
+    // `mobileOnly` link is a destination the row carries another way: it is
+    // out of the row and in the panel, and the row names no third place for it.
+    const row = screen.getByRole('navigation', { name: COPY.nav })
+    expect([...row.querySelectorAll('a')].map((link) => link.getAttribute('href'))).toEqual(['/docs'])
+
+    await user.click(screen.getByRole('button', { name: COPY.menuOpen }))
+
+    // The panel is the site's navigation and navigates in place by default;
+    // an entry that leaves the site carries `newTab` and opens the way the row
+    // would have opened it, rather than losing that to the holding-back.
+    const panelLink = await screen.findByRole('link', { name: 'Playground' })
+    expect(panelLink).toHaveAttribute('href', 'https://playground.nanisoft.com')
+    expect(panelLink).toHaveAttribute('target', '_blank')
+    expect(panelLink).toHaveAttribute('rel', 'noopener noreferrer')
+  })
 })
 
 /**

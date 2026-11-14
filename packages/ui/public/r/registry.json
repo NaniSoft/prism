@@ -3264,7 +3264,6 @@
       "type": "registry:component",
       "dependencies": [
         "@tsparticles/engine",
-        "@tsparticles/react",
         "@tsparticles/slim",
         "clsx",
         "tailwind-merge"

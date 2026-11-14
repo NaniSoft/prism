@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
-import Particles, { ParticlesProvider } from '@tsparticles/react'
-import type { Engine, ISourceOptions } from '@tsparticles/engine'
+import { tsParticles } from '@tsparticles/engine'
+import type { Container, ISourceOptions } from '@tsparticles/engine'
 import { loadSlim } from '@tsparticles/slim'
 
 import { cn } from '../../lib/utils'
@@ -28,13 +28,17 @@ export type TsparticlesFieldProps = {
 }
 
 /**
- * The provider's init callback, at module scope so its identity is stable for
- * the app lifecycle. `ParticlesProvider` keeps the first callback it receives
- * and throws when a later one differs, so an inline arrow here threw
- * `ParticlesProvider init callback must be stable across the app lifecycle`
- * on a re-render or a double mount before the engine finished loading.
+ * The engine, armed at most once for the app lifecycle. Registration is
+ * idempotent and expensive, so every field on the page shares the one
+ * promise, and a field that mounts before the registration settles waits on
+ * the same promise rather than registering the plugins twice.
  */
-const initTsparticles = (engine: Engine): Promise<void> => loadSlim(engine)
+let engineArming: Promise<void> | null = null
+
+function armEngine(): Promise<void> {
+  engineArming ??= loadSlim(tsParticles)
+  return engineArming
+}
 
 /**
  * The floor the page paints before any script runs, in its own user units: the
@@ -82,11 +86,31 @@ function floorMarks(count: number): Array<{ x: number; y: number; r: number; hal
  * is server-rendered markup; the engine is armed by the package and disarmed
  * under `prefers-reduced-motion`, and the whole field is `aria-hidden`, because
  * a medium is not information.
+ *
+ * **The engine call is the field's own, and its rejections are the field's.**
+ * The field does not mount the engine through a second Component's load
+ * promise. That promise carried no `catch`, so an engine error — a platform
+ * whose canvas APIs are missing, a container racing its own unmount — escaped
+ * as an uncaught page error on a site that had done nothing wrong, which the
+ * 1.8 audit caught as `TSP-1101` on console. Here the whole chain is held:
+ * each load is serialized behind the previous one so two loads never race the
+ * same element, an unmount before the load settles destroys the container on
+ * arrival, and whatever the engine still rejects is carried to `console.warn`
+ * with the floor standing behind it, where the failure is diagnosable and the
+ * page is untouched.
  */
 function TsparticlesField({ count = 60, linkDistance = 150, className }: TsparticlesFieldProps) {
   const [ink, setInk] = useState({ particle: '#aebccb', link: '#8b98a7' })
   const [reduced, setReduced] = useState(false)
   const marks = Math.max(12, Math.min(140, Math.round(count)))
+  const canvasId = useId()
+  /*
+   * The loads this field has run, chained. `tsParticles.load` targets its
+   * element by id, so two loads in flight for one element is a race the
+   * engine answers badly; the chain makes the next load wait for the last
+   * one to settle, whichever way it settled.
+   */
+  const operations = useRef<Promise<void>>(Promise.resolve())
 
   useEffect(() => {
     const read = () => {
@@ -154,6 +178,33 @@ function TsparticlesField({ count = 60, linkDistance = 150, className }: Tsparti
     [ink, marks, linkDistance],
   )
 
+  useEffect(() => {
+    if (reduced) return
+    let cancelled = false
+    let container: Container | undefined
+    const run = operations.current
+      .then(async () => {
+        if (cancelled) return
+        const loaded = await tsParticles.load({ id: canvasId, options })
+        if (cancelled) {
+          loaded?.destroy()
+          return
+        }
+        container = loaded
+      })
+      .catch((error: unknown) => {
+        // An engine rejection is a platform or a race the page cannot act on,
+        // and the floor stands behind the field complete. Say it where a
+        // developer can see it; never let it reach the page uncaught.
+        console.warn('TsparticlesField: the particle engine could not arm; the static floor stands in.', error)
+      })
+    operations.current = run
+    return () => {
+      cancelled = true
+      container?.destroy()
+    }
+  }, [canvasId, options, reduced])
+
   return (
     <div
       data-slot="tsparticles-field"
@@ -185,14 +236,12 @@ function TsparticlesField({ count = 60, linkDistance = 150, className }: Tsparti
         ))}
       </svg>
       {reduced ? null : (
-        <ParticlesProvider init={initTsparticles}>
-          <Particles
-            id="tsparticles"
-            key={ink.particle + ink.link}
-            options={options}
-            className="absolute inset-0 h-full w-full"
-          />
-        </ParticlesProvider>
+        /*
+         * The element the engine loads its canvas into, looked up by the id
+         * the effect above passes. It carries no content: the floor's svg
+         * behind it is the figure, and the canvas only ever adds the motion.
+         */
+        <div data-slot="tsparticles-field-canvas" id={canvasId} className="absolute inset-0 h-full w-full" />
       )}
     </div>
   )

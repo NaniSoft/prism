@@ -14,6 +14,19 @@ const COLUMN_CLASS: Record<DSGridColumns, string> = {
   4: 'sm:grid-cols-2 lg:grid-cols-4',
 }
 
+/*
+ * The one-column template is explicit, not the implicit track a bare `grid`
+ * leaves behind. An implicit auto track sizes to its content's max-content, so
+ * a tile that carries its own legible floor (a `Diagram` or a `PulseGraph` at
+ * the width below which its labels stop being legible) grew the page at phone
+ * width instead of scrolling inside itself, and the narrowing below read as a
+ * decision while the page scrolled sideways. `grid-cols-1` is
+ * `repeat(1, minmax(0, 1fr))`, which clamps the track to the container and
+ * hands the overflow to the tile's own scroll container, the bargain those
+ * Components document. Every count below its variant threshold lands on it.
+ */
+const ONE_COLUMN = 'grid-cols-1'
+
 const GAP_CLASS: Record<DSGridGap, string> = {
   sm: 'gap-3',
   md: 'gap-4',
@@ -50,7 +63,10 @@ export interface DSGridProps extends ComponentProps<'div'> {
  * **One column below `sm` is the decision, not an omission.** The narrowing is
  * what keeps a set of tiles legible at 390px; the `Gallery01` tracks do the
  * same thing, and this is that track logic lifted to the primitive every Block
- * could have drawn by hand instead.
+ * could have drawn by hand instead. The narrowing is an explicit
+ * `grid-cols-1` template and not the implicit track a bare `grid` leaves, so a
+ * tile that carries its own legible floor overflows inside itself rather than
+ * sizing the track and scrolling the page.
  *
  * It is a server Component. It holds no state and reads nothing.
  */
@@ -59,7 +75,7 @@ function DSGrid({ columns = 3, gap = 'md', className, ...props }: DSGridProps) {
     <div
       data-slot="ds-grid"
       data-columns={columns}
-      className={cn('grid', GAP_CLASS[gap], COLUMN_CLASS[columns], className)}
+      className={cn('grid', ONE_COLUMN, GAP_CLASS[gap], COLUMN_CLASS[columns], className)}
       {...props}
     />
   )

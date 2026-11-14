@@ -6,7 +6,8 @@
  *
  * Structure:
  *   tailwindcss        the framework and its preflight
- *   @source            Prism's own component and block source
+ *   @source            Prism's own component and block source, plus the
+ *                      documented consumer classes no Component uses
  *   the face           `@font-face` for the weights and the one style the scale
  *                      renders, plus the metric-adjusted fallback beside them
  *   token CSS          the emitted `:root`/`.dark`/`[data-pack=...]` variables
@@ -19,6 +20,21 @@
 
 /* Prism's component and block source is the only thing that must be scanned. */
 @source './';
+
+/*
+ * The classes the site-navbar documentation prescribes and no Component of
+ * Prism's own uses. The bar's arrangement for a destination the row carries
+ * another way pairs a cluster action hidden below the width it stops fitting at
+ * (`hidden sm:inline-flex`, or `xl:inline-flex` for a cluster that fits longer)
+ * with the panel's `mobileOnly` entry, and a consumer of this sheet can write
+ * neither class unless the sheet emits it: a utility class exists here only if
+ * Prism's own source names it, which left the documented arrangement legal on
+ * the site that builds its own Tailwind and unwritable in the four consumer
+ * repositories this sheet exists for. Emitting them here is what makes the
+ * documentation true for every consumer, and the gate kit's variant law reads
+ * this file, so a consumer's variant gate exempts exactly what this names.
+ */
+@source inline("hidden sm:inline-flex xl:inline-flex");
 
 /*
  * The face, the metric-adjusted fallback, and the licence beside them.
