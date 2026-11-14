@@ -94,6 +94,13 @@ describe('responsive completeness (Gate G) over the layout primitives', () => {
     expect(grid.className).toContain('sm:grid-cols-2')
     expect(grid.className).toContain('lg:grid-cols-4')
     expect(grid.className).toContain('grid')
+    // The narrowing is an explicit template, not the implicit track a bare
+    // `grid` leaves. An implicit auto track sizes to its content's
+    // max-content, so a tile carrying its own legible floor (a Diagram at the
+    // width its labels stop being legible) sized the track and scrolled the
+    // page at phone width; `grid-cols-1` is minmax(0, 1fr), which clamps the
+    // track and hands the overflow to the tile's own scroll container.
+    expect(grid.className).toContain('grid-cols-1')
   })
 
   it('the icon stays ordered with its words at every width', () => {

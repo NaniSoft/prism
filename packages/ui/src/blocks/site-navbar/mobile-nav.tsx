@@ -15,6 +15,17 @@ export type MobileNavLink = {
   href: string
   /** Marks the link as the page the reader is on. */
   current?: boolean
+  /**
+   * Opens the destination in a new browsing context, which defaults the link
+   * relationship to `noopener noreferrer`.
+   *
+   * The panel is the site's navigation and navigates in place by default, so
+   * this is set only on a destination that leaves the site. A `mobileOnly`
+   * entry carries it when the row would have carried it: the panel holds a
+   * destination the row cannot afford below its threshold, and holding it back
+   * does not also hold back the way the row opened it.
+   */
+  newTab?: boolean
 }
 
 /**
@@ -150,6 +161,8 @@ function PanelLink({ link, onNavigate }: { link: MobileNavLink; onNavigate: () =
       href={link.href}
       aria-current={link.current ? 'page' : undefined}
       onClick={onNavigate}
+      rel={link.newTab ? 'noopener noreferrer' : undefined}
+      target={link.newTab ? '_blank' : undefined}
       className={
         link.current
           ? 'bg-accent text-accent-foreground focus-visible:border-ring focus-visible:ring-ring flex min-h-11 items-center rounded-lg px-3 text-sm font-medium transition-colors focus-visible:ring-[3px] focus-visible:outline-none'

@@ -279,9 +279,6 @@ importers:
       '@tsparticles/engine':
         specifier: ^4.5.2
         version: 4.5.2
-      '@tsparticles/react':
-        specifier: ^4.5.2
-        version: 4.5.2(@tsparticles/engine@4.5.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@tsparticles/slim':
         specifier: ^4.5.2
         version: 4.5.2
