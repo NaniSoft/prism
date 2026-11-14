@@ -2,7 +2,7 @@
 '@nanisoft/prism-ui': minor
 ---
 
-Close the 1.8 audit's upstream filings: the grid the narrowing promised, the panel's new-tab, the documented pair the sheet now emits, and an engine the field owns
+Close the 1.8 audit's filings: grid track, panel new tab, sheet pair, field's engine
 
 - `DSGrid`'s one-column template below `sm` is explicit (`grid-cols-1`, `repeat(1, minmax(0, 1fr))`) instead of the implicit track a bare `grid` leaves. An implicit auto track sizes to its content's max-content, so a tile carrying its own legible floor (a `Diagram` at the width its labels stop being legible) grew the page at phone width and scrolled it sideways; the track is clamped now and the overflow belongs to the tile's own scroll container, the bargain those Components document.
 - The mobile panel's entries accept `newTab`. The panel is the site's navigation and navigates in place, so a `mobileOnly` entry whose destination leaves the site can now open the way the row would have, and a destination held back to the panel no longer loses the way it opened.
