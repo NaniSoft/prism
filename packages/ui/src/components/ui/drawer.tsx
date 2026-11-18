@@ -309,7 +309,7 @@ function DrawerContent({
         <DrawerPrimitive.Popup
           data-slot="drawer-popup"
           className={cn(
-            'bg-background text-foreground shadow-md flex flex-col outline-none',
+            'bg-popover text-popover-foreground shadow-md flex flex-col outline-none',
             'focus-visible:ring-ring focus-visible:ring-[3px]',
             'transition-transform duration-slow ease-out',
             'data-swiping:transition-none',

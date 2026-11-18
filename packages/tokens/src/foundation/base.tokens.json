@@ -170,5 +170,10 @@
     "glass": { "$value": 0.72 },
     "scrim": { "$value": 0.8 },
     "cover": { "$value": 0.9 }
+  },
+  "blur": {
+    "$type": "dimension",
+    "$description": "Backdrop blur radii for the glass finish. A translucent pane reads as glass because the ground behind it blurs, and the radius of that blur is a design value like any other, so it is authored here rather than left to a utility's stock scale. The material rules in the component stylesheet reach a step as `blur(var(--blur-glass))`; a component never writes a raw blur length.",
+    "glass": { "$value": { "value": 16, "unit": "px" } }
   }
 }

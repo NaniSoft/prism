@@ -1,10 +1,10 @@
 {
-  "$description": "Dark mode. Same token contract as light, re-pointed at the dark end of each ramp. A new theme must provide every token listed in light.tokens.json.",
+  "$description": "Dark mode. Same token contract as light, re-pointed at the dark end of each ramp. A new theme must provide every token listed in light.tokens.json. Translucent roles carry the same alpha extension mechanism as light: the dark glass is the pack's own tint at a low alpha over the near-black ground, because in dark the thickness reads through what the pane adds, not what it hides.",
   "background": { "$value": "{color.neutral.950}" },
   "foreground": { "$value": "{color.neutral.100}" },
-  "card": { "$value": "{color.neutral.900}" },
+  "card": { "$value": "{color.neutral.100}", "$extensions": { "com.nanisoft.prism": { "alpha": 0.07 } }, "$description": "The resting surface as dark glass: a breath of the pack's tint over the ground, compositing to a step the ground does not have, with the rim and hairline carrying the edge. Contrast pairs composite it over the page ground." },
   "card-foreground": { "$value": "{color.neutral.100}" },
-  "popover": { "$value": "{color.neutral.900}" },
+  "popover": { "$value": "{color.neutral.800}", "$extensions": { "com.nanisoft.prism": { "alpha": 0.88 } }, "$description": "The floating surface, the thickest pane in the ladder: nearly opaque in dark, because it overlaps text a reader is reading, and thickness is how the ladder says closer." },
   "popover-foreground": { "$value": "{color.neutral.100}" },
   "primary": { "$value": "{color.neutral.100}" },
   "primary-foreground": { "$value": "{color.neutral.900}" },
@@ -29,12 +29,16 @@
   "chart-3": { "$value": "{color.amber.400}" },
   "chart-4": { "$value": "{color.neutral.400}" },
   "chart-5": { "$value": "{color.red.400}" },
-  "sidebar": { "$value": "{color.neutral.900}" },
+  "sidebar": { "$value": "{color.neutral.100}", "$extensions": { "com.nanisoft.prism": { "alpha": 0.04 } }, "$description": "Sidebar surface, the thinnest pane in the ladder: the faintest of the three dark glasses, holding the ground long enough to carry navigation." },
   "sidebar-foreground": { "$value": "{color.neutral.100}" },
   "sidebar-primary": { "$value": "{color.neutral.100}" },
   "sidebar-primary-foreground": { "$value": "{color.neutral.900}" },
   "sidebar-accent": { "$value": "{color.neutral.800}" },
   "sidebar-accent-foreground": { "$value": "{color.neutral.100}" },
   "sidebar-border": { "$value": "{color.neutral.800}" },
-  "sidebar-ring": { "$value": "{color.neutral.500}" }
+  "sidebar-ring": { "$value": "{color.neutral.500}" },
+  "elevation-rim": { "$value": "{color.neutral.100}", "$extensions": { "com.nanisoft.prism": { "alpha": 0.1 } }, "$description": "The glass edge finish in dark: a faint light along a pane's top rim. Far fainter than light mode, because a hot highlight on a dark ground reads as a glow, and a glow is the one thing this finish is not." },
+  "elevation-inner": { "$value": "{color.neutral.100}", "$extensions": { "com.nanisoft.prism": { "alpha": 0.04 } }, "$description": "The inside hairline in dark, barely there: thickness in dark is a suggestion the rim and the shade make together." },
+  "elevation-contact": { "$value": "{color.neutral.950}", "$extensions": { "com.nanisoft.prism": { "alpha": 0.4 } }, "$description": "The tight shadow where a lifted pane meets its ground. Darker and heavier than light mode, because depth in dark comes from what the pane blocks." },
+  "elevation-shade": { "$value": "{color.neutral.950}", "$extensions": { "com.nanisoft.prism": { "alpha": 0.55 } }, "$description": "The wide, soft ambient shadow under a lifted pane in dark." }
 }

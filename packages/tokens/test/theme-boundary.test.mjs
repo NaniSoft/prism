@@ -84,7 +84,6 @@ describe('pack boundary selector shape', () => {
   it('keeps both dark arms in ONE rule, so neither can lose to the other', async () => {
     for (const id of packIds) {
       const css = await stylesheet(id, 'dark')
-      const afterBanner = css.replace(/^\/\*[\s\S]*?\*\/\s*/, '')
 
       /*
        * Specificity, by reasoning rather than by measurement: the two arms are
@@ -95,9 +94,27 @@ describe('pack boundary selector shape', () => {
        * nothing to contest, which is the point of putting them in one rule: the
        * compound arm stays published for a fixed-mode boundary and the
        * descendant arm is added beside it rather than replacing it.
+       *
+       * The reduced-transparency fallback is a second rule under the same
+       * selector list, and the count below reads the base rule apart from it
+       * rather than the whole file: the base rule must be the file's only other
+       * rule, and the fallback must keep the same one-list shape, so the two
+       * arms cannot start contesting each other there either.
        */
-      expect(afterBanner.split('{').length - 1, `themes/${id}/dark.css rule count`).toBe(1)
-      expect(blockOf(css).trim().length, `themes/${id}/dark.css block`).not.toBe('')
+      const base = css.replace(/@media[^{]*\{[\s\S]*$/, '')
+      expect(base.split('{').length - 1, `themes/${id}/dark.css rule count`).toBe(1)
+      expect(blockOf(base).trim().length, `themes/${id}/dark.css block`).not.toBe('')
+
+      const fallbackOpen = css.indexOf('@media')
+      expect(fallbackOpen, `themes/${id}/dark.css fallback block`).toBeGreaterThan(-1)
+      const fallbackArms = css
+        .slice(fallbackOpen)
+        .replace(/^@media[^{]*\{/, '')
+        .split('{')[0]
+        .trim()
+      expect(fallbackArms, `themes/${id}/dark.css fallback arms`).toBe(
+        `[data-pack="${id}"].dark, .dark [data-pack="${id}"]`,
+      )
     }
   })
 

@@ -27,6 +27,7 @@ import {
   luminance,
   ratio,
   readSemanticRoles,
+  resolveMeasured,
 } from '../scripts/check-contrast.mjs'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
@@ -54,6 +55,19 @@ for (const { source, mode } of combinations) {
   resolved.set(`${source.id}/${mode}`, await readJson(modeFile(source, mode)))
 }
 const tokensOf = (source, mode) => resolved.get(`${source.id}/${mode}`)
+
+/**
+ * The page ground of a pack and mode, and the resolution the gate applies
+ * before it measures: a hex passes through, a translucent pane composites over
+ * that ground. Every measurement below resolves through this helper, so the
+ * suite and the gate cannot disagree about what a pane's colour IS.
+ */
+function groundOf(source, mode) {
+  return resolveMeasured(tokensOf(source, mode).background?.value)
+}
+
+const measuredOf = (source, mode, role) =>
+  resolveMeasured(tokensOf(source, mode)[role]?.value, groundOf(source, mode))
 
 const source = await readSemanticRoles()
 const declaredNonColours = new Set(
@@ -233,15 +247,15 @@ describe('a role is measured in both modes, and a mismatch fails', () => {
      * The mode rule as implemented: an exemption buys a role freedom from a
      * GROUND, never from a MODE. So an exempt role still has to resolve in light
      * and in dark, which is what makes "no role is exempt from one mode"
-     * checkable rather than a claim about the table.
+     * checkable rather than a claim about the table. A translucent role
+     * resolves when its rgba composites over the page ground, which is the
+     * shape the glass panes ship in.
      */
     const missing = []
     for (const { source: pack, mode } of combinations) {
-      const tokens = tokensOf(pack, mode)
       for (const role of colourRoles) {
-        const value = tokens[role]?.value
-        if (typeof value === 'string' && value.startsWith('#')) continue
-        missing.push(`${pack.id}/${mode} ${role} = ${value}`)
+        if (measuredOf(pack, mode, role)) continue
+        missing.push(`${pack.id}/${mode} ${role} = ${tokensOf(pack, mode)[role]?.value}`)
       }
     }
     expect(missing).toEqual([])
@@ -249,10 +263,9 @@ describe('a role is measured in both modes, and a mismatch fails', () => {
 
   it('measures every row in both modes, so no row is a light-mode-only claim', () => {
     for (const { source: pack, mode } of combinations) {
-      const tokens = tokensOf(pack, mode)
       for (const [fg, bg] of PAIRS) {
-        expect(tokens[fg]?.value, `${pack.id}/${mode} ${fg}`).toMatch(/^#[0-9a-f]{6}$/i)
-        expect(tokens[bg]?.value, `${pack.id}/${mode} ${bg}`).toMatch(/^#[0-9a-f]{6}$/i)
+        expect(measuredOf(pack, mode, fg), `${pack.id}/${mode} ${fg}`).toMatch(/^#[0-9a-f]{6}$/i)
+        expect(measuredOf(pack, mode, bg), `${pack.id}/${mode} ${bg}`).toMatch(/^#[0-9a-f]{6}$/i)
       }
     }
   })
@@ -273,10 +286,11 @@ describe('the focus rings clear 3:1 on the surface they land on', () => {
 
   for (const { source: pack, mode } of combinations) {
     it(`clears 3:1 in ${pack.label}/${mode}`, () => {
-      const tokens = tokensOf(pack, mode)
       for (const [fg, bg] of ringRows) {
-        const measured = ratio(tokens[fg].value, tokens[bg].value)
-        expect(measured, `${pack.label}/${mode} ${fg} (${tokens[fg].value}) on ${bg} (${tokens[bg].value})`)
+        const fgValue = measuredOf(pack, mode, fg)
+        const bgValue = measuredOf(pack, mode, bg)
+        const measured = ratio(fgValue, bgValue)
+        expect(measured, `${pack.label}/${mode} ${fg} (${tokensOf(pack, mode)[fg].value}) on ${bg} (${tokensOf(pack, mode)[bg].value})`)
           .toBeGreaterThanOrEqual(3)
       }
     })
@@ -291,9 +305,8 @@ describe('the focus rings clear 3:1 on the surface they land on', () => {
      * future edit from pointing one ring at the other's surface.
      */
     for (const { source: pack, mode } of combinations) {
-      const tokens = tokensOf(pack, mode)
-      const sidebarRing = ratio(tokens['sidebar-ring'].value, tokens.sidebar.value)
-      const pageRing = ratio(tokens.ring.value, tokens.background.value)
+      const sidebarRing = ratio(measuredOf(pack, mode, 'sidebar-ring'), measuredOf(pack, mode, 'sidebar'))
+      const pageRing = ratio(measuredOf(pack, mode, 'ring'), measuredOf(pack, mode, 'background'))
       expect(sidebarRing, `${pack.label}/${mode}: the sidebar ring must hold on the sidebar, not the page`)
         .toBeGreaterThanOrEqual(3)
       expect(pageRing, `${pack.label}/${mode}`).toBeGreaterThanOrEqual(3)
@@ -318,7 +331,10 @@ describe('the brand ink is text, and it is gated against all three grounds', () 
       const tokens = tokensOf(pack, mode)
       const ink = tokens['brand-ink'].value
       for (const ground of grounds) {
-        const measured = ratio(ink, tokens[ground].value)
+        // A translucent ground composites over the page before the ink is held
+        // to it, which is what a reader looking at a glass card sees.
+        const groundValue = measuredOf(pack, mode, ground)
+        const measured = ratio(ink, groundValue)
         expect(measured, `${pack.label}/${mode} brand-ink ${ink} on ${ground} ${tokens[ground].value}`)
           .toBeGreaterThanOrEqual(4.5)
       }

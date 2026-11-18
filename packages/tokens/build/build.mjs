@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url'
 import { rm, mkdir, readFile, writeFile, readdir } from 'node:fs/promises'
 import StyleDictionary from 'style-dictionary'
 import { expandTheme, themeSelector, THEME_SELECTOR_STYLE } from './themes.mjs'
-import { readToken, cssVarName } from './serialize.mjs'
+import { readToken, tokenValue, tokenAlpha, cssVarName } from './serialize.mjs'
 import { foundationTree, groupEntries } from './foundation.mjs'
 import { writeDtcg } from './dtcg.mjs'
 
@@ -96,11 +96,36 @@ StyleDictionary.registerFormat({
   name: 'ds/css-vars',
   format: ({ dictionary, options }) => {
     const selector = options.selector ?? ':root'
-    const decls = dictionary.allTokens
-      .filter(isSemantic)
-      .map((t) => `  ${cssVarName(t.path)}: ${readToken(t)};`)
+    const tokens = dictionary.allTokens.filter(isSemantic)
+    const decls = tokens
+      .map((t) => `  ${cssVarName(t.path)}: ${tokenValue(t)};`)
       .join('\n')
-    return `${BANNER}${selector} {\n${decls}\n}\n`
+
+    /*
+     * The reduced-transparency fallback, emitted from the same source as the
+     * translucent value it backs.
+     *
+     * A semantic colour role that authors an alpha also authors its opaque
+     * form: the same aliased colour with the alpha dropped. This block is what
+     * a reader's `prefers-reduced-transparency` setting resolves to, so the
+     * fallback is a value this repository decided rather than a guess a
+     * stylesheet makes at runtime. It is declared after the base rule under the
+     * same selector, so at equal specificity the later declaration wins in the
+     * mode and pack the file scopes, and the mode files' import order in the
+     * component stylesheet keeps dark winning over light exactly where the base
+     * rules already do.
+     */
+    const translucent = tokens.filter((t) => {
+      const alpha = tokenAlpha(t)
+      return alpha !== undefined && alpha < 1
+    })
+    const fallback = translucent.length
+      ? `\n@media (prefers-reduced-transparency: reduce) {\n${selector} {\n${translucent
+          .map((t) => `  ${cssVarName(t.path)}: ${readToken(t)};`)
+          .join('\n')}\n}\n}\n`
+      : ''
+
+    return `${BANNER}${selector} {\n${decls}\n}\n${fallback}`
   },
 })
 
@@ -200,6 +225,14 @@ function staticThemeDecls() {
    */
   emitGroup('veil', (token) => `${Math.round((token.$value ?? token.value) * 100)}%`)
 
+  /*
+   * The backdrop blur the glass finish reads, in its own group so the radius is
+   * a token like every other design value. The material rules in the component
+   * stylesheet reach it as `blur(var(--blur-glass))`; a component never writes
+   * a raw blur length, the same way it never writes a raw duration.
+   */
+  emitGroup('blur')
+
   // Tailwind's `duration-*` utility reads `--transition-duration-*`, not
   // `--duration-*`, so the duration tokens are mirrored here.
   push('--transition-duration-fast', 'var(--duration-fast)')
@@ -298,7 +331,7 @@ StyleDictionary.registerFormat({
     const out = {}
     for (const token of dictionary.allTokens) {
       out[token.path.join('.')] = {
-        value: readToken(token),
+        value: tokenValue(token),
         ...(token.$description ? { description: token.$description } : {}),
       }
     }
@@ -314,7 +347,7 @@ StyleDictionary.registerFormat({
     const foundation = {}
     for (const token of dictionary.allTokens) {
       const key = token.path.join('.')
-      ;(isSemantic(token) ? semantic : foundation)[key] = readToken(token)
+      ;(isSemantic(token) ? semantic : foundation)[key] = tokenValue(token)
     }
     return [
       BANNER,

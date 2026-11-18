@@ -219,21 +219,33 @@ never literals.
 
 `default` is the neutral base pack, and it is also the absence of a pack id at
 runtime. In it, `primary` is a near-black (`{colors.base-primary}`) and reads as
-ink, not colour. `background`, `card` and `popover` all resolve to the same
-value, so a surface is separated from the page by a border and a shadow rather
-than by a fill change. `secondary`, `muted` and `accent` also resolve to one
-value, so those three roles are visually identical in the base pack and diverge
-only in the pastels. `muted-foreground` is pinned to neutral 600 rather than
-neutral 500: helper text sits on the tinted `muted` surface as well as on the
-page ground, and neutral 500 cleared 4.5:1 on white but fell to 4.34:1 on
-`muted`.
+ink, not colour. The surface roles form a thickness ladder of translucent panes
+over the page ground: `background` is the opaque ground, one tinted step off
+white so the panes above it have something to be glass over, and `sidebar`,
+`card` and `popover` are the pack's lightest step at an authored alpha, from
+`sidebar` at 0.55 through `card` at 0.72 to `popover` at 0.92. Thickness is how
+the ladder says closer, and a surface is separated from the page by its edge
+finish, the blurred ground behind it, and its shadow rather than by a fill
+change. `secondary`, `muted` and `accent` also resolve to one value, so those
+three roles are visually identical in the base pack and diverge only in the
+pastels. In light mode `muted` is the same step as the ground, which is
+deliberate: a well on the ground reads as a shape of the ground, and inside a
+pane, where most wells sit, the pane's own glass lifts it off.
+`muted-foreground` is pinned to neutral 600 rather than neutral 500: helper
+text sits on the tinted `muted` surface as well as on the page ground, and
+neutral 500 cleared 4.5:1 on white but fell to 4.34:1 on `muted`.
 
 ### The seven pastels
 
 Each pastel is a light fill, never text. Light surfaces take the pack's brand
 400 step with its brand 950 text; the pastel set is the atmosphere, and mid-tone
 ink carries meaning. Every pack also owns a tinted neutral ramp whose chroma is
-deliberately tiny, so the tint registers as cohesion rather than as colour.
+deliberately tiny, so the tint registers as cohesion rather than as colour. The
+pack tint reaches a glass pane from behind in light mode: the panes are the
+pack's lightest step, and what colours them is the tinted ground showing
+through. In dark, where a near-black ground is too dark to tint a pane from
+behind, the panes carry the tint themselves, the pack's own tinted step at a
+low alpha over the ground.
 
 - **Blush, soft rose** (`{colors.blush-primary}`, 0.875rem radius): the softest
   of the seven, with a generously rounded radius.
@@ -326,6 +338,25 @@ allows above 400. That is why dark is brand 200.
 and never a raw value, so theming is automatic, including at runtime. This is
 enforced by the grep gates and by `scripts/check-motion.mjs`, described under
 Token Contract.
+
+**The Pane Rule.** The three panes are translucent roles over the ground, and
+their translucency is authored where their colour is: a `com.nanisoft.prism`
+alpha extension beside the alias, so the colour stays a reference into the
+foundation ramp and the opacity stays a decision the semantic tier makes. The
+build composes the emitted `rgba()` from the two halves, and emits the same
+aliased colour, opaque, as the role's fallback under
+`prefers-reduced-transparency`, so a reader who declines translucency gets the
+panes this system had before it drew glass, gated on the same contrast rows.
+The contrast gate measures every pane composited over the page ground, which
+is the one backing a pane always has.
+
+**The Thickness Rule.** The ladder is `sidebar`, `card`, `popover`, thinnest
+to thickest, and thickness is opacity: a popover is more opaque than a card
+because it overlaps content a reader is reading, and a sidebar is the most
+transparent because it holds navigation a reader scans. A floating surface is
+a popover pane: a dialog, an alert dialog and a drawer render `bg-popover`,
+not the page ground, and a floating surface that renders `bg-background` is
+the ground wearing a shadow.
 
 ## Typography
 
@@ -675,17 +706,28 @@ name is gone because the site turned out to be using it.
 
 ## Elevation & Depth
 
-Elevation is authored, not borrowed. There are exactly three shadow steps, all
-mode-independent, all black-alpha with a real vertical offset and a soft blur.
+Elevation is authored, not borrowed. There are exactly three shadow steps, and
+every stack is two named layer kinds in a fixed order. The edge finish comes
+first: the rim, a one-pixel highlight inset along a pane's top edge, and the
+inner hairline, a one-pixel inset just inside the border, are the two things
+that make a surface read as having thickness rather than as having a border.
+Their colours are semantic roles (`elevation-rim`, `elevation-inner`), so one
+mode-independent geometry catches light in every pack and mode: the stacks
+reference the roles through `var()`, and the roles resolve per mode like any
+colour. The depth layers come second: a tight contact shadow
+(`elevation-contact`) and a wide, soft ambient shade (`elevation-shade`), both
+black alpha with a real vertical offset and a soft blur.
 
 - **`--shadow-xs`**, the resting filled control: the `default`, `destructive`,
-  `outline` and `secondary` button variants.
-- **`--shadow-sm`**, the resting surface: a card.
+  `outline` and `secondary` button variants. Rim plus contact.
+- **`--shadow-sm`**, the resting surface: a card. Rim, hairline, contact,
+  shade.
 - **`--shadow-md`**, the lifted surface: the one element that means lifted,
-  paired with a border in the pack's primary colour.
+  paired with a border in the pack's primary colour. Rim, hairline, contact,
+  and a shade twice as deep as `sm`'s.
 
-No shadow is tinted, zero-offset or hard-offset, and the authored set is
-exhaustive, so the rule is structural rather than a review claim.
+The authored set is exhaustive, so the rule is structural rather than a review
+claim.
 
 ### There is no docs-only exception, and there was one
 
@@ -722,8 +764,36 @@ Component that wants an inset edge asks upstream for one.
 ceiling rather than a floor: the floating panels a fourth step was reserved for
 are drawn at `md`, so there is nothing in this system a fourth step is for.
 
-**The Unlit Shadow Rule.** No shadow is tinted or hard-offset. Every authored
-layer is a black alpha with real vertical offset and soft blur.
+**The Unlit Shadow Rule.** The depth layers of a stack stay unlit: black alpha,
+a real vertical offset, a soft blur, and no hard offset anywhere. The edge
+finish is the one light the system puts in a shadow, it is the authored pair of
+roles above, and no stack layer carries a colour that is not one of the four
+elevation roles. The rule lives in the layer grammar of `shadow.tokens.json`
+rather than in a reviewer's memory: a stack is finish first, depth second, and
+a layer outside those two kinds is a value this source did not author.
+
+### The glass material
+
+The panes are translucent fills over the page ground, and what makes
+translucency read as glass rather than as a faded fill is the ground behind
+them blurring. The blur radius is authored (`blur.glass`, 16px) and reaches
+the stylesheet's material rule as `blur(var(--blur-glass))`; a component never
+writes a raw blur length, the same way it never writes a raw duration. The
+rule is unlayered in the one stylesheet, keyed on the pane classes, because a
+pane is a material decision rather than a utility a call site may mix away:
+the finish is at the edge and in the ground, and a Component that wants a pane
+asks for the pane.
+
+`prefers-reduced-transparency` is the transparency policy's answer to what
+`prefers-reduced-motion` is to motion, and it is two halves from one source.
+The stylesheet's half is one unlayered rule that stops every backdrop blur the
+package authors, the same shape as the motion block beside it. The build's
+half is the fallback: each translucent role's opaque form, emitted beside it
+under the same query in the same file, so a reader who declines translucency
+gets panes that are opaque, bordered, shadowed, and measured by the same
+contrast rows. A browser without `backdrop-filter` drops the declaration and
+renders the translucent fill alone, which is legible, because a pane was
+gated on contrast over the ground, not over what the blur preserves.
 
 ## Shapes
 

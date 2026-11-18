@@ -5,7 +5,10 @@ import type { HeadingElement } from './typography'
 import { cn } from '../../lib/utils'
 
 /**
- * A bordered surface for a small group of related content.
+ * A pane for a small group of related content: the resting surface of the
+ * thickness ladder, translucent over the page ground and finished at the edge
+ * by the `sm` elevation stack. A reader who declines translucency gets the same
+ * surface opaque.
  *
  * Compose it from `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`
  * and `CardFooter`. Those parts ship from this module rather than as separate
