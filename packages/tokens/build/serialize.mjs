@@ -26,12 +26,13 @@ function shadowLength(value) {
 
 /** `0 1px 2px 0 rgb(0 0 0 / 0.05)` — offset-x offset-y blur spread color. */
 function shadowLayer(layer) {
+  const inset = layer.inset === true ? 'inset ' : ''
   const x = shadowLength(layer.offsetX)
   const y = shadowLength(layer.offsetY)
   const blur = shadowLength(layer.blur)
   const spread = shadowLength(layer.spread)
   const color = typeof layer.color === 'string' ? layer.color : toCss(layer.color)
-  return `${x} ${y} ${blur} ${spread} ${color}`
+  return `${inset}${x} ${y} ${blur} ${spread} ${color}`
 }
 
 /**
@@ -77,6 +78,42 @@ export function toCss(value) {
 
 /** Serialise a Style Dictionary token (DTCG `$value` or legacy `value`). */
 export const readToken = (token) => toCss(token.$value ?? token.value)
+
+/**
+ * The alpha a semantic colour role carries, authored as an extension beside its
+ * reference rather than as a raw literal in the value:
+ *
+ *   "card": { "$value": "{color.neutral.0}", "$extensions": { "com.nanisoft.prism": { "alpha": 0.72 } } }
+ *
+ * The colour stays an alias into the foundation ramp, which is what the
+ * Alias-Only Rule requires, and the translucency is a decision the semantic
+ * tier makes about that alias. The build composes the emitted `rgba()` from the
+ * resolved colour and this alpha, so a retune of either half is one edit.
+ */
+export function tokenAlpha(token) {
+  return token?.$extensions?.['com.nanisoft.prism']?.alpha
+}
+
+/**
+ * Serialise a semantic token, composing the authored alpha into a resolved
+ * colour. Foundation tokens never carry the extension, so this is a pass-through
+ * for them and both tiers can call it without a tier check at the call site.
+ */
+export function tokenValue(token) {
+  const value = token.$value ?? token.value
+  const alpha = tokenAlpha(token)
+  if (
+    alpha === undefined ||
+    alpha === 1 ||
+    value === null ||
+    typeof value !== 'object' ||
+    !Array.isArray(value.components) ||
+    typeof value.colorSpace !== 'string'
+  ) {
+    return readToken(token)
+  }
+  return toCss({ ...value, alpha })
+}
 
 /** DTCG `{color.neutral.900}` -> `['color', 'neutral', '900']`. */
 export function referencePath(reference) {

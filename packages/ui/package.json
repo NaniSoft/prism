@@ -1,6 +1,6 @@
 {
   "name": "@nanisoft/prism-ui",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "type": "module",
   "description": "Prism's React component, block and page library.",
   "license": "MIT",

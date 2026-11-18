@@ -73,6 +73,43 @@ export const ratio = (a, b) => {
   return (hi + 0.05) / (lo + 0.05)
 }
 
+const RGBA = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)$/
+
+/**
+ * Composite a translucent surface over the page ground.
+ *
+ * A glass pane is a colour at an authored alpha, and what a reader sees is the
+ * composite of that colour with whatever is behind it. The gate composites over
+ * `background` because the ground is the one backing a pane always has: a card
+ * sits on the page, a popover on the page or a card over it, and the page ground
+ * is the honest worst case a measured ratio can name. A backing a pane cannot
+ * predict (an image behind a floating pane) is a runtime condition, and a build
+ * gate does not measure screenshots.
+ */
+export function compositeOverGround(color, ground) {
+  const match = RGBA.exec(color)
+  if (!match) return null
+  const alpha = Number(match[4])
+  if (alpha >= 1) return null
+  const g = Number.parseInt(ground.replace('#', ''), 16)
+  const [gr, gg, gb] = [(g >> 16) & 255, (g >> 8) & 255, g & 255]
+  const mix = (c, base) => Math.round(Number(c) * alpha + base * (1 - alpha))
+  const toHex = (n) => n.toString(16).padStart(2, '0')
+  return `#${toHex(mix(match[1], gr))}${toHex(mix(match[2], gg))}${toHex(mix(match[3], gb))}`
+}
+
+/**
+ * Resolve a role's emitted value to the hex a measurement needs: a hex passes
+ * through, the emitted rgba of a translucent role composites over the ground,
+ * and anything else is unresolved.
+ */
+export function resolveMeasured(value, ground) {
+  if (typeof value !== 'string') return null
+  if (value.startsWith('#')) return value
+  if (RGBA.test(value)) return ground ? compositeOverGround(value, ground) : null
+  return null
+}
+
 /**
  * [foreground, background, minimum, label, severity]
  *
@@ -143,6 +180,21 @@ const CHART_REASON =
   'distinct.'
 
 /**
+ * Why an elevation finish role is not measured against a ground. The four roles
+ * are the glass edge finish the elevation stacks inset: the rim highlight along
+ * a pane's top edge, the inside hairline, and the contact and shade depth
+ * layers. All four say the same thing, so the reason is stated once.
+ */
+const FINISH_REASON =
+  'an elevation finish layer is neither text nor the boundary of a control: it is the one-pixel ' +
+  'highlight and hairline that make a translucent pane read as having thickness, and the black ' +
+  'alpha depth layers under it. WCAG 1.4.3 and 1.4.11 bind text and control boundaries, not ' +
+  'material finishes, and the boundary a pane actually relies on is its own `border` role, which ' +
+  'is measured. What binds the set instead is the mode rule below: each finish role resolves in ' +
+  'both modes of every pack, because a finish that resolved in only one mode would draw panes ' +
+  'edgeless there.'
+
+/**
  * The whole exemption list. Every entry carries a reason, every reason is printed
  * on every run, and the count is printed with them, because an allowlist nobody
  * can read is a silent hole with a name on it.
@@ -164,6 +216,10 @@ export const EXEMPTIONS = [
   { role: 'chart-3', kind: 'graphic', reason: CHART_REASON },
   { role: 'chart-4', kind: 'graphic', reason: CHART_REASON },
   { role: 'chart-5', kind: 'graphic', reason: CHART_REASON },
+  { role: 'elevation-rim', kind: 'graphic', reason: FINISH_REASON },
+  { role: 'elevation-inner', kind: 'graphic', reason: FINISH_REASON },
+  { role: 'elevation-contact', kind: 'graphic', reason: FINISH_REASON },
+  { role: 'elevation-shade', kind: 'graphic', reason: FINISH_REASON },
 ]
 
 /**
@@ -338,12 +394,28 @@ async function main() {
     for (const mode of MODES) {
       const tokens = await readJson(path.join(DIST, sourceEntry[mode]))
 
+      /*
+       * The ground. A translucent role composites over `background`, so the
+       * ground itself has to resolve opaque: a translucent page ground would
+       * make every measured pane composite over an undefined colour, which is
+       * the one arrangement this gate cannot measure and therefore refuses.
+       */
+      const ground = resolveMeasured(tokens.background?.value)
+      if (!ground) {
+        fail(
+          `${sourceEntry.label}/${mode}: background does not resolve to an opaque sRGB ground ` +
+            `(${tokens.background?.value === undefined ? 'absent from the emitted token map' : `"${tokens.background?.value}"`}), ` +
+            'and every translucent surface composites over it',
+        )
+      }
+
       // Every colour role, exempt ones included, has to resolve in this mode.
       // This is the mode rule: an exemption is freedom from a GROUND, not from a
-      // MODE, so a role cannot be excused in light and unresolved in dark.
+      // MODE, so a role cannot be excused in light and unresolved in dark. A
+      // translucent role resolves when its rgba composites over the ground.
       for (const role of colours) {
         const value = tokens[role]?.value
-        if (typeof value === 'string' && value.startsWith('#')) continue
+        if (resolveMeasured(value, ground)) continue
         fail(
           `${sourceEntry.label}/${mode}: ${role} does not resolve to an sRGB value ` +
             `(${value === undefined ? 'absent from the emitted token map' : `"${value}"`}). A role ` +
@@ -353,13 +425,13 @@ async function main() {
       }
 
       for (const [fg, bg, min, label, severity] of PAIRS) {
-        const f = tokens[fg]?.value
-        const b = tokens[bg]?.value
-        if (!f?.startsWith('#') || !b?.startsWith('#')) {
-          // A required pair with a missing or non-hex value is an error, not a
-          // silent skip: a forgotten token must fail rather than disappear. An
-          // advisory pair may still skip, and the mode rule above is what
-          // reports the role itself.
+        const f = resolveMeasured(tokens[fg]?.value, ground)
+        const b = resolveMeasured(tokens[bg]?.value, ground)
+        if (!f || !b) {
+          // A required pair with a missing or non-resolving value is an error,
+          // not a silent skip: a forgotten token must fail rather than
+          // disappear. An advisory pair may still skip, and the mode rule above
+          // is what reports the role itself.
           if (severity === 'required') {
             fail(`${sourceEntry.label}/${mode}  ${label}: ${fg} or ${bg} did not resolve, needs ${min}:1`)
             rows.push({ theme: sourceEntry.label, mode, label, ratio: 0, min, ok: false, fg, bg, severity })

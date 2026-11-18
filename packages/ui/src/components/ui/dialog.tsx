@@ -188,7 +188,7 @@ function DialogContent({
           data-slot="dialog-content"
           initialFocus={initialFocus}
           className={cn(
-            'bg-background shadow-md relative grid gap-4 p-6 outline-none',
+            'bg-popover text-popover-foreground shadow-md relative grid gap-4 p-6 outline-none',
             'transition-[opacity,transform] duration-base ease-out data-[starting-style]:opacity-0 data-[ending-style]:opacity-0',
             POPUP[side],
             className,

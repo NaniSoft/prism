@@ -696,6 +696,36 @@
   }
 }
 
+/* ------------------------------------------------------------------ *
+ * The glass material
+ *
+ * The panes of the surface ladder: a card, a popover and a sidebar are
+ * translucent colours over the page ground, and what makes translucency
+ * read as glass rather than as a faded fill is the ground behind them
+ * blurring. The blur radius is the token `--blur-glass`; the translucent
+ * fills themselves are the token values of `--card`, `--popover` and
+ * `--sidebar`, composed with their authored alpha by the token build.
+ *
+ * This rule is unlayered on purpose, like the marketing surface below. A
+ * pane is a material decision, not a utility a call site may mix away: the
+ * finish is at the edge and in the ground, and a Component that wants a
+ * pane asks for the pane, not for a fill plus a filter it assembles
+ * itself. The reduced-transparency block at the foot of this file is what
+ * declines the blur, and the token build's own fallback is what re-points
+ * the fills opaque when a reader declines translucency.
+ *
+ * A browser without `backdrop-filter` drops the declaration and renders
+ * the translucent fill alone, which is legible; the fill was gated on
+ * contrast over the page ground, not over what the blur preserves.
+ * ------------------------------------------------------------------ */
+
+.bg-card,
+.bg-popover,
+.bg-sidebar {
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  backdrop-filter: blur(var(--blur-glass));
+}
+
 /*
  * Reduced motion, and the whole of what this system does about it.
  *
@@ -825,6 +855,33 @@
   ::after {
     animation: none;
     transition: none;
+  }
+}
+
+/*
+ * Reduced transparency, and the whole of what this system does about it.
+ *
+ * The motion block above has a sibling, and the shape is the same on purpose:
+ * one unlayered rule on the universal selector, no `!important`, so it reaches
+ * every blur this package authors and nothing a consumer wrote. The package's
+ * blurs are the panes' material rule above, the scrolled bar's glass, and the
+ * scrim's `backdrop-blur` in the overlays; all of them are `backdrop-filter`,
+ * so one property is the whole kill switch, and a reader who asked for less
+ * translucency gets every surface this package draws without one.
+ *
+ * The fills do not live here. A translucent pane is a token value composed by
+ * the token build, and the build emits each translucent role's opaque form
+ * beside it under the same `prefers-reduced-transparency` query, so the
+ * fallback is the same aliased colour with its authored alpha dropped rather
+ * than a second value a stylesheet guesses at. A reader who declines
+ * translucency gets the panes this system had before it drew glass: opaque,
+ * bordered, shadowed, and gated on the same contrast rows.
+ */
+@media (prefers-reduced-transparency: reduce) {
+  *,
+  ::before,
+  ::after {
+    backdrop-filter: none;
   }
 }
 

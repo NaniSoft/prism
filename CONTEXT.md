@@ -71,6 +71,16 @@ modal). No component writes a raw alpha at a call site; a translucent surface
 names a rung, and a colour utility reaches one as `bg-primary/(--veil-light)`.
 _Avoid_: opacity token, alpha value, glassmorphism, transparency.
 
+**Pane**:
+A surface of the thickness ladder: `sidebar` the thinnest, `card` the resting
+surface, `popover` the thickest. A pane is the pack's light step at an authored
+alpha over the page ground, blurred behind it by the `blur-glass` token, and it
+carries the elevation stack's rim highlight and inside hairline at its edge.
+Thickness is how the ladder says closer: the more of the ground a pane blocks,
+the closer it reads. A reader who declines translucency gets the same panes
+opaque, from the role's own fallback.
+_Avoid_: glassmorphism, frosted surface, transparency, elevated surface.
+
 ### Composition
 
 **Component**:

@@ -138,7 +138,7 @@ function AlertDialogContent({ className, ...props }: AlertDialogContentProps) {
         <AlertDialogPrimitive.Popup
           data-slot="alert-dialog-content"
           className={cn(
-            'bg-background shadow-md relative grid w-full max-w-overlay-dialog gap-4 rounded-xl border p-6 outline-none',
+            'bg-popover text-popover-foreground shadow-md relative grid w-full max-w-overlay-dialog gap-4 rounded-xl border p-6 outline-none',
             'transition-[opacity,transform] duration-base ease-out',
             'focus-visible:ring-ring focus-visible:ring-[3px]',
             'data-[starting-style]:scale-95 data-[starting-style]:opacity-0',

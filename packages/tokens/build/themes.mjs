@@ -73,6 +73,28 @@ export function themeSelector(id, mode, style = DEFAULT_THEME_SELECTOR_STYLE) {
   return mode === 'dark' ? selected.dark(id) : selected.light(id)
 }
 
+/**
+ * The glass alphas, shared by every pack. The tint of a light pane comes from
+ * the tinted ground showing through it, not from the pane itself, so the glass
+ * itself is the pack's lightest step and one alpha table serves all eight
+ * sources. Dark panes carry their own tint at a low alpha, because a near-black
+ * ground is too dark to tint a pane from behind.
+ */
+const GLASS_ALPHA = {
+  card: 0.72,
+  popover: 0.92,
+  sidebar: 0.55,
+  darkCard: 0.07,
+  darkPopover: 0.88,
+  darkSidebar: 0.04,
+}
+
+/** A semantic value that is a colour plus a declared translucency. */
+const glass = (reference, alpha) => ({
+  $value: reference,
+  $extensions: { 'com.nanisoft.prism': { alpha } },
+})
+
 /** @param {string} id theme id, e.g. 'blush' */
 export function expandTheme(id) {
   const N = `color.${id}-neutral`
@@ -80,11 +102,11 @@ export function expandTheme(id) {
 
   return {
     light: {
-      background: { $value: `{${N}.0}` },
+      background: { $value: `{${N}.100}` },
       foreground: { $value: `{${N}.900}` },
-      card: { $value: `{${N}.0}` },
+      card: glass(`{${N}.0}`, GLASS_ALPHA.card),
       'card-foreground': { $value: `{${N}.900}` },
-      popover: { $value: `{${N}.0}` },
+      popover: glass(`{${N}.0}`, GLASS_ALPHA.popover),
       'popover-foreground': { $value: `{${N}.900}` },
       primary: { $value: `{${B}.400}` },
       'primary-foreground': { $value: `{${B}.950}` },
@@ -102,7 +124,12 @@ export function expandTheme(id) {
       'warning-foreground': { $value: `{${N}.950}` },
       border: { $value: `{${N}.200}` },
       input: { $value: `{${N}.200}` },
-      ring: { $value: `{${B}.500}` },
+      // The ring is measured against the tinted page ground now, and brand 500
+      // cleared 3:1 on white by less than the ground took away: the seven
+      // pastels measured 2.63:1 to 2.93:1 on their own neutral 100. Brand 600
+      // is the step the sidebar ring already holds, and it clears 3:1 on the
+      // ground in all seven. The base pack's neutral ring keeps its step.
+      ring: { $value: `{${B}.600}` },
       // The one brand hue in the contract that is read as text rather than used
       // as a fill. The accent ground decides the step, and it is brand 700 here:
       // brand 600 measures 3.82:1 to 4.21:1 on the five packs' own accent surface
@@ -114,28 +141,33 @@ export function expandTheme(id) {
       'chart-3': { $value: '{color.amber.500}' },
       'chart-4': { $value: `{${N}.500}` },
       'chart-5': { $value: '{color.red.500}' },
-      sidebar: { $value: `{${N}.50}` },
+      sidebar: glass(`{${N}.0}`, GLASS_ALPHA.sidebar),
       'sidebar-foreground': { $value: `{${N}.900}` },
       'sidebar-primary': { $value: `{${B}.400}` },
       'sidebar-primary-foreground': { $value: `{${B}.950}` },
       'sidebar-accent': { $value: `{${B}.100}` },
       'sidebar-accent-foreground': { $value: `{${B}.950}` },
       'sidebar-border': { $value: `{${N}.200}` },
-      // The sidebar is a step off the page ground in every mode: in light it is
-      // neutral 50 rather than neutral 0, so a ring on it has slightly less room,
-      // and brand 500 measured 2.86:1 in Mint and 2.97:1 in Sky. Brand 600 is the
-      // first step that clears 3:1 on all five. In dark the sidebar is neutral
-      // 900, lighter than the page ground, and brand 300 already holds 8.06:1 or
-      // better, so the dark arm keeps its step.
+      // The sidebar is a step off the page ground in every mode, and its ring is
+      // measured against the composited pane. The check-contrast run prints the
+      // measured ratio for every pack; the step below is the one that clears
+      // 3:1 there.
       'sidebar-ring': { $value: `{${B}.600}` },
+      // The edge finish, tinted per pack: the rim highlight is the pack's own
+      // lightest step at a light alpha, so a Blush card and a Cyan card catch
+      // the same light in their own hue. The alphas match the base pack's.
+      'elevation-rim': glass(`{${N}.0}`, 0.55),
+      'elevation-inner': glass(`{${N}.0}`, 0.35),
+      'elevation-contact': glass(`{${N}.950}`, 0.1),
+      'elevation-shade': glass(`{${N}.950}`, 0.12),
     },
 
     dark: {
       background: { $value: `{${N}.950}` },
       foreground: { $value: `{${N}.100}` },
-      card: { $value: `{${N}.900}` },
+      card: glass(`{${N}.100}`, GLASS_ALPHA.darkCard),
       'card-foreground': { $value: `{${N}.100}` },
-      popover: { $value: `{${N}.900}` },
+      popover: glass(`{${N}.800}`, GLASS_ALPHA.darkPopover),
       'popover-foreground': { $value: `{${N}.100}` },
       primary: { $value: `{${B}.300}` },
       'primary-foreground': { $value: `{${B}.950}` },
@@ -165,7 +197,7 @@ export function expandTheme(id) {
       'chart-3': { $value: '{color.amber.400}' },
       'chart-4': { $value: `{${N}.400}` },
       'chart-5': { $value: '{color.red.400}' },
-      sidebar: { $value: `{${N}.900}` },
+      sidebar: glass(`{${N}.100}`, GLASS_ALPHA.darkSidebar),
       'sidebar-foreground': { $value: `{${N}.100}` },
       'sidebar-primary': { $value: `{${B}.300}` },
       'sidebar-primary-foreground': { $value: `{${B}.950}` },
@@ -173,6 +205,10 @@ export function expandTheme(id) {
       'sidebar-accent-foreground': { $value: `{${B}.100}` },
       'sidebar-border': { $value: `{${N}.800}` },
       'sidebar-ring': { $value: `{${B}.300}` },
+      'elevation-rim': glass(`{${N}.100}`, 0.1),
+      'elevation-inner': glass(`{${N}.100}`, 0.04),
+      'elevation-contact': glass(`{${N}.950}`, 0.4),
+      'elevation-shade': glass(`{${N}.950}`, 0.55),
     },
   }
 }

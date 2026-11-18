@@ -69,7 +69,7 @@ export const catalog: readonly CatalogItem[] = [
     slug: 'card',
     kind: 'component',
     category: 'Data display',
-    description: 'A bordered surface for a small group of related content.',
+    description: 'A pane for a small group of related content.',
     source: 'src/components/ui/card.tsx',
     exports: ['Card', 'CardHeader', 'CardTitle', 'CardDescription', 'CardContent', 'CardFooter'],
     status: 'stable',

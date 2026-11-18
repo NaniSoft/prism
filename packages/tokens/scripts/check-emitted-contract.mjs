@@ -23,9 +23,9 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readFile } from 'node:fs/promises'
-import { toCss, readToken } from '../build/serialize.mjs'
+import { toCss, readToken, tokenAlpha } from '../build/serialize.mjs'
 import { foundationTree, groupEntries } from '../build/foundation.mjs'
-import { themeSelector, THEME_SELECTOR_STYLE } from '../build/themes.mjs'
+import { themeSelector, THEME_SELECTOR_STYLE, expandTheme } from '../build/themes.mjs'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const PKG = path.join(HERE, '..')
@@ -52,6 +52,59 @@ function atRuleBody(text, atRule) {
   const close = text.indexOf('}', open)
   if (open === -1 || close === -1) return null
   return text.slice(open + 1, close)
+}
+
+/**
+ * The full balanced body of an at-rule, nesting included. The reduced-transparency
+ * fallback blocks hold a rule of their own, so the first-`}` read above cannot
+ * see inside them.
+ */
+function balancedAtRuleBody(text, atRule) {
+  const start = text.indexOf(atRule)
+  if (start === -1) return null
+  const open = text.indexOf('{', start)
+  if (open === -1) return null
+  let depth = 0
+  for (let i = open; i < text.length; i += 1) {
+    if (text[i] === '{') depth += 1
+    else if (text[i] === '}') {
+      depth -= 1
+      if (depth === 0) return text.slice(open + 1, i)
+    }
+  }
+  return null
+}
+
+/**
+ * Remove every `@media` block, nesting included. The token files now emit the
+ * reduced-transparency fallback under the same selectors as the base rule, and
+ * the declarations below must compare the BASE value: reading the whole file
+ * would let the fallback's opaque colour, declared later, win the map and read
+ * as a mismatch.
+ */
+function stripMediaBlocks(text) {
+  let out = text
+  let index = out.indexOf('@media')
+  while (index !== -1) {
+    const open = out.indexOf('{', index)
+    if (open === -1) break
+    let depth = 0
+    let end = -1
+    for (let i = open; i < out.length; i += 1) {
+      if (out[i] === '{') depth += 1
+      else if (out[i] === '}') {
+        depth -= 1
+        if (depth === 0) {
+          end = i
+          break
+        }
+      }
+    }
+    if (end === -1) break
+    out = out.slice(0, index) + out.slice(end + 1)
+    index = out.indexOf('@media')
+  }
+  return out
 }
 
 const DECLARATION = /--((?:\\.|[^\s:;])+)\s*:\s*([^;]+);/g
@@ -88,10 +141,27 @@ function flatten(tree, prefix = [], out = new Map()) {
 
 const foundationTokens = flatten(foundationTree)
 
-function resolveReference(reference) {
+/**
+ * Resolve a semantic reference to the value the build emits, the authored alpha
+ * composed in when the role carries one. The same composition lives in
+ * `tokenValue`, so the two sides of the equality below cannot drift.
+ */
+function resolveReference(reference, alpha) {
   const path = String(reference).replace(/^\{|\}$/g, '')
   const token = foundationTokens.get(path)
-  return token ? toCss(token.$value ?? token.value) : null
+  if (!token) return null
+  const value = token.$value ?? token.value
+  if (
+    alpha !== undefined &&
+    alpha !== 1 &&
+    value !== null &&
+    typeof value === 'object' &&
+    Array.isArray(value.components) &&
+    typeof value.colorSpace === 'string'
+  ) {
+    return toCss({ ...value, alpha })
+  }
+  return toCss(value)
 }
 
 // ── Expected static block ─────────────────────────────────────────────────────
@@ -126,6 +196,9 @@ for (const [key, token] of groupEntries(foundationTree, ['ambient-ease'])) put(`
 const veilPercent = (token) => `${Math.round((token.$value ?? token.value) * 100)}%`
 for (const [key, token] of groupEntries(foundationTree, ['veil'])) put(`veil-${key}`, veilPercent(token))
 
+// The backdrop blur the glass material reads, a token like any other radius.
+for (const [key, token] of groupEntries(foundationTree, ['blur'])) put(`blur-${key}`, readToken(token))
+
 put('transition-duration-fast', 'var(--duration-fast)')
 put('transition-duration-base', 'var(--duration-base)')
 put('transition-duration-slow', 'var(--duration-slow)')
@@ -149,8 +222,8 @@ for (const [key, token] of groupEntries(foundationTree, ['container'])) put(`con
 const lightCss = await readText(path.join(DIST, 'light.css'))
 const darkCss = await readText(path.join(DIST, 'dark.css'))
 const themeCss = await readText(path.join(DIST, 'theme.css'))
-const lightDecls = declarations(lightCss)
-const darkDecls = declarations(darkCss)
+const lightDecls = declarations(stripMediaBlocks(lightCss))
+const darkDecls = declarations(stripMediaBlocks(darkCss))
 const inlineDecls = declarations(atRuleBody(themeCss, '@theme inline {'))
 const staticDecls = declarations(atRuleBody(themeCss, '@theme static {'))
 
@@ -163,12 +236,49 @@ for (const mode of ['light', 'dark']) {
   const decls = mode === 'light' ? lightDecls : darkDecls
   for (const [name, token] of Object.entries(source)) {
     if (name.startsWith('$') || name === 'radius') continue
-    const want = resolveReference(token.$value)
+    const want = resolveReference(token.$value, tokenAlpha(token))
     check(decls.has(name), `${mode}.css is missing --${name}`)
     if (want !== null && decls.has(name)) {
       check(decls.get(name) === want, `--${name} in ${mode}.css is "${decls.get(name)}", authored "${want}"`)
     }
   }
+}
+
+/*
+ * The reduced-transparency fallback. Every role that authors an alpha must also
+ * emit its opaque form under the same query in the same file, because a reader
+ * who declines translucency is owed the value this repository decided, not a
+ * colour a stylesheet derives at runtime. The expected value is the same
+ * referenced colour with the alpha dropped, which is `resolveReference` without
+ * the composition.
+ */
+const FALLBACK_QUERY = '@media (prefers-reduced-transparency: reduce)'
+{
+  let authoredTranslucent = 0
+  for (const mode of ['light', 'dark']) {
+    const source = await readJson(path.join(SRC, 'semantic', `${mode}.tokens.json`))
+    const translucent = Object.entries(source).filter(
+      ([name, token]) => !name.startsWith('$') && tokenAlpha(token) !== undefined && tokenAlpha(token) < 1,
+    )
+    authoredTranslucent += translucent.length
+    const css = mode === 'light' ? lightCss : darkCss
+    const body = balancedAtRuleBody(css, FALLBACK_QUERY)
+    const fallbackDecls = declarations(body)
+    if (translucent.length) {
+      check(body !== null, `${mode}.css declares a translucent role but carries no ${FALLBACK_QUERY} fallback block`)
+    }
+    for (const [name, token] of translucent) {
+      const want = resolveReference(token.$value)
+      check(
+        fallbackDecls.get(name) === want,
+        `the reduced-transparency fallback for --${name} in ${mode}.css is "${fallbackDecls.get(name)}", authored "${want}"`,
+      )
+    }
+  }
+  check(
+    authoredTranslucent > 0,
+    'no semantic role authors a translucent value, so the reduced-transparency fallback this file asserts is untested',
+  )
 }
 
 // Radius is mode-independent but mode-scoped in the shadcn contract.
@@ -194,7 +304,7 @@ for (const [name, want] of expected) {
 // 4. No declaration in a bound namespace that the source did not author.
 const NAMESPACES = [
   'font-', 'font-weight-', 'text-', 'leading-', 'tracking-',
-  'duration-', 'ease-', 'ambient-', 'ambient-ease-', 'veil-', 'shadow-', 'breakpoint-', 'container-',
+  'duration-', 'ease-', 'ambient-', 'ambient-ease-', 'veil-', 'blur-', 'shadow-', 'breakpoint-', 'container-',
   'aspect-', 'z-', 'media-',
   'transition-duration-', 'default-transition-duration', 'default-transition-timing-function',
 ]
@@ -461,6 +571,30 @@ for (const { id } of manifest) {
     selectorOf(themeDark) === themeSelector(id, 'dark', THEME_SELECTOR_STYLE),
     `themes/${id}/dark.css should select "${themeSelector(id, 'dark', THEME_SELECTOR_STYLE)}", found "${selectorOf(themeDark)}"`,
   )
+  // Every pack's translucent roles carry their fallback beside them, like the
+  // base pack's do above.
+  const expanded = expandTheme(id)
+  for (const [mode, css] of [
+    ['light', themeLight],
+    ['dark', themeDark],
+  ]) {
+    const translucent = Object.entries(expanded[mode]).filter(
+      ([name, token]) => !name.startsWith('$') && tokenAlpha(token) !== undefined && tokenAlpha(token) < 1,
+    )
+    check(translucent.length > 0, `pack "${id}" ${mode} expands to no translucent role`)
+    const body = balancedAtRuleBody(css, FALLBACK_QUERY)
+    const fallbackDecls = declarations(body)
+    if (translucent.length) {
+      check(body !== null, `themes/${id}/${mode}.css declares translucent roles but carries no ${FALLBACK_QUERY} fallback block`)
+    }
+    for (const [name, token] of translucent) {
+      const want = resolveReference(token.$value)
+      check(
+        fallbackDecls.get(name) === want,
+        `the reduced-transparency fallback for --${name} in themes/${id}/${mode}.css is "${fallbackDecls.get(name)}", authored "${want}"`,
+      )
+    }
+  }
 }
 
 // ── Result ────────────────────────────────────────────────────────────────────
