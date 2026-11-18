@@ -112,7 +112,9 @@ describe('get_theme_doc', () => {
   it('answers the default semantic set with the selection mechanism', () => {
     const body = readText(renderThemeDoc(store, {}))
     expect(body).toContain('# Prism theme: default / light')
-    expect(body).toContain('--background: #ffffff')
+    // The ground is the tinted pane backing the glass release: one step off
+    // white, so the translucent panes above it read as thickness.
+    expect(body).toContain('--background: #f5f5f5')
     expect(body).toContain('default, blush, mint, lavender, sky, peach')
     // The selection guidance is a contract, and it was wrong: it told an agent
     // the attribute belongs on `<html>` while the token block printed below it
@@ -150,7 +152,7 @@ describe('get_theme_doc', () => {
   it('answers the semantic group explicitly and errors on an unknown mode', () => {
     const semantic = readText(renderThemeDoc(store, { group: 'semantic' }))
     expect(semantic).toContain('# Prism theme: default / light')
-    expect(semantic).toContain('--background: #ffffff')
+    expect(semantic).toContain('--background: #f5f5f5')
     const mode = renderThemeDoc(store, { mode: 'twilight' })
     expect(mode.isError).toBe(true)
     expect(readText(mode)).toContain('Valid modes')
