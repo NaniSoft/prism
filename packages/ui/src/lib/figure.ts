@@ -55,6 +55,16 @@ export type FigureLabel = {
   size: number
   /** Its baseline, measured down from the mark's centre. */
   offset: number
+  /**
+   * Where its centre sits on the x axis, measured from the mark's centre.
+   *
+   * Absent means centred on the mark, which is the only arrangement a label
+   * needed while every label centred on its own mark. A drawing that pulls a
+   * mark's label back inside the canvas at the frame's edge moves the ink
+   * without moving the mark, and the trim has to follow the ink rather than
+   * the mark, or a stroke would be stopped by a box the words had left.
+   */
+  x?: number
 }
 
 /**
@@ -114,9 +124,10 @@ export function labelHalfHeight(size: number): number {
  */
 function labelBox(at: FigurePoint, label: FigureLabel): FigureBox {
   const half = labelHalfWidth(label.text, label.size)
+  const centreX = at.x + (label.x ?? 0)
   return {
-    l: at.x - half - INK_CLEARANCE,
-    r: at.x + half + INK_CLEARANCE,
+    l: centreX - half - INK_CLEARANCE,
+    r: centreX + half + INK_CLEARANCE,
     t: at.y + label.offset - LABEL_ASCENT * label.size - INK_CLEARANCE,
     b: at.y + label.offset + LABEL_DESCENT * label.size + INK_CLEARANCE,
   }
