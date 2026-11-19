@@ -74,8 +74,16 @@ export type NavbarControlsProps = {
  * because it is the only control that answers a question the reader arrived with;
  * then the two menus, which are choices about where to be rather than about what to
  * do; then the mode, which is the choice that persists across every site in the
- * family; then the mobile trigger, which is last because it is the only one that
- * appears at the narrow end of the range and appears alone there.
+ * family; then the mobile trigger, which is last because it is the one the narrow
+ * end of the range is left holding.
+ *
+ * **The narrow end is measured, and the two menus yield there.** Five 44 pixel
+ * targets and a lockup need about 400 pixels, so below `sm` the sites menu and the
+ * pack chooser leave the row: they are the two choices about where to be, and a row
+ * that cannot hold them drops them before it drops search, the mode, or a control
+ * off the viewport edge. Search, the mode, the caller's actions and the trigger are
+ * what remains, and that row fits a 320 pixel viewport with the lockup beside it.
+ * Above `sm` nothing changes, so a site whose bar fits today keeps the bar it has.
  */
 export function NavbarControls(props: NavbarControlsProps) {
   const {
@@ -109,11 +117,22 @@ export function NavbarControls(props: NavbarControlsProps) {
           />
         ) : null}
 
+        {/* Below `sm` the two menus yield, so the row holds its remaining controls
+            beside the lockup at 320 pixels instead of pushing one off the viewport
+            edge. The order above is the order of surrender: they are the choices
+            about where to be, and search, the mode and the panel stay. The popup
+            renders in a portal, so the wrapper carries no styling of its own. */}
         {sites && sites.length > 0 && sitesLabel ? (
-          <SitesMenu sites={sites} currentId={currentSiteId} label={sitesLabel} />
+          <div data-slot="site-navbar-sites" className="hidden sm:block">
+            <SitesMenu sites={sites} currentId={currentSiteId} label={sitesLabel} />
+          </div>
         ) : null}
 
-        {theme ? <ThemeMenu label={theme.label} packs={theme.packs} /> : null}
+        {theme ? (
+          <div data-slot="site-navbar-theme" className="hidden sm:block">
+            <ThemeMenu label={theme.label} packs={theme.packs} />
+          </div>
+        ) : null}
 
         {mode ? <ModeToggle lightLabel={mode.lightLabel} darkLabel={mode.darkLabel} /> : null}
 

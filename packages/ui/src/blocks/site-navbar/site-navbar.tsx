@@ -266,13 +266,15 @@ export type SiteNavbarProps = {
  * copy it derives is a pack's own name from its own identifier, and only when the
  * caller names none.
  *
- * **The bar is one flex row that wraps, and it fits by measurement.** The brand
- * lockup and the controls hold their ends, the navigation sits in the middle, and
- * the navigation row is hidden below `lg` where the panel takes over. The brand
- * lockup is the one element that never wraps: a wordmark broken across two lines is
- * not a wordmark, and it is also the one element that yields rather than pushing a
- * control off the right edge of the viewport, which is the harm a header-fit test
- * exists to catch.
+  * **The bar is one flex row that wraps, and it fits by measurement.** The brand
+  * lockup and the controls hold their ends, the navigation sits in the middle, and
+  * the navigation row is hidden below `lg` where the panel takes over. The brand
+  * lockup is the one element that never wraps: a wordmark broken across two lines is
+  * not a wordmark, and it is also the one element that yields rather than pushing a
+  * control off the right edge of the viewport, which is the harm a header-fit test
+  * exists to catch. Below `sm` the fitting is the cluster's own act rather than the
+  * lockup's: the sites menu and the pack chooser leave the row, which is
+  * NavbarControls' decision and carries its reasoning there.
  *
  * **The navigation is a `nav` and the sites menu is a second landmark of its own.**
  * A reader who navigates by landmark needs two regions rather than one region with

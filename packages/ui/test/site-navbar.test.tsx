@@ -438,6 +438,33 @@ describe('the bar of a product site: its own surface', () => {
     // it off is not also changing its surface.
     expect(classes).toEqual(expect.arrayContaining(['border-border', 'bg-background', 'w-full']))
   })
+
+  it('yields the two menus below sm, and keeps every other control on the row', () => {
+    // A phone was the one width that pushed a control off the viewport edge: five
+    // 44 pixel targets and a lockup need about 400 pixels, and a row the page has to
+    // scroll horizontally is the harm a header-fit test exists to catch. The yield is
+    // a class-string assertion for the reason the describe above gives: which
+    // controls survive at the narrow end is a fact a consumer inherits, and it is
+    // carried by class names. The menus keep their buttons in the document (jsdom
+    // runs no CSS), so the names above stay reachable and the assertion here is the
+    // narrow-end behaviour itself.
+    const { container } = render(withEveryControl())
+    const yielded = container
+      .querySelectorAll('[data-slot="site-navbar-sites"], [data-slot="site-navbar-theme"]')
+    expect(yielded).toHaveLength(2)
+    for (const wrapper of yielded) {
+      expect(wrapper.className).toContain('hidden')
+      expect(wrapper.className).toContain('sm:block')
+    }
+    // Search, the mode and the trigger are what remain, and none of them sits behind
+    // a wrapper that would hide it on a phone. The token is exact, because the
+    // trigger itself carries `lg:hidden` and hides at the wide end, which is its own
+    // decision and not this one.
+    for (const name of [COPY.search, COPY.toDark, COPY.menuOpen]) {
+      const button = screen.getByRole('button', { name })
+      expect(button.className.split(/\s+/)).not.toContain('hidden')
+    }
+  })
 })
 
 describe('the search in the bar', () => {
