@@ -197,6 +197,39 @@ describe('a node carries a second line, and the name is read off it', () => {
     }
   })
 
+  it('pulls a label wider than the edge band back inside the canvas, at either edge', () => {
+    // A node placed at the caller's own 100 sits on the padding wall, and a
+    // second line wider than the wall centred on that mark runs past the viewBox,
+    // where the svg clips its own words: a finding whose last word is gone reads
+    // as finished. The measured half-width is the same estimate the stroke trim
+    // uses, and past an edge the label ends at the edge rather than centres on
+    // the mark, which keeps the words and moves them the shortest distance that
+    // keeps them. A short name is inside the band and stays centred, because a
+    // rule that moved every label would be a rule about aesthetics wearing the
+    // clothes of one about ink.
+    const EDGE = { id: 'edge', name: 'P-1042', subtitle: 'Payroll-NG, sensitive', x: 100, y: 50 }
+    const { container } = render(
+      <Diagram nodes={[{ id: 'start', name: 'j.harper', x: 0, y: 50 }, EDGE]} relations={[]} label="the finding" />,
+    )
+
+    const canvasWidth = Number(
+      /0 0 (\d+) \d+/.exec(container.querySelector('svg')?.getAttribute('viewBox') ?? '')?.[1],
+    )
+    const mark = container.querySelector('[data-node="edge"]')!
+    const second = mark.querySelector('[data-slot="diagram-node-subtitle"]')!
+    expect(second.getAttribute('text-anchor')).toBe('end')
+    expect(Number(second.getAttribute('x'))).toBe(canvasWidth)
+
+    // The other edge, where the ink would run off the left: the anchor starts at
+    // the wall rather than ending at it.
+    const head = container.querySelector('[data-node="start"] text')!
+    expect(head.getAttribute('text-anchor')).toBe('middle')
+
+    // And a node whose label fits the band is none the wiser.
+    const edgeName = mark.querySelector('text')!
+    expect(edgeName.getAttribute('text-anchor')).toBe('middle')
+  })
+
   it('names the drawing from the nodes own text when the caller names it nowhere', () => {
     // The defect this replaces: a role description that existed only inside the
     // accessible name, which served a screen reader and gave a sighted reader
@@ -495,14 +528,21 @@ const EPSILON = 0.01
 type Box = { l: number; r: number; t: number; b: number }
 type Point = { x: number; y: number }
 
-/** The ink box of one rendered label, from the three numbers the markup carries. */
+/** The ink box of one rendered label, from the numbers the markup carries. */
 function labelBox(text: Element): Box {
-  expect(text.getAttribute('text-anchor')).toBe('middle')
+  // The anchor is read rather than assumed. A label centred on its mark puts its
+  // centre at `x`; a label the Component pulled back inside the canvas at the
+  // frame's edge starts or ends there, and its ink is where the attribute says
+  // the ink is. The box has to follow, because the assertions below hold strokes
+  // out of the ink, wherever the ink was drawn.
   const size = Number(text.getAttribute('font-size'))
   const x = Number(text.getAttribute('x'))
   const y = Number(text.getAttribute('y'))
   const half = (text.textContent ?? '').length * MONO_ADVANCE * size * 0.5
-  return { l: x - half, r: x + half, t: y - LABEL_ASCENT * size, b: y + LABEL_DESCENT * size }
+  const anchor = text.getAttribute('text-anchor')
+  const centre =
+    anchor === 'start' ? x + half : anchor === 'end' ? x - half : x
+  return { l: centre - half, r: centre + half, t: y - LABEL_ASCENT * size, b: y + LABEL_DESCENT * size }
 }
 
 /** The two ends of one rendered stroke, from the `d` the Component wrote. */

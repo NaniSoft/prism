@@ -300,6 +300,27 @@ const RELATION_NAME_SIZE = 12
 const NODE_SUBTITLE_OFFSET = NODE_NAME_OFFSET + NODE_SUBTITLE_SIZE + 5
 
 /**
+ * Where one of a node's own labels sits on the x axis, which is under the mark and
+ * inside the canvas.
+ *
+ * A label centres on its mark, and `PADDING` buys the room a centred label needs
+ * for the widths the band was sized against. A caller can place a mark at the
+ * frame's own edge, and a label wider than that band then runs past the viewBox
+ * and the drawing clips its own words, which is the one failure a drawing can
+ * have that looks like success. The measured half-width is the same arithmetic
+ * the relation trim uses, so the answer is one estimate shared by everything
+ * that prints ink: past an edge, the label ends at the edge rather than centres
+ * on the mark, which keeps the whole line and moves it the shortest distance
+ * that keeps it.
+ */
+function nodeLabelX(at: Placed, text: string, size: number): { x: number; textAnchor: 'start' | 'middle' | 'end' } {
+  const half = labelHalfWidth(text, size)
+  if (at.x + half > CANVAS_WIDTH) return { x: CANVAS_WIDTH, textAnchor: 'end' }
+  if (at.x - half < 0) return { x: 0, textAnchor: 'start' }
+  return { x: at.x, textAnchor: 'middle' }
+}
+
+/**
  * Where a relation's label sits, which is beside the line and never on it.
  *
  * The offset is the label's own half-width measured across the line plus its half
@@ -338,12 +359,24 @@ function relationLabel(label: string, segment: Segment): Placed {
  * both below its mark, so a relation leaving sideways runs along the mark's centre
  * line and clears both, while one leaving downward enters both. The arithmetic is
  * `lib/figure`, which is where the shared answer lives; what is left here is the two
- * labels this drawing prints and where it prints them.
+ * labels this drawing prints and where it prints them. Where the mark sits at the
+ * frame's edge the label is the one `nodeLabelX` moved, and the box carries the same
+ * shift, because a stroke is stopped by where the words are rather than by where
+ * the mark is.
  */
-function nodeLabels(node: DiagramNode): FigureLabel[] {
-  const labels: FigureLabel[] = [{ text: node.name, size: NODE_NAME_SIZE, offset: NODE_NAME_OFFSET }]
+function nodeLabels(node: DiagramNode, at: Placed): FigureLabel[] {
+  const nameAt = nodeLabelX(at, node.name, NODE_NAME_SIZE)
+  const labels: FigureLabel[] = [
+    { text: node.name, size: NODE_NAME_SIZE, offset: NODE_NAME_OFFSET, x: nameAt.x - at.x },
+  ]
   if (node.subtitle !== undefined) {
-    labels.push({ text: node.subtitle, size: NODE_SUBTITLE_SIZE, offset: NODE_SUBTITLE_OFFSET })
+    const secondAt = nodeLabelX(at, node.subtitle, NODE_SUBTITLE_SIZE)
+    labels.push({
+      text: node.subtitle,
+      size: NODE_SUBTITLE_SIZE,
+      offset: NODE_SUBTITLE_OFFSET,
+      x: secondAt.x - at.x,
+    })
   }
   return labels
 }
@@ -466,7 +499,10 @@ function Diagram({
     // Each end carries its mark's centre and the labels printed under it, because
     // a stroke is trimmed against the labels it would enter and the two are not the
     // same thing.
-    const end = (node: DiagramNode) => ({ at: place(node), labels: nodeLabels(node) })
+    const end = (node: DiagramNode) => {
+      const at = place(node)
+      return { at, labels: nodeLabels(node, at) }
+    }
     return [{ relation, from: end(from), to: end(to) }]
   })
 
@@ -515,6 +551,9 @@ function Diagram({
 
         {nodes.map((node) => {
           const at = place(node)
+          const nameAt = nodeLabelX(at, node.name, NODE_NAME_SIZE)
+          const secondAt =
+            node.subtitle === undefined ? null : nodeLabelX(at, node.subtitle, NODE_SUBTITLE_SIZE)
           // `default` is the absence of the attribute, spelled the way the token
           // build spells it, so a node on the base pack resolves its fill and its
           // stroke from the page rather than from a selector nothing emits.
@@ -538,21 +577,21 @@ function Diagram({
                 )}
               />
               <text
-                x={at.x}
+                x={nameAt.x}
                 y={at.y + NODE_NAME_OFFSET}
                 fontSize={NODE_NAME_SIZE}
-                textAnchor="middle"
+                textAnchor={nameAt.textAnchor}
                 className="fill-foreground font-mono"
               >
                 {node.name}
               </text>
-              {node.subtitle ? (
+              {secondAt === null ? null : (
                 <text
                   data-slot="diagram-node-subtitle"
-                  x={at.x}
+                  x={secondAt.x}
                   y={at.y + NODE_SUBTITLE_OFFSET}
                   fontSize={NODE_SUBTITLE_SIZE}
-                  textAnchor="middle"
+                  textAnchor={secondAt.textAnchor}
                   // Muted ink rather than the name's own: the line below a name is
                   // supporting, and a reader's eye reaches the name first. Both are
                   // contract roles, so a boundary above either moves it.
@@ -560,7 +599,7 @@ function Diagram({
                 >
                   {node.subtitle}
                 </text>
-              ) : null}
+              )}
             </g>
           )
         })}
