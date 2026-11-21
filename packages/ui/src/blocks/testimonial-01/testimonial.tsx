@@ -285,7 +285,7 @@ export function Testimonial01({
       {title ? (
         <SectionHeading
           as={headingLevel}
-          align="left"
+          align="center"
           eyebrow={eyebrow}
           title={title}
           description={description}

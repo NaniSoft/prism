@@ -218,6 +218,10 @@ export function MediaBand01({
             mediaFirst ? 'lg:order-2' : 'lg:order-1',
           )}
         >
+          {/* Left, not centred: this copy shares the band with a figure, and a
+              centred column beside media reads as two unrelated pieces. The
+              landing-band blocks centre only when the band's content sits under
+              the heading. */}
           <SectionHeading
             as={headingLevel}
             align="left"

@@ -134,6 +134,17 @@ export type ProductGrid01Props = {
  * it, and middle-click opens it in a new tab. The mark is `aria-hidden` inside
  * it, so the link is announced once, by name, rather than as a shape and a word.
  *
+ * **The row is drawn at the size a platform band is read at, not at the size a
+ * table row is scanned at.** This section closes a landing page more often than it
+ * closes a dashboard: it is the band where a reader decides which product to leave
+ * for, and a mark at the smallest drawn size under a hairline at one line of
+ * padding is a footnote about products a reader is being asked to choose between.
+ * The mark is drawn at `lg`, the tagline steps to the body size above the small
+ * breakpoint, the row breathes at six lines of padding, and the hover wash rounds
+ * at the `lg` radius so the row reads as a surface the page drew rather than as a
+ * highlight painted over a rule. A consumer whose set lives in a working area and
+ * not on a landing composes the table suite instead, which is what it is for.
+ *
  * **Which level a sentence belongs at is a fact about the sentence, and this
  * settles it.** There are two levels and both are right, for different claims:
  *
@@ -171,7 +182,7 @@ export function ProductGrid01({
       {title ? (
         <SectionHeading
           as={headingLevel}
-          align="left"
+          align="center"
           eyebrow={eyebrow}
           title={title}
           description={description}
@@ -186,13 +197,13 @@ export function ProductGrid01({
               href={product.href}
               rel={product.newTab ? 'noopener noreferrer' : undefined}
               target={product.newTab ? '_blank' : undefined}
-              className="hover:bg-accent/50 focus-visible:ring-ring flex flex-col gap-1 px-2 py-4 transition-colors duration-fast ease-out sm:flex-row sm:items-baseline sm:gap-6 focus-visible:ring-[3px] focus-visible:outline-none"
+              className="hover:bg-accent/50 focus-visible:ring-ring flex flex-col gap-1.5 rounded-lg px-3 py-6 transition-colors duration-fast ease-out sm:flex-row sm:items-baseline sm:gap-6 focus-visible:ring-[3px] focus-visible:outline-none"
             >
               <span className="flex shrink-0 items-center sm:w-64">
-                <ProductMark id={product.id} name={product.name} pack={product.pack} mark={product.mark} size="md" />
+                <ProductMark id={product.id} name={product.name} pack={product.pack} mark={product.mark} size="lg" />
               </span>
               <span className="flex min-w-0 flex-col gap-0.5">
-                <span className="text-muted-foreground text-pretty text-sm">{product.tagline}</span>
+                <span className="text-muted-foreground text-pretty text-sm sm:text-base">{product.tagline}</span>
                 {/* A second line, per row, drawn only when there is one. A row that
                     reserved the space for absent content would push every row below
                     it down by one line, and this is a stack of full-width rules

@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+
 /**
  * The editorial figure for the Prism landing: a prism, a beam and a spectrum.
  *
@@ -7,6 +9,17 @@
  * stock image that says nothing about the product. The one place a spectrum is
  * allowed is here, because Prism owns every hue the products wear, and the mark
  * it draws with is the spectrum itself.
+ *
+ * **The figure is the token pipeline, running.** A beam goes in, a spectrum comes
+ * out, and that is the system's own story told as a picture of itself, so the
+ * figure shows it running the way the catalogue's live figures do: one packet
+ * rides the incoming beam on the ambient-travel cycle, and the refraction point
+ * pulses once per ambient cycle where the beam meets the glass. Both are classes
+ * the stylesheet publishes, priced by the ambient tokens, and both stop under the
+ * universal reduced-motion rule with the figure still complete: the beam, the
+ * glass, the fan and the packets it already split are all there with nothing
+ * moving. A token goes in at the left, eight expressions come out at the right,
+ * and neither half of that sentence depends on an animation to be true.
  *
  * It is decorative: the band's title and description carry the meaning, and the
  * figure is `aria-hidden` so a screen reader is not read a set of lines.
@@ -91,6 +104,43 @@ export function EditorialPrism() {
           <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="4" />
         ))}
       </g>
+
+      {/*
+        The one packet on the beam, on the travel cycle the factory figure on the
+        company landing rides. It is drawn at full ink, the way the design
+        system's own figures draw their moving parts, and the distance it covers
+        is this figure's own geometry: the walk from the beam's start to the
+        glass, not a value the ambient token owns.
+      */}
+      <g className="text-foreground" fill="currentColor">
+        <rect
+          x="62"
+          y="334.5"
+          width="16"
+          height="7"
+          rx="3.5"
+          className="prism-ambient-travel"
+          style={{ '--ambient-travel-distance': '372px' } as CSSProperties}
+        />
+      </g>
+
+      {/*
+        The refraction point, pulsing once per ambient cycle in the pack's
+        primary: the moment the beam meets the glass is the moment the spectrum
+        is made, and it is the one point on the figure that earns a signal ink.
+        The origin is the point itself, in the figure's own user units, the way
+        the constellation's ring pulses around its centre.
+      */}
+      <circle
+        cx="610"
+        cy="338"
+        r="14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        className="text-primary prism-ambient-pulse"
+        style={{ transformOrigin: '610px 338px' }}
+      />
     </svg>
   )
 }

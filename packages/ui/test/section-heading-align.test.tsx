@@ -1,40 +1,45 @@
 /**
- * A section heading that has content under it is aligned left, in every Block.
+ * Section heading alignment is one roster, not one hundred decisions.
  *
  * **The rule is `SectionHeading`'s own, and it is not this file's.** That
- * Component's documentation says: "`center` is right for a band that is only a
- * heading, and `left` is right for a section with content under it, where a
- * centred title above a left-aligned list reads as two unrelated pieces." So
- * nothing here decides anything. This file holds the one question every Block that
- * opens with a heading has to answer the same way, because a Block that answers it
- * differently is not expressing a preference, it is inheriting a default.
+ * Component's documentation states it: a landing band centres its heading and
+ * its lede above the band's content, because a page whose job is to persuade
+ * opens every band that way; an operate surface, a reading surface, and copy
+ * beside media keep the heading flush left, because a reader there is working
+ * down the page rather than deciding about it. So nothing here decides anything.
+ * This file holds the one question every Block that opens with a heading has to
+ * answer, because a Block that answers it on its own is not expressing a
+ * preference, it is inheriting a default.
  *
  * **Why one file for every Block, which is the same reason
  * `card-title-headings.test.tsx` is one file for six.** Ten files with one case
  * each would let the eleventh Block answer this question differently and still
- * pass, and that is precisely the failure: the list *is* the assertion, so a new
- * Block has to be added here to be checked at all.
+ * pass, and that is precisely the failure: the list *is* the assertion, so a
+ * new Block has to be added here to be checked at all.
  *
- * **The defect it was written for, and where it was visible.** `FeatureGrid01` and
- * `Pricing01` each rendered a centred heading over a grid of cards, and they were
- * the only two of ten that did. Neither had a stated reason, so neither had made a
- * decision. It was invisible in this repository, which previews one Block at a time
- * and so never put a centred title next to a left-aligned one. It was visible in
- * the consumer: the Nexus landing is composed from seven of these Blocks and put
- * two centred section titles among five left ones, and the page's rhythm read as an
- * accident. A page's composition belongs to the consumer, but a consumer cannot
- * correct one Block's alignment without restyling a catalogue item, which the
- * no-override-path rule does not allow. So the answer has to be the same in every
- * Block rather than something a consumer works around per page.
+ * **The history, because the rule has run in both directions.** `FeatureGrid01`
+ * and `Pricing01` once centred a heading over a grid with no stated reason, and
+ * the unification that followed made every Block left because a mixture on one
+ * page reads as an accident: the Nexus landing was composed from seven of these
+ * Blocks and put two centred titles among five left ones. The mixture was real,
+ * and the landing tier has since been turned back to centre as the deliberate
+ * version of the same arrangement: the Blocks the landing pages compose centre
+ * together, so the mixture cannot return inside a tier. A Block joins
+ * `LANDING_ROSTER` when a landing composes it, and the final assertion holds the
+ * rendered rows to that list, so joining is a diff in this file rather than a
+ * drift in a render.
  *
- * **The two exceptions are stated, and both are the rule rather than a carve-out.**
- * `Cta01` draws no `SectionHeading` at all: it renders a centred title on a filled
- * primary panel with two actions and nothing under it, which is the case `center`
- * exists for. `Hero01` takes an `align` of its own because its two forms differ: a
- * centred hero is a band that is only a heading, and the two-column form puts its
- * figure beside the copy rather than under it, so it has content beside the heading
- * and not below it. Both are asserted, because an exception that is not asserted is
- * an exception that grows.
+ * **The stated exceptions, and each is the rule rather than a carve-out.**
+ * `Cta01` draws no `SectionHeading` at all: it renders a centred title on a
+ * filled primary panel with two actions and nothing under it, which is the case
+ * `center` exists for. `Hero01` takes an `align` of its own because its two
+ * forms differ: a standalone hero is a band that is only a heading and centres,
+ * and the two-column form puts its figure beside the copy rather than under it,
+ * so it has content beside the heading and not below it. `MediaBand01` is in
+ * the list as a left row on purpose: its copy sits beside media, which is the
+ * arrangement most tempting to re-decide at a call site, so the rule is pinned
+ * here instead. Both `Cta01` and `Hero01` are asserted too, because an exception
+ * that is not asserted is an exception that grows.
  *
  * **How alignment is read.** From the class list on the element that wraps the
  * heading, which is where `SectionHeading` puts the decision: `items-start` with
@@ -75,6 +80,7 @@ import { Industries01 } from '../src/blocks/industries-01'
 import { Integration01 } from '../src/blocks/integration-01'
 import { LogoCloud01 } from '../src/blocks/logo-cloud-01'
 import { LogoStrip01 } from '../src/blocks/logo-strip-01'
+import { MediaBand01 } from '../src/blocks/media-band-01'
 import { MemberList01 } from '../src/blocks/member-list-01'
 import { MilestoneTimeline01 } from '../src/blocks/milestone-timeline-01'
 import { Newsletter01 } from '../src/blocks/newsletter-01'
@@ -183,17 +189,39 @@ const LEFT = { items: 'start', text: 'left' }
 const CENTRE = { items: 'center', text: 'center' }
 
 /**
+ * The Blocks the landing pages compose, which centre their headings together.
+ *
+ * Membership is the decision: a Block joins when a landing page composes it,
+ * and the final assertion holds the rendered rows to this list, so a Block
+ * cannot drift into centre by taste and a page composed from the roster cannot
+ * mix the two arrangements.
+ */
+const LANDING_ROSTER = [
+  'FeatureGrid01',
+  'NoteGrid01',
+  'ProcessFlow01',
+  'ProcessRail01',
+  'StackGrid01',
+  'StatusLedger01',
+  'ProductGrid01',
+  'LogoStrip01',
+  'Stats01',
+  'Testimonial01',
+  'Bento01',
+]
+
+/**
  * Every Block that opens with a section heading, in one array.
  *
- * `align` is the arrangement the Block is expected to render its heading at, and
- * `rendersUnderneath` is whether the Block draws content below that heading, which
- * is what decides the answer rather than the Block's own taste. The two columns are
- * separate on purpose: a reader can see at a glance that the Blocks expected to
- * centre are the two with nothing underneath, and that is the rule rather than a
- * preference list.
+ * `align` is the arrangement the Block is expected to render its heading at,
+ * and `rendersUnderneath` records whether the Block draws content below that
+ * heading. The columns are separate on purpose: the rows expecting centre all
+ * draw content underneath their heading, which is what the landing arrangement
+ * is, a centred intro above a band of content the reader is being asked to act
+ * on, so a centre row with nothing underneath would be an unused exception.
  *
- * Adding a Block means adding a row. A row that expects `CENTRE` while
- * `rendersUnderneath` is true is a finding, and that is the whole mechanism.
+ * Adding a Block means adding a row. A row that expects `CENTRE` while its item
+ * is not in `LANDING_ROSTER` is a finding, and that is the whole mechanism.
  */
 const HEADINGS: Array<{
   item: string
@@ -205,7 +233,7 @@ const HEADINGS: Array<{
   {
     item: 'FeatureGrid01',
     rendersUnderneath: true,
-    align: LEFT,
+    align: CENTRE,
     render: () => (
       <FeatureGrid01
         title={TITLE}
@@ -228,7 +256,7 @@ const HEADINGS: Array<{
   {
     item: 'NoteGrid01',
     rendersUnderneath: true,
-    align: LEFT,
+    align: CENTRE,
     render: () => (
       <NoteGrid01 title={TITLE} notes={[{ title: 'First point', body: 'A sentence about it.' }]} />
     ),
@@ -236,7 +264,7 @@ const HEADINGS: Array<{
   {
     item: 'StackGrid01',
     rendersUnderneath: true,
-    align: LEFT,
+    align: CENTRE,
     render: () => (
       <StackGrid01 title={TITLE} parts={[{ name: 'Bedrock', role: 'The data lake' }]} />
     ),
@@ -244,7 +272,7 @@ const HEADINGS: Array<{
   {
     item: 'StatusLedger01',
     rendersUnderneath: true,
-    align: LEFT,
+    align: CENTRE,
     render: () => (
       <StatusLedger01
         title={TITLE}
@@ -255,7 +283,7 @@ const HEADINGS: Array<{
   {
     item: 'ProductGrid01',
     rendersUnderneath: true,
-    align: LEFT,
+    align: CENTRE,
     render: () => (
       <ProductGrid01
         title={TITLE}
@@ -266,13 +294,13 @@ const HEADINGS: Array<{
   {
     item: 'LogoStrip01',
     rendersUnderneath: true,
-    align: LEFT,
+    align: CENTRE,
     render: () => <LogoStrip01 title={TITLE} items={['One short phrase']} label="A named strip" />,
   },
   {
     item: 'ProcessRail01',
     rendersUnderneath: true,
-    align: LEFT,
+    align: CENTRE,
     render: () => (
       <ProcessRail01
         title={TITLE}
@@ -286,7 +314,7 @@ const HEADINGS: Array<{
   {
     item: 'ProcessFlow01',
     rendersUnderneath: true,
-    align: LEFT,
+    align: CENTRE,
     render: () => (
       <ProcessFlow01
         title={TITLE}
@@ -300,7 +328,7 @@ const HEADINGS: Array<{
   {
     item: 'Stats01',
     rendersUnderneath: true,
-    align: LEFT,
+    align: CENTRE,
     render: () => <Stats01 title={TITLE} stats={[{ key: 'one', label: 'One label', value: '1' }]} />,
   },
   {
@@ -379,8 +407,9 @@ const HEADINGS: Array<{
    * The header above says why: the list is the assertion, so a Block that is not
    * in it is a Block whose heading alignment nothing checks. Forty-two new Blocks
    * arrived in one effort, and every one of them that opens with a heading is a
-   * row here, all of them `LEFT`, because every one of them draws content under
-   * its heading.
+   * row here. `Bento01` and `Testimonial01` are landing bands and expect CENTRE
+   * through `LANDING_ROSTER`; the rest draw working content under their headings
+   * and expect LEFT.
    *
    * Four of the expansion's Blocks are deliberately absent, and each absence is a
    * decision rather than an oversight. `Hero02` is the `Hero01` exception: its
@@ -415,7 +444,7 @@ const HEADINGS: Array<{
   {
     item: 'Bento01',
     rendersUnderneath: true,
-    align: LEFT,
+    align: CENTRE,
     render: () => (
       <Bento01 title={TITLE} cells={[{ id: 'first', span: 'md', title: 'First cell' }]} />
     ),
@@ -482,11 +511,28 @@ const HEADINGS: Array<{
   {
     item: 'Testimonial01',
     rendersUnderneath: true,
-    align: LEFT,
+    align: CENTRE,
     render: () => (
       <Testimonial01
         title={TITLE}
         quotes={[{ id: 'first', quote: 'A sentence about it.', name: 'A person' }]}
+      />
+    ),
+  },
+  {
+    // Beside media, so LEFT: the copy column shares the band with a figure, and
+    // a centred column next to a figure reads as two unrelated pieces. In the
+    // list on purpose, because this is the arrangement most tempting to
+    // re-decide at a call site.
+    item: 'MediaBand01',
+    rendersUnderneath: false,
+    align: LEFT,
+    render: () => (
+      <MediaBand01
+        title={TITLE}
+        description="A sentence about it."
+        media={<p>One figure.</p>}
+        caption="One caption."
       />
     ),
   },
@@ -1674,7 +1720,7 @@ const HEADINGS: Array<{
   },
 ]
 
-describe('a section heading with content under it is aligned left', () => {
+describe('a landing band centres its heading and every other heading is left', () => {
   for (const { item, align, render: at } of HEADINGS) {
     it(`${item} aligns its heading and its text together`, () => {
       render(at())
@@ -1682,12 +1728,15 @@ describe('a section heading with content under it is aligned left', () => {
     })
   }
 
-  it('and every Block that draws content below its heading expects the same answer', () => {
-    // The rule stated over the list rather than over a rendering, so a Block cannot
-    // be added to this file expecting `CENTRE` while putting a grid underneath it.
-    const overContent = HEADINGS.filter((entry) => entry.rendersUnderneath)
-    expect(overContent.length).toBe(HEADINGS.length)
-    expect([...new Set(overContent.map((entry) => entry.align.text))]).toEqual(['left'])
+  it('and the rows expecting centre are exactly the landing roster, which is a listed decision', () => {
+    // The centre set is not a taste column: a Block joins when a landing page
+    // composes it, and set equality is what makes joining a decision somebody
+    // writes down. A new Block defaults to LEFT even with content underneath,
+    // and landing it in `LANDING_ROSTER` is a diff in this file.
+    const centre = HEADINGS.filter((entry) => entry.align.text === 'center').map(
+      (entry) => entry.item,
+    )
+    expect(centre.sort()).toEqual([...LANDING_ROSTER].sort())
   })
 })
 

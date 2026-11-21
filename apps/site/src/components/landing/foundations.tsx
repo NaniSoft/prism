@@ -58,6 +58,23 @@ export function Foundations() {
           title: 'Motion',
           body: (
             <div className="flex flex-col gap-3">
+              {/*
+                The band's own rule is that every value is drawn in the component
+                that uses it, and the motion cell was the one holding that rule
+                in prose: the cycles were written out and none of them was
+                running. The ring is the pulse cycle at its authored 2.4s, the
+                same class a live figure in the catalogue rides, so the cell
+                shows one law and runs the other beside its own readout. Under
+                the reduced-motion rule the ring stops and stays a ring, which is
+                the second law's own test: the figure survives the stopping.
+              */}
+              <div className="flex items-center gap-2.5">
+                <span
+                  aria-hidden="true"
+                  className="border-primary prism-ambient-pulse block size-3 rounded-full border-2"
+                />
+                <span className="font-mono text-mono uppercase">pulse 2.4s, live</span>
+              </div>
               <div className="flex flex-col gap-1">
                 <span className="font-mono text-mono uppercase">feedback</span>
                 <span className="text-muted-foreground text-sm">80 / 160 / 280 ms, decelerating</span>

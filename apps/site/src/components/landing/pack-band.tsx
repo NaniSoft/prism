@@ -11,8 +11,11 @@ import themes from '@nanisoft/prism-tokens/dist/themes.json'
  * other three bands on the landing page are words about the system, and words
  * about a design system are indistinguishable from words about any product. The
  * claim this band makes is checkable by looking at it: one card per pack, each
- * one painting its own compiled `primary` and its own border, in the same
- * markup, with nothing selected and no JavaScript involved.
+ * one drawing a miniature page in the pack's own compiled values, in the same
+ * markup, with nothing selected and no JavaScript involved. The figure carries
+ * the four axes a boundary re-points at once: the primary on the mark and the
+ * button, the ink at its veil steps, the chart scale on the bars, and the
+ * corner radius spent on every chip.
  *
  * **The base pack is on this band, and it is the honest entry.** `themes.json`
  * carries the pastels only; `default` is the absence of a `data-pack`
@@ -65,8 +68,7 @@ export function PackBand({
         eyebrow={eyebrow}
         title={title}
         description={description}
-        align="left"
-        className="max-w-measure mb-10"
+        className="mx-auto max-w-measure mb-10"
       />
 
       {/*
@@ -104,9 +106,44 @@ export function PackBand({
               data-pack={pack.id === 'default' ? undefined : pack.id}
               className="bg-card flex flex-col gap-3 p-3"
             >
-              <div className="bg-muted flex h-14 flex-col justify-between rounded-none p-2">
-                <span className="bg-primary block h-3 w-full rounded-none" />
-                <span className="bg-accent border-accent-foreground/20 block h-3 w-2/3 rounded-none border" />
+              {/*
+                The swatch is a page, not two bars. A pack re-points colour AND
+                corner radius beneath its boundary, and two full-width bars can
+                show the first of those and nothing else, so eight near-identical
+                rectangles argued one axis of an eight-way claim. The figure
+                below is a miniature of the page a consumer ships, drawn from the
+                same reads a real page makes: a mark dot and a button chip in the
+                pack's primary, headline and nav readouts in the pack's own ink
+                at the veil steps, and a four-bar chart in the pack's own chart
+                scale. Every corner on it is spent from a pack-relative radius
+                utility, which is the half of a boundary the bars could not show:
+                Base at 0.5rem and Gold at 1rem draw visibly different corners on
+                the same markup, which is the contract this band exists to prove.
+
+                It is a readout, and it says so: `aria-hidden` on the figure,
+                because the pack's name and radius below it are the accessible
+                content and the figure is the picture of them.
+              */}
+              <div
+                aria-hidden="true"
+                className="bg-background border-border flex flex-col gap-1.5 rounded-md border p-2"
+              >
+                <div className="flex items-center gap-1">
+                  <span className="bg-primary size-1.5 rounded-full" />
+                  <span className="bg-foreground/25 h-1 w-5 rounded-full" />
+                  <span className="bg-foreground/25 h-1 w-4 rounded-full" />
+                  <span className="bg-primary ms-auto h-2.5 w-6 rounded-sm" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="bg-foreground/70 h-1.5 w-3/4 rounded-full" />
+                  <span className="bg-foreground/25 h-1 w-1/2 rounded-full" />
+                </div>
+                <div className="flex items-end gap-1 pt-0.5">
+                  <span className="bg-chart-1 h-3 flex-1 rounded-sm" />
+                  <span className="bg-chart-2 h-5 flex-1 rounded-sm" />
+                  <span className="bg-chart-3 h-4 flex-1 rounded-sm" />
+                  <span className="bg-chart-4 h-6 flex-1 rounded-sm" />
+                </div>
               </div>
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-medium tracking-tight">{pack.name}</span>

@@ -102,8 +102,7 @@ export function Specimens({
         as={headingLevel}
         title={title}
         description={description}
-        align="left"
-        className="max-w-measure mb-4"
+        className="mx-auto max-w-measure mb-4"
       />
 
       {meta ? (

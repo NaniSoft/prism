@@ -462,6 +462,17 @@ title: `Cta01` draws a centred title on a filled panel with nothing under it, so
 it resolves its own tag and asks this table for its size rather than keeping a
 second answer to the same question.
 
+**A section heading's alignment is the tier's answer, not the Block's.** A
+landing band centres its heading and its lede above the band's content, because
+a page whose job is to persuade opens every band that way, and the blocks the
+landing pages compose centre together, so one page never mixes the two. An
+operate surface, a reading surface, and any copy that sits beside media keep the
+heading flush left, because a reader there is working down the page rather than
+deciding about it, and a centred column next to a figure reads as two unrelated
+pieces. `SectionHeading` states the rule, and the roster of centre Blocks is
+held by `test/section-heading-align.test.tsx`, so joining it is a listed
+decision rather than a preference one Block expresses.
+
 **`Prose` walks this ladder from one rung down, and the reason is the measure
 rather than a second decision.** A run of prose is held to `--container-measure`,
 42rem. Display is 3rem, and a 42rem column is fourteen of those, so a document

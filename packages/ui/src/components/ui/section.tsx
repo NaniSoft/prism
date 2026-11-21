@@ -171,9 +171,14 @@ export function headingSizeClass(level: HeadingLevel): string {
  * supporting line, and the level of the one heading it renders.
  *
  * `align` is the block's own decision about where the heading sits in the
- * container. `center` is right for a band that is only a heading, and `left` is
- * right for a section with content under it, where a centred title above a
- * left-aligned list reads as two unrelated pieces.
+ * container, and the tier decides it rather than taste. `center` is a landing
+ * band's arrangement: a page whose job is to persuade opens every band with its
+ * title and lede centred above the band's content, and the blocks those pages
+ * compose centre together, so the roster in
+ * `test/section-heading-align.test.tsx` is what keeps one page from mixing the
+ * two. `left` is right where a reader is working rather than deciding, which is
+ * every operate and reading surface, and for copy that sits beside media, where
+ * a centred column next to a figure reads as two unrelated pieces.
  *
  * **`as` decides the size as well as the tag, and the size is derived rather than
  * passed.** `as` was already on every Block as `headingLevel` and `childLevel()`

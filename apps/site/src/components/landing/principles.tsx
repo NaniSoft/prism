@@ -49,8 +49,7 @@ export function Principles({
         eyebrow={eyebrow}
         title={title}
         description={description}
-        align="left"
-        className="max-w-measure mb-10"
+        className="mx-auto max-w-measure mb-10"
       />
 
       {/*

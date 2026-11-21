@@ -105,7 +105,7 @@ export function Stats01({ eyebrow, title, stats, headingLevel = 'h2' }: Stats01P
           as={headingLevel}
           eyebrow={eyebrow}
           title={title}
-          align="left"
+          align="center"
           className="mb-10"
         />
       ) : null}
