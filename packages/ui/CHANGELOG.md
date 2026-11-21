@@ -1,5 +1,57 @@
 # @nanisoft/prism-ui
 
+## 1.12.0
+
+### Minor Changes
+
+- 24d6ada: Landing band blocks centre their section headings
+  
+  `FeatureGrid01`, `NoteGrid01`, `ProcessFlow01`, `ProcessRail01`, `StackGrid01`,
+  `StatusLedger01`, `ProductGrid01`, `LogoStrip01`, `Stats01`, `Testimonial01` and
+  `Bento01` now centre their section heading and its lede above the band's
+  content, because a page whose job is to persuade opens every band that way and
+  the blocks the landing pages compose centre together, so one page never mixes
+  the two. The rule has run in both directions, and the history is recorded where
+  the law lives: `SectionHeading`'s documentation states the tier rule, and
+  `test/section-heading-align.test.tsx` holds the centre roster, so a Block joins
+  it as a listed decision.
+  
+  `left` stays where a reader is working rather than deciding: every operate and
+  reading Block keeps its heading flush left, and copy that sits beside media
+  stays left too, which is now pinned by a `MediaBand01` row in the same test.
+  `Hero01` keeps its own `align` and `Cta01` is unchanged. A consumer landing page
+  sees the change without editing anything; a page that wants the old arrangement
+  on one band cannot opt out per call site, because alignment is a catalogue
+  decision and the no-override-path rule is why.
+- 24d6ada: `ProductGrid01` rows draw at the size a platform band is read at
+  
+  The closing product band on every landing page drew its rows like table rows: a
+  mark at the smallest drawn size, one line of padding under a hairline, and a
+  tagline at the caption step. A band whose job is the one place a reader decides
+  which product to leave for read as a footnote about the products it names.
+  
+  Each row now draws its mark at `lg`, steps its tagline to the body size above
+  the small breakpoint, breathes at six lines of padding, and rounds its hover
+  wash at the `lg` radius so the row reads as a surface rather than as a
+  highlight painted over a rule. The API, the anchor semantics, the boundary on
+  `ProductMark` and the two-level `tagline` and `detail` rule are unchanged, and
+  a consumer sees the change without editing anything. A caller whose product set
+  lives in a working area composes the table suite, which is what it is for.
+- 744a512: SelectableTree picks a record out of a hierarchy
+  
+  Adds `SelectableTree`, the Component a master and detail screen was assembling by
+  hand: a tree of records where the reader picks one and the pick is the record the
+  page shows beside it. A record carries a name, a supporting line, a leading mark
+  and a trailing fact; a chapter over records is a group and cannot be picked. The
+  pick is one value the caller holds and `aria-selected` states it, the whole tree
+  is one Tab stop with the arrows inside it, and Enter or Space picks the record the
+  reader is on, so browsing with the arrows never rewrites the pane beside it.
+  
+  It is a second tree rather than a mode on `Tree`, because `Tree` navigates by
+  address and its own documentation refuses selection. Nothing collapses, the empty
+  case is authored, and the Component draws no frame: it composes inside
+  `ListPanel`, which owns the heading, the count, the toolbar and the scroll region.
+
 ## 1.11.0
 
 ### Minor Changes
