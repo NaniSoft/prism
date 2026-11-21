@@ -476,6 +476,7 @@ const BUDGETS = {
   'toggle-group': 4,
   tooltip: 5,
   tree: 2,
+  'selectable-tree': 2,
   'ds-image': 6,
   'ds-avatar': 5,
 }

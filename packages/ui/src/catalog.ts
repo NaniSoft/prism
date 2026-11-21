@@ -525,6 +525,17 @@ export const catalog: readonly CatalogItem[] = [
     status: 'stable',
   },
   {
+    name: 'SelectableTree',
+    slug: 'selectable-tree',
+    kind: 'component',
+    category: 'Layout',
+    description:
+      'A hierarchy of records where the reader picks one, and the pick is the record the page shows beside it.',
+    source: 'src/components/ui/selectable-tree.tsx',
+    exports: ['SelectableTree'],
+    status: 'stable',
+  },
+  {
     name: 'Diagram',
     slug: 'diagram',
     kind: 'component',

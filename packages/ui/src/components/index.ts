@@ -73,6 +73,13 @@ export { Mark } from './ui/mark'
 export type { MatchProps, MatchRange } from './ui/mark'
 export { Tree } from './ui/tree'
 export type { TreeProps, TreeNode, TreeNodePage, TreeNodeGroup, TreeNodeDivider } from './ui/tree'
+export { SelectableTree } from './ui/selectable-tree'
+export type {
+  SelectableTreeProps,
+  SelectableTreeNode,
+  SelectableTreeGroup,
+  SelectableTreeItem,
+} from './ui/selectable-tree'
 export { Diagram } from './ui/diagram'
 export type { DiagramProps, DiagramNode, DiagramRelation } from './ui/diagram'
 export { PulseGraph } from './ui/pulse-graph'

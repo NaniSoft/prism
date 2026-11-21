@@ -1,0 +1,152 @@
+---
+slug: components/selectable-tree
+title: SelectableTree
+---
+
+## Overview
+
+A SelectableTree is a hierarchy of records where the reader picks one, and the
+pick is the record the page shows beside it. It is a Client Component.
+
+**It is not a mode on `Tree`.** A `Tree` is a way through a hierarchy: every node
+is an anchor with an address, the current node is marked with `aria-current`, and
+its own documentation says not to use it to select. This is the other job. No
+record has an address, the pick is one value, and `aria-selected` is the state.
+Folding the two into one Component would have made a node's meaning depend on
+which props a caller happened to pass, which is the arrangement this package
+refuses everywhere else.
+
+**The hierarchy is real or it is flat.** A caller passing only items gets a flat
+tree, because an outline of one level is a tree of one level. A caller with
+chapters passes groups; a caller whose middle levels are records themselves
+passes an item with `items`. A group is a label and cannot be picked, because a
+chapter heading that the reader could pick would put two rows of one hierarchy
+into one single-selection at once: the group they are looking at and the record
+they are editing.
+
+**Selection is one value and the caller holds it.** The common consumer renders
+the picked record in a pane beside the tree, and two answers to "which record" is
+a pane that can disagree with the highlight that opened it. A record is picked by
+a press or by Enter or Space, and not by the arrow keys, because a reader moving
+through a pipeline is browsing rather than choosing.
+
+## Usage
+
+```tsx
+import {
+  SelectableTree,
+  type SelectableTreeNode,
+} from '@nanisoft/prism-ui/components/selectable-tree'
+
+const nodes: SelectableTreeNode[] = [
+  {
+    type: 'group',
+    title: 'Standard',
+    meta: <Badge variant="secondary">default</Badge>,
+    items: [
+      { type: 'item', id: 'plan', leading: '1', title: 'Plan the change', description: 'planning' },
+      { type: 'item', id: 'patch', leading: '2', title: 'Write the patch' },
+    ],
+  },
+]
+
+<SelectableTree
+  nodes={nodes}
+  value={phaseId}
+  onValueChange={setPhaseId}
+  label="Pipelines"
+/>
+```
+
+<ComponentDemo slug="selectable-tree" />
+
+## Guidelines
+
+### When to use
+
+Use a SelectableTree when a page is split between a set of records and the one
+record being worked on: a pipeline editor, a settings section beside its fields,
+a file browser beside a preview, a list of contact groups with the people in
+them.
+
+Use it where the reader needs to know where a record sits, not only what it is
+called. A hierarchy that is real is the signal: chapters with records under them,
+folders with folders under them, phases in a named sequence.
+
+Use `leading` for the ordinal in an ordered set. It is drawn in a fixed column,
+so the names line up down the rail and the order is legible without reading every
+line.
+
+### When not to use
+
+Do not use it for navigation. A record here has no address and cannot be opened
+in a new tab; a set of places is a `Tree`, a sidebar, or a row of links.
+
+Do not use it for a set of controls that act rather than records that are picked,
+such as a toolbar or a menu. A pick changes what the page shows beside it, and a
+control that acts changes the world rather than the pane.
+
+Do not use it to choose a form value, such as a category on a record being
+edited. That is a `Select`, a `Combobox` or a `RadioGroup`, and a tree in a form
+is a field drawn as a page.
+
+Do not use it for a flat set of more than a dozen records with no hierarchy and
+no pane beside them. That is `ListPanel` with `Item` rows, and it is cheaper to
+scan and cheaper to draw.
+
+### Best practices
+
+- Hold the value in state and pass it back. The Component draws the state it is
+  given, and a caller who forgets to apply the change sees a row that visibly
+  refuses to be picked, which is a better failure than a Component that half
+  owns its own answer.
+- Give every record an `id` you own, not the title and not the index. A record
+  identified by its position has the reader's pick land on a different record the
+  moment one above it moves.
+- Use a group for a level that is a place rather than a record, and an item with
+  `items` for a level that is both. The two may sit beside each other.
+- Keep the supporting line to one line. A row that wraps to three lines is a rail
+  a reader loses their place in.
+- Put a mark in `leading` and a short fact in `meta`. A badge belongs beside the
+  name a reader is scanning; a second sentence belongs in `description`.
+- Omit `description` rather than passing an empty string, for the reason the rest
+  of this package gives: a row with an empty second line is one line tall with
+  the reader looking for the thing that is not there.
+- Wrap it in `ListPanel` when it is a rail. The tree draws no frame of its own,
+  and the panel brings the heading, the count, the toolbar and the scroll region.
+- Use `className` for width and placement only. It cannot change a Prism-owned
+  visual property.
+
+### Accessibility
+
+The set is a `role="tree"` with a required `label`. Records are `role="treeitem"`
+with `aria-level`, so a reader is told where they sit rather than only being able
+to see the indent.
+
+The pick is `aria-selected` on the record, and the fill and the edge marker
+repeat it for a reader who reads by eye. A group label is a treeitem with its
+level and no `aria-selected`: it is placed in the hierarchy and cannot be picked.
+
+The whole tree is one Tab stop. The arrows move which record holds it, Home and
+End take it to the first and last, and it lands on the current value when the
+tree has one and on the first record otherwise. Enter and Space pick the record
+the reader is on, and the arrows do not, so a keyboard reader can browse without
+changing the pane.
+
+No live region is drawn. `aria-selected` on the focused record is announced when
+it changes, and a second announcement of the same fact would speak over the
+reader moving through the records that follow.
+
+### Content guidelines
+
+- Write the group title as the name of a set, in the product's own words. It is
+  drawn in the upper case label style, so write it in sentence case and let the
+  style do the rest.
+- Write the record title as the name of the thing, not as an instruction. "Plan
+  the change" names a phase; "Click to edit the plan" names an interaction.
+- Write the supporting line as a fact about the record. Skills, a count, a short
+  state. Omit it when there is nothing to say.
+- Keep `leading` to a short mark. An ordinal, a two-letter code or an icon. A
+  word there makes the column a second title.
+- Keep `meta` to a badge or a number. It sits at the end of the name's line, and
+  a sentence there takes the line from the name.
