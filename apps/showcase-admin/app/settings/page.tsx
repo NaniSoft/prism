@@ -24,12 +24,12 @@ import { Switch } from '@nanisoft/prism-ui/components/switch'
 export default function SettingsRoute() {
   return (
     <AppChrome currentPath="/settings" trail="Settings">
-      <PageHeader01
-        headingLevel="h1"
-        title="Settings"
-        description="The shop, the morning page and what reaches the operator."
-      />
       <DSStack gap="lg">
+        <PageHeader01
+          headingLevel="h1"
+          title="Settings"
+          description="The shop, the morning page and what reaches the operator."
+        />
         <Card>
           <CardHeader>
             <CardTitle>The shop</CardTitle>

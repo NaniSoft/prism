@@ -22,92 +22,92 @@ export default function MarketingPageDemo() {
     <MarketingPage
       headingLevel="h3"
       hero={{
-        eyebrow: 'Preview',
-        title: 'A headline that fits on two lines',
+        eyebrow: 'Nexus Estate',
+        title: 'Observe the estate without waking the team',
         description:
-          'One or two sentences of supporting copy, so the measure and the spacing around it can be judged.',
+          'Read-only collectors, deterministic replays and one append-only ledger across every service you run.',
         actions: [
-          { label: 'Primary action', href: '/overview/quickstart' },
-          { label: 'Secondary', href: '/blocks/hero-01', variant: 'outline' },
+          { label: 'Read the quickstart', href: '/overview/quickstart' },
+          { label: 'Explore the hero block', href: '/blocks/hero-01', variant: 'outline' },
         ],
       }}
       features={{
-        eyebrow: 'Preview',
-        title: 'Section heading',
-        description: 'An optional line that explains what the set below it has in common.',
+        eyebrow: 'Capabilities',
+        title: 'Four guarantees in every collector run',
+        description: 'Every collector writes to the same columnar format and verifies its own schema before flushing.',
         features: [
           {
             icon: Palette,
-            title: 'First item',
-            body: 'A short sentence describing the first thing in the set.',
+            title: 'Zero-touch ingestion',
+            body: 'Collectors attach to existing read replicas and message queues without application changes.',
           },
           {
             icon: Blocks,
-            title: 'Second item',
-            body: 'A short sentence describing the second thing in the set.',
+            title: 'Columnar session blocks',
+            body: 'Each session lands in an immutable partition ready for instant backtesting and replay.',
           },
           {
             icon: Zap,
-            title: 'Third item',
-            body: 'A short sentence describing the third thing in the set.',
+            title: 'Isolated connection pools',
+            body: 'Live capture and historical queries never compete for the same database handles.',
           },
           {
             icon: ShieldCheck,
-            title: 'Fourth item',
-            body: 'A short sentence describing the fourth thing in the set.',
+            title: 'Signed audit trail',
+            body: 'Every schema change and permission grant is recorded with the actor and the diff.',
           },
         ],
       }}
       stats={{
-        eyebrow: 'Preview',
-        title: 'Section heading',
+        eyebrow: 'Estate telemetry',
+        title: 'Measured across production workspaces',
         stats: [
-          { key: 'first', label: 'First metric', value: '1,284', delta: 12, deltaFormat: '12 more than last month', hint: 'vs last month' },
-          { key: 'second', label: 'Second metric', value: '47.2%', delta: -3, deltaFormat: '3 points lower', hint: 'vs last month' },
-          { key: 'third', label: 'Third metric', value: '2.4d', delta: 0, hint: 'vs last quarter' },
-          { key: 'fourth', label: 'Fourth metric', value: '138' },
+          { key: 'first', label: 'Active collectors', value: '1,284', delta: 12, deltaFormat: '12 more than last month', hint: 'vs last month' },
+          { key: 'second', label: 'Replay cache hit rate', value: '94.2%', delta: 3, deltaFormat: '3 points higher', hint: 'vs last month' },
+          { key: 'third', label: 'Median flush latency', value: '18ms', delta: 0, hint: 'vs last quarter' },
+          { key: 'fourth', label: 'Estates observed', value: '138' },
         ],
       }}
       pricing={{
-        title: 'Section heading',
+        title: 'Plans priced by estate, not by seat',
         plans: [
           {
             id: 'first',
-            name: 'First plan',
+            name: 'Starter',
             price: '$0',
             period: ' / month',
-            body: 'One line on who it is for.',
-            features: ['First included line', 'Second included line', 'Third included line'],
-            action: { label: 'Choose', href: '#plans' },
+            body: 'One workspace and one scheduled collector.',
+            features: ['One read-only collector', 'Seven-day replay retention', 'Community support'],
+            action: { label: 'Start free', href: '#plans' },
           },
           {
             id: 'second',
-            name: 'Second plan',
-            price: '$24',
+            name: 'Team',
+            price: '$240',
             period: ' / month',
-            body: 'One line on who it is for.',
-            features: ['Everything in the first plan', 'One extra line', 'Another extra line'],
-            action: { label: 'Choose', href: '#plans' },
+            body: 'Four maintainers, every collector and a shared schedule.',
+            features: ['Everything in Starter', 'Unlimited windowed collectors', 'Ninety-day columnar retention'],
+            action: { label: 'Start on Team', href: '#plans' },
             featured: true,
           },
           {
             id: 'third',
-            name: 'Third plan',
-            price: '$68',
+            name: 'Enterprise',
+            price: '$680',
             period: ' / month',
-            body: 'One line on who it is for.',
-            features: ['Everything in the second plan', 'One extra line', 'Another extra line'],
-            action: { label: 'Choose', href: '#plans' },
+            body: 'The full pipeline inside your own cloud estate.',
+            features: ['Everything in Team', 'Self-hosted storage buckets', 'Four-hour response SLA'],
+            action: { label: 'Talk to us', href: '#plans' },
           },
         ],
       }}
       cta={{
-        title: 'A closing line, two lines at most',
-        description: 'A sentence that says what happens next, then one action.',
+        title: 'Connect your first collector in ten minutes',
+        description: 'Generate a read-only key, point it at a staging replica, and watch the first session land.',
         // `Cta01`'s own member name, unchanged: it is the closing band's `action`
         // that is a link, and it was always a link. Only `Pricing01`'s plan record
         // renamed, because only that one rendered a Button.
-        action: { label: 'Do the thing', href: '/components/button' },
+        action: { label: 'Inspect the button surface', href: '/components/button' },
       }}
     />
   )

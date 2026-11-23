@@ -15,66 +15,88 @@ export default function AboutPageDemo() {
       headingLevel="h3"
       eyebrow="About"
       title="We run the thing we sell"
-      description="A short paragraph under the heading, so the measure and the spacing around it can be judged against the statement beside it."
-      statement="A large sentence saying what this is, in the present tense, for the reader."
+      description="Nexus was started by three engineers who spent a decade watching software teams turn every incident into a ticket queue and every deployment into an all-hands review."
+      statement="An estate that observes its own runs, isolates what drifted, and hands the operator a verified diff rather than an alert."
       principles={[
         {
           id: 'runs',
           title: 'It runs without being watched',
-          body: 'A principle is a short name and one sentence saying what holding to it means in practice.',
+          body: 'A collector that needs a dashboard open to stay healthy is a manual job wearing a cron schedule.',
         },
         {
           id: 'evidence',
           title: 'The evidence is the output',
-          body: 'A second principle, so the grid can be judged with more than one tile in it.',
+          body: 'Every finding names the span, the commit and the threshold it crossed before it asks anyone to act.',
         },
         {
           id: 'boring',
           title: 'Boring where it can be',
-          body: 'A third principle, because a grid of one reads as a sentence with a border around it.',
+          body: 'Plain files, deterministic replays and one append-only ledger that survives the tool that wrote it.',
         },
       ]}
       milestones={[
         {
           id: 'first',
-          at: '2023',
-          title: 'First milestone',
-          body: "One sentence about what changed, in the reader's terms rather than the company's.",
+          at: '2024',
+          title: 'First unattended collector',
+          body: 'Captured full-chain market and service telemetry across four estates for ninety days without a manual restart.',
         },
         {
           id: 'second',
-          at: '2025',
-          title: 'Second milestone',
-          body: 'A second row, so the rail can be judged as a rail rather than as one dot.',
+          at: '2026',
+          title: 'The read-only agent surface',
+          body: 'Opened the same verified ledger to automated reviewers and human operators under one contract.',
         },
       ]}
       people={[
-        { id: 'one', name: 'A Person', role: 'What they do', bio: 'A sentence or two at the reading measure.' },
-        { id: 'two', name: 'Another Person', role: 'What they do' },
-        { id: 'three', name: 'A Third Person', role: 'What they do' },
+        {
+          id: 'one',
+          name: 'Margret Haldorsdottir',
+          role: 'Founding engineer, collectors',
+          bio: 'Built the minute-by-minute capture loop and the deterministic replay format.',
+          avatar: { name: 'MH' },
+        },
+        {
+          id: 'two',
+          name: 'Tunde Oyelaran',
+          role: 'Runtime and storage',
+          bio: 'Keeps the columnar partitions fast enough to query while a run is still writing.',
+          avatar: { name: 'TO' },
+        },
+        {
+          id: 'three',
+          name: 'Priya Raman',
+          role: 'Operator console',
+          bio: 'Designs the morning review surfaces and the diff ledger.',
+          avatar: { name: 'PR' },
+        },
       ]}
       services={[
         {
           id: 'first',
-          title: 'First engagement',
-          body: 'A sentence or two about what the work is.',
-          deliverables: ['First deliverable', 'Second deliverable'],
-          outcome: 'One line on what it is for.',
+          title: 'Estate instrumentation',
+          body: 'We wire read-only collectors across your queues, databases and worker nodes in a two-week sprint.',
+          deliverables: ['Collector topology map', 'Retention and partition schedule'],
+          outcome: 'Every service emits structured runs before you change a line of application code.',
         },
         {
           id: 'second',
-          title: 'Second engagement',
-          body: 'A sentence or two about what the work is.',
+          title: 'Replay and audit verification',
+          body: 'We pair your incident history against the ledger so every past failure can be re-run deterministically.',
+          deliverables: ['Seeded regression corpus', 'Signed audit trail export'],
+          outcome: 'Postmortems test the fix against the exact bytes that caused the outage.',
         },
         {
           id: 'third',
-          title: 'Third engagement',
-          body: 'A sentence or two about what the work is.',
+          title: 'Dedicated operator handoff',
+          body: 'We train the on-call rotation to run the morning review from one screen and retire redundant alert rules.',
+          deliverables: ['Morning review playbook', 'Alert-noise reduction report'],
+          outcome: 'Pager volume drops to the faults that actually require a human hand.',
         },
       ]}
       contact={{
-        title: 'A closing line, two lines at most',
-        description: 'A sentence that says what happens next, then one link.',
+        title: 'Walk through an estate with us',
+        description: 'Bring one service that keeps waking your team up and we will map its collector path.',
         cta: { label: 'Get in touch', href: '/contact' },
       }}
     />

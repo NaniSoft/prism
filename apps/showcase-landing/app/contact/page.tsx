@@ -14,13 +14,13 @@ import { publicPath } from '@/lib/site'
 export default function ContactRoute() {
   return (
     <SiteChrome currentPath="/contact">
+      <PageHeader01
+        headingLevel="h1"
+        breadcrumbs={[{ label: 'Home', href: publicPath('/') }]}
+        title="Contact"
+        description="The ways in, for a shop, a courier or an engineer who wants to look under a figure."
+      />
       <Section>
-        <PageHeader01
-          headingLevel="h1"
-          breadcrumbs={[{ label: 'Home', href: publicPath('/') }]}
-          title="Contact"
-          description="The ways in, for a shop, a courier or an engineer who wants to look under a figure."
-        />
         <FactList
           facts={[
             { label: 'Shops and plans', value: 'hello@meridian.example', href: 'mailto:hello@meridian.example' },
@@ -29,17 +29,17 @@ export default function ContactRoute() {
             { label: 'Post', value: 'Meridian, 14 Guildhall Lane, Leicester LE1 5FJ' },
           ]}
         />
-        <Cta01
-          title="Write to us, or read the system that wrote this page."
-          description="Every surface of Meridian is composed from Prism, the NaniSoft design system, and the showcase exists to be read as much as used."
-          action={{ label: 'Email the team', href: 'mailto:hello@meridian.example' }}
-          secondaryAction={{
-            label: 'Visit Prism',
-            href: 'https://prism.nanisoft.com',
-          }}
-          note="Meridian is fictional. The address is too, and the mail reaches nobody."
-        />
       </Section>
+      <Cta01
+        title="Write to us, or read the system that wrote this page."
+        description="Every surface of Meridian is composed from Prism, the NaniSoft design system, and the showcase exists to be read as much as used."
+        action={{ label: 'Email the team', href: 'mailto:hello@meridian.example' }}
+        secondaryAction={{
+          label: 'Visit Prism',
+          href: 'https://prism.nanisoft.com',
+        }}
+        note="Meridian is fictional. The address is too, and the mail reaches nobody."
+      />
     </SiteChrome>
   )
 }

@@ -110,8 +110,8 @@ export default function ThemesPage() {
             Themes
           </h1>
           <p className="text-muted-foreground max-w-measure text-sm">
-            Five pastel themes, generated from OKLCH so every ramp is perceptually even and
-            the set reads as one family. Each theme is a tinted neutral plus a pastel brand
+            Seven pastel packs, generated from OKLCH so every ramp is perceptually even and
+            the set reads as one family. Each pack is a tinted neutral plus a pastel brand
             ramp, re-pointed onto the shared semantic contract at build time.
           </p>
         </header>

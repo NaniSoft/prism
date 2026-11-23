@@ -11,7 +11,7 @@ import foundationTokens from '@nanisoft/prism-tokens/dist/tokens.foundation.json
 type FoundationEntry = { value: string; description?: string }
 const FOUNDATION = foundationTokens as Record<string, FoundationEntry>
 
-type PreviewKind = 'radius' | 'shadow' | 'spacing' | 'font' | 'size' | 'leading' | 'tracking' | 'weight' | 'motion'
+type PreviewKind = 'radius' | 'shadow' | 'spacing' | 'font' | 'size' | 'leading' | 'tracking' | 'weight' | 'motion' | 'ambient' | 'ambient-ease'
 
 type Row = {
   key: string
@@ -75,6 +75,10 @@ function rowsFor(group: string): Row[] {
         ...foundationRows('duration', 'motion'),
         ...foundationRows('ease', 'motion'),
       ]
+    case 'ambient':
+      return foundationRows('ambient', 'ambient')
+    case 'ambient-ease':
+      return foundationRows('ambient-ease', 'ambient-ease')
     default:
       return []
   }
@@ -145,6 +149,36 @@ function Preview({ row }: { row: Row }) {
               ? `var(${row.variable})`
               : 'var(--ease-out)',
           }}
+        />
+      )
+    case 'ambient': {
+      const cycle = row.key.split('.')[1] ?? ''
+      const cycleClass =
+        cycle === 'travel'
+          ? 'prism-ambient-travel'
+          : cycle === 'sweep'
+            ? 'prism-ambient-sweep'
+            : cycle === 'drift'
+              ? 'prism-ambient-drift'
+              : cycle === 'scan'
+                ? 'prism-ambient-scan'
+                : cycle === 'pulse'
+                  ? 'prism-ambient-pulse'
+                  : cycle === 'shimmer'
+                    ? 'prism-ambient-shimmer'
+                    : 'prism-ambient-aurora'
+      return (
+        <span
+          aria-hidden="true"
+          className={`border-primary bg-primary/20 inline-block size-5 rounded-full border ${cycleClass}`}
+        />
+      )
+    }
+    case 'ambient-ease':
+      return (
+        <span
+          aria-hidden="true"
+          className="border-primary bg-primary/20 prism-ambient-pulse inline-block size-5 rounded-sm border"
         />
       )
     default:

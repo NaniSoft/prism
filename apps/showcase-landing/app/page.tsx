@@ -4,9 +4,17 @@ import { SiteChrome } from '@/components/site-chrome'
 import { Cta01 } from '@nanisoft/prism-ui/blocks/cta-01'
 import { FeatureGrid01 } from '@nanisoft/prism-ui/blocks/feature-grid-01'
 import { Hero01 } from '@nanisoft/prism-ui/blocks/hero-01'
+import { InstrumentPanel01 } from '@nanisoft/prism-ui/blocks/instrument-panel-01'
 import { LogoStrip01 } from '@nanisoft/prism-ui/blocks/logo-strip-01'
 import { Stats01 } from '@nanisoft/prism-ui/blocks/stats-01'
 import { Testimonial01 } from '@nanisoft/prism-ui/blocks/testimonial-01'
+import { Badge } from '@nanisoft/prism-ui/components/badge'
+import { DSGrid } from '@nanisoft/prism-ui/components/ds-grid'
+import { DSStack } from '@nanisoft/prism-ui/components/ds-stack'
+import { Item } from '@nanisoft/prism-ui/components/item'
+import { Metric } from '@nanisoft/prism-ui/components/metric'
+import { Sparkline } from '@nanisoft/prism-ui/components/sparkline'
+import { Status } from '@nanisoft/prism-ui/components/status'
 
 import { publicPath } from '@/lib/site'
 import { ORDERS_SERIES, STORES } from '@/lib/store'
@@ -31,6 +39,48 @@ export default function HomePage() {
             variant: 'outline',
           },
         ]}
+        instrument={
+          <InstrumentPanel01
+            label="Bloom and Barrel · morning page"
+            state="live"
+            stateLabel="checked"
+            caption="A live morning summary for Bloom and Barrel: overnight revenue, order volume and two exceptions sorted to the top"
+            footnote="Three channels settled into one ledger before the shop opens."
+          >
+            <DSStack gap="md">
+              <DSGrid columns={2} gap="sm">
+                <Metric label="Revenue, month to date" value="$48,120" delta={6} />
+                <Metric label="Orders checked overnight" value="1,204" delta={4} />
+              </DSGrid>
+              <Sparkline
+                label="Orders by month across the shop and marketplaces"
+                values={ORDERS_SERIES}
+                width={420}
+                height={48}
+              />
+              <DSStack gap="xs">
+                <Item
+                  entry={{
+                    id: 'M-10482',
+                    title: 'M-10482 · Farah Osman',
+                    description: '3 items · $84.40',
+                    meta: <Badge variant="secondary">The shop</Badge>,
+                    actions: <Status tone="success" label="Dispatched" size="sm" />,
+                  }}
+                />
+                <Item
+                  entry={{
+                    id: 'M-10479',
+                    title: 'M-10479 · Aya Traore',
+                    description: '2 items · $61.80',
+                    meta: <Badge variant="secondary">The shop</Badge>,
+                    actions: <Status tone="warning" label="Held, address" size="sm" />,
+                  }}
+                />
+              </DSStack>
+            </DSStack>
+          </InstrumentPanel01>
+        }
       />
 
       <LogoStrip01 label="Shops that run on Meridian" items={STORES} />

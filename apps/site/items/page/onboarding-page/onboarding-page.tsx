@@ -31,7 +31,7 @@ export default function OnboardingPageDemo() {
       layout="split"
       eyebrow="Setup"
       title="Three things, then your estate is running"
-      description="One or two sentences saying what the reader will have when the list is finished."
+      description="Connect a read-only collector, approve its four scopes, and let the first scheduled run populate your ledger."
       steps={[
         {
           id: 'workspace',

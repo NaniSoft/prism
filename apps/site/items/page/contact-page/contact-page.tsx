@@ -27,7 +27,7 @@ export default function ContactPageDemo() {
       headingLevel="h3"
       eyebrow="The desk"
       title="Tell us what is going wrong"
-      description="One or two sentences saying who reads this and what happens next, so a reader knows before they type."
+      description="Requests are read by the on-call estate engineers in London and Berlin, in the order they arrive."
       form={{
         title: 'Write to the estate desk',
         description: 'The same four fields every support request needs, and nothing this repository has an opinion about.',

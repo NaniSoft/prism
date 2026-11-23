@@ -1,7 +1,6 @@
 import { SiteChrome } from '@/components/site-chrome'
 import { About01 } from '@nanisoft/prism-ui/blocks/about-01'
 import { Team01 } from '@nanisoft/prism-ui/blocks/team-01'
-import { Section } from '@nanisoft/prism-ui/components/section'
 
 import { PEOPLE } from '@/lib/people'
 import { publicPath } from '@/lib/site'
@@ -55,16 +54,14 @@ export default function AboutRoute() {
           { label: 'Contact the team', href: publicPath('/contact') },
         ]}
       />
-      <Section>
-        <Team01
-          headingLevel="h2"
-          eyebrow="The team"
-          title="Who answers"
-          description="Four invented people, because this whole product is the showcase of a design system and no real person agreed to be here."
-          variant="cards"
-          people={PEOPLE}
-        />
-      </Section>
+      <Team01
+        headingLevel="h2"
+        eyebrow="The team"
+        title="Who answers"
+        description="Four invented people, because this whole product is the showcase of a design system and no real person agreed to be here."
+        variant="cards"
+        people={PEOPLE}
+      />
     </SiteChrome>
   )
 }

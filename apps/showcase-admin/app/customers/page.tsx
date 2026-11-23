@@ -4,6 +4,7 @@ import { PageHeader01 } from '@nanisoft/prism-ui/blocks/page-header-01'
 import { Avatar, AvatarFallback } from '@nanisoft/prism-ui/components/avatar'
 import { Badge } from '@nanisoft/prism-ui/components/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@nanisoft/prism-ui/components/card'
+import { DSStack } from '@nanisoft/prism-ui/components/ds-stack'
 import { Price } from '@nanisoft/prism-ui/components/price'
 import { RelativeTime } from '@nanisoft/prism-ui/components/relative-time'
 import {
@@ -23,56 +24,58 @@ import {
 export default function CustomersRoute() {
   return (
     <AppChrome currentPath="/customers" trail="Customers">
-      <PageHeader01
-        headingLevel="h1"
-        title="Customers"
-        description="Everyone who has ordered this year, with the tier their year earned."
-      />
-      <Card>
-        <CardHeader>
-          <CardTitle>The book</CardTitle>
-          <CardDescription>Spend to date, orders to date, and the day the first one arrived.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Customer</TableHead>
-                <TableHead>City</TableHead>
-                <TableHead>Tier</TableHead>
-                <TableHead className="text-end">Orders</TableHead>
-                <TableHead className="text-end">Spend</TableHead>
-                <TableHead>Since</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {CUSTOMERS.map((customer) => (
-                <TableRow key={customer.id}>
-                  <TableCell>
-                    <span className="flex items-center gap-3">
-                      <Avatar className="size-8" aria-hidden>
-                        <AvatarFallback>{customer.initials}</AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium">{customer.name}</span>
-                    </span>
-                  </TableCell>
-                  <TableCell>{customer.city}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{customer.tier}</Badge>
-                  </TableCell>
-                  <TableCell className="text-end">{customer.orders}</TableCell>
-                  <TableCell className="text-end">
-                    <Price {...customer.spend} />
-                  </TableCell>
-                  <TableCell>
-                    <RelativeTime date={customer.since} />
-                  </TableCell>
+      <DSStack gap="lg">
+        <PageHeader01
+          headingLevel="h1"
+          title="Customers"
+          description="Everyone who has ordered this year, with the tier their year earned."
+        />
+        <Card>
+          <CardHeader>
+            <CardTitle>The book</CardTitle>
+            <CardDescription>Spend to date, orders to date, and the day the first one arrived.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>City</TableHead>
+                  <TableHead>Tier</TableHead>
+                  <TableHead className="text-end">Orders</TableHead>
+                  <TableHead className="text-end">Spend</TableHead>
+                  <TableHead>Since</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              </TableHeader>
+              <TableBody>
+                {CUSTOMERS.map((customer) => (
+                  <TableRow key={customer.id}>
+                    <TableCell>
+                      <span className="flex items-center gap-3">
+                        <Avatar className="size-8" aria-hidden>
+                          <AvatarFallback>{customer.initials}</AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{customer.name}</span>
+                      </span>
+                    </TableCell>
+                    <TableCell>{customer.city}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{customer.tier}</Badge>
+                    </TableCell>
+                    <TableCell className="text-end">{customer.orders}</TableCell>
+                    <TableCell className="text-end">
+                      <Price {...customer.spend} />
+                    </TableCell>
+                    <TableCell>
+                      <RelativeTime date={customer.since} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </DSStack>
     </AppChrome>
   )
 }

@@ -106,7 +106,7 @@ export function Specimens({
       />
 
       {meta ? (
-        <p className="text-muted-foreground font-mono text-mono mb-10">{meta}</p>
+        <p className="text-muted-foreground font-mono text-mono mb-10 text-center">{meta}</p>
       ) : null}
 
       {/*

@@ -23,7 +23,7 @@ export default function PricingPageDemo() {
       headingLevel="h3"
       eyebrow="Plans"
       title="What it costs"
-      description="One sentence saying what every plan has in common, so a reader can tell whether the row below is worth reading."
+      description="Every plan includes deterministic replay, signed audit exports and read-only MCP access."
       changeNote={{
         title: 'The metered run price moved on 1 September.',
         description: 'Runs are now billed per thousand rather than per hour. Nothing else changed.',

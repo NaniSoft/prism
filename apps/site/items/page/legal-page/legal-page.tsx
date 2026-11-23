@@ -44,29 +44,30 @@ export default function LegalPageDemo() {
         <>
           <h2>1. The agreement</h2>
           <p>
-            A paragraph, at the measure, so the line length and the block spacing can be judged. The
-            words are the caller&apos;s, and so is the structure: this page holds the measure and
-            nothing else.
+            These terms govern your access to the Nexus collector service and its associated ledger
+            endpoints. By provisioning a workspace or running a collector key against an estate, you
+            agree to be bound by this agreement on behalf of your organisation.
           </p>
           <h2>2. What the service does</h2>
           <p>
-            A second section, so a document with a shape of its own can be published without the
-            page deciding what a section is.
+            Nexus ingests read-only operational telemetry from the targets you configure, writes it to
+            partitioned columnar storage, and exposes it to authorised operators and read-only tools.
           </p>
           <ul>
-            <li>A list inside the document, styled by the prose treatments.</li>
-            <li>A second item, so the list can be judged as a list.</li>
+            <li>You retain all right, title and interest in the telemetry your estate emits.</li>
+            <li>We process and store that telemetry solely to provide, secure and replay your workspace.</li>
           </ul>
           <h2>3. Changes</h2>
           <p>
-            A paragraph carrying a <a href="#changes">link to a place in the document</a>, which is the
-            case a plain string body would have had to give up.
+            We may revise these terms when we ship a new storage region or collector capability. Material
+            updates are announced thirty days in advance in the{' '}
+            <a href="#changes">revision history at the foot of this document</a>.
           </p>
         </>
       }
       footer={
         <p className="text-muted-foreground text-sm">
-          The caller&apos;s own slot for whatever comes after the document.
+          Questions about subprocessors, data residency or custom retention schedules can be sent to legal@nexus.example.
         </p>
       }
     />

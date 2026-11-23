@@ -40,47 +40,75 @@ export function ShowcaseBand() {
       ]}
       media={
         <div aria-hidden="true" className="grid gap-3 sm:grid-cols-2">
-          <div className="bg-background border-border flex flex-col gap-2 rounded-lg border p-2.5">
-            <div className="flex items-center gap-1">
-              <span className="bg-primary size-1.5 rounded-full" />
-              <span className="bg-foreground/25 h-1 w-6 rounded-full" />
-              <span className="bg-foreground/25 h-1 w-4 rounded-full" />
+          <div className="bg-background border-border flex flex-col gap-2 rounded-lg border p-3">
+            <div className="flex items-center gap-1.5">
+              <span className="bg-primary size-2 rounded-full" />
+              <span className="text-foreground font-mono text-mono font-semibold">Meridian</span>
+              <span className="bg-foreground/20 ms-2 h-1 w-5 rounded-full" />
+              <span className="bg-foreground/20 h-1 w-4 rounded-full" />
               <span className="bg-primary ms-auto h-2.5 w-7 rounded-sm" />
             </div>
-            <div className="flex flex-col gap-1 py-1.5">
-              <span className="bg-foreground/70 h-2 w-4/5 rounded-full" />
-              <span className="bg-foreground/70 h-2 w-3/5 rounded-full" />
-              <span className="bg-foreground/25 h-1 w-2/3 rounded-full" />
+            <div className="flex flex-col gap-1 py-1">
+              <span className="text-foreground text-xs font-semibold tracking-tight">
+                Every order, one morning.
+              </span>
+              <span className="bg-foreground/25 h-1 w-3/4 rounded-full" />
             </div>
             <div className="flex gap-1.5">
               <span className="bg-primary h-4 w-12 rounded-sm" />
               <span className="border-border h-4 w-12 rounded-sm border" />
             </div>
-            <div className="flex items-end gap-1 pt-1">
-              <span className="bg-foreground/15 h-5 flex-1 rounded-sm" />
-              <span className="bg-foreground/15 h-8 flex-1 rounded-sm" />
-              <span className="bg-foreground/15 h-6 flex-1 rounded-sm" />
+            <div className="grid grid-cols-3 gap-1.5 pt-1">
+              <div className="bg-muted flex flex-col gap-0.5 rounded-sm p-1.5">
+                <span className="text-foreground font-mono text-mono font-semibold">1,900</span>
+                <span className="bg-foreground/25 h-1 w-8 rounded-full" />
+              </div>
+              <div className="bg-muted flex flex-col gap-0.5 rounded-sm p-1.5">
+                <span className="text-foreground font-mono text-mono font-semibold">4.2M</span>
+                <span className="bg-foreground/25 h-1 w-8 rounded-full" />
+              </div>
+              <div className="bg-muted flex flex-col gap-0.5 rounded-sm p-1.5">
+                <span className="text-foreground font-mono text-mono font-semibold">96%</span>
+                <span className="bg-foreground/25 h-1 w-8 rounded-full" />
+              </div>
             </div>
             <span className="text-muted-foreground mt-auto pt-1 font-mono text-mono uppercase">
               /showcase/landing
             </span>
           </div>
 
-          <div className="bg-background border-border flex gap-2 rounded-lg border p-2.5">
-            <div className="bg-muted flex w-6 flex-col items-center gap-1.5 rounded-sm py-1.5">
-              <span className="bg-primary size-1.5 rounded-full" />
-              <span className="bg-foreground/25 h-1 w-3 rounded-full" />
-              <span className="bg-foreground/25 h-1 w-3 rounded-full" />
-              <span className="bg-foreground/25 h-1 w-3 rounded-full" />
+          <div className="bg-background border-border flex gap-2.5 rounded-lg border p-3">
+            <div className="bg-muted flex w-7 flex-col items-center gap-1.5 rounded-sm py-2">
+              <span className="bg-primary size-2 rounded-full" />
+              <span className="bg-primary/40 h-1 w-3.5 rounded-full" />
+              <span className="bg-foreground/20 h-1 w-3.5 rounded-full" />
+              <span className="bg-foreground/20 h-1 w-3.5 rounded-full" />
+              <span className="bg-foreground/20 h-1 w-3.5 rounded-full" />
             </div>
-            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-              {[0, 1, 2, 3].map((row) => (
-                <div key={row} className="flex items-center gap-1.5">
-                  <span className="bg-foreground/25 size-1.5 shrink-0 rounded-full" />
-                  <span className="bg-foreground/40 h-1 flex-1 rounded-full" />
-                  <span className="bg-foreground/15 h-2 w-6 rounded-full" />
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <div className="grid grid-cols-2 gap-1.5">
+                <div className="bg-muted flex flex-col gap-0.5 rounded-sm p-1.5">
+                  <span className="text-muted-foreground font-mono text-mono">Revenue</span>
+                  <span className="text-foreground font-mono text-xs font-semibold">$48,120</span>
                 </div>
-              ))}
+                <div className="bg-muted flex flex-col gap-0.5 rounded-sm p-1.5">
+                  <span className="text-muted-foreground font-mono text-mono">Orders</span>
+                  <span className="text-foreground font-mono text-xs font-semibold">1,204</span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                {[
+                  ['M-10482', 'bg-success'],
+                  ['M-10481', 'bg-primary'],
+                  ['M-10479', 'bg-warning'],
+                ].map(([id, dot]) => (
+                  <div key={id} className="border-border flex items-center gap-1.5 border-t pt-1">
+                    <span className={`${dot} size-1.5 shrink-0 rounded-full`} />
+                    <span className="text-foreground font-mono text-mono">{id}</span>
+                    <span className="bg-foreground/20 ms-auto h-1.5 w-8 rounded-full" />
+                  </div>
+                ))}
+              </div>
               <span className="text-muted-foreground mt-auto pt-1 font-mono text-mono uppercase">
                 /showcase/admin
               </span>

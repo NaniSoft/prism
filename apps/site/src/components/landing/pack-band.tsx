@@ -154,7 +154,7 @@ export function PackBand({
         ))}
       </ul>
 
-      <div className="mt-10">
+      <div className="mt-10 flex justify-center">
         <CtaLink href={action.href} variant="outline" className="group">
           {action.label}
           <ArrowRight

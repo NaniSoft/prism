@@ -1,3 +1,4 @@
+import { CtaLink } from '@nanisoft/prism-ui/components/cta-link'
 import { ChangelogPage } from '@nanisoft/prism-ui/pages/changelog-page'
 
 /**
@@ -14,7 +15,7 @@ export default function ChangelogPageDemo() {
       headingLevel="h3"
       eyebrow="Changelog"
       title="Everything that has changed"
-      description="One or two sentences under the heading, saying how this record is grouped and what the kinds mean."
+      description="Every release of the collector daemon and the ledger specification, newest first."
       kinds={[
         { id: 'added', label: 'Added', state: 'on' },
         { id: 'changed', label: 'Changed', state: 'on' },
@@ -23,57 +24,65 @@ export default function ChangelogPageDemo() {
         { id: 'security', label: 'Security', state: 'on' },
       ]}
       filters={
-        <p className="text-muted-foreground text-sm">The caller&apos;s own filter control goes here.</p>
+        <p className="text-muted-foreground text-sm">
+          Showing 4 of 5 change categories. Removed records are hidden in this view.
+        </p>
       }
       releases={[
         {
           id: '2-4-0',
           version: '2.4.0',
-          at: '2026-09-28',
-          summary: 'One line about the release as a whole, for a reader deciding whether to read on.',
+          at: '28 September 2026',
+          summary: 'Split the connection pool between live capture and batch inference, and retired the legacy v1 socket.',
           entries: [
             {
               id: 'e1',
               kind: 'added',
-              title: 'First record',
-              body: 'The sentence under the line: why it changed, what it affects, what to do about it.',
+              title: 'Per-workload connection pools on the collector daemon',
+              body: 'Live capture and historical replay now draw from isolated pools so a long replay never starves an incoming tick.',
             },
             {
               id: 'e2',
               kind: 'changed',
-              title: 'Second record',
+              title: 'Windowed collectors now flush on the exchange minute boundary',
               href: '/changelog/2-4-0/changed',
               hrefLabel: 'Read the migration note',
             },
-            { id: 'e3', kind: 'removed', title: 'Third record, complete on its own line' },
+            { id: 'e3', kind: 'removed', title: 'Dropped the unauthenticated local status socket' },
           ],
         },
         {
           id: '2-3-1',
           version: '2.3.1',
-          at: '2026-09-04',
+          at: '4 September 2026',
           entries: [
             {
               id: 'e1',
               kind: 'security',
-              title: 'A record that is a security fix',
-              body: 'The sentence under the line, so the kind mark and the record are both on screen.',
+              title: 'Rotated collector signing keys now reject pre-rotation replay tokens immediately',
+              body: 'Previously a token signed within the five-minute clock-skew window remained valid until the window expired.',
             },
-            { id: 'e2', kind: 'fixed', title: 'A record that is a fix' },
+            { id: 'e2', kind: 'fixed', title: 'Additive quote-schema fields no longer stall an in-flight batch write' },
           ],
         },
       ]}
       older={
         <div className="flex flex-col items-start gap-3">
           <p className="text-muted-foreground text-sm">
-            The caller&apos;s own way of reaching the releases that are not on this page.
+            Showing releases from September 2026. Older releases from 2.0.0 onward are archived by quarter.
           </p>
         </div>
       }
       subscribe={{
         title: 'Get told when this changes',
-        description: 'One or two sentences, then the control the caller composes.',
-        cta: <div data-slot="demo-subscribe-control" />,
+        description: 'Receive one plain-text release note whenever a new collector version is tagged.',
+        cta: (
+          <div data-slot="demo-subscribe-control">
+            <CtaLink href="#release-feed" variant="outline" size="sm">
+              Subscribe to the release feed
+            </CtaLink>
+          </div>
+        ),
       }}
       empty="Nothing has been published on this page yet."
     />

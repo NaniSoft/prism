@@ -57,9 +57,16 @@ const GROUP_ORDER = [
   'spacing',
   'duration',
   'ease',
+  'ambient',
+  'ambient-ease',
+  'veil',
+  'blur',
   'shadow',
   'breakpoint',
   'container',
+  'aspect',
+  'media',
+  'z',
   'color',
 ]
 
@@ -83,9 +90,11 @@ export function TokenBrowser() {
     groups.set(group, list)
   }
 
-  const groupNames = [...groups.keys()].sort(
-    (a, b) => GROUP_ORDER.indexOf(a) - GROUP_ORDER.indexOf(b),
-  )
+  const groupNames = [...groups.keys()].sort((a, b) => {
+    const ia = GROUP_ORDER.indexOf(a)
+    const ib = GROUP_ORDER.indexOf(b)
+    return (ia === -1 ? GROUP_ORDER.length : ia) - (ib === -1 ? GROUP_ORDER.length : ib)
+  })
 
   return (
     <div className="flex flex-col gap-10">
