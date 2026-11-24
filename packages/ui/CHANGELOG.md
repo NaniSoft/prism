@@ -1,5 +1,24 @@
 # @nanisoft/prism-ui
 
+## 1.13.0
+
+### Minor Changes
+
+- dfe3477: DocsShell's navigation rail stands behind a disclosure below lg
+  
+  Below the `lg` cut the rail's one copy of the tree now stands behind a named trigger and opens in place, so a phone reader reaches the article one tap from the navigation instead of past the whole tree. It is the deliberate client island the 0.16.1 removal commit asked for: the tree is still drawn once at every width, the disclosure wraps it rather than repeating it, there is no second `<nav>` under the rail's accessible name, and the trigger carrying `navLabel` is the only control the frame holds. The island renders open, which is the server's answer and the answer for a reader with scripting disabled, and once script is present it agrees with the frame's own `lg` cut via `matchMedia`, closed below it and open above it, so the one cost is a fold at hydration that is stated in the JSDoc rather than hidden. The rail-level slots `docs-rail-disclosure`, `docs-rail-trigger` and `docs-rail-panel` are new, and the retired `docs-nav-compact` and `docs-nav-disclosure` names stay retired.
+
+### Patch Changes
+
+- dfe3477: Raise `Item` and `BlogPostPage` targets, make figures keyboard-scrollable, label `DocsShell` rails
+  
+  Every anchor and `[tabindex="0"]` region now inherits a 3px `var(--ring)` focus-visible outline from `@layer base` when no component utility replaces it, `BlogPostPage` trail links carry a 44px minimum height (`min-h-11`) and explicit 3px focus ring, `SiteFooter` links carry explicit 3px focus rings, `Item` links carry a 24px target floor (`flex min-h-6 items-center`) with two-line descriptions (`line-clamp-2`), all `Diagram` and `PulseGraph` horizontal scroll containers carry `tabIndex={0}`, with accessible region labels on non-decorative drawings, `DocsShell` names its two `<aside>` regions with `navLabel` and `tocLabel`, and `.site-footer-tagline` resolves to `var(--brand-ink)`.
+- dfe3477: InstrumentPanel01 state words never truncate, and text-link targets take the coarse-pointer floor
+  
+  `InstrumentPanel01`'s `stateLabel` span drops `truncate` and carries `shrink-0`, so the state's words arrive whole at any width and the label is the one span that yields: the word-first rule carried down to a phone bar, where an ellipsis in place of a state word was the usual outcome when a long label and a short state word shared one row. `DocsShell` rail links (page links and group headings) and `SiteFooter` social and column links now step up to a 44px target box under a coarse pointer (`pointer-coarse:min-h-11`, with the rail link's block turning into a centred flex row), the same step `Button` and `CtaLink` already take, paid on the box rather than on the type and leaving the fine-pointer rows untouched.
+  
+  A rail group heading also carries the 24px target-size floor at every pointer now, as `flex min-h-6 items-center`: the heading was a bare inline anchor whose whole hit area was the type's content area, which is the exact shape `DESIGN.md`'s target-size floor is written against, and a floor owed under a mouse as much as under a finger is not delivered by a coarse-pointer step alone. `SiteNavbar`'s brand link takes the coarse step as well, because the brand is a control the bar asks to be hit and the step is a flex item's height inside the bar's own centred row, so nothing beside it moves.
+
 ## 1.12.0
 
 ### Minor Changes
