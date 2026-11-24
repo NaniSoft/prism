@@ -136,6 +136,16 @@ client.
 - Expect three columns from `lg`: a 15rem rail, the document, and a 13rem
   contents rail. The third track exists only when you pass `toc`, so a route with
   no outline gets the width back rather than a hole in the frame.
+- Below `lg` the rail stands behind a disclosure: a trigger carrying `navLabel`
+  and the tree in a panel that ships open, so a reader with scripting disabled
+  meets the whole tree in flow exactly as above the cut, and a reader with script
+  gets the article one tap from the navigation. The tree is drawn once at every
+  width; the disclosure wraps it rather than repeating it, and the trigger is the
+  only control the frame carries.
+- The rail's text links carry the target floors: a group heading is a 24 pixel
+  box at every pointer where it was the type's own content area before, and every
+  rail link steps up to a 44 pixel box under a coarse pointer. Both floors are
+  paid on the box, so the fourteen pixel type inside them does not move.
 - Omit `title` when your document owns its own heading. The Page renders no empty
   `h1` to fill the gap, so a document with no title keeps exactly the outline its
   own content declares.

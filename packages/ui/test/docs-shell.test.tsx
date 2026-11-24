@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { DocsShell, type DocsNavEntry, type DocsShellProps } from '../src/pages/docs-shell'
@@ -324,6 +325,20 @@ const railOf = (container: HTMLElement) =>
 const contentsOf = (container: HTMLElement) =>
   container.querySelector('[data-slot="docs-contents"] nav') as HTMLElement
 
+/**
+ * The rail's sticky wrapper: the element that carries the scroll region and the fade.
+ *
+ * The nav rail's wrapper sits inside the disclosure's panel now, and the contents
+ * rail has no disclosure, so the path is read from slots rather than from child
+ * positions: the panel's own first child where the disclosure is, and the region's
+ * own first child where it is not. A fixed child index on the region would have
+ * been a second copy of the DOM shape, and the shape has moved once already.
+ */
+const wrapperOf = (region: HTMLElement) => {
+  const panel = region.querySelector(':scope [data-slot="docs-rail-panel"]')
+  return ((panel as HTMLElement | null) ?? region).firstElementChild as HTMLElement
+}
+
 /** Every anchor inside a region, in document order. */
 const linksIn = (region: HTMLElement) => [...region.querySelectorAll('a')]
 
@@ -345,13 +360,21 @@ const slotsUnder = (region: HTMLElement) =>
   [...new Set([...region.querySelectorAll('[data-slot]')].map((el) => el.getAttribute('data-slot') as string))].sort()
 
 /**
- * Every control this Page could put in a rail, in one selector.
+ * Every control this Page could put in a rail's lists, in one selector.
  *
  * The selector is the whole of the claim rather than a sample of it, and it is
  * the list one consumer's own suite holds: a button, a summary, a disclosure, or
- * anything with an expanded state or a button role. A rail that satisfies it
- * cannot be operated, which is what "a section is a label and not a control"
+ * anything with an expanded state or a button role. A rail's lists that satisfy
+ * it cannot be operated, which is what "a section is a label and not a control"
  * means at the level of the region rather than at the level of one row.
+ *
+ * It is asked of the two `<nav>` regions and not of the whole frame, because the
+ * frame holds exactly one control by design now: the rail's own disclosure
+ * trigger, which stands between the aside and the `<nav>` it opens and is
+ * asserted separately. The 0.16.0 lesson is unchanged either way: the counts are
+ * taken over rendered output without a copy-naming helper, and a second `<nav>`
+ * under the rail's name, or a `<details>` anywhere in the frame, is the
+ * regression this file exists to refuse.
  */
 const CONTROLS = 'button, summary, details, [aria-expanded], [aria-controls], [aria-pressed], [role="button"]'
 
@@ -379,7 +402,12 @@ function markupAt(width: number, props: Partial<DocsShellProps>): string {
   )
   const markup = container.innerHTML
   unmount()
-  return markup
+  // base-ui names the panel a trigger controls from a module-level counter, so
+  // two roots rendered in one test process get two names for the same wiring,
+  // and an exact comparison of two true renders would fail on the name alone.
+  // The wiring itself is held by the trigger assertions and by the Collapsible's
+  // own suite; the counter is normalized out so this test stays about structure.
+  return markup.replace(/base-ui-_r_[^_]+_/g, 'base-ui-id')
 }
 
 /**
@@ -545,9 +573,12 @@ describe('the tree is drawn once', () => {
 
     // The whole published slot vocabulary of this Page in one list, on the tree
     // that exercises every arm of it: six addressed sections, so six headings and
-    // no labels, and `docs-rail-fade` still there on both rails.
-    // `docs-nav-compact` and `docs-nav-disclosure` are gone, and this is where a
-    // second copy of the tree would come back under a name nobody re-reads.
+    // no labels, and `docs-rail-fade` still there on both rails. The three
+    // `docs-rail-*` disclosure slots are the rail's island, and they stand at the
+    // rail level rather than the `docs-nav-` level on purpose: the retired
+    // `docs-nav-compact` and `docs-nav-disclosure` names are where a second copy
+    // of the tree came back under a name nobody re-reads, and no slot of this
+    // Page will wear that shape again.
     expect(slotsUnder(container.querySelector('[data-slot="docs-shell-frame"]') as HTMLElement)).toEqual([
       'docs-article',
       'docs-contents',
@@ -558,13 +589,16 @@ describe('the tree is drawn once', () => {
       'docs-nav-page',
       'docs-pager',
       'docs-rail',
+      'docs-rail-disclosure',
       'docs-rail-fade',
+      'docs-rail-panel',
+      'docs-rail-trigger',
       'prose',
     ])
     unmount()
   })
 
-  it('carries no control in the rail or anywhere else in the frame', () => {
+  it('carries one control in the frame, the rail trigger, and none in either rail', () => {
     for (const [site, nav] of SITES) {
       const { container, unmount } = render(
         <DocsShell {...LABELS} nav={nav} toc={TOC} currentHref="/docs/introduction">
@@ -575,9 +609,21 @@ describe('the tree is drawn once', () => {
       // Read over the whole frame and not over a section row, because 0.16.0 put
       // a `<details>` and a `<summary>` inside the region whose own test asserted
       // no disclosure control. Scoping that test to the stage rather than the rail
-      // was correct about the stage and wrong about the rail, and the consumer
-      // that holds the invariant holds it over the rail.
-      expect(container.querySelectorAll(CONTROLS), site).toHaveLength(0)
+      // was correct about the stage and wrong about the rail, and the invariant
+      // is still held over the whole frame: the two `<nav>` regions carry no
+      // control at all, and the frame carries exactly one, asserted to BE the
+      // rail's trigger so a second one arriving under another name fails here.
+      expect(railOf(container).querySelectorAll(CONTROLS), site).toHaveLength(0)
+      expect(contentsOf(container).querySelectorAll(CONTROLS), site).toHaveLength(0)
+      const controls = container.querySelectorAll(CONTROLS)
+      expect(controls, site).toHaveLength(1)
+      const trigger = container.querySelector('[data-slot="docs-rail-trigger"]')
+      expect(trigger, site).not.toBeNull()
+      expect(trigger, site).toBe(controls[0])
+      expect(trigger!.getAttribute('aria-expanded'), site).toBe('true')
+      // Hidden above the cut by its class rather than by absence, so the markup
+      // at one width is the markup at the other and the test below can say so.
+      expect(trigger!.className, site).toContain('lg:hidden')
       // Each rail holds the lists of its own tree and no other's, which is the
       // per-tree half of "drawn once" and the half a scoped query can see.
       expect(railOf(container).querySelectorAll('[data-slot="docs-nav-list"]').length, site).toBe(listsIn(nav))
@@ -595,6 +641,91 @@ describe('the tree is drawn once', () => {
       // the three entries of the outline, once each.
       expect(narrow.split('data-slot="docs-nav-page"')).toHaveLength(pagesIn(nav) + TOC.length + 1)
     }
+  })
+})
+
+describe('the rail below lg', () => {
+  /**
+   * A narrow viewport, for the duration of one test.
+   *
+   * The setup stub answers a min-width query as a desktop, because that is the
+   * arrangement the suite at large renders against. The disclosure is the one
+   * feature that exists for the other answer, so the tests that hold it install
+   * the other answer here rather than turning the stub into a flag every other
+   * test would have to remember to set.
+   */
+  function narrowViewport() {
+    vi.spyOn(window, 'matchMedia').mockImplementation((query: string) => ({
+      matches: !query.includes('min-width'),
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }))
+  }
+
+  it('collapses behind the named trigger, with no rows and no Tab stops ahead of the article', () => {
+    narrowViewport()
+    const { container } = render(
+      <DocsShell {...LABELS} nav={ALPHALENS} toc={TOC} currentHref="/docs/data-platform/capture">
+        {BODY}
+      </DocsShell>,
+    )
+
+    // The trigger is the frame's one control, and it says what it is: the rail's
+    // own name, carrying the closed state truthfully.
+    const trigger = screen.getByRole('button', { name: LABELS.navLabel })
+    expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    // The closed panel unmounts, which is the point of it: the rail region holds
+    // no `<nav>` at all, so a keyboard reader reaches the article in one Tab
+    // instead of through twenty-seven pages' worth of tree. The contents rail is
+    // not the rail, and it is not disclosed: its own links stay in the document,
+    // which is why the query is scoped to the rail region and not to the frame.
+    const railRegion = container.querySelector('[data-slot="docs-rail"]')
+    expect(railRegion?.querySelector('nav')).toBeNull()
+    expect(container.querySelector('[aria-current="page"]')).toBeNull()
+    expect(container.querySelectorAll(CONTROLS)).toHaveLength(1)
+  })
+
+  it('opens the tree in place on toggle, one navigation under the rail name', async () => {
+    narrowViewport()
+    const { container } = render(
+      <DocsShell {...LABELS} nav={ALPHALENS} toc={TOC} currentHref="/docs/data-platform/capture">
+        {BODY}
+      </DocsShell>,
+    )
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: LABELS.navLabel }))
+
+    // Opened, the rail is the same rail the wide viewport renders: the role
+    // query a consumer suite reaches the rail by has exactly one answer, the
+    // tree in it is the whole tree, and the current-page marker is on the page
+    // the test named, exactly once.
+    const trigger = screen.getByRole('button', { name: LABELS.navLabel })
+    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getAllByRole('navigation', { name: LABELS.navLabel })).toHaveLength(1)
+    expect(linksIn(railOf(container))).toHaveLength(destinationsOf(ALPHALENS).length)
+    expect(container.querySelectorAll('[aria-current="page"]')).toHaveLength(1)
+  })
+
+  it('puts nothing on the trigger but the name the rail already answers to', () => {
+    narrowViewport()
+    render(
+      <DocsShell {...LABELS} nav={NEXUS}>
+        {BODY}
+      </DocsShell>,
+    )
+
+    // The trigger word is `navLabel` and nothing beside it: no verb of this
+    // package's, no count, no status. The frame-wide text guard the label tests
+    // hold makes that a rule rather than a hope at every width; this asserts the
+    // trigger side of it at the width where the trigger shows.
+    const trigger = screen.getByRole('button', { name: LABELS.navLabel })
+    expect(trigger.textContent).toBe(LABELS.navLabel)
   })
 })
 
@@ -680,15 +811,19 @@ describe('a section is a label and not a control', () => {
       </DocsShell>,
     )
 
-    // No control: nothing focusable, nothing operable, nothing holding a state a
-    // reader could change. A collapsible or a sortable heading would tell a
-    // reader that a pipeline stage is an independent topic in any order, which is
-    // the one misreading the information architecture exists to prevent.
+    // No control on the section: nothing focusable, nothing operable, nothing
+    // holding a state a reader could change. A collapsible or a sortable heading
+    // would tell a reader that a pipeline stage is an independent topic in any
+    // order, which is the one misreading the information architecture exists to
+    // prevent.
     //
-    // Asserted over the whole frame and not over the stage row, because the rail
-    // itself once carried a disclosure and a test scoped to the stage passed
-    // straight over it.
-    expect(container.querySelectorAll(CONTROLS)).toHaveLength(0)
+    // Asserted over the nav regions, with the frame's single control asserted to
+    // be the rail trigger and nothing else, because the rail itself once carried
+    // a disclosure and a test scoped to the stage passed straight over it.
+    expect(railOf(container).querySelectorAll(CONTROLS)).toHaveLength(0)
+    const controls = container.querySelectorAll(CONTROLS)
+    expect(controls).toHaveLength(1)
+    expect(controls[0].getAttribute('data-slot')).toBe('docs-rail-trigger')
     expect(container.querySelectorAll('select, input')).toHaveLength(0)
 
     // And the element holding the title carries nothing that could be operated:
@@ -1627,7 +1762,7 @@ describe('the rail is bounded in height, and the bound is visible', () => {
       // The honest limit: jsdom loads no stylesheet, so this asserts the shipped
       // class contract and cannot measure a layout. The cascade lane that would
       // resolve it is named and unbuilt in DESIGN.md.
-      const wrapper = region.firstElementChild as HTMLElement
+      const wrapper = wrapperOf(region)
       expect(wrapper.tagName, slot).toBe('DIV')
       expect(wrapper.className, slot).toContain('sticky')
       expect(wrapper.className, slot).toContain('top-20')
@@ -1744,7 +1879,7 @@ describe('the rail is bounded in height, and the bound is visible', () => {
 
       for (const slot of ['docs-rail', 'docs-contents']) {
         const region = container.querySelector(`[data-slot="${slot}"]`) as HTMLElement
-        const wrapper = region.firstElementChild as HTMLElement
+        const wrapper = wrapperOf(region)
         const scroller = wrapper.querySelector(':scope > nav') as HTMLElement
         const fade = wrapper.querySelector(':scope > [data-slot="docs-rail-fade"]') as HTMLElement
 
@@ -1807,7 +1942,7 @@ describe('the rail is bounded in height, and the bound is visible', () => {
 
       for (const slot of ['docs-rail', 'docs-contents']) {
         const region = container.querySelector(`[data-slot="${slot}"]`) as HTMLElement
-        const wrapper = region.firstElementChild as HTMLElement
+        const wrapper = wrapperOf(region)
         const scroller = wrapper.querySelector(':scope > nav') as HTMLElement
         const fade = wrapper.querySelector(':scope > [data-slot="docs-rail-fade"]') as HTMLElement
 
@@ -1891,12 +2026,14 @@ describe('the rail is bounded in height, and the bound is visible', () => {
       const scroller = region.querySelector('nav') as HTMLElement
       expect(scroller.className, slot).toContain('overflow-y-auto')
       // The fade is outside the scroller, so nothing about it can scroll with the
-      // content, and the region itself is still the thing that scrolls.
+      // content, and the region itself is still the thing that scrolls. The
+      // wrapper is where the fade lives, and the fade is its last element: the
+      // sibling-after-the-region position is the whole of the arrangement.
       expect(region.querySelector('nav [data-slot="docs-rail-fade"]'), slot).toBeNull()
-      expect(
-        region.firstElementChild?.lastElementChild?.getAttribute('data-slot'),
-        slot,
-      ).toBe('docs-rail-fade')
+      const wrapper = wrapperOf(region)
+      const fade = wrapper.querySelector(':scope > [data-slot="docs-rail-fade"]') as HTMLElement
+      expect(fade, slot).not.toBeNull()
+      expect(wrapper.lastElementChild, slot).toBe(fade)
       expect(scroller.className, slot).not.toContain('overflow-hidden')
     }
   })
@@ -1986,13 +2123,16 @@ describe('the navigation at every width', () => {
       </DocsShell>,
     )
 
-    // The claim, over the whole frame: no disclosure, no summary, no button, no
-    // expanded state. A reader who opens the rail below `lg` meets the same rows
-    // there are at `lg`, and a consumer whose documentation rail is contractually
-    // free of controls is free of them.
-    expect(container.querySelectorAll('details, summary, button, [aria-expanded]')).toHaveLength(0)
-    expect(container.querySelector('[data-slot="docs-nav-compact"]')).toBeNull()
-    expect(container.querySelector('[data-slot="docs-nav-disclosure"]')).toBeNull()
+    // The claim, over the whole frame: the one control is the rail's trigger and
+    // the retired shapes never come back. A reader who opens the rail below `lg`
+    // meets the same rows there are at `lg`, and the two slot names 0.16.0 spent
+    // on a second copy of the tree are gone for good, which is the half a count
+    // of zero cannot say on its own.
+    const overlays = container.querySelectorAll(
+      'details, summary, [data-slot="docs-nav-compact"], [data-slot="docs-nav-disclosure"]',
+    )
+    expect(overlays).toHaveLength(0)
+    expect(container.querySelectorAll('button')).toHaveLength(1)
     unmount()
   })
 })
@@ -2081,6 +2221,10 @@ describe('the Page ships no copy of its own', () => {
     expect(screen.getAllByRole('navigation', { name: 'Nexus documentation' })).toHaveLength(1)
     expect(screen.getAllByRole('navigation', { name: 'On this page' })).toHaveLength(1)
     expect(screen.getAllByRole('navigation', { name: 'Nexus pages' })).toHaveLength(1)
+    // And the two complementary `<aside>` landmarks carry those same names, so
+    // axe's `landmark-unique` rule sees two distinct complementary regions.
+    expect(screen.getAllByRole('complementary', { name: 'Nexus documentation' })).toHaveLength(1)
+    expect(screen.getAllByRole('complementary', { name: 'On this page' })).toHaveLength(1)
   })
 })
 
@@ -2096,9 +2240,9 @@ describe('the Page is a server Component', () => {
     // The same classification `check-client-budget.mjs` uses, so a directive added
     // here would put the Page on the client roster.
     expect(/^['"]use client['"]/m.test(source)).toBe(false)
-    // No hook, no context and no event handler: nothing here holds state, and the
-    // narrow arrangement the 0.16.0 disclosure stood in for is now the rail
-    // showing, which is why there is nothing for any of the three to hold.
+    // No hook, no context and no event handler in the Page: the open state the
+    // rail's disclosure needs is the island's, in the module named below, not
+    // this one's.
     expect(
       /from ['"]react['"].*\buse(State|Effect|Memo|Callback|Ref|Reducer|Context|SyncExternalStore)\b/.test(
         source,
@@ -2109,5 +2253,18 @@ describe('the Page is a server Component', () => {
     // And no runtime token read: every colour on this Page is a semantic utility,
     // so nothing here resolves a value out of the cascade at runtime.
     expect(/getComputedStyle|getPropertyValue/.test(source)).toBe(false)
+  })
+
+  it('holds its one client boundary in the disclosure module, which carries the directive the Page declines', () => {
+    // The island is the deliberate client boundary the 0.16.1 removal commit said
+    // should be made on purpose if it was ever made at all, and "on purpose"
+    // includes being one file with one job: the directive is there and only
+    // there, so the Page stays a server Component and the boundary is legible
+    // from the tree.
+    const island = readFileSync(
+      path.join(REPO, 'packages', 'ui', 'src', 'pages', 'docs-shell', 'rail-disclosure.tsx'),
+      'utf8',
+    )
+    expect(/^['"]use client['"]/m.test(island)).toBe(true)
   })
 })

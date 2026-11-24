@@ -694,6 +694,18 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
+
+  /*
+   * A default keyboard focus indicator for every anchor and every focusable
+   * scroll region, so a link composed by a consumer's own markup or a figure
+   * scroll container draws the same 3px ring the Components draw on themselves.
+   * Because it sits in `@layer base`, any Component utility that customises or
+   * replaces its own ring outranks it.
+   */
+  a:focus-visible,
+  [tabindex="0"]:focus-visible {
+    outline: 3px solid var(--ring);
+  }
 }
 
 /* ------------------------------------------------------------------ *
@@ -1000,7 +1012,7 @@
 
 .site-footer-tagline {
   margin: 0;
-  color: var(--foreground);
+  color: var(--brand-ink);
   font-size: var(--text-base);
   font-weight: 600;
   letter-spacing: var(--tracking-tight);

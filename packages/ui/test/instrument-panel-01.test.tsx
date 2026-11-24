@@ -87,7 +87,7 @@ describe('a panel around an instrument', () => {
 })
 
 /**
- * The bar's two truncating spans, and the reason this file asserts what they
+ * The bar's one truncating span, and the reason this file asserts what the spans
  * carry rather than what a row would do with them.
  *
  * **The bar cannot overflow horizontally, and the reason is a spec rule rather
@@ -96,19 +96,29 @@ describe('a panel around an instrument', () => {
  * comes from. CSS Flexbox 1 §4.5 carves out the exception that settles it: the
  * automatic minimum size is zero "for scroll containers", and `overflow: hidden`
  * is what makes a box a scroll container. Tailwind's `truncate` sets
- * `overflow: hidden`, so both spans already have an automatic minimum size of
- * zero, both shrink, and the bar stays the width of the figure whether the label
+ * `overflow: hidden`, so the label span already has an automatic minimum size of
+ * zero, it shrinks, and the bar stays the width of the figure whether the label
  * is two words or thirty. Adding `min-w-0` here would change nothing that is
  * painted, and a class written to prevent an overflow that cannot happen is a
  * false record in the source.
  *
+ * **The label is the only span that yields, and the state's words are the one
+ * span that may not.** The word-first rule is why `stateLabel` is required
+ * whenever the state is not `neutral`: the words are what a reader is told and
+ * the dot is only what a reader sees, and a state word cut to an ellipsis is that
+ * same failure one size smaller. On a phone bar, where a long label and a short
+ * state word share one row, truncation was the usual outcome before the change.
+ * So the state span carries `shrink-0` and no `truncate`: it holds its own width,
+ * the label truncates first and alone, and the bar still holds at any width
+ * because the label is the flexible one.
+ *
  * **So what this asserts is the invariant the whole thing rests on.** If a later
- * edit replaced `truncate` on either span with `whitespace-nowrap`, or with a
- * line clamp that does not set `overflow`, the automatic minimum size would go
- * back to the text's own width and the row would start pushing the figure wider
- * than the panel it is in. That is the regression worth a test, and it is a
- * regression guard rather than a proof of a fix, because nothing here was broken
- * and nothing here was changed.
+ * edit replaced `truncate` on the label with `whitespace-nowrap`, or with a line
+ * clamp that does not set `overflow`, the automatic minimum size would go back to
+ * the text's own width and the row would start pushing the figure wider than the
+ * panel it is in. And if a later edit gave the state span `truncate` or dropped
+ * its `shrink-0`, the state word would yield to the label exactly where a reader
+ * has the least room to spare. Those are the regressions worth a test.
  *
  * The other twelve `truncate` sites in the tree that carry no `min-w-0` are the
  * same case and are not listed here: a `truncate` inside a flex COLUMN is sized
@@ -116,7 +126,7 @@ describe('a panel around an instrument', () => {
  * flex parent already carries `min-w-0` inherits the behaviour from it.
  */
 describe('the bar a panel titles itself with', () => {
-  it('truncates both of its text spans, which is what lets them shrink at all', () => {
+  it('truncates the label and the label alone, which is what lets it shrink at all', () => {
     const { container } = render(
       <InstrumentPanel01 label="The estate, as one graph" state="live" stateLabel="live view">
         <span />
@@ -127,10 +137,13 @@ describe('the bar a panel titles itself with', () => {
     const truncating = [...bar.querySelectorAll('span')].filter((span) =>
       span.className.split(' ').includes('truncate'),
     )
-    expect(truncating.map((span) => span.textContent)).toEqual(['The estate, as one graph', 'live view'])
+    // One truncating span, and it is the label. The state's words are never in
+    // this list, at any width, because a state a reader has to squint at is a dot
+    // with extra steps.
+    expect(truncating.map((span) => span.textContent)).toEqual(['The estate, as one graph'])
   })
 
-  it('keeps the dot and the actions slot out of the shrinking', () => {
+  it('keeps the dot, the state words and the actions slot out of the shrinking', () => {
     const { container } = render(
       <InstrumentPanel01
         label="The loop"
@@ -144,11 +157,17 @@ describe('the bar a panel titles itself with', () => {
 
     const bar = container.querySelector('[data-slot="instrument-panel-bar"]')!
     // The dot is eight pixels and the actions slot is application content whose
-    // width the caller owns, so both are held at their own size and the two text
-    // spans are what yield. A row of four where nothing could shrink would be a
-    // row that pushes the panel wider than the figure; a row where the dot and
-    // the actions can be squeezed is a row that hides the controls.
+    // width the caller owns, so both are held at their own size and the label is
+    // what yields. A row where nothing could shrink would be a row that pushes
+    // the panel wider than the figure; a row where the dot and the actions can be
+    // squeezed is a row that hides the controls.
     expect(bar.querySelector('[data-state]')?.className).toContain('shrink-0')
     expect(bar.querySelector('button')?.parentElement?.className).toContain('shrink-0')
+    // And the state's words hold their own width too: `shrink-0` and no
+    // `truncate`, so the state arrives whole at any width and the label is the
+    // span that yields.
+    const stateWords = [...bar.querySelectorAll('span')].find((span) => span.textContent === 'live')
+    expect(stateWords?.className).toContain('shrink-0')
+    expect(stateWords?.className).not.toContain('truncate')
   })
 })

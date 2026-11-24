@@ -485,7 +485,16 @@ function PulseGraph({
     // The sideways region, for the reason `LEGIBLE_MIN_WIDTH` states: the drawing
     // holds a legible floor and a container narrower than it moves under the
     // drawing rather than the drawing shrinking below what it says.
-    <div data-slot="pulse-graph-container" className="w-full overflow-x-auto">
+    // `tabIndex={0}` gives keyboard-only readers a tab stop to scroll the
+    // container horizontally when it overflows, including a decorative graph
+    // (which is still a scrollable region) with no named landmark.
+    <div
+      data-slot="pulse-graph-container"
+      tabIndex={0}
+      role={decorative ? undefined : 'region'}
+      aria-label={decorative ? undefined : label}
+      className="w-full overflow-x-auto rounded-sm"
+    >
       <svg
         data-slot="pulse-graph"
         data-unresolved-relations={relations.length - drawn.length}

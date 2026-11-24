@@ -112,7 +112,10 @@ export type InstrumentPanel01Props = {
  * a dot is a shape, and a reader who cannot see `success` has learned nothing from
  * it. `stateLabel` is therefore required whenever the state is `live` or `paused`,
  * and the Block throws without it rather than shipping a state a reader can only
- * see.
+ * see. The words also do not truncate: the label yields first and alone, so the
+ * state arrives whole at any width, which is the word-first rule carried down to
+ * a phone bar where an ellipsis in place of a state word is the same failure as
+ * a bare dot, one size smaller.
  *
  * The bar is a `Section`-width row rather than a page-width one, because a panel
  * is a column and a column that runs the page's width is not a column. The frame
@@ -163,7 +166,15 @@ export function InstrumentPanel01({
           className={cn('inline-block size-2 shrink-0 rounded-full', STATE_DOT[state])}
         />
         <span className="truncate font-medium">{label}</span>
-        {stateLabel ? <span className="truncate">{stateLabel}</span> : null}
+        {/*
+          The state's words are the one string in the bar that may not truncate.
+          The word-first rule is that the state is announced in words beside the
+          dot because the dot is a shape a reader can only see; a state word cut
+          to an ellipsis is that same failure one size smaller, and on a phone
+          bar it was the usual outcome. The label truncates first and alone, so
+          the bar still holds at any width and the state arrives whole.
+        */}
+        {stateLabel ? <span className="shrink-0">{stateLabel}</span> : null}
         {actions ? <span className="ms-auto flex shrink-0 items-center gap-2">{actions}</span> : null}
       </div>
 

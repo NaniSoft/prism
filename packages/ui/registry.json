@@ -8992,6 +8992,11 @@
           "target": "components/pages/docs-shell/index.tsx"
         },
         {
+          "path": "src/pages/docs-shell/rail-disclosure.tsx",
+          "type": "registry:component",
+          "target": "components/pages/docs-shell/rail-disclosure.tsx"
+        },
+        {
           "path": "src/components/ui/section.tsx",
           "type": "registry:component",
           "target": "components/ui/section.tsx"

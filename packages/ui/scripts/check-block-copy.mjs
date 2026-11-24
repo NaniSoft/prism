@@ -227,9 +227,9 @@ const EXCLUSIONS = [
   },
   {
     name: 'a media condition',
-    match: /^\((?:prefers-reduced-motion: (?:reduce|no-preference)|prefers-color-scheme: (?:light|dark)|prefers-contrast: (?:more|less|no-preference))\)$/,
+    match: /^\((?:prefers-reduced-motion: (?:reduce|no-preference)|prefers-color-scheme: (?:light|dark)|prefers-contrast: (?:more|less|no-preference)|min-width: \d+(?:\.\d+)?(?:px|rem|em))\)$/,
     reason:
-      'a media-feature condition handed to `matchMedia`, read from its shape against the enumerated spellings the media-queries specification defines rather than from its position, because the platform compares the string and no reader ever sees it. `prefers-reduced-motion: reduce` reads as a sentence to the shape rule and is the platform\'s own spelling of a reader\'s preference, so the members are enumerated exactly as the key-name set is, and a sentence that merely begins with a condition stays a sentence.',
+      'a media-feature condition handed to `matchMedia`, read from its shape against the enumerated spellings the media-queries specification defines rather than from its position, because the platform compares the string and no reader ever sees it. `prefers-reduced-motion: reduce` reads as a sentence to the shape rule and is the platform\'s own spelling of a reader\'s preference, so the members are enumerated exactly as the key-name set is, and a sentence that merely begins with a condition stays a sentence. The width features are members the same way, with the value closed to a number and a length unit: `(min-width: 64rem)` is the viewport query the DocsShell rail evaluates against the same `lg` breakpoint the frame\'s own classes compile to, machine by construction, and a sentence carrying a colon and a bare digit is not this shape.',
   },
 ]
 

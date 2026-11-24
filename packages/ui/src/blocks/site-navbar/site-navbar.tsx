@@ -403,9 +403,16 @@ export function SiteNavbar({
         else.
       */}
       <div className="mx-auto flex h-14 w-full max-w-page items-center gap-2 px-6">
+        {/*
+          The brand is a control a reader is asked to hit, so it takes the
+          coarse-pointer floor like every other control on the bar. It is a flex
+          item in a centred row, so the 44 pixel box stays centred inside the
+          bar's own height and nothing beside it moves; under a mouse the anchor
+          is exactly the mark it wraps.
+        */}
         <a
           href={homeHref}
-          className="focus-visible:border-ring focus-visible:ring-ring shrink-0 rounded-sm focus-visible:ring-[3px] focus-visible:outline-none"
+          className="focus-visible:border-ring focus-visible:ring-ring shrink-0 rounded-sm focus-visible:ring-[3px] focus-visible:outline-none pointer-coarse:min-h-11"
         >
           <ProductMark
             id={product.id}

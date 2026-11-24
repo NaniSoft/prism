@@ -394,6 +394,9 @@ describe('no label is drawn below text-xs', () => {
 
     const region = container.querySelector('[data-slot="pulse-graph-container"]')
     expect(region?.getAttribute('class')).toContain('overflow-x-auto')
+    expect(region?.getAttribute('tabindex')).toBe('0')
+    expect(region?.getAttribute('role')).toBe('region')
+    expect(region?.getAttribute('aria-label')).toBe('the pipeline')
 
     const svg = container.querySelector('svg') as SVGSVGElement
     const floor = [...svg.classList].find((name) => name.startsWith('min-w-'))

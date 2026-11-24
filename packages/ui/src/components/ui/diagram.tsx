@@ -510,7 +510,16 @@ function Diagram({
     // The sideways region, for the reason `LEGIBLE_MIN_WIDTH` states: the drawing
     // holds a legible floor and a container narrower than it moves under the
     // drawing rather than the drawing shrinking below what it says.
-    <div data-slot="diagram-container" className="w-full overflow-x-auto">
+    // `tabIndex={0}` gives keyboard-only readers a tab stop to scroll the
+    // container horizontally when it overflows, including a decorative drawing
+    // (which is still a scrollable region) with no named landmark.
+    <div
+      data-slot="diagram-container"
+      tabIndex={0}
+      role={decorative ? undefined : 'region'}
+      aria-label={decorative ? undefined : name}
+      className="w-full overflow-x-auto rounded-sm"
+    >
       <svg
         data-slot="diagram"
         data-unresolved-relations={relations.length - drawn.length}

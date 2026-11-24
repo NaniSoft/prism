@@ -29,6 +29,8 @@ import { describe, expect, it } from 'vitest'
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogTitle, AlertDialogTrigger } from '../src/components/ui/alert-dialog'
 import { Carousel, type CarouselSlide } from '../src/components/ui/carousel'
+import type { DocsNavEntry } from '../src/pages/docs-shell'
+import { DocsShell } from '../src/pages/docs-shell'
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from '../src/components/ui/drawer'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '../src/components/ui/dropdown-menu'
 import { ImageZoom } from '../src/components/ui/image-zoom'
@@ -41,6 +43,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '../src/components/ui/po
 import { Resizable, ResizableHandle, ResizablePanel } from '../src/components/ui/resizable'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../src/components/ui/select'
 import { Sidebar, SidebarHeader, SidebarToggle } from '../src/components/ui/sidebar'
+import { SiteFooter } from '../src/blocks/site-footer'
+import { SiteNavbar } from '../src/blocks/site-navbar'
 import { Steps } from '../src/components/ui/steps'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../src/components/ui/tabs'
 import { Toggle } from '../src/components/ui/toggle'
@@ -494,5 +498,109 @@ describe('Steps is not a target and takes no floor', () => {
     // It is not a control, and that is the whole reason.
     expect(marker?.getAttribute('role')).toBeNull()
     expect(marker?.getAttribute('tabindex')).toBeNull()
+  })
+})
+
+/**
+ * The documentation rail and the site footer, and the two places a text link is
+ * the densest target cluster on the page.
+ *
+ * The floor on a text link is paid on the box the same way the 24 pixel floor is
+ * (`flex min-h-6 items-center` in the shipped links), and the coarse step is the
+ * same step `Button` and `CtaLink` take: the box grows to the input method, the
+ * fourteen pixel type inside it does not move. A docs rail link is a `block` with
+ * a left rule at every pointer, so its step also turns the block into a flex row
+ * and centres the type in it, which is why two more utilities are asserted on
+ * that one control and why `pointer-coarse:min-h-11` alone would not say the
+ * whole of it. A docs rail group heading carries both floors at once: the 24
+ * pixel floor at every pointer, because the heading was a bare inline anchor
+ * whose whole target was the type's own content area, and the coarse step on top
+ * of it, so the universal half is asserted on it alongside the coarse one.
+ */
+describe('a text link in a dense rail takes the floor on its box', () => {
+  const page = (title: string, href: string): DocsNavEntry => ({ type: 'page', title, href })
+
+  const NAV: DocsNavEntry[] = [
+    {
+      type: 'group',
+      title: 'Data platform (live)',
+      href: '/docs/data-platform',
+      items: [page('Capture', '/docs/data-platform/capture')],
+    },
+  ]
+
+  const paintDocs = () =>
+    render(
+      <DocsShell
+        nav={NAV}
+        navLabel="Documentation"
+        tocLabel="On this page"
+        pagerLabel="Documentation pages"
+        pagerLabels={{ previous: 'Previous', next: 'Next' }}
+        currentHref="/docs/data-platform/capture"
+      >
+        <p>The document.</p>
+      </DocsShell>,
+    )
+
+  it('on a docs rail page link, where the step also turns the block into a centred row', () => {
+    paintDocs()
+    const link = screen.getByRole('link', { name: 'Capture' })
+    expectStep(link, 'pointer-coarse:min-h-11')
+    expect(link.className).toContain('pointer-coarse:flex')
+    expect(link.className).toContain('pointer-coarse:items-center')
+  })
+
+  it('on a docs rail group heading, which pays the 24 pixel floor at every pointer and the coarse step on top', () => {
+    paintDocs()
+    const heading = screen.getByRole('link', { name: 'Data platform (live)' })
+    // The universal half is asserted beside the coarse one on purpose: the heading
+    // was a bare inline anchor whose whole hit area was the type's content area,
+    // which is the shape the target-size floor was written against, and the floor
+    // is owed under a mouse as much as under a finger. The arrangement is the one
+    // DESIGN.md states for the floor, the same one a footer column link is built
+    // from, so the three utilities together are what holds it.
+    expect(heading.className).toContain('flex')
+    expect(heading.className).toContain('min-h-6')
+    expect(heading.className).toContain('items-center')
+    expectStep(heading, 'pointer-coarse:min-h-11')
+  })
+
+  it('on the rail trigger, which is the control the tree stands behind below lg', () => {
+    paintDocs()
+    expectStep(screen.getByRole('button', { name: 'Documentation' }), 'pointer-coarse:min-h-11')
+  })
+
+  it('on a site footer column link and a social link', () => {
+    render(
+      <SiteFooter
+        product={{ id: 'nexus', name: 'Nexus', pack: 'lavender' as const }}
+        columns={[{ title: 'Site', links: [{ label: 'Docs', href: '/docs' }] }]}
+        social={[{ label: 'GitHub', href: 'https://github.com/NaniSoft/nexus' }]}
+      />,
+    )
+    // Both link kinds, because a footer where the social row is 44 and the
+    // columns beside it are 24 is a footer a finger finds unevenly spaced.
+    expectStep(screen.getByRole('link', { name: 'Docs' }), 'pointer-coarse:min-h-11')
+    expectStep(screen.getByRole('link', { name: 'GitHub' }), 'pointer-coarse:min-h-11')
+  })
+})
+
+describe('the site navbar brand takes the floor as a step', () => {
+  it('on the brand link, which is a control the bar asks to be hit', () => {
+    render(
+      <SiteNavbar
+        product={{ id: 'nexus', name: 'Nexus', pack: 'lavender' as const }}
+        defaultPack="lavender"
+        defaultMode="light"
+        navLabel="Site"
+        mobileLabels={{ open: 'Open menu', close: 'Close menu' }}
+        nav={[{ label: 'Docs', href: '/docs' }]}
+      />,
+    )
+    // The anchor is a flex item in the bar's own centred row, so the step is
+    // the height alone: the 44 pixel box centres inside the bar and nothing
+    // beside it moves, which is why no width utility rides beside it.
+    expectStep(screen.getByRole('link', { name: /Nexus/ }), 'pointer-coarse:min-h-11')
   })
 })

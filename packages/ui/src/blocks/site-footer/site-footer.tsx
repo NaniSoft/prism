@@ -174,12 +174,20 @@ export type SiteFooterProps = {
  * `--spacing-6` tall with the same fourteen-pixel type inside it, and the visual
  * weight of the link is untouched. It is the same arrangement `mobile-nav` uses for
  * a stacked link at the coarse-pointer floor, one step lower and at every pointer.
- * `DESIGN.md` records the rule under **The target-size floor**.
+ * `DESIGN.md` records the rule under **The target-size floor**. Under a coarse
+ * pointer the floor steps up with the input method, `pointer-coarse:min-h-11`,
+ * which is the same step `Button` and `CtaLink` take and the reason a column of
+ * footer links is a stack of 44 pixel targets on a phone and a stack of 24 pixel
+ * rows under a mouse. `DESIGN.md` records that rule under **The coarse-pointer
+ * floor**.
  *
  * It changes no height anywhere. A column link sat in a line box built from the
  * footer's inherited sixteen-pixel body, so each row was already twenty-four pixels
  * tall before the floor and the row is the same twenty-four after it; only the
  * seventeen pixels of target inside it grew, and a reader's eye is where it was.
+ * The coarse step is a touch-input question rather than a viewport one, so a
+ * desktop window resized to phone width keeps the 24 pixel rows and a phone keeps
+ * the 44 pixel ones.
  *
  * It is a server Component. It fetches nothing, it holds no state, and it
  * imports no router: a consumer renders it from a server file and the links are
@@ -228,7 +236,7 @@ export function SiteFooter({
                       href={link.href}
                       rel={link.newTab === false ? undefined : 'noopener noreferrer'}
                       target={link.newTab === false ? undefined : '_blank'}
-                      className="text-muted-foreground hover:text-foreground flex min-h-6 items-center gap-2 rounded-sm text-sm font-medium transition-colors duration-fast ease-out"
+                      className="text-muted-foreground hover:text-foreground focus-visible:ring-ring flex min-h-6 items-center gap-2 rounded-sm text-sm font-medium transition-colors duration-fast ease-out focus-visible:ring-[3px] focus-visible:outline-none pointer-coarse:min-h-11"
                     >
                       {link.icon ? (
                         <span aria-hidden className="inline-flex items-center">
@@ -255,7 +263,7 @@ export function SiteFooter({
                           href={link.href}
                           rel={link.newTab ? 'noopener noreferrer' : undefined}
                           target={link.newTab ? '_blank' : undefined}
-                          className="text-muted-foreground hover:text-foreground flex min-h-6 items-center rounded-sm text-sm transition-colors duration-fast ease-out"
+                          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring flex min-h-6 items-center rounded-sm text-sm transition-colors duration-fast ease-out focus-visible:ring-[3px] focus-visible:outline-none pointer-coarse:min-h-11"
                         >
                           {link.label}
                         </a>

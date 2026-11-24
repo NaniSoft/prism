@@ -165,7 +165,7 @@ function Item({ entry, className, ...props }: ItemProps) {
               data-slot="item-link"
               href={href}
               className={cn(
-                'hover:underline focus-visible:ring-ring rounded-sm outline-none focus-visible:ring-[3px]',
+                'hover:underline focus-visible:ring-ring flex min-h-6 items-center truncate rounded-sm outline-none focus-visible:ring-[3px]',
               )}
             >
               {title}
@@ -176,7 +176,7 @@ function Item({ entry, className, ...props }: ItemProps) {
         {description === undefined || description === null || description === false ? null : (
           <span
             data-slot="item-description"
-            className="text-muted-foreground min-w-0 truncate text-sm"
+            className="text-muted-foreground min-w-0 line-clamp-2 text-sm"
           >
             {description}
           </span>

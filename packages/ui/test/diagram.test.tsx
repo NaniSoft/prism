@@ -267,6 +267,17 @@ describe('a node carries a second line, and the name is read off it', () => {
     expect(container.querySelector('svg')).not.toHaveAttribute('aria-label')
     expect(screen.queryByRole('img')).toBeNull()
   })
+
+  it('keeps a decorative drawing scrollable by keyboard, without a named landmark', () => {
+    // A decorative drawing is still a horizontally scrollable region on a
+    // phone, so `scrollable-region-focusable` applies to it too. It simply
+    // carries no landmark name because nothing inside it is announced.
+    const { container } = render(<Diagram nodes={DESCRIBED} relations={[]} decorative />)
+    const region = container.querySelector('[data-slot="diagram-container"]')!
+    expect(region.getAttribute('tabindex')).toBe('0')
+    expect(region.hasAttribute('role')).toBe(false)
+    expect(region.hasAttribute('aria-label')).toBe(false)
+  })
 })
 
 describe('a node wears its own pack, on the mark and nowhere else', () => {
@@ -953,6 +964,9 @@ describe('no label is drawn below text-xs', () => {
 
     const region = container.querySelector('[data-slot="diagram-container"]')
     expect(region?.getAttribute('class')).toContain('overflow-x-auto')
+    expect(region?.getAttribute('tabindex')).toBe('0')
+    expect(region?.getAttribute('role')).toBe('region')
+    expect(region?.getAttribute('aria-label')).toBe('the loop')
 
     const svg = container.querySelector('svg') as SVGSVGElement
     const floor = [...svg.classList].find((name) => name.startsWith('min-w-'))

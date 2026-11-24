@@ -144,6 +144,20 @@ describe('the Item', () => {
     expect(root(container)?.getAttribute('data-item')).toBe('prism-tokens')
   })
 
+  it('gives the row link a 24px target-size floor and a full-strength focus ring, and lets the description wrap to two lines', () => {
+    const { container } = render(<Item entry={ROW} />)
+    const link = container.querySelector('[data-slot="item-link"]')!
+    expect(link.className).toContain('flex')
+    expect(link.className).toContain('min-h-6')
+    expect(link.className).toContain('items-center')
+    expect(link.className).toContain('focus-visible:ring-ring')
+    expect(link.className).toContain('focus-visible:ring-[3px]')
+
+    const description = container.querySelector('[data-slot="item-description"]')!
+    expect(description.className).toContain('line-clamp-2')
+    expect(description.className).not.toContain('truncate')
+  })
+
   it('has no accessibility violations when it is on the page', async () => {
     const { container } = render(
       <ul aria-label="Packages">

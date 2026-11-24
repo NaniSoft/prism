@@ -255,7 +255,7 @@ export function BlogPostPage({
                   {tag.href ? (
                     <a
                       href={tag.href}
-                      className="rounded-sm"
+                      className="focus-visible:ring-ring inline-flex min-h-6 items-center rounded-sm focus-visible:ring-[3px] focus-visible:outline-none"
                       aria-label={`Posts tagged ${tag.label}`}
                     >
                       <Badge variant="secondary">{tag.label}</Badge>
@@ -277,7 +277,10 @@ export function BlogPostPage({
             className="border-border grid gap-4 border-t pt-6 sm:grid-cols-2"
           >
             {previous ? (
-              <a href={previous.href} className="flex flex-col gap-1 rounded-sm">
+              <a
+                href={previous.href}
+                className="focus-visible:ring-ring flex min-h-11 flex-col justify-center gap-1 rounded-sm py-1 focus-visible:ring-[3px] focus-visible:outline-none"
+              >
                 <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                   {trailLabels.previous}
                 </span>
@@ -287,7 +290,7 @@ export function BlogPostPage({
             {next ? (
               <a
                 href={next.href}
-                className="flex flex-col gap-1 rounded-sm sm:items-end sm:text-right"
+                className="focus-visible:ring-ring flex min-h-11 flex-col justify-center gap-1 rounded-sm py-1 focus-visible:ring-[3px] focus-visible:outline-none sm:items-end sm:text-right"
               >
                 <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                   {trailLabels.next}

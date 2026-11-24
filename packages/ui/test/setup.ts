@@ -13,7 +13,16 @@ if (typeof window.matchMedia !== 'function') {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: (query: string) => ({
-      matches: false,
+      // A min-width query answers as a desktop viewport, because that is the
+      // arrangement components must hold at rest: the DocsShell rail's
+      // disclosure reads `(min-width: 64rem)` on mount and a stub that answered
+      // "no" to every min-width query would collapse the rail in every test
+      // that ever renders it. Feature queries that describe an input or a
+      // preference (pointer, prefers-reduced-motion, prefers-color-scheme)
+      // still answer "no", which is the desktop-with-mouse default every
+      // coarse-pointer contract is written against. A test that needs the
+      // other answer stubs matchMedia itself.
+      matches: query.includes('min-width'),
       media: query,
       onchange: null,
       addListener: vi.fn(),

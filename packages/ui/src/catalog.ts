@@ -1411,7 +1411,7 @@ export const catalog: readonly CatalogItem[] = [
     kind: 'page',
     category: null,
     description:
-      'A documentation screen: a navigation rail whose shape arrives as data, the document at the measure, a contents rail, and a pager derived from the navigation rather than passed.',
+      'A documentation screen: a navigation rail whose shape arrives as data and that stands behind a disclosure below lg, the document at the measure, a contents rail, and a pager derived from the navigation rather than passed.',
     source: 'src/pages/docs-shell/index.tsx',
     exports: ['DocsShell'],
     status: 'stable',

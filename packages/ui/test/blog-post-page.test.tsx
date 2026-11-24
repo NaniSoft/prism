@@ -131,6 +131,30 @@ describe('a blog post screen', () => {
     expect(screen.getByText('market-data')).toBeTruthy()
     expect(container.textContent).not.toMatch(/Back to the index|Previous|Next/)
   })
+
+  it('gives the trail links a 44px touch-target floor and a full-strength focus ring', () => {
+    const { container } = render(
+      <BlogPostPage
+        title="A post"
+        date="21 September 2026"
+        dateTime="2026-09-21"
+        trailLabels={TRAIL}
+        trailLabel="More posts"
+        previous={{ title: 'The last one', href: '/blog/last' }}
+        next={{ title: 'The next one', href: '/blog/next' }}
+      >
+        {BODY}
+      </BlogPostPage>,
+    )
+
+    const links = [...container.querySelectorAll('nav[aria-label="More posts"] a')]
+    expect(links).toHaveLength(2)
+    for (const link of links) {
+      expect(link.className).toContain('min-h-11')
+      expect(link.className).toContain('focus-visible:ring-ring')
+      expect(link.className).toContain('focus-visible:ring-[3px]')
+    }
+  })
 })
 
 /**

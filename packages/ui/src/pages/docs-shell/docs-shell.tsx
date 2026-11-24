@@ -5,6 +5,8 @@ import { headingSizeClass } from '../../components/ui/section'
 import { Heading, Text } from '../../components/ui/typography'
 import { cn } from '../../lib/utils'
 
+import { RailDisclosure } from './rail-disclosure'
+
 /**
  * One page in a documentation tree: a title and the address it is read at.
  *
@@ -328,8 +330,10 @@ export type DocsShellProps = {
  * which way, it needs `scrollbar-gutter` reserved in a 15rem rail to stop the
  * content shifting when a short tree becomes a tall one, and in Chrome it is the
  * least reliable of the three to reason about because the property that makes it
- * persistent is the same one whose default is an overlay. A collapse control needs
- * a disclosure whose state a server Component cannot hold. An "N more" control is
+     * persistent is the same one whose default is an overlay. A collapse control needs
+     * a disclosure whose state a server Component cannot hold; the one the rail now
+     * stands behind below `lg` is that disclosure, and it is the island described
+     * further down. An "N more" control is
  * copy this Page does not ship and it needs the count the Page cannot compute
  * without measuring, which is the one thing a server Component cannot do.
  *
@@ -370,24 +374,35 @@ export type DocsShellProps = {
  * that had two answers where it expects one. So there is one copy now, and it
  * shows at every width.
  *
- * **What that costs, with the number.** A consumer's rail measured 1,318 pixels
- * of content in a built export at 1280 by 680, and those rows wrap on a phone, so
- * a reader arriving at the top of a documentation page scrolls past a thousand
- * pixels of navigation before the article begins. That is a real regression for
- * that reader and it is the reason a disclosure was reached for in the first
- * place. It is paid rather than hidden, because every arrangement that avoids it
- * is worse: a rail at `lg` and nothing below it reopens the gap this change
- * closes, and drawing the tree twice to keep the scroll short is what broke three
- * consumer test files in the first place.
+ * **What that cost, with the number, and what removes it now.** A consumer's rail
+ * measured 1,318 pixels of content in a built export at 1280 by 680, and those
+ * rows wrap on a phone, so a reader arriving at the top of a documentation page
+ * scrolled past a thousand pixels of navigation before the article began. From
+ * 0.16.1 to 1.12 that was paid rather than hidden, because every arrangement that
+ * avoided it was worse: a rail at `lg` and nothing below it reopens the gap this
+ * change closes, and drawing the tree twice to keep the scroll short is what broke
+ * three consumer test files in the first place. The removal commit named the one
+ * honest answer and declined to build it in the same breath: a collapsed rail
+ * below `lg` needs an open state, a server Component cannot hold one, and a
+ * `<details>` is the only disclosure the platform holds on the Page's behalf, so
+ * the control had to be a client island made deliberately rather than smuggled in
+ * as the side effect of fixing a duplicate.
  *
- * **What would actually remove the scroll.** A collapsed rail below `lg` needs an
- * open state. A server Component cannot hold one, and `<details>` is the only
- * disclosure the platform holds on the Page's behalf, so the control that opens
- * it has to be a client island inside the Page. That is a separate piece of work
- * with its own budget, and it is not built here: a Page that ships a client
- * boundary to save one scroll is making a different trade than the one stated
- * above, and it should be made deliberately rather than smuggled in as the side
- * effect of fixing a duplicate.
+ * **That island is built now, and it is the rail's own disclosure.** Below `lg`
+ * the one copy of the tree stands behind a named trigger and opens in place: a
+ * phone reader lands on the article one tap from the navigation instead of a
+ * thousand pixels below it, which is `WCAG 2.1 SC 2.4.1`'s bypass read from the
+ * other end. It is built on the terms the paragraph above set: the tree is still
+ * drawn once, the disclosure wraps it rather than repeating it, and the island's
+ * open state is the only state in the frame. Above the cut the trigger does not
+ * render and the rail is exactly the sticky, capped, fading scroll region the
+ * paragraphs above describe; below it the trigger carries the rail's own
+ * accessible name, so the way back is a named control and never a vanished panel.
+ * The island renders open, which is the server's answer and the answer for a
+ * reader with scripting disabled: the whole tree in flow, as 0.16.1 left it. The
+ * one cost is a fold at hydration, and a phone reader watches the rail close once
+ * where they can see it rather than being handed a layout that lies about where
+ * script is running.
  *
  * **The frame is three columns from `lg`, and the third is the consumer's to
  * fill.** The rail is 15rem, the document takes the rest, and the contents rail
@@ -408,9 +423,12 @@ export type DocsShellProps = {
  *
  * It is a server Component. It fetches nothing, it holds no state and it imports
  * no router, so a consumer renders it from whichever route their framework names
- * and hands it the document their pipeline produced. Nothing here needs a client
- * boundary, and the one feature that would want one is named above as work not
- * done rather than quietly added.
+ * and hands it the document their pipeline produced. The frame's one client
+ * boundary is the rail's disclosure below `lg`, named above and built as the
+ * deliberate island that sentence asked for rather than arrived at sideways: the
+ * Page itself still holds no state, and the open state the disclosure needs is
+ * the island's, in one module, where its weight is the pages rule of the client
+ * budget gate.
  */
 export function DocsShell({
   title,
@@ -464,8 +482,17 @@ export function DocsShell({
         )}
       >
         {rail ? (
-          <aside data-slot="docs-rail" className="lg:col-start-1 lg:row-start-1">
-            <Rail label={navLabel} entries={rail} currentHref={currentHref} unnamed={unnamedNav} />
+          <aside data-slot="docs-rail" aria-label={navLabel} className="lg:col-start-1 lg:row-start-1">
+            {/*
+              The disclosure stands between the aside and the rail below `lg` and
+              is invisible above it. It holds the one copy of the tree, so the
+              doubling 0.16.0 shipped cannot come back through it: there is no
+              second `<nav>` and no second list anywhere in this frame, and the
+              tests over the whole container are what hold that to be true.
+            */}
+            <RailDisclosure label={navLabel}>
+              <Rail label={navLabel} entries={rail} currentHref={currentHref} unnamed={unnamedNav} />
+            </RailDisclosure>
           </aside>
         ) : null}
 
@@ -500,7 +527,7 @@ export function DocsShell({
         </article>
 
         {contents ? (
-          <aside data-slot="docs-contents" className="lg:col-start-3 lg:row-start-1">
+          <aside data-slot="docs-contents" aria-label={tocLabel} className="lg:col-start-3 lg:row-start-1">
             <Rail label={tocLabel} entries={contents} currentHref={currentHref} unnamed={unnamedToc} />
           </aside>
         ) : null}
@@ -565,12 +592,15 @@ export function DocsShell({
  * legible, which is why looking did not catch it: a gradient painted over content
  * is a defect, and it is not a legibility one.
  *
- * **The limit bought here is stated rather than left to be found.** Below `lg` the
- * rail is bounded by its content rather than by the viewport, so a long tree runs
- * past the fold of a phone screen with nothing marking where it ends: no cut to
- * mark, no band to reserve and no scroll region to scroll inside. That is the
- * honest price of one copy of the tree at every width, and the measurement behind
- * it is stated once on the Page above rather than repeated here.
+ * **The limit bought here is stated rather than left to be found.** Below `lg`,
+ * while the rail is open, it is bounded by its content rather than by the
+ * viewport, so a long tree runs past the fold of a phone screen with nothing
+ * marking where it ends: no cut to mark, no band to reserve and no scroll region
+ * to scroll inside. That is the honest price of one copy of the tree at every
+ * width, and the measurement behind it is stated once on the Page above rather
+ * than repeated here. Since the rail's disclosure landed, that price is paid only
+ * where a reader chose it: below `lg` the closed rail renders no rows at all, and
+ * the unbounded run happens inside a panel the reader opened.
  *
  * `unnamed` is carried on the `<nav>` rather than logged, for the reason
  * `unnamedIn` gives.
@@ -823,6 +853,16 @@ function NavNode({
             A group whose title cannot be rendered draws no label at all rather than
             an empty one, and keeps its pages: the heading went missing, not the
             section, and the count of headings that went missing is on the rail.
+
+            When the title is a destination, the anchor is also the one target in
+            the rail that had no box of its own: a bare inline link whose whole hit
+            area was the type's content area, twenty pixels tall at `text-sm`. It
+            carries the target-size floor the way a footer column link is built,
+            `flex min-h-6 items-center`, which is a floor owed at every pointer and
+            not a coarse-pointer one, and the coarse step rides on top of it because
+            a phone reader hits this row on the way into a section's pages. The
+            label arm above takes neither, because a `span` is not a target and the
+            floor is a claim about targets.
           */}
           {!named(entry) ? null : href === undefined ? (
             <span
@@ -840,7 +880,7 @@ function NavNode({
               href={href}
               aria-current={currentHref === href ? 'page' : undefined}
               className={cn(
-                'hover:text-foreground rounded-sm text-sm font-semibold tracking-tight transition-colors duration-fast ease-out',
+                'hover:text-foreground flex min-h-6 items-center rounded-sm text-sm font-semibold tracking-tight transition-colors duration-fast ease-out pointer-coarse:min-h-11',
                 under(href, currentHref) ? 'text-foreground' : 'text-muted-foreground',
               )}
             >
@@ -864,15 +904,21 @@ function NavNode({
   if (!named(entry)) return null
   return (
     <li data-slot="docs-nav-page">
+      {/*
+        The coarse-pointer floor is paid on the box rather than on the type, and
+        on this link the box is a `block` at every pointer, so the step turns the
+        box into a centred row rather than padding the line. Above the cut the
+        link is exactly the 28 pixel row it has always been.
+      */}
       <a
         data-slot="docs-nav-link"
         href={href}
         aria-current={currentHref === href ? 'page' : undefined}
         className={cn(
-          '-ms-px block border-l-2 py-1 ps-3 text-sm transition-colors duration-fast ease-out',
+          '-ms-px block py-1 ps-3 text-sm transition-colors duration-fast ease-out pointer-coarse:flex pointer-coarse:min-h-11 pointer-coarse:items-center',
           currentHref === href
-            ? 'text-foreground border-primary font-medium'
-            : 'text-muted-foreground hover:text-foreground border-transparent',
+            ? 'text-foreground border-primary font-medium border-l-2'
+            : 'text-muted-foreground hover:text-foreground border-transparent border-l-2',
         )}
       >
         {entry.title}
